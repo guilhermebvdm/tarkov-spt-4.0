@@ -1460,10 +1460,13 @@ public class Plugin : BaseUnityPlugin
     /// </summary>
     public static void MarkCameraOffsetDirty() => _cameraOffsetDirty = true;
 
+    private static bool? _isFikaInstalled;
+    private static bool IsFikaInstalled => _isFikaInstalled ??= Chainloader.PluginInfos.ContainsKey("com.fika.core");
+
     // Update is called every frame by Unity
     public void Update()
     {
-        if (Chainloader.PluginInfos.ContainsKey("com.fika.core"))
+        if (IsFikaInstalled)
         {
             CameraRotationMod.Networking.FikaSyncManager.EnsurePacketsRegistered();
         }

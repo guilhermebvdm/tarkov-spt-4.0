@@ -548,9 +548,12 @@ namespace TRLImmersiveCombatMedicine
         private static BandAidController _debugCtrl;
         private float _debugNextBeat = 0f;
 
+        private static bool? _isFikaInstalled;
+        private static bool IsFikaInstalled => _isFikaInstalled ??= BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("com.fika.core");
+
         private void Update()
         {
-            if (BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("com.fika.core"))
+            if (IsFikaInstalled)
             {
                 Band_Aid.BandAidNetworkHandler.EnsurePacketsRegistered();
             }

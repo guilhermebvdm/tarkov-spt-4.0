@@ -111,20 +111,20 @@ namespace Band_Aid
 
         private static void OnTraumaFaintReceived(TraumaFaintPacket packet)
         {
-            // Host/headless retransmite (mesmo padrão de relay dos pacotes de heal)
-            if (Singleton<FikaServer>.Instantiated)
-            {
-                var hostPlayer = Singleton<GameWorld>.Instance?.MainPlayer;
-                string myId = hostPlayer?.ProfileId ?? "";
-                if (packet.ProfileId != myId)
-                {
-                    var relay = packet;
-                    Singleton<FikaServer>.Instance.SendData(ref relay, DeliveryMethod.ReliableOrdered, true);
-                }
-            }
-
             try
             {
+                // Host/headless retransmite (mesmo padrão de relay dos pacotes de heal)
+                if (Singleton<FikaServer>.Instantiated)
+                {
+                    var hostPlayer = Singleton<GameWorld>.Instance?.MainPlayer;
+                    string myId = hostPlayer?.ProfileId ?? "";
+                    if (packet.ProfileId != myId)
+                    {
+                        var relay = packet;
+                        Singleton<FikaServer>.Instance.SendData(ref relay, DeliveryMethod.ReliableOrdered, true);
+                    }
+                }
+
                 var gameWorld = Singleton<GameWorld>.Instance;
                 if (gameWorld == null) return;
 
@@ -162,9 +162,9 @@ namespace Band_Aid
                     else TrueTrauma.AggroHelper.RestoreAggro(victim);
                 }
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
-                Logger.LogWarning($"OnTraumaFaintReceived: {ex.Message}");
+                Logger.LogError($"[BandAidNetworkHandler] Error in OnTraumaFaintReceived: {ex.Message}");
             }
         }
 
