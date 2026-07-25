@@ -56,13 +56,13 @@
       "fetch": true,
       "tracked": false,
       "upstream": "https://github.com/project-fika/Fika-Server-CSharp.git",
-      "pin": { "type": "commit", "ref": "df69e69dd37541d162adee06224adc4a8c7a4483" },
+      "pin": { "type": "commit", "ref": "a56e9994eec692f31be4754727b5ff9803619364" },
       "branch": "main",
       "lfs": false,
       "stripGit": false,
-      "fikaVersion": "2.3.4",
-      "vendoredAt": "2026-07-12",
-      "note": "Lado servidor da conexão cooperativa (Fika). Pinado por commit para citações arquivo.cs:linha reprodutíveis entre máquinas. Pin df69e69 = tag v2.3.4 (checkout local rematerializado em 2026-07-12; antes estava em 4a78c133, atrás do pin)."
+      "fikaVersion": "2.3.5",
+      "vendoredAt": "2026-07-25",
+      "note": "Lado servidor da conexão cooperativa (Fika). Pinado por commit para citações arquivo.cs:linha reprodutíveis entre máquinas. Pin a56e999 = tag v2.3.5, a última tag publicada (rematerializado em 2026-07-25; antes estava em df69e69, tag v2.3.4). `main` upstream tem commits além de v2.3.5 sem tag nova — pin fica na última tag até haver uma nova."
     },
     {
       "id": "fika-plugin",
@@ -72,13 +72,13 @@
       "fetch": true,
       "tracked": false,
       "upstream": "https://github.com/project-fika/Fika-Plugin.git",
-      "pin": { "type": "commit", "ref": "6ccdd2b0290467789d41f8c094e7f59c2c830810" },
+      "pin": { "type": "commit", "ref": "82349518b5628094865f99009d017bfb2aeff5d9" },
       "branch": "main",
       "lfs": false,
       "stripGit": false,
-      "fikaVersion": "2.3.4",
-      "vendoredAt": "2026-07-12",
-      "note": "Lado cliente da coop; contém a pasta Fika.Core (verdade para classes/métodos/variáveis de coop). Pinado por commit para reprodutibilidade. Pin 6ccdd2b = tag v2.3.4, igual ao Fika.Core.dll 2.3.4.0 instalado em D:\\SPT (checkout local rematerializado em 2026-07-12; antes estava em 02c0de7a, era 2.2.6)."
+      "fikaVersion": "2.3.8",
+      "vendoredAt": "2026-07-25",
+      "note": "Lado cliente da coop; contém a pasta Fika.Core (verdade para classes/métodos/variáveis de coop). Pinado por commit para reprodutibilidade. Pin 8234951 = tag v2.3.8, a última publicada e a mesma versão baixada do site oficial (Forge) pra instalar em D:\\SPT (rematerializado em 2026-07-25; antes estava em 6ccdd2b, tag v2.3.4). Confirmar Fika.Core.dll instalado após a atualização — ver reference_spt_bundle_cache_pipeline / instalação manual."
     },
     {
       "id": "fika-headless",
