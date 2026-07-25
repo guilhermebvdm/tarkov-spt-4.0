@@ -39,6 +39,16 @@ namespace TRLFixes
             {
                 Logger.LogError($"TRL-Fixes: Falha ao carregar Patch_PoolManagerCreateItem: {ex.Message}");
             }
+
+            try
+            {
+                new Patches.PickupAimingSafetyPatch().Enable();
+                Logger.LogInfo("TRL-Fixes: PickupAimingSafetyPatch ativado com sucesso.");
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"TRL-Fixes: Falha ao carregar PickupAimingSafetyPatch: {ex.Message}");
+            }
         }
     }
 }
