@@ -150,38 +150,45 @@ namespace TRL_SpeakFromTarkov.Audio
 
         void Update()
         {
-            if (audioSource != null)
+            try
             {
-                smoothedDistance = Mathf.Lerp(smoothedDistance, currentDistanceTarget, Time.deltaTime * 5f);
-                audioSource.maxDistance = smoothedDistance;
-
-                // Força o Play caso o jogo tenha pausado ou o AudioSource tenha falhado no Awake
-                if (!audioSource.isPlaying && audioSource.enabled && gameObject.activeInHierarchy)
+                if (audioSource != null)
                 {
-                    audioSource.Play();
-                }
-            }
+                    smoothedDistance = Mathf.Lerp(smoothedDistance, currentDistanceTarget, Time.deltaTime * 5f);
+                    audioSource.maxDistance = smoothedDistance;
 
-            if (decoder == null) return;
-            
-            while (packetQueue.TryDequeue(out byte[] opusData))
-            {
+                    // Força o Play caso o jogo tenha pausado ou o AudioSource tenha falhado no Awake
+                    if (!audioSource.isPlaying && audioSource.enabled && gameObject.activeInHierarchy)
+                    {
+                        audioSource.Play();
+                    }
+                }
+
+                if (decoder == null || opusDecodeBuffer == null || streamBuffer == null) return;
+                
+                while (packetQueue.TryDequeue(out byte[] opusData))
+                {
 #pragma warning disable CS0618
-                int len = decoder.Decode(opusData, 0, opusData.Length, opusDecodeBuffer, 0, frameSize, false);
+                    int len = decoder.Decode(opusData, 0, opusData.Length, opusDecodeBuffer, 0, frameSize, false);
 #pragma warning restore CS0618
 
-                if (len <= 0)
-                {
-                    VoIPPlugin.Log.LogWarning($"[SFT-DEBUG] Opus Decode retornou {len} amostras!");
-                }
+                    if (len <= 0)
+                    {
+                        VoIPPlugin.Log.LogWarning($"[SFT-DEBUG] Opus Decode retornou {len} amostras!");
+                    }
 
-                int currentWritePos = streamWritePos;
-                for (int i = 0; i < len; i++)
-                {
-                    streamBuffer[(currentWritePos + i) % streamBuffer.Length] = opusDecodeBuffer[i];
+                    int currentWritePos = streamWritePos;
+                    for (int i = 0; i < len; i++)
+                    {
+                        streamBuffer[(currentWritePos + i) % streamBuffer.Length] = opusDecodeBuffer[i];
+                    }
+                    
+                    streamWritePos = (currentWritePos + len) % streamBuffer.Length;
                 }
-                
-                streamWritePos = (currentWritePos + len) % streamBuffer.Length;
+            }
+            catch (Exception ex)
+            {
+                VoIPPlugin.Log.LogError($"[SFT] Erro no Update de RemoteSpeaker: {ex.Message}");
             }
         }
 
@@ -287,7 +294,8 @@ namespace TRL_SpeakFromTarkov.Audio
                 }
                 else if (Singleton<GameWorld>.Instantiated && Singleton<GameWorld>.Instance.MainPlayer != null)
                 {
-                    listenerRight = Singleton<GameWorld>.Instance.MainPlayer.Transform.Original.right;
+                    var mp = Singleton<GameWorld>.Instance.MainPlayer;
+                    if (mp.Transform != null) listenerRight = mp.Transform.Original.right;
                 }
 
                 Vector3 dirToSpeaker = transform.position - listenerPos;

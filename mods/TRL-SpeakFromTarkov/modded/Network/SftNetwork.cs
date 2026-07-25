@@ -62,24 +62,34 @@ namespace TRL_SpeakFromTarkov.Network
 
         public void Broadcast(byte[] opusData, byte channel, float voiceLevel = 0f)
         {
-            if (!IsSessionActive || !Singleton<IFikaNetworkManager>.Instantiated) return;
-            if (VoIPPlugin.EnableMod != null && !VoIPPlugin.EnableMod.Value) return;
-            
-            string myProfileId = LocalSessionId;
-            if (Singleton<GameWorld>.Instantiated && Singleton<GameWorld>.Instance.MainPlayer != null)
+            try
             {
-                string pId = Singleton<GameWorld>.Instance.MainPlayer.ProfileId;
-                if (!string.IsNullOrEmpty(pId)) myProfileId = pId;
-            }
+                if (!IsSessionActive || !Singleton<IFikaNetworkManager>.Instantiated) return;
+                if (VoIPPlugin.EnableMod != null && !VoIPPlugin.EnableMod.Value) return;
+                
+                // Se o nível de áudio for desprezível (< 0.002f), ignora o envio (evita flood de silêncio no LiteNetLib)
+                if (voiceLevel < 0.002f) return;
 
-            SftAudioPacket packet = new SftAudioPacket 
-            { 
-                ProfileId = myProfileId,
-                Channel = channel, 
-                AudioData = opusData,
-                VoiceLevel = voiceLevel
-            };
-            Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, Fika.Core.Networking.LiteNetLib.DeliveryMethod.Unreliable, broadcast: true);
+                string myProfileId = LocalSessionId;
+                if (Singleton<GameWorld>.Instantiated && Singleton<GameWorld>.Instance.MainPlayer != null)
+                {
+                    string pId = Singleton<GameWorld>.Instance.MainPlayer.ProfileId;
+                    if (!string.IsNullOrEmpty(pId)) myProfileId = pId;
+                }
+
+                SftAudioPacket packet = new SftAudioPacket 
+                { 
+                    ProfileId = myProfileId,
+                    Channel = channel, 
+                    AudioData = opusData,
+                    VoiceLevel = voiceLevel
+                };
+                Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, Fika.Core.Networking.LiteNetLib.DeliveryMethod.Unreliable, broadcast: true);
+            }
+            catch (System.Exception ex)
+            {
+                Log?.LogError($"[SFT] Erro ao enviar Broadcast de áudio: {ex.Message}");
+            }
         }
 
         private void OnReceiveVoipData(SftAudioPacket packet)
