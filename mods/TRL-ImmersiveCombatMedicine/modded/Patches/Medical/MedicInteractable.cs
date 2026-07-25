@@ -42,12 +42,12 @@ namespace TRLImmersiveCombatMedicine
             actions.Actions.Add(new ActionsTypesClass
             {
                 Action = Examine,
-                Name = "Examinar (Médico)"
+                Name = MedicLocale.Get(MedicTextId.ActionExamine)
             });
             actions.Actions.Add(new ActionsTypesClass
             {
                 Action = ShoulderTap,
-                Name = "Tocar no ombro"
+                Name = MedicLocale.Get(MedicTextId.ActionShoulderTap)
             });
             return actions;
         }

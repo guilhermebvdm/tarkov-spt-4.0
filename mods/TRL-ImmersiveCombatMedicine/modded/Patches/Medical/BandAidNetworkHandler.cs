@@ -8,6 +8,8 @@ using Fika.Core.Networking.LiteNetLib;
 using System;
 using System.Linq;
 using System.Reflection;
+using TRLImmersiveCombatMedicine; // PA-01-02 (review técnica 01): MedicDenyReasonId/MedicLocale
+                                   // vivem no namespace do plugin — sem este using, CS0103.
 
 namespace Band_Aid
 {
@@ -416,7 +418,7 @@ namespace Band_Aid
             if (patient == Singleton<GameWorld>.Instance?.MainPlayer)
             {
                 NotificationManagerClass.DisplayMessageNotification(
-                    "Você foi tratado por um aliado.", ENotificationDurationType.Default, ENotificationIconType.Quest);
+                    MedicLocale.Get(MedicTextId.TreatedByAlly), ENotificationDurationType.Default, ENotificationIconType.Quest);
             }
             else
             {
@@ -634,7 +636,7 @@ namespace Band_Aid
                 if (packet.TargetProfileId == mainPlayer.ProfileId)
                 {
                     NotificationManagerClass.DisplayMessageNotification(
-                        $"\u2708 Você recebeu um toque no ombro de {packet.SenderNickname}",
+                        MedicLocale.Get(MedicTextId.ShoulderTapReceived, packet.SenderNickname),
                         ENotificationDurationType.Default, ENotificationIconType.Quest);
                     Logger.LogInfo($"Toque no ombro recebido de {packet.SenderNickname}");
                 }
@@ -708,15 +710,15 @@ namespace Band_Aid
                 // Validar localmente com ActiveHealthController
                 var stats = ItemDatabase.GetStats(packet.ItemTemplateId);
                 bool approved = false;
-                string denyReason = "Item desconhecido.";
+                var denyReasonId = MedicDenyReasonId.UnknownItem;
 
                 if (stats != null)
                 {
                     approved = MedicalLogic.CanUseItem(mainPlayer, stats);
-                    denyReason = approved ? "" : $"{stats.Name}: Sem ferimento compatível.";
+                    denyReasonId = approved ? MedicDenyReasonId.None : MedicDenyReasonId.NoCompatibleWound;
                 }
 
-                Logger.LogInfo($"HealCheck recebido | Item: {packet.ItemTemplateId} | Approved: {approved} | Reason: {denyReason}");
+                Logger.LogInfo($"HealCheck recebido | Item: {packet.ItemTemplateId} | Approved: {approved} | Reason: {denyReasonId}");
 
                 // Membro-alvo esperado (mesma lógica da aplicação) — médico vê ANTES da animação
                 EBodyPart expectedPart = EBodyPart.Common;
@@ -733,7 +735,7 @@ namespace Band_Aid
                     PatientProfileId = packet.PatientProfileId,
                     ItemTemplateId = packet.ItemTemplateId,
                     Approved = approved,
-                    DenyReason = denyReason,
+                    DenyReasonId = denyReasonId,
                     ExpectedBodyPart = (byte)expectedPart
                 };
 
@@ -873,7 +875,7 @@ namespace Band_Aid
                 CacheTypes();
                 var stats = ItemDatabase.GetStats(packet.ItemTemplateId);
                 bool approved = stats != null && MedicalLogic.CanUseItem(bot, stats);
-                string denyReason = approved ? "" : (stats == null ? "Item desconhecido." : $"{stats.Name}: Sem ferimento compatível.");
+                var denyReasonId = approved ? MedicDenyReasonId.None : (stats == null ? MedicDenyReasonId.UnknownItem : MedicDenyReasonId.NoCompatibleWound);
 
                 // Membro-alvo esperado do bot (médico vê antes da animação)
                 EBodyPart expectedPart = EBodyPart.Common;
@@ -889,7 +891,7 @@ namespace Band_Aid
                     PatientProfileId = packet.PatientProfileId,
                     ItemTemplateId = packet.ItemTemplateId,
                     Approved = approved,
-                    DenyReason = denyReason,
+                    DenyReasonId = denyReasonId,
                     ExpectedBodyPart = (byte)expectedPart
                 };
                 Singleton<FikaServer>.Instance.SendData(ref response, DeliveryMethod.ReliableOrdered, true);
@@ -927,7 +929,7 @@ namespace Band_Aid
                 // Só o médico processa
                 if (mainPlayer == null || packet.DoctorProfileId != mainPlayer.ProfileId) return;
 
-                Logger.LogInfo($"HealCheck Response recebido | Approved: {packet.Approved} | Reason: {packet.DenyReason}");
+                Logger.LogInfo($"HealCheck Response recebido | Approved: {packet.Approved} | Reason: {packet.DenyReasonId}");
 
                 // Dispara evento para BandAidPlugin processar
                 OnHealCheckResponse?.Invoke(packet);

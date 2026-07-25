@@ -20,9 +20,6 @@ Fonte única de verdade das `ConfigEntry` expostas no menu F12 (regra do repo: t
 | Nome (key) | Tipo | Padrão | Faixa | Tooltip |
 |---|---|---|---|---|
 | Sistema de Desmaio | bool | `true` | — | Ativa o desmaio ao receber muito dano massivo. |
-| Sistema de Pernas | bool | `true` | — | (INERTE desde a v1.3.0 — substituído pelo Trauma 2.0 / Legs Effects. Remoção da key no item 010.) |
-| Sistema de Braços | bool | `true` | — | (INERTE desde a v1.6.0 — substituído pelo Trauma 2.0 / Arms Effects. Remoção da key no item 010.) |
-| Sistema de Estomago | bool | `true` | — | (INERTE desde a v1.7.0 — substituído pelo Trauma 2.0 / Stomach Effects. Remoção da key no item 010.) |
 
 ## Seção 3. Balanceamento (Trauma)
 
@@ -39,7 +36,7 @@ Fonte única de verdade das `ConfigEntry` expostas no menu F12 (regra do repo: t
 | Medic Interact Mode | EBandAidPressMode | `Hold` | Press·Hold·DoubleTap | Modo de ativação: Press (aperta e solta), Hold (segura), DoubleTap (aperta 2x). |
 | Emergency Drop Key | KeyboardShortcut | `F` | — | Tecla para drop emergencial do item durante animação de cura. |
 | Emergency Drop Mode | EBandAidPressMode | `Press` | Press·Hold·DoubleTap | Modo de ativação do drop emergencial. |
-| Medic Interact Distance | float | `5` | 1–15 | Distancia (m) do prompt E do acionamento do modo medico (mesma regra). Valor alto para testes; **reduzir no pacote final**. |
+| Medic Interact Distance | float | `3.5` | 1–15 | Distancia (m) do prompt E do acionamento do modo medico (mesma regra). |
 
 ## Seção 5. Debug
 
@@ -49,7 +46,7 @@ Fonte única de verdade das `ConfigEntry` expostas no menu F12 (regra do repo: t
 
 ## Seção 5. Trauma 2.0 (Motor)
 
-Motor de estados do Trauma 2.0 (spec 002). Semântica: o motor publica sempre que `Ativar Mod` (master legado) **e** `Enable Trauma 2.0` estiverem on; estado neutro = rastrear e logar, zero efeito de gameplay. Keys em EN (migração dos textos antigos é o item 010). Entradas "Avançado" só aparecem com *Advanced settings* habilitado no F12.
+Motor de estados do Trauma 2.0 (spec 002). Semântica: o motor publica sempre que `Ativar Mod` (master legado) **e** `Enable Trauma 2.0` estiverem on; estado neutro = rastrear e logar, zero efeito de gameplay. Keys em EN (migração dos textos antigos p/ i18n EN/PT entregue no item 010, `MedicLocale`). Entradas "Avançado" só aparecem com *Advanced settings* habilitado no F12.
 
 | Nome (key) | Tipo | Padrão | Faixa | Avançado | Tooltip |
 |---|---|---|---|---|---|
@@ -77,6 +74,9 @@ Toggle POR consumidor (comportamento 9 da spec funcional 002): cada consumidor s
 | Nome (key) | Removida em | Motivo |
 |---|---|---|
 | Shoulder Tap Key / Shoulder Tap Mode | 2026-07-12 (CR-01-15) | O toque no ombro virou ação do painel nativo de interação — keybind própria ficou morta. Valores salvos no .cfg dos usuários ficam órfãos (inofensivo). |
+| Sistema de Pernas | 2026-07-25 (item 010) | Legado Trauma 2.0 aposentado (D10, item 003), sem leitura funcional fora da key — removida junto do campo `ConfigLegsEnabled`. |
+| Sistema de Braços | 2026-07-25 (item 010) | Legado Trauma 2.0 aposentado (D10, item 005), sem leitura funcional fora da key mojibake já migrada (CR-02, 2026-07-12) — removida junto do campo `ConfigArmsEnabled` e do bloco de migração one-time do mojibake em `MigrateOrphanedConfigKeys()`. |
+| Sistema de Estomago | 2026-07-25 (item 010) | Legado Trauma 2.0 aposentado (D10, item 006), sem leitura funcional fora da key — removida junto do campo `ConfigStomachEnabled`. |
 
 ## Renomeadas (migração automática)
 
@@ -157,3 +157,4 @@ Gatilho percentual de desmaio (item 007, spec 007 §3) — substitui os limiares
 | 2026-07-19 | Guilherme | Item 006 (estômago Trauma 2.0, v1.7.0): seção nova `10. Trauma 2.0 (Estômago)` (2 entries — chance de agachar sem/com analgésico, sliders independentes sem clamp); RENAME `Stomach Effects (item 006)` → `Stomach Effects` (default ON; órfã deletada sem copiar valor — tabela Renomeadas); `Sistema de Estomago` (seção 2) marcado INERTE — legado "sem ar" aposentado (D10), remoção da key no item 010. |
 | 2026-07-19 | Guilherme | Item 007 (desmaio percentual, v1.8.0): seção nova `11. Trauma 2.0 (Desmaio)` (4 entries — 2 percentuais + 2 pisos absolutos; probabilidades de roll são constantes fixas, não expostas); RENAME `Blackout 2.0 (item 007)` → `Blackout 2.0` (default ON; órfã deletada sem copiar valor — tabela Renomeadas); limiares fixos legados (tórax ≥35/cabeça ≥10, sem gate de analgésico) REMOVIDOS do caminho de gatilho ativo — `Sistema de Desmaio` (seção 2/3) segue como master do pipeline inteiro. |
 | 2026-07-19 | Guilherme | Item 008 (desmaio duração aleatória, v1.9.0): seção 3 — `Duracao do Desmaio` (campo fixo único) REMOVIDA, substituída por `Duracao Minima do Desmaio` / `Duracao Maxima do Desmaio` (mesma faixa 5–120, default 20/20); MIGRAÇÃO POR CÓPIA (não rename-at-delivery) do valor antigo para AMBOS os campos novos — tabela Renomeadas — porque o valor era escolha real do usuário, não placeholder inerte. |
+| 2026-07-25 | Guilherme | Item 010 (migração de configs + release, v1.10.0): seção 2 perde `Sistema de Pernas`/`Braços`/`Estomago` (REMOVIDAS — tabela Removidas — legado Trauma 2.0 aposentado sem leitura funcional; a remoção de `Sistema de Braços` inclui o bloco de migração one-time do mojibake em `MigrateOrphanedConfigKeys()`, que escrevia nela); `Medic Interact Distance` (seção 4) default `5`→`3.5`, tooltip sem "para testes"; textos legados do Band-Aid/torniquete/ActionPanel/HUD (~25 pontos) migrados para i18n EN/PT via `MedicLocale` (classe nova, `Patches/Medical/MedicLocale.cs`) — nenhuma `ConfigEntry` nova, é migração de texto hardcoded PT para tabelas EN/PT resolvidas pelo idioma do jogo (mesmo padrão do `TraumaLocale`). |

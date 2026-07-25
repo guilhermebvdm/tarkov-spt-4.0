@@ -65,7 +65,7 @@ namespace Band_Aid
             if (_activeTourniquets.ContainsKey(bodyPart))
             {
                 NotificationManagerClass.DisplayMessageNotification(
-                    $"Torniquete já aplicado: {GetBodyPartName(bodyPart)}",
+                    MedicLocale.Get(MedicTextId.TourniquetAlreadyApplied, GetBodyPartName(bodyPart)),
                     ENotificationDurationType.Default, ENotificationIconType.Alert);
                 return false;
             }
@@ -88,7 +88,7 @@ namespace Band_Aid
 
             Logger.LogInfo($"Torniquete aplicado: {bodyPart} no paciente {patient.Profile?.Nickname}");
             NotificationManagerClass.DisplayMessageNotification(
-                $"Torniquete aplicado: {GetBodyPartName(bodyPart)}. Remova após parar o sangramento!",
+                MedicLocale.Get(MedicTextId.TourniquetApplied, GetBodyPartName(bodyPart)),
                 ENotificationDurationType.Long, ENotificationIconType.Quest);
 
             return true;
@@ -103,7 +103,7 @@ namespace Band_Aid
             if (!_activeTourniquets.TryGetValue(bodyPart, out TourniquetData data))
             {
                 NotificationManagerClass.DisplayMessageNotification(
-                    $"Nenhum torniquete em: {GetBodyPartName(bodyPart)}",
+                    MedicLocale.Get(MedicTextId.TourniquetNotFound, GetBodyPartName(bodyPart)),
                     ENotificationDurationType.Default, ENotificationIconType.Alert);
                 return false;
             }
@@ -114,7 +114,7 @@ namespace Band_Aid
             Logger.LogInfo($"Torniquete removido: {bodyPart} (duração: {duration:F1}s)");
 
             NotificationManagerClass.DisplayMessageNotification(
-                $"Torniquete removido: {GetBodyPartName(bodyPart)} ({duration:F0}s). Item devolvido.",
+                MedicLocale.Get(MedicTextId.TourniquetRemoved, GetBodyPartName(bodyPart), duration.ToString("F0")),
                 ENotificationDurationType.Long, ENotificationIconType.Quest);
 
             return true;
@@ -171,7 +171,7 @@ namespace Band_Aid
                         if (hp.Current - DAMAGE_PER_TICK <= hp.Maximum * 0.3f)
                         {
                             NotificationManagerClass.DisplayMessageNotification(
-                                $"⚠ Torniquete em {GetBodyPartName(bodyPart)}: risco de necrose! Remova agora!",
+                                MedicLocale.Get(MedicTextId.TourniquetNecrosisWarning, GetBodyPartName(bodyPart)),
                                 ENotificationDurationType.Default, ENotificationIconType.Alert);
                         }
                     }
@@ -179,7 +179,7 @@ namespace Band_Aid
                     {
                         // Membro destruído pelo torniquete
                         NotificationManagerClass.DisplayMessageNotification(
-                            $"☠ {GetBodyPartName(bodyPart)} destruído por necrose do torniquete!",
+                            MedicLocale.Get(MedicTextId.TourniquetDestroyed, GetBodyPartName(bodyPart)),
                             ENotificationDurationType.Long, ENotificationIconType.Alert);
                         _activeTourniquets.Remove(bodyPart);
                     }
@@ -207,19 +207,6 @@ namespace Band_Aid
             return 0f;
         }
 
-        private string GetBodyPartName(EBodyPart part)
-        {
-            switch (part)
-            {
-                case EBodyPart.Head: return "Cabeça";
-                case EBodyPart.Chest: return "Tórax";
-                case EBodyPart.Stomach: return "Estômago";
-                case EBodyPart.LeftArm: return "Braço Esquerdo";
-                case EBodyPart.RightArm: return "Braço Direito";
-                case EBodyPart.LeftLeg: return "Perna Esquerda";
-                case EBodyPart.RightLeg: return "Perna Direita";
-                default: return part.ToString();
-            }
-        }
+        private string GetBodyPartName(EBodyPart part) => MedicLocale.BodyPartLong(part);
     }
 }

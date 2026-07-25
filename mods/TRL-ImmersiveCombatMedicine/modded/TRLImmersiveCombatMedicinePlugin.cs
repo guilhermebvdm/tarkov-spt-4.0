@@ -14,7 +14,7 @@ namespace TRLImmersiveCombatMedicine
     // TraumaBotFall.RegisterLayer (sem o atributo, a ordem de load do BepInEx 5 pode falso-negativar
     // PluginInfos com BigBrain instalado). GUID confirmado: bigbrain_full/BigBrainPlugin.cs:10.
     [BepInDependency("xyz.drakia.bigbrain", BepInDependency.DependencyFlags.SoftDependency)]
-    [BepInPlugin("com.trl.immersivecombatmedicine", "TRL-ImmersiveCombatMedicine", "1.9.1")]
+    [BepInPlugin("com.trl.immersivecombatmedicine", "TRL-ImmersiveCombatMedicine", "1.10.0")]
     public class TRLImmersiveCombatMedicinePlugin : BaseUnityPlugin
     {
         public static TRLImmersiveCombatMedicinePlugin Instance;
@@ -23,9 +23,6 @@ namespace TRLImmersiveCombatMedicine
 
         // --- TrueTrauma Configs ---
         public static ConfigEntry<bool> ConfigMasterEnabled;
-        public static ConfigEntry<bool> ConfigLegsEnabled;
-        public static ConfigEntry<bool> ConfigArmsEnabled;
-        public static ConfigEntry<bool> ConfigStomachEnabled;
         public static ConfigEntry<bool> ConfigBlackoutEnabled;
         // ref: item 008 — ConfigBlackoutDuration (campo único fixo) REMOVIDO; substituído pelo
         // par min/max abaixo. Migração do valor antigo por CÓPIA (não descarte) em
@@ -84,7 +81,7 @@ namespace TRLImmersiveCombatMedicine
         {
             Instance = this;
             ModLogger = base.Logger;
-            ModLogger.LogInfo("TRL-ImmersiveCombatMedicine Plugin v1.9.1 carregado.");
+            ModLogger.LogInfo("TRL-ImmersiveCombatMedicine Plugin v1.10.0 carregado.");
 
             // Inicializações combinadas
             ItemDatabase.Initialize();
@@ -92,13 +89,10 @@ namespace TRLImmersiveCombatMedicine
             // Configs TrueTrauma
             TraumaState.Logger = Logger;
             ConfigMasterEnabled = Config.Bind("1. Geral (Trauma)", "Ativar Mod", true, "Liga ou desliga todo o funcionamento do mod.");
+            // ref: item 010 — as 3 keys legadas (Sistema de Pernas/Braços/Estomago) eram vestígio puro
+            // do sistema pré-Trauma-2.0; nenhum patch lê .Value delas fora da migração histórica do
+            // mojibake (já removida em MigrateOrphanedConfigKeys() abaixo) — removidas por inteiro.
             ConfigBlackoutEnabled = Config.Bind("2. Mecanicas (Trauma)", "Sistema de Desmaio", true, "Ativa o desmaio ao receber muito dano massivo.");
-            // ref: spec 003 §3 — legado de pernas aposentado (D10); key mantida p/ não órfanar o .cfg (remoção no item 010)
-            ConfigLegsEnabled = Config.Bind("2. Mecanicas (Trauma)", "Sistema de Pernas", true, "(INERTE desde a v1.3.0 — substituído pelo Trauma 2.0 / Legs Effects. Remoção da key no item 010.)");
-            // ref: spec 005 §1.7 — legado de braços aposentado (D10); key mantida p/ não órfanar o .cfg (remoção no item 010)
-            ConfigArmsEnabled = Config.Bind("2. Mecanicas (Trauma)", "Sistema de Braços", true, "(INERTE desde a v1.6.0 — substituído pelo Trauma 2.0 / Arms Effects. Remoção da key no item 010.)");
-            // ref: spec 006 §1.9 — legado de estômago aposentado (D10); key mantida p/ não órfanar o .cfg (remoção no item 010)
-            ConfigStomachEnabled = Config.Bind("2. Mecanicas (Trauma)", "Sistema de Estomago", true, "(INERTE desde a v1.7.0 — substituído pelo Trauma 2.0 / Stomach Effects. Remoção da key no item 010.)");
             // ref: CR-04 — piso de 5s herdado: duração baixa (~3-5s no teste) colapsava blackout+grace
             // num flap instantâneo (andar "desmaiado", timers sumindo antes do visual).
             // ref: item 008 — par min/max substitui o campo fixo único; default 20/20 preserva o
@@ -119,9 +113,9 @@ namespace TRLImmersiveCombatMedicine
             EmergencyDropMode = Config.Bind("4. Keybinds (Medic)", "Emergency Drop Mode", EBandAidPressMode.Press, "Modo de ativação do drop emergencial.");
             // Regra ÚNICA de distância: o prompt e o acionamento usam este valor (o
             // controller dirige o ActionPanel nativo por scan próprio — os caps do
-            // vanilla, 1,3m/2,5m, não se aplicam). Reduzir ao empacotar para o server.
-            MedicInteractDistance = Config.Bind("4. Keybinds (Medic)", "Medic Interact Distance", 5f,
-                new ConfigDescription("Distancia (m) do prompt E do acionamento do modo medico (mesma regra). Valor alto para testes; reduzir no pacote final.",
+            // vanilla, 1,3m/2,5m, não se aplicam).
+            MedicInteractDistance = Config.Bind("4. Keybinds (Medic)", "Medic Interact Distance", 3.5f,
+                new ConfigDescription("Distancia (m) do prompt E do acionamento do modo medico (mesma regra).",
                     new AcceptableValueRange<float>(1f, 15f)));
 
             // Configs Trauma 2.0 (spec 002 §3) — keys em EN (migração dos textos antigos é o item 010).
@@ -253,11 +247,10 @@ namespace TRLImmersiveCombatMedicine
             string pluginPath = System.IO.Path.GetDirectoryName(Info.Location);
             ImageLoader.Init(pluginPath);
 
-            // Componentes no GameObject do PRÓPRIO plugin (BepInEx manager): o boot do
-            // EFT destrói GameObjects órfãos criados durante o chainloader (provado por
-            // [DEBUG-ICM] OnDestroy logo após "Chainloader startup complete") — o manager
-            // do BepInEx sobrevive a sessão inteira. DontDestroyOnLoad NÃO protege de
-            // destruição explícita.
+            // Componentes no GameObject do PRÓPRIO plugin (BepInEx manager): o boot do EFT destrói
+            // GameObjects órfãos criados durante o chainloader (achado da Sessão 2, diagnóstico do
+            // prompt F) — o manager do BepInEx sobrevive à sessão inteira. DontDestroyOnLoad NÃO
+            // protege de destruição explícita.
             gameObject.AddComponent<BandAidUI>();
             gameObject.AddComponent<BandAidController>();
             gameObject.AddComponent<TraumaEngine>(); // motor Trauma 2.0 (spec 002) — inerte até OnRaidStarted()
@@ -266,11 +259,6 @@ namespace TRLImmersiveCombatMedicine
             gameObject.AddComponent<TraumaArmsConsumer>(); // consumidor de braços (spec 005) — DEPOIS do TraumaEngine (replay vazio inofensivo — padrão 003)
             gameObject.AddComponent<TraumaStomachConsumer>(); // consumidor de estômago (spec 006) — DEPOIS do TraumaEngine (ordem do 003; replay vazio inofensivo)
             TraumaBotFall.RegisterLayer(); // camada BigBrain do hold de bot — gateada por Chainloader ("xyz.drakia.bigbrain")
-
-            // [DEBUG-ICM] sondas de lifecycle — remover após diagnóstico do prompt F
-            _debugHost = gameObject;
-            _debugCtrl = gameObject.GetComponent<BandAidController>();
-            ModLogger.LogWarning($"[DEBUG-ICM] componentes no plugin GO | active={gameObject.activeInHierarchy} | ctrl!=null={_debugCtrl != null} | ctrl.enabled={(_debugCtrl != null ? _debugCtrl.enabled.ToString() : "n/a")}");
 
             // Setup reflection para TrueTrauma
             TraumaState.PlayerField = typeof(EFT.MovementContext).GetField("_player", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -321,24 +309,19 @@ namespace TRLImmersiveCombatMedicine
                 Logger.LogError($"TrueTrauma Fika Integration Error: {ex.Message}");
             }
 
-            // Registrar handler de handshake (Band-Aid)
-            BandAidNetworkHandler.OnHealCheckResponse += OnHealCheckResponseHandler;
-        }
-
-        private void OnDestroy()
-        {
-            BandAidNetworkHandler.OnHealCheckResponse -= OnHealCheckResponseHandler;
-        }
-
-        private void OnHealCheckResponseHandler(BandAidHealCheckResponsePacket response)
-        {
-            // O tratamento disso ficará na classe dedicada ou adaptaremos o código de BandAidPlugin aqui.
+            // ref: item 010 (PA-01-04) — o handler morto/duplicado OnHealCheckResponseHandler(...) e
+            // seu subscribe (BandAidNetworkHandler.OnHealCheckResponse += ...) foram removidos por
+            // inteiro: corpo sempre vazio, nunca preenchido; o tratamento real já existe em
+            // BandAidController.OnHealCheckResponseHandler (subscrito separadamente no Awake() do
+            // controller). O OnDestroy() deste plugin só existia para desinscrever esse handler morto
+            // — removido junto (sem substituto: este plugin não segura mais nenhuma inscrição própria).
         }
 
         /// <summary>
-        /// ref: CR-02 — copia o valor da key antiga com bytes quebrados
-        /// ("Sistema de BraÃ§os") para a key corrigida, uma única vez.
-        /// OrphanedEntries é internal no BepInEx → reflection.
+        /// Migrações one-time de keys órfãs (renomeações/remoções ao longo dos itens 003-008).
+        /// OrphanedEntries é internal no BepInEx → reflection. A migração do mojibake "Sistema de
+        /// Braços" (CR-02, 2026-07-12) foi removida no item 010 junto com o campo ConfigArmsEnabled —
+        /// já tinha cumprido seu papel one-time em toda instalação real.
         /// </summary>
         private void MigrateOrphanedConfigKeys()
         {
@@ -346,33 +329,6 @@ namespace TRLImmersiveCombatMedicine
             {
                 var orphansProp = AccessTools.Property(typeof(ConfigFile), "OrphanedEntries");
                 if (!(orphansProp?.GetValue(Config) is System.Collections.IDictionary orphans)) return;
-
-                string oldKey = "Sistema de BraÃ§os"; // mojibake literal da key antiga
-                object orphanDef = null;
-                bool oldValue = false;
-                foreach (System.Collections.DictionaryEntry entry in orphans)
-                {
-                    var def = entry.Key;
-                    string section = AccessTools.Property(def.GetType(), "Section")?.GetValue(def) as string;
-                    string key = AccessTools.Property(def.GetType(), "Key")?.GetValue(def) as string;
-                    if (section == "2. Mecanicas (Trauma)" && key == oldKey &&
-                        bool.TryParse(entry.Value as string, out oldValue))
-                    {
-                        orphanDef = def;
-                        break;
-                    }
-                }
-                if (orphanDef != null)
-                {
-                    // ref: CR-03-01 — REMOVER o órfão antes do Save: o BepInEx persiste
-                    // OrphanedEntries no .cfg e as repopula no Reload — sem o Remove, a
-                    // "migração" rodaria TODO boot, re-clobberando a escolha do usuário
-                    // feita via F12 com o valor antigo.
-                    ConfigArmsEnabled.Value = oldValue;
-                    orphans.Remove(orphanDef);
-                    Config.Save();
-                    ModLogger.LogWarning($"[Config] Valor órfão migrado (one-time): 'Sistema de Braços' = {oldValue}; key antiga removida do .cfg.");
-                }
 
                 // ref: item 008 — MIGRAÇÃO POR CÓPIA (não descarte, diferente do padrão rename-at-delivery
                 // dos placeholders 003-007): "Duracao do Desmaio" era um valor ATIVO e real (ajustado ao
@@ -543,11 +499,6 @@ namespace TRLImmersiveCombatMedicine
             TraumaState.Logger.LogInfo("TRL-ImmersiveCombatMedicine: Estado limpo para nova raid.");
         }
 
-        // [DEBUG-ICM] heartbeat — remover após diagnóstico do prompt F
-        private static GameObject _debugHost;
-        private static BandAidController _debugCtrl;
-        private float _debugNextBeat = 0f;
-
         private static bool? _isFikaInstalled;
         private static bool IsFikaInstalled => _isFikaInstalled ??= BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("com.fika.core");
 
@@ -556,16 +507,6 @@ namespace TRLImmersiveCombatMedicine
             if (IsFikaInstalled)
             {
                 Band_Aid.BandAidNetworkHandler.EnsurePacketsRegistered();
-            }
-
-            // [DEBUG-ICM] roda ANTES de qualquer early-return: Plugin.Update comprovadamente vive em raid
-            if (Time.time >= _debugNextBeat)
-            {
-                _debugNextBeat = Time.time + 10f;
-                var gw = Comfort.Common.Singleton<EFT.GameWorld>.Instance;
-                string host = _debugHost == null ? "DESTRUÍDO" : (_debugHost.activeInHierarchy ? "ativo" : "INATIVO");
-                string ctrl = _debugCtrl == null ? "DESTRUÍDO" : (_debugCtrl.enabled ? "enabled" : "DISABLED");
-                ModLogger.LogWarning($"[DEBUG-ICM] beat | host={host} | ctrl={ctrl} | world={(gw != null)} | mainPlayer={(gw?.MainPlayer != null)}");
             }
 
             // Lógica unificada de Update aqui

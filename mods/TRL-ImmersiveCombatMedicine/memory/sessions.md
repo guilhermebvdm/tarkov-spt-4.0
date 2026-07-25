@@ -33,6 +33,39 @@
 
 ---
 
+## 2026-07-25 (GMT-3) — Sessão 5 (continuação): item 010 entregue — OVERHAUL TRAUMA 2.0 CONCLUÍDO (002→010)
+
+**Tema central:** Fechar o item 010 (migração de configs + release), o último do backlog formal do overhaul Trauma 2.0 — do zero (spec funcional) até entregue, incluindo uma mudança de wire format de rede Fika (o handshake de recusa de cura `DenyReason` string → `DenyReasonId` enum/byte).
+
+**Decisões-chave:**
+- Distância de interação final (`Medic Interact Distance`) resolvida em **3,5 m** (era 5, "valor alto para testes") — sem decisão prévia registrada; escolhida com evidência (vanilla nativo ~2,5 m + margem para a cura em coop, que exige ficar parado por vários segundos, ao contrário do loot instantâneo). Ajuste de 1 número, fácil de recalibrar se o usuário quiser outro valor após validar in-game.
+- As 3 keys legadas inertes ("Sistema de Pernas/Braços/Estomago") foram removidas por **remoção simples** (padrão Shoulder Tap), não por migração — nenhuma delas era lida funcionalmente. Isso corrigiu uma expectativa registrada no defer do item 008 (CR-01-01: "o item 010 vai adicionar uma 7ª/8ª/9ª cópia do bloco de resgate de órfã") — não era verdade, porque não há valor a migrar.
+- **Achado crítico da spec técnica** (pego ANTES do `/code-mod`, não depois): remover `ConfigArmsEnabled` sem remover também o bloco de migração histórica do mojibake "Sistema de Braços" em `MigrateOrphanedConfigKeys()` (que escrevia `ConfigArmsEnabled.Value`) quebraria a compilação. O bloco inteiro foi removido junto (já tinha cumprido seu papel one-time desde 2026-07-12).
+- Textos legados (Band-Aid/torniquete/ActionPanel/HUD médico, ~25 pontos) migrados para i18n EN/PT via `MedicLocale.cs` (classe nova, espelha `TraumaLocale.cs` do item 002, reusa `IsGamePortuguese()` sem duplicar a leitura de idioma) — fecha a decisão 22 por completo.
+- **Mudança de wire format Fika:** `BandAidHealCheckResponsePacket.DenyReason` (string) → `DenyReasonId` (enum `MedicDenyReasonId`, byte). A tradução do motivo de recusa passou a acontecer no MÉDICO (ponto de exibição), não no paciente (ponto de geração) — cada peer vê a recusa no PRÓPRIO idioma, reusando o `ItemTemplateId` já existente no pacote (sem campo novo). Mesma classe de mudança já feita antes pelo mod (CR-02/CR-05) — todos os peers de uma sessão coop precisam da MESMA build pós-item-010.
+- **Rigor do gate:** 2 rodadas de review técnica ANTES do `/code-mod` (13 achados totais, incluindo 3 bloqueadores de compilação reais no wire format — `using` faltantes + um 3º ponto de leitura do campo não mapeado) + só 1 rodada de code-review DEPOIS (1 achado opcional, aplicado). Decisão deliberada de não rodar uma 2ª rodada de code-review: o risco real do item (wire format) já tinha sido extensivamente mitigado na fase de spec técnica, e a única rodada de code-review (com verificação via `git diff` linha a linha em todos os 12 arquivos + build isolado) não achou nenhum problema real — só uma nota informativa. Retorno marginal de uma 2ª rodada seria baixo.
+
+**Lições / hipóteses descartadas:**
+- Confirmada a lição de custo já registrada: investir rigor na fase de SPEC TÉCNICA (antes do código existir) é mais barato que investir o mesmo rigor depois — os 3 bloqueadores de compilação do wire format foram pegos e corrigidos ANTES de qualquer linha de código real ser escrita, então o `/code-mod` implementou uma spec já "pré-testada" e o `/code-review` subsequente só precisou CONFIRMAR, não caçar.
+- Um achado de review que a própria sugestão do revisor marca como "não recomendo ação agora" (ex.: CR-01-01, `BandAidUI.ShowTreatment` fora do escopo original de i18n) ainda deve ser aplicado por padrão (diretiva do usuário) — a leitura correta de "sugestão de baixa prioridade" não é "pular", é "aplicar, já que é barato e fecha completamente o objetivo do item".
+
+**Atividade cronológica:**
+1. Escopo real mapeado por pesquisa dedicada (Agent Explore) ANTES de escrever a spec — 6 sub-itens com evidência de código real (configs, sondas debug, PROPRIEDADES.md, distância, i18n, release).
+2. Spec funcional escrita + revisada (decisão de distância resolvida, inventário completo de ~25 textos i18n anexado).
+3. Spec técnica escrita (achou sozinha 2 problemas: o bloco do mojibake e o congelamento de idioma no `BuildUI()`) + 2 rodadas de review técnica (13 achados, incl. 3 bloqueadores de compilação no wire format — todos aplicados).
+4. `/code-mod` — implementação completa dos 4 blocos, 1 desvio da spec (CS0052 em `DenyReasonId`, campo precisou ser `internal`) documentado e corrigido. Build v1.10.0, 0 erros.
+5. Code-review rodada 1 — 1 achado 🟢 opcional (texto residual de `BandAidUI.ShowTreatment`), aplicado. Item fechado sem 2ª rodada (rigor já mitigado na fase de spec técnica).
+
+**Pendências abertas nesta sessão:**
+- [P-4.4] (herdada) segue aberta e agora cobre também o item 010 — nada do overhaul completo (002-010) foi validado IN-GAME. Testes específicos do 010: distância 3,5 m percebida como razoável; textos em inglês aparecem corretamente com o jogo em EN; torniquete/cura aplicado por um peer aparece traduzido no idioma de CADA peer (não do originador) — o teste mais importante, já que é o único ponto que muda wire format.
+- **TODOS os peers Fika de uma sessão coop precisam rodar a build pós-item-010 simultaneamente** — mudança de wire format incompatível com builds anteriores (mesmo aviso já dado em CR-02/CR-05 anteriores do mod).
+
+**Cross-refs:**
+- Resolve [P-4.5] (aberta na Sessão 4, atualizada no início desta Sessão 5) — item 010 concluído, fecha o ciclo do backlog formal 002→010 (011 já entregue antes, na Sessão 4).
+- Fecha o backlog formal completo do overhaul Trauma 2.0 (`mods/TRL-ImmersiveCombatMedicine/backlog/mod-backlog.md`, itens 001-011, todos 🟢).
+
+---
+
 ## 2026-07-25 (GMT-3) — Sessão 5: item 009 (hardening coop) entregue — P-4.1 fechada; iniciando item 010
 
 **Tema central:** Fechar o item 009 (hardening coop/bots do Trauma 2.0 — helper compartilhado `TraumaConsumerLifecycle` + decisão A3 de voz dupla-fonte), que já vinha com Bloco A implementado e 1ª rodada de code-review sem bloqueadores de uma sessão anterior; rodar a 2ª rodada de code-review (plano 2× dado o risco da refatoração A4 tocar 4 consumidores já entregues) e então avançar para o item 010.
@@ -90,8 +123,8 @@
 9. Todos os gaps corrigidos diretamente no documento; item 011 fechado 🟢.
 
 **Pendências abertas nesta sessão:**
-- [P-4.4] (aberta 2026-07-19) Nenhum item do overhaul completo (002-011) foi validado IN-GAME. Ver as notas "VALIDAR IN-GAME" específicas de cada item nas pendências P-3.2 a P-3.7. Candidato natural para consumir o plano de teste de `docs/trauma-behavior-matrix.md` §5.
-- [P-4.5] (aberta 2026-07-19, ATUALIZADA 2026-07-25 — ver Sessão 5) Item 009 (hardening coop) ENTREGUE 🟢 v1.9.1 (ver Sessão 5). Item 010 (migração de configs + release) segue no backlog, em andamento nesta mesma sessão.
+- [P-4.4] (aberta 2026-07-19, ATUALIZADA 2026-07-25) Nenhum item do overhaul completo (002-010, backlog fechado) foi validado IN-GAME. Ver as notas "VALIDAR IN-GAME" específicas de cada item nas pendências P-3.2 a P-3.7. Candidato natural para consumir o plano de teste de `docs/trauma-behavior-matrix.md` §5 + `docs/trauma-coop-test-protocol.md` (item 009). Item 010 soma 3 testes específicos: distância 3,5 m, textos EN corretos com jogo em inglês, e — o mais importante, único ponto com mudança de wire format — torniquete/cura aplicado por um peer aparece traduzido no idioma de CADA peer que observa, não no idioma de quem originou o evento.
+- [P-4.5] (aberta 2026-07-19, FECHADA 2026-07-25 — ver Sessão 5) Item 009 (hardening coop) ENTREGUE 🟢 v1.9.1; item 010 (migração de configs + release) ENTREGUE 🟢 v1.10.0 — overhaul Trauma 2.0 CONCLUÍDO (backlog formal 001-011, todos 🟢).
 
 **Cross-refs:**
 - Resolve [P-3.7] (aberta nesta mesma sessão, ver bloco de Pendências no topo — FECHADA).

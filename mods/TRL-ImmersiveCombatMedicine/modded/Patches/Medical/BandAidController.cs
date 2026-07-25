@@ -57,21 +57,14 @@ namespace TRLImmersiveCombatMedicine
 
         private void Awake()
         {
-            TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning("[DEBUG-ICM] Controller.Awake INÍCIO");
             Instance = this;
 
             // Registrar handler de resposta do handshake
             BandAidNetworkHandler.OnHealCheckResponse += OnHealCheckResponseHandler;
-            TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning("[DEBUG-ICM] Controller.Awake FIM (handler registrado; prompt via ActionPanel nativo)");
         }
-
-        // [DEBUG-ICM] sondas de lifecycle — remover após diagnóstico do prompt F
-        private void OnEnable()  { TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning("[DEBUG-ICM] Controller.OnEnable"); }
-        private void OnDisable() { TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning("[DEBUG-ICM] Controller.OnDisable"); }
 
         private void OnDestroy()
         {
-            TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning("[DEBUG-ICM] Controller.OnDestroy");
             BandAidNetworkHandler.OnHealCheckResponse -= OnHealCheckResponseHandler;
         }
 
@@ -115,9 +108,13 @@ namespace TRLImmersiveCombatMedicine
             }
             else
             {
+                // ref: item 010 — tradução acontece AQUI, no médico (exibidor): cada peer vê no
+                // PRÓPRIO idioma, independente do idioma de quem gerou a recusa (wire format
+                // carrega só o ID, nunca texto).
+                string denyText = MedicLocale.GetDenyReasonText(response.DenyReasonId, response.ItemTemplateId);
                 NotificationManagerClass.DisplayMessageNotification(
-                    response.DenyReason, ENotificationDurationType.Default, ENotificationIconType.Alert);
-                TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"Handshake negado: {response.DenyReason}");
+                    denyText, ENotificationDurationType.Default, ENotificationIconType.Alert);
+                TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"Handshake negado: {denyText}");
             }
 
             // Limpar estado pendente
@@ -126,26 +123,15 @@ namespace TRLImmersiveCombatMedicine
             _pendingHealPatient = null;
         }
 
-        // [DEBUG-ICM] flags log-once — remover após diagnóstico do prompt F
-        private bool _dbgUpdateAlive = false;
-        private bool _dbgInRaid = false;
-
         private void Update()
         {
-            // [DEBUG-ICM]
-            if (!_dbgUpdateAlive)
-            {
-                _dbgUpdateAlive = true;
-                TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning("[DEBUG-ICM] Controller.Update PRIMEIRO frame");
-            }
-
             // O registro de pacotes deve ocorrer independentemente de haver um jogador local.
             // Em servidores dedicados (Headless), o MainPlayer é null. Se pularmos, os pacotes nunca são registrados.
             try { BandAidNetworkHandler.CheckInit(); }
             catch (Exception ex)
             {
-                // [DEBUG-ICM] CheckInit era chamado sem guarda ANTES do scan — uma exceção aqui mataria o Update todo frame
-                TRLImmersiveCombatMedicinePlugin.ModLogger.LogError($"[DEBUG-ICM] CheckInit exception: {ex}");
+                // Guard: uma exceção aqui mataria o Update inteiro a cada frame.
+                TRLImmersiveCombatMedicinePlugin.ModLogger.LogError($"CheckInit exception: {ex}");
             }
 
             if (Singleton<GameWorld>.Instance == null || Singleton<GameWorld>.Instance.MainPlayer == null)
@@ -164,13 +150,6 @@ namespace TRLImmersiveCombatMedicine
             {
                 ResetAllState();
                 _lastGameWorld = Singleton<GameWorld>.Instance;
-            }
-
-            // [DEBUG-ICM]
-            if (!_dbgInRaid)
-            {
-                _dbgInRaid = true;
-                TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning("[DEBUG-ICM] Controller.Update EM RAID (GameWorld+MainPlayer ok) — sweep de MedicInteractable ativo");
             }
 
             // ref: CR-05 — consumo pendente sem report dentro do timeout → fallback
@@ -224,7 +203,7 @@ namespace TRLImmersiveCombatMedicine
                     // Zerá-la antes deixava a HealRoutine viva aplicando o tratamento
                     // a qualquer distância depois do "Abortado!".
                     if (_isHealingInProgress)
-                        NotificationManagerClass.DisplayMessageNotification("Abortado!", ENotificationDurationType.Default, ENotificationIconType.Alert);
+                        NotificationManagerClass.DisplayMessageNotification(MedicLocale.Get(MedicTextId.Aborted), ENotificationDurationType.Default, ENotificationIconType.Alert);
                     DeactivateMedicMode();
                     return;
                 }
@@ -242,7 +221,7 @@ namespace TRLImmersiveCombatMedicine
                 _pendingHealStats = null;
                 _pendingHealPatient = null;
                 NotificationManagerClass.DisplayMessageNotification(
-                    "Sem resposta do paciente (timeout).", ENotificationDurationType.Default, ENotificationIconType.Alert);
+                    MedicLocale.Get(MedicTextId.NoPatientResponseTimeout), ENotificationDurationType.Default, ENotificationIconType.Alert);
             }
         }
 
@@ -354,7 +333,7 @@ namespace TRLImmersiveCombatMedicine
 
                     BandAidNetworkHandler.SendHealCheck(mainPlayer, _targetPatient, item.TemplateId.ToString());
                     NotificationManagerClass.DisplayMessageNotification(
-                        $"Verificando {stats.Name}...", ENotificationDurationType.Default, ENotificationIconType.Quest);
+                        MedicLocale.Get(MedicTextId.CheckingItem, stats.Name), ENotificationDurationType.Default, ENotificationIconType.Quest);
                 }
                 else
                 {
@@ -362,7 +341,7 @@ namespace TRLImmersiveCombatMedicine
                     if (!MedicalLogic.CanUseItem(_targetPatient, stats))
                     {
                         NotificationManagerClass.DisplayMessageNotification(
-                            $"{stats.Name}: Sem ferimento compatível.", ENotificationDurationType.Default, ENotificationIconType.Alert);
+                            MedicLocale.Get(MedicTextId.NoCompatibleWoundLocal, stats.Name), ENotificationDurationType.Default, ENotificationIconType.Alert);
                         return;
                     }
                     _activeHealCoroutine = StartCoroutine(HealRoutine(mainPlayer, _targetPatient, item, stats));
@@ -443,7 +422,7 @@ namespace TRLImmersiveCombatMedicine
 
             // Notificação local
             NotificationManagerClass.DisplayMessageNotification(
-                $"Toque no ombro → {target.Profile.Nickname}", 
+                MedicLocale.Get(MedicTextId.ShoulderTapSent, target.Profile.Nickname),
                 ENotificationDurationType.Default, ENotificationIconType.Quest);
 
             // Tocar gesto de mão "There" (apontar com a mão)
@@ -536,7 +515,7 @@ namespace TRLImmersiveCombatMedicine
             doctor.MovementContext.SetPhysicalCondition(EPhysicalCondition.UsingMeds, false);
             ReleaseSurgeryImmobilize(doctor);   // 077 — solta HealingLegs + reseta anim mult
 
-            NotificationManagerClass.DisplayMessageNotification("Item dropado!", ENotificationDurationType.Default, ENotificationIconType.Alert);
+            NotificationManagerClass.DisplayMessageNotification(MedicLocale.Get(MedicTextId.ItemDropped), ENotificationDurationType.Default, ENotificationIconType.Alert);
         }
 
         private bool _patientDiedDuringHeal = false;
@@ -573,7 +552,7 @@ namespace TRLImmersiveCombatMedicine
             // (invariante do review PA-01-03 — não depende do reset do cleanup anterior).
             MedicHealPatch.AllyAnimSpeedMult = allyTimeMult > 0f ? 1f / allyTimeMult : 1f;
 
-            NotificationManagerClass.DisplayMessageNotification($"Aplicando {itemUsed.ShortName.Localized()}...", ENotificationDurationType.Default, ENotificationIconType.Quest);
+            NotificationManagerClass.DisplayMessageNotification(MedicLocale.Get(MedicTextId.ApplyingItem, itemUsed.ShortName.Localized()), ENotificationDurationType.Default, ENotificationIconType.Quest);
 
             // Feedback do membro-alvo: paciente remoto já informou o alvo esperado na
             // resposta do handshake (visível ANTES da animação); Common = "..." quando
@@ -653,9 +632,10 @@ namespace TRLImmersiveCombatMedicine
                 TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo("HealRoutine: MedEffect nativo aplicado no paciente — ApplyTreatment programático pulado.");
                 // ref: CR-03 — expor a parte tratada na notificação (a feature do
                 // membro-alvo já resolve essa informação)
-                string partSuffix = MedicHealPatch.LastAppliedPart != EBodyPart.Common
-                    ? $" ({BandAidUI.PartLabel(MedicHealPatch.LastAppliedPart)})" : "";
-                NotificationManagerClass.DisplayMessageNotification($"Tratamento Completo{partSuffix}.", ENotificationDurationType.Long, ENotificationIconType.Quest);
+                string treatmentText = MedicHealPatch.LastAppliedPart != EBodyPart.Common
+                    ? MedicLocale.Get(MedicTextId.TreatmentCompleteWithPart, BandAidUI.PartLabel(MedicHealPatch.LastAppliedPart))
+                    : MedicLocale.Get(MedicTextId.TreatmentComplete);
+                NotificationManagerClass.DisplayMessageNotification(treatmentText, ENotificationDurationType.Long, ENotificationIconType.Quest);
                 // ref: CR-04-14 — sucesso também limpa o rastreamento (referência
                 // estática ao MedEffect não atravessa curas/raids)
                 MedicHealPatch.ClearNativeEffectTracking();
@@ -668,12 +648,12 @@ namespace TRLImmersiveCombatMedicine
                     // Verificar se o item ainda é válido (não foi destruído/lootado)
                     var _ = itemUsed.TemplateId;
                     MedicalLogic.ApplyTreatment(doctor, patient, itemUsed, stats);
-                    NotificationManagerClass.DisplayMessageNotification("Tratamento Completo.", ENotificationDurationType.Long, ENotificationIconType.Quest);
+                    NotificationManagerClass.DisplayMessageNotification(MedicLocale.Get(MedicTextId.TreatmentComplete), ENotificationDurationType.Long, ENotificationIconType.Quest);
                 }
                 catch (Exception ex)
                 {
                     TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning($"HealRoutine: Item destruído durante cura — {ex.Message}");
-                    NotificationManagerClass.DisplayMessageNotification("Item perdido durante tratamento.", ENotificationDurationType.Default, ENotificationIconType.Alert);
+                    NotificationManagerClass.DisplayMessageNotification(MedicLocale.Get(MedicTextId.ItemLostDuringTreatment), ENotificationDurationType.Default, ENotificationIconType.Alert);
                 }
             }
             else
@@ -752,7 +732,7 @@ namespace TRLImmersiveCombatMedicine
             try { doctor.MovementContext.SetPhysicalCondition(EPhysicalCondition.UsingMeds, false); } catch { }
             ReleaseSurgeryImmobilize(doctor);   // 077 — solta HealingLegs + reseta anim mult
 
-            NotificationManagerClass.DisplayMessageNotification("Tratamento cancelado.", ENotificationDurationType.Default, ENotificationIconType.Alert);
+            NotificationManagerClass.DisplayMessageNotification(MedicLocale.Get(MedicTextId.TreatmentCancelled), ENotificationDurationType.Default, ENotificationIconType.Alert);
             TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo("CancelHealInProgress: cura cancelada (Mouse0).");
         }
 
@@ -770,19 +750,13 @@ namespace TRLImmersiveCombatMedicine
             var gameWorld = Singleton<GameWorld>.Instance;
             var mainPlayer = gameWorld.MainPlayer;
             var players = gameWorld.AllAlivePlayersList;
-            int attached = 0;
             for (int i = 0; i < players.Count; i++)
             {
                 Player p = players[i];
                 if (p == null || p == mainPlayer) continue;
                 if (p.HealthController == null || !p.HealthController.IsAlive) continue;
-                if (MedicInteractable.Ensure(p)) attached++;
+                MedicInteractable.Ensure(p);
             }
-
-            // [DEBUG-ICM] remover após diagnóstico
-            if (attached > 0)
-                TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning(
-                    $"[DEBUG-ICM] sweep: +{attached} MedicInteractable (vivos na lista: {players.Count})");
         }
 
         // === PROMPT DIRIGIDO PELO CONTROLLER (regra única de distância) ===
@@ -903,7 +877,7 @@ namespace TRLImmersiveCombatMedicine
             _isMedicModeActive = true; 
             _targetPatient = p; 
             BandAidUI.Instance?.ShowUI(p);
-            NotificationManagerClass.DisplayMessageNotification($"MÉDICO: {p.Profile.Nickname}", ENotificationDurationType.Default, ENotificationIconType.Quest); 
+            NotificationManagerClass.DisplayMessageNotification(MedicLocale.Get(MedicTextId.MedicExamining, p.Profile.Nickname), ENotificationDurationType.Default, ENotificationIconType.Quest);
         }
 
         private void DeactivateMedicMode() 

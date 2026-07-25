@@ -305,9 +305,12 @@ namespace Band_Aid
                 new Vector2(420, 0), new Vector2(480, 600), COL_BG_PANEL);
 
             // === TÍTULO ===
+            // ref: item 010 — texto inicial nunca é visível (_canvasObj.SetActive(false) logo
+            // abaixo; ShowUI() sobrescreve com MedicLocale antes do canvas aparecer) — mantido
+            // como literal EN por clareza, sem necessidade de chamar MedicLocale aqui.
             _titleText = MakeText(panel.transform, "Title",
                 new Vector2(0, 275), new Vector2(460, 20),
-                "SITUAÇÃO DO OPERADOR", 14, TextAnchor.MiddleCenter,
+                "OPERATOR STATUS", 14, TextAnchor.MiddleCenter,
                 COL_TITLE, FontStyle.Bold);
 
             // === SUBTÍTULO (nome do operador, mais brilhante) ===
@@ -363,9 +366,11 @@ namespace Band_Aid
             CreateEcg(panel.transform);
 
             // === RODAPÉ ===
+            // ref: item 010 — mesmo raciocínio do título acima: texto inicial nunca visível,
+            // mantido como literal EN por clareza (ShowUI() reaplica via MedicLocale).
             _footerText = MakeText(panel.transform, "Footer",
                 new Vector2(0, -268), new Vector2(440, 32),
-                "Utilize as suas teclas de atalhos para curar\n[Pressione F] Fechar Examinador", 12, TextAnchor.MiddleCenter,
+                "Use your hotkeys to heal\n[Press F] Close Examiner", 12, TextAnchor.MiddleCenter,
                 COL_FOOTER, FontStyle.Normal);
 
             _canvasObj.SetActive(false);
@@ -646,18 +651,26 @@ namespace Band_Aid
             CacheSprites();
             if (_canvasObj != null)
             {
+                // ref: item 010 — título e rótulos de membro: BuildUI() só roda 1x (Awake, antes de
+                // qualquer raid) — reaplicar aqui garante leitura do idioma NO MOMENTO DE EXIBIR
+                // (nunca cacheado), mesma regra do TraumaLocale.IsGamePortuguese() (AP-08).
+                if (_titleText != null) _titleText.text = MedicLocale.Get(MedicTextId.HudTitle);
+                foreach (var kvp in _limbViews)
+                    if (kvp.Value.NameText != null)
+                        kvp.Value.NameText.text = MedicLocale.BodyPartShort(kvp.Key);
+
                 // ref: CR-03 — footer reflete a keybind/modo REAIS configurados
                 // (era hardcoded "[Pressione F]", contradizendo o default Hold)
                 if (_footerText != null)
                 {
                     var shortcut = TRLImmersiveCombatMedicinePlugin.MedicInteractKey.Value;
                     var mode = TRLImmersiveCombatMedicinePlugin.MedicInteractMode.Value;
-                    string verbo = mode == EBandAidPressMode.Hold ? "Segure" : (mode == EBandAidPressMode.DoubleTap ? "Duplo" : "Pressione");
+                    string verbo = MedicLocale.PressModeVerb(mode);
                     // ref: CR-04-21 — incluir modifiers (Shift+F etc.), mesma semântica
                     // do CheckPressMode (que EXIGE o modifier quando configurado)
                     string keyLabel = shortcut.MainKey.ToString();
                     foreach (var m in shortcut.Modifiers) keyLabel = m + "+" + keyLabel;
-                    _footerText.text = $"Utilize as suas teclas de atalhos para curar\n[{verbo} {keyLabel}] Fechar Examinador";
+                    _footerText.text = MedicLocale.Get(MedicTextId.HudFooterDynamic, verbo, keyLabel);
                 }
                 _canvasObj.SetActive(true);
                 _lastUpdateTime = 0f;
@@ -680,13 +693,6 @@ namespace Band_Aid
         private Color _treatmentOutlineOriginal;
         private static readonly Color COL_TREAT = new Color(0.95f, 0.75f, 0.20f, 1f); // âmbar
 
-        private static readonly Dictionary<EBodyPart, string> PartLabelPt = new Dictionary<EBodyPart, string>
-        {
-            { EBodyPart.Head, "CABEÇA" }, { EBodyPart.Chest, "TÓRAX" }, { EBodyPart.Stomach, "ESTÔMAGO" },
-            { EBodyPart.LeftArm, "BRAÇO ESQ." }, { EBodyPart.RightArm, "BRAÇO DIR." },
-            { EBodyPart.LeftLeg, "PERNA ESQ." }, { EBodyPart.RightLeg, "PERNA DIR." },
-        };
-
         /// <summary>
         /// Mostra qual membro está recebendo o tratamento (destaque pulsante no bloco
         /// do membro + linha de status). part=Common → só o status, sem destaque
@@ -694,11 +700,9 @@ namespace Band_Aid
         /// </summary>
         private string _treatmentItemName;
 
-        /// <summary>Label PT do membro (fonte única — usada também nos blocos do HUD).</summary>
-        public static string PartLabel(EBodyPart part)
-        {
-            return PartLabelPt.TryGetValue(part, out var l) ? l : "...";
-        }
+        /// <summary>Label do membro (fonte única — usada também nos blocos do HUD).
+        /// ref: item 010 — delega a MedicLocale.BodyPartShort (i18n EN/PT), sem duplicar a tabela.</summary>
+        public static string PartLabel(EBodyPart part) => MedicLocale.BodyPartShort(part);
 
         public void ShowTreatment(EBodyPart part, string itemName)
         {
@@ -708,10 +712,12 @@ namespace Band_Aid
             // mostrado no início da cura, evitando o texto trocar no meio.
             if (!string.IsNullOrEmpty(itemName)) _treatmentItemName = itemName;
 
+            // ref: CR-01-01 (code-review 010 r1) — migrado para i18n EN/PT (era PT hardcoded,
+            // único resíduo do fluxo de cura fora do escopo original da migração).
             string label = PartLabel(part);
             _treatmentText.text = string.IsNullOrEmpty(_treatmentItemName)
-                ? $"► TRATANDO: {label}"
-                : $"► {_treatmentItemName.ToUpper()} → {label}";
+                ? MedicLocale.Get(MedicTextId.TreatingLabel, label)
+                : MedicLocale.Get(MedicTextId.TreatingLabelWithItem, _treatmentItemName.ToUpper(), label);
             _treatmentText.gameObject.SetActive(true);
 
             // Restaurar o destaque anterior antes de trocar de membro (inclusive
@@ -785,7 +791,7 @@ namespace Band_Aid
                 var profile = _targetPlayer.Profile;
 
                 if (hc == null || profile == null)
-                { _subtitleText.text = "INDISPONÍVEL"; return; }
+                { _subtitleText.text = MedicLocale.Get(MedicTextId.HudUnavailable); return; }
 
                 // === AUTO-CLOSE: fechar HUD se médico se afastou do paciente ===
                 var mainPlayer = Comfort.Common.Singleton<GameWorld>.Instance?.MainPlayer;

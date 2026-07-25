@@ -36,9 +36,17 @@ namespace Band_Aid
     {
         public string DoctorProfileId;
         public string PatientProfileId;
-        public string ItemTemplateId;
+        public string ItemTemplateId;   // reusado por MedicLocale.GetDenyReasonText p/ resolver o
+                                         // nome do item localmente no médico — nenhum campo NOVO
         public bool Approved;
-        public string DenyReason; // Motivo da recusa (ex: "Sem sangramento")
+        // ref: item 010 — DESVIO da spec técnica (stub 5): o campo precisou virar `internal` (não
+        // `public` como escrito no stub) porque `MedicDenyReasonId` é `internal` (encapsulamento
+        // intencional, mesmo padrão de MedicLocale) — um campo PÚBLICO de um struct PÚBLICO com tipo
+        // INTERNO é CS0052 ("Inconsistent accessibility"), confirmado por build isolado (dotnet build,
+        // repro mínimo). `internal` preserva o mesmo acesso de fato (Band_Aid/TRLImmersiveCombatMedicine
+        // são a mesma assembly) sem expor o enum para fora do mod. Tradução
+        // acontece no médico (exibidor), nunca serializada como texto.
+        internal TRLImmersiveCombatMedicine.MedicDenyReasonId DenyReasonId;
         // Membro que o smart-target do paciente PRETENDE tratar (mesma lógica da
         // aplicação) — permite ao médico ver o alvo ANTES da animação começar.
         public byte ExpectedBodyPart;
@@ -49,7 +57,7 @@ namespace Band_Aid
             writer.Put(PatientProfileId);
             writer.Put(ItemTemplateId);
             writer.Put(Approved);
-            writer.Put(DenyReason ?? "");
+            writer.Put((byte)DenyReasonId);
             writer.Put(ExpectedBodyPart);
         }
 
@@ -59,7 +67,7 @@ namespace Band_Aid
             PatientProfileId = reader.GetString();
             ItemTemplateId = reader.GetString();
             Approved = reader.GetBool();
-            DenyReason = reader.GetString();
+            DenyReasonId = (TRLImmersiveCombatMedicine.MedicDenyReasonId)reader.GetByte();
             ExpectedBodyPart = reader.GetByte();
         }
     }
