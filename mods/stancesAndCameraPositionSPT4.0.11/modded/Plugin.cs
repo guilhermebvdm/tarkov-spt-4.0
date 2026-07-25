@@ -1305,6 +1305,7 @@ public class Plugin : BaseUnityPlugin
 
         // Item 019: Chamber Check Ammo UI
         SafeEnable("ChamberCheckAmmoPatch", () => new Patches.ChamberCheckAmmoPatch());
+        SafeEnable("PickupAimingSafetyPatch", () => new Patches.PickupAimingSafetyPatch());
 
         // Carrega sprites do ícone de mount (reusados pelo novo item de mount; carregamento mantido).
         LoadedSprites["mounting.png"] = LoadEmbeddedSprite("mounting.png");
