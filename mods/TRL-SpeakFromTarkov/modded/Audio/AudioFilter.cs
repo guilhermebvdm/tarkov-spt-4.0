@@ -73,7 +73,7 @@ namespace TRL_SpeakFromTarkov.Audio
         public float RNNoiseGateHold { get; set; } = 0.15f;
 
         // ── Novos Filtros Avançados (Qualidade Estúdio) ────────
-        public bool EnableAGC { get; set; } = true;
+        public bool EnableAGC { get; set; } = false;
         public bool EnableLimiter { get; set; } = true;
         
         private float _lpfAlpha;
@@ -148,9 +148,6 @@ namespace TRL_SpeakFromTarkov.Audio
                 ApplyFallback(buffer);
             }
 
-            // O AGC roda DEPOIS da supressão do RNNoise para não amplificar o ruído de fundo antes do filtro
-            if (EnableAGC) ApplyAGC(buffer);
-            
             // O limiter é a última barreira de proteção de áudio
             if (EnableLimiter) ApplyLimiter(buffer);
         }
