@@ -4,6 +4,7 @@ using Fika.Core.Networking;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 using EFT;
 using System.Linq;
@@ -66,20 +67,32 @@ namespace TRL_SpeakFromTarkov.Network
         private const int ErrorLogIntervalMs = 5000;
         private static int _lastErrorLogTick;
         private static int _suppressedErrors;
-        private static bool _firstErrorLogged;
 
         /// <summary>
-        /// Loga a exceção completa na primeira ocorrência e, depois, no máximo uma vez a cada 5 s
-        /// com a contagem do que foi suprimido. Usa Environment.TickCount (e não Time.time) porque
-        /// também é chamado da thread de captura, onde a API da Unity não pode ser tocada.
+        /// Tipos de exceção que já renderam stack trace completo. A chave é o TIPO (e não um
+        /// booleano global): uma falha diferente que apareça raids depois ainda precisa do trace,
+        /// caso contrário o throttle esconderia justamente o problema novo.
+        /// </summary>
+        private static readonly HashSet<Type> _tracedExceptionTypes = new HashSet<Type>();
+
+        /// <summary>
+        /// Loga a exceção completa na primeira ocorrência de cada TIPO e, depois, no máximo uma vez
+        /// a cada 5 s com a contagem do que foi suprimido. Usa Environment.TickCount (e não
+        /// Time.time) porque também é chamado da thread de captura, onde a API da Unity não pode
+        /// ser tocada.
         /// </summary>
         internal static void LogErrorThrottled(string context, Exception ex)
         {
             var now = Environment.TickCount;
 
-            if (!_firstErrorLogged)
+            bool firstOfType;
+            lock (_tracedExceptionTypes)
             {
-                _firstErrorLogged = true;
+                firstOfType = ex != null && _tracedExceptionTypes.Add(ex.GetType());
+            }
+
+            if (firstOfType)
+            {
                 _lastErrorLogTick = now;
                 Log?.LogError($"[SFT] {context}: {ex}");
                 return;
@@ -88,14 +101,13 @@ namespace TRL_SpeakFromTarkov.Network
             // Subtração de ints trata o wrap-around de TickCount corretamente.
             if (now - _lastErrorLogTick < ErrorLogIntervalMs)
             {
-                _suppressedErrors++;
+                Interlocked.Increment(ref _suppressedErrors);
                 return;
             }
 
             _lastErrorLogTick = now;
-            var suppressed = _suppressedErrors;
-            _suppressedErrors = 0;
-            Log?.LogError($"[SFT] {context}: {ex.Message}"
+            var suppressed = Interlocked.Exchange(ref _suppressedErrors, 0);
+            Log?.LogError($"[SFT] {context}: {ex?.Message}"
                 + (suppressed > 0 ? $" (+{suppressed} falhas suprimidas nos últimos {ErrorLogIntervalMs / 1000}s)" : string.Empty));
         }
 

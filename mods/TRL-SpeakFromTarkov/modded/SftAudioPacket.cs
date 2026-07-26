@@ -14,6 +14,13 @@ namespace TRL_SpeakFromTarkov
     /// NetDataReader silenciosamente. Manter este tipo registrado permite que um cliente novo
     /// continue OUVINDO um peer antigo enquanto o parque não está todo atualizado.
     ///
+    /// ATENÇÃO — a compatibilidade é de MÃO ÚNICA: 1.4.0 ouve 1.3.0, mas um peer 1.3.0 que receba
+    /// um V2 não tem handler para esse hash e o NetPacketProcessor lança ParseException, que sobe
+    /// até o PollEvents (sem try/catch) e descarta a fila de eventos daquele frame. Portanto 1.4.0
+    /// é release LOCKSTEP: todos os peers e o headless precisam subir juntos. A alternativa
+    /// (manter o nome e mudar o layout) seria pior — os dois lados aceitariam o pacote um do outro
+    /// e desalinhariam em silêncio, sem erro diagnosticável.
+    ///
     /// O envio usa sempre <see cref="SftAudioPacketV2"/>. Este tipo pode ser removido quando todos
     /// os peers (incluindo o headless) estiverem em ≥ 1.4.0.
     /// </summary>
@@ -89,8 +96,10 @@ namespace TRL_SpeakFromTarkov
             inner.Put(VoiceLevel);
 
             // Sobrecarga com offset/length: escreve os mesmos bytes sem a cópia do CopyData().
-            // O corpo é limitado por MaxAudioBytes + ProfileId, muito abaixo do teto ushort.
-            writer.PutBytesWithLength(inner.Data, 0, (ushort)inner.Length);
+            // O corpo é limitado por MaxAudioBytes + ProfileId, muito abaixo do teto ushort do
+            // prefixo; `checked` faz um aumento futuro de bitrate estourar de forma visível em vez
+            // de truncar o comprimento em silêncio (que produziria desalinhamento no receptor).
+            writer.PutBytesWithLength(inner.Data, 0, checked((ushort)inner.Length));
         }
 
         public void Deserialize(NetDataReader reader)
