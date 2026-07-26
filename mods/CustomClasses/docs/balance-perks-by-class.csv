@@ -1,0 +1,39 @@
+Classe;Nome EN;Nome PT;Modificador;Polaridade;Valor;Efeito atual;Faixa;Ativo (default);Chave F12;Origem
+Combat Medic;Efficient Metabolism;Metabolismo Eficiente;dreno de fome/sede;menor é melhor;0.85;Perk;0.5-1;on;Efficient Metabolism — Hunger/thirst drain;B17
+Combat Medic;Rapid Care;Cuidado Rápido;tempo de cura/estabilização;menor é melhor;0.7;Perk;0.3-1;on;Rapid Care — Use time mult;072
+Combat Medic;Swift Surgeon;Cirurgião Ágil;tempo de cirurgia;menor é melhor;0.5;Perk;0.3-1;on;Swift Surgeon — Surgery time mult;072
+Combat Medic;Mobile Surgery;Cirurgia em Movimento;andar durante a cirurgia;flag;on;Perk;—;on;Mobile Surgery — Enabled;072
+Combat Medic;Restorative Surgery;Cirurgia Restauradora;HP máx retido na cirurgia;maior é melhor;0.80;Perk;0-1;on;Restorative Surgery — Restored max HP;076
+Combat Medic;Shaky Hands;Mãos Trêmulas;recuo;menor é melhor;1.25;Drawback;1-2;OFF;Shaky Hands — Recoil mult;050
+Rifleman;Cool Under Fire;Sangue-frio;flinch ao levar dano;menor é melhor;0.50;Perk;0-1;on;Cool Under Fire — Flinch mult;050
+Rifleman;Anti-Jam;Antitravamento;chance de travamento da arma;menor é melhor;0.50;Perk;0-1;on;Cool Under Fire — Malfunction chance mult;050
+Rifleman;Adrenaline (janela);Adrenalina (janela);duração da janela (s);maior é melhor;25;parâmetro;5-120;on;Adrenaline — Window (s);050
+Rifleman;Adrenaline (cooldown);Adrenalina (cooldown);espera após a janela (s);menor é melhor;120;parâmetro;0-600;on;Adrenaline — Cooldown (s);050
+Rifleman;Adrenaline Grip;Pegada de Adrenalina;recuo (na janela);menor é melhor;0.70;Perk;0.3-1;on;Adrenaline — Recoil mult;050
+Rifleman;Adrenaline Reload;Recarga de Adrenalina;tempo de recarga (na janela);menor é melhor;0.80;Perk;0.3-1;on;Adrenaline — Reload time mult;050
+Rifleman;Adrenaline Focus;Foco de Adrenalina;tempo de ADS (na janela);menor é melhor;0.80;Perk;0.3-1;on;Adrenaline — ADS time mult;050
+Rifleman;Loud Operator;Barulhento;raio de som de movimento;menor é melhor;1.30;Drawback;1-2;on;Loud Operator — Sound radius mult;050
+Hunter;Sharpshooter;Atirador;tempo de ADS (todas as armas);menor é melhor;0.85;Perk;0.5-1;on;Sharpshooter — ADS time mult;050
+Hunter;Iron Lungs;Fôlego de Aço;dreno de respiração;menor é melhor;0.667;Perk;0.2-1;on;Iron Lungs — Breath drain mult;050
+Hunter;Steady Arms;Braços Firmes;fadiga de braço ao mirar;menor é melhor;0.65;Perk;0.2-1;on;Steady Arms — ADS arm drain mult;051
+Hunter;Calm Sights;Mira Serena;oscilação de mira/movimento (sway);menor é melhor;0.7;Perk;0.3-1;on;Calm Sights — Sway mult;072
+Hunter;Stalker;Espreita;raio de som de movimento;menor é melhor;0.80;Perk;0.1-1;on;Stalker — Sound radius mult;064
+Hunter;Rooted;Enraizado;velocidade ao mirar;maior é melhor;0.85;Drawback;0.5-1;on;Rooted — ADS move speed;074
+Stealth;Ghost Step;Passo Fantasma;raio de som de movimento;menor é melhor;0.70;Perk;0.1-1;on;Ghost Step — Sound radius mult;050
+Stealth;Execution;Execução;dano de melee;maior é melhor;3.5;Perk;1-10;on;Execution — Melee damage mult;050
+Stealth;Swift Blade;Lâmina Veloz;velocidade com a faca na mão;maior é melhor;1.10;Perk;1-1.5;on;Execution — Melee move speed;050
+Stealth;Rattled;Abalado;tranco na mira ao levar dano;menor é melhor;1.50;Drawback;1-3;on;Rattled — Aim-punch mult;050
+Scavenger;Quick Hands;Mãos Rápidas;revista 2 contêineres de uma vez;flag;on;Perk;—;on;Quick Hands — Enabled;061
+Scavenger;Silent Looter;Saque Silencioso;volume de interação/loot;menor é melhor;0.40;Perk;0.1-1;on;Silent Looter — Volume mult;050
+Scavenger;Pack Mule;Mula de Carga;limite de carga (bônus);maior é melhor;0.30;Perk;0-1;on;Pack Mule — Carry limit bonus (Scav);050
+Scavenger;Overladen;Sobrecarregado;inércia com o peso;menor é melhor;1.50;Drawback;1-3;on;Overladen — Inertia mult;074
+Tank;Pack Mule;Mula de Carga;limite de carga (bônus);maior é melhor;0.30;Perk;0-1;on;Pack Mule — Carry limit bonus (Tank);050
+Tank;Bulwark;Couraça;dano recebido (com colete pesado);menor é melhor;0.85;Perk;0.5-1;on;Bulwark — Damage taken;050
+Tank;Bulwark (req.);Couraça (req.);classe mín. de armadura p/ valer;maior é melhor;4;parâmetro;1-6;on;Bulwark — Min armor class;050
+Tank;Steady Mount;Apoio Firme;recuo com arma pesada (LMG/HMG/GL);menor é melhor;0.85;Perk;0.5-1;on;Bunker — Heavy weapon recoil mult;050
+Tank;Heavy Handling;Manejo Pesado;ergonomia com arma pesada;maior é melhor;1.15;Perk;1-1.5;on;Bunker — Heavy weapon ergo mult;050
+Tank;Tireless Arms;Braços Incansáveis;fadiga de braço com arma pesada;menor é melhor;0.20;Perk;0-1;on;Tireless Arms — Heavy arm drain mult;051
+Tank;Heavy Frame;Estrutura Pesada;velocidade de movimento;maior é melhor;0.90;Drawback;0.5-1;on;Heavy Frame — Move speed;050
+Tank;Heavy Appetite;Apetite Pesado;dreno de fome/sede;menor é melhor;1.30;Drawback;1-2;on;Heavy Frame — Hunger/thirst drain;050
+Tank;Loud Operator;Barulhento;raio de som de movimento;menor é melhor;1.30;Drawback;1-2;on;Loud Operator — Sound radius mult (Tank);050
+Naked;(nenhum);(nenhum);—;—;—;—;—;—;—;016

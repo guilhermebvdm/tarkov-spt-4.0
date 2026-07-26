@@ -1,0 +1,54 @@
+Nome EN;Nome PT;Modificador;Polaridade;Status;Mecanismo;Onde está hoje;Valor exemplo;Custo;Fonte
+Efficient Metabolism;Metabolismo Eficiente;dreno de fome/sede;menor é melhor;Funcional;lever existente;Combat Medic;0.85;—;catálogo
+Rapid Care;Cuidado Rápido;tempo de cura/estabilização;menor é melhor;Funcional;lever existente;Combat Medic;0.7;—;catálogo
+Swift Surgeon;Cirurgião Ágil;tempo de cirurgia;menor é melhor;Funcional;lever existente;Combat Medic;0.5;—;catálogo
+Mobile Surgery;Cirurgia em Movimento;andar durante a cirurgia;flag;Funcional;flag;Combat Medic;on;—;catálogo
+Restorative Surgery;Cirurgia Restauradora;HP máx retido na cirurgia;maior é melhor;Funcional;lever existente;Combat Medic;0.80;—;catálogo
+Shaky Hands;Mãos Trêmulas;recuo;menor é melhor;Funcional (OFF);lever existente;Combat Medic;1.25;—;catálogo
+Cool Under Fire;Sangue-frio;flinch ao levar dano;menor é melhor;Funcional;lever existente;Rifleman;0.50;—;catálogo
+Anti-Jam;Antitravamento;chance de travamento da arma;menor é melhor;Funcional;lever existente;Rifleman;0.50;—;catálogo
+Adrenaline Grip;Pegada de Adrenalina;recuo na janela de combate;menor é melhor;Funcional;lever existente (reativo);Rifleman;0.70;—;catálogo
+Adrenaline Reload;Recarga de Adrenalina;recarga na janela de combate;menor é melhor;Funcional;lever existente (reativo);Rifleman;0.80;—;catálogo
+Adrenaline Focus;Foco de Adrenalina;ADS na janela de combate;menor é melhor;Funcional;lever existente (reativo);Rifleman;0.80;—;catálogo
+Loud Operator;Barulhento;raio de som de movimento;menor é melhor;Funcional;lever existente;Rifleman + Tank;1.30;—;catálogo
+Sharpshooter;Atirador;tempo de ADS (todas as armas);menor é melhor;Funcional;lever existente;Hunter;0.85;—;catálogo
+Iron Lungs;Fôlego de Aço;dreno de respiração;menor é melhor;Funcional;lever existente;Hunter;0.667;—;catálogo
+Steady Arms;Braços Firmes;fadiga de braço ao mirar;menor é melhor;Funcional;lever existente (req. stances);Hunter;0.65;—;catálogo
+Calm Sights;Mira Serena;oscilação de mira (sway);menor é melhor;Funcional;lever existente;Hunter;0.7;—;catálogo
+Stalker;Espreita;raio de som de movimento;menor é melhor;Funcional;lever existente;Hunter;0.80;—;catálogo
+Rooted;Enraizado;velocidade ao mirar;maior é melhor;Funcional;lever existente;Hunter;0.85;—;catálogo
+Ghost Step;Passo Fantasma;raio de som de movimento;menor é melhor;Funcional;lever existente;Stealth;0.70;—;catálogo
+Execution;Execução;dano de melee;maior é melhor;Funcional;lever existente;Stealth;3.5;—;catálogo
+Swift Blade;Lâmina Veloz;velocidade com a faca na mão;maior é melhor;Funcional;lever existente;Stealth;1.10;—;catálogo
+Rattled;Abalado;tranco na mira ao levar dano;menor é melhor;Funcional;lever existente (reativo);Stealth;1.50;—;catálogo
+Quick Hands;Mãos Rápidas;revista 2 contêineres de uma vez;flag;Funcional;mecânica elite EFT;Scavenger;on;—;catálogo
+Silent Looter;Saque Silencioso;volume de interação/loot;menor é melhor;Funcional;lever existente;Scavenger;0.40;—;catálogo
+Pack Mule;Mula de Carga;limite de carga (bônus);maior é melhor;Funcional;lever existente;Scavenger + Tank;0.30;—;catálogo
+Overladen;Sobrecarregado;inércia com o peso;menor é melhor;Funcional;lever existente;Scavenger;1.50;—;catálogo
+Bulwark;Couraça;dano recebido (colete pesado);menor é melhor;Funcional;lever existente (condicional);Tank;0.85;—;catálogo
+Steady Mount;Apoio Firme;recuo com arma pesada (LMG/HMG/GL);menor é melhor;Funcional;lever existente (condicional);Tank;0.85;—;catálogo
+Heavy Handling;Manejo Pesado;ergonomia com arma pesada;maior é melhor;Funcional;lever existente (condicional);Tank;1.15;—;catálogo
+Grenadier;Granadeiro;lança-granadas sem penalidade de ergo;flag;Funcional;flag;Tank;on;—;catálogo
+Tireless Arms;Braços Incansáveis;fadiga de braço (arma pesada);menor é melhor;Funcional;lever existente (req. stances);Tank;0.20;—;catálogo
+Heavy Frame;Estrutura Pesada;velocidade de movimento;maior é melhor;Funcional;lever existente;Tank;0.90;—;catálogo
+Heavy Appetite;Apetite Pesado;dreno de fome/sede;menor é melhor;Funcional;lever existente;Tank;1.30;—;catálogo
+Noisy Pockets;Bolsos Barulhentos;raio de som escalado pela carga;menor é melhor;Ideia (APROVADA);lever existente (reativo ao peso);Scavenger (sugerido);som ×1.0 a ×1.4;Baixo;sessão 2026-07-19
+Light Frame;Estrutura Leve;limite de carga (bônus);maior é melhor;Ideia;lever existente (invertido);Stealth (sugerido);-0.20;Baixo;sessão 2026-07-19
+Heavy Hands;Mãos Pesadas;fadiga de braço ao mirar;menor é melhor;Ideia;lever existente (invertido, req. stances);a decidir;1.30;Baixo;sessão 2026-07-19
+Blind Focus;Foco Cego;visão de túnel na janela de adrenalina;n/a (visual);Ideia;efeito visual EFT (reativo);Rifleman (sugerido);—;Médio;sessão 2026-07-19
+Battered;Abalado (visual);desfoque ao levar dano forte;n/a (visual);Ideia;efeito visual EFT (reativo);a decidir;blur 1-2s;Médio;sessão 2026-07-19
+Combat Fog;Névoa de Combate;desfoque acumulado por rajada longa;n/a (visual);Ideia;efeito visual EFT (reativo);Rifleman ou Tank;—;Médio;sessão 2026-07-19
+Exhaustion Haze;Névoa de Exaustão;vinheta reforçada ao esgotar stamina;n/a (visual);Ideia;efeito visual EFT (reativo);Tank (sugerido);—;Médio;sessão 2026-07-19
+Blood Scent;Cheiro de Sangue;detecção da IA ao sangrar;n/a;Ideia;patch novo;Stealth (sugerido);—;Alto;perk-ideas.md
+Butterfingers;Dedos de Manteiga;chance de derrubar item ao levar tiro;n/a;Ideia (risco);patch novo (inventário);Scavenger (sugerido);chance X%;Alto;perk-ideas.md
+Claustrophobia;Claustrofobia;penalidade em espaços fechados;n/a;Ideia;patch novo;Tank (sugerido);—;Alto;perk-ideas.md
+Deflection;Deflexão;ricochete no colete pesado sem dano;chance;Ideia (forte);mecânica elite EFT;Tank (sugerido);chance a definir;Médio;perk-ideas.md
+Lucky Find;Golpe de Sorte;revista rende um item melhor;flag;Ideia;mecânica elite EFT;Scavenger (sugerido);—;Médio;perk-ideas.md
+Clotting;Coagulação;sangramento leve para sozinho;flag;Ideia;mecânica elite EFT;Combat Medic (sugerido);—;Médio;perk-ideas.md
+Serpent;Serpente;rastejar rápido (sprint deitado);flag;Ideia;mecânica elite EFT;Stealth (sugerido);—;Médio;perk-ideas.md
+Iron Gut;Estômago de Ferro;não desidrata;flag;Ideia;mecânica elite EFT;Tank ou Medic;—;Médio;perk-ideas.md
+Silent Kill;Morte Silenciosa;abate com faca não emite som;flag;Ideia;patch novo;Stealth (sugerido);—;Alto;perk-ideas.md
+Last Stand;Último Suspiro;dano fatal deixa com 1 HP, 1x/raid;flag;Ideia;patch novo;Tank (sugerido);1x por raid;Alto;perk-ideas.md
+Second Wind;Segundo Fôlego;stamina cheia 1x/raid abaixo de X% HP;flag;Ideia;patch novo;Rifleman (sugerido);1x por raid;Alto;perk-ideas.md
+Field Surgeon;Cirurgião de Campo;curar um aliado concede buff;flag;Ideia;patch novo (coop);Combat Medic (sugerido);—;Médio;perk-ideas.md
+Naked Ambition;Ambição Nua;XP acelerado (aprende mais rápido);maior é melhor;Ideia;multiplicador de XP (viewer/.jsonc);Naked (sugerido);×1.10 a ×1.20;Baixo;perk-ideas.md
