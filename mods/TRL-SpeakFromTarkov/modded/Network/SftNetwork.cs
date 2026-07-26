@@ -64,6 +64,7 @@ namespace TRL_SpeakFromTarkov.Network
         {
             try
             {
+                EnsurePacketRegistered();
                 if (!IsSessionActive || !Singleton<IFikaNetworkManager>.Instantiated) return;
                 if (VoIPPlugin.EnableMod != null && !VoIPPlugin.EnableMod.Value) return;
                 
@@ -96,7 +97,7 @@ namespace TRL_SpeakFromTarkov.Network
         {
             try
             {
-                if (!IsSessionActive) return;
+                if (!Singleton<GameWorld>.Instantiated) return;
                 if (VoIPPlugin.EnableMod != null && !VoIPPlugin.EnableMod.Value) return;
                 
                 // Rejeita pacotes próprios (Eco loopback local)
