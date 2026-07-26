@@ -369,7 +369,10 @@ public class ModUpdaterController : ControllerBase
         try
         {
             var files = new List<object>();
-            _fileMapCache.Clear();
+            // 🟡 CR: dict LOCAL preenchido e trocado por referência atômica no fim — evita que um
+            // /refresh concorrente com Clear()+repopular derrube o TryGetValue do /download (404 nos -ref,
+            // que só existem via cache).
+            var fileMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
             var modsPath = GetModsRepoPath();
             if (!Directory.Exists(modsPath))
@@ -395,8 +398,8 @@ public class ModUpdaterController : ControllerBase
                 var relNorm = relPath.ToLowerInvariant();
 
                 // S-2: os JSON de definição são METADADOS — nunca sincronizados no jogo do player.
-                if (relNorm.EndsWith("plugins-optional.json", StringComparison.Ordinal)
-                    || relNorm.EndsWith("config-performance/performance.json", StringComparison.Ordinal))
+                if (relNorm == "bepinex/plugins-optional.json"
+                    || relNorm == "bepinex/config-performance/performance.json")
                 {
                     continue;
                 }
@@ -416,12 +419,12 @@ public class ModUpdaterController : ControllerBase
 
                     // Fonte: aplica em config/ quando o item está ligado (performance-to-config).
                     files.Add(new { path = relPath, hash, size, performanceId = perfId });
-                    _fileMapCache[relPath] = file;
+                    fileMap[relPath] = file;
 
                     // D-18: 2º prefixo lógico — MESMO arquivo físico, espelhado no cliente (mirror-reference).
                     var refPath = "BepInEx/config-performance-ref/" + relPath.Substring(PerfPrefixCased.Length);
                     files.Add(new { path = refPath, hash, size });
-                    _fileMapCache[refPath] = file;
+                    fileMap[refPath] = file;
                     continue;
                 }
 
@@ -433,7 +436,7 @@ public class ModUpdaterController : ControllerBase
                 {
                     files.Add(new { path = relPath, hash, size });
                 }
-                _fileMapCache[relPath] = file;
+                fileMap[relPath] = file;
             }
 
             string[] managedPaths = Array.Empty<string>();
@@ -481,15 +484,15 @@ public class ModUpdaterController : ControllerBase
             try
             {
                 var configContent = System.IO.File.ReadAllText(configPath);
-                var doc = JsonDocument.Parse(configContent);
+                using var doc = JsonDocument.Parse(configContent);
                 var root = doc.RootElement;
 
                 if (root.TryGetProperty("managedPaths", out var mpProp) && mpProp.ValueKind == JsonValueKind.Array)
-                    managedPaths = mpProp.EnumerateArray().Select(x => x.GetString()).Where(x => x != null).Cast<string>().ToArray();
+                    managedPaths = mpProp.EnumerateArray().Where(x => x.ValueKind == JsonValueKind.String).Select(x => x.GetString()).Cast<string>().ToArray();
                 if (root.TryGetProperty("deleteFiles", out var dfProp) && dfProp.ValueKind == JsonValueKind.Array)
-                    deleteFiles = dfProp.EnumerateArray().Select(x => x.GetString()).Where(x => x != null).Cast<string>().ToArray();
+                    deleteFiles = dfProp.EnumerateArray().Where(x => x.ValueKind == JsonValueKind.String).Select(x => x.GetString()).Cast<string>().ToArray();
                 if (root.TryGetProperty("ignoredFiles", out var ifProp) && ifProp.ValueKind == JsonValueKind.Array)
-                    ignoredFiles = ifProp.EnumerateArray().Select(x => x.GetString()).Where(x => x != null).Cast<string>().ToArray();
+                    ignoredFiles = ifProp.EnumerateArray().Where(x => x.ValueKind == JsonValueKind.String).Select(x => x.GetString()).Cast<string>().ToArray();
                 // Item 030: optionalGroups foi aposentado (ScanOptionalGroups removido) — mods opcionais e
                 // configs de performance vêm de plugins-optional.json / performance.json (LoadOptionalDefs/
                 // LoadPerformanceDefs) e são taggeados por arquivo no scan acima.
@@ -532,6 +535,7 @@ public class ModUpdaterController : ControllerBase
             var hashBytes = md5.ComputeHash(System.Text.Encoding.UTF8.GetBytes(json));
             
             _manifestHash = BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
+            _fileMapCache = fileMap; // troca atômica de referência (fim da geração)
             _manifestCache = manifestObj;
         }
         catch (Exception ex)

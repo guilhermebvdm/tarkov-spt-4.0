@@ -176,6 +176,25 @@ namespace SPT.Launcher.Tests.Sync
         }
 
         [Fact]
+        public async Task Disabled_optional_mod_in_default_rule_folder_does_not_crash()
+        {
+            using var fx = new SyncTestFixture();
+            fx.WriteLocal("SomeRootThing.dat", "x"); // raiz → regra Default, matchedPrefix null
+
+            var manifest = new[]
+            {
+                fx.Entry("SomeRootThing.dat", "x", optional: true, optionalId: "weird"),
+            };
+
+            // 🔴 CR: mod opcional desligado cujo arquivo cai em Default não pode estourar NRE em
+            // BuildDisabledTarget (derrubaria o plano inteiro). Preserva + avisa, sem quarentenar.
+            var plan = await PlanAsync(fx, manifest);
+
+            Assert.DoesNotContain(plan.Actions, a => a.Kind == SyncActionKind.MoveToDisabled);
+            Assert.Contains(plan.Warnings, w => w.Contains("sem pasta de quarentena"));
+        }
+
+        [Fact]
         public async Task Enabled_optional_mod_files_are_not_quarantined()
         {
             using var fx = new SyncTestFixture();

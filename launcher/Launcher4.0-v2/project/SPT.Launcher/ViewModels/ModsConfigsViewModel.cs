@@ -20,8 +20,6 @@ namespace SPT.Launcher.ViewModels
     public class ModsConfigsViewModel : ViewModelBase
     {
         private readonly bool _onboarding;
-        // Estado inicial de cada id ao abrir a tela — o diff contra ele decide o que aplicar (CC-18).
-        private readonly Dictionary<string, bool> _initialState = new();
 
         public ObservableCollection<OptionalItemToggle> OptionalMods { get; } = new();
         public ObservableCollection<OptionalItemToggle> PerformanceItems { get; } = new();
@@ -80,7 +78,6 @@ namespace SPT.Launcher.ViewModels
 
         private OptionalItemToggle BuildToggle(ModsConfigCatalog.Item def, bool enabled, bool isNew, bool preferPt)
         {
-            _initialState[def.Id] = enabled;
             return new OptionalItemToggle
             {
                 Id = def.Id,
@@ -112,13 +109,13 @@ namespace SPT.Launcher.ViewModels
             int changedCount = 0;
             foreach (var item in all)
             {
-                bool was = _initialState.TryGetValue(item.Id, out var v) && v;
                 bool persisted = item.IsPerformance
                     ? settings.IsPerformanceItemEnabled(item.Id)
                     : settings.IsOptionalEnabled(item.Id);
 
-                // Persiste sempre no onboarding (grava o estado inicial aceito); fora dele, quando mudou
-                // em relação ao que está salvo. Marca pra aplicar quando o estado EFETIVO mudou.
+                // Persiste sempre no onboarding (grava o estado inicial aceito); fora dele, só quando mudou
+                // em relação ao salvo. Só o estado EFETIVO conta — liga-desliga que voltou ao salvo não
+                // dispara sync (o "was" da versão anterior era sempre == persisted, ramo morto — 🟢 CR).
                 if (_onboarding || item.IsEnabled != persisted)
                 {
                     if (item.IsPerformance) settings.EnabledPerformanceItems[item.Id] = item.IsEnabled;
@@ -130,10 +127,6 @@ namespace SPT.Launcher.ViewModels
                     if (!settings.PendingApply.Contains(item.Id)) settings.PendingApply.Add(item.Id);
                     changedCount++;
                 }
-                else if (item.IsEnabled != was)
-                {
-                    changedCount++; // liga-desliga que voltou ao salvo: conta pra decisão, sem re-aplicar
-                }
 
                 // CA-030.11: item visto ao SAIR da tela (não ao abrir).
                 if (!settings.SeenItemIds.Contains(item.Id)) settings.SeenItemIds.Add(item.Id);
@@ -143,16 +136,15 @@ namespace SPT.Launcher.ViewModels
             bool firstRun = _onboarding && !settings.ModsConfigsOnboardingDone;
             if (_onboarding) settings.ModsConfigsOnboardingDone = true;
 
-            settings.SaveSettings();
-
             // CA-030.22: fora do onboarding, sem alteração não dispara sync. No 1º acesso dispara sempre
-            // (CA-030.19) — é a ingestão que instala os mods.
-            if (changedCount > 0 || firstRun)
+            // (CA-030.19). O marker sinaliza ao ProfileViewModel que há o que aplicar (🟢 CR: com guard de
+            // duplicata + um único SaveSettings).
+            if ((changedCount > 0 || firstRun) && !settings.PendingApply.Contains(SyncTriggers.PendingApplyMarker))
             {
                 settings.PendingApply.Add(SyncTriggers.PendingApplyMarker);
-                settings.SaveSettings();
             }
 
+            settings.SaveSettings();
             NavigateBack();
         }
     }

@@ -357,6 +357,17 @@ namespace SPT.Launcher.Sync
                         continue; // nada aplicado, nada a reverter
                     }
 
+                    // 🔴 CR: HÁ versão base (config/ ou config-force/)? Então o canal config/config-force já
+                    // restaura/força este alvo NESTA passada — o canal de performance NÃO interfere (nem
+                    // reverte, nem preserva, nem quarentena). Emitir PreserveCustomized aqui geraria uma
+                    // entrada espúria no MESMO alvo que o force sobrescreve (relatório mostraria forced +
+                    // preserved para o mesmo arquivo, inflando o contador Preserved).
+                    if (baseSourcePaths.Contains(perfTargetNorm))
+                    {
+                        continue;
+                    }
+
+                    // A partir daqui o arquivo é SÓ-de-performance (sem base).
                     if (!perfMatchesBaseline)
                     {
                         // Customizado desde a aplicação: a edição do player prevalece (RN-3/CC-3).
@@ -371,19 +382,15 @@ namespace SPT.Launcher.Sync
                         continue;
                     }
 
-                    // Intocado. Com versão base (config/ ou config-force/) → o fluxo normal a restaura nesta
-                    // mesma passada. Sem base (só existe por causa da performance) → quarentena (D-8/D-20).
-                    if (!baseSourcePaths.Contains(perfTargetNorm))
+                    // Intocado e sem base → quarentena (D-8/D-20).
+                    plan.Actions.Add(new SyncAction
                     {
-                        plan.Actions.Add(new SyncAction
-                        {
-                            RelativePath = perfTargetRel,
-                            MoveTargetRelative = SyncPathUtil.DeriveDisabledBackup(perfTargetRel, matchedPrefix, SyncPathUtil.DisabledOrigin.PerformanceRemoved),
-                            Kind = SyncActionKind.MoveToDisabled,
-                            Rule = rule,
-                            Reason = "performance desligada (arquivo sem versão base — movido para a quarentena)",
-                        });
-                    }
+                        RelativePath = perfTargetRel,
+                        MoveTargetRelative = SyncPathUtil.DeriveDisabledBackup(perfTargetRel, matchedPrefix, SyncPathUtil.DisabledOrigin.PerformanceRemoved),
+                        Kind = SyncActionKind.MoveToDisabled,
+                        Rule = rule,
+                        Reason = "performance desligada (arquivo sem versão base — movido para a quarentena)",
+                    });
 
                     continue;
                 }
@@ -751,6 +758,16 @@ namespace SPT.Launcher.Sync
                 if (SyncPathUtil.ContainsDisabledSegment(normalized)) continue;
 
                 var rule = _resolver.Resolve(normalized, out string matchedPrefix);
+
+                // 🔴 CR: sem prefixo casado (regra Default — arquivo do mod fora de plugins/patchers/config)
+                // não há pasta-irmã "<x>-disabled/" pra derivar. BuildDisabledTarget faria NRE em
+                // Substring(matchedPrefix.Length) e derrubaria o PLANO INTEIRO (fora de try/catch). Preserva
+                // + avisa: um mod opcional deveria viver sob uma pasta com regra de quarentena.
+                if (string.IsNullOrEmpty(matchedPrefix))
+                {
+                    plan.Warnings.Add($"mod opcional desligado sem pasta de quarentena (regra Default) — preservado: {file.path}");
+                    continue;
+                }
 
                 if (_options.DevMode)
                 {

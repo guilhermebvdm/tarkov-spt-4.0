@@ -694,12 +694,17 @@ namespace SPT.Launcher.ViewModels
                     LogManager.Instance.Info("[Profile] Todos os mods estão atualizados.");
                 }
 
-                // Item 030 (PA-01-05): a intenção pendente só é limpa quando o sync conclui SEM erro e sem
-                // cancelamento — senão persiste e o próximo sync retenta (falha/rede não perde a escolha).
-                if (!result.Cancelled && result.Errors == 0 && LauncherSettingsProvider.Instance.PendingApply.Count > 0)
+                // Item 030 (PA-01-05 + 🟡 CR): a intenção pendente só é limpa quando o sync conclui SEM erro
+                // e sem cancelamento. Remove APENAS o snapshot que ESTE sync aplicou (justToggled + marker),
+                // não Clear() — um toggle registrado por outra tela DURANTE este sync (que ficou pendente
+                // porque o guard de concorrência o pulou) não pode ser descartado sem ter sido aplicado.
+                if (!result.Cancelled && result.Errors == 0)
                 {
-                    LauncherSettingsProvider.Instance.PendingApply.Clear();
-                    LauncherSettingsProvider.Instance.SaveSettings();
+                    var pending = LauncherSettingsProvider.Instance.PendingApply;
+                    int before = pending.Count;
+                    foreach (var id in justToggled) pending.Remove(id);
+                    pending.RemoveAll(x => x == SyncTriggers.PendingApplyMarker);
+                    if (pending.Count != before) LauncherSettingsProvider.Instance.SaveSettings();
                 }
                 Dispatcher.UIThread.Post(RefreshModsConfigsSummary);
 

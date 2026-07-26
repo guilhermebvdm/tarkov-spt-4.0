@@ -121,6 +121,28 @@ namespace SPT.Launcher.Tests.Sync
             Assert.Equal("base-v1", fx.ReadLocal(Target)); // base restaurada pelo canal config
         }
 
+        // 🟡 CR — desligar performance quando HÁ base customizada não emite PreserveCustomized espúrio pelo
+        // canal de performance (a base config/config-force é quem decide o alvo nesta passada).
+        [Fact]
+        public async Task Disabling_with_customized_base_emits_no_performance_preserve()
+        {
+            using var fx = new SyncTestFixture();
+            var manifest = new[]
+            {
+                fx.Entry(ConfigSource, "base-v1"),
+                fx.Entry(PerfSource, "perf-config", performanceId: "perf1"),
+            };
+
+            await fx.PlanAndRunAsync(manifest,
+                fx.Options(performanceEnabled: id => id == "perf1", justToggled: new[] { "perf1" }));
+            fx.WriteLocal(Target, "eu-mexi-depois"); // customiza o alvo à mão
+
+            var plan = await PlanAsync(fx, manifest, fx.Options(performanceEnabled: _ => false));
+
+            Assert.DoesNotContain(plan.Actions,
+                a => a.Rule == SyncFolderRule.PerformanceToConfig && a.Kind == SyncActionKind.PreserveCustomized);
+        }
+
         // CA-030.1 / RN-2 — performance LIGADA vence config-force do mesmo alvo; o force é suprimido e o
         // relatório registra performance-suppressed-force.
         [Fact]
