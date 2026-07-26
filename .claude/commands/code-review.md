@@ -32,6 +32,7 @@ Se alguma pré-condição falhar, parar com mensagem clara.
 
 4. **Ler:**
    - **Memória do mod** — topo de `mods/<mod>/memory/sessions.md` (snapshot + pendências) + entradas que citam o item `<NNN>`. Aplicar `memory-curation` § "Consumo de memória por commands" (§14): reportar pendências que afetam esta tarefa; pendência 🔴 do item/mod → alertar antes de prosseguir. Bug/lição registrada na memória que reaparece no código = achado com ref à sessão. Se o arquivo não existir, registrar "sem memória prévia".
+   - **Contexto técnico do repo** — consultar [docs/technical/README.md](../../docs/technical/README.md) e ler **os docs cujo gatilho o item dispara** (`spt-antipatterns.md` dispara sempre). Código que viola um doc canônico cujo gatilho se aplica = ponto **Categoria D** (arquitetura), ou **A/B** se a violação produzir bug concreto.
    - Spec funcional, spec técnica, **todos** os reviews técnicos (para conhecer pontos `🟡`/`🟢` aceitos como ressalvas e quais PA-NN-MM foram aplicados no build).
    - Reviews de code-review anteriores (`04-code-review-*.md`) — pontos já `✅ Resolvido` ou `✅ Aplicado` **não voltam**; pontos pendentes podem ser revalidados.
    - `05-asbuild.md` (se existir) — para a lista canônica de arquivos tocados.

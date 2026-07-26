@@ -131,9 +131,9 @@ Catálogo dos erros que **já cometemos neste repo**, com o caso real, a causa r
 | AP-06 | — | — | `/apply-code-review` (output) | repo-workflow (artefato 06) | `fix.md.tmpl`; gate `check-delivered-validation.sh` |
 | AP-07 | — | check 7 | `/review-technical-spec` Cat. C | C# checklist 13 (reentrância) | — |
 | AP-08 | — | check 8 | `/code-review` Cat. B | C# checklist 12 (estado stale) | grafo de código (`affected`) |
-| AP-09 | — | reconfirmar patch-point | `/create-technical-spec`; `/code-mod` | `graph-code-navigation`; SPT | `ilspycmd`/`dnSpy` vs `Assembly-CSharp.dll` |
-| AP-10 | — | lever skill vs patch | `/create-technical-spec` | SPT | catálogo de skills do mod (`globals.json` `SkillsSettings`) |
-| AP-11 | critério padrão Fika/multiplayer | check 2 (quando há pacote próprio) | `/code-review` Cat. A/B | SPT §9, checklist 11 | `scripts/check-packet-hashes.js`; [guia de rede FIKA](fika-packet-desync-prevention-plan.md) |
+| AP-09 | — | **check 9** (reconfirmar patch-point) | `/create-technical-spec`; `/code-mod` | `graph-code-navigation`; SPT | `types-index.json`; `ilspycmd` nos 3 casos legítimos |
+| AP-10 | — | **check 10** (lever skill vs patch) | `/create-technical-spec` | SPT | catálogo de skills do mod (`globals.json` `SkillsSettings`) |
+| AP-11 | critério padrão Fika/multiplayer | **check 11** (pacote próprio) | `/code-review` Cat. A/B | SPT §9, checklist 11 | `scripts/check-packet-hashes.js`; [guia de rede FIKA](fika-packet-desync-prevention-plan.md) |
 
 ## Histórico de Alterações
 
@@ -148,3 +148,4 @@ Catálogo dos erros que **já cometemos neste repo**, com o caso real, a causa r
 | 2026-06-23 | Guilherme | feat(CustomClasses): implement 050 signature perks/drawbacks (client) |
 | 2026-07-19 | Guilherme | docs(launcher): review 01 da spec tecnica do 030 — 3 bloqueadores |
 | 2026-07-26 | Guilherme | chore(harness): faixa AP-NN em vez de AP-01..AP-10 e regra de rename de doc em conventions |
+| 2026-07-26 | Guilherme | docs(technical): corrige guia FIKA contra o codigo vendorizado e fecha a auditoria dos 6 mods com pacote |
