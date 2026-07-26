@@ -68,7 +68,7 @@ namespace TRLImmersiveCombatMedicine
             BandAidNetworkHandler.OnHealCheckResponse -= OnHealCheckResponseHandler;
         }
 
-        private void OnHealCheckResponseHandler(BandAidHealCheckResponsePacket response)
+        private void OnHealCheckResponseHandler(BandAidHealCheckResponsePacketV2 response)
         {
             // Verificar se temos um check pendente
             if (_pendingHealTimeout < 0 || _pendingHealItem == null || _pendingHealPatient == null) return;

@@ -7,8 +7,10 @@ namespace Band_Aid
     /// FikaPacketManager do TrueTrauma 3.11). Sem ele, o host nunca sabia que um
     /// client desmaiou e os bots continuavam atirando no desmaiado.
     /// Dono do estado → (rede) → host relay → todos.
+    ///
+    /// Corpo dentro de um envelope de comprimento (ver <see cref="PacketEnvelope"/>).
     /// </summary>
-    public struct TraumaFaintPacket : INetSerializable
+    public struct TraumaFaintPacketV2 : INetSerializable
     {
         public string ProfileId;
         public bool IsFainted;
@@ -17,20 +19,35 @@ namespace Band_Aid
         public float DurationSeconds;
         public float GraceSeconds;
 
+        /// <summary>NÃO serializado. Falso quando o corpo veio truncado — ver BandAidHealPacketV2.Valid.</summary>
+        internal bool Valid;
+
         public void Serialize(NetDataWriter writer)
         {
-            writer.Put(ProfileId);
-            writer.Put(IsFainted);
-            writer.Put(DurationSeconds);
-            writer.Put(GraceSeconds);
+            var inner = PacketEnvelope.Open();
+            inner.Put(ProfileId ?? string.Empty);
+            inner.Put(IsFainted);
+            inner.Put(DurationSeconds);
+            inner.Put(GraceSeconds);
+            PacketEnvelope.Close(writer, inner);
         }
 
         public void Deserialize(NetDataReader reader)
         {
-            ProfileId = reader.GetString();
-            IsFainted = reader.GetBool();
-            DurationSeconds = reader.GetFloat();
-            GraceSeconds = reader.GetFloat();
+            ProfileId = string.Empty;
+            IsFainted = false;
+            DurationSeconds = 0f;
+            GraceSeconds = 0f;
+            Valid = false;
+
+            if (!PacketEnvelope.TryOpen(reader, out var inner)) return;
+
+            if (!PacketEnvelope.TryReadString(inner, out ProfileId)) return;
+            if (!inner.TryGetBool(out IsFainted)) return;
+            if (!inner.TryGetFloat(out DurationSeconds)) return;
+            if (!inner.TryGetFloat(out GraceSeconds)) return;
+
+            Valid = true;
         }
     }
 }
