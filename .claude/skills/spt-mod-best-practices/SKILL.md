@@ -132,6 +132,20 @@ If the spec talks about a "raid mod" that should not run in hideout, this guard 
 - Before mutating any field directly, grep the Assembly for the setter/command/operation the game itself uses for that transition and list its side-effects in the technical spec. If you still bypass it, document why and which side-effects you intentionally skip.
 - See `docs/technical/spt-antipatterns.md` AP-04 for the full case history.
 
+## 9. Custom FIKA packets (`INetSerializable`)
+
+Applies to any mod that declares its own packet. Full rationale, copy-paste templates and the audit checklist live in [`docs/technical/fika-packet-desync-prevention-plan.md`](../../../docs/technical/fika-packet-desync-prevention-plan.md) — that document is the source of truth; this section is the short form. Case history: AP-11.
+
+A packet bug in one mod is **not contained to that mod**. `LiteNetManager.PollEvents` walks the pending-event queue with no `try/catch`, so any exception escaping a packet path drops every event queued that frame — all peers, all other mods, and the `PlayerState` events carrying movement. That is why "player skating" is a common symptom.
+
+- **Registration:** track the manager by instance reference (`private static IFikaNetworkManager _lastRegisteredManager`), never a `bool`. FIKA destroys and recreates the manager on every session transition and the new `NetPacketProcessor` is empty. Call `EnsurePacketsRegistered()` in the plugin's `Update()` **and** first thing in every send path — route all sends through one helper so in-callback relays are covered too.
+- **Never call `UnregisterPacket`.** Gate out-of-raid behaviour with `if (!Singleton<GameWorld>.Instantiated) return;` inside the callback instead.
+- **Serialization must be byte-symmetric.** Wrap the body in a length envelope (`PutBytesWithLength` / `TryGetBytesWithLength`) so a failed read can never misalign the shared reader. Read with `TryGet*` only — the plain `Get*` throw on truncated payloads. Note `TryGetString` writes `null` into its `out` on failure: read into a local, assign on success.
+- **The callback's `try/catch` does not protect `Deserialize`** — it runs inside FIKA's lambda, before `onReceive`. Carry a non-serialised `Valid` flag and drop invalid packets instead of processing *and relaying* them.
+- **Send only from the main thread.** `FikaClient`/`FikaServer` share one unlocked `NetDataWriter` for all sends; transmitting from a background thread corrupts it. Background producers enqueue; `Update()` drains.
+- **Changing a packet's layout requires renaming the type** (`V2` suffix): the hash is a CRC-16 of `typeof(T).ToString()` and ignores the mod version. Bump the version, mark the release lockstep, and register a stub for the old name so stale peers don't kill the frame's queue.
+- **Verify:** `node scripts/check-packet-hashes.js` — 16 bits of hash space means collisions silently overwrite another mod's handler.
+
 ## Review checklist (use during `/review-technical-spec` and `/code-mod`)
 
 1. **Lifecycle:** Is there a clear Awake / raid-start / raid-end story? Are stop hooks idempotent and covering both `GameWorld.OnDestroy` and `BaseLocalGame.Stop` (patch `AbstractGame.Stop` only to cover all derived game types — rare)?
@@ -144,5 +158,6 @@ If the spec talks about a "raid mod" that should not run in hideout, this guard 
 8. **Sandbox:** All changes in `modded/`? `original/` untouched?
 9. **Canonical API:** state changes go through the EFT command/API path (§8)? Side-effects of any bypass documented? (AP-04)
 10. **Virtual dispatch:** when patching a virtual/abstract method, were ALL overrides audited for base-call, and is the patch on a routing point that covers every path? (AP-03)
+11. **FIKA packets:** if the mod declares an `INetSerializable` — envelope + `TryGet*` only, `Valid` flag before processing/relaying, sends on the main thread, registration tracked by manager instance, zero `UnregisterPacket`, throttled airbag in every callback, type renamed if the layout changed, and `check-packet-hashes.js` clean? (AP-11, §9)
 
 If any item is unanswered, flag as 🔴 in the review or stop the build and request a `/review-technical-spec` pass.

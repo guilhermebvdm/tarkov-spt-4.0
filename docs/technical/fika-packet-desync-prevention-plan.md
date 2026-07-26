@@ -46,8 +46,12 @@ No FIKA, a transmissão de pacotes customizados de mods utiliza estruturas `INet
                         └───────────────────────────┘
 ```
 
-- **Identificação de Pacotes**: O `NetPacketProcessor` do LiteNetLib mapeia cada estrutura `INetSerializable` usando a hash determinística do nome do tipo (`typeof(T).FullName`).
+- **Identificação de Pacotes**: o `NetPacketProcessor` mapeia cada `INetSerializable` por uma hash **CRC-16-CCITT de 16 bits** calculada sobre `typeof(T).ToString()` (namespace + nome do tipo) — ver `ShortHashCache<T>` e `WriteShortHash<T>` em [NetPacketProcessor.cs:27-56](../../references/fika-plugin/Fika.Core/Networking/LiteNetLib/Utils/NetPacketProcessor.cs). Três consequências práticas:
+  - A hash **não depende da versão do mod**. Mudar o layout de um pacote mantendo o nome do tipo faz peers de versões diferentes aceitarem o pacote um do outro e desalinharem em silêncio. Mudança de formato exige **renomear o tipo** (sufixo `V2`), para que o peer desatualizado falhe de forma diagnosticável.
+  - O registro é um `Dictionary<ushort, …>`: dois tipos que colidam fazem o segundo `RegisterPacket` **sobrescrever** o handler do primeiro, sem erro no log. Com 16 bits e dezenas de mods instalados isso é verificável — rode `node scripts/check-packet-hashes.js` (hoje: 52 tipos, 0 colisões).
+  - Existe também um `HashCache<T>` FNV-1 de 64 bits no mesmo arquivo, mas ele **não é usado** no caminho `INetSerializable`.
 - **Ciclo de Vida do Manager**: A instância de `IFikaNetworkManager` **não é persistente durante todo o jogo**. O FIKA destrói e recria o gerenciador de rede em transições de sessão (ex.: Menu ➔ Lobby ➔ Raid ➔ Tela de Extração/Desconexão).
+- **Buffer de envio compartilhado**: `FikaClient` e `FikaServer` serializam **todos** os envios num único `NetDataWriter` de instância (`_dataWriter`, [FikaClient.cs:123](../../references/fika-plugin/Fika.Core/Networking/FikaClient.cs) e [FikaServer.cs:129](../../references/fika-plugin/Fika.Core/Networking/FikaServer.cs)), **sem lock**. Chamar `SendData` fora da main thread corrompe esse buffer — ver causa raiz 🔴 6.
 
 ---
 
@@ -64,8 +68,36 @@ Ao transitar de menu/lobby para a raid, o FIKA recria a instância de `IFikaNetw
 ### 🔴 3. Chamadas Nocivas a `UnregisterPacket<T>()`
 Desregistrar pacotes ao sair da raid ou ao desativar funcionalidades remove o tipo da tabela de hashes do LiteNetLib. Se pacotes tardios ou retidos em buffer de rede chegarem após a desativação, a camada de transporte é corrompida.
 
-### 🔴 4. Exceções Não-Tratadas nos Callbacks (Lote Descartado)
-No LiteNetLib, múltiplos pacotes de rede são processados em lote (`ReadAllPackets`). Se um callback de mod lança uma exceção não-tratada (como `NullReferenceException`), a execução do lote é interrompida abruptamente, descartando todos os pacotes restantes daquele frame para os demais mods.
+### 🔴 4. Exceções Não-Tratadas nos Callbacks (Fila do Frame Descartada)
+Se um callback de mod lança uma exceção não-tratada (como `NullReferenceException`), ela **não é capturada em nenhum ponto do caminho**: sobe por `ReadAllPackets` → `OnNetworkReceive` → `ProcessEvent` até [`LiteNetManager.PollEvents`](../../references/fika-plugin/Fika.Core/Networking/LiteNetLib/LiteNetManager.cs), que desanexa a fila de eventos pendentes e a percorre **sem `try/catch`**:
+
+```csharp
+while (pendingEvent != null)
+{
+    var next = pendingEvent.Next;
+    ProcessEvent(pendingEvent);   // ← sem proteção
+    pendingEvent = next;
+}
+```
+
+O resultado é maior do que "o lote daquele datagrama": **todos os eventos pendentes do frame são descartados** — de todos os peers, de todos os outros mods, e também os `EPacketType.PlayerState`, que carregam posição e movimento. É por isso que uma falha num mod de áudio ou de pose se manifesta como jogadores patinando.
+
+### 🔴 5. Assimetria entre `Serialize` e `Deserialize` (Desalinhamento do Reader)
+`ReadAllPackets` percorre o datagrama com `while (reader.AvailableBytes > 0) ReadPacket(reader)`. Se um `Deserialize` consome um número de bytes **diferente** do que o `Serialize` escreveu, o `NetDataReader` fica desalinhado e a iteração seguinte lê 2 bytes arbitrários como hash de pacote → `ParseException: Undefined packet in NetDataReader: <lixo>` → causa 4 acima.
+
+O sintoma é traiçoeiro: **o hash reportado no erro não corresponde a tipo nenhum**, e o mod culpado não é o que aparece no log. Para confirmar que um hash é lixo, rode `node scripts/check-packet-hashes.js --list` e procure o número.
+
+Três fontes de assimetria, todas já observadas neste repo:
+- `try/catch` dentro do `Deserialize` que engole a falha e retorna **sem** consumir o restante do payload.
+- Peer com versão divergente do struct (campo novo/removido) — ver a regra de renomear o tipo em §1.
+- Uso de `Get*` que lança em payload truncado. Prefira sempre as variantes **`TryGet*`**, que devolvem `false` sem lançar.
+
+> ⚠️ **O airbag `try/catch` do callback NÃO protege o `Deserialize`.** O `Deserialize` roda dentro do lambda registrado pelo `SubscribeNetSerializable`, **antes** de `onReceive` ([NetPacketProcessor.cs:387-396](../../references/fika-plugin/Fika.Core/Networking/LiteNetLib/Utils/NetPacketProcessor.cs)). Uma exceção ali passa por fora do airbag.
+
+### 🔴 6. `SendData` fora da Main Thread (Corrupção do Buffer Compartilhado)
+`FikaClient`/`FikaServer` reusam um único `_dataWriter` para todo envio, sem lock. Enviar de uma thread de background (áudio, I/O, worker) enquanto a main thread envia `PlayerState` faz as duas escritas se intercalarem no mesmo buffer, e o que sai na rede é um datagrama malformado — que produz a causa 5 **no receptor**, sem que haja nada de errado no código dele.
+
+**Regra:** todo `SendData` acontece na main thread. Trabalho em background deve **enfileirar** (`ConcurrentQueue`) e deixar o `Update()` drenar.
 
 ---
 
@@ -124,7 +156,13 @@ Todo mod do projeto que transmita pacotes via FIKA deve implementar o padrão **
 3. **Proibição Absoluta de `UnregisterPacket<T>()`**:
    **NUNCA** chame `UnregisterPacket`. Desativações de lógica fora de raid devem ser tratadas com guard clauses dentro do callback (`if (!Singleton<GameWorld>.Instantiated) return;`).
 4. **Airbag / Try-Catch Raiz em Callbacks**:
-   Todo callback registrado no `NetPacketProcessor` deve ter o seu corpo 100% envolvido por um bloco `try { ... } catch (Exception ex) { Log.LogError(ex); }`.
+   Todo callback registrado no `NetPacketProcessor` deve ter o seu corpo 100% envolvido por um bloco `try { ... } catch (Exception ex) { Log.LogError(ex); }`. Em caminhos de alta frequência (áudio, tick por frame), o log precisa de **throttle** — stack completo na primeira ocorrência de cada tipo de exceção e resumo periódico depois, senão uma falha sistemática vira flood e causa hitching.
+5. **Envelope de Comprimento em Todo Pacote** (fecha a causa 5):
+   O corpo do pacote é gravado com prefixo de tamanho, de modo que o reader externo avance sempre exatamente o declarado — mesmo que a leitura interna falhe. É o que impede que um mod desalinhe o stream compartilhado.
+6. **Renomear o Tipo ao Mudar o Formato**:
+   A hash deriva do nome do tipo, não da versão. Mudou o layout → sufixo `V2`. Opcionalmente, registre um **stub do nome antigo** que apenas consome o payload: não restaura funcionalidade, mas evita que um peer desatualizado derrube a fila de eventos do frame inteiro com `Undefined packet`.
+7. **Enviar Sempre da Main Thread** (fecha a causa 6):
+   Produtores em background enfileiram; o `Update()` drena e transmite.
 
 ---
 
@@ -199,14 +237,89 @@ namespace Seumod.Networking
                 // Guard clause: Ignora se estiver fora de raid
                 if (!Singleton<EFT.GameWorld>.Instantiated) return;
 
+                // Corpo truncado: não processar NEM retransmitir (ver Valid abaixo)
+                if (!packet.Valid) return;
+
                 // Lógica do mod...
             }
             catch (Exception ex)
             {
-                // Proteção para evitar descartar o lote de rede dos outros mods
+                // Proteção para evitar descartar a fila de eventos do frame
                 Log.LogError($"[NET] Exceção capturada no handler de rede: {ex}");
             }
         }
+    }
+}
+```
+
+### 5.1 Envelope de Comprimento (obrigatório em todo `INetSerializable`)
+
+```csharp
+public struct MeuPacoteV2 : INetSerializable   // sufixo V2: a hash vem do NOME do tipo
+{
+    public string ProfileId;
+    public float Valor;
+
+    /// <summary>NÃO serializado. Falso quando o corpo veio truncado.</summary>
+    internal bool Valid;
+
+    [ThreadStatic] private static NetDataWriter _inner;
+
+    public void Serialize(NetDataWriter writer)
+    {
+        var inner = _inner ??= new NetDataWriter(true, 256);
+        inner.Reset();
+
+        inner.Put(ProfileId ?? string.Empty);
+        inner.Put(Valor);
+
+        // `checked`: estouro falha visível em vez de truncar o comprimento em silêncio.
+        writer.PutBytesWithLength(inner.Data, 0, checked((ushort)inner.Length));
+    }
+
+    public void Deserialize(NetDataReader reader)
+    {
+        ProfileId = string.Empty;
+        Valor = 0f;
+        Valid = false;
+
+        // Consome SEMPRE o envelope inteiro; false sem lançar quando falta dado.
+        if (!reader.TryGetBytesWithLength(out var payload) || payload == null) return;
+
+        var inner = new NetDataReader(payload);
+
+        // ATENÇÃO: TryGetString escreve null no `out` quando falha — passar o campo direto
+        // destrói o default. Ler para local e atribuir só no sucesso.
+        if (!inner.TryGetString(out var profileId) || profileId == null) return;
+        ProfileId = profileId;
+
+        if (!inner.TryGetFloat(out Valor)) return;
+
+        Valid = true;
+    }
+}
+```
+
+### 5.2 Envio a partir de thread de background
+
+```csharp
+// Produtor (thread de background): apenas ENFILEIRA. Nada de API Unity/EFT/FIKA aqui.
+public void Enqueue(byte[] dados)
+{
+    while (_fila.Count >= MaxItens && _fila.TryDequeue(out _)) { }   // drop-oldest
+    _fila.Enqueue(dados);
+}
+
+// Consumidor (main thread): transmite.
+void Update()
+{
+    EnsurePacketsRegistered();
+    if (_fila.IsEmpty) return;
+
+    while (_fila.TryDequeue(out var item))
+    {
+        var packet = new MeuPacoteV2 { /* ... */ };
+        Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.Unreliable, broadcast: true);
     }
 }
 ```
@@ -215,14 +328,22 @@ namespace Seumod.Networking
 
 ## 6. Inventário & Status dos Mods do Workspace
 
-| Mod | Possui Pacotes FIKA? | Padrão Aplicado (`EnsurePacketsRegistered`) | Callbacks Protegidos com Airbag? | Status |
-| :--- | :---: | :---: | :---: | :---: |
-| **`TRL-SpeakFromTarkov`** | Sim (`SftAudioPacket`) | 🟢 Sim (`SftNetwork.cs`) | 🟢 Sim | 🟢 **Conforme** |
-| **`TRL-ImmersiveCombatMedicine`** | Sim (6 pacotes) | 🟢 Sim (`BandAidNetworkHandler.cs`) | 🟢 Sim | 🟢 **Conforme** |
-| **`stancesAndCameraPositionSPT4.0.11`** | Sim (`StanceSyncPacket`) | 🟢 Sim (`FikaSyncManager.cs`) | 🟢 Sim | 🟢 **Conforme** |
-| **`TrueTrauma`** | Sim (`TraumaFaintPacket`) | 🟢 Sim (`FikaPacketManager.cs`) | 🟢 Sim | 🟢 **Conforme** |
-| **`Skills-Extended`** | Sim (`LockPickingSyncPacket`) | 🟢 Sim (`FikaSyncPlugin.cs`) | 🟢 Sim | 🟢 **Conforme** |
-| **`TRL-DynamicSpawn`** | Não | N/A (Usa reflexão de estado) | N/A | 🟢 **Conforme** |
+Auditoria de 2026-07-26 (8 mods do workspace verificados um a um):
+
+| Mod | Pacotes FIKA | Envelope | Main thread | Airbag + guard | Status |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **`TRL-SpeakFromTarkov`** | 1 (`SftAudioPacketV2`) | 🟢 | 🟢 fila → `Update` | 🟢 | 🟢 **Conforme** (v1.4.0) |
+| **`stancesAndCameraPositionSPT4.0.11`** | 1 (`StanceSyncPacketV2`) | 🟢 | 🟢 já era | 🟢 | 🟢 **Conforme** (v2.11.0) |
+| **`TRL-ImmersiveCombatMedicine`** | 6 (`*V2`) | 🟢 | 🟢 já era | 🟢 | 🟢 **Conforme** (v1.11.0) |
+| `CustomClasses` | — | — | — | — | ⚪ N/A (só reflection de `FikaBackendUtils` p/ UI) |
+| `TarkovIRL-SPT4.0-beta` | — | — | — | — | ⚪ N/A (zero símbolos de rede) |
+| `TRL-DynamicSpawn` | — | — | — | — | ⚪ N/A (reflection de papel host/client) |
+| `TRL-Fixes` | — | — | — | — | ⚪ N/A (Harmony local) |
+| `TRL-ItemsManagement` | — | — | — | — | ⚪ N/A (nem referencia `Fika.Core`) |
+
+**Fora do escopo da auditoria, mas presentes no repo:** `Skills-Extended` (`LockPickingSyncPacket`), `TrueTrauma` (`TraumaFaintPacket`) e `mods/Band-Aid/` (predecessor standalone do ICM) — nenhum revisado contra este guia.
+
+> ⚠️ `mods/Band-Aid/` declara `Band_Aid.BandAidHealPacket` e outros 3 com FQN **idêntico** aos stubs legados do ICM. Instalar os dois ao mesmo tempo faz um registro sobrescrever o outro. Hoje só o ICM está instalado; `node scripts/check-packet-hashes.js` avisa se isso mudar.
 
 ---
 
@@ -230,13 +351,36 @@ namespace Seumod.Networking
 
 Antes de aprovar qualquer PR ou alteração de mod que envolva sincronização FIKA, execute a seguinte lista de verificação:
 
+**Registro e ciclo de vida**
 - [ ] **Sem Flags Estáticas Booleans**: O mod utiliza rastreamento por referência (`_lastRegisteredManager == currentManager`) em vez de um simples `bool _initialized`.
 - [ ] **Zero Invocação de `UnregisterPacket`**: A palavra-chave `UnregisterPacket` não existe no repositório do mod.
 - [ ] **Garantia no Loop `Update()`**: A verificação `EnsurePacketsRegistered()` é chamada no `Update()` principal do plugin.
-- [ ] **Segurança no Envio (`SendData`)**: `EnsurePacketsRegistered()` é chamada imediatamente antes de qualificar o envio do pacote.
-- [ ] **Callbacks com Try-Catch Total**: 100% do código dentro de `OnPacketReceived` está envelopado por `try { ... } catch (Exception ex) { Log.LogError(ex); }`.
+- [ ] **Segurança no Envio (`SendData`)**: `EnsurePacketsRegistered()` é chamada imediatamente antes de qualificar o envio do pacote — inclusive nos relays feitos de dentro de callbacks. Centralizar os envios num único helper é o jeito de garantir isso.
+- [ ] **Callback estático**: o delegate registrado sobrevive à destruição de um `MonoBehaviour`. Se o callback for método de instância, ele pode rodar sobre um objeto Unity já destruído.
+
+**Serialização** (causa 5)
+- [ ] **Envelope de comprimento**: `Serialize` grava o corpo com `PutBytesWithLength`; `Deserialize` consome com `TryGetBytesWithLength`.
+- [ ] **Só `TryGet*`**: nenhum `GetString`/`GetInt`/`GetFloat` cru no `Deserialize` — eles lançam em payload truncado.
+- [ ] **String lida para local**: `TryGetString` escreve `null` no `out` ao falhar; passar o campo direto destrói o default.
+- [ ] **Flag `Valid`**: corpo truncado não é processado **nem retransmitido** (o host relayaria lixo re-serializado).
+- [ ] **Tipo renomeado se o formato mudou**: sufixo `V2` + bump de versão + nota de release lockstep. Stub do nome antigo registrado para consumir o payload de peers desatualizados.
+
+**Threading** (causa 6)
+- [ ] **`SendData` só na main thread**: nenhum envio a partir de thread de captura/worker/`Task`. Produtores em background enfileiram.
+
+**Runtime**
+- [ ] **Callbacks com Try-Catch Total**: 100% do código dentro de `OnPacketReceived` está envelopado por `try { ... } catch (Exception ex) { Log.LogError(ex); }`, com o objeto `ex` completo (não só `ex.Message`).
+- [ ] **Log com throttle** em caminhos de alta frequência.
 - [ ] **Guard Clause de Instância Ativa**: Callbacks validam a existência do `GameWorld.Instantiated` antes de mutar o estado dos jogadores.
+
+**Automatizado**
+- [ ] `node scripts/check-packet-hashes.js` passa (sem colisão de CRC-16).
 
 ---
 
-*Documento revisado e validado de acordo com as diretrizes arquiteturais do projeto tarkov-spt-4.0.*
+## Histórico de Alterações
+
+| Data | Autor | Alteração |
+|---|---|---|
+| 2026-07-26 | Guilherme + agente | Criação. |
+| 2026-07-26 | Guilherme + agente | Correção factual e ampliação após auditoria dos 8 mods: hash é CRC-16 de 16 bits sobre `typeof(T).ToString()` (não FNV-1/`FullName`); causas raiz 5 (assimetria `Serialize`/`Deserialize`) e 6 (`SendData` fora da main thread corrompendo o `_dataWriter` compartilhado); esclarecido que o airbag não cobre o `Deserialize` e que a exceção derruba a fila do frame no `PollEvents`, não só o lote; §5.1/5.2 com os padrões de envelope e de fila; inventário §6 refeito com os 8 mods reais; checklist reorganizado. |
