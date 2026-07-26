@@ -216,17 +216,17 @@ internal static class PerksConfig
             SecMedic, "Rapid Care — Enabled", true,
             "Médico: curativos e estabilizações são mais rápidos (efeito E animação). / Combat Medic: faster heals and stabilizations (both effect and animation).");
         RapidCareUseTime = config.Bind(
-            SecMedic, "Rapid Care — Use time mult", 0.7f,
+            SecMedic, "Rapid Care — Use time mult", 0.75f,
             new ConfigDescription(
-                "Multiplicador do tempo de uso de itens médicos (0.7 = 30% mais rápido). Não vale para o kit de cirurgia (veja Swift Surgeon). / Medical item use-time multiplier (0.7 = 30% faster). Does not apply to the surgery kit (see Swift Surgeon).",
+                "Multiplicador do tempo de uso de itens médicos (0.75 = 25% mais rápido). Não vale para o kit de cirurgia (veja Swift Surgeon). / Medical item use-time multiplier (0.75 = 25% faster). Does not apply to the surgery kit (see Swift Surgeon).",
                 new AcceptableValueRange<float>(0.3f, 1f)));
         SwiftSurgeonEnabled = config.Bind(
             SecMedic, "Swift Surgeon — Enabled", true,
             "Médico: cirurgia (CMS/Surv12) muito mais rápida. / Combat Medic: much faster surgery (CMS/Surv12).");
         SwiftSurgeonTime = config.Bind(
-            SecMedic, "Swift Surgeon — Surgery time mult", 0.5f,
+            SecMedic, "Swift Surgeon — Surgery time mult", 0.75f,
             new ConfigDescription(
-                "Multiplicador do tempo de cirurgia (0.5 = metade do tempo). A skill Surgery do jogador segue valendo por cima. / Surgery time multiplier (0.5 = half the time). The player's Surgery skill still stacks on top.",
+                "Multiplicador do tempo de cirurgia (0.75 = 25% mais rápido). A skill Surgery do jogador segue valendo por cima. / Surgery time multiplier (0.75 = 25% faster). The player's Surgery skill still stacks on top.",
                 new AcceptableValueRange<float>(0.3f, 1f)));
         MobileSurgeryEnabled = config.Bind(
             SecMedic, "Mobile Surgery — Enabled", true,
@@ -285,14 +285,14 @@ internal static class PerksConfig
                 "Multiplicador de recuo na janela (0.70 = −30%). / Recoil multiplier during the window (0.70 = −30%).",
                 new AcceptableValueRange<float>(0.3f, 1f)));
         AdrenalineReloadTime = config.Bind(
-            SecRifleman, "Adrenaline — Reload time mult", 0.80f,
+            SecRifleman, "Adrenaline — Reload time mult", 0.7f,
             new ConfigDescription(
-                "Multiplicador do TEMPO de recarga na janela (0.80 = 20% mais rápido). / Reload time multiplier during the window (0.80 = 20% faster).",
+                "Multiplicador do TEMPO de recarga na janela (0.7 = 30% mais rápido). / Reload time multiplier during the window (0.7 = 30% faster).",
                 new AcceptableValueRange<float>(0.3f, 1f)));
         AdrenalineAdsTime = config.Bind(
-            SecRifleman, "Adrenaline — ADS time mult", 0.80f,
+            SecRifleman, "Adrenaline — ADS time mult", 0.7f,
             new ConfigDescription(
-                "Multiplicador do TEMPO de ADS na janela (0.80 = 20% mais rápido). / ADS time multiplier during the window (0.80 = 20% faster).",
+                "Multiplicador do TEMPO de ADS na janela (0.7 = 30% mais rápido). / ADS time multiplier during the window (0.7 = 30% faster).",
                 new AcceptableValueRange<float>(0.3f, 1f)));
         LoudOperatorRiflemanEnabled = config.Bind(
             SecRifleman, "Loud Operator — Enabled", true,
@@ -329,9 +329,9 @@ internal static class PerksConfig
             "Caçador: segura a respiração por mais tempo. / Hunter: holds breath longer.");
         // B3: dreno ×0.667 ⇒ duração ×1.5 (+50% exatos, o que o card anuncia).
         IronLungsBreathDrain = config.Bind(
-            SecHunter, "Iron Lungs — Breath drain mult", 0.667f,
+            SecHunter, "Iron Lungs — Breath drain mult", 0.7f,
             new ConfigDescription(
-                "Multiplicador do consumo de O₂ ao prender a respiração (0.667 → +50% de duração). / Hold-breath O2 drain multiplier (0.667 → +50% duration).",
+                "Multiplicador do consumo de O₂ ao prender a respiração (0.7 → +43% de duração). / Hold-breath O2 drain multiplier (0.7 → +43% duration).",
                 new AcceptableValueRange<float>(0.2f, 1f)));
         SteadyArmsEnabled = config.Bind(
             SecHunter, "Steady Arms — Enabled", true,
@@ -454,9 +454,9 @@ internal static class PerksConfig
             SecTank, "Bunker — Enabled", true,
             "Tanque: com arma pesada (LMG/HMG/GL) na mão, menos recuo e mais ergonomia. / Tank: heavy weapons (LMG/HMG/GL) handle better.");
         BunkerHeavyRecoil = config.Bind(
-            SecTank, "Bunker — Heavy weapon recoil mult", 0.85f,
+            SecTank, "Bunker — Heavy weapon recoil mult", 0.7f,
             new ConfigDescription(
-                "Multiplicador de recuo com arma pesada (0.85 = −15%). / Heavy-weapon recoil multiplier (0.85 = −15%).",
+                "Multiplicador de recuo com arma pesada (0.7 = −30%). / Heavy-weapon recoil multiplier (0.7 = −30%).",
                 new AcceptableValueRange<float>(0.5f, 1f)));
         BunkerHeavyErgo = config.Bind(
             SecTank, "Bunker — Heavy weapon ergo mult", 1.15f,
@@ -469,9 +469,9 @@ internal static class PerksConfig
         // B16 (balance 2026-07-11): 0 → 0.2. Imunidade ABSOLUTA (×0) era outlier — o especialista em mira
         // (Caçador) tem ×0.65. Com 0.2 o braço cansa 5× mais devagar: preserva a fantasia sem imunidade.
         TirelessArmsDrain = config.Bind(
-            SecTank, "Tireless Arms — Heavy arm drain mult", 0.20f,
+            SecTank, "Tireless Arms — Heavy arm drain mult", 0.5f,
             new ConfigDescription(
-                "Multiplicador do dreno de braço do Tanque com arma pesada (0.20 = 5× mais lento; 0 = não drena). Requer o stances mod. / Tank heavy-weapon arm-drain multiplier (0.20 = 5x slower). Requires the stances mod.",
+                "Multiplicador do dreno de braço do Tanque com arma pesada (0.5 = 2× mais lento; 0 = não drena). Requer o stances mod. / Tank heavy-weapon arm-drain multiplier (0.5 = 2x slower). Requires the stances mod.",
                 new AcceptableValueRange<float>(0f, 1f)));
         HeavyFrameEnabled = config.Bind(
             SecTank, "Heavy Frame — Enabled", true,
@@ -482,9 +482,9 @@ internal static class PerksConfig
                 "Multiplicador de velocidade do Tanque (0.90 = −10%). / Tank move speed multiplier (0.90 = −10%).",
                 new AcceptableValueRange<float>(0.5f, 1f)));
         HeavyFrameHungerThirst = config.Bind(
-            SecTank, "Heavy Frame — Hunger/thirst drain", 1.30f,
+            SecTank, "Heavy Frame — Hunger/thirst drain", 1.15f,
             new ConfigDescription(
-                "Multiplicador do dreno de fome/sede do Tanque (1.30 = +30% mais rápido). / Tank hunger/thirst drain multiplier (1.30 = +30% faster).",
+                "Multiplicador do dreno de fome/sede do Tanque (1.15 = +15% mais rápido). / Tank hunger/thirst drain multiplier (1.15 = +15% faster).",
                 new AcceptableValueRange<float>(1f, 2f)));
         PackMuleTankEnabled = config.Bind(
             SecTank, "Pack Mule — Enabled", true,
