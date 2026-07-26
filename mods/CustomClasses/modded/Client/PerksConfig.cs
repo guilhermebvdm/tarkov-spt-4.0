@@ -73,7 +73,7 @@ internal static class PerksConfig
     internal static ConfigEntry<float>? RapidCareUseTime;         // 072
     internal static ConfigEntry<bool>? SwiftSurgeonEnabled;       // 072
     internal static ConfigEntry<float>? SwiftSurgeonTime;         // 072
-    internal static ConfigEntry<bool>? MobileSurgeryEnabled;      // 072
+    // 079: Mobile Surgery REMOVIDO (decisão do usuário — o Médico não anda mais em cirurgia).
     internal static ConfigEntry<bool>? RestorativeSurgeryEnabled;    // 076
     internal static ConfigEntry<float>? RestorativeSurgeryRetention; // 076 (v0.6.1: piso de HP máx retido, era "penalty mult")
     internal static ConfigEntry<bool>? ShakyHandsEnabled;
@@ -122,8 +122,11 @@ internal static class PerksConfig
     internal static ConfigEntry<float>? SilentLooterVolume;
     internal static ConfigEntry<bool>? PackMuleScavEnabled;       // desdobrado do compartilhado (2026-07-10)
     internal static ConfigEntry<float>? PackMuleScavCarryBonus;
-    internal static ConfigEntry<bool>? OverladenEnabled;
-    internal static ConfigEntry<float>? OverladenInertia;
+    // 079: Overladen REMOVIDO (substituído pela Lebre, item 081). Levers novos do 079:
+    internal static ConfigEntry<bool>? LightFrameEnabled;         // 079 Caçador + Furtivo (carga reduzida)
+    internal static ConfigEntry<float>? LightFrameCarryPenalty;   // 079
+    internal static ConfigEntry<bool>? LoudLooterEnabled;         // 079 Fuzileiro (loot barulhento)
+    internal static ConfigEntry<float>? LoudLooterVolume;         // 079
 
     // 7 · Tank
     internal static ConfigEntry<bool>? BulwarkEnabled;
@@ -228,9 +231,7 @@ internal static class PerksConfig
             new ConfigDescription(
                 "Multiplicador do tempo de cirurgia (0.75 = 25% mais rápido). A skill Surgery do jogador segue valendo por cima. / Surgery time multiplier (0.75 = 25% faster). The player's Surgery skill still stacks on top.",
                 new AcceptableValueRange<float>(0.3f, 1f)));
-        MobileSurgeryEnabled = config.Bind(
-            SecMedic, "Mobile Surgery — Enabled", true,
-            "Médico: pode ANDAR durante a cirurgia (continua sem correr/pular). / Combat Medic: can WALK during surgery (still no sprint/jump).");
+        // 079: Mobile Surgery REMOVIDO (o Médico não anda mais em cirurgia — nem própria nem de aliado).
         // 076 — a cirurgia do Médico não deixa a "cicatriz" permanente de HP máximo. Vale p/ a própria cirurgia
         // (caminho nativo) E p/ aliados operados via ICM (TRL-ImmersiveCombatMedicine), gateado pela classe do OPERADOR.
         RestorativeSurgeryEnabled = config.Bind(
@@ -241,14 +242,15 @@ internal static class PerksConfig
             new ConfigDescription(
                 "Fração MÍNIMA do HP máximo que o membro operado retém (0.80 = volta com 80%). É um PISO: nunca pior que o vanilla, e a skill Surgery do jogador pode melhorar ALÉM disto. / Minimum fraction of the limb's max HP retained after surgery (0.80 = comes back at 80%). It's a FLOOR: never worse than vanilla, and the player's Surgery skill can push beyond it.",
                 new AcceptableValueRange<float>(0f, 1f)));
-        // B1: default OFF até os perks do Médico existirem (hoje o Metabolismo já cobre — mas o recuo fica desligado por padrão).
+        // 079: "Shaky Hands" renomeado p/ "Unskilled" / "Falta de habilidade" + LIGADO (era OFF) + agora
+        // Médico E Saqueador (gate no ShootRecoilPatch). Key F12 renomeada → reseta o valor salvo (changelog).
         ShakyHandsEnabled = config.Bind(
-            SecMedic, "Shaky Hands — Enabled", false,
-            "Médico: +recuo (mãos trêmulas). / Combat Medic: more recoil (shaky hands).");
+            SecMedic, "Unskilled — Enabled", true,
+            "Médico/Saqueador: +recuo por falta de habilidade com armas de fogo. / Combat Medic/Scavenger: more recoil from lack of firearm skill.");
         ShakyHandsRecoil = config.Bind(
-            SecMedic, "Shaky Hands — Recoil mult", 1.25f,
+            SecMedic, "Unskilled — Recoil mult", 1.25f,
             new ConfigDescription(
-                "Multiplicador de recuo do Médico (1.25 = +25%). / Combat Medic recoil multiplier (1.25 = +25%).",
+                "Multiplicador de recuo por falta de habilidade (1.25 = +25%). / Recoil multiplier from lack of skill (1.25 = +25%).",
                 new AcceptableValueRange<float>(1f, 2f)));
         BindClassColor(config, SecMedic, "Combat Medic", "#6f9455");   // 067
 
@@ -420,14 +422,26 @@ internal static class PerksConfig
             new ConfigDescription(
                 "Piso do bônus de limite de carga do Saqueador (0.30 = +30%). / Scavenger carry-limit bonus floor (0.30 = +30%).",
                 new AcceptableValueRange<float>(0f, 1f)));
-        OverladenEnabled = config.Bind(
-            SecScavenger, "Overladen — Enabled", true,
-            "Saqueador: inércia escala mais com o peso (movimento clunky carregado). / Scavenger: inertia scales more with weight.");
-        OverladenInertia = config.Bind(
-            SecScavenger, "Overladen — Inertia mult", 1.50f,
+        // 079: Overladen REMOVIDO (substituído pela Lebre, item 081). Aqui entram os 2 levers NOVOS do 079
+        // (a seção no F12 vem do 1º arg SecHunter/SecRifleman, não da posição física no código).
+        // Light Frame (Caçador + Furtivo): limite de carga REDUZIDO. Valor NEGATIVO (teto, não piso — ver PackMulePatch).
+        LightFrameEnabled = config.Bind(
+            SecHunter, "Light Frame — Enabled", true,
+            "Caçador/Furtivo: limite de carga reduzido (estrutura leve — leva menos loot). / Hunter/Stealth: reduced carry limit (light frame).");
+        LightFrameCarryPenalty = config.Bind(
+            SecHunter, "Light Frame — Carry limit penalty", -0.20f,
             new ConfigDescription(
-                "Multiplicador de inércia do Saqueador (1.50 = +50% sobre a inércia já escalada pelo peso). / Scavenger inertia multiplier (1.50).",
-                new AcceptableValueRange<float>(1f, 3f)));
+                "Redução do limite de carga (−0.20 = −20%). Valor NEGATIVO. / Carry-limit reduction (−0.20 = −20%). Negative.",
+                new AcceptableValueRange<float>(-0.5f, 0f)));
+        // Loud Looter / Saque Barulhento (Fuzileiro): som de interação/loot mais ALTO (a IA ouve mais — requer SAIN).
+        LoudLooterEnabled = config.Bind(
+            SecRifleman, "Loud Looter — Enabled", true,
+            "Fuzileiro: som de interação/loot mais ALTO (a IA ouve mais; o canal de IA requer SAIN). / Rifleman: LOUDER interaction/loot sound (AI hears more; AI channel needs SAIN).");
+        LoudLooterVolume = config.Bind(
+            SecRifleman, "Loud Looter — Volume mult", 1.30f,
+            new ConfigDescription(
+                "Multiplicador do volume de interação/loot (1.30 = +30%). / Interaction/loot volume multiplier (1.30 = +30%).",
+                new AcceptableValueRange<float>(1f, 2f)));
         BindClassColor(config, SecScavenger, "Scavenger", "#c4ad45");   // 067
 
         // ───────────────────────── 7 · Tank ─────────────────────────

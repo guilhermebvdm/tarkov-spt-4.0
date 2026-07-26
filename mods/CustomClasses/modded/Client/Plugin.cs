@@ -10,7 +10,7 @@ namespace CustomClasses.Client;
 ///     Busca os fatores do server (rota /customclasses/skill-multipliers) e faz Prefix em
 ///     AbstractSkillClass.OnTrigger. UI (linha+tooltip) vem na Fatia 2.
 /// </summary>
-[BepInPlugin("customclasses.mdj.client", "CustomClasses", "0.6.3")]
+[BepInPlugin("customclasses.mdj.client", "CustomClasses", "0.7.1")]
 [BepInDependency("com.SPT.core", "4.0.0")]
 [BepInDependency("me.sol.sain", BepInDependency.DependencyFlags.SoftDependency)]   // (050.4 SAIN) carrega após o SAIN se presente
 public class Plugin : BaseUnityPlugin
@@ -126,7 +126,7 @@ public class Plugin : BaseUnityPlugin
         // (050.1 fix 2026-07-15) A velocidade voltou aos getters SEM ESTADO (MaxSpeed/SprintingSpeed). Os patches
         // nos DRIVERS (SetCharacterMovementSpeed/SprintAcceleration) do fix de 2026-06-24 CAUSAVAM decaimento
         // geométrico da velocidade a cada frame de movimento (campos relidos+regravados) → removidos. Ver ClassMoveSpeed.
-        new OverladenInertiaPatch().Enable();               // (050.1/074-F5) 🔻 Saqueador — inércia ∝ peso (retarget PlayerPhysicalClass)
+        // 079: OverladenInertiaPatch REMOVIDO (substituído pela Lebre, item 081).
         new RootedAimSlowdownPatch().Enable();              // (074-F1) 🔻 Caçador — −15% vel em ADS (teto de mira)
         try
         {
@@ -225,14 +225,7 @@ public class Plugin : BaseUnityPlugin
             MedicTiming.ForceDisable();                     // efeito sem animação (ou vice-versa) é pior que nada
             Log.LogError($"[CustomClasses] (072) Rapid Care / Swift Surgeon DESLIGADOS (patch incompleto): {ex.Message}");
         }
-        try
-        {
-            new MobileSurgeryPatch().Enable();              // (072) 🔧 Médico — cirurgia andando (HealingLegs off)
-        }
-        catch (System.Exception ex)
-        {
-            Log.LogError($"[CustomClasses] (072) Mobile Surgery não aplicado: {ex.Message}");
-        }
+        // 079: MobileSurgeryPatch REMOVIDO (o Médico não anda mais em cirurgia).
         new SurgeryPenaltyPatch().Enable();                 // (076) 🔧 Médico — cirurgia sem cortar HP máx (auto; ally via ICM)
         try
         {

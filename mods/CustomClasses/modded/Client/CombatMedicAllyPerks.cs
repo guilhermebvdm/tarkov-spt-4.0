@@ -46,20 +46,9 @@ public static class CombatMedicAllyPerks
     }
 
     /// <summary>
-    ///     True se o operador local é <b>Combat Medic</b> com 🔧 <b>Mobile Surgery</b> ligado → pode ANDAR durante a
-    ///     cirurgia de aliado (sem correr/pular). False (default seguro) faz o ICM imobilizar o operador.
+    ///     079 — <b>Mobile Surgery foi REMOVIDO</b> do Médico (decisão do usuário). Esta API vira constante
+    ///     <c>false</c>: o ICM passa a SEMPRE imobilizar o operador na cirurgia de aliado (ninguém anda). Mantida
+    ///     como stub p/ o bridge do ICM (reflection soft-dep) não quebrar — remover quando o ICM deixar de chamá-la.
     /// </summary>
-    public static bool AllyMobileSurgeon()
-    {
-        try
-        {
-            return PerksConfig.MobileSurgeryEnabled?.Value == true
-                   && SkillMultipliers.IsLocalClass("Combat Medic");
-        }
-        catch (Exception ex)
-        {
-            Plugin.Log?.LogError($"[CustomClasses] (077) AllyMobileSurgeon falhou: {ex.Message}");
-            return false;
-        }
-    }
+    public static bool AllyMobileSurgeon() => false;
 }

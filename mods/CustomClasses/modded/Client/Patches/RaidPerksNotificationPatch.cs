@@ -65,10 +65,10 @@ internal class RaidPerksNotificationPatch : ModulePatch
             // "+30%" porque o marcador lê o getter LIVE (já floorado) — é a discrepância, não a causa.
             // AQUI o estado já estabilizou (MainPlayer setado, Prefetch resolveu a classe), então forçar o recálculo
             // re-cacheia os limites JÁ com o piso. OnWeightLimitsUpdated() = UpdateWeightLimits() + OnWeightUpdated().
-            // ⚠️ LOAD-BEARING TAMBÉM PRO OVERLADEN (074/F5): a 1ª OnWeightUpdated do player roda em Player.Init (MainPlayer
-            // ainda null → o OverladenInertiaPatch pula) → a inércia nasceria vanilla até a 1ª mudança de peso. Este
-            // OnWeightUpdated (via OnWeightLimitsUpdated), pós-MainPlayer, re-aplica o boost do Overladen no raid-start.
-            // NÃO remover pensando que é só Pack Mule. (ref: reference_spt_init_before_mainplayer)
+            // ⚠️ LOAD-BEARING PRO PACK MULE / LIGHT FRAME: a 1ª OnWeightUpdated roda em Player.Init (MainPlayer ainda
+            // null → o gate do piso/teto de carga pula) → o limite nasceria vanilla até a 1ª mudança de peso. Este
+            // OnWeightUpdated (via OnWeightLimitsUpdated), pós-MainPlayer, re-aplica no raid-start. (079: o Overladen
+            // que também dependia disto foi removido.) (ref: reference_spt_init_before_mainplayer)
             try
             {
                 __instance.MainPlayer?.Physical?.OnWeightLimitsUpdated();

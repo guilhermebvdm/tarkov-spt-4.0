@@ -35,8 +35,9 @@ internal class ShootRecoilPatch : ModulePatch
 
             var str0 = str;   // (052) baseline p/ o diagnóstico
 
-            // 🔻 Shaky Hands (Médico): +25% de recuo (mãos trêmulas).
-            if (PerksConfig.ShakyHandsEnabled?.Value == true && SkillMultipliers.IsLocalClass("Combat Medic"))
+            // 🔻 Falta de habilidade / Unskilled (Médico + Saqueador — 079): +25% de recuo por falta de perícia.
+            if (PerksConfig.ShakyHandsEnabled?.Value == true
+                && (SkillMultipliers.IsLocalClass("Combat Medic") || SkillMultipliers.IsLocalClass("Scavenger")))
             {
                 str *= PerksConfig.ShakyHandsRecoil?.Value ?? 1f;
             }
@@ -262,9 +263,11 @@ internal class AimPunchPatch : ModulePatch
             // clampados → escalá-los entrega o ±% CHEIO em todo hit (e o Cool Under Fire passa a reduzir o flinch
             // até em hits enormes, que antes já saturavam). Rattled/Cool Under Fire são classes mutuamente exclusivas.
             var factor = 1f;
-            if (PerksConfig.RattledEnabled?.Value == true && SkillMultipliers.IsLocalClass("Stealth"))
+            // 🔻 Rattled / Abalado (Furtivo + Médico — 079): +50% tranco ao levar dano. Mesmo lever/valor p/ as 2 classes.
+            if (PerksConfig.RattledEnabled?.Value == true
+                && (SkillMultipliers.IsLocalClass("Stealth") || SkillMultipliers.IsLocalClass("Combat Medic")))
             {
-                factor = PerksConfig.RattledAimPunch?.Value ?? 1f;          // 🔻 Furtivo: +50% tranco
+                factor = PerksConfig.RattledAimPunch?.Value ?? 1f;
             }
             else if (PerksConfig.CoolUnderFireEnabled?.Value == true && SkillMultipliers.IsLocalClass("Rifleman"))
             {

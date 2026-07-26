@@ -80,7 +80,7 @@ internal static class PerksCatalog
             // 072 (2026-07-13): os 3 saíram do "em breve" — efeito E animação casados (ver ClassMedicPatches).
             P("Rapid Care", "Cuidado Rápido", "heal/stab use time", "tempo de cura/estabilização", ValueFormat.Percent, 0.7f, Polarity.LowerBetter, EBuffId.VitalityBuffRegeneration, live: () => PerksConfig.RapidCareUseTime?.Value ?? 0.7f),
             P("Swift Surgeon", "Cirurgião Ágil", "surgery time", "tempo de cirurgia", ValueFormat.Percent, 0.5f, Polarity.LowerBetter, EBuffId.SurgerySpeed, live: () => PerksConfig.SwiftSurgeonTime?.Value ?? 0.5f),
-            Flag("Mobile Surgery", "Cirurgia em Movimento", "walk during surgery", "andar durante a cirurgia", isPerk: true, EBuffId.SurgeryReducePenalty),
+            // 079: "Cirurgia em Movimento" (Mobile Surgery) REMOVIDA do Médico.
             // 076 (2026-07-19): a cirurgia restaura o membro a ~80% do HP máximo (piso configurável), em vez da
             // cicatriz grande do vanilla. Vale na auto-cirurgia + aliado via ICM.
             Flag("Restorative Surgery", "Cirurgia Restauradora", "surgery restores ~80% limb max HP", "cirurgia restaura ~80% do HP máx do membro", isPerk: true, EBuffId.SurgeryReducePenalty),
@@ -89,9 +89,10 @@ internal static class PerksCatalog
         {
             P("Efficient Metabolism", "Metabolismo Eficiente", "hunger/thirst drain", "fome/sede", ValueFormat.Percent, 0.85f, Polarity.LowerBetter, EBuffId.MetabolismEnergyExpenses, live: () => PerksConfig.EfficientMetabolismHungerThirst?.Value ?? 0.85f),
         }),
-        ["shaky_hands"] = G("Shaky Hands", "Mãos Trêmulas", ESkillId.RecoilControl, new[]
+        // 079: "Shaky Hands / Mãos Trêmulas" renomeado p/ "Unskilled / Falta de habilidade" — agora Médico E Saqueador.
+        ["shaky_hands"] = G("Unskilled", "Falta de habilidade", ESkillId.RecoilControl, new[]
         {
-            P("Shaky Hands", "Mãos Trêmulas", "recoil", "recuo", ValueFormat.Multiplier, 1.25f, Polarity.LowerBetter, EBuffId.RecoilControlImprove, live: () => PerksConfig.ShakyHandsRecoil?.Value ?? 1.25f),
+            P("Unskilled", "Falta de habilidade", "recoil (lack of skill)", "recuo (falta de habilidade)", ValueFormat.Multiplier, 1.25f, Polarity.LowerBetter, EBuffId.RecoilControlImprove, live: () => PerksConfig.ShakyHandsRecoil?.Value ?? 1.25f),
         }),
 
         // 🔫 Fuzileiro
@@ -166,9 +167,16 @@ internal static class PerksCatalog
         {
             Flag("Silent Looter", "Saque Silencioso", "silent looting", "saque silencioso", isPerk: true, EBuffId.CovertMovementSoundVolume),
         }),
-        ["overladen"] = G("Overladen", "Sobrecarregado", ESkillId.Endurance, new[]
+        // 079: Overladen REMOVIDO (substituído pela Lebre, item 081). Grupos NOVOS do 079:
+        // Light Frame (Caçador + Furtivo): carga reduzida — live = 1 + penalidade negativa (<1 → drawback).
+        ["light_frame"] = G("Light Frame", "Estrutura Leve", ESkillId.Strength, new[]
         {
-            Flag("Overladen", "Sobrecarregado", "inertia scales with weight", "inércia escala com o peso", isPerk: false, EBuffId.StrengthBuffLiftWeightInc),
+            P("Light Frame", "Estrutura Leve", "carry limit", "limite de carga", ValueFormat.Percent, 0.8f, Polarity.HigherBetter, EBuffId.StrengthBuffLiftWeightInc, live: () => 1f + (PerksConfig.LightFrameCarryPenalty?.Value ?? -0.2f)),
+        }),
+        // Loud Looter / Saque Barulhento (Fuzileiro): loot mais alto (>1 → drawback).
+        ["loud_looter"] = G("Loud Looter", "Saque Barulhento", ESkillId.SilentOps, new[]
+        {
+            P("Loud Looter", "Saque Barulhento", "interaction/loot volume", "volume de interação/loot", ValueFormat.Percent, 1.3f, Polarity.LowerBetter, EBuffId.CovertMovementSoundVolume, live: () => PerksConfig.LoudLooterVolume?.Value ?? 1.3f),
         }),
 
         // 🛡️ Tanque
@@ -208,11 +216,11 @@ internal static class PerksCatalog
     // Composição por classe (chave EN estável = displayName.en). Ordem = ordem de exibição.
     private static readonly Dictionary<string, string[]> ByClass = new(StringComparer.OrdinalIgnoreCase)
     {
-        ["Combat Medic"] = new[] { "combat_medic", "efficient_metabolism", "shaky_hands" },   // B17: perk vivo (Metabolismo)
-        ["Rifleman"]     = new[] { "cool_under_fire", "adrenaline", "loud_operator_rifleman" },
-        ["Hunter"]       = new[] { "sharpshooter", "iron_lungs", "stalker", "rooted" },   // stalker: ruído −20% (2026-07-11)
-        ["Stealth"]      = new[] { "ghost_step", "execution", "rattled" },
-        ["Scavenger"]    = new[] { "quick_hands", "silent_looter", "pack_mule_scav", "overladen" },
+        ["Combat Medic"] = new[] { "combat_medic", "efficient_metabolism", "shaky_hands", "rattled" },   // 079: −Mobile Surgery, +Abalado
+        ["Rifleman"]     = new[] { "cool_under_fire", "adrenaline", "loud_operator_rifleman", "loud_looter" },   // 079: +Saque Barulhento
+        ["Hunter"]       = new[] { "sharpshooter", "iron_lungs", "stalker", "rooted", "light_frame" },   // 079: +Estrutura Leve
+        ["Stealth"]      = new[] { "ghost_step", "execution", "rattled", "light_frame" },   // 079: +Estrutura Leve
+        ["Scavenger"]    = new[] { "quick_hands", "silent_looter", "pack_mule_scav", "shaky_hands" },   // 079: −Overladen, +Falta de habilidade
         ["Tank"]         = new[] { "pack_mule_tank", "bulwark", "bunker", "heavy_frame", "loud_operator_tank" },   // Pack Mule + Loud Operator próprios (desdobrados 2026-07-10)
     };
 

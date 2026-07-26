@@ -58,9 +58,17 @@ internal static class SilentLooter
 {
     internal static float MultFor(string? classNameEn)
     {
-        return SkillMultipliers.IsClass(classNameEn, "Scavenger") && PerksConfig.SilentLooterEnabled?.Value == true
-            ? (PerksConfig.SilentLooterVolume?.Value ?? 1f)
-            : 1f;
+        // Scavenger: loot mais SILENCIOSO (perk). Rifleman: loot mais ALTO (079 — Saque Barulhento, drawback).
+        // Resolve a classe de QUALQUER emissor (local ou peer via rota 057) → vale no pipeline coop/AI (SAIN).
+        if (SkillMultipliers.IsClass(classNameEn, "Scavenger") && PerksConfig.SilentLooterEnabled?.Value == true)
+        {
+            return PerksConfig.SilentLooterVolume?.Value ?? 1f;
+        }
+        if (SkillMultipliers.IsClass(classNameEn, "Rifleman") && PerksConfig.LoudLooterEnabled?.Value == true)
+        {
+            return PerksConfig.LoudLooterVolume?.Value ?? 1f;
+        }
+        return 1f;
     }
 }
 
@@ -222,19 +230,19 @@ internal class InteractionSoundPatch : ModulePatch
     {
         try
         {
-            if (PerksConfig.SilentLooterEnabled?.Value != true)
-            {
-                return;
-            }
-
+            // 079: 1ª pessoa — só o MainPlayer local. Scavenger (Silent Looter, perk) OU Rifleman (Loud Looter, drawback).
             if (!ReferenceEquals(__instance, Singleton<GameWorld>.Instance?.MainPlayer))
             {
                 return;
             }
 
-            if (SkillMultipliers.IsLocalClass("Scavenger"))
+            if (PerksConfig.SilentLooterEnabled?.Value == true && SkillMultipliers.IsLocalClass("Scavenger"))
             {
                 volume *= PerksConfig.SilentLooterVolume?.Value ?? 1f;
+            }
+            else if (PerksConfig.LoudLooterEnabled?.Value == true && SkillMultipliers.IsLocalClass("Rifleman"))
+            {
+                volume *= PerksConfig.LoudLooterVolume?.Value ?? 1f;   // 079 — Saque Barulhento (loot mais alto)
             }
         }
         catch (Exception ex)

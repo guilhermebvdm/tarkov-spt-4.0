@@ -543,9 +543,9 @@ namespace TRLImmersiveCombatMedicine
             // 077 — perks de TEMPO/MOVIMENTO do Médico na cura de ALIADO (via CustomClasses; no-op se ausente).
             // O operador é o MainPlayer local, então o gate (classe) é resolvido localmente pela bridge (sem 057/packet).
             float allyTimeMult = CustomClassesBridge.AllyHealTimeMult(stats.IsSurgery);   // 1 se não-Médico/sem CC
-            // Imobiliza o operador na CIRURGIA de aliado (HealingLegs = não anda), EXCETO Médico com Mobile Surgery.
-            // Curativo NÃO enraíza (só UsingMeds, que permite andar — CanWalk só checa HealingLegs). Fail-safe: sem
-            // CustomClasses, AllyMobileSurgeon()=false → ninguém anda (comportamento seguro do ICM standalone).
+            // Imobiliza o operador na CIRURGIA de aliado (HealingLegs = não anda). Nota (CustomClasses 079): o
+            // Mobile Surgery foi REMOVIDO, então AllyMobileSurgeon() é sempre false → NINGUÉM anda na cirurgia de
+            // aliado. Curativo NÃO enraíza (só UsingMeds, que permite andar — CanWalk só checa HealingLegs).
             if (stats.IsSurgery && !CustomClassesBridge.AllyMobileSurgeon())
                 doctor.MovementContext.SetPhysicalCondition(EPhysicalCondition.HealingLegs, true); // ref: MovementContext.cs:1578/1296
             // Animação acompanha o UseTime encurtado. Setado ANTES do SetInHands, no início de CADA HealRoutine
