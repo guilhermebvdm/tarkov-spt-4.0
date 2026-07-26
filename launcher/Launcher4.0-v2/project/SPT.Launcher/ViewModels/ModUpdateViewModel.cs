@@ -147,7 +147,7 @@ namespace SPT.Launcher.ViewModels
         // Internal state
         private SyncPlan _plan;
         private SyncBaseline _baseline;
-        private SyncManifestOverlay _performanceOverlay; // item 008 — null when the toggle is off
+        // Item 030: _performanceOverlay removido — config-performance virou regra de pasta (D-13).
         private CancellationTokenSource _cts;
         private readonly string _gamePath;
 
@@ -198,33 +198,18 @@ namespace SPT.Launcher.ViewModels
                 var ignoredFiles = manifest["ignoredFiles"]?.ToObject<List<string>>() ?? new List<string>();
                 var managedPaths = manifest["managedPaths"]?.ToObject<List<string>>() ?? new List<string>();
                 var folderRules = manifest["folderRules"]?.ToObject<Dictionary<string, string>>();
-                var optionalGroups = manifest["optionalGroups"]?.ToObject<List<OptionalModsHelper.OptionalGroupInfo>>()
-                                     ?? new List<OptionalModsHelper.OptionalGroupInfo>();
-                var performanceOverlayFiles = manifest["performanceOverlay"]?.ToObject<List<ManifestFile>>() ?? new List<ManifestFile>();
 
-                // Refresh the optional-mods cache so GetAllKnownOptionalPaths() protects inactive groups too (CC3)
-                var optionalManifestFiles = files
-                    .Where(f => f.optional)
-                    .Select(f => new OptionalModsHelper.ManifestFile
-                    {
-                        path = f.path, hash = f.hash, size = f.size, optional = f.optional, optionalGroup = f.optionalGroup,
-                    })
-                    .ToList();
-                OptionalModsHelper.UpdateFromManifest(optionalGroups, optionalManifestFiles);
+                // Item 030: catálogo dos itens da tela "Mods e Configs" (mesmo modelo do ProfileViewModel).
+                ModsConfigCatalog.UpdateFromManifest(manifest["optionalMods"], manifest["performanceItems"]);
 
                 TotalFiles = files.Count;
                 MaxProgress = Math.Max(1, files.Count);
 
-                // Item 008: overlay de configs performance (merge — spec 008 D3)
+                // Item 030: sem overlay — config-performance virou regra de pasta. Discriminadores das prefs.
                 IReadOnlyList<ManifestFile> effectiveFiles = files;
-                _performanceOverlay = null;
-
-                if (LauncherSettingsProvider.Instance.UsePerformanceConfigs && performanceOverlayFiles.Count > 0)
-                {
-                    _performanceOverlay = SyncManifestOverlay.Merge(files, performanceOverlayFiles);
-                    effectiveFiles = _performanceOverlay.Files;
-                    Controllers.LogManager.Instance.Info($"[ModUpdateView] Configs performance ON — overlay com {performanceOverlayFiles.Count} arquivo(s)");
-                }
+                var justToggled = LauncherSettingsProvider.Instance.PendingApply
+                    .Where(id => id != SyncTriggers.PendingApplyMarker)
+                    .ToList();
 
                 var resolver = new SyncRuleResolver(folderRules);
                 _baseline = SyncBaseline.Load(Path.Combine(LauncherStateDir, "sync-state.json"));
@@ -235,11 +220,10 @@ namespace SPT.Launcher.ViewModels
                     DevMode = LauncherSettingsProvider.Instance.IsDevMode,
                     IgnoredFiles = ignoredFiles,
                     ExcludeFromCleanup = LauncherSettingsProvider.Instance.ExcludeFromCleanup ?? Array.Empty<string>(),
-                    ProtectedPaths = OptionalModsHelper.GetAllKnownOptionalPaths()
-                        .Select(p => p.Replace(Path.DirectorySeparatorChar, '/'))
-                        .ToList(),
                     ManagedPaths = managedPaths,
                     IsOptionalModEnabled = id => LauncherSettingsProvider.Instance.IsOptionalEnabled(id),
+                    IsPerformanceItemEnabled = id => LauncherSettingsProvider.Instance.IsPerformanceItemEnabled(id),
+                    JustToggledIds = justToggled,
                 };
 
                 var planner = new SyncPlanner(resolver, _baseline, options);
@@ -413,15 +397,8 @@ namespace SPT.Launcher.ViewModels
 
         private SyncEngine CreateEngine()
         {
+            // Item 030: um downloader só (overlay/performance-download aposentado — D-13).
             SyncDownloader downloader = (path, ct) => Task.Run(() => RequestHandler.DownloadModFile(path), ct);
-
-            if (_performanceOverlay != null)
-            {
-                // Item 008: paths do pack baixam do endpoint performance-download
-                downloader = _performanceOverlay.CreateDownloader(
-                    downloader,
-                    (path, ct) => Task.Run(() => RequestHandler.DownloadPerformanceFile(path), ct));
-            }
 
             // Item 016 — mede a taxa como camada MAIS EXTERNA: captura todos os downloads
             // (base, overlay do 008 e seeds do 017), independente da origem.

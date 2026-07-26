@@ -379,18 +379,8 @@ namespace SPT.Launcher.Helpers
             set => SetProperty(ref _disableUpdates, value);
         }
 
-        /// <summary>
-        /// Item 008: when true, the file verification applies the server performance-config
-        /// overlay (Launcher-Updater/config-performance) on top of the normal sync — user
-        /// customizations (divergent from baseline) are never overwritten. Turning it off
-        /// makes the next verification restore the server defaults. Per machine (D5).
-        /// </summary>
-        private bool _usePerformanceConfigs;
-        public bool UsePerformanceConfigs
-        {
-            get => _usePerformanceConfigs;
-            set => SetProperty(ref _usePerformanceConfigs, value);
-        }
+        // Item 030 (D-12): UsePerformanceConfigs (overlay global do item 008) removido — a performance
+        // agora é por item na tela "Mods e Configs", como regra de pasta config-performance.
 
         /// <summary>
         /// Modo homolog: quando ligado, as rotas do mod TarkovRedLine ganham o prefixo "/homolog"

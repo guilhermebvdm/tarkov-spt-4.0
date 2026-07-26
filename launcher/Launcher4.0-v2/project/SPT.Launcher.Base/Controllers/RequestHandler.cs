@@ -209,47 +209,10 @@ namespace SPT.Launcher
             return DownloadBinary($"{request.RemoteEndPoint}{M("/launcher/mods/download")}?file={Uri.EscapeDataString(filePath)}", timeoutMs);
         }
 
-        /// <summary>
-        /// Item 021: baixa um arquivo de uma subpasta de Opcionais (offFolders), via a MESMA via
-        /// <see cref="WebRequest"/> do resto do launcher (honra o bypass TLS self-signed do
-        /// ServicePointManager, esquema+porta reais do <c>RemoteEndPoint</c>) — não mais HttpClient
-        /// cru com URL http:80 reinventada (CA-021.1/2/3, CC-2). Timeout largo por serem binários.
-        /// </summary>
-        public static byte[] DownloadOptionalFile(string folder, string file, int timeoutMs = 300000)
-        {
-            return DownloadBinary(
-                $"{request.RemoteEndPoint}{M("/launcher/mods/optional-download")}?folder={Uri.EscapeDataString(folder)}&file={Uri.EscapeDataString(file)}",
-                timeoutMs);
-        }
-
-        /// <summary>
-        /// Item 021: busca o manifesto de uma subpasta de Opcionais (JSON puro) pelo backend real
-        /// (RemoteEndPoint). Lança em erro/timeout — o chamador conta como falha visível (CA-021.4).
-        /// </summary>
-        public static string RequestOptionalsManifest(string folder)
-        {
-            return GetString(
-                $"{request.RemoteEndPoint}{M("/launcher/mods/optionals-manifest")}?folder={Uri.EscapeDataString(folder)}",
-                10000);
-        }
-
-        /// <summary>
-        /// Item 008: baixa um arquivo do pacote de configs de performance
-        /// (Launcher-Updater/config-performance no servidor)
-        /// </summary>
-        public static byte[] DownloadPerformanceFile(string filePath)
-        {
-            return DownloadBinary($"{request.RemoteEndPoint}{M("/launcher/mods/performance-download")}?file={Uri.EscapeDataString(filePath)}");
-        }
-
-        /// <summary>
-        /// Item 009: busca a lista de grupos opcionais com descritores
-        /// (GET /launcher/mods/optionals-list)
-        /// </summary>
-        public static string RequestOptionalsList()
-        {
-            return GetFromHwidManager(M("/launcher/mods/optionals-list"));
-        }
+        // Item 030 (S-7): DownloadOptionalFile / RequestOptionalsManifest / DownloadPerformanceFile /
+        // RequestOptionalsList removidos — as rotas correspondentes saíram do servidor (modelo antigo de
+        // opcionais + overlay de performance aposentados, D-13). O canal config-performance baixa do
+        // /download comum, como o resto do manifesto.
 
         private static byte[] DownloadBinary(string url, int timeoutMs = 30000)
         {

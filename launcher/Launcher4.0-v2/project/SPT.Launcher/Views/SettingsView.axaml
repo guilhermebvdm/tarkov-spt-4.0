@@ -124,22 +124,8 @@
                                 <cc:LocalizedLauncherActionSelector />
                             </StackPanel>
 
-                            <!-- Item 008: configs de performance (overlay via motor de sync) -->
-                            <StackPanel Spacing="4">
-                                <ToggleSwitch IsChecked="{Binding UsePerformanceConfigs, Mode=TwoWay}"
-                                              OnContent="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=enabled}" OffContent="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=disabled}" Cursor="Hand">
-                                    <ToggleSwitch.Content>
-                                        <TextBlock Classes="trl-label" Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=use_performance_configs}"/>
-                                    </ToggleSwitch.Content>
-                                </ToggleSwitch>
-                                <!-- ref: CR-01-03 — texto reflete a semântica real do preserve-divergent:
-                                     arquivo modificado desde a última sincronização (por você ou pelo
-                                     próprio jogo) é preservado também no desligar; não prometer
-                                     restauração incondicional. -->
-                                <TextBlock Classes="trl-muted" FontSize="{DynamicResource TrlTextXs}" TextWrapping="Wrap"
-                                           MaxWidth="460" HorizontalAlignment="Left"
-                                           Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=use_performance_configs_description}"/>
-                            </StackPanel>
+                            <!-- Item 030: o toggle "Usar configs de performance" saiu daqui (D-12) —
+                                 performance agora vive na tela "Mods e Configs", item a item. -->
 
                             <!-- Dev Mode — protegido por senha -->
                             <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">

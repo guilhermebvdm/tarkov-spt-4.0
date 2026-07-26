@@ -75,10 +75,11 @@
                             <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=nav_support_coffee}" VerticalAlignment="Center"/>
                         </DockPanel>
                     </Button>
-                    <Button Classes="nav" Cursor="Hand" ToolTip.Tip="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=nav_under_construction_tooltip}" IsEnabled="False" Opacity="0.5">
+                    <!-- Item 030: acesso à tela "Mods e Configs" (substitui o placeholder em construção). -->
+                    <Button Classes="nav" Cursor="Hand" Command="{Binding OpenModsConfigsCommand}">
                         <StackPanel Orientation="Horizontal" Spacing="10">
                             <Path Data="{StaticResource TrlIconMenu2}" VerticalAlignment="Center"/>
-                            <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=nav_mods_list}" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=nav_mods_configs}" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
                 </StackPanel>
@@ -136,24 +137,24 @@
                         </StackPanel>
                     </cc:TrlPanel>
 
-                    <!-- Box: MODS OPCIONAIS (item 009: descrição visível abaixo do nome) -->
-                    <cc:TrlPanel Title="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=optional_mods_panel_title}" Background="{DynamicResource TrlPanelOverPhotoBrush}">
-                        <ItemsControl ItemsSource="{Binding OptionalMods}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <StackPanel Spacing="2" Margin="0,0,0,6">
-                                        <CheckBox Content="{Binding Name}"
-                                                  Cursor="Hand"
-                                                  IsChecked="{Binding IsEnabled}"/>
-                                        <TextBlock Classes="trl-muted"
-                                                   FontSize="{DynamicResource TrlTextXs}"
-                                                   TextWrapping="Wrap"
-                                                   Text="{Binding Description}"
-                                                   IsVisible="{Binding Description, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                    <!-- Box: MODS E CONFIGS (item 030) — resumo clicável que abre a tela dedicada.
+                         Oculto quando não há itens conhecidos (nunca "0 de 0", §4.1). -->
+                    <cc:TrlPanel Title="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=nav_mods_configs}"
+                                 Background="{DynamicResource TrlPanelOverPhotoBrush}"
+                                 IsVisible="{Binding HasModsConfigsSummary}">
+                        <Button Classes="ghost" Cursor="Hand" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+                                Command="{Binding OpenModsConfigsCommand}">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="{Binding ModsConfigsSummary}" VerticalAlignment="Center"
+                                           FontSize="{DynamicResource TrlTextXs}" TextWrapping="Wrap"/>
+                                <Border Background="{DynamicResource TrlAccentBrush}" CornerRadius="0" Padding="5,1"
+                                        VerticalAlignment="Center" IsVisible="{Binding HasModsConfigsNew}">
+                                    <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=mods_configs_new_badge}"
+                                               FontSize="{DynamicResource TrlText2Xs}" FontWeight="Bold"
+                                               Foreground="{DynamicResource TrlBgBrush}"/>
+                                </Border>
+                            </StackPanel>
+                        </Button>
                     </cc:TrlPanel>
 
                     <!-- Box: CONTA -->
