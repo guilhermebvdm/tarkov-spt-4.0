@@ -36,12 +36,31 @@ Levantadas durante a pesquisa técnica do item 001 e nunca incorporadas ao desig
 
 Se algum destes virar item de backlog, o candidato natural é uma extensão do item 003 (Pernas) ou um item novo dedicado — nenhum dos quatro precisa de código do mod para o efeito em si acontecer (já é vanilla); o trabalho seria só de calibração/documentação para não conflitar com Manqueira/Cair/Desmaio.
 
+### 1.2 A fronteira mod ↔ vanilla nas pernas (verificada 2026-07-26, item 021)
+
+Levantado ao investigar o achado S1.1 do 1º teste in-game, e **muda a leitura de toda a §4.1**. O vanilla concentra toda a penalidade de perna ferida dentro de uma única condição: *"o jogador não está sob analgésico"*. Fora dela, não aplica nada.
+
+O que o vanilla faz, com perna zerada **ou** quebrada:
+
+| Sob analgésico? | Cap de velocidade vanilla | Sprint vanilla |
+|---|---|---|
+| **Não** | aplica (mais severo que o alvo do mod) | **bloqueado** |
+| **Sim** | **não aplica nada** | **liberado** |
+
+Três consequências, todas relevantes para calibrar:
+
+1. **Correr com 1 perna comprometida é bloqueio do vanilla, não do mod.** O pedido S1.1 ("liberar correr com a perna doendo") só seria atendível se o mod passasse a **forçar** o sprint liberado, sobrescrevendo o vanilla. Isso viola a regra de projeto de que o mod nunca acelera acima do vanilla (decisão 18) e foi **recusado por decisão do usuário em 2026-07-26**. Fica como limitação assumida: com perna zerada ou quebrada, não se corre.
+2. **Sem analgésico, os alvos de velocidade do mod são decorativos.** A penalidade vanilla e o cap do mod convivem no mesmo dicionário de limites, cuja composição é **pelo mínimo** — e o vanilla é sempre o mais severo. Os defaults 80% (Leve) / 55% (Severa) não se manifestam nessa coluna. A §4.1 já previa o clamp e o registra no log (`clamped=true`), mas ninguém havia confrontado o que isso significa: **a coluna "sem analgésico" da matriz de pernas é, na prática, vanilla.**
+3. **Com analgésico, o mod é a única penalidade existente.** O vanilla não limita nada e libera o sprint; o cap do mod e o bloqueio de sprint do tier Severa são tudo o que resta. É exatamente a coluna onde os dois achados do 1º teste apareceram (S1.7 e o agachar), e é por isso que o item 017 é integralmente efetivo.
+
+**Verificação obrigatória no próximo teste:** ler `[Trauma2] legs cap RECOMPUTE ... clamped=` no log. O esperado é `true` sem analgésico e `false` com. Se vier `true` nos dois, os defaults de calibração precisam ser repensados junto — não é ajuste de uma linha da matriz, é o item 003 inteiro.
+
 ## 2. Matriz de efeitos (estado atual, pós-010)
 
 | Região | Condição | Sem analgésico | Com analgésico | Status |
 |---|---|---|---|---|
 | Perna | Zerar 1 | Manqueira Leve (p=100%) | Nada | ✅ Conforme original |
-| Perna | Zerar 2 | Agachar involuntário (p=100%, one-shot) + Manqueira Severa contínua | Manqueira Leve | ✅ Conforme original |
+| Perna | Zerar 2 | Agachar involuntário (p=100%, one-shot) + Manqueira Severa contínua | **Manqueira Severa** (sem agachar) | 🔄 Alterado — item 017 |
 | Perna | Quebrar 1 | Manqueira Leve | Nada | ✅ Conforme original |
 | Perna | Quebrar 2 | **Cair** (prone forçado, sem dano de queda) + ciclo Janela 3s/Bloqueio 15s | Manqueira Leve | ✅ Conforme original |
 | Perna | Zerar 1 + Quebrar 1 | Manqueira Severa | Manqueira Leve | ✅ Conforme original |
@@ -143,12 +162,13 @@ Cobertura mínima: 1 cenário por linha da matriz (§2) + os corners mais arrisc
 
 ### 4.1 Pernas — Manqueira
 
-- Levantar com as 2 pernas zeradas NUNCA fratura nem causa dano extra — comportamento puramente reativo (fratura só vem de combate/vanilla, nunca do mod).
-- Zerar 1 perna → Manqueira Leve, log confirma; tomar analgésico → nada; expirar → Manqueira Leve de novo.
-- Zerar 2 pernas → agacha 1×, Manqueira Severa, sprint bloqueado mesmo com analgésico.
+- Levantar com as 2 pernas zeradas NUNCA fratura nem causa dano extra — comportamento puramente reativo (fratura só vem de combate/vanilla, nunca do mod). **Em reavaliação no item 019** (o candidato de punição física do TrueTrauma 3.11 — ver §5.6).
+- Zerar 1 perna → Manqueira Leve, log confirma; tomar analgésico → nada; expirar → Manqueira Leve de novo. **Correr continua bloqueado pelo vanilla nos dois casos** — ver §1.2.
+- Zerar 2 pernas → agacha 1×, Manqueira Severa, sprint bloqueado. **Com analgésico (item 017): Manqueira Severa e sprint bloqueado igualmente, mas SEM o agachar** — o analgésico deixou de rebaixar a linha e passou a só suprimir o one-shot.
 - Curar (própria/aliado/cirurgia) → Manqueira some em ≤1s.
 - Bot zera perna → manca/dip visível ao host e a peers.
 - Toggle "Legs Effects" OFF mid-raid → desfaz caps na hora, inclusive em jogador DOWNED.
+- **Leitura de log obrigatória:** `legs cap RECOMPUTE ... clamped=` — confirma qual das duas penalidades (mod ou vanilla) está de fato governando a velocidade em cada coluna. Ver §1.2.
 
 ### 4.2 Pernas — Ciclo de Queda
 
@@ -288,15 +308,59 @@ Toda decisão referenciada no texto abaixo, num só lugar. "D-N" vem do document
 
 ### 5.4 Débito técnico e pendências vivas
 
-- **Roteiro de teste ainda não executado** — nenhum item do overhaul (002-010) foi validado in-game de fato; §4 é o roteiro pendente.
+- **Roteiro de teste parcialmente executado** — o 1º teste in-game aconteceu em 2026-07-26 (Fika, 2 PCs) e parou no meio por excesso de cenários; o roteiro de sessão passou a ser [happy-flow-test-plan.md](./happy-flow-test-plan.md) e a §4 deste documento virou referência de corner cases. Os achados estão nos itens 013-021 do backlog.
 - **`trauma-matrix.md` original não foi retrofitado** com a correção do D12 (composição por mínimo, não multiplicativa) — só este documento reflete a correção.
 - **Padrões de migração de config divergentes**: placeholder inerte → rename-at-delivery com descarte (003-007); valor real do usuário → migração por cópia culture-invariant (008). O código de busca de config órfã tinha 6 cópias quase idênticas desse idioma antes do 010 fazer a limpeza final de key.
 - **Chave de dedup da fila de one-shots adiados** evoluiu de `(jogador, tipo)` para `(jogador, tipo, região)` no item 006 — sem isso, um agachar de pernas e um de estômago adiados colidiam numa única entrada.
+
+### 5.5 Esclarecimentos do 1º teste in-game (2026-07-26)
+
+Comportamentos reportados como suspeitos que, investigados, são **corretos**. Registrados para não voltarem a consumir sessão de diagnóstico.
+
+**Tremor aparecendo na cabeça, inclusive sob analgésico.** Existem **dois** tremores no jogo e eles coexistem por design:
+
+| | Tremor do mod | Tremor nativo |
+|---|---|---|
+| Ancorado em | o **braço** comprometido | sempre a **cabeça** |
+| Origem | o estado de braço da matriz | o efeito de **Dor**, que gera tremor por conta própria depois de um tempo |
+| Depende de qual membro foi ferido? | sim | **não** — dor de perna também produz tremor na cabeça |
+| Analgésico | remove com 1 braço; **mantém** com 2 (§2) | **oculta o ícone de dor**, mas não remove o tremor já criado |
+
+O mod ancora deliberadamente no braço para não colidir com o tremor de estimulante, que o vanilla ancora na cabeça. Portanto: ver o ícone na cabeça é esperado, não é o mod errando de membro, e **não** é o mod UnderFire — desabilitá-lo não muda nada.
+
+**Ferimento presente no spawn da raid seguinte.** Não é o mod persistindo estado. O mod **não grava nada** em perfil nem no servidor: todo o estado é em memória e zerado nas fronteiras de raid (o item 020 torna essa purga explícita e verificável por log). Membro zerado que volta ferido, e efeitos como Fratura e Sangramento, são persistência **vanilla do EFT/SPT** — o servidor grava HP e efeitos no perfil ao fim da raid. Mudar isso exigiria tocar o servidor, e foi **decidido não mexer** em 2026-07-26.
+
+### 5.6 Veredito dos candidatos do TrueTrauma 3.11
+
+O mod nasceu da fusão Band-Aid + TrueTrauma 3.11. A auditoria do fonte antigo (`mods/TrueTrauma - FINALIZADO/`) em 2026-07-26 levantou 15 itens presentes lá e ausentes aqui. Veredito:
+
+| Candidato | Veredito |
+|---|---|
+| Falas dedicadas de perna e mão quebrada | **Portar** — item 019 |
+| Fala de dor no estômago | **Portar** — item 019 |
+| Fala de ofego ao tentar mirar com braços zerados | **Portar** — item 019 |
+| Fala de dor no **hit**, não só na transição de estado | **Portar** — item 019 |
+| Desmaio próprio, sem o downed do Fika (mantém hitbox e vulnerabilidade) | **Portar** — item 015, é a decisão central do pós-teste |
+| Efeito de atordoamento na entrada do desmaio | **Portar** — item 015; era inerte aqui só porque o downed do Fika zera o coeficiente de dano |
+| Borrão de tontura contínuo durante o desmaio | **Portar** — item 015, mesma razão |
+| Vulnerabilidade parcial durante o desmaio | **Portar ampliado** — item 015 decidiu vulnerabilidade **total**, mais forte que o original |
+| Punição física ao levantar com 2 pernas zeradas (fratura ou dano de queda) | **Decidir no item 019** — foi aposentada pela decisão 21; o ciclo de queda atual bloqueia levantar sem nenhuma consequência física. Nota: o vanilla já tem algo nessa linha (dano a si mesmo se estiver correndo no instante em que a perna se compromete) |
+| Bloqueio de 1s ao zerar uma perna (impedir levantar imediatamente após o tiro) | **Avaliar** — removido na decisão 10 sem substituto; candidato a item próprio |
+| Bot re-equipar a arma primária e reorientar ao levantar | **Avaliar** — o ciclo de bot atual devolve o controle à IA sem isso |
+| Stamina zerada no hit de estômago ("sem ar") | **Não portar** — o estômago novo agacha por probabilidade; somar stamina zerada empilharia duas punições no mesmo evento |
+| Falas de dor em **bots** | **Não portar** — decidido em 2026-07-26: polui o áudio e atrapalha identificar quem está ferido |
+| Loop de re-bloqueio de 10s a cada tentativa de levantar | **Não portar** — o ciclo Janela/Bloqueio do item 004 substitui com timers configuráveis |
+| Menu acessível durante o congelamento de input | **Já migrado** — preservar em qualquer refactor do desmaio (requisito não-óbvio) |
+
+Anti-candidatos, removidos por decisão consciente e que **não** devem voltar: limiar de dano cru fixo (substituído pelo percentual da vida atual), clamp de 90s na perna de bot (causa-raiz do "levanta e nunca mais cai"), período de graça ancorado na entrada em vez do despertar, duração de desmaio fixa, canal único de anti-repetição de voz.
+
+Um vestígio do 3.11 ainda **ativo e indesejado**: a lista de exceções da mordaça de voz durante o desmaio (duas frases que o mod antigo usava como canal de rede, antes de existir pacote próprio). É bug a remover — item 015.
 
 ## Histórico de Alterações
 
 | Data | Autor | Alteração |
 |---|---|---|
+| 2026-07-26 | Guilherme | Registro dos achados do **1º teste in-game** (item 021): nova §1.2 (fronteira mod↔vanilla nas pernas — S1.1 inviável, caps do mod só observáveis sob analgésico), §5.5 (esclarecimentos: tremor da cabeça é nativo derivado de Dor; ferimento no spawn é persistência vanilla), §5.6 (veredito dos 15 candidatos do TrueTrauma 3.11) e a linha `Zerar 2 + analgésico` da §2 alterada para Manqueira Severa (item 017). |
 | 2026-07-19 | Guilherme (com Claude) | Criação — consolida `trauma-matrix.md` + toda decisão/premissa adotada durante os itens 002-008. |
 | 2026-07-19 | Guilherme (com Claude) | Verificação de completude independente: 9 premissas de prioridade alta incorporadas (maioria do item 004). |
 | 2026-07-25 | Guilherme (com Claude) | Reescrita completa: (1) atualização com os itens 009 (hardening coop) e 010 (migração de configs + release), ambos entregues — remoção real dos legados do F12, distância de interação 3,5m, i18n completo do fluxo médico, helper compartilhado de lifecycle, voz dupla-fonte aceita sem arbitragem; (2) reorganização em produto (§1-4, critérios de aceite e configuração, sem jargão de código) + apêndice técnico (§5, decisões/histórico); (3) renomeação de "N1/N2" para "Manqueira Leve/Severa" com nota explícita de que não é terminologia vanilla; (4) glossário único de códigos de decisão (D1-D20, Decisão 1-22); (5) nova seção §1.1 listando penalidades vanilla de perna ferida não cobertas pelo mod (dano ao correr, dano ao pousar, furtividade, escalada por lado), como candidatas a expansão futura, não pendência aberta. |

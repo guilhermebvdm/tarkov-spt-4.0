@@ -21,7 +21,7 @@ O plano mestre (44 solo + 12 coop) continua sendo a fonte de **corner cases** e 
 
 ## Bloco 0 — Pré-requisitos
 
-- [ ] **P1** — F12 → BepInEx → as versões batem com o que foi implantado. Após a Leva 1: `TRLImmersiveCombatMedicine` **1.11.1** e `TRL Fixes` **1.1.1**. Se não bater, é build velha no jogo: pare aqui.
+- [ ] **P1** — F12 → BepInEx → as versões batem com o que foi implantado. Após a Leva 1: `TRLImmersiveCombatMedicine` **1.11.2** e `TRL Fixes` **1.1.1**. Se não bater, é build velha no jogo: pare aqui.
 - [ ] **P2** — F12 → "6. Trauma 2.0 (Consumidores)": os 5 toggles (Legs / Fall / Arms / Stomach / Blackout 2.0) **Ligados**.
 - [ ] **P3** — ⚠️ **Wire format:** a 1.11.0 reescreveu a serialização dos 6 pacotes Fika do mod (tipos com sufixo `V2`). Um peer em build anterior não fala o mesmo protocolo — o mod degrada de forma contida, mas cura remota e sync de desmaio **não** funcionam entre versões diferentes. **Os dois PCs precisam atualizar juntos**, e o `TRL-Fixes` também tem de estar nos dois.
 - [ ] **P4** — Confirmar no log de cada máquina que os hooks subiram: `TRL-Fixes: Hook no ReviveInteractable.RemoveRagdoll aplicado com sucesso!`. Sem essa linha, o C2 não tem validade.

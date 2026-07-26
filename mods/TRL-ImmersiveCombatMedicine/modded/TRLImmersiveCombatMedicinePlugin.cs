@@ -20,7 +20,7 @@ namespace TRLImmersiveCombatMedicine
     // e os patches são dispensados em silêncio. Funcionava por acidente de ordenação até aqui.
     // Padrão já usado no repo por DiscordRaidMap e MOAR-Client.
     [BepInDependency("com.fika.core", BepInDependency.DependencyFlags.SoftDependency)]
-    [BepInPlugin("com.trl.immersivecombatmedicine", "TRL-ImmersiveCombatMedicine", "1.11.1")]
+    [BepInPlugin("com.trl.immersivecombatmedicine", "TRL-ImmersiveCombatMedicine", "1.11.2")]
     public class TRLImmersiveCombatMedicinePlugin : BaseUnityPlugin
     {
         public static TRLImmersiveCombatMedicinePlugin Instance;
