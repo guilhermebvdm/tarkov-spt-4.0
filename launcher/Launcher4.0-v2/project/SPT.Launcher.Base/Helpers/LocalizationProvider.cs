@@ -351,6 +351,8 @@ namespace SPT.Launcher.Helpers
         public string mods_configs_empty_optional { get => _mods_configs_empty_optional; set => SetProperty(ref _mods_configs_empty_optional, value); }
         private string _mods_configs_empty_optional_config;
         public string mods_configs_empty_optional_config { get => _mods_configs_empty_optional_config; set => SetProperty(ref _mods_configs_empty_optional_config, value); }
+        private string _mods_configs_uncategorized;
+        public string mods_configs_uncategorized { get => _mods_configs_uncategorized; set => SetProperty(ref _mods_configs_uncategorized, value); }
         private string _mods_configs_new_badge;
         public string mods_configs_new_badge { get => _mods_configs_new_badge; set => SetProperty(ref _mods_configs_new_badge, value); }
         private string _mods_configs_summary_format;

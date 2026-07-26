@@ -322,5 +322,6 @@
   "titlebar_settings_tooltip": "Configurações",
   "version_footer_launcher_label": "Versão do launcher:",
   "version_footer_server_label": "Versão do servidor:",
-  "window_title": "Launcher Tarkov Red Line v{0}"
+  "window_title": "Launcher Tarkov Red Line v{0}",
+  "mods_configs_uncategorized": "Outros"
 }

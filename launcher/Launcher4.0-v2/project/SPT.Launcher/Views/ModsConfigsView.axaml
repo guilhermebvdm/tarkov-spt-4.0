@@ -42,7 +42,7 @@
                 <!-- 2 COLUNAS -->
                 <Grid ColumnDefinitions="*, 20, *">
 
-                    <!-- COLUNA: MODS OPCIONAIS -->
+                    <!-- COLUNA: MODS OPCIONAIS (agrupada por categoria) -->
                     <cc:TrlPanel Grid.Column="0" Title="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=mods_configs_optional_column}">
                         <StackPanel Spacing="10">
                             <Button Classes="ghost sm" Cursor="Hand" HorizontalAlignment="Left"
@@ -53,22 +53,32 @@
                             <TextBlock Classes="trl-faint" TextWrapping="Wrap" IsVisible="{Binding !HasOptionalMods}"
                                        Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=mods_configs_empty_optional}"/>
 
-                            <ItemsControl ItemsSource="{Binding OptionalMods}">
+                            <ItemsControl ItemsSource="{Binding OptionalModGroups}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <StackPanel Spacing="2" Margin="0,0,0,8">
-                                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                                <CheckBox Content="{Binding Name}" Cursor="Hand" IsChecked="{Binding IsEnabled}"/>
-                                                <Border Background="{DynamicResource TrlAccentBrush}" CornerRadius="0" Padding="5,1"
-                                                        VerticalAlignment="Center" IsVisible="{Binding IsNew}">
-                                                    <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=mods_configs_new_badge}"
-                                                               FontSize="{DynamicResource TrlText2Xs}" FontWeight="Bold"
-                                                               Foreground="{DynamicResource TrlBgBrush}"/>
-                                                </Border>
-                                            </StackPanel>
-                                            <TextBlock Classes="trl-muted" FontSize="{DynamicResource TrlTextXs}" TextWrapping="Wrap"
-                                                       Margin="26,0,0,0" Text="{Binding Description}"
-                                                       IsVisible="{Binding Description, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+                                        <StackPanel Spacing="4" Margin="0,4,0,10">
+                                            <TextBlock Text="{Binding Name}" Classes="trl-label" FontWeight="Bold"
+                                                       IsVisible="{Binding HasName}" Margin="0,0,0,2"/>
+                                            <ItemsControl ItemsSource="{Binding Items}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <StackPanel Spacing="2" Margin="0,0,0,8">
+                                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                                <CheckBox Content="{Binding Name}" Cursor="Hand" IsChecked="{Binding IsEnabled}"/>
+                                                                <Border Background="{DynamicResource TrlAccentBrush}" CornerRadius="0" Padding="5,1"
+                                                                        VerticalAlignment="Center" IsVisible="{Binding IsNew}">
+                                                                    <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=mods_configs_new_badge}"
+                                                                               FontSize="{DynamicResource TrlText2Xs}" FontWeight="Bold"
+                                                                               Foreground="{DynamicResource TrlBgBrush}"/>
+                                                                </Border>
+                                                            </StackPanel>
+                                                            <TextBlock Classes="trl-muted" FontSize="{DynamicResource TrlTextXs}" TextWrapping="Wrap"
+                                                                       Margin="26,0,0,0" Text="{Binding Description}"
+                                                                       IsVisible="{Binding Description, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+                                                        </StackPanel>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
                                         </StackPanel>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
@@ -76,7 +86,7 @@
                         </StackPanel>
                     </cc:TrlPanel>
 
-                    <!-- COLUNA: CONFIGS DE PERFORMANCE -->
+                    <!-- COLUNA: CONFIGS OPCIONAIS (agrupada por categoria) -->
                     <cc:TrlPanel Grid.Column="2" Title="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=mods_configs_optional_config_column}">
                         <StackPanel Spacing="10">
                             <Button Classes="ghost sm" Cursor="Hand" HorizontalAlignment="Left"
@@ -87,22 +97,32 @@
                             <TextBlock Classes="trl-faint" TextWrapping="Wrap" IsVisible="{Binding !HasOptionalConfigs}"
                                        Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=mods_configs_empty_optional_config}"/>
 
-                            <ItemsControl ItemsSource="{Binding OptionalConfigs}">
+                            <ItemsControl ItemsSource="{Binding OptionalConfigGroups}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <StackPanel Spacing="2" Margin="0,0,0,8">
-                                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                                <CheckBox Content="{Binding Name}" Cursor="Hand" IsChecked="{Binding IsEnabled}"/>
-                                                <Border Background="{DynamicResource TrlAccentBrush}" CornerRadius="0" Padding="5,1"
-                                                        VerticalAlignment="Center" IsVisible="{Binding IsNew}">
-                                                    <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=mods_configs_new_badge}"
-                                                               FontSize="{DynamicResource TrlText2Xs}" FontWeight="Bold"
-                                                               Foreground="{DynamicResource TrlBgBrush}"/>
-                                                </Border>
-                                            </StackPanel>
-                                            <TextBlock Classes="trl-muted" FontSize="{DynamicResource TrlTextXs}" TextWrapping="Wrap"
-                                                       Margin="26,0,0,0" Text="{Binding Description}"
-                                                       IsVisible="{Binding Description, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+                                        <StackPanel Spacing="4" Margin="0,4,0,10">
+                                            <TextBlock Text="{Binding Name}" Classes="trl-label" FontWeight="Bold"
+                                                       IsVisible="{Binding HasName}" Margin="0,0,0,2"/>
+                                            <ItemsControl ItemsSource="{Binding Items}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <StackPanel Spacing="2" Margin="0,0,0,8">
+                                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                                <CheckBox Content="{Binding Name}" Cursor="Hand" IsChecked="{Binding IsEnabled}"/>
+                                                                <Border Background="{DynamicResource TrlAccentBrush}" CornerRadius="0" Padding="5,1"
+                                                                        VerticalAlignment="Center" IsVisible="{Binding IsNew}">
+                                                                    <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=mods_configs_new_badge}"
+                                                                               FontSize="{DynamicResource TrlText2Xs}" FontWeight="Bold"
+                                                                               Foreground="{DynamicResource TrlBgBrush}"/>
+                                                                </Border>
+                                                            </StackPanel>
+                                                            <TextBlock Classes="trl-muted" FontSize="{DynamicResource TrlTextXs}" TextWrapping="Wrap"
+                                                                       Margin="26,0,0,0" Text="{Binding Description}"
+                                                                       IsVisible="{Binding Description, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+                                                        </StackPanel>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
                                         </StackPanel>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>

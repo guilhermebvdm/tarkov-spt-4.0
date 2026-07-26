@@ -538,7 +538,7 @@ namespace SPT.Launcher.ViewModels
                 // Item 030: catálogo dos itens da tela "Mods e Configs" (mods opcionais + configs de
                 // performance). O resumo na tela logada e a própria tela leem daqui. Substitui o modelo
                 // antigo (optionalGroups/performanceOverlay + toggles inline).
-                ModsConfigCatalog.UpdateFromManifest(manifest["optionalMods"], manifest["optionalConfigs"]);
+                ModsConfigCatalog.UpdateFromManifest(manifest["optionalMods"], manifest["optionalConfigs"], manifest["optionalModCategories"], manifest["optionalConfigCategories"]);
                 Dispatcher.UIThread.Post(RefreshModsConfigsSummary);
 
                 // Se as hashes são iguais, já terminamos o trabalho inicial (que era só montar a UI)

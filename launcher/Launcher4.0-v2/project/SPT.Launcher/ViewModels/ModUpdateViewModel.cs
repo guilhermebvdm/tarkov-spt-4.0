@@ -200,7 +200,7 @@ namespace SPT.Launcher.ViewModels
                 var folderRules = manifest["folderRules"]?.ToObject<Dictionary<string, string>>();
 
                 // Item 030: catálogo dos itens da tela "Mods e Configs" (mesmo modelo do ProfileViewModel).
-                ModsConfigCatalog.UpdateFromManifest(manifest["optionalMods"], manifest["optionalConfigs"]);
+                ModsConfigCatalog.UpdateFromManifest(manifest["optionalMods"], manifest["optionalConfigs"], manifest["optionalModCategories"], manifest["optionalConfigCategories"]);
 
                 TotalFiles = files.Count;
                 MaxProgress = Math.Max(1, files.Count);

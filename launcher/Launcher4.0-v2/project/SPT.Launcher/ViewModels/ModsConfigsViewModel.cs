@@ -21,8 +21,12 @@ namespace SPT.Launcher.ViewModels
     {
         private readonly bool _onboarding;
 
+        // Listas planas (usadas por ToggleAll e SaveAndReturn); a UI renderiza os GRUPOS por categoria.
         public ObservableCollection<OptionalItemToggle> OptionalMods { get; } = new();
         public ObservableCollection<OptionalItemToggle> OptionalConfigs { get; } = new();
+
+        public ObservableCollection<CategoryGroup> OptionalModGroups { get; } = new();
+        public ObservableCollection<CategoryGroup> OptionalConfigGroups { get; } = new();
 
         public bool HasOptionalMods => OptionalMods.Count > 0;
         public bool HasOptionalConfigs => OptionalConfigs.Count > 0;
@@ -66,11 +70,14 @@ namespace SPT.Launcher.ViewModels
 
             foreach (var def in ModsConfigCatalog.OptionalConfigs)
             {
-                // Onboarding (D-5): performance DESLIGADA (o modal recomenda ligar quem tem máquina fraca).
+                // Onboarding (D-5): configs opcionais DESLIGADAS (o modal recomenda ligar quem tem máquina fraca).
                 bool enabled = !_onboarding && settings.IsOptionalConfigEnabled(def.Id);
                 bool isNew = !_onboarding && !settings.SeenItemIds.Contains(def.Id);
                 OptionalConfigs.Add(BuildToggle(def, enabled, isNew, preferPt));
             }
+
+            BuildGroups(OptionalMods, ModsConfigCatalog.OptionalModCategories, OptionalModGroups, preferPt);
+            BuildGroups(OptionalConfigs, ModsConfigCatalog.OptionalConfigCategories, OptionalConfigGroups, preferPt);
 
             this.RaisePropertyChanged(nameof(HasOptionalMods));
             this.RaisePropertyChanged(nameof(HasOptionalConfigs));
@@ -82,11 +89,46 @@ namespace SPT.Launcher.ViewModels
             {
                 Id = def.Id,
                 IsOptionalConfig = def.IsOptionalConfig,
+                Category = def.Category,
                 Name = def.ResolveName(preferPt),
                 Description = def.ResolveDescription(preferPt),
                 IsEnabled = enabled,
                 IsNew = isNew,
             };
+        }
+
+        /// <summary>
+        /// Item 030: agrupa os toggles por categoria — as categorias declaradas (na ordem `order`) primeiro,
+        /// depois um grupo "Outros" com os itens sem categoria ou com categoria desconhecida. Grupo vazio
+        /// não aparece. Um único grupo sem nome (só "Outros") não mostra subtítulo (evita ruído).
+        /// </summary>
+        private static void BuildGroups(
+            IEnumerable<OptionalItemToggle> toggles,
+            IReadOnlyList<ModsConfigCatalog.Category> categories,
+            ObservableCollection<CategoryGroup> groups,
+            bool preferPt)
+        {
+            groups.Clear();
+            var list = toggles.ToList();
+            var byCat = list.ToLookup(t => t.Category ?? string.Empty);
+            var known = new HashSet<string>(categories.Select(c => c.Id));
+
+            foreach (var cat in categories.OrderBy(c => c.Order))
+            {
+                var items = byCat[cat.Id].ToList();
+                if (items.Count == 0) continue;
+                groups.Add(new CategoryGroup(cat.ResolveName(preferPt), items));
+            }
+
+            var orphans = list.Where(t => string.IsNullOrEmpty(t.Category) || !known.Contains(t.Category)).ToList();
+            if (orphans.Count > 0)
+            {
+                // Se NÃO há categorias declaradas, o único grupo não recebe título (lista simples).
+                string name = groups.Count == 0 && categories.Count == 0
+                    ? null
+                    : LocalizationProvider.Instance.mods_configs_uncategorized;
+                groups.Add(new CategoryGroup(name, orphans));
+            }
         }
 
         private static void ToggleAll(ObservableCollection<OptionalItemToggle> items)
@@ -146,6 +188,20 @@ namespace SPT.Launcher.ViewModels
 
             settings.SaveSettings();
             NavigateBack();
+        }
+    }
+
+    /// <summary>Item 030: um grupo de itens sob uma categoria na tela "Mods e Configs".</summary>
+    public sealed class CategoryGroup
+    {
+        public string Name { get; }
+        public bool HasName => !string.IsNullOrEmpty(Name);
+        public ObservableCollection<OptionalItemToggle> Items { get; }
+
+        public CategoryGroup(string name, System.Collections.Generic.IEnumerable<OptionalItemToggle> items)
+        {
+            Name = name;
+            Items = new ObservableCollection<OptionalItemToggle>(items);
         }
     }
 

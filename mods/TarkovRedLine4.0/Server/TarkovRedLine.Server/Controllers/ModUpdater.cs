@@ -221,9 +221,10 @@ public class ModUpdaterController : ControllerBase
     /// Validações S-5: recusa o mod inteiro se algum path está sob user/mods (client-only, D-15) ou se
     /// sobrepõe outro mod (D-19); o motivo vai pro log.
     /// </summary>
-    private static object[] LoadOptionalDefs(string modsPath, out List<(string prefix, string id)> optionalPrefixes, List<string> warnings)
+    private static object[] LoadOptionalDefs(string modsPath, out List<(string prefix, string id)> optionalPrefixes, out object[] categories, List<string> warnings)
     {
         optionalPrefixes = new List<(string prefix, string id)>();
+        categories = Array.Empty<object>();
         var mods = new List<object>();
 
         string defsPath = Path.Combine(modsPath, "BepInEx", "plugins-optional.json");
@@ -232,6 +233,7 @@ public class ModUpdaterController : ControllerBase
         try
         {
             using var doc = JsonDocument.Parse(System.IO.File.ReadAllText(defsPath));
+            categories = ReadCategories(doc.RootElement); // item 030: categorias para agrupar na UI
             if (!doc.RootElement.TryGetProperty("mods", out var modsProp) || modsProp.ValueKind != JsonValueKind.Array)
             {
                 return mods.ToArray();
@@ -273,7 +275,8 @@ public class ModUpdaterController : ControllerBase
 
                 object name = mod.TryGetProperty("name", out var nP) ? nP.Clone() : (object)id;
                 object description = mod.TryGetProperty("description", out var dP) ? dP.Clone() : null;
-                mods.Add(new { id, name, description });
+                string category = mod.TryGetProperty("category", out var cP) && cP.ValueKind == JsonValueKind.String ? cP.GetString() : null;
+                mods.Add(new { id, name, description, category });
             }
         }
         catch (Exception ex)
@@ -282,6 +285,28 @@ public class ModUpdaterController : ControllerBase
         }
 
         return mods.ToArray();
+    }
+
+    /// <summary>
+    /// Item 030: lê o array "categories" do JSON — [ { id, name (string ou {pt,en}), order } ] — para
+    /// agrupar os itens na tela. Categoria ausente/inválida vira lista vazia (a UI cai num grupo default).
+    /// </summary>
+    private static object[] ReadCategories(JsonElement root)
+    {
+        var cats = new List<object>();
+        if (root.TryGetProperty("categories", out var catsP) && catsP.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var c in catsP.EnumerateArray())
+            {
+                if (c.ValueKind != JsonValueKind.Object) continue;
+                string cid = c.TryGetProperty("id", out var idP) && idP.ValueKind == JsonValueKind.String ? idP.GetString() : null;
+                if (string.IsNullOrWhiteSpace(cid)) continue;
+                object cname = c.TryGetProperty("name", out var nP) ? nP.Clone() : (object)cid;
+                int order = c.TryGetProperty("order", out var oP) && oP.ValueKind == JsonValueKind.Number && oP.TryGetInt32(out var o) ? o : 0;
+                cats.Add(new { id = cid, name = cname, order });
+            }
+        }
+        return cats.ToArray();
     }
 
     /// <summary>Item 030: dois prefixos se sobrepõem se são iguais ou um é pasta-mãe do outro.</summary>
@@ -300,9 +325,10 @@ public class ModUpdaterController : ControllerBase
     /// config-optional/ → id do item). "files" é relativo à pasta config-optional/. Validação S-5:
     /// arquivo em dois itens é recusado (D-19).
     /// </summary>
-    private static object[] LoadOptionalConfigDefs(out Dictionary<string, string> pathToOptionalConfigId, List<string> warnings)
+    private static object[] LoadOptionalConfigDefs(out Dictionary<string, string> pathToOptionalConfigId, out object[] categories, List<string> warnings)
     {
         pathToOptionalConfigId = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        categories = Array.Empty<object>();
         var items = new List<object>();
 
         string defsPath = Path.Combine(GetOptionalConfigPath(), "configs-optional.json");
@@ -311,6 +337,7 @@ public class ModUpdaterController : ControllerBase
         try
         {
             using var doc = JsonDocument.Parse(System.IO.File.ReadAllText(defsPath));
+            categories = ReadCategories(doc.RootElement);
             if (!doc.RootElement.TryGetProperty("items", out var itemsProp) || itemsProp.ValueKind != JsonValueKind.Array)
             {
                 return items.ToArray();
@@ -340,7 +367,8 @@ public class ModUpdaterController : ControllerBase
 
                 object name = item.TryGetProperty("name", out var nP) ? nP.Clone() : (object)id;
                 object description = item.TryGetProperty("description", out var dP) ? dP.Clone() : null;
-                items.Add(new { id, name, description });
+                string category = item.TryGetProperty("category", out var cP) && cP.ValueKind == JsonValueKind.String ? cP.GetString() : null;
+                items.Add(new { id, name, description, category });
             }
         }
         catch (Exception ex)
@@ -400,8 +428,8 @@ public class ModUpdaterController : ControllerBase
             // optionalConfigId. Validações de conteúdo (S-5): recusa path sob user/mods (mod opcional é
             // client-only, D-15) e arquivo repetido em dois itens (D-19). As mensagens vão pro log.
             var contentWarnings = new List<string>();
-            var optionalMods = LoadOptionalDefs(modsPath, out var optionalPrefixes, contentWarnings);
-            var optionalConfigs = LoadOptionalConfigDefs(out var pathToOptionalConfigId, contentWarnings);
+            var optionalMods = LoadOptionalDefs(modsPath, out var optionalPrefixes, out var optionalModCategories, contentWarnings);
+            var optionalConfigs = LoadOptionalConfigDefs(out var pathToOptionalConfigId, out var optionalConfigCategories, contentWarnings);
 
             const string PerfPrefix = "bepinex/config-optional/";
             const string PerfPrefixCased = "BepInEx/config-optional/";
@@ -550,6 +578,8 @@ public class ModUpdaterController : ControllerBase
                 ignoredFiles = ignoredFiles,
                 optionalMods = optionalMods,
                 optionalConfigs = optionalConfigs,
+                optionalModCategories = optionalModCategories,
+                optionalConfigCategories = optionalConfigCategories,
                 folderRules = folderRules,
                 files = files
             };

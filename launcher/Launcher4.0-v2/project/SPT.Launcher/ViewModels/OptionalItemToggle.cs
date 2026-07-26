@@ -10,8 +10,11 @@ namespace SPT.Launcher.ViewModels
     {
         public string Id { get; set; }
 
-        /// <summary>true = eixo de configs de performance; false = eixo de mods opcionais.</summary>
+        /// <summary>true = eixo de configs opcionais; false = eixo de mods opcionais.</summary>
         public bool IsOptionalConfig { get; set; }
+
+        /// <summary>Item 030: id da categoria do item (usado pra agrupar na tela). null → grupo default.</summary>
+        public string Category { get; set; }
 
         private string _name;
         public string Name
