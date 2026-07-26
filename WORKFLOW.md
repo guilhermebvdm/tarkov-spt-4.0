@@ -80,4 +80,4 @@ Grafos AST (graphify) de todas as fontes em [references/graphs/](references/grap
 ### Hierarquia de fontes e antipatterns
 
 - Evidência técnica: [.agents/resources.md](.agents/resources.md) § Hierarquia de evidência (Assembly 🥇 → web 🪛).
-- Erros já cometidos: [docs/technical/spt-antipatterns.md](docs/technical/spt-antipatterns.md) (AP-01..AP-10) — leitura obrigatória antes de spec/review técnica; checados na §9 da spec técnica, nos critérios padrão da spec funcional e no checklist do fix.
+- Erros já cometidos: [docs/technical/spt-antipatterns.md](docs/technical/spt-antipatterns.md) (`AP-NN`) — leitura obrigatória antes de spec/review técnica; checados na §9 da spec técnica, nos critérios padrão da spec funcional e no checklist do fix.

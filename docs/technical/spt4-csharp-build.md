@@ -60,10 +60,11 @@ A `.dll` final será gerada na pasta `Release`:
 
 *Coloque esta `.dll` na pasta `user/mods/TarkovRedLine.Server/` (junto com o pacote BepInEx se necessário) na pasta principal do jogo para ser inicializada no Boot.*
 
-## Histórico
+## Histórico de Alterações
 
-| Data | Autor | Descrição |
+| Data | Autor | Alteração |
 |---|---|---|
 | 2026-07-06 | Guilherme | chore(launcher): remove empty placeholder diff.txt |
 | 2026-07-06 | Guilherme | Frontmatter normalizado (title/date/status/authors); paths absolutos de máquina antiga (`d:\Projetos\GITHUB TARKOV\...`, `Launcher4.0_1.4.0`) corrigidos para relativos ao repo; aviso de escopo adicionado apontando `/compile-mod` + `.spt-path` para mods client genéricos |
 | 2026-07-06 | Guilherme | docs(references): adiciona SPT-Waypoints ao manifest e enxuga README |
+| 2026-07-26 | Guilherme | docs(technical): reescreve guias de criacao e migracao alinhados ao /compile-mod e ao decompile local |
