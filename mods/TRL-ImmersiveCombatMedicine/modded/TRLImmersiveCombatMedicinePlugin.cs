@@ -14,7 +14,13 @@ namespace TRLImmersiveCombatMedicine
     // TraumaBotFall.RegisterLayer (sem o atributo, a ordem de load do BepInEx 5 pode falso-negativar
     // PluginInfos com BigBrain instalado). GUID confirmado: bigbrain_full/BigBrainPlugin.cs:10.
     [BepInDependency("xyz.drakia.bigbrain", BepInDependency.DependencyFlags.SoftDependency)]
-    [BepInPlugin("com.trl.immersivecombatmedicine", "TRL-ImmersiveCombatMedicine", "1.11.0")]
+    // ref: item 013 / CR-01-01 — SoftDependency do Fika: FikaRevivePatch e BandAidNetworkHandler
+    // resolvem tipos do Fika por nome (AccessTools.TypeByName). Sem declarar a dependência a ordem
+    // de carga do BepInEx é indeterminada; se este plugin subir antes do Fika, os alvos não resolvem
+    // e os patches são dispensados em silêncio. Funcionava por acidente de ordenação até aqui.
+    // Padrão já usado no repo por DiscordRaidMap e MOAR-Client.
+    [BepInDependency("com.fika.core", BepInDependency.DependencyFlags.SoftDependency)]
+    [BepInPlugin("com.trl.immersivecombatmedicine", "TRL-ImmersiveCombatMedicine", "1.11.1")]
     public class TRLImmersiveCombatMedicinePlugin : BaseUnityPlugin
     {
         public static TRLImmersiveCombatMedicinePlugin Instance;

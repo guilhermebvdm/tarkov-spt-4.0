@@ -22,12 +22,12 @@ namespace TRLFixes.Patches
                 if (manualUpdateMethod != null)
                 {
                     harmony.Patch(manualUpdateMethod, prefix: new HarmonyMethod(prefixMethod));
-                    Debug.Log("TRL-Fixes: Hook no SAINActivationClass.ManualUpdate aplicado com sucesso!");
+                    Plugin.Log?.LogInfo("TRL-Fixes: Hook no SAINActivationClass.ManualUpdate aplicado com sucesso!");
                 }
             }
             else
             {
-                Debug.LogError("TRL-Fixes: SAIN não detectado. A correção da flashbang não será aplicada.");
+                Plugin.Log?.LogError("TRL-Fixes: SAIN não detectado. A correção da flashbang não será aplicada.");
             }
         }
 
@@ -65,7 +65,7 @@ namespace TRLFixes.Patches
             }
             catch (Exception ex)
             {
-                Debug.LogError($"TRL-Fixes FlashbangPatch Error: {ex}");
+                Plugin.Log?.LogError($"TRL-Fixes FlashbangPatch Error: {ex}");
             }
             
             return true; // Continua a execução do SAIN normalmente se não estiver cego

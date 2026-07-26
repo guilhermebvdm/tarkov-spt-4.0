@@ -26,16 +26,16 @@ namespace TRLFixes.Patches
                 {
                     var prefixMethod = AccessTools.Method(typeof(Patch_PoolManagerCreateItem), nameof(Prefix));
                     harmony.Patch(targetMethod, prefix: new HarmonyMethod(prefixMethod));
-                    Debug.Log("TRL-Fixes: Hook no PoolManagerClass.CreateItem aplicado com sucesso!");
+                    Plugin.Log?.LogInfo("TRL-Fixes: Hook no PoolManagerClass.CreateItem aplicado com sucesso!");
                 }
                 else
                 {
-                    Debug.LogError("TRL-Fixes: Metodo PoolManagerClass.CreateItem nao encontrado!");
+                    Plugin.Log?.LogError("TRL-Fixes: Metodo PoolManagerClass.CreateItem nao encontrado!");
                 }
             }
             catch (Exception ex)
             {
-                Debug.LogError($"TRL-Fixes: Erro ao aplicar patch PoolManagerClass.CreateItem: {ex}");
+                Plugin.Log?.LogError($"TRL-Fixes: Erro ao aplicar patch PoolManagerClass.CreateItem: {ex}");
             }
         }
 
@@ -55,7 +55,7 @@ namespace TRLFixes.Patches
                 }
                 catch (Exception ex)
                 {
-                    Debug.LogError($"[TRL-Fixes] Erro ao instanciar item de recarga para jogador remoto {player.Profile?.Nickname}: {ex}");
+                    Plugin.Log?.LogError($"[TRL-Fixes] Erro ao instanciar item de recarga para jogador remoto {player.Profile?.Nickname}: {ex}");
                     __result = null;
                     return false;
                 }

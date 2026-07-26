@@ -19,11 +19,11 @@ namespace TRLFixes.Patches
             if (originalMethod != null)
             {
                 harmony.Patch(originalMethod, postfix: new HarmonyMethod(postfixMethod));
-                Debug.Log("TRL-Fixes: Hook no EFT.Grenade.Explosion (Raio da Flashbang) aplicado com sucesso!");
+                Plugin.Log?.LogInfo("TRL-Fixes: Hook no EFT.Grenade.Explosion (Raio da Flashbang) aplicado com sucesso!");
             }
             else
             {
-                Debug.LogError("TRL-Fixes: Erro ao encontrar EFT.Grenade.Explosion");
+                Plugin.Log?.LogError("TRL-Fixes: Erro ao encontrar EFT.Grenade.Explosion");
             }
         }
 

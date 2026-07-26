@@ -19,26 +19,49 @@ namespace Band_Aid
         internal const string TemplateId = "5c052e6986f7746b207bc3c9";
     }
 
+    /// <summary>Reflection do ReviveInteractable do Fika, resolvida UMA vez.
+    /// ref: CR-01-02 — os lookups estavam sendo refeitos a cada revive dentro do Prefix; o padrão do
+    /// repo é cachear MethodInfo/FieldInfo em static readonly (csharp-mod-best-practices §3).
+    /// Tipo é `internal sealed` no Fika, daí o acesso por nome em vez de referência de assembly.</summary>
+    internal static class FikaReviveReflection
+    {
+        internal const string TypeName = "Fika.Core.Main.Components.ReviveInteractable";
+
+        internal static readonly Type Type = AccessTools.TypeByName(TypeName);
+        internal static readonly FieldInfo LocalPlayerField = Type != null ? AccessTools.Field(Type, "_localPlayer") : null;
+        internal static readonly FieldInfo ObservedPlayerField = Type != null ? AccessTools.Field(Type, "_observedPlayer") : null;
+    }
+
     [HarmonyPatch]
     public class FikaReviveGetActionsPatch
     {
         static MethodBase TargetMethod()
         {
-            var type = AccessTools.TypeByName("Fika.Core.Main.Components.ReviveInteractable");
-            if (type == null) return null;
-            return AccessTools.Method(type, "GetActions");
+            if (FikaReviveReflection.Type == null) return null;
+            return AccessTools.Method(FikaReviveReflection.Type, "GetActions");
         }
 
         [HarmonyPostfix]
         private static void Postfix(GamePlayerOwner owner, ref ActionsReturnClass __result)
         {
-            if (__result == null || __result.Actions == null) return;
-
-            bool hasDefib = HasDefibrillator(owner.Player);
-
-            if (!hasDefib)
+            // ref: CR-01-03 — corpo de patch sem try/catch: uma exceção aqui (inventário em estado
+            // transitório durante o GetAllItemByTemplate) propagaria para o GetActions do Fika e o
+            // jogador perderia o prompt de interação inteiro, não só a ação de revive.
+            try
             {
-                __result.Actions.RemoveAll(a => a.Name != "Search");
+                if (__result == null || __result.Actions == null) return;
+                if (owner == null) return;
+
+                if (!HasDefibrillator(owner.Player))
+                {
+                    // "Search" é literal hardcoded no Fika (ReviveInteractable.cs:176), não
+                    // localizado — a comparação por nome é estável em qualquer idioma.
+                    __result.Actions.RemoveAll(a => a.Name != "Search");
+                }
+            }
+            catch (Exception ex)
+            {
+                TrueTrauma.TraumaState.Logger?.LogError($"FikaReviveGetActionsPatch: {ex.Message} — ações de revive seguem sem o gate do desfibrilador.");
             }
         }
 
@@ -56,9 +79,8 @@ namespace Band_Aid
     {
         static MethodBase TargetMethod()
         {
-            var type = AccessTools.TypeByName("Fika.Core.Main.Components.ReviveInteractable");
-            if (type == null) return null;
-            return AccessTools.Method(type, "RevivePlayer");
+            if (FikaReviveReflection.Type == null) return null;
+            return AccessTools.Method(FikaReviveReflection.Type, "RevivePlayer");
         }
 
         [HarmonyPrefix]
@@ -70,11 +92,9 @@ namespace Band_Aid
             try
             {
                 if (!success) return;
+                if (FikaReviveReflection.LocalPlayerField == null) return;
 
-                var type = AccessTools.TypeByName("Fika.Core.Main.Components.ReviveInteractable");
-                var localPlayerField = AccessTools.Field(type, "_localPlayer");
-                var player = localPlayerField.GetValue(__instance) as Player;
-
+                var player = FikaReviveReflection.LocalPlayerField.GetValue(__instance) as Player;
                 if (player == null) return;
 
                 // ref: item 013 §2 — espelhar os guards de abort do corpo do Fika
@@ -83,9 +103,7 @@ namespace Band_Aid
                 // cobrado por um revive que não aconteceu (reanimador morto no último instante
                 // do plant) — o aliado seguia caído e o item era perdido.
                 if (player.HealthController == null || !player.HealthController.IsAlive) return;
-
-                var observedPlayerField = AccessTools.Field(type, "_observedPlayer");
-                if (observedPlayerField?.GetValue(__instance) == null) return;
+                if (FikaReviveReflection.ObservedPlayerField?.GetValue(__instance) == null) return;
 
                 ConsumeDefibrillator(player);
             }
