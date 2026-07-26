@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using EFT;
 using UnityEngine;
 
@@ -10,6 +10,9 @@ namespace TRLImmersiveCombatMedicine.Trauma
     internal static class TraumaVoice
     {
         private static readonly Dictionary<(string, bool), float> _nextAllowed = new Dictionary<(string, bool), float>();
+
+        /// <summary>ref: item 020 — janelas de anti-spam de voz sobreviventes.</summary>
+        internal static int ResidualCount => _nextAllowed.Count;
         private const float SpamCooldown = 2f;
 
         /// <summary>FORTE (queda executada + tentativa negada): OnAgony com importance explícita — fura o Busy do

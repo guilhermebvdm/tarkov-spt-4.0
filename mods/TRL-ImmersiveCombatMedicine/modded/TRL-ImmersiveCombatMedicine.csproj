@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <AssemblyName>TRLImmersiveCombatMedicine</AssemblyName>
     <RootNamespace>TRLImmersiveCombatMedicine</RootNamespace>
-    <Version>1.11.2</Version>
+    <Version>1.12.0</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <RestoreAdditionalProjectSources>
       https://api.nuget.org/v3/index.json;

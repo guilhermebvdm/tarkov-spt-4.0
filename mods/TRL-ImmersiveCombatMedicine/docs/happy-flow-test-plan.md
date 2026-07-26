@@ -21,7 +21,7 @@ O plano mestre (44 solo + 12 coop) continua sendo a fonte de **corner cases** e 
 
 ## Bloco 0 — Pré-requisitos
 
-- [ ] **P1** — F12 → BepInEx → as versões batem com o que foi implantado. Após a Leva 1: `TRLImmersiveCombatMedicine` **1.11.2** e `TRL Fixes` **1.1.1**. Se não bater, é build velha no jogo: pare aqui.
+- [ ] **P1** — F12 → BepInEx → as versões batem com o que foi implantado. Estado atual: `TRLImmersiveCombatMedicine` **1.12.0** e `TRL Fixes` **1.1.1**. Se não bater, é build velha no jogo: pare aqui.
 - [ ] **P2** — F12 → "6. Trauma 2.0 (Consumidores)": os 5 toggles (Legs / Fall / Arms / Stomach / Blackout 2.0) **Ligados**.
 - [ ] **P3** — ⚠️ **Wire format:** a 1.11.0 reescreveu a serialização dos 6 pacotes Fika do mod (tipos com sufixo `V2`). Um peer em build anterior não fala o mesmo protocolo — o mod degrada de forma contida, mas cura remota e sync de desmaio **não** funcionam entre versões diferentes. **Os dois PCs precisam atualizar juntos**, e o `TRL-Fixes` também tem de estar nos dois.
 - [ ] **P4** — Confirmar no log de cada máquina que os hooks subiram: `TRL-Fixes: Hook no ReviveInteractable.RemoveRagdoll aplicado com sucesso!`. Sem essa linha, o C2 não tem validade.
@@ -34,13 +34,13 @@ O plano mestre (44 solo + 12 coop) continua sendo a fonte de **corner cases** e 
 | | Cenário | Resultado esperado | Requer |
 |---|---|---|---|
 | **H1** | Zerar 1 perna; depois curar | Manca; ao curar volta ao normal em ≤1s | — |
-| **H2** | Zerar 2 pernas; depois tomar analgésico | Agacha 1× **na hora**, manca forte e **não corre** — e continua sem correr com o analgésico ativo | ✅ 1.11.2 |
+| **H2** | Zerar 2 pernas; depois tomar analgésico | Agacha 1× **na hora**, manca forte e **não corre** — e continua sem correr com o analgésico ativo | ✅ 1.11.2+ |
 | **H3** | Quebrar 2 pernas sem analgésico | Cai; levanta e após ~3s de pé cai sozinho; tentar levantar durante o bloqueio dá grito de dor e é negado; ao liberar, levanta devagar | — |
 | **H4** | Zerar 2 braços e segurar a mira | Tremor visível; a mira cai sozinha em ~4s; re-mirar em seguida é bloqueado, com grito | — |
 | **H5** | Zerar o estômago 4× (curando entre cada) | Agachou na maioria das vezes; o log mostra um roll por zerada | — |
 | **H6** | Tomar um tiro forte no tórax sem analgésico | Desmaia; a duração bate com a config; acorda e recupera o controle sem prone fantasma | — |
 | **H7** | Já desmaiado, tomar dano até zerar o HP | O dano **aplica**; ao zerar, entra em **coma** — não morre | item 015 |
-| **H8** | Sair da raid ferido e entrar na próxima | Log mostra a purga com contagem; nenhum efeito **do mod** ativo no spawn. Ferimento vanilla presente é **esperado** | item 020 |
+| **H8** | Sair da raid ferido e entrar na próxima | Log mostra a purga com contagem; nenhum efeito **do mod** ativo no spawn. Ferimento vanilla presente é **esperado** | ✅ 1.12.0 |
 | **H9** | Aproximar de um bot ferido a ~3,5 m; trocar o idioma do jogo | Prompt médico aparece a 3,5 m e não a 5-6 m; os textos trocam de idioma sem reiniciar o jogo | — |
 | **H10** | Zerar a 2ª perna **enquanto corre** | Agacha imediatamente **ou** o log registra o cancelamento — nunca uma agachada fantasma segundos depois | item 018 |
 
@@ -78,7 +78,8 @@ Não são cenários de jogo. São três diagnósticos que só o log responde.
 - [ ] **L1** — Procurar `legs cap RECOMPUTE`. O campo `clamped=` diz se a penalidade vanilla está engolindo o cap do mod. **Esperado:** `true` sem analgésico, `false` com analgésico. Se vier `true` nos dois, os defaults de calibração N1/N2 precisam ser repensados.
 - [ ] **L2** — Procurar `crouch DEFERRED`. O motivo entre parênteses (`airborne`, `internal-guard`, `ladder`, `btr`) identifica qual guard atrasou o agachar do H10. **É a evidência que o item 018 precisa para calibrar o TTL** em vez de chutar.
 - [ ] **L3** — Procurar `[Blackout]` → confere a duração sorteada contra a config.
-- [ ] **L4** — Nenhuma linha contém `[DEBUG-ICM]`.
+- [ ] **L4** — Procurar `purge raid-start` → duas linhas por entrada de raid. **Esperado:** `clean (total=0)` nas duas. `RESIDUAL` na fase `before` nomeia o que a raid anterior deixou vazar; na fase `after`, é falha do próprio mecanismo de limpeza. É esta leitura que fecha o H8 e responde de vez a dúvida do S1b.
+- [ ] **L5** — Nenhuma linha contém `[DEBUG-ICM]`.
 
 ---
 

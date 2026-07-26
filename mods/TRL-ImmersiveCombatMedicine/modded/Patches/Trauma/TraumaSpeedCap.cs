@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using EFT;
 using UnityEngine;
 
@@ -16,6 +16,9 @@ namespace TRLImmersiveCombatMedicine.Trauma
 
         /// <summary>Bookkeeping do 004 (consultado pelo re-log RECOMPUTE ANTES do gate IsActive do 003 — spec §4).</summary>
         private static readonly HashSet<Player> _applied = new HashSet<Player>();
+
+        /// <summary>ref: item 020 — caps da janela do 004 ainda aplicados (deveria ser 0 fora de raid).</summary>
+        internal static int ResidualCount => _applied.Count;
 
         internal static bool IsApplied(Player p) => !(p is null) && _applied.Contains(p);
 

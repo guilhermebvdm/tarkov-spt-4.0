@@ -20,7 +20,7 @@ namespace TRLImmersiveCombatMedicine
     // e os patches são dispensados em silêncio. Funcionava por acidente de ordenação até aqui.
     // Padrão já usado no repo por DiscordRaidMap e MOAR-Client.
     [BepInDependency("com.fika.core", BepInDependency.DependencyFlags.SoftDependency)]
-    [BepInPlugin("com.trl.immersivecombatmedicine", "TRL-ImmersiveCombatMedicine", "1.11.2")]
+    [BepInPlugin("com.trl.immersivecombatmedicine", "TRL-ImmersiveCombatMedicine", "1.12.0")]
     public class TRLImmersiveCombatMedicinePlugin : BaseUnityPlugin
     {
         public static TRLImmersiveCombatMedicinePlugin Instance;
@@ -495,6 +495,12 @@ namespace TRLImmersiveCombatMedicine
 
         public static void OnRaidStartCleanup()
         {
+            // ref: item 020 — mede ANTES de limpar: qualquer coisa viva aqui é resíduo da raid
+            // anterior, e é o único ponto onde a contagem é confiável (a limpeza de fim de raid é
+            // uma cascata assíncrona por consumidor, medir no meio dela daria falso positivo).
+            // Sem esta linha, o teste do S1b só podia SUPOR que nada vazou.
+            TraumaPurge.Audit(TraumaPurge.PhaseBefore);
+
             // ref: CR-01-09 — ResetAll cobre TODOS os campos (a lista manual antiga
             // esquecia IsFainted e LegPenaltyTimers → prone/wake fantasma na raid seguinte)
             TraumaState.ResetAll();
@@ -503,6 +509,13 @@ namespace TRLImmersiveCombatMedicine
             // inicial estabelecedora; dispara de novo na chegada de transit (novo GameWorld)
             TraumaEngine.OnRaidStarted();
             TraumaState.Logger.LogInfo("TRL-ImmersiveCombatMedicine: Estado limpo para nova raid.");
+
+            // ref: item 020 — confirma que a limpeza desta entrada zerou o estado TRANSITÓRIO
+            // (desmaio, cooldowns, voz, áudio). Resíduo aqui é falha do mecanismo, não da raid
+            // anterior: loga como erro. O sweep estabelecedor do OnRaidStarted acima repovoa
+            // records/caps/tremor de propósito quando o spawn é ferido — estado legítimo, excluído
+            // desta medição (ver a nota de design 2 em TraumaPurge).
+            TraumaPurge.Audit(TraumaPurge.PhaseAfter);
         }
 
         private static bool? _isFikaInstalled;

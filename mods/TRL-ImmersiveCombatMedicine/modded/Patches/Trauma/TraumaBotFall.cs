@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using DrakiaXYZ.BigBrain.Brains; // ref: protótipo P6 compilado 0 erros (scratchpad/spike001/proto-traumadowned/)
@@ -28,6 +28,9 @@ namespace TRLImmersiveCombatMedicine.Trauma
         }
 
         private static readonly Dictionary<string, Hold> _holds = new Dictionary<string, Hold>(); // por profileId
+
+        /// <summary>ref: item 020 — holds de bot + camadas BigBrain pendentes.</summary>
+        internal static int ResidualCount => _holds.Count + _brainPending.Count;
         private static readonly List<string> _scratch = new List<string>(); // reusada — sem alocação no caminho quente
 
         // CR-01-01: hold só nasce se a camada BigBrain EXISTE p/ o bot — lista única compartilhada com o
