@@ -1,4 +1,15 @@
+---
+title: Códigos Legados (TypeScript — SPT 3.x)
+date: 2026-07-26
+status: ⚫ Arquivado
+authors: Guilherme + agente
+---
+
 # Códigos Legados (TypeScript - SPT 3.x)
+
+> ⚫ **Arquivado em 2026-07-26.** Código TypeScript da era SPT 3.x (servidor Node.js), arquitetura descontinuada no SPT 4.0 — ver [spt3-to-spt4-mod-migration.md](../spt3-to-spt4-mod-migration.md). Mantido apenas como referência histórica das lógicas do `TarkovRedLine-ServerMod`. **Não seguir como modelo.**
+>
+> 🔐 **Nota de segurança.** Este arquivo continha, em claro, a `SUPABASE_URL` e uma chave **`service_role`** do Supabase (que ignora Row Level Security). Os valores foram substituídos por `<REDACTED>` nesta data. O repositório é **público** e a chave esteve exposta em `origin/main` desde 2026-06-07 (`cbf3fc87`) — **a chave foi/deve ser rotacionada no painel do Supabase**; a redação aqui não desfaz a exposição no histórico do git.
 
 Este arquivo foi gerado para salvar as lógicas extraídas do mod `TarkovRedLine-ServerMod` que não farão parte da migração imediata para o SPT 4.0, para que possam ser reaproveitadas em mods futuros.
 
@@ -39,8 +50,8 @@ import * as path from "path";
 import * as https from "https";
 import CUSTOM_POSTS from "./targramPostStrings";
 
-const SUPABASE_URL = "https://xpvppamneubxmrzjvotw.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhwdnBwYW1uZXVieG1yemp2b3R3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NDMyNTQ5NiwiZXhwIjoyMDg5OTAxNDk2fQ.-ZBEMbEHKsBiBPCN15DNB7nLfoALjX5XR2Dv6cizERs"; // service_role — NUNCA expor no frontend
+const SUPABASE_URL = "<REDACTED>";
+const SUPABASE_KEY = "<REDACTED>"; // era uma chave de service_role — ver nota de segurança no topo
 
 const HIDEOUT_AREA_NAMES = {
     0: "Ventilação", 1: "Segurança", 2: "Banheiro", 3: "Armazém (estoque)",
@@ -350,8 +361,9 @@ function startSyncLoop(logger) {
 export { startSyncLoop, supabaseRequest };
 ```
 
-## Histórico
+## Histórico de Alterações
 
-| Data | Autor | Descrição |
+| Data | Autor | Alteração |
 |---|---|---|
 | 2026-07-06 | Guilherme | chore(launcher): remove empty placeholder diff.txt |
+| 2026-07-26 | Guilherme + agente | Arquivado. Código TS da era SPT 3.x, arquitetura descontinuada no 4.0 e sem inbound link no repo. Credenciais Supabase (`SUPABASE_URL` + chave `service_role`) redigidas para `<REDACTED>`; frontmatter adicionado (o arquivo falhava o `validate-doc-header.sh` e bloqueava qualquer commit que o tocasse). Substituído, como referência de migração, por [spt3-to-spt4-mod-migration.md](../spt3-to-spt4-mod-migration.md). |
