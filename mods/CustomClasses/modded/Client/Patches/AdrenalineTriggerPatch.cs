@@ -42,6 +42,7 @@ internal class AdrenalineTriggerPatch : ModulePatch
             if (ReferenceEquals(__instance, mp) || dealt)
             {
                 AdrenalineState.Trigger();
+                AdrenalineState.EnsureReloadResync();   // 085: força o re-sync do reload speed no open/close da janela
             }
         }
         catch (Exception ex)

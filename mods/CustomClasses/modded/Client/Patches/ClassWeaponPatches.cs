@@ -70,20 +70,31 @@ internal class ShootRecoilPatch : ModulePatch
 }
 
 /// <summary>
-///     🔧 Adrenaline (Fuzileiro) — recarga mais rápida durante a janela.
-///     Postfix em <c>FirearmController.GetWeaponReloadAnimationSpeed</c> (a speed do animator de reload):
-///     tempo ×0.8 ⇒ speed ÷0.8 (mais rápido). Gate: a arma atual do MainPlayer.
+///     085 — 🔧 Adrenaline (Fuzileiro) — recarga mais rápida durante a janela de combate. <b>CORRIGIDO (era um
+///     NO-OP)</b>: o alvo antigo <c>GetWeaponReloadAnimationSpeed</c> é CÓDIGO MORTO no EFT 0.16.9 (nada o chama; o
+///     reload speed virou push-based) → o Postfix nunca disparava e o perk não tinha efeito. Migrado para o MESMO
+///     funil do <see cref="ShotgunReloadPatch"/> (084): Prefix ESCALA <c>BuffInfo.ReloadSpeed ÷ t</c> antes do push
+///     (arma+corpo em lockstep), Postfix RESTAURA. Ref: [[reference_eft_reload_speed_getter_dead]].
+///     <para>
+///     ⚠️ <b>Abrir/fechar a janela NÃO gera sync sozinho</b> (os gatilhos de re-sync são saque/init/skill-level/
+///     mastering/dano-de-braço), então o valor congelaria. O <see cref="AdrenalineState"/> força
+///     <c>FirearmController.SetAnimatorAndProceduralValues()</c> nas transições da janela (watcher) → este Prefix
+///     re-avalia <c>IsActive</c> e aplica/restaura. Gate: MainPlayer local (075) + Rifleman + janela ativa. Vale p/
+///     QUALQUER arma. Coexiste com o 084 no mesmo método sem conflito de <c>__state</c>: são classes MUTUAMENTE
+///     EXCLUSIVAS (Tank vs Rifleman), então nunca escalam juntos.
+///     </para>
 /// </summary>
 internal class ReloadSpeedPatch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return AccessTools.Method(typeof(Player.FirearmController), nameof(Player.FirearmController.GetWeaponReloadAnimationSpeed));
+        return AccessTools.Method(typeof(Player.FirearmController), "SetAnimatorAndProceduralValues");
     }
 
-    [PatchPostfix]
-    private static void Postfix(Player.FirearmController __instance, ref float __result)
+    [PatchPrefix]
+    private static void Prefix(Player.FirearmController __instance, out float __state)
     {
+        __state = float.NaN;
         try
         {
             if (PerksConfig.AdrenalineEnabled?.Value != true || !AdrenalineState.IsActive
@@ -94,18 +105,41 @@ internal class ReloadSpeedPatch : ModulePatch
 
             if (!ReferenceEquals(__instance, Singleton<GameWorld>.Instance?.MainPlayer?.HandsController))
             {
-                return;   // só a arma do player local
+                return;   // só a arma do player local (075)
+            }
+
+            var buff = __instance.BuffInfo;
+            if (buff == null)
+            {
+                return;
             }
 
             var t = PerksConfig.AdrenalineReloadTime?.Value ?? 1f;
             if (t > 0f && t < 1f)
             {
-                __result /= t;   // tempo ×0.8 → speed ÷0.8 (recarrega mais rápido)
+                __state = buff.ReloadSpeed;
+                buff.ReloadSpeed /= t;   // arma+corpo recebem ×(1/t) em lockstep (tempo 0.7 → speed ÷0.7 ≈ ×1.43)
             }
         }
         catch (Exception ex)
         {
-            Plugin.Log?.LogError($"[CustomClasses] adrenaline reload falhou: {ex.Message}");
+            Plugin.Log?.LogError($"[CustomClasses] (085) adrenaline reload (pre) falhou: {ex.Message}");
+        }
+    }
+
+    [PatchPostfix]
+    private static void Postfix(Player.FirearmController __instance, float __state)
+    {
+        try
+        {
+            if (!float.IsNaN(__state) && __instance.BuffInfo != null)
+            {
+                __instance.BuffInfo.ReloadSpeed = __state;
+            }
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log?.LogError($"[CustomClasses] (085) adrenaline reload (post) falhou: {ex.Message}");
         }
     }
 }
