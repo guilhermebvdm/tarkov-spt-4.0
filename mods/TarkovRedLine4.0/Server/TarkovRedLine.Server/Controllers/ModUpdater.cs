@@ -21,7 +21,8 @@ public class ModUpdaterController : ControllerBase
     // miss would 404 instead of falling back.
     private static Dictionary<string, string> _fileMapCache = new(StringComparer.OrdinalIgnoreCase);
     // Item 008: performance overlay pack (Launcher-Updater/config-performance) — rel path -> physical path.
-    private static Dictionary<string, string> _performanceFileMapCache = new(StringComparer.OrdinalIgnoreCase);
+    // Item 030: _performanceFileMapCache removido — o pack de performance vive no mods_repo e entra no
+    // _fileMapCache comum (servido pelo /download). Ver S-7.
 
     private static string GetUpdaterBasePath()
     {
@@ -46,8 +47,8 @@ public class ModUpdaterController : ControllerBase
     }
 
     private static string GetModsRepoPath() => Path.Combine(GetUpdaterBasePath(), "mods_repo");
-    private static string GetOptionalsPath() => Path.Combine(GetUpdaterBasePath(), "Opcionais");
-    private static string GetPerformancePath() => Path.Combine(GetUpdaterBasePath(), "config-performance");
+    // Item 030 (D-9): config-performance passa a viver DENTRO do mods_repo, junto das irmãs config-*.
+    private static string GetPerformancePath() => Path.Combine(GetModsRepoPath(), "BepInEx", "config-performance");
 
     /// <summary>
     /// Versão do server/mods, de Launcher-Updater/server-version.txt (paridade com ServerVersionController).
@@ -188,151 +189,10 @@ public class ModUpdaterController : ControllerBase
         return NotFound(new { error = "File not found" });
     }
 
-    /// <summary>
-    /// Item 008: serves a file from the performance overlay pack (Launcher-Updater/config-performance).
-    /// Separate from /download because pack paths intentionally collide with mods_repo paths (overrides).
-    /// </summary>
-    [HttpGet("performance-download")]
-    public IActionResult DownloadPerformanceFile([FromQuery] string file)
-    {
-        if (string.IsNullOrEmpty(file))
-        {
-            return BadRequest(new { error = "Missing 'file'" });
-        }
-
-        var normalizedFile = file.Replace("\\", "/").TrimStart('/');
-
-        if (_performanceFileMapCache.TryGetValue(normalizedFile, out string physicalPath) && System.IO.File.Exists(physicalPath))
-        {
-            return PhysicalFile(physicalPath, "application/octet-stream");
-        }
-
-        // ref: CR-01-06 — trailing-separator prefix check via the shared guard (a sibling
-        // folder like "config-performance-bak" must not pass by raw StartsWith prefix).
-        if (TryResolveUnder(GetPerformancePath(), file, out var fallbackPath) && System.IO.File.Exists(fallbackPath))
-        {
-            return PhysicalFile(fallbackPath, "application/octet-stream");
-        }
-
-        return NotFound(new { error = "File not found" });
-    }
-
-    /// <summary>
-    /// Item 009 (contrato SP0): each optional group folder may carry a description.json
-    /// descriptor: { "name": "...", "description": { "pt": "...", "en": "..." } }.
-    /// Response: { folders: [ { id, name, description } ] }.
-    /// Retrocompat: folder without (or with invalid) descriptor -> name = folder name, description = null.
-    /// </summary>
-    [HttpGet("optionals-list")]
-    public IActionResult GetOptionalsList()
-    {
-        var optsPath = GetOptionalsPath();
-        if (!Directory.Exists(optsPath))
-        {
-            return Ok(new { folders = Array.Empty<object>() });
-        }
-
-        var folders = new List<object>();
-
-        foreach (var dir in Directory.GetDirectories(optsPath))
-        {
-            var id = Path.GetFileName(dir);
-            var name = id;
-            object description = null;
-
-            var descriptorPath = Path.Combine(dir, "description.json");
-            if (System.IO.File.Exists(descriptorPath))
-            {
-                try
-                {
-                    using var doc = JsonDocument.Parse(System.IO.File.ReadAllText(descriptorPath));
-                    var root = doc.RootElement;
-
-                    if (root.TryGetProperty("name", out var nameProp) && nameProp.ValueKind == JsonValueKind.String
-                        && !string.IsNullOrWhiteSpace(nameProp.GetString()))
-                    {
-                        name = nameProp.GetString();
-                    }
-
-                    if (root.TryGetProperty("description", out var descProp) && descProp.ValueKind == JsonValueKind.Object)
-                    {
-                        string pt = descProp.TryGetProperty("pt", out var ptProp) && ptProp.ValueKind == JsonValueKind.String
-                            ? ptProp.GetString() : null;
-                        string en = descProp.TryGetProperty("en", out var enProp) && enProp.ValueKind == JsonValueKind.String
-                            ? enProp.GetString() : null;
-
-                        if (pt != null || en != null)
-                        {
-                            description = new { pt, en };
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    // Invalid descriptor -> treated as absent (retrocompat), just logged.
-                    Console.WriteLine($"[ModUpdater] description.json inválido em '{id}': {ex.Message}");
-                }
-            }
-
-            folders.Add(new { id, name, description });
-        }
-
-        return Ok(new { folders });
-    }
-
-    [HttpGet("optionals-manifest")]
-    public IActionResult GetOptionalsManifest([FromQuery] string folder)
-    {
-        if (string.IsNullOrEmpty(folder))
-        {
-            return BadRequest(new { error = "Missing 'folder'" });
-        }
-
-        // ref: CR-01-01 — same containment guard as the download endpoints (rooted input
-        // to Path.Combine would discard the base dir; separator-suffixed prefix check).
-        if (!TryResolveUnder(GetOptionalsPath(), folder, out var targetFolder) || !Directory.Exists(targetFolder))
-        {
-            return NotFound(new { error = "Folder not found" });
-        }
-
-        var filesList = new List<object>();
-        var allFiles = Directory.GetFiles(targetFolder, "*.*", SearchOption.AllDirectories);
-
-        foreach (var file in allFiles)
-        {
-            var relPath = Path.GetRelativePath(targetFolder, file).Replace("\\", "/");
-
-            // Item 009: the group descriptor is metadata, never synced into the game folder.
-            if (string.Equals(relPath, "description.json", StringComparison.OrdinalIgnoreCase))
-            {
-                continue;
-            }
-
-            var hash = GetFileHash(file);
-            var size = new FileInfo(file).Length;
-            filesList.Add(new { path = relPath, hash, size });
-        }
-
-        return Ok(new { folder, totalFiles = filesList.Count, files = filesList });
-    }
-
-    [HttpGet("optional-download")]
-    public IActionResult DownloadOptional([FromQuery] string folder, [FromQuery] string file)
-    {
-        if (string.IsNullOrEmpty(folder) || string.IsNullOrEmpty(file))
-        {
-            return BadRequest(new { error = "Missing params" });
-        }
-
-        // ref: CR-01-01 — folder+file resolved through the shared containment guard
-        // (rooted 'file' would discard base+folder in Path.Combine; suffixed prefix check).
-        if (!TryResolveUnder(GetOptionalsPath(), folder + "/" + file, out var fullPath) || !System.IO.File.Exists(fullPath))
-        {
-            return NotFound(new { error = "File not found" });
-        }
-
-        return PhysicalFile(fullPath, "application/octet-stream");
-    }
+    // Item 030 (S-7): removidas as rotas do modelo antigo — performance-download (o pack de performance
+    // agora vive no mods_repo e é servido pelo /download comum via _fileMapCache) e optionals-list/
+    // optionals-manifest/optional-download (mods opcionais vêm de plugins-optional.json, sem pasta
+    // Opcionais/). D-13 aposentou o overlay; o launcher da Fase 3 não chama mais nenhuma delas.
 
     [HttpGet("refresh")]
     public IActionResult Refresh()
@@ -353,84 +213,151 @@ public class ModUpdaterController : ControllerBase
     }
 
     /// <summary>
-    /// Item 021 (D-021.B): tag optional-group files into the manifest so the launcher's group download
-    /// actually fetches them (before, GenerateManifest only scanned mods_repo, so optionalGroup files
-    /// were never emitted → the client's per-group cache was empty → "activate" downloaded nothing).
-    /// Mirrors the legacy TS scan (modUpdater.ts): for each group, walk every Opcionais/&lt;folder&gt;,
-    /// emit { path = targetSubDir + relPath, optional = true, optionalGroup = id }, and map the FINAL
-    /// path to the physical file so the existing /download?file= endpoint serves it (via _fileMapCache).
-    /// The group folders + their contents are operator-deployed content (gate G-5): a missing folder is
-    /// logged and skipped, leaving the group with 0 files — which the launcher now surfaces as an error.
+    /// Item 030 (S-4): lê mods_repo/BepInEx/plugins-optional.json e devolve o array optionalMods
+    /// (id/name/description) para o manifesto, preenchendo <paramref name="pathToOptionalId"/>
+    /// (path normalizado → id do mod dono). Validações S-5: recusa o mod inteiro se algum path está
+    /// sob user/mods (client-only, D-15) ou já pertence a outro mod (D-19); o motivo vai pro log.
     /// </summary>
-    private static void ScanOptionalGroups(JsonElement optionalGroups, List<object> files)
+    private static object[] LoadOptionalDefs(string modsPath, out Dictionary<string, string> pathToOptionalId, List<string> warnings)
     {
-        var optionalsRoot = GetOptionalsPath();
-        if (!Directory.Exists(optionalsRoot))
+        pathToOptionalId = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        var mods = new List<object>();
+
+        string defsPath = Path.Combine(modsPath, "BepInEx", "plugins-optional.json");
+        if (!System.IO.File.Exists(defsPath)) return mods.ToArray();
+
+        try
         {
-            Console.WriteLine($"[ModUpdater] Pasta Opcionais inexistente: {optionalsRoot} — nenhum opcional taggeado (gate de conteúdo G-5).");
-            return;
+            using var doc = JsonDocument.Parse(System.IO.File.ReadAllText(defsPath));
+            if (!doc.RootElement.TryGetProperty("mods", out var modsProp) || modsProp.ValueKind != JsonValueKind.Array)
+            {
+                return mods.ToArray();
+            }
+
+            foreach (var mod in modsProp.EnumerateArray())
+            {
+                if (mod.ValueKind != JsonValueKind.Object) continue;
+                string id = mod.TryGetProperty("id", out var idP) && idP.ValueKind == JsonValueKind.String ? idP.GetString() : null;
+                if (string.IsNullOrWhiteSpace(id)) continue;
+                if (!mod.TryGetProperty("paths", out var pathsP) || pathsP.ValueKind != JsonValueKind.Array) continue;
+
+                var validPaths = new List<string>();
+                bool rejected = false;
+                foreach (var p in pathsP.EnumerateArray())
+                {
+                    if (p.ValueKind != JsonValueKind.String) continue;
+                    string relNorm = (p.GetString() ?? "").Replace("\\", "/").TrimStart('/').ToLowerInvariant();
+                    if (relNorm.Length == 0) continue;
+
+                    if (relNorm.StartsWith("user/mods/", StringComparison.Ordinal))
+                    {
+                        warnings.Add($"mod opcional '{id}' referencia '{relNorm}' sob user/mods — RECUSADO (mod opcional é client-only, D-15)");
+                        rejected = true; break;
+                    }
+                    if (pathToOptionalId.TryGetValue(relNorm, out var owner))
+                    {
+                        warnings.Add($"arquivo '{relNorm}' está em dois mods opcionais ('{owner}' e '{id}') — mod '{id}' RECUSADO (D-19)");
+                        rejected = true; break;
+                    }
+                    validPaths.Add(relNorm);
+                }
+                if (rejected) continue;
+
+                foreach (var rn in validPaths) pathToOptionalId[rn] = id;
+
+                object name = mod.TryGetProperty("name", out var nP) ? nP.Clone() : (object)id;
+                object description = mod.TryGetProperty("description", out var dP) ? dP.Clone() : null;
+                mods.Add(new { id, name, description });
+            }
+        }
+        catch (Exception ex)
+        {
+            warnings.Add($"plugins-optional.json inválido: {ex.Message}");
         }
 
-        foreach (var group in optionalGroups.EnumerateArray())
+        return mods.ToArray();
+    }
+
+    /// <summary>
+    /// Item 030 (S-4): lê mods_repo/BepInEx/config-performance/performance.json e devolve performanceItems
+    /// (id/name/description), preenchendo <paramref name="pathToPerformanceId"/> (path normalizado sob
+    /// config-performance/ → id do item). "files" é relativo à pasta config-performance/. Validação S-5:
+    /// arquivo em dois itens é recusado (D-19).
+    /// </summary>
+    private static object[] LoadPerformanceDefs(out Dictionary<string, string> pathToPerformanceId, List<string> warnings)
+    {
+        pathToPerformanceId = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        var items = new List<object>();
+
+        string defsPath = Path.Combine(GetPerformancePath(), "performance.json");
+        if (!System.IO.File.Exists(defsPath)) return items.ToArray();
+
+        try
         {
-            if (group.ValueKind != JsonValueKind.Object) continue;
-
-            string id = group.TryGetProperty("id", out var idProp) && idProp.ValueKind == JsonValueKind.String
-                ? idProp.GetString() : null;
-            if (string.IsNullOrWhiteSpace(id)) continue;
-
-            string targetSubDir = group.TryGetProperty("targetSubDir", out var tsProp) && tsProp.ValueKind == JsonValueKind.String
-                ? tsProp.GetString() : "";
-
-            if (!group.TryGetProperty("folders", out var foldersProp) || foldersProp.ValueKind != JsonValueKind.Array)
+            using var doc = JsonDocument.Parse(System.IO.File.ReadAllText(defsPath));
+            if (!doc.RootElement.TryGetProperty("items", out var itemsProp) || itemsProp.ValueKind != JsonValueKind.Array)
             {
-                continue;
+                return items.ToArray();
             }
 
-            int groupFileCount = 0;
-            foreach (var folderEl in foldersProp.EnumerateArray())
+            foreach (var item in itemsProp.EnumerateArray())
             {
-                if (folderEl.ValueKind != JsonValueKind.String) continue;
-                var folder = folderEl.GetString();
-                if (string.IsNullOrWhiteSpace(folder)) continue;
+                if (item.ValueKind != JsonValueKind.Object) continue;
+                string id = item.TryGetProperty("id", out var idP) && idP.ValueKind == JsonValueKind.String ? idP.GetString() : null;
+                if (string.IsNullOrWhiteSpace(id)) continue;
+                if (!item.TryGetProperty("files", out var filesP) || filesP.ValueKind != JsonValueKind.Array) continue;
 
-                // Same containment guard as the download/list endpoints (ref: CR-01-01).
-                if (!TryResolveUnder(optionalsRoot, folder, out var folderPath) || !Directory.Exists(folderPath))
+                foreach (var f in filesP.EnumerateArray())
                 {
-                    Console.WriteLine($"[ModUpdater] Pasta opcional não encontrada para grupo '{id}': {folder}");
-                    continue;
-                }
+                    if (f.ValueKind != JsonValueKind.String) continue;
+                    string inner = (f.GetString() ?? "").Replace("\\", "/").TrimStart('/');
+                    if (inner.Length == 0) continue;
+                    string relNorm = ("bepinex/config-performance/" + inner).ToLowerInvariant();
 
-                foreach (var file in Directory.GetFiles(folderPath, "*.*", SearchOption.AllDirectories))
-                {
-                    var relPath = Path.GetRelativePath(folderPath, file).Replace("\\", "/");
-
-                    // Item 009: the group descriptor is metadata, never synced into the game folder.
-                    if (string.Equals(relPath, "description.json", StringComparison.OrdinalIgnoreCase))
+                    if (pathToPerformanceId.TryGetValue(relNorm, out var owner))
                     {
+                        warnings.Add($"arquivo '{relNorm}' está em dois itens de performance ('{owner}' e '{id}') — ignorado (D-19)");
                         continue;
                     }
-
-                    // Trim('/') (não só TrimEnd): barra INICIAL no targetSubDir furaria o
-                    // _fileMapCache — o endpoint /download normaliza a request com TrimStart('/').
-                    var finalPath = string.IsNullOrEmpty(targetSubDir)
-                        ? relPath
-                        : $"{targetSubDir.Replace("\\", "/").Trim('/')}/{relPath}";
-
-                    files.Add(new
-                    {
-                        path = finalPath,
-                        hash = GetFileHash(file),
-                        size = new FileInfo(file).Length,
-                        optional = true,
-                        optionalGroup = id
-                    });
-                    _fileMapCache[finalPath] = file;
-                    groupFileCount++;
+                    pathToPerformanceId[relNorm] = id;
                 }
-            }
 
-            Console.WriteLine($"[ModUpdater] Opcional '{id}': {groupFileCount} arquivo(s) taggeado(s)");
+                object name = item.TryGetProperty("name", out var nP) ? nP.Clone() : (object)id;
+                object description = item.TryGetProperty("description", out var dP) ? dP.Clone() : null;
+                items.Add(new { id, name, description });
+            }
+        }
+        catch (Exception ex)
+        {
+            warnings.Add($"performance.json inválido: {ex.Message}");
+        }
+
+        return items.ToArray();
+    }
+
+    /// <summary>
+    /// Item 030 (RN-2, lado servidor): avisa quando o mesmo relativo existe em config-force/ e em
+    /// config-performance/. A performance vence (D-1), mas a config forçada — que existe para paridade
+    /// de coop — é silenciosamente sobreposta em quem tiver o item ligado; o operador precisa enxergar.
+    /// </summary>
+    private static void DetectForcePerformanceCollisions(string modsPath, List<string> warnings)
+    {
+        string forceDir = Path.Combine(modsPath, "BepInEx", "config-force");
+        string perfDir = GetPerformancePath();
+        if (!Directory.Exists(forceDir) || !Directory.Exists(perfDir)) return;
+
+        var perfRels = new HashSet<string>(
+            Directory.GetFiles(perfDir, "*.*", SearchOption.AllDirectories)
+                .Select(f => Path.GetRelativePath(perfDir, f).Replace("\\", "/").ToLowerInvariant()),
+            StringComparer.Ordinal);
+
+        foreach (var f in Directory.GetFiles(forceDir, "*.*", SearchOption.AllDirectories))
+        {
+            string rel = Path.GetRelativePath(forceDir, f).Replace("\\", "/").ToLowerInvariant();
+            if (perfRels.Contains(rel))
+            {
+                warnings.Add($"'{rel}' está em config-force E config-performance — a performance sobrepõe a config forçada em quem tiver o item ligado (RN-2)");
+            }
         }
     }
 
@@ -450,43 +377,69 @@ public class ModUpdaterController : ControllerBase
                 Directory.CreateDirectory(modsPath);
             }
 
+            // Item 030: lê as definições ANTES do scan, para taggear cada arquivo com optionalId/
+            // performanceId. Validações de conteúdo (S-5): recusa path sob user/mods (mod opcional é
+            // client-only, D-15) e arquivo repetido em dois itens (D-19). As mensagens vão pro log.
+            var contentWarnings = new List<string>();
+            var optionalMods = LoadOptionalDefs(modsPath, out var pathToOptionalId, contentWarnings);
+            var performanceItems = LoadPerformanceDefs(out var pathToPerformanceId, contentWarnings);
+
+            const string PerfPrefix = "bepinex/config-performance/";
+            const string PerfPrefixCased = "BepInEx/config-performance/";
+
             var allFiles = Directory.GetFiles(modsPath, "*.*", SearchOption.AllDirectories);
 
             foreach (var file in allFiles)
             {
                 var relPath = Path.GetRelativePath(modsPath, file).Replace("\\", "/");
+                var relNorm = relPath.ToLowerInvariant();
+
+                // S-2: os JSON de definição são METADADOS — nunca sincronizados no jogo do player.
+                if (relNorm.EndsWith("plugins-optional.json", StringComparison.Ordinal)
+                    || relNorm.EndsWith("config-performance/performance.json", StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
                 var hash = GetFileHash(file);
                 var size = new FileInfo(file).Length;
 
-                files.Add(new { path = relPath, hash, size });
+                if (relNorm.StartsWith(PerfPrefix, StringComparison.Ordinal))
+                {
+                    // S-5: arquivo sob config-performance/ SEM performanceId é erro de conteúdo — não emite
+                    // (senão viraria config aplicada que o player não consegue desligar).
+                    if (!pathToPerformanceId.TryGetValue(relNorm, out var perfId))
+                    {
+                        contentWarnings.Add($"'{relPath}' não está listado em nenhum item do performance.json — ignorado (não emitido no manifesto)");
+                        continue;
+                    }
+
+                    // Fonte: aplica em config/ quando o item está ligado (performance-to-config).
+                    files.Add(new { path = relPath, hash, size, performanceId = perfId });
+                    _fileMapCache[relPath] = file;
+
+                    // D-18: 2º prefixo lógico — MESMO arquivo físico, espelhado no cliente (mirror-reference).
+                    var refPath = "BepInEx/config-performance-ref/" + relPath.Substring(PerfPrefixCased.Length);
+                    files.Add(new { path = refPath, hash, size });
+                    _fileMapCache[refPath] = file;
+                    continue;
+                }
+
+                if (pathToOptionalId.TryGetValue(relNorm, out var optId))
+                {
+                    files.Add(new { path = relPath, hash, size, optional = true, optionalId = optId });
+                }
+                else
+                {
+                    files.Add(new { path = relPath, hash, size });
+                }
                 _fileMapCache[relPath] = file;
-            }
-
-            // Item 008: performance overlay pack — paths relative to the game root, mirroring
-            // mods_repo layout. Exposed in the manifest so pack changes also change the manifest
-            // hash (clients rescan). Downloaded via /launcher/mods/performance-download.
-            var performanceFiles = new List<object>();
-            _performanceFileMapCache.Clear();
-
-            var perfPath = GetPerformancePath();
-            if (!Directory.Exists(perfPath))
-            {
-                Directory.CreateDirectory(perfPath);
-            }
-
-            foreach (var file in Directory.GetFiles(perfPath, "*.*", SearchOption.AllDirectories))
-            {
-                var relPath = Path.GetRelativePath(perfPath, file).Replace("\\", "/");
-                performanceFiles.Add(new { path = relPath, hash = GetFileHash(file), size = new FileInfo(file).Length });
-                _performanceFileMapCache[relPath] = file;
             }
 
             string[] managedPaths = Array.Empty<string>();
             string[] deleteFiles = Array.Empty<string>();
             string[] ignoredFiles = Array.Empty<string>();
-            object optionalGroupsArray = Array.Empty<object>();
             // Item 007: optional per-folder sync rules (prefix -> rule name), pass-through to the manifest.
-            // Rule names: "default" | "preserve-divergent" | "mirror-delete" | "mirror-move-disabled".
             // Absent -> launcher falls back to its built-in prefix table.
             Dictionary<string, string> folderRules = new();
 
@@ -498,10 +451,13 @@ public class ModUpdaterController : ControllerBase
                     managedPaths = new[] { "BepInEx/plugins", "user/mods" },
                     deleteFiles = Array.Empty<string>(),
                     ignoredFiles = new[] { "BepInEx/plugins/spt", "user/mods/spt" },
-                    optionalGroups = Array.Empty<object>(),
                     folderRules = new Dictionary<string, string>
                     {
                         ["BepInEx/config"] = "preserve-divergent",
+                        // Item 030: config de performance aplica em config/ quando ligada (vence force e
+                        // config); a pasta-espelho -ref é biblioteca de referência no cliente (D-18).
+                        ["BepInEx/config-performance"] = "performance-to-config",
+                        ["BepInEx/config-performance-ref"] = "mirror-reference",
                         // config-server = MIRROR-REFERENCE (biblioteca de referência). Os arquivos em
                         // mods_repo/BepInEx/config-server/ só são espelhados em BepInEx/config-server/ do
                         // cliente (última versão sempre; NÃO deleta extras; NUNCA toca BepInEx/config/).
@@ -534,12 +490,9 @@ public class ModUpdaterController : ControllerBase
                     deleteFiles = dfProp.EnumerateArray().Select(x => x.GetString()).Where(x => x != null).Cast<string>().ToArray();
                 if (root.TryGetProperty("ignoredFiles", out var ifProp) && ifProp.ValueKind == JsonValueKind.Array)
                     ignoredFiles = ifProp.EnumerateArray().Select(x => x.GetString()).Where(x => x != null).Cast<string>().ToArray();
-                if (root.TryGetProperty("optionalGroups", out var ogProp) && ogProp.ValueKind == JsonValueKind.Array)
-                {
-                    optionalGroupsArray = JsonSerializer.Deserialize<object[]>(ogProp.GetRawText()) ?? Array.Empty<object>();
-                    // Item 021 (D-021.B): tag optional files so the launcher's group download fetches them.
-                    ScanOptionalGroups(ogProp, files);
-                }
+                // Item 030: optionalGroups foi aposentado (ScanOptionalGroups removido) — mods opcionais e
+                // configs de performance vêm de plugins-optional.json / performance.json (LoadOptionalDefs/
+                // LoadPerformanceDefs) e são taggeados por arquivo no scan acima.
                 if (root.TryGetProperty("folderRules", out var frProp) && frProp.ValueKind == JsonValueKind.Object)
                     folderRules = JsonSerializer.Deserialize<Dictionary<string, string>>(frProp.GetRawText()) ?? new();
             }
@@ -547,6 +500,16 @@ public class ModUpdaterController : ControllerBase
             {
                 Console.WriteLine($"[ModUpdater] Erro ao ler config.json: {ex.Message}");
             }
+
+            // S-6 / R-11: garante que o manifesto SEMPRE carregue as regras do item 030, mesmo que o
+            // config.json de produção não as defina — cliente antigo que não conhece "performance-to-config"
+            // ignora a regra (TryParse falha), então mover a pasta antes de todos atualizarem é seguro.
+            folderRules["BepInEx/config-performance"] = "performance-to-config";
+            folderRules["BepInEx/config-performance-ref"] = "mirror-reference";
+
+            // RN-2 (lado servidor): avisa quando o mesmo arquivo está em config-force E config-performance.
+            DetectForcePerformanceCollisions(modsPath, contentWarnings);
+            foreach (var w in contentWarnings) Console.WriteLine($"[ModUpdater] item030: {w}");
 
             var manifestObj = new
             {
@@ -557,9 +520,9 @@ public class ModUpdaterController : ControllerBase
                 managedPaths = managedPaths,
                 deleteFiles = deleteFiles,
                 ignoredFiles = ignoredFiles,
-                optionalGroups = optionalGroupsArray,
+                optionalMods = optionalMods,
+                performanceItems = performanceItems,
                 folderRules = folderRules,
-                performanceOverlay = performanceFiles,
                 files = files
             };
 
