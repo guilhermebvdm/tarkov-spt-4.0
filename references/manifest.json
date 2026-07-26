@@ -77,7 +77,6 @@
       "lfs": false,
       "stripGit": false,
       "fikaVersion": "2.3.8",
-      "vendoredAt": "2026-07-25",
       "note": "Lado cliente da coop; contém a pasta Fika.Core (verdade para classes/métodos/variáveis de coop). Pinado por commit para reprodutibilidade. Pin 8234951 = tag v2.3.8, a última publicada e a mesma versão baixada do site oficial (Forge) pra instalar em D:\\SPT (rematerializado em 2026-07-25; antes estava em 6ccdd2b, tag v2.3.4). Confirmar Fika.Core.dll instalado após a atualização — ver reference_spt_bundle_cache_pipeline / instalação manual."
     },
     {
