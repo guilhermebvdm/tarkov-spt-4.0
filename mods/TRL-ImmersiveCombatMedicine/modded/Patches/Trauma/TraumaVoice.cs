@@ -67,8 +67,12 @@ namespace TRLImmersiveCombatMedicine.Trauma
         /// consumir a janela do Strong (queda) nem ser consumido por ela.</summary>
         internal static void PlayZeroed(Player p)
         {
-            if (!Allowed(p, Kind.Zeroed)) return;
-            p.Speaker?.Play(EPhraseTrigger.OnAgony, ETagStatus.Combat | ETagStatus.Dying, demand: true, importance: 100);
+            if (!Allowed(p, Kind.Zeroed, consume: false)) return;
+            // ref: review 019 CR-01-03 — readback antes de consumir a janela, mesmo contrato do TryPlayStrong
+            // (PA-01-02 do item 005): o Speaker devolve null quando engole a fala por Busy/importance, e
+            // consumir a janela nesse caso custaria 2s de silêncio por uma fala que nunca saiu.
+            if (p.Speaker?.Play(EPhraseTrigger.OnAgony, ETagStatus.Combat | ETagStatus.Dying, demand: true, importance: 100) == null) return;
+            Consume(p, Kind.Zeroed);
         }
 
         /// <summary>ref: item 019 — ESFORÇO/ofego, não agonia: usado quando a mira cai por fraqueza do braço.
@@ -99,17 +103,32 @@ namespace TRLImmersiveCombatMedicine.Trauma
             p.Say(EPhraseTrigger.OnBeingHurt, demand: true);
         }
 
-        private static bool Allowed(Player p, Kind kind)
+        private static bool Allowed(Player p, Kind kind, bool consume = true)
         {
             if (p is null || p.ProfileId == null) return false;
             // ref: item 019 — bots são MUDOS por decisão do usuário (2026-07-26): o mod antigo não filtrava IA e
             // os bots gritavam, o que polui o áudio e atrapalha identificar quem está ferido de verdade. Hoje
             // nenhum call site passa bot, então é guard defensivo — e é o ponto único onde a decisão vive.
             if (p.IsAI) return false;
+
+            // ref: review 019 CR-01-02 — mordaça de desmaio AQUI, e não só no SilenceVoicePatch. Aquele patch
+            // intercepta `Player.Say`, mas PlayStrong/PlayZeroed usam `Speaker.Play` DIRETO e furavam a mordaça:
+            // um desmaiado que levasse um tiro capaz de zerar um membro gritaria de dentro do apagão. Centralizar
+            // no gate cobre os dois caminhos de emissão de uma vez.
+            if (TrueTrauma.TraumaState.BlackoutTimers.ContainsKey(p.ProfileId)) return false;
+
             var key = (p.ProfileId, kind);
             if (_nextAllowed.TryGetValue(key, out float next) && Time.time < next) return false;
-            _nextAllowed[key] = Time.time + SpamCooldown;
+            if (consume) _nextAllowed[key] = Time.time + SpamCooldown;
             return true;
+        }
+
+        /// <summary>Consome a janela de anti-spam depois de confirmar que o Speaker aceitou a fala
+        /// (par de `Allowed(..., consume: false)`).</summary>
+        private static void Consume(Player p, Kind kind)
+        {
+            if (p is null || p.ProfileId == null) return;
+            _nextAllowed[(p.ProfileId, kind)] = Time.time + SpamCooldown;
         }
 
         /// <summary>Ponto de limpeza DECLARADO do dict estático (PA-02-08 — skill csharp §2): chamado no sweep de

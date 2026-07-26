@@ -1,4 +1,4 @@
-# 019 — Feedback de dor: falas de dor ao ferir membro
+﻿# 019 — Feedback de dor: falas de dor ao ferir membro
 
 **Mod:** TRL-ImmersiveCombatMedicine
 **Status:** Entregue
@@ -34,7 +34,9 @@ A investigação achou duas coisas que mudam o item por completo:
 - **Analgésico cala a dor** e **bots são sempre mudos**. Nenhuma das duas é invenção nossa: é literalmente a condição que o jogo usa para gritar no pouso com a perna ferida.
 - **Entrar na raid já ferido não fala** — é reconhecimento de um estado que já existia, não um ferimento novo. Mesma regra que já vale para o aviso de tela e para o agachar involuntário.
 - **Curar não fala.** Só agravamento produz som.
-- Um canal de anti-spam **por tipo de dor**, para que uma perna quebrada e um braço quebrado no mesmo instante produzam as duas falas em vez de uma calar a outra.
+- Um canal de anti-spam **por tipo de dor**. O ganho não é falar duas coisas ao mesmo tempo — um personagem não faz isso, e o próprio jogo engole a segunda fala quando o locutor está ocupado. O ganho é que **falas de tipos diferentes em momentos próximos** não se calam: perder a mira (ofego) e ser bloqueado ao re-mirar (agonia) acontecem a menos de 2 segundos de distância e agora são os dois audíveis, onde antes o segundo era engolido pela janela do primeiro.
+- Quando o jogo engolir uma fala porque o locutor está ocupado, a janela de anti-spam **não é consumida** — senão o jogador perderia 2 segundos de silêncio por uma fala que nunca saiu.
+- **Durante o desmaio, silêncio total.** Um inconsciente não fala, nem que leve um tiro que destrua um membro nesse instante.
 - Um interruptor no F12 desliga só as falas, sem afetar nenhum efeito de jogo.
 
 ## Critérios de aceite
@@ -47,7 +49,7 @@ A investigação achou duas coisas que mudam o item por completo:
 - [x] Entrar na raid já ferido não produz fala.
 - [x] Curar não produz fala.
 - [x] Perder a mira por braço ferido produz ofego, audivelmente distinto do grito de agonia do bloqueio de re-mira que vem em seguida.
-- [x] Dois ferimentos de regiões diferentes no mesmo instante produzem as duas falas.
+- [x] Dois ferimentos no mesmo instante produzem **uma** fala, não duas sobrepostas — é o que o jogo faz e é o correto acusticamente. Falas de tipos diferentes em momentos próximos (ofego da mira perdida, depois agonia do bloqueio) são as duas audíveis.
 - [x] O interruptor do F12 desligado silencia as falas novas sem alterar nenhum efeito de jogo.
 - [x] O sistema de voz morto do mod antigo e a exceção órfã da mordaça de desmaio saem do código.
 - [x] **Fika/multiplayer:** o aliado ouve a fala. Nenhum pacote novo — o jogo já sincroniza fala de jogador, e o mod fala pelo dono do personagem, então a propagação é a nativa.
@@ -57,9 +59,10 @@ A investigação achou duas coisas que mudam o item por completo:
 
 - [x] **Membro zerado E fraturado ao mesmo tempo** → prevalece a fala de fratura, que é a mais específica.
 - [x] **Rajada de espingarda destruindo um membro** → uma fala só. O mod fala na mudança de estado, não no impacto, e o motor consolida vários impactos numa transição por quadro. O mod antigo falava no impacto e dependia do anti-spam para não metralhar.
-- [x] **Ferimento durante o desmaio** → a mordaça de voz do desmaio continua valendo; inconsciente não fala.
+- [x] **Ferimento durante o desmaio** → silêncio. A mordaça original só cobria um dos dois caminhos de emissão de voz do mod (interceptava `Player.Say`, mas não `Speaker.Play`), então um desmaiado que tivesse um membro destruído gritava de dentro do apagão. O gate agora é centralizado e cobre os dois.
 - [x] **Analgésico expirando com o membro ainda ferido** → a reavaliação reconhece o agravamento e a fala sai então. É coerente: a dor volta quando o efeito passa.
 - [x] **Piorar dentro da mesma região** (zerar a segunda perna) → fala de novo, porque a severidade aumentou; respeitando o anti-spam do tipo.
+- [x] **Fala engolida por combate** → o jogo tem fila de voz com prioridade. O grito de agonia fura a fila (é reação imediata a trauma grave); a fala de fratura **não** fura, porque é fala de status — o próprio jogo a classifica abaixo do grito de dor forte na tabela de prioridade dos bots. Consequência aceita: em tiroteio intenso, a fratura pode não ser ouvida na hora. Em troca, o mod não monopoliza o canal de voz.
 - [x] **Peer observando** → ouve pelo caminho nativo do jogo. O mod não toca em fala de personagem que não é dele.
 
 ## Fora de escopo

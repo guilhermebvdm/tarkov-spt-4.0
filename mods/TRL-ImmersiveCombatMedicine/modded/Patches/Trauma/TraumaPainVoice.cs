@@ -38,6 +38,20 @@ namespace TRLImmersiveCombatMedicine.Trauma
 
         private static void OnTransition(TraumaTransition t)
         {
+            // ref: review 019 CR-01-01 — try/catch OBRIGATÓRIO aqui, e não é formalidade: o motor publica com
+            // `StateChanged?.Invoke(t)` (TraumaEngine.cs:317,570). Um evento C# invoca os handlers em cadeia, e
+            // uma exceção em QUALQUER handler aborta a cadeia e propaga para dentro do motor — derrubando a
+            // consolidação/reconciliação do frame e, com ela, os consumidores de gameplay. Uma falha de ÁUDIO
+            // nunca pode custar o efeito de trauma.
+            try { EmitPainVoice(t); }
+            catch (System.Exception ex)
+            {
+                TRLImmersiveCombatMedicinePlugin.ModLogger.LogError($"[Trauma2] pain voice falhou: {ex.Message}");
+            }
+        }
+
+        private static void EmitPainVoice(TraumaTransition t)
+        {
             if (!IsActive()) return;
 
             // Reconhecimento de estado que já existia (spawn ferido, religar toggle) não é um ferimento novo:

@@ -1,4 +1,4 @@
-# TRL-ImmersiveCombatMedicine — Propriedades (F12 / BepInEx)
+﻿# TRL-ImmersiveCombatMedicine — Propriedades (F12 / BepInEx)
 
 > **Data:** 2026-07-12<br>
 > **Status:** 🟢 Vivo<br>
@@ -67,6 +67,7 @@ Toggle POR consumidor (comportamento 9 da spec funcional 002): cada consumidor s
 | Arms Effects | bool | `true` | — | — | Tremor contínuo + cancelamento de ADS escalonado (item 005). Governado pelo master Trauma 2.0; desligar mid-raid remove o tremor e cancela o lockout. (Key renomeada na entrega do 005 — ver tabela Renomeadas.) |
 | Stomach Effects | bool | `true` | — | — | Agachar involuntário probabilístico ao zerar o estômago (item 006). Governado pelo master Trauma 2.0; desligar mid-raid cancela agachares pendentes DO ESTÔMAGO (não toca os de pernas); o "sem ar" legado NÃO volta. (Key renomeada na entrega do 006 — ver tabela Renomeadas.) |
 | Blackout 2.0 | bool | `true` | — | — | Gatilho percentual de desmaio (item 007): tórax ≥50% da vida atual (piso 25 de dano absoluto) rola p=50%, imune sob analgésico; cabeça ≥25% da vida atual (piso 10) rola p=50%, p=25% sob analgésico. Governado pelo master "Sistema de Desmaio" — este toggle decide SÓ a lógica de entrada (percentual ou nenhuma); o limiar fixo legado NÃO volta mesmo desligado. (Key renomeada na entrega do 007 — ver tabela Renomeadas.) |
+| Pain Voice | bool | `true` | — | — | Falas de dor ao ferir membro (item 019): perna/braço FRATURADO usa a fala dedicada do jogo (`LegBroken`/`HandBroken` — os mesmos gatilhos que os bots usam nesse evento); membro zerado e estômago zerado usam o grito de agonia; perder a mira por braço ferido usa ofego (`OnBreath`). Analgésico cala e bots são mudos (regras copiadas do vanilla — `Player.cs:31241`). Não fala em spawn ferido, ao curar, nem durante desmaio. Só áudio: desligar não altera nenhum efeito de gameplay. |
 | Debug Test Consumer | bool | `false` | — | Sim | Consumidor de teste SEM efeito de gameplay: registra-se ATIVO para as TRÊS regiões (pernas/braços/estômago), destravando o toast/i18n para validação (AC5 da spec funcional). |
 
 ## Removidas
