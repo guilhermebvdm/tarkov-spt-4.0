@@ -16,9 +16,9 @@ Este documento é a **fonte de verdade técnica e arquitetural** para desenvolvi
 1. [Arquitetura de Rede do FIKA & LiteNetLib](#1-arquitetura-de-rede-do-fika--litenetlib)
 2. [Causas Raiz de Desincronização & `ParseException`](#2-causas-raiz-de-desincronização--parseexception)
 3. [A Dúvida da Velocidade de CPU vs Sincronia de Arquivos](#3-a-dúvida-da-velocidade-de-cpu-vs-sincronia-de-arquivos)
-4. [O Padrão Canônico de Sincronização Defensiva](#4-o-padrão-canônico-de-sincronização-defensiva)
+4. [O Padrão Canônico de Sincronização Defensiva](#4-o-padrão-canônico-de-sincronização-defensiva) · [4.1 Padrão híbrido (API de eventos)](#41-padrão-híbrido--a-api-de-eventos-do-fika--polling)
 5. [Template Canônico de Código C# (Copy-Paste para Mods)](#5-template-canônico-de-código-c-copy-paste-para-mods)
-6. [Inventário & Status dos Mods do Workspace](#6-inventário--status-dos-mods-do-workspace)
+6. [Inventário & Status dos Mods do Workspace](#6-inventário--status-dos-mods-do-workspace) · [6.1 Não conformes](#61-os-três-não-conformes--detalhe) · [6.2 Descartados](#62-verificado-e-descartado)
 7. [Checklist de Auditoria e Validação](#7-checklist-de-auditoria-e-validação)
 
 ---
@@ -57,19 +57,31 @@ No FIKA, a transmissão de pacotes customizados de mods utiliza estruturas `INet
 
 ## 2. Causas Raiz de Desincronização & `ParseException`
 
-O estouro de exceções do tipo `ParseException: Undefined packet in NetDataReader: <HASH>` e o descongestionamento de frames (jogadores patinando/congelados) ocorrem por quatro falhas estruturais:
+O estouro de exceções do tipo `ParseException: Undefined packet in NetDataReader: <HASH>` e o descongestionamento de frames (jogadores patinando/congelados) ocorrem por seis falhas estruturais. **As seis terminam no mesmo lugar** — uma exceção que sobe até o `PollEvents` e derruba a fila de eventos do frame inteiro (causa 4). Vale ler a causa 4 primeiro: ela é o mecanismo, as outras são as portas de entrada.
+
+> ⚠️ **Nenhuma delas "descarta silenciosamente" um pacote.** Hash sem handler registrado **lança**: `GetCallbackFromData` faz `throw new ParseException(...)` em [NetPacketProcessor.cs:83-91](../../references/fika-plugin/Fika.Core/Networking/LiteNetLib/Utils/NetPacketProcessor.cs). Não existe caminho de descarte — o custo de um registro ausente é o mesmo de uma exceção em callback.
 
 ### 🔴 1. Registro Tardio (Late Registration / Timing de CPU)
-Quando um jogador abre a raid, se o mod não registrar o pacote no **frame zero** da inicialização do FIKA, um pacote enviado pelo Host pode chegar na placa de rede do Client antes que o Client tenha executado a chamada de registro. O LiteNetLib consulta o dicionário de handlers, não encontra a chave e descarta a leitura.
+Quando um jogador abre a raid, se o mod não registrar o pacote no **frame zero** da inicialização do FIKA, um pacote enviado pelo Host pode chegar antes que o Client tenha executado a chamada de registro. O LiteNetLib consulta o dicionário de handlers, não encontra a chave e **lança `ParseException`** — que sobe até o `PollEvents` e derruba **todos** os eventos daquele frame (causa 4), inclusive os `PlayerState` de movimento dos outros peers. Um mod que registra tarde não perde só o próprio pacote: congela o movimento de todo mundo naquele frame.
 
 ### 🔴 2. Perda de Registro em Trocas de Sessão (`IFikaNetworkManager` Recriado)
-Ao transitar de menu/lobby para a raid, o FIKA recria a instância de `IFikaNetworkManager`. Mods que utilizam flags booleanas estáticas (`_isRegistered = true`) acreditam que o registro ainda está ativo, mas a nova instância do `NetPacketProcessor` está vazia.
+Ao transitar de menu/lobby para a raid, o FIKA recria a instância de `IFikaNetworkManager`. Mods que utilizam flags booleanas estáticas (`_isRegistered = true`) acreditam que o registro ainda está ativo, mas a nova instância do `NetPacketProcessor` está vazia. O efeito é idêntico à causa 1 — `ParseException` a cada pacote recebido daquele tipo, e a fila do frame cai junto.
 
 ### 🔴 3. Chamadas Nocivas a `UnregisterPacket<T>()`
-Desregistrar pacotes ao sair da raid ou ao desativar funcionalidades remove o tipo da tabela de hashes do LiteNetLib. Se pacotes tardios ou retidos em buffer de rede chegarem após a desativação, a camada de transporte é corrompida.
+Desregistrar pacotes ao sair da raid ou ao desativar funcionalidades remove o tipo do dicionário de handlers. Pacotes tardios ou retidos em buffer de rede que cheguem depois disso caem exatamente no `throw` da causa 1 — a cada datagrama, até a sessão acabar. É a causa 1 provocada de propósito.
 
-### 🔴 4. Exceções Não-Tratadas nos Callbacks (Fila do Frame Descartada)
-Se um callback de mod lança uma exceção não-tratada (como `NullReferenceException`), ela **não é capturada em nenhum ponto do caminho**: sobe por `ReadAllPackets` → `OnNetworkReceive` → `ProcessEvent` até [`LiteNetManager.PollEvents`](../../references/fika-plugin/Fika.Core/Networking/LiteNetLib/LiteNetManager.cs), que desanexa a fila de eventos pendentes e a percorre **sem `try/catch`**:
+### 🔴 4. Exceções Não-Tratadas nos Callbacks (Fila do Frame Descartada) — **o mecanismo comum**
+Se um callback de mod lança uma exceção não-tratada (como `NullReferenceException`), ela **não é capturada em nenhum ponto do caminho**. Cadeia verificada, sem um único `try/catch`:
+
+```
+LiteNetManager.PollEvents           :1406-1442   ← desanexa a fila e itera sem proteção
+  └─ ProcessEvent                   :443-444
+       └─ FikaClient.OnNetworkReceive  :494-500
+            └─ NetPacketProcessor.ReadAllPackets  :135-141
+                 └─ ReadPacket → GetCallbackFromData  :88  ← throw ParseException
+```
+
+O laço final, em [`LiteNetManager.cs:1436-1441`](../../references/fika-plugin/Fika.Core/Networking/LiteNetLib/LiteNetManager.cs):
 
 ```csharp
 while (pendingEvent != null)
@@ -106,20 +118,28 @@ Três fontes de assimetria, todas já observadas neste repo:
 ### ❓ A dúvida comum:
 > *"O nosso launcher garante que todos os jogadores estão com os mesmos arquivos dos mods. Se a velocidade de processamento do computador de um jogador for diferente dos outros, a ordem de carregamento pode mudar e quebrar o pacote?"*
 
-### 💡 Resposta Técnica Definitiva:
+### 💡 Resposta Técnica:
 
-**SIM, a diferença de velocidade de processamento da CPU/SSD pode causar falhas SE o mod depender de inicialização ingênua em `Awake()` ou `Start()`. Mas a solução proposta CERCA 100% esse problema.**
+**SIM, a diferença de velocidade de CPU/SSD pode causar falhas se o mod depender de inicialização ingênua em `Awake()`/`Start()`. O padrão deste guia reduz drasticamente a janela — mas não a fecha por completo, e vale saber por quê.**
 
 #### Por que isso acontece?
 1. O BepInEx carrega os plugins de forma paralela/indeterminística com base na descoberta de arquivos e agendamento do SO.
 2. Em um PC ultra-rápido (Host), o mod `SpeakFromTarkov` pode rodar o `Awake()` 50ms antes do mod `ImmersiveCombatMedicine`. Em um PC mais lento (Guest), a ordem pode se inverter.
-3. Se os pacotes fossem indexados por ordem de chamada (0, 1, 2...), a inversão quebraria a rede. **Porém, no FIKA/LiteNetLib, a hash do pacote é determinística (deriva do nome da classe `typeof(T).FullName`).**
-4. Portanto, a única variável crítica é o **TEMPO DE REGISTRO**: se o Host enviar o pacote no frame 1 da raid e a CPU do Guest ainda estiver finalizando a carga do mod no frame 2, o pacote chega sem handler cadastrado no Guest.
+3. Se os pacotes fossem indexados por ordem de chamada (0, 1, 2...), a inversão quebraria a rede. **Porém, no FIKA/LiteNetLib, a hash do pacote é determinística** — CRC-16 de `typeof(T).ToString()`, ver §1. Ordem de carga dos mods é irrelevante.
+4. Portanto, a única variável crítica é o **TEMPO DE REGISTRO**: se o Host enviar o pacote no frame 1 da raid e a CPU do Guest ainda estiver finalizando a carga do mod, o pacote chega sem handler — e isso **lança** (causa 1), derrubando a fila do frame.
 
-#### Como o nosso padrão cerca 100% este problema:
-- **Garantia Pré-Envio**: Antes de *qualquer* transmissão (`Broadcast` / `SendData`), o mod executa `EnsurePacketsRegistered()`.
-- **Garantia Pré-Recepção**: O método `EnsurePacketsRegistered()` é invocado no topo do loop `Update()` da Unity no frame zero de carregamento do FIKA, registrando os handlers no `NetPacketProcessor` **antes que a fila de rede comece a ler os pacotes da raid**.
-- **Independência de Ordem de Mods**: Como o registro é feito por hash de tipo (`typeof(T)`), a ordem em que o Mod A ou o Mod B são carregados pela CPU é irrelevante; o LiteNetLib associa a hash exata da classe independentemente da sequência.
+#### O que o padrão cobre
+- **Pré-envio**: antes de *qualquer* transmissão (`Broadcast`/`SendData`), o mod executa `EnsurePacketsRegistered()`.
+- **Pré-recepção**: `EnsurePacketsRegistered()` é invocado no `Update()` do plugin, re-registrando assim que a instância do manager muda (§4).
+- **Independência de ordem de mods**: o registro é por hash de tipo; a sequência de carga não importa.
+
+#### ⚠️ A janela residual — por que "100%" seria mentira
+
+`FikaClient` e `FikaServer` chamam `PollEvents()` de dentro do **próprio `Update()`** ([FikaClient.cs:312-314](../../references/fika-plugin/Fika.Core/Networking/FikaClient.cs), [FikaServer.cs:546-548](../../references/fika-plugin/Fika.Core/Networking/FikaServer.cs)). A ordem de execução de `Update()` entre `MonoBehaviour`s no Unity é **indeterminada** sem Script Execution Order configurado.
+
+Ou seja: no primeiro frame após a criação do manager, se o `Update()` do `FikaClient` rodar **antes** do `Update()` do seu mod, o pacote é lido com o dicionário ainda vazio. A janela é de um frame e é rara — mas existe, e não se fecha com polling.
+
+**Quem quiser fechá-la de verdade** usa a API de eventos do FIKA (§4.1): o registro acontece no momento em que o manager é criado, não no `Update()` seguinte. Mesmo assim resta uma fresta — o evento dispara **depois** de `await client.Init()`, que já abriu o socket (`FikaClient.cs:179/183`). O padrão híbrido (evento **+** polling como rede de segurança) é o mais próximo de zero que dá para chegar sem patchear o FIKA.
 
 ---
 
@@ -163,6 +183,44 @@ Todo mod do projeto que transmita pacotes via FIKA deve implementar o padrão **
    A hash deriva do nome do tipo, não da versão. Mudou o layout → sufixo `V2`. Opcionalmente, registre um **stub do nome antigo** que apenas consome o payload: não restaura funcionalidade, mas evita que um peer desatualizado derrube a fila de eventos do frame inteiro com `Undefined packet`.
 7. **Enviar Sempre da Main Thread** (fecha a causa 6):
    Produtores em background enfileiram; o `Update()` drena e transmite.
+
+### 4.1 Padrão híbrido — a API de eventos do FIKA + polling
+
+O FIKA expõe uma API oficial de modding em [`Fika.Core/Modding/Events/`](../../references/fika-plugin/Fika.Core/Modding/Events/), com 10 eventos. Dois interessam aqui:
+
+| Evento | Disparado em |
+|---|---|
+| `FikaNetworkManagerCreatedEvent` | [`NetManagerUtils.cs:198`](../../references/fika-plugin/Fika.Core/Networking/NetManagerUtils.cs) (server) e `:207` (client) |
+| `FikaNetworkManagerDestroyedEvent` | `FikaClient.cs:362` · `FikaServer.cs:603` |
+
+Registrar **no evento** resolve a causa 2 na origem: o handler entra no `NetPacketProcessor` no instante em que o manager nasce, sem esperar o próximo `Update()`. O `Skills-Extended` deste repo já usa esse caminho ([`FikaSyncPlugin.cs:37`](../../mods/Skills-Extended/modded/FikaSync/FikaSyncPlugin.cs)).
+
+```csharp
+private void Awake()
+{
+    // UMA vez, no Awake. Ver ressalva 2 abaixo — não dá para desinscrever.
+    FikaEventDispatcher.SubscribeEvent<FikaNetworkManagerCreatedEvent>(OnManagerCreated);
+}
+
+private static void OnManagerCreated(FikaNetworkManagerCreatedEvent e)
+{
+    try   // ver ressalva 3: sem isto, você impede os OUTROS mods de registrarem
+    {
+        EnsurePacketsRegistered();
+    }
+    catch (Exception ex) { Log.LogError($"[NET] registro no evento falhou: {ex}"); }
+}
+```
+
+**Recomendação: híbrido.** Evento **e** `EnsurePacketsRegistered()` no `Update()`/send. O `EnsurePacketsRegistered` já é idempotente (compara a referência da instância), então o polling não custa nada quando o evento já registrou — e cobre o caso de o evento não ter disparado.
+
+Três ressalvas, todas verificadas no código:
+
+1. **A janela não é zero.** O evento dispara **depois** de `await client.Init()`, que já executou `_netClient.Start()` ([`FikaClient.cs:179/183`](../../references/fika-plugin/Fika.Core/Networking/FikaClient.cs)) — o socket já está aberto quando o handler roda.
+2. **Não dá para desinscrever.** `FikaEventDispatcher.SubscribeEvent<T>` embrulha o callback num lambda novo, e `UnsubscribeEvent` faz `-=` de **outro** lambda novo — que não remove nada ([`FikaEventDispatcher.cs`](../../references/fika-plugin/Fika.Core/Modding/FikaEventDispatcher.cs)). Subscrever **uma única vez no `Awake`**; subscrever por raid vaza handlers acumulados.
+3. **Airbag obrigatório no handler do evento.** `DispatchEvent` faz `OnFikaEvent?.Invoke(e)` sem `try/catch`. Como é um multicast delegate, uma exceção no seu handler **interrompe a lista de invocação** — os mods registrados depois do seu nunca recebem o evento e ficam sem registrar os pacotes deles. Um mod mal-comportado aqui causa a causa 1 em todos os outros.
+
+> **Mods já conformes não precisam migrar.** `TRL-SpeakFromTarkov` v1.4.0, `stancesAndCameraPositionSPT4.0.11` v2.11.0 e `TRL-ImmersiveCombatMedicine` v1.11.0 foram fechados e validados in-game com polling puro, que continua correto. O híbrido é **recomendado para código novo**; a coluna "Registro" no §6 documenta qual mecanismo cada mod usa.
 
 ---
 
@@ -254,6 +312,11 @@ namespace Seumod.Networking
 
 ### 5.1 Envelope de Comprimento (obrigatório em todo `INetSerializable`)
 
+> 🔁 **A instância do pacote é REUTILIZADA entre recepções.** `SubscribeNetSerializable` cria **um** `new T()` e o reusa em toda chegada — *"To reduce allocations, this method uses a single internal reference to `T`"* ([NetPacketProcessor.cs:388-397](../../references/fika-plugin/Fika.Core/Networking/LiteNetLib/Utils/NetPacketProcessor.cs)). Duas consequências:
+>
+> - **Vale para `struct` e `class`:** o `Deserialize` **precisa resetar todos os campos logo na entrada**. Campo não escrito nesta leitura guarda o valor da leitura **anterior** — é por isso que o template abaixo zera tudo antes de ler, e não por estilo.
+> - **Só para pacote declarado como `class`:** o handler **não pode reter a referência** nem processar de forma assíncrona — o próximo pacote sobrescreve o mesmo objeto. Os pacotes deste repo são `struct` (o callback recebe cópia por valor), então o risco não se aplica aqui; aplica-se a quem copiar o padrão usando `class`.
+
 ```csharp
 public struct MeuPacoteV2 : INetSerializable   // sufixo V2: a hash vem do NOME do tipo
 {
@@ -274,6 +337,9 @@ public struct MeuPacoteV2 : INetSerializable   // sufixo V2: a hash vem do NOME 
         inner.Put(Valor);
 
         // `checked`: estouro falha visível em vez de truncar o comprimento em silêncio.
+        // ⚠️ Usar SEMPRE o overload de 3 args. O de 1 arg — PutBytesWithLength(inner.Data) —
+        // delega a PutArray(data, 1) e escreve o BUFFER INTEIRO, incluindo o padding além
+        // de Length (NetDataWriter.cs:381). Transmitiria lixo e inflaria o pacote.
         writer.PutBytesWithLength(inner.Data, 0, checked((ushort)inner.Length));
     }
 
@@ -328,22 +394,35 @@ void Update()
 
 ## 6. Inventário & Status dos Mods do Workspace
 
-Auditoria de 2026-07-26 (8 mods do workspace verificados um a um):
+**Critério do universo auditado:** todo mod do repo que declara pelo menos um `INetSerializable` — são **6** dos 41 diretórios de `mods/`. Levantados com `grep -rl "INetSerializable" mods/ --include="*.cs"` (excluindo `original/` e `-bak/`); a contagem cruza com `node scripts/check-packet-hashes.js`. Mods sem pacote próprio não entram na tabela: mesmo referenciando `Fika.Core` por reflection (papel host/client, `FikaBackendUtils` para UI), não tocam o stream compartilhado.
 
-| Mod | Pacotes FIKA | Envelope | Main thread | Airbag + guard | Status |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| **`TRL-SpeakFromTarkov`** | 1 (`SftAudioPacketV2`) | 🟢 | 🟢 fila → `Update` | 🟢 | 🟢 **Conforme** (v1.4.0) |
-| **`stancesAndCameraPositionSPT4.0.11`** | 1 (`StanceSyncPacketV2`) | 🟢 | 🟢 já era | 🟢 | 🟢 **Conforme** (v2.11.0) |
-| **`TRL-ImmersiveCombatMedicine`** | 6 (`*V2`) | 🟢 | 🟢 já era | 🟢 | 🟢 **Conforme** (v1.11.0) |
-| `CustomClasses` | — | — | — | — | ⚪ N/A (só reflection de `FikaBackendUtils` p/ UI) |
-| `TarkovIRL-SPT4.0-beta` | — | — | — | — | ⚪ N/A (zero símbolos de rede) |
-| `TRL-DynamicSpawn` | — | — | — | — | ⚪ N/A (reflection de papel host/client) |
-| `TRL-Fixes` | — | — | — | — | ⚪ N/A (Harmony local) |
-| `TRL-ItemsManagement` | — | — | — | — | ⚪ N/A (nem referencia `Fika.Core`) |
+A coluna **Instalado** reflete `D:/SPT/BepInEx/plugins/` **nesta máquina** — é o que separa risco ativo de dívida documental.
 
-**Fora do escopo da auditoria, mas presentes no repo:** `Skills-Extended` (`LockPickingSyncPacket`), `TrueTrauma` (`TraumaFaintPacket`) e `mods/Band-Aid/` (predecessor standalone do ICM) — nenhum revisado contra este guia.
+Auditoria de 2026-07-26:
 
-> ⚠️ `mods/Band-Aid/` declara `Band_Aid.BandAidHealPacket` e outros 3 com FQN **idêntico** aos stubs legados do ICM. Instalar os dois ao mesmo tempo faz um registro sobrescrever o outro. Hoje só o ICM está instalado; `node scripts/check-packet-hashes.js` avisa se isso mudar.
+| Mod | Pacotes | Envelope | Main thread | Airbag + guard | Registro | Instalado | Status |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| **`TRL-SpeakFromTarkov`** | 1 (`SftAudioPacketV2`) | 🟢 | 🟢 fila → `Update` | 🟢 | polling | 🟢 | 🟢 **Conforme** (v1.4.0) |
+| **`stancesAndCameraPositionSPT4.0.11`** | 1 (`StanceSyncPacketV2`) | 🟢 | 🟢 já era | 🟢 | polling | 🟢 (`RealisticMobility/`) | 🟢 **Conforme** (v2.11.0) |
+| **`TRL-ImmersiveCombatMedicine`** | 6 (`*V2`) | 🟢 | 🟢 já era | 🟢 | polling | 🟢 | 🟢 **Conforme** (v1.11.0) |
+| `Skills-Extended` | 1 (`LockPickingSyncPacket`) | 🔴 | — | 🔴 | evento | ⚪ parcial | 🟠 **Não conforme · inativo** |
+| `TrueTrauma - FINALIZADO` | 1 (`TraumaFaintPacket`) | 🔴 | — | 🔴 | evento | ⚪ não | 🟠 **Não conforme · não instalado** |
+| `Band-Aid` | 4 (`BandAid*`) | 🔴 | — | — | 🔴 `bool` | ⚪ não | 🟠 **Não conforme · não instalado** |
+
+### 6.1 Os três não conformes — detalhe
+
+Nenhum é fork nosso; **não foram alterados**, só auditados. Nenhum representa risco ativo hoje, pelos motivos da coluna Instalado.
+
+- **`Skills-Extended`** — [`LockPickingSyncPacket`](../../mods/Skills-Extended/modded/FikaSync/Packets/LockPickingSyncPacket.cs) serializa direto (`writer.Put`) e lê com `GetString`/`GetInt`/`GetBool` **crus**, que lançam em payload truncado (causa 5); sem envelope, sem flag `Valid`, e sem reset dos campos na entrada do `Deserialize` (§5.1). O callback em [`FikaSyncPlugin.cs:52-59`](../../mods/Skills-Extended/modded/FikaSync/FikaSyncPlugin.cs) **não tem airbag** — uma exceção ali derruba a fila do frame (causa 4). Registra por `FikaNetworkManagerCreatedEvent`, que é o padrão recomendado de §4.1.
+  **Por que é inativo:** `D:/SPT/BepInEx/plugins/SkillsExtended/` contém `SkillsExtended.dll` e `SkillsExtendedCommon.dll`, mas **não** o assembly do Fika sync — o plugin que registra o pacote não está instalado. Se um update trouxer o `SkillsExtendedFika.dll`, isto vira risco ativo.
+- **`TrueTrauma - FINALIZADO`** — [`TraumaFaintPacket`](<../../mods/TrueTrauma - FINALIZADO/FikaPacketManager.cs>) tem os mesmos problemas de serialização (`Put`/`Get*` crus, sem envelope, sem `Valid`, sem reset). Acerta o registro: subscreve `FikaNetworkManagerCreatedEvent` uma única vez, e o `bool _initialized` guarda a **subscrição**, não o registro do pacote — que é o uso correto do flag.
+- **`Band-Aid`** — predecessor standalone do ICM. Usa `bool _initialized` para o **registro** (a antipattern da regra 1 de §4), com um paliativo que reseta o flag quando `IFikaNetworkManager` deixa de estar instanciado — frágil: se o manager for recriado sem que um frame observe `!Instantiated`, o flag continua `true` e o novo `NetPacketProcessor` fica vazio (causa 2).
+
+> ⚠️ **FQN duplicado entre `Band-Aid` e o ICM.** `mods/Band-Aid/` declara `Band_Aid.BandAidHealPacket` e outros 3 com FQN **idêntico** aos stubs legados do ICM. Mesmo FQN → mesma hash: instalar os dois ao mesmo tempo faz um `RegisterPacket` sobrescrever o handler do outro, sem erro no log. Hoje só o ICM está instalado. `node scripts/check-packet-hashes.js` reporta os 4 casos como aviso.
+
+### 6.2 Verificado e descartado
+
+- **`hazelify.StanceSync.dll`** — está instalado em `D:/SPT/BepInEx/plugins/`, e o repo tem `mods/StanceSync/`. Nenhum `.cs` do mod referencia `Fika`, `INetSerializable` ou `NetDataWriter`, e o binário instalado tem **zero** ocorrências da string `Fika`. Não declara pacote — fora do escopo deste guia.
 
 ---
 
@@ -359,8 +438,9 @@ Antes de aprovar qualquer PR ou alteração de mod que envolva sincronização F
 - [ ] **Callback estático**: o delegate registrado sobrevive à destruição de um `MonoBehaviour`. Se o callback for método de instância, ele pode rodar sobre um objeto Unity já destruído.
 
 **Serialização** (causa 5)
-- [ ] **Envelope de comprimento**: `Serialize` grava o corpo com `PutBytesWithLength`; `Deserialize` consome com `TryGetBytesWithLength`.
+- [ ] **Envelope de comprimento**: `Serialize` grava o corpo com `PutBytesWithLength` **no overload de 3 args** (`data, offset, length`) — o de 1 arg escreve o buffer inteiro, com padding; `Deserialize` consome com `TryGetBytesWithLength`.
 - [ ] **Só `TryGet*`**: nenhum `GetString`/`GetInt`/`GetFloat` cru no `Deserialize` — eles lançam em payload truncado.
+- [ ] **Campos resetados na entrada do `Deserialize`**: a instância do pacote é **reutilizada** entre recepções (§5.1); campo não escrito nesta leitura guarda o valor da anterior.
 - [ ] **String lida para local**: `TryGetString` escreve `null` no `out` ao falhar; passar o campo direto destrói o default.
 - [ ] **Flag `Valid`**: corpo truncado não é processado **nem retransmitido** (o host relayaria lixo re-serializado).
 - [ ] **Tipo renomeado se o formato mudou**: sufixo `V2` + bump de versão + nota de release lockstep. Stub do nome antigo registrado para consumir o payload de peers desatualizados.
@@ -384,3 +464,5 @@ Antes de aprovar qualquer PR ou alteração de mod que envolva sincronização F
 |---|---|---|
 | 2026-07-26 | Guilherme + agente | Criação. |
 | 2026-07-26 | Guilherme + agente | Correção factual e ampliação após auditoria dos 8 mods: hash é CRC-16 de 16 bits sobre `typeof(T).ToString()` (não FNV-1/`FullName`); causas raiz 5 (assimetria `Serialize`/`Deserialize`) e 6 (`SendData` fora da main thread corrompendo o `_dataWriter` compartilhado); esclarecido que o airbag não cobre o `Deserialize` e que a exceção derruba a fila do frame no `PollEvents`, não só o lote; §5.1/5.2 com os padrões de envelope e de fila; inventário §6 refeito com os 8 mods reais; checklist reorganizado. |
+| 2026-07-26 | Guilherme + agente | Segunda revisão contra `references/fika-plugin/`, com `arquivo.cs:linha` para cada afirmação. **§2:** causa 1 descrevia "descarta a leitura" — o real é `throw new ParseException` (`NetPacketProcessor.cs:88`); causas 1-3 reescritas para convergir na causa 4, com a cadeia sem `try/catch` (`PollEvents:1436-1441` → `ProcessEvent:443` → `OnNetworkReceive:494` → `ReadAllPackets:135`). **§3:** removido o "cerca 100%" — `PollEvents` roda no `Update()` do `FikaClient`/`FikaServer` e a ordem de `Update()` entre `MonoBehaviour`s é indeterminada, então resta uma janela de um frame. **§4.1 (nova):** padrão híbrido com a API oficial `Fika.Core/Modding/Events/` (`FikaNetworkManagerCreatedEvent`), com as 3 ressalvas verificadas — evento dispara após `Init()`, `UnsubscribeEvent` não remove nada, e `DispatchEvent` sem `try/catch` faz um handler que lança impedir o registro dos mods seguintes. **§5.1:** a instância do pacote é reutilizada (`SubscribeNetSerializable:388`) → reset obrigatório dos campos; aviso sobre o overload de 1 arg de `PutBytesWithLength`. **§6:** critério do universo declarado (6 mods com `INetSerializable`), coluna "Instalado" e "Registro", e §6.1/6.2 com a auditoria dos 3 que estavam fora do escopo (todos não conformes, nenhum ativo) + `StanceSync` verificado e descartado. |
+| 2026-07-26 | Guilherme | chore(harness): faixa AP-NN em vez de AP-01..AP-10 e regra de rename de doc em conventions |
