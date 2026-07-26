@@ -4,14 +4,14 @@ namespace SPT.Launcher.ViewModels
 {
     /// <summary>
     /// Item 030: um item da tela "Mods e Configs" — serve os DOIS eixos (mod opcional e config de
-    /// performance). Gerado a partir do manifesto (optionalMods[] / performanceItems[]).
+    /// performance). Gerado a partir do manifesto (optionalMods[] / optionalConfigs[]).
     /// </summary>
     public class OptionalItemToggle : ReactiveObject
     {
         public string Id { get; set; }
 
         /// <summary>true = eixo de configs de performance; false = eixo de mods opcionais.</summary>
-        public bool IsPerformance { get; set; }
+        public bool IsOptionalConfig { get; set; }
 
         private string _name;
         public string Name

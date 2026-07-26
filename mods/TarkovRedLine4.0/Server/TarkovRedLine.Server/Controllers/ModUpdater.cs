@@ -20,7 +20,7 @@ public class ModUpdaterController : ControllerBase
     // client's request casing (merge preserves base casing); on a case-sensitive host the
     // miss would 404 instead of falling back.
     private static Dictionary<string, string> _fileMapCache = new(StringComparer.OrdinalIgnoreCase);
-    // Item 008: performance overlay pack (Launcher-Updater/config-performance) — rel path -> physical path.
+    // Item 008: performance overlay pack (Launcher-Updater/config-optional) — rel path -> physical path.
     // Item 030: _performanceFileMapCache removido — o pack de performance vive no mods_repo e entra no
     // _fileMapCache comum (servido pelo /download). Ver S-7.
 
@@ -47,8 +47,8 @@ public class ModUpdaterController : ControllerBase
     }
 
     private static string GetModsRepoPath() => Path.Combine(GetUpdaterBasePath(), "mods_repo");
-    // Item 030 (D-9): config-performance passa a viver DENTRO do mods_repo, junto das irmãs config-*.
-    private static string GetPerformancePath() => Path.Combine(GetModsRepoPath(), "BepInEx", "config-performance");
+    // Item 030 (D-9): config-optional passa a viver DENTRO do mods_repo, junto das irmãs config-*.
+    private static string GetOptionalConfigPath() => Path.Combine(GetModsRepoPath(), "BepInEx", "config-optional");
 
     /// <summary>
     /// Versão do server/mods, de Launcher-Updater/server-version.txt (paridade com ServerVersionController).
@@ -99,7 +99,7 @@ public class ModUpdaterController : ControllerBase
     /// Path.Combine with a ROOTED second argument discards the base dir, and
     /// .Replace("..", "") is a no-op for rooted inputs — so the resolved path MUST be
     /// re-checked against the base prefix (with trailing separator, ref: CR-01-06, so a
-    /// sibling like "config-performance-bak" cannot pass by prefix).
+    /// sibling like "config-optional-bak" cannot pass by prefix).
     /// </summary>
     private static bool TryResolveUnder(string baseDir, string relativeInput, out string fullPath)
     {
@@ -295,17 +295,17 @@ public class ModUpdaterController : ControllerBase
         relNorm == prefix || relNorm.StartsWith(prefix + "/", StringComparison.Ordinal);
 
     /// <summary>
-    /// Item 030 (S-4): lê mods_repo/BepInEx/config-performance/performance.json e devolve performanceItems
-    /// (id/name/description), preenchendo <paramref name="pathToPerformanceId"/> (path normalizado sob
-    /// config-performance/ → id do item). "files" é relativo à pasta config-performance/. Validação S-5:
+    /// Item 030 (S-4): lê mods_repo/BepInEx/config-optional/configs-optional.json e devolve optionalConfigs
+    /// (id/name/description), preenchendo <paramref name="pathToOptionalConfigId"/> (path normalizado sob
+    /// config-optional/ → id do item). "files" é relativo à pasta config-optional/. Validação S-5:
     /// arquivo em dois itens é recusado (D-19).
     /// </summary>
-    private static object[] LoadPerformanceDefs(out Dictionary<string, string> pathToPerformanceId, List<string> warnings)
+    private static object[] LoadOptionalConfigDefs(out Dictionary<string, string> pathToOptionalConfigId, List<string> warnings)
     {
-        pathToPerformanceId = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        pathToOptionalConfigId = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         var items = new List<object>();
 
-        string defsPath = Path.Combine(GetPerformancePath(), "performance.json");
+        string defsPath = Path.Combine(GetOptionalConfigPath(), "configs-optional.json");
         if (!System.IO.File.Exists(defsPath)) return items.ToArray();
 
         try
@@ -328,14 +328,14 @@ public class ModUpdaterController : ControllerBase
                     if (f.ValueKind != JsonValueKind.String) continue;
                     string inner = (f.GetString() ?? "").Replace("\\", "/").TrimStart('/');
                     if (inner.Length == 0) continue;
-                    string relNorm = ("bepinex/config-performance/" + inner).ToLowerInvariant();
+                    string relNorm = ("bepinex/config-optional/" + inner).ToLowerInvariant();
 
-                    if (pathToPerformanceId.TryGetValue(relNorm, out var owner))
+                    if (pathToOptionalConfigId.TryGetValue(relNorm, out var owner))
                     {
                         warnings.Add($"arquivo '{relNorm}' está em dois itens de performance ('{owner}' e '{id}') — ignorado (D-19)");
                         continue;
                     }
-                    pathToPerformanceId[relNorm] = id;
+                    pathToOptionalConfigId[relNorm] = id;
                 }
 
                 object name = item.TryGetProperty("name", out var nP) ? nP.Clone() : (object)id;
@@ -345,7 +345,7 @@ public class ModUpdaterController : ControllerBase
         }
         catch (Exception ex)
         {
-            warnings.Add($"performance.json inválido: {ex.Message}");
+            warnings.Add($"configs-optional.json inválido: {ex.Message}");
         }
 
         return items.ToArray();
@@ -353,13 +353,13 @@ public class ModUpdaterController : ControllerBase
 
     /// <summary>
     /// Item 030 (RN-2, lado servidor): avisa quando o mesmo relativo existe em config-force/ e em
-    /// config-performance/. A performance vence (D-1), mas a config forçada — que existe para paridade
+    /// config-optional/. A performance vence (D-1), mas a config forçada — que existe para paridade
     /// de coop — é silenciosamente sobreposta em quem tiver o item ligado; o operador precisa enxergar.
     /// </summary>
-    private static void DetectForcePerformanceCollisions(string modsPath, List<string> warnings)
+    private static void DetectForceOptionalConfigCollisions(string modsPath, List<string> warnings)
     {
         string forceDir = Path.Combine(modsPath, "BepInEx", "config-force");
-        string perfDir = GetPerformancePath();
+        string perfDir = GetOptionalConfigPath();
         if (!Directory.Exists(forceDir) || !Directory.Exists(perfDir)) return;
 
         var perfRels = new HashSet<string>(
@@ -372,7 +372,7 @@ public class ModUpdaterController : ControllerBase
             string rel = Path.GetRelativePath(forceDir, f).Replace("\\", "/").ToLowerInvariant();
             if (perfRels.Contains(rel))
             {
-                warnings.Add($"'{rel}' está em config-force E config-performance — a performance sobrepõe a config forçada em quem tiver o item ligado (RN-2)");
+                warnings.Add($"'{rel}' está em config-force E config-optional — a performance sobrepõe a config forçada em quem tiver o item ligado (RN-2)");
             }
         }
     }
@@ -397,14 +397,14 @@ public class ModUpdaterController : ControllerBase
             }
 
             // Item 030: lê as definições ANTES do scan, para taggear cada arquivo com optionalId/
-            // performanceId. Validações de conteúdo (S-5): recusa path sob user/mods (mod opcional é
+            // optionalConfigId. Validações de conteúdo (S-5): recusa path sob user/mods (mod opcional é
             // client-only, D-15) e arquivo repetido em dois itens (D-19). As mensagens vão pro log.
             var contentWarnings = new List<string>();
             var optionalMods = LoadOptionalDefs(modsPath, out var optionalPrefixes, contentWarnings);
-            var performanceItems = LoadPerformanceDefs(out var pathToPerformanceId, contentWarnings);
+            var optionalConfigs = LoadOptionalConfigDefs(out var pathToOptionalConfigId, contentWarnings);
 
-            const string PerfPrefix = "bepinex/config-performance/";
-            const string PerfPrefixCased = "BepInEx/config-performance/";
+            const string PerfPrefix = "bepinex/config-optional/";
+            const string PerfPrefixCased = "BepInEx/config-optional/";
 
             var allFiles = Directory.GetFiles(modsPath, "*.*", SearchOption.AllDirectories);
 
@@ -415,7 +415,7 @@ public class ModUpdaterController : ControllerBase
 
                 // S-2: os JSON de definição são METADADOS — nunca sincronizados no jogo do player.
                 if (relNorm == "bepinex/plugins-optional.json"
-                    || relNorm == "bepinex/config-performance/performance.json")
+                    || relNorm == "bepinex/config-optional/configs-optional.json")
                 {
                     continue;
                 }
@@ -425,20 +425,20 @@ public class ModUpdaterController : ControllerBase
 
                 if (relNorm.StartsWith(PerfPrefix, StringComparison.Ordinal))
                 {
-                    // S-5: arquivo sob config-performance/ SEM performanceId é erro de conteúdo — não emite
+                    // S-5: arquivo sob config-optional/ SEM optionalConfigId é erro de conteúdo — não emite
                     // (senão viraria config aplicada que o player não consegue desligar).
-                    if (!pathToPerformanceId.TryGetValue(relNorm, out var perfId))
+                    if (!pathToOptionalConfigId.TryGetValue(relNorm, out var perfId))
                     {
-                        contentWarnings.Add($"'{relPath}' não está listado em nenhum item do performance.json — ignorado (não emitido no manifesto)");
+                        contentWarnings.Add($"'{relPath}' não está listado em nenhum item do configs-optional.json — ignorado (não emitido no manifesto)");
                         continue;
                     }
 
-                    // Fonte: aplica em config/ quando o item está ligado (performance-to-config).
-                    files.Add(new { path = relPath, hash, size, performanceId = perfId });
+                    // Fonte: aplica em config/ quando o item está ligado (optional-config-to-config).
+                    files.Add(new { path = relPath, hash, size, optionalConfigId = perfId });
                     fileMap[relPath] = file;
 
                     // D-18: 2º prefixo lógico — MESMO arquivo físico, espelhado no cliente (mirror-reference).
-                    var refPath = "BepInEx/config-performance-ref/" + relPath.Substring(PerfPrefixCased.Length);
+                    var refPath = "BepInEx/config-optional-ref/" + relPath.Substring(PerfPrefixCased.Length);
                     files.Add(new { path = refPath, hash, size });
                     fileMap[refPath] = file;
                     continue;
@@ -484,8 +484,8 @@ public class ModUpdaterController : ControllerBase
                         ["BepInEx/config"] = "preserve-divergent",
                         // Item 030: config de performance aplica em config/ quando ligada (vence force e
                         // config); a pasta-espelho -ref é biblioteca de referência no cliente (D-18).
-                        ["BepInEx/config-performance"] = "performance-to-config",
-                        ["BepInEx/config-performance-ref"] = "mirror-reference",
+                        ["BepInEx/config-optional"] = "optional-config-to-config",
+                        ["BepInEx/config-optional-ref"] = "mirror-reference",
                         // config-server = MIRROR-REFERENCE (biblioteca de referência). Os arquivos em
                         // mods_repo/BepInEx/config-server/ só são espelhados em BepInEx/config-server/ do
                         // cliente (última versão sempre; NÃO deleta extras; NUNCA toca BepInEx/config/).
@@ -519,8 +519,8 @@ public class ModUpdaterController : ControllerBase
                 if (root.TryGetProperty("ignoredFiles", out var ifProp) && ifProp.ValueKind == JsonValueKind.Array)
                     ignoredFiles = ifProp.EnumerateArray().Where(x => x.ValueKind == JsonValueKind.String).Select(x => x.GetString()).Cast<string>().ToArray();
                 // Item 030: optionalGroups foi aposentado (ScanOptionalGroups removido) — mods opcionais e
-                // configs de performance vêm de plugins-optional.json / performance.json (LoadOptionalDefs/
-                // LoadPerformanceDefs) e são taggeados por arquivo no scan acima.
+                // configs de performance vêm de plugins-optional.json / configs-optional.json (LoadOptionalDefs/
+                // LoadOptionalConfigDefs) e são taggeados por arquivo no scan acima.
                 if (root.TryGetProperty("folderRules", out var frProp) && frProp.ValueKind == JsonValueKind.Object)
                     folderRules = JsonSerializer.Deserialize<Dictionary<string, string>>(frProp.GetRawText()) ?? new();
             }
@@ -530,13 +530,13 @@ public class ModUpdaterController : ControllerBase
             }
 
             // S-6 / R-11: garante que o manifesto SEMPRE carregue as regras do item 030, mesmo que o
-            // config.json de produção não as defina — cliente antigo que não conhece "performance-to-config"
+            // config.json de produção não as defina — cliente antigo que não conhece "optional-config-to-config"
             // ignora a regra (TryParse falha), então mover a pasta antes de todos atualizarem é seguro.
-            folderRules["BepInEx/config-performance"] = "performance-to-config";
-            folderRules["BepInEx/config-performance-ref"] = "mirror-reference";
+            folderRules["BepInEx/config-optional"] = "optional-config-to-config";
+            folderRules["BepInEx/config-optional-ref"] = "mirror-reference";
 
-            // RN-2 (lado servidor): avisa quando o mesmo arquivo está em config-force E config-performance.
-            DetectForcePerformanceCollisions(modsPath, contentWarnings);
+            // RN-2 (lado servidor): avisa quando o mesmo arquivo está em config-force E config-optional.
+            DetectForceOptionalConfigCollisions(modsPath, contentWarnings);
             foreach (var w in contentWarnings) Console.WriteLine($"[ModUpdater] item030: {w}");
 
             var manifestObj = new
@@ -549,7 +549,7 @@ public class ModUpdaterController : ControllerBase
                 deleteFiles = deleteFiles,
                 ignoredFiles = ignoredFiles,
                 optionalMods = optionalMods,
-                performanceItems = performanceItems,
+                optionalConfigs = optionalConfigs,
                 folderRules = folderRules,
                 files = files
             };

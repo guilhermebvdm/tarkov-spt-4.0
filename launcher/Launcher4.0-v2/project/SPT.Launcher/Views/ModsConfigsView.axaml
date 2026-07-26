@@ -77,17 +77,17 @@
                     </cc:TrlPanel>
 
                     <!-- COLUNA: CONFIGS DE PERFORMANCE -->
-                    <cc:TrlPanel Grid.Column="2" Title="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=mods_configs_performance_column}">
+                    <cc:TrlPanel Grid.Column="2" Title="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=mods_configs_optional_config_column}">
                         <StackPanel Spacing="10">
                             <Button Classes="ghost sm" Cursor="Hand" HorizontalAlignment="Left"
-                                    IsVisible="{Binding HasPerformanceItems}"
+                                    IsVisible="{Binding HasOptionalConfigs}"
                                     Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=mods_configs_toggle_all}"
-                                    Command="{Binding ToggleAllPerformanceCommand}"/>
+                                    Command="{Binding ToggleAllOptionalConfigCommand}"/>
 
-                            <TextBlock Classes="trl-faint" TextWrapping="Wrap" IsVisible="{Binding !HasPerformanceItems}"
-                                       Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=mods_configs_empty_performance}"/>
+                            <TextBlock Classes="trl-faint" TextWrapping="Wrap" IsVisible="{Binding !HasOptionalConfigs}"
+                                       Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=mods_configs_empty_optional_config}"/>
 
-                            <ItemsControl ItemsSource="{Binding PerformanceItems}">
+                            <ItemsControl ItemsSource="{Binding OptionalConfigs}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <StackPanel Spacing="2" Margin="0,0,0,8">

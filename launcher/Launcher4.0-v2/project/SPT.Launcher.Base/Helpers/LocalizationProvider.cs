@@ -343,14 +343,14 @@ namespace SPT.Launcher.Helpers
         public string mods_configs_intro { get => _mods_configs_intro; set => SetProperty(ref _mods_configs_intro, value); }
         private string _mods_configs_optional_column;
         public string mods_configs_optional_column { get => _mods_configs_optional_column; set => SetProperty(ref _mods_configs_optional_column, value); }
-        private string _mods_configs_performance_column;
-        public string mods_configs_performance_column { get => _mods_configs_performance_column; set => SetProperty(ref _mods_configs_performance_column, value); }
+        private string _mods_configs_optional_config_column;
+        public string mods_configs_optional_config_column { get => _mods_configs_optional_config_column; set => SetProperty(ref _mods_configs_optional_config_column, value); }
         private string _mods_configs_toggle_all;
         public string mods_configs_toggle_all { get => _mods_configs_toggle_all; set => SetProperty(ref _mods_configs_toggle_all, value); }
         private string _mods_configs_empty_optional;
         public string mods_configs_empty_optional { get => _mods_configs_empty_optional; set => SetProperty(ref _mods_configs_empty_optional, value); }
-        private string _mods_configs_empty_performance;
-        public string mods_configs_empty_performance { get => _mods_configs_empty_performance; set => SetProperty(ref _mods_configs_empty_performance, value); }
+        private string _mods_configs_empty_optional_config;
+        public string mods_configs_empty_optional_config { get => _mods_configs_empty_optional_config; set => SetProperty(ref _mods_configs_empty_optional_config, value); }
         private string _mods_configs_new_badge;
         public string mods_configs_new_badge { get => _mods_configs_new_badge; set => SetProperty(ref _mods_configs_new_badge, value); }
         private string _mods_configs_summary_format;

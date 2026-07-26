@@ -16,7 +16,7 @@ namespace SPT.Launcher.Models.Launcher
         /// <summary>Item 030: id do MOD opcional dono deste arquivo.</summary>
         public string optionalId { get; set; }
 
-        /// <summary>Item 030: id do ITEM de config de performance dono deste arquivo (quando sob config-performance/).</summary>
-        public string performanceId { get; set; }
+        /// <summary>Item 030: id do ITEM de config de performance dono deste arquivo (quando sob config-optional/).</summary>
+        public string optionalConfigId { get; set; }
     }
 }

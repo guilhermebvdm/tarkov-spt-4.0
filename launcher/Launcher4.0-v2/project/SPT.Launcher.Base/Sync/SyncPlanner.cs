@@ -80,7 +80,7 @@ namespace SPT.Launcher.Sync
             // Item 030 (D-1): alvos config/<rel> de itens de performance LIGADOS (performance vence force
             // e config); e os alvos que TÊM versão base em config/ ou config-force/ (usado ao desligar
             // performance: se há base, o fluxo normal restaura; se não, o arquivo sai para a quarentena).
-            var performanceTargets = BuildPerformanceTargets(filesToCheck);
+            var optionalConfigTargets = BuildOptionalConfigTargets(filesToCheck);
             var baseSourcePaths = BuildBaseSourcePaths(filesToCheck);
 
             int checkedCount = 0;
@@ -106,26 +106,26 @@ namespace SPT.Launcher.Sync
                 {
                     // Force perde para uma config de performance LIGADA do mesmo alvo (RN-2 — registra e avisa).
                     string forceDest = SyncPathUtil.DeriveSeedTarget(file.path, matchedPrefix);
-                    if (forceDest != null && performanceTargets.Contains(SyncPathUtil.Normalize(forceDest)))
+                    if (forceDest != null && optionalConfigTargets.Contains(SyncPathUtil.Normalize(forceDest)))
                     {
                         plan.Warnings.Add($"{file.path}: config de performance ligada sobrepõe esta config forçada (config-force ignorado)");
                         plan.InfoEntries.Add(new SyncReportEntry
                         {
                             path = forceDest,
-                            action = "performance-suppressed-force",
+                            action = "optional-config-suppressed-force",
                             detail = file.path,
                             timestamp = DateTime.UtcNow,
                         });
                         continue;
                     }
                 }
-                else if (rule != SyncFolderRule.PerformanceToConfig
-                         && (forceTargets.Contains(normalized) || performanceTargets.Contains(normalized)))
+                else if (rule != SyncFolderRule.OptionalConfigToConfig
+                         && (forceTargets.Contains(normalized) || optionalConfigTargets.Contains(normalized)))
                 {
                     // Entrada normal (config/ etc.) cujo alvo é governado por um force OU por performance
                     // ligada: ignorada — quem vence é o canal de maior precedência (resultado independente
                     // da ordem do manifesto).
-                    plan.Warnings.Add($"{file.path} também está em config-force/config-performance — a versão de maior precedência vence (entrada ignorada)");
+                    plan.Warnings.Add($"{file.path} também está em config-force/config-optional — a versão de maior precedência vence (entrada ignorada)");
                     continue;
                 }
 
@@ -265,9 +265,9 @@ namespace SPT.Launcher.Sync
                     continue;
                 }
 
-                // Item 030: config-performance → config. Híbrido (§1.1): EXPLÍCITO ao alternar (aplica/
+                // Item 030: config-optional → config. Híbrido (§1.1): EXPLÍCITO ao alternar (aplica/
                 // remove mesmo divergente, com quarentena); preserve-divergent nos syncs de rotina.
-                if (rule == SyncFolderRule.PerformanceToConfig)
+                if (rule == SyncFolderRule.OptionalConfigToConfig)
                 {
                     string perfTargetRel = SyncPathUtil.DeriveSeedTarget(file.path, matchedPrefix);
                     if (perfTargetRel == null)
@@ -275,17 +275,17 @@ namespace SPT.Launcher.Sync
                         continue; // sem remainder após o prefixo
                     }
 
-                    // Guard de self-target (misconfig: prefixo sem "-performance" → alvo = fonte).
+                    // Guard de self-target (misconfig: prefixo sem "-optional" → alvo = fonte).
                     if (string.Equals(SyncPathUtil.Normalize(perfTargetRel), normalized, StringComparison.Ordinal))
                     {
-                        plan.Warnings.Add($"performance-to-config em '{matchedPrefix}' não tem o sufixo '-performance' (alvo = fonte) — ignorado: {file.path}");
+                        plan.Warnings.Add($"optional-config-to-config em '{matchedPrefix}' não tem o sufixo '-performance' (alvo = fonte) — ignorado: {file.path}");
                         continue;
                     }
 
                     string perfTargetLocal = SyncPathUtil.ToLocalPath(_options.GameRoot, perfTargetRel);
                     string perfTargetNorm = SyncPathUtil.Normalize(perfTargetRel);
-                    bool enabled = _options.IsPerformanceItemEnabled(file.performanceId ?? string.Empty);
-                    bool justToggled = _options.JustToggledIds.Contains(file.performanceId ?? string.Empty);
+                    bool enabled = _options.IsOptionalConfigEnabled(file.optionalConfigId ?? string.Empty);
+                    bool justToggled = _options.JustToggledIds.Contains(file.optionalConfigId ?? string.Empty);
                     bool exists = File.Exists(perfTargetLocal);
 
                     string perfLocalHash = exists
@@ -310,12 +310,12 @@ namespace SPT.Launcher.Sync
                         {
                             plan.Actions.Add(new SyncAction
                             {
-                                RelativePath = file.path,            // fonte: config-performance/<rel>
+                                RelativePath = file.path,            // fonte: config-optional/<rel>
                                 SeedTargetRelative = perfTargetRel,  // destino: config/<rel>
                                 MoveTargetRelative = exists
-                                    ? SyncPathUtil.DeriveDisabledBackup(perfTargetRel, matchedPrefix, SyncPathUtil.DisabledOrigin.PerformanceReplaced)
+                                    ? SyncPathUtil.DeriveDisabledBackup(perfTargetRel, matchedPrefix, SyncPathUtil.DisabledOrigin.OptionalConfigReplaced)
                                     : null,
-                                Kind = SyncActionKind.PerformanceCopy,
+                                Kind = SyncActionKind.OptionalConfigCopy,
                                 Rule = rule,
                                 ServerHash = file.hash,
                                 Reason = justToggled
@@ -386,7 +386,7 @@ namespace SPT.Launcher.Sync
                     plan.Actions.Add(new SyncAction
                     {
                         RelativePath = perfTargetRel,
-                        MoveTargetRelative = SyncPathUtil.DeriveDisabledBackup(perfTargetRel, matchedPrefix, SyncPathUtil.DisabledOrigin.PerformanceRemoved),
+                        MoveTargetRelative = SyncPathUtil.DeriveDisabledBackup(perfTargetRel, matchedPrefix, SyncPathUtil.DisabledOrigin.OptionalConfigRemoved),
                         Kind = SyncActionKind.MoveToDisabled,
                         Rule = rule,
                         Reason = "performance desligada (arquivo sem versão base — movido para a quarentena)",
@@ -519,7 +519,7 @@ namespace SPT.Launcher.Sync
                         || rule == SyncFolderRule.SeedIfMissingByName
                         || rule == SyncFolderRule.MirrorReference
                         || rule == SyncFolderRule.ForceToConfig
-                        || rule == SyncFolderRule.PerformanceToConfig)
+                        || rule == SyncFolderRule.OptionalConfigToConfig)
                     {
                         // Extras in config / config-server folders are never touched (config-server
                         // overwrites to latest but doesn't delete extras — conservative, ref CR-01-03).
@@ -671,18 +671,18 @@ namespace SPT.Launcher.Sync
         /// Item 030: alvos config/&lt;rel&gt; de itens de performance LIGADOS. Usado para a precedência
         /// (performance vence force e config). Item desligado não entra (não suprime nada).
         /// </summary>
-        private HashSet<string> BuildPerformanceTargets(IReadOnlyList<ManifestFile> files)
+        private HashSet<string> BuildOptionalConfigTargets(IReadOnlyList<ManifestFile> files)
         {
             var targets = new HashSet<string>(StringComparer.Ordinal);
 
             foreach (var file in files)
             {
                 string normalized = SyncPathUtil.Normalize(file.path);
-                if (_resolver.Resolve(normalized, out string matchedPrefix) != SyncFolderRule.PerformanceToConfig)
+                if (_resolver.Resolve(normalized, out string matchedPrefix) != SyncFolderRule.OptionalConfigToConfig)
                 {
                     continue;
                 }
-                if (!_options.IsPerformanceItemEnabled(file.performanceId ?? string.Empty))
+                if (!_options.IsOptionalConfigEnabled(file.optionalConfigId ?? string.Empty))
                 {
                     continue; // só itens ligados vencem
                 }

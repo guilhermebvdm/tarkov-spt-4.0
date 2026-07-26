@@ -50,7 +50,7 @@ namespace SPT.Launcher.Sync
             var result = new SyncResult();
             result.Warnings.AddRange(plan.Warnings);
 
-            // Item 030: entries informativas do planner (ex.: performance-suppressed-force, RN-2) —
+            // Item 030: entries informativas do planner (ex.: optional-config-suppressed-force, RN-2) —
             // não são ações de disco, apenas registram algo no relatório.
             result.Entries.AddRange(plan.InfoEntries);
 
@@ -162,7 +162,7 @@ namespace SPT.Launcher.Sync
                                 // Item 030: mesma ação (MoveToDisabled) com label próprio quando é reversão
                                 // de config de performance — separa "removi um extra" de "desliguei performance".
                                 AddEntry(result, action.RelativePath,
-                                    action.Rule == SyncFolderRule.PerformanceToConfig ? "performance-reverted" : "moved-to-disabled",
+                                    action.Rule == SyncFolderRule.OptionalConfigToConfig ? "optional-config-reverted" : "moved-to-disabled",
                                     action.MoveTargetRelative);
                             }
                             catch (Exception ex)
@@ -288,15 +288,15 @@ namespace SPT.Launcher.Sync
 
                             break;
 
-                        case SyncActionKind.PerformanceCopy:
+                        case SyncActionKind.OptionalConfigCopy:
                             try
                             {
-                                // Item 030: config-performance → config. Mesma mecânica não-destrutiva do
+                                // Item 030: config-optional → config. Mesma mecânica não-destrutiva do
                                 // ForceCopy (baixa primeiro; preserva o anterior na quarentena antes de
                                 // sobrescrever), com UMA diferença central: grava BASELINE do que aplicou.
                                 string perfDestination = ResolveUnderRoot(action.SeedTargetRelative); // ref: CR-01-05
 
-                                byte[] perfData = await _downloader(action.RelativePath, cancellationToken); // FONTE (config-performance)
+                                byte[] perfData = await _downloader(action.RelativePath, cancellationToken); // FONTE (config-optional)
 
                                 bool perfTargetExists = File.Exists(perfDestination);
                                 if (perfTargetExists && string.IsNullOrEmpty(action.MoveTargetRelative))
@@ -323,10 +323,10 @@ namespace SPT.Launcher.Sync
                                 // para sempre (SyncPlanner: R1.5) — o híbrido nunca convergiria.
                                 _baseline.SetHash(action.SeedTargetRelative, SyncPathUtil.ComputeMd5(perfData));
 
-                                result.PerformanceApplied++;
+                                result.OptionalConfigApplied++;
                                 if (perfBackupRel != null) result.ConfigsBackedUp++;
                                 ioDone++;
-                                AddEntry(result, action.SeedTargetRelative, "performance-applied",
+                                AddEntry(result, action.SeedTargetRelative, "optional-config-applied",
                                     perfBackupRel != null ? $"{action.Reason} · backup: {perfBackupRel}" : action.Reason);
                             }
                             catch (OperationCanceledException)

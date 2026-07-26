@@ -22,13 +22,13 @@ namespace SPT.Launcher.ViewModels
         private readonly bool _onboarding;
 
         public ObservableCollection<OptionalItemToggle> OptionalMods { get; } = new();
-        public ObservableCollection<OptionalItemToggle> PerformanceItems { get; } = new();
+        public ObservableCollection<OptionalItemToggle> OptionalConfigs { get; } = new();
 
         public bool HasOptionalMods => OptionalMods.Count > 0;
-        public bool HasPerformanceItems => PerformanceItems.Count > 0;
+        public bool HasOptionalConfigs => OptionalConfigs.Count > 0;
 
         public ReactiveCommand<Unit, Unit> ToggleAllOptionalCommand { get; }
-        public ReactiveCommand<Unit, Unit> ToggleAllPerformanceCommand { get; }
+        public ReactiveCommand<Unit, Unit> ToggleAllOptionalConfigCommand { get; }
         public ReactiveCommand<Unit, Unit> SaveAndReturnCommand { get; }
 
         public ModsConfigsViewModel(IScreen Host, bool onboarding = false) : base(Host)
@@ -36,7 +36,7 @@ namespace SPT.Launcher.ViewModels
             _onboarding = onboarding;
 
             ToggleAllOptionalCommand = ReactiveCommand.Create(() => ToggleAll(OptionalMods));
-            ToggleAllPerformanceCommand = ReactiveCommand.Create(() => ToggleAll(PerformanceItems));
+            ToggleAllOptionalConfigCommand = ReactiveCommand.Create(() => ToggleAll(OptionalConfigs));
             SaveAndReturnCommand = ReactiveCommand.Create(SaveAndReturn);
 
             LoadItems();
@@ -64,16 +64,16 @@ namespace SPT.Launcher.ViewModels
                 OptionalMods.Add(BuildToggle(def, enabled, isNew, preferPt));
             }
 
-            foreach (var def in ModsConfigCatalog.PerformanceItems)
+            foreach (var def in ModsConfigCatalog.OptionalConfigs)
             {
                 // Onboarding (D-5): performance DESLIGADA (o modal recomenda ligar quem tem máquina fraca).
-                bool enabled = !_onboarding && settings.IsPerformanceItemEnabled(def.Id);
+                bool enabled = !_onboarding && settings.IsOptionalConfigEnabled(def.Id);
                 bool isNew = !_onboarding && !settings.SeenItemIds.Contains(def.Id);
-                PerformanceItems.Add(BuildToggle(def, enabled, isNew, preferPt));
+                OptionalConfigs.Add(BuildToggle(def, enabled, isNew, preferPt));
             }
 
             this.RaisePropertyChanged(nameof(HasOptionalMods));
-            this.RaisePropertyChanged(nameof(HasPerformanceItems));
+            this.RaisePropertyChanged(nameof(HasOptionalConfigs));
         }
 
         private OptionalItemToggle BuildToggle(ModsConfigCatalog.Item def, bool enabled, bool isNew, bool preferPt)
@@ -81,7 +81,7 @@ namespace SPT.Launcher.ViewModels
             return new OptionalItemToggle
             {
                 Id = def.Id,
-                IsPerformance = def.IsPerformance,
+                IsOptionalConfig = def.IsOptionalConfig,
                 Name = def.ResolveName(preferPt),
                 Description = def.ResolveDescription(preferPt),
                 IsEnabled = enabled,
@@ -104,13 +104,13 @@ namespace SPT.Launcher.ViewModels
         private void SaveAndReturn()
         {
             var settings = LauncherSettingsProvider.Instance;
-            var all = OptionalMods.Concat(PerformanceItems).ToList();
+            var all = OptionalMods.Concat(OptionalConfigs).ToList();
 
             int changedCount = 0;
             foreach (var item in all)
             {
-                bool persisted = item.IsPerformance
-                    ? settings.IsPerformanceItemEnabled(item.Id)
+                bool persisted = item.IsOptionalConfig
+                    ? settings.IsOptionalConfigEnabled(item.Id)
                     : settings.IsOptionalEnabled(item.Id);
 
                 // Persiste sempre no onboarding (grava o estado inicial aceito); fora dele, só quando mudou
@@ -118,7 +118,7 @@ namespace SPT.Launcher.ViewModels
                 // dispara sync (o "was" da versão anterior era sempre == persisted, ramo morto — 🟢 CR).
                 if (_onboarding || item.IsEnabled != persisted)
                 {
-                    if (item.IsPerformance) settings.EnabledPerformanceItems[item.Id] = item.IsEnabled;
+                    if (item.IsOptionalConfig) settings.EnabledOptionalConfigs[item.Id] = item.IsEnabled;
                     else settings.EnabledOptionals[item.Id] = item.IsEnabled;
                 }
 

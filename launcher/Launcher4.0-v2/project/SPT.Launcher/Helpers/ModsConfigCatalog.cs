@@ -6,7 +6,7 @@ namespace SPT.Launcher.Helpers
 {
     /// <summary>
     /// Item 030: catálogo dos itens da tela "Mods e Configs", parseado do manifesto do servidor
-    /// (optionalMods[] / performanceItems[]) e compartilhado entre o ProfileViewModel (que sincroniza e
+    /// (optionalMods[] / optionalConfigs[]) e compartilhado entre o ProfileViewModel (que sincroniza e
     /// alimenta o catálogo + o resumo) e a ModsConfigsViewModel (que lista). Cada item tem name/description
     /// bilíngue (o servidor passa `string` OU `{ pt, en }`), resolvido pelo idioma ativo no consumo.
     /// </summary>
@@ -15,7 +15,7 @@ namespace SPT.Launcher.Helpers
         public sealed class Item
         {
             public string Id { get; init; }
-            public bool IsPerformance { get; init; }
+            public bool IsOptionalConfig { get; init; }
             public string NamePt { get; init; }
             public string NameEn { get; init; }
             public string DescPt { get; init; }
@@ -29,16 +29,16 @@ namespace SPT.Launcher.Helpers
         }
 
         public static IReadOnlyList<Item> OptionalMods { get; private set; } = new List<Item>();
-        public static IReadOnlyList<Item> PerformanceItems { get; private set; } = new List<Item>();
+        public static IReadOnlyList<Item> OptionalConfigs { get; private set; } = new List<Item>();
 
         /// <summary>Atualiza o catálogo a partir dos dois arrays do manifesto (tolerante a ausência/shape).</summary>
-        public static void UpdateFromManifest(JToken optionalModsToken, JToken performanceItemsToken)
+        public static void UpdateFromManifest(JToken optionalModsToken, JToken optionalConfigsToken)
         {
-            OptionalMods = Parse(optionalModsToken, isPerformance: false);
-            PerformanceItems = Parse(performanceItemsToken, isPerformance: true);
+            OptionalMods = Parse(optionalModsToken, isOptionalConfig: false);
+            OptionalConfigs = Parse(optionalConfigsToken, isOptionalConfig: true);
         }
 
-        private static List<Item> Parse(JToken token, bool isPerformance)
+        private static List<Item> Parse(JToken token, bool isOptionalConfig)
         {
             var result = new List<Item>();
             if (token is not JArray array) return result;
@@ -54,7 +54,7 @@ namespace SPT.Launcher.Helpers
                 result.Add(new Item
                 {
                     Id = id,
-                    IsPerformance = isPerformance,
+                    IsOptionalConfig = isOptionalConfig,
                     NamePt = namePt,
                     NameEn = nameEn,
                     DescPt = descPt,

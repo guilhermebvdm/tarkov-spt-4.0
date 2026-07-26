@@ -64,7 +64,7 @@ namespace SPT.Launcher.Helpers
             // Incrementar EXPECTED_CONFIG_VERSION a cada mudança estrutural no config.
             // Quando a versão salva < esperada, força re-save para limpar campos obsoletos
             // e gravar novos campos com defaults, sem perder dados do jogador.
-            const int EXPECTED_CONFIG_VERSION = 5; // v5: item 030 — EnabledPerformanceItems, ModsConfigsOnboardingDone, PendingApply, SeenItemIds
+            const int EXPECTED_CONFIG_VERSION = 5; // v5: item 030 — EnabledOptionalConfigs, ModsConfigsOnboardingDone, PendingApply, SeenItemIds
             if (settings.ConfigVersion < EXPECTED_CONFIG_VERSION)
             {
                 LogManager.Instance.Info($"[Settings] Config desatualizado (v{settings.ConfigVersion} → v{EXPECTED_CONFIG_VERSION}). Atualizando...");
@@ -277,11 +277,11 @@ namespace SPT.Launcher.Helpers
         // === Item 030: tela "Mods e Configs" — eixo de configs de performance + onboarding ===
 
         /// <summary>Item 030: itemId → enabled do eixo de configs de PERFORMANCE (espelha EnabledOptionals).</summary>
-        private Dictionary<string, bool> _enabledPerformanceItems = new Dictionary<string, bool>();
-        public Dictionary<string, bool> EnabledPerformanceItems
+        private Dictionary<string, bool> _enabledOptionalConfigs = new Dictionary<string, bool>();
+        public Dictionary<string, bool> EnabledOptionalConfigs
         {
-            get => _enabledPerformanceItems;
-            set => SetProperty(ref _enabledPerformanceItems, value);
+            get => _enabledOptionalConfigs;
+            set => SetProperty(ref _enabledOptionalConfigs, value);
         }
 
         /// <summary>Item 030 (D-17/CA-030.16b): fonte de verdade do onboarding — o estado do disco não decide.</summary>
@@ -317,16 +317,16 @@ namespace SPT.Launcher.Helpers
         }
 
         /// <summary>Item 030: um item de config de performance está ligado?</summary>
-        public bool IsPerformanceItemEnabled(string itemId)
+        public bool IsOptionalConfigEnabled(string itemId)
         {
-            return !string.IsNullOrEmpty(itemId) && _enabledPerformanceItems.TryGetValue(itemId, out bool enabled) && enabled;
+            return !string.IsNullOrEmpty(itemId) && _enabledOptionalConfigs.TryGetValue(itemId, out bool enabled) && enabled;
         }
 
         /// <summary>Item 030: define o estado de um item de performance e salva.</summary>
-        public void SetPerformanceItemEnabled(string itemId, bool enabled)
+        public void SetOptionalConfigEnabled(string itemId, bool enabled)
         {
             if (string.IsNullOrEmpty(itemId)) return;
-            _enabledPerformanceItems[itemId] = enabled;
+            _enabledOptionalConfigs[itemId] = enabled;
             SaveSettings();
         }
 
@@ -380,7 +380,7 @@ namespace SPT.Launcher.Helpers
         }
 
         // Item 030 (D-12): UsePerformanceConfigs (overlay global do item 008) removido — a performance
-        // agora é por item na tela "Mods e Configs", como regra de pasta config-performance.
+        // agora é por item na tela "Mods e Configs", como regra de pasta config-optional.
 
         /// <summary>
         /// Modo homolog: quando ligado, as rotas do mod TarkovRedLine ganham o prefixo "/homolog"

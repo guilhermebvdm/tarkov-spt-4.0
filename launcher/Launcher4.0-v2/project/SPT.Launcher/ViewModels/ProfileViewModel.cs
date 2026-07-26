@@ -290,7 +290,7 @@ namespace SPT.Launcher.ViewModels
         {
             var settings = LauncherSettingsProvider.Instance;
             var mods = ModsConfigCatalog.OptionalMods;
-            var perf = ModsConfigCatalog.PerformanceItems;
+            var perf = ModsConfigCatalog.OptionalConfigs;
 
             if (mods.Count == 0 && perf.Count == 0)
             {
@@ -301,7 +301,7 @@ namespace SPT.Launcher.ViewModels
             }
 
             int modsOn = mods.Count(m => settings.IsOptionalEnabled(m.Id));
-            int perfOn = perf.Count(x => settings.IsPerformanceItemEnabled(x.Id));
+            int perfOn = perf.Count(x => settings.IsOptionalConfigEnabled(x.Id));
             ModsConfigsSummary = string.Format(LocalizationProvider.Instance.mods_configs_summary_format,
                 modsOn, mods.Count, perfOn, perf.Count);
             HasModsConfigsNew = mods.Concat(perf).Any(i => !settings.SeenItemIds.Contains(i.Id));
@@ -538,7 +538,7 @@ namespace SPT.Launcher.ViewModels
                 // Item 030: catálogo dos itens da tela "Mods e Configs" (mods opcionais + configs de
                 // performance). O resumo na tela logada e a própria tela leem daqui. Substitui o modelo
                 // antigo (optionalGroups/performanceOverlay + toggles inline).
-                ModsConfigCatalog.UpdateFromManifest(manifest["optionalMods"], manifest["performanceItems"]);
+                ModsConfigCatalog.UpdateFromManifest(manifest["optionalMods"], manifest["optionalConfigs"]);
                 Dispatcher.UIThread.Post(RefreshModsConfigsSummary);
 
                 // Se as hashes são iguais, já terminamos o trabalho inicial (que era só montar a UI)
@@ -593,7 +593,7 @@ namespace SPT.Launcher.ViewModels
                 var resolver = new SyncRuleResolver(folderRules);
                 var baseline = SyncBaseline.Load(Path.Combine(SyncStateDir, "sync-state.json"));
 
-                // Item 030: o canal config-performance agora é regra de pasta (performance-to-config),
+                // Item 030: o canal config-optional agora é regra de pasta (optional-config-to-config),
                 // não overlay de manifesto — o SyncManifestOverlay foi aposentado (D-13). Os discriminadores
                 // vêm das preferências: mods opcionais e itens de performance ligados, mais os ids que o
                 // player acabou de alternar (PendingApply) — para estes a aplicação é explícita.
@@ -610,7 +610,7 @@ namespace SPT.Launcher.ViewModels
                     ExcludeFromCleanup = LauncherSettingsProvider.Instance.ExcludeFromCleanup ?? Array.Empty<string>(),
                     ManagedPaths = managedPaths,
                     IsOptionalModEnabled = id => LauncherSettingsProvider.Instance.IsOptionalEnabled(id),
-                    IsPerformanceItemEnabled = id => LauncherSettingsProvider.Instance.IsPerformanceItemEnabled(id),
+                    IsOptionalConfigEnabled = id => LauncherSettingsProvider.Instance.IsOptionalConfigEnabled(id),
                     JustToggledIds = justToggled,
                 };
 
@@ -755,8 +755,8 @@ namespace SPT.Launcher.ViewModels
 
         private SyncEngine BuildSyncEngine(string gamePath, SyncBaseline baseline)
         {
-            // Item 030: um downloader só — o canal config-performance virou regra de pasta (as duas
-            // entradas lógicas config-performance/ e config-performance-ref/ baixam do /download comum,
+            // Item 030: um downloader só — o canal config-optional virou regra de pasta (as duas
+            // entradas lógicas config-optional/ e config-optional-ref/ baixam do /download comum,
             // servidas pelo _fileMapCache do servidor). O overlay/performance-download foi aposentado.
             SyncDownloader downloader = (path, ct) => Task.Run(() => RequestHandler.DownloadModFile(path), ct);
 

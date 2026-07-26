@@ -41,9 +41,9 @@ namespace SPT.Launcher.Sync
 
         /// <summary>
         /// Item 030: um ITEM de config de performance (id) está ligado? Não existia no motor antigo —
-        /// sem isto o planner não distingue ligar de desligar no canal PerformanceToConfig.
+        /// sem isto o planner não distingue ligar de desligar no canal OptionalConfigToConfig.
         /// </summary>
-        public Func<string, bool> IsPerformanceItemEnabled { get; set; } = _ => false;
+        public Func<string, bool> IsOptionalConfigEnabled { get; set; } = _ => false;
 
         /// <summary>
         /// Item 030: ids que o player ACABOU de alternar (vem de PendingApply, persistido). Para eles a

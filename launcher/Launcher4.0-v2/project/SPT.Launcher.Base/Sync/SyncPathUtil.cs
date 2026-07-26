@@ -60,7 +60,7 @@ namespace SPT.Launcher.Sync
         /// NB: o default do config-server (MirrorReference) NÃO usa isto — espelha "config-server/&lt;rel&gt;"
         /// direto, sem derivar alvo em "config/". Hoje só o config-force (e o seed opt-in) derivam alvo.
         /// </summary>
-        private static readonly string[] SourceFolderSuffixes = { "-server", "-force", "-performance" };
+        private static readonly string[] SourceFolderSuffixes = { "-server", "-force", "-optional" };
 
         /// <summary>
         /// Item 030 (D-14/D-20): origem de um arquivo posto em quarentena, para que backups de canais
@@ -68,16 +68,16 @@ namespace SPT.Launcher.Sync
         /// Force e MirrorExtra ficam na RAIZ (formato legado, já em produção desde a 2.3.0 — mover
         /// partiria os backups do force em dois lugares, o oposto do objetivo de D-14). As origens NOVAS
         /// ganham subpasta: mod opcional (optional), config do player sobrescrita ao ligar performance
-        /// (performance/replaced), config do servidor retirada ao desligar (performance/removed).
+        /// (optional-config/replaced), config do servidor retirada ao desligar (optional-config/removed).
         /// </summary>
-        public enum DisabledOrigin { MirrorExtra, Force, Optional, PerformanceReplaced, PerformanceRemoved }
+        public enum DisabledOrigin { MirrorExtra, Force, Optional, OptionalConfigReplaced, OptionalConfigRemoved }
 
         /// <summary>Segmento de subpasta por origem — null = raiz de "&lt;pasta&gt;-disabled/" (Force/MirrorExtra).</summary>
         public static string OriginSegment(DisabledOrigin origin) => origin switch
         {
             DisabledOrigin.Optional => "optional",
-            DisabledOrigin.PerformanceReplaced => "performance/replaced",
-            DisabledOrigin.PerformanceRemoved => "performance/removed",
+            DisabledOrigin.OptionalConfigReplaced => "optional-config/replaced",
+            DisabledOrigin.OptionalConfigRemoved => "optional-config/removed",
             _ => null, // MirrorExtra, Force
         };
 

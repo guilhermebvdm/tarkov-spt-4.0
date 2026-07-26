@@ -147,7 +147,7 @@ namespace SPT.Launcher.ViewModels
         // Internal state
         private SyncPlan _plan;
         private SyncBaseline _baseline;
-        // Item 030: _performanceOverlay removido — config-performance virou regra de pasta (D-13).
+        // Item 030: _performanceOverlay removido — config-optional virou regra de pasta (D-13).
         private CancellationTokenSource _cts;
         private readonly string _gamePath;
 
@@ -200,12 +200,12 @@ namespace SPT.Launcher.ViewModels
                 var folderRules = manifest["folderRules"]?.ToObject<Dictionary<string, string>>();
 
                 // Item 030: catálogo dos itens da tela "Mods e Configs" (mesmo modelo do ProfileViewModel).
-                ModsConfigCatalog.UpdateFromManifest(manifest["optionalMods"], manifest["performanceItems"]);
+                ModsConfigCatalog.UpdateFromManifest(manifest["optionalMods"], manifest["optionalConfigs"]);
 
                 TotalFiles = files.Count;
                 MaxProgress = Math.Max(1, files.Count);
 
-                // Item 030: sem overlay — config-performance virou regra de pasta. Discriminadores das prefs.
+                // Item 030: sem overlay — config-optional virou regra de pasta. Discriminadores das prefs.
                 IReadOnlyList<ManifestFile> effectiveFiles = files;
                 var justToggled = LauncherSettingsProvider.Instance.PendingApply
                     .Where(id => id != SyncTriggers.PendingApplyMarker)
@@ -222,7 +222,7 @@ namespace SPT.Launcher.ViewModels
                     ExcludeFromCleanup = LauncherSettingsProvider.Instance.ExcludeFromCleanup ?? Array.Empty<string>(),
                     ManagedPaths = managedPaths,
                     IsOptionalModEnabled = id => LauncherSettingsProvider.Instance.IsOptionalEnabled(id),
-                    IsPerformanceItemEnabled = id => LauncherSettingsProvider.Instance.IsPerformanceItemEnabled(id),
+                    IsOptionalConfigEnabled = id => LauncherSettingsProvider.Instance.IsOptionalConfigEnabled(id),
                     JustToggledIds = justToggled,
                 };
 

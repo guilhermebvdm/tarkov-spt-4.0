@@ -69,7 +69,7 @@ namespace SPT.Launcher.Tests.Sync
         }
 
         public ManifestFile Entry(string path, string content, bool optional = false,
-            string optionalId = null, string performanceId = null)
+            string optionalId = null, string optionalConfigId = null)
         {
             ServerContent[path] = System.Text.Encoding.UTF8.GetBytes(content);
 
@@ -80,7 +80,7 @@ namespace SPT.Launcher.Tests.Sync
                 size = content.Length,
                 optional = optional,
                 optionalId = optionalId,
-                performanceId = performanceId,
+                optionalConfigId = optionalConfigId,
             };
         }
 
@@ -115,18 +115,18 @@ namespace SPT.Launcher.Tests.Sync
             GameRoot = Root,
             DevMode = devMode,
             IsOptionalModEnabled = optionalEnabled ?? (_ => false),
-            IsPerformanceItemEnabled = performanceEnabled ?? (_ => false),
+            IsOptionalConfigEnabled = performanceEnabled ?? (_ => false),
             JustToggledIds = justToggled ?? Array.Empty<string>(),
         };
 
-        /// <summary>Resolver com config-performance ativo via folderRules explícito (o server real faz isso).</summary>
+        /// <summary>Resolver com config-optional ativo via folderRules explícito (o server real faz isso).</summary>
         public static SyncRuleResolver ResolverWithPerformance() =>
             new SyncRuleResolver(new Dictionary<string, string>
             {
-                ["config-performance"] = "performance-to-config",
-                ["BepInEx/config-performance"] = "performance-to-config",
-                ["config-performance-ref"] = "mirror-reference",
-                ["BepInEx/config-performance-ref"] = "mirror-reference",
+                ["config-optional"] = "optional-config-to-config",
+                ["BepInEx/config-optional"] = "optional-config-to-config",
+                ["config-optional-ref"] = "mirror-reference",
+                ["BepInEx/config-optional-ref"] = "mirror-reference",
             });
 
         public async Task<(SyncPlan Plan, SyncResult Result, SyncBaseline Baseline)> PlanAndRunAsync(

@@ -23,14 +23,14 @@ namespace SPT.Launcher.Tests.Sync
         {
             string optional = SyncPathUtil.DeriveDisabledBackup("BepInEx/config/x.cfg", "bepinex/config-force",
                 SyncPathUtil.DisabledOrigin.Optional);
-            string replaced = SyncPathUtil.DeriveDisabledBackup("BepInEx/config/x.cfg", "bepinex/config-performance",
-                SyncPathUtil.DisabledOrigin.PerformanceReplaced);
-            string removed = SyncPathUtil.DeriveDisabledBackup("BepInEx/config/x.cfg", "bepinex/config-performance",
-                SyncPathUtil.DisabledOrigin.PerformanceRemoved);
+            string replaced = SyncPathUtil.DeriveDisabledBackup("BepInEx/config/x.cfg", "bepinex/config-optional",
+                SyncPathUtil.DisabledOrigin.OptionalConfigReplaced);
+            string removed = SyncPathUtil.DeriveDisabledBackup("BepInEx/config/x.cfg", "bepinex/config-optional",
+                SyncPathUtil.DisabledOrigin.OptionalConfigRemoved);
 
             Assert.Equal("BepInEx/config-disabled/optional/x.cfg", optional);
-            Assert.Equal("BepInEx/config-disabled/performance/replaced/x.cfg", replaced);
-            Assert.Equal("BepInEx/config-disabled/performance/removed/x.cfg", removed);
+            Assert.Equal("BepInEx/config-disabled/optional-config/replaced/x.cfg", replaced);
+            Assert.Equal("BepInEx/config-disabled/optional-config/removed/x.cfg", removed);
         }
 
         // G-7: o MESMO nome de arquivo vindo das três origens cai em três caminhos distintos — nenhuma
@@ -42,8 +42,8 @@ namespace SPT.Launcher.Tests.Sync
                 SyncPathUtil.DisabledOrigin.Force);
             string optional = SyncPathUtil.DeriveDisabledBackup("BepInEx/config/dupe.cfg", "bepinex/config-force",
                 SyncPathUtil.DisabledOrigin.Optional);
-            string perf = SyncPathUtil.DeriveDisabledBackup("BepInEx/config/dupe.cfg", "bepinex/config-performance",
-                SyncPathUtil.DisabledOrigin.PerformanceReplaced);
+            string perf = SyncPathUtil.DeriveDisabledBackup("BepInEx/config/dupe.cfg", "bepinex/config-optional",
+                SyncPathUtil.DisabledOrigin.OptionalConfigReplaced);
 
             Assert.NotEqual(force, optional);
             Assert.NotEqual(force, perf);
@@ -56,7 +56,7 @@ namespace SPT.Launcher.Tests.Sync
         public void Disabled_segment_guard_covers_the_new_subfolders()
         {
             Assert.True(SyncPathUtil.ContainsDisabledSegment("bepinex/config-disabled/optional/x.cfg"));
-            Assert.True(SyncPathUtil.ContainsDisabledSegment("bepinex/config-disabled/performance/replaced/x.cfg"));
+            Assert.True(SyncPathUtil.ContainsDisabledSegment("bepinex/config-disabled/optional-config/replaced/x.cfg"));
         }
     }
 }
