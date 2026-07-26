@@ -66,7 +66,10 @@ namespace TRL_SpeakFromTarkov.Core
             // Wiring Events
             capturer.OnAudioDataCaptured += processor.ProcessAudio;
             processor.OnOpusDataEncoded += (opusData, voiceLevel) => {
-                // TRANSMISSÃO DIRETA THREAD-SAFE (Imune a quedas de FPS do jogo!)
+                // Roda na THREAD DE CAPTURA. Broadcast apenas ENFILEIRA; a transmissão acontece no
+                // Update do SftNetwork (main thread), porque FikaClient/FikaServer serializam todos
+                // os envios num único NetDataWriter de instância sem lock — enviar daqui corromperia
+                // esse buffer compartilhado e colocaria um datagrama malformado na rede.
                 network.Broadcast(opusData, CurrentChannel, voiceLevel);
 
                 if (VoIPPlugin.EnableEcho != null && VoIPPlugin.EnableEcho.Value && !processor.IsMuted)
