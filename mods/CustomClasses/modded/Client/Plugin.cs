@@ -10,7 +10,7 @@ namespace CustomClasses.Client;
 ///     Busca os fatores do server (rota /customclasses/skill-multipliers) e faz Prefix em
 ///     AbstractSkillClass.OnTrigger. UI (linha+tooltip) vem na Fatia 2.
 /// </summary>
-[BepInPlugin("customclasses.mdj.client", "CustomClasses", "0.10.1")]
+[BepInPlugin("customclasses.mdj.client", "CustomClasses", "0.11.1")]
 [BepInDependency("com.SPT.core", "4.0.0")]
 [BepInDependency("me.sol.sain", BepInDependency.DependencyFlags.SoftDependency)]   // (050.4 SAIN) carrega após o SAIN se presente
 public class Plugin : BaseUnityPlugin
@@ -168,6 +168,7 @@ public class Plugin : BaseUnityPlugin
         new ShootRecoilPatch().Enable();                    // (050.2) 🔻 Médico — recuo ×1.25 (Shaky Hands) + Adrenaline ×0.7
         new AimPunchPatch().Enable();                       // (050.2) 🔻 Furtivo — aim-punch ×1.5 (Rattled)
         new HolsterDrawSpeedPatch().Enable();               // (080) 🔫 Caçador/Fuzileiro/Furtivo — saque do holster mais rápido
+        new ShotgunReloadPatch().Enable();                  // (084) 🔫 Tanque — recarga de escopeta tubular mais rápida
         new MedrosoDamagePatch().Enable();                  // (082) 🔻 Saqueador — tremor ao levar tiro
         Medroso.Init();                                     // (082) hook de supressão/near-miss (GClass897.OnShoot)
         new LocalHitTypePatch().Enable();                   // (review) captura tipo do dano local (barra aim-punch em queda)
@@ -191,6 +192,14 @@ public class Plugin : BaseUnityPlugin
         catch (System.Exception ex)
         {
             Log.LogError($"[CustomClasses] (050.4) SoundRadiusPatch falhou ao aplicar: {ex.Message}");
+        }
+        try
+        {
+            new SilentKnifePatch().Enable();                // (083) 👻 Furtivo — faca sem som (BaseSoundPlayer.PlayClip; tipo obfuscado-ish)
+        }
+        catch (System.Exception ex)
+        {
+            Log.LogError($"[CustomClasses] (083) SilentKnifePatch falhou ao aplicar: {ex.Message}");
         }
         // 050.4b — Bunker recuo (branch no ShootRecoilPatch já ligado) + Sharpshooter ADS (branch no AdsSpeedPatch já ligado)
         try

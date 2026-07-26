@@ -369,3 +369,97 @@ internal class LocalHitTypePatch : ModulePatch
         }
     }
 }
+
+/// <summary>
+///     084 — 🔫 <b>Recarga Rápida Escopeta</b> (Tanque): acelera a recarga de escopetas de TUBO (shell-a-shell). A
+///     mecânica elite "2 cartuchos por vez" (Mag Drills) NÃO existe no EFT 0.16.9 — o fallback do épico é reduzir o
+///     TEMPO. Como a recarga tubular é 100% dirigida por eventos de animação (cada shell = 1 keyframe), acelerar a
+///     animação de reload acelera a cadência shell-a-shell na mesma proporção.
+///     <para>
+///     Alvo: <c>FirearmController.SetAnimatorAndProceduralValues()</c> — o funil REAL que empurra o reload speed
+///     (lê o CAMPO <c>BuffInfo.ReloadSpeed</c> direto e o repassa a DOIS animators em lockstep: o da ARMA
+///     (<c>FirearmsAnimator</c>) e o do CORPO (<c>MovementContext.PlayerAnimator</c>). ⚠️ O getter
+///     <c>GetWeaponReloadAnimationSpeed()</c> é CÓDIGO MORTO no 0.16.9 (nada o chama), então o molde do
+///     <see cref="ReloadSpeedPatch"/> (Postfix no getter) não serve — este ponto é o funil de fato.
+///     </para>
+///     <para>
+///     <b>Estratégia (code-review CR-084):</b> em vez de re-setar SÓ o animator da arma num Postfix (o que
+///     dessincronizaria mãos×corpo, pois o base atualiza os dois), o <b>Prefix ESCALA o campo</b>
+///     <c>BuffInfo.ReloadSpeed ÷ t</c> ANTES do método rodar → os DOIS animators recebem o valor já acelerado, em
+///     lockstep, sem tocar no draw/swap (a branch de quickdraw-fast preserva o próprio <c>draw</c>). O <b>Postfix
+///     RESTAURA</b> o valor original (via <c>__state</c>) → não acumula entre syncs nem vaza para outros consumidores
+///     do campo. Persiste enquanto a escopeta estiver em mãos (o método roda no saque/sync/início de reload).
+///     </para>
+///     <para>Gate: MainPlayer local (075) + Tank + <c>WeapClass=="shotgun"</c> + <c>Weapon.SupportsInternalReload</c>.
+///     ⚠️ O <c>SupportsInternalReload</c> sozinho pega bolt-action (Mosin), SKS, revólveres e a M32 (todos
+///     <c>InternalMagazine</c>) — o <c>WeapClass=="shotgun"</c> restringe às 8 escopetas de tubo (MR-133/153, M870,
+///     KS-23M, 590A1, MP-155, MTs-255, Benelli M3). Saiga (<c>ExternalMagazine</c>) e bicano (<c>OnlyBarrel</c>) ficam
+///     de fora corretamente.</para>
+/// </summary>
+internal class ShotgunReloadPatch : ModulePatch
+{
+    protected override MethodBase GetTargetMethod()
+    {
+        return AccessTools.Method(typeof(Player.FirearmController), "SetAnimatorAndProceduralValues");
+    }
+
+    // __state = NaN → "não escalei" (Postfix não restaura). Senão = o ReloadSpeed original a restaurar.
+    [PatchPrefix]
+    private static void Prefix(Player.FirearmController __instance, out float __state)
+    {
+        __state = float.NaN;
+        try
+        {
+            if (PerksConfig.ShotgunReloadEnabled?.Value != true || !SkillMultipliers.IsLocalClass("Tank"))
+            {
+                return;
+            }
+
+            if (!ReferenceEquals(__instance, Singleton<GameWorld>.Instance?.MainPlayer?.HandsController))
+            {
+                return;   // só a arma do player local (075)
+            }
+
+            var weapon = __instance.Item;
+            // WeapClass=="shotgun" é OBRIGATÓRIO: SupportsInternalReload sozinho pega Mosin/SKS/revólver/M32.
+            if (weapon == null || weapon.WeapClass != "shotgun" || !weapon.SupportsInternalReload)
+            {
+                return;   // só escopeta de TUBO; Saiga (ExternalMagazine) e bicano (OnlyBarrel) ficam de fora
+            }
+
+            var buff = __instance.BuffInfo;   // = gclass2250_0 (pode ser null antes do 1º sync de skill)
+            if (buff == null)
+            {
+                return;
+            }
+
+            var t = PerksConfig.ShotgunReloadTime?.Value ?? 1f;   // TEMPO de recarga (0.6 = 40% mais rápido)
+            if (t > 0f && t < 1f)
+            {
+                __state = buff.ReloadSpeed;         // salva o original p/ o Postfix restaurar
+                buff.ReloadSpeed /= t;              // escala ANTES do push → arma + corpo recebem ×(1/t) em lockstep
+            }
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log?.LogError($"[CustomClasses] (084) shotgun reload (pre) falhou: {ex.Message}");
+        }
+    }
+
+    [PatchPostfix]
+    private static void Postfix(Player.FirearmController __instance, float __state)
+    {
+        try
+        {
+            // restaura o campo (não acumula a cada sync; não vaza p/ FixSpeed/AimMovementSpeed etc. que leem o mesmo GClass2250)
+            if (!float.IsNaN(__state) && __instance.BuffInfo != null)
+            {
+                __instance.BuffInfo.ReloadSpeed = __state;
+            }
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log?.LogError($"[CustomClasses] (084) shotgun reload (post) falhou: {ex.Message}");
+        }
+    }
+}

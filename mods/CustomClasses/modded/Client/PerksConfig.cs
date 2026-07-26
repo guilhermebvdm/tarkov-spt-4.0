@@ -115,6 +115,7 @@ internal static class PerksConfig
     internal static ConfigEntry<float>? GhostStepSoundRadius;
     internal static ConfigEntry<bool>? RattledEnabled;
     internal static ConfigEntry<float>? RattledAimPunch;
+    internal static ConfigEntry<bool>? SilentKnifeEnabled;   // 083 (Morte Silenciosa — faca sem som)
 
     // 6 · Scavenger
     internal static ConfigEntry<bool>? QuickHandsEnabled;   // 061: busca 2 contêineres (bônus elite da Search, antecipado)
@@ -153,6 +154,8 @@ internal static class PerksConfig
     internal static ConfigEntry<float>? PackMuleTankCarryBonus;
     internal static ConfigEntry<bool>? LoudOperatorTankEnabled;   // desdobrado do compartilhado (2026-07-10)
     internal static ConfigEntry<float>? LoudOperatorTankSoundRadius;
+    internal static ConfigEntry<bool>? ShotgunReloadEnabled;     // 084 (recarga de escopeta tubular mais rápida)
+    internal static ConfigEntry<float>? ShotgunReloadTime;       // 084
 
     // 9 · Vanilla Skill Fixes — Weapon Mastery (058; renumerado 8→9 no 067)
     internal static ConfigEntry<bool>? WeaponMasteryEnabled;
@@ -406,6 +409,12 @@ internal static class PerksConfig
             new ConfigDescription(
                 "Multiplicador do tranco ao levar dano (1.50 = +50%). / Aim-punch multiplier when hit (1.50 = +50%).",
                 new AcceptableValueRange<float>(1f, 3f)));
+        // 083 — Morte Silenciosa (Furtivo): a faca não faz som (sacar + golpe + acerto). Um único choke de áudio
+        // (BaseSoundPlayer.PlayClip) gateado por faca + classe do EMISSOR — cobre coop (você não ouve a faca do peer
+        // Furtivo). A IA nunca foi alertada por SOM de faca no vanilla (só pelo dano), então não há nada a suprimir lá.
+        SilentKnifeEnabled = config.Bind(
+            SecStealth, "Silent Knife — Enabled", true,
+            "Furtivo: a faca não faz barulho (sacar, golpear e acertar são silenciosos). / Stealth: the knife makes no sound (drawing, swinging and hitting are all silent).");
         BindClassColor(config, SecStealth, "Stealth", "#8b8fa3");   // 067
 
         // ───────────────────────── 6 · Scavenger ─────────────────────────
@@ -557,6 +566,17 @@ internal static class PerksConfig
             new ConfigDescription(
                 "Multiplicador do raio de som de movimento do Tanque (1.30 = +30%). / Tank movement-sound radius multiplier (1.30 = +30%).",
                 new AcceptableValueRange<float>(1f, 2f)));
+        // 084 — Recarga Rápida Escopeta (Tanque): acelera a recarga de escopetas de TUBO (shell-a-shell). A mecânica
+        // elite "2 cartuchos por vez" (Mag Drills) NÃO existe no EFT — o fallback do épico é reduzir o TEMPO. Só
+        // escopeta tubular (Weapon.SupportsInternalReload); Saiga com carregador destacável fica de fora.
+        ShotgunReloadEnabled = config.Bind(
+            SecTank, "Shotgun Reload — Enabled", true,
+            "Tanque: recarrega escopetas de tubo (shell-a-shell) mais rápido. Não afeta escopetas com carregador destacável (Saiga). / Tank: faster tube-fed (shell-by-shell) shotgun reload. Does not affect detachable-magazine shotguns (Saiga).");
+        ShotgunReloadTime = config.Bind(
+            SecTank, "Shotgun Reload — Reload time mult", 0.6f,
+            new ConfigDescription(
+                "Multiplicador do TEMPO de recarga da escopeta (0.6 = 40% mais rápido). / Shotgun reload TIME multiplier (0.6 = 40% faster).",
+                new AcceptableValueRange<float>(0.4f, 1f)));
         BindClassColor(config, SecTank, "Tank", "#6b7280");   // 067
 
         // ───────────────────────── 8 · Naked ─────────────────────────

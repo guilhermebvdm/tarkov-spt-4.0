@@ -156,6 +156,11 @@ internal static class PerksCatalog
         {
             P("Rattled", "Abalado", "aim punch when hit", "tranco na mira ao ser atingido", ValueFormat.Percent, 1.5f, Polarity.LowerBetter, EBuffId.AimMasterWiggle, live: () => PerksConfig.RattledAimPunch?.Value ?? 1.5f),
         }),
+        // 083 — Morte Silenciosa (Furtivo): a faca (sacar/golpe/acerto) não faz som. Perk qualitativo.
+        ["silent_knife"] = G("Silent Kill", "Morte Silenciosa", ESkillId.Melee, new[]
+        {
+            Flag("Silent Kill", "Morte Silenciosa", "knife makes no sound", "a faca não faz barulho", isPerk: true, EBuffId.CovertMovementSoundVolume),
+        }),
 
         // 🎒 Saqueador
         ["quick_hands"] = G("Quick Hands", "Mãos Rápidas", ESkillId.Search, new[]
@@ -226,6 +231,12 @@ internal static class PerksCatalog
             P("Heavy Frame", "Estrutura Pesada", "move speed", "velocidade", ValueFormat.Percent, 0.9f, Polarity.HigherBetter, EBuffId.StrengthBuffSprintSpeedInc, live: () => PerksConfig.HeavyFrameMoveSpeed?.Value ?? 0.9f),
             P("Heavy Appetite", "Apetite Pesado", "hunger/thirst drain", "fome/sede", ValueFormat.Percent, 1.3f, Polarity.LowerBetter, EBuffId.MetabolismEnergyExpenses, live: () => PerksConfig.HeavyFrameHungerThirst?.Value ?? 1.3f),
         }),
+        // 084 — Recarga Rápida Escopeta (Tanque): tempo de recarga de escopeta tubular reduzido (fallback do
+        // épico; a mecânica elite "2 por vez" não existe no EFT). Ícone = Mag Drills (skill de recarga).
+        ["shotgun_reload"] = G("Shotgun Reload", "Recarga de Escopeta", ESkillId.MagDrills, new[]
+        {
+            P("Shotgun Reload", "Recarga de Escopeta", "shotgun reload time", "tempo de recarga de escopeta", ValueFormat.Percent, 0.6f, Polarity.LowerBetter, EBuffId.WeaponReloadBuff, live: () => PerksConfig.ShotgunReloadTime?.Value ?? 0.6f),
+        }),
     };
 
     // Composição por classe (chave EN estável = displayName.en). Ordem = ordem de exibição.
@@ -234,9 +245,9 @@ internal static class PerksCatalog
         ["Combat Medic"] = new[] { "combat_medic", "efficient_metabolism", "shaky_hands", "rattled" },   // 079: −Mobile Surgery, +Abalado
         ["Rifleman"]     = new[] { "cool_under_fire", "adrenaline", "loud_operator_rifleman", "loud_looter", "quick_draw" },   // 079 +Saque Barulhento · 080 +Saque Rápido
         ["Hunter"]       = new[] { "sharpshooter", "iron_lungs", "stalker", "rooted", "light_frame", "quick_draw" },   // 079 +Estrutura Leve · 080 +Saque Rápido
-        ["Stealth"]      = new[] { "ghost_step", "execution", "rattled", "light_frame", "quick_draw" },   // 079 +Estrutura Leve · 080 +Saque Rápido
+        ["Stealth"]      = new[] { "ghost_step", "execution", "silent_knife", "rattled", "light_frame", "quick_draw" },   // 079 +Estrutura Leve · 080 +Saque Rápido · 083 +Morte Silenciosa
         ["Scavenger"]    = new[] { "quick_hands", "silent_looter", "pack_mule_scav", "lebre", "shaky_hands", "medroso" },   // 079 −Overladen +Falta · 081 +Lebre · 082 +Medroso
-        ["Tank"]         = new[] { "pack_mule_tank", "bulwark", "bunker", "heavy_frame", "loud_operator_tank" },   // Pack Mule + Loud Operator próprios (desdobrados 2026-07-10)
+        ["Tank"]         = new[] { "pack_mule_tank", "bulwark", "bunker", "shotgun_reload", "heavy_frame", "loud_operator_tank" },   // 084 +Recarga Escopeta
     };
 
     private static bool _validated;
