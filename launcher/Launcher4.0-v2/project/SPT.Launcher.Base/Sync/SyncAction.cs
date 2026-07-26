@@ -26,6 +26,15 @@ namespace SPT.Launcher.Sync
         /// <see cref="SyncAction.SeedTargetRelative"/>), mas SEM o guard de "só se ausente".
         /// </summary>
         ForceCopy,
+
+        /// <summary>
+        /// Item 030: config-performance → config. Baixa de <see cref="SyncAction.RelativePath"/> (fonte
+        /// config-performance/&lt;rel&gt;), grava em <see cref="SyncAction.SeedTargetRelative"/> (config/&lt;rel&gt;),
+        /// preserva o anterior em <see cref="SyncAction.MoveTargetRelative"/> quando havia algo. DIFERENÇA
+        /// central vs ForceCopy: o engine GRAVA BASELINE do que aplicou — é o que faz o híbrido convergir
+        /// (sem baseline, o sync seguinte trataria como customizado para sempre).
+        /// </summary>
+        PerformanceCopy,
     }
 
     /// <summary>One planned action produced by <see cref="SyncPlanner"/> and executed by <see cref="SyncEngine"/>.</summary>

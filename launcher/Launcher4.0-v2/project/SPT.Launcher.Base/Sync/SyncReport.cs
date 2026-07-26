@@ -24,15 +24,18 @@ namespace SPT.Launcher.Sync
         private static readonly IReadOnlyDictionary<string, int> ActionPriority = new Dictionary<string, int>(StringComparer.Ordinal)
         {
             ["updated"] = 1,
-            ["forced"] = 2,
-            ["reference-updated"] = 3,
-            ["seeded"] = 4,
-            ["seed-skipped"] = 5,
-            ["preserved"] = 6,
-            ["preserved-devmode"] = 7,
-            ["moved-to-disabled"] = 8,
-            ["deleted"] = 9,
-            ["error"] = 10,
+            ["performance-applied"] = 2,
+            ["forced"] = 3,
+            ["performance-suppressed-force"] = 4,
+            ["reference-updated"] = 5,
+            ["seeded"] = 6,
+            ["seed-skipped"] = 7,
+            ["preserved"] = 8,
+            ["preserved-devmode"] = 9,
+            ["performance-reverted"] = 10,
+            ["moved-to-disabled"] = 11,
+            ["deleted"] = 12,
+            ["error"] = 13,
         };
 
         /// <summary>
@@ -42,6 +45,9 @@ namespace SPT.Launcher.Sync
         private static readonly IReadOnlyDictionary<string, string> ActionDescricao = new Dictionary<string, string>(StringComparer.Ordinal)
         {
             ["updated"] = "baixada do servidor (estava desatualizada ou faltando)",
+            ["performance-applied"] = "config de performance aplicada (item ligado; se você tinha uma, foi preservada na quarentena)",
+            ["performance-reverted"] = "config de performance desligada — removida (movida para quarentena)",
+            ["performance-suppressed-force"] = "config de performance sobrepôs uma config obrigatória (config-force) do mesmo arquivo",
             ["forced"] = "config obrigatória do servidor — se você tinha uma, ela foi preservada em uma pasta -disabled/",
             ["reference-updated"] = "biblioteca de referência atualizada (pasta config-server; não altera a sua config)",
             ["seeded"] = "config padrão copiada (não existia)",

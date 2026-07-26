@@ -62,8 +62,12 @@ namespace SPT.Launcher.Sync
                 manifestFiles.Select(f => SyncPathUtil.Normalize(f.path)),
                 StringComparer.Ordinal);
 
+            // Item 030: mod opcional DESLIGADO sai do check (não baixa); seus arquivos que já existem no
+            // disco são quarentenados por QuarantineDisabledOptionalMods (com as guardas do ScanExtras).
+            // O filtro PERMANECE: sem ele o arquivo de mod desligado voltaria a Download e criaria loop
+            // download↔quarentena a cada sync.
             var filesToCheck = manifestFiles
-                .Where(f => !f.optional || _options.IsOptionalGroupEnabled(f.optionalGroup ?? string.Empty))
+                .Where(f => !f.optional || _options.IsOptionalModEnabled(OptionalIdOf(f)))
                 .ToList();
 
             // Pre-pass: destinos do config-force. O operador tende a COPIAR a cfg para config-force/ e
@@ -72,6 +76,12 @@ namespace SPT.Launcher.Sync
             // manifesto (arbitrária) e o baseline gravado com o hash da versão errada (o arquivo viraria
             // "customizado" para sempre e nunca mais receberia update). O FORCE VENCE, explicitamente.
             var forceTargets = BuildForceTargets(filesToCheck);
+
+            // Item 030 (D-1): alvos config/<rel> de itens de performance LIGADOS (performance vence force
+            // e config); e os alvos que TÊM versão base em config/ ou config-force/ (usado ao desligar
+            // performance: se há base, o fluxo normal restaura; se não, o arquivo sai para a quarentena).
+            var performanceTargets = BuildPerformanceTargets(filesToCheck);
+            var baseSourcePaths = BuildBaseSourcePaths(filesToCheck);
 
             int checkedCount = 0;
 
@@ -90,11 +100,32 @@ namespace SPT.Launcher.Sync
 
                 var rule = _resolver.Resolve(normalized, out string matchedPrefix);
 
-                // Colisão config/ × config-force/: esta entrada do manifesto grava no MESMO destino de
-                // um force. Ignorada — a versão forçada é a que vale (resultado independente da ordem).
-                if (rule != SyncFolderRule.ForceToConfig && forceTargets.Contains(normalized))
+                // Precedência performance > force > config (D-1). O canal de performance (branch dedicado
+                // abaixo) nunca é suprimido aqui.
+                if (rule == SyncFolderRule.ForceToConfig)
                 {
-                    plan.Warnings.Add($"{file.path} também está em config-force — a versão FORÇADA vence (entrada do manifesto ignorada)");
+                    // Force perde para uma config de performance LIGADA do mesmo alvo (RN-2 — registra e avisa).
+                    string forceDest = SyncPathUtil.DeriveSeedTarget(file.path, matchedPrefix);
+                    if (forceDest != null && performanceTargets.Contains(SyncPathUtil.Normalize(forceDest)))
+                    {
+                        plan.Warnings.Add($"{file.path}: config de performance ligada sobrepõe esta config forçada (config-force ignorado)");
+                        plan.InfoEntries.Add(new SyncReportEntry
+                        {
+                            path = forceDest,
+                            action = "performance-suppressed-force",
+                            detail = file.path,
+                            timestamp = DateTime.UtcNow,
+                        });
+                        continue;
+                    }
+                }
+                else if (rule != SyncFolderRule.PerformanceToConfig
+                         && (forceTargets.Contains(normalized) || performanceTargets.Contains(normalized)))
+                {
+                    // Entrada normal (config/ etc.) cujo alvo é governado por um force OU por performance
+                    // ligada: ignorada — quem vence é o canal de maior precedência (resultado independente
+                    // da ordem do manifesto).
+                    plan.Warnings.Add($"{file.path} também está em config-force/config-performance — a versão de maior precedência vence (entrada ignorada)");
                     continue;
                 }
 
@@ -234,6 +265,129 @@ namespace SPT.Launcher.Sync
                     continue;
                 }
 
+                // Item 030: config-performance → config. Híbrido (§1.1): EXPLÍCITO ao alternar (aplica/
+                // remove mesmo divergente, com quarentena); preserve-divergent nos syncs de rotina.
+                if (rule == SyncFolderRule.PerformanceToConfig)
+                {
+                    string perfTargetRel = SyncPathUtil.DeriveSeedTarget(file.path, matchedPrefix);
+                    if (perfTargetRel == null)
+                    {
+                        continue; // sem remainder após o prefixo
+                    }
+
+                    // Guard de self-target (misconfig: prefixo sem "-performance" → alvo = fonte).
+                    if (string.Equals(SyncPathUtil.Normalize(perfTargetRel), normalized, StringComparison.Ordinal))
+                    {
+                        plan.Warnings.Add($"performance-to-config em '{matchedPrefix}' não tem o sufixo '-performance' (alvo = fonte) — ignorado: {file.path}");
+                        continue;
+                    }
+
+                    string perfTargetLocal = SyncPathUtil.ToLocalPath(_options.GameRoot, perfTargetRel);
+                    string perfTargetNorm = SyncPathUtil.Normalize(perfTargetRel);
+                    bool enabled = _options.IsPerformanceItemEnabled(file.performanceId ?? string.Empty);
+                    bool justToggled = _options.JustToggledIds.Contains(file.performanceId ?? string.Empty);
+                    bool exists = File.Exists(perfTargetLocal);
+
+                    string perfLocalHash = exists
+                        ? await Task.Run(() => SyncPathUtil.ComputeMd5(perfTargetLocal), cancellationToken)
+                        : null;
+                    bool perfMatchesBaseline = exists
+                        && _baseline.TryGetHash(perfTargetNorm, out string perfBaseHash)
+                        && string.Equals(perfBaseHash, perfLocalHash, StringComparison.OrdinalIgnoreCase);
+
+                    if (enabled)
+                    {
+                        if (exists && string.Equals(perfLocalHash, file.hash, StringComparison.OrdinalIgnoreCase))
+                        {
+                            // já aplicado — no-op (CC7: semeia baseline com local == server).
+                            plan.UpToDate.Add(new KeyValuePair<string, string>(perfTargetNorm, perfLocalHash));
+                            continue;
+                        }
+
+                        // Ação explícita (D-16/CC-19) avaliada ANTES do Dev Mode: o Dev Mode protege contra
+                        // reversão AUTOMÁTICA (rotina), não contra um toggle que o próprio usuário clicou.
+                        if (justToggled || !exists || perfMatchesBaseline)
+                        {
+                            plan.Actions.Add(new SyncAction
+                            {
+                                RelativePath = file.path,            // fonte: config-performance/<rel>
+                                SeedTargetRelative = perfTargetRel,  // destino: config/<rel>
+                                MoveTargetRelative = exists
+                                    ? SyncPathUtil.DeriveDisabledBackup(perfTargetRel, matchedPrefix, SyncPathUtil.DisabledOrigin.PerformanceReplaced)
+                                    : null,
+                                Kind = SyncActionKind.PerformanceCopy,
+                                Rule = rule,
+                                ServerHash = file.hash,
+                                Reason = justToggled
+                                    ? "performance ligada (sua config anterior foi preservada na quarentena)"
+                                    : (exists ? "performance (atualizada pelo servidor)" : "performance (aplicada)"),
+                            });
+                            continue;
+                        }
+
+                        // Rotina + Dev Mode: preserva a build local do dev.
+                        if (_options.DevMode)
+                        {
+                            plan.Actions.Add(new SyncAction
+                            {
+                                RelativePath = perfTargetRel,
+                                Kind = SyncActionKind.PreserveDevMode,
+                                Rule = rule,
+                                ServerHash = file.hash,
+                                Reason = "Dev Mode: config de performance preservada (difere do servidor)",
+                            });
+                            continue;
+                        }
+
+                        // Rotina: customizado desde a aplicação → preserva (CA-030.3/RN-3).
+                        plan.Actions.Add(new SyncAction
+                        {
+                            RelativePath = perfTargetRel,
+                            Kind = SyncActionKind.PreserveCustomized,
+                            Rule = rule,
+                            ServerHash = file.hash,
+                            Reason = "você customizou — sua versão foi mantida",
+                        });
+                        continue;
+                    }
+
+                    // ---- DESLIGADO (CA-030.2b / CA-030.5) ----
+                    if (!exists)
+                    {
+                        continue; // nada aplicado, nada a reverter
+                    }
+
+                    if (!perfMatchesBaseline)
+                    {
+                        // Customizado desde a aplicação: a edição do player prevalece (RN-3/CC-3).
+                        plan.Actions.Add(new SyncAction
+                        {
+                            RelativePath = perfTargetRel,
+                            Kind = SyncActionKind.PreserveCustomized,
+                            Rule = rule,
+                            ServerHash = file.hash,
+                            Reason = "você customizou — reversão da performance foi pulada",
+                        });
+                        continue;
+                    }
+
+                    // Intocado. Com versão base (config/ ou config-force/) → o fluxo normal a restaura nesta
+                    // mesma passada. Sem base (só existe por causa da performance) → quarentena (D-8/D-20).
+                    if (!baseSourcePaths.Contains(perfTargetNorm))
+                    {
+                        plan.Actions.Add(new SyncAction
+                        {
+                            RelativePath = perfTargetRel,
+                            MoveTargetRelative = SyncPathUtil.DeriveDisabledBackup(perfTargetRel, matchedPrefix, SyncPathUtil.DisabledOrigin.PerformanceRemoved),
+                            Kind = SyncActionKind.MoveToDisabled,
+                            Rule = rule,
+                            Reason = "performance desligada (arquivo sem versão base — movido para a quarentena)",
+                        });
+                    }
+
+                    continue;
+                }
+
                 string localPath = SyncPathUtil.ToLocalPath(_options.GameRoot, file.path);
 
                 if (!File.Exists(localPath))
@@ -292,6 +446,11 @@ namespace SPT.Launcher.Sync
                     AddDownload(plan, file, rule, "outdated");
                 }
             }
+
+            // Item 030 (§2.4): mod opcional DESLIGADO cujos arquivos existem no disco → quarentena
+            // explícita (o ScanExtras não serve — manifestPaths protege optional inativo dele). Reusa
+            // as MESMAS guardas do ScanExtras (coop-safe, Dev Mode, protected/ignored/excluded).
+            QuarantineDisabledOptionalMods(plan, manifestFiles, cancellationToken);
 
             ScanExtras(plan, manifestPaths, cancellationToken);
 
@@ -352,7 +511,8 @@ namespace SPT.Launcher.Sync
                     if (rule == SyncFolderRule.PreserveDivergent
                         || rule == SyncFolderRule.SeedIfMissingByName
                         || rule == SyncFolderRule.MirrorReference
-                        || rule == SyncFolderRule.ForceToConfig)
+                        || rule == SyncFolderRule.ForceToConfig
+                        || rule == SyncFolderRule.PerformanceToConfig)
                     {
                         // Extras in config / config-server folders are never touched (config-server
                         // overwrites to latest but doesn't delete extras — conservative, ref CR-01-03).
@@ -452,12 +612,21 @@ namespace SPT.Launcher.Sync
             return string.Join("/", resolved);
         }
 
-        /// <summary>"BepInEx/plugins/Sub/X.dll" (prefix "bepinex/plugins") → "BepInEx/plugins-disabled/Sub/X.dll".</summary>
-        private static string BuildDisabledTarget(string relative, string matchedPrefix)
+        /// <summary>
+        /// "BepInEx/plugins/Sub/X.dll" (prefix "bepinex/plugins") → "BepInEx/plugins-disabled/Sub/X.dll".
+        /// Item 030 (D-14): a origem escolhe a subpasta. O default MirrorExtra mantém o formato legado
+        /// (raiz) — o único caller até aqui era o ScanExtras, e mudá-lo quebraria testes em produção sem
+        /// ganho. A quarentena de mod opcional desligado passa DisabledOrigin.Optional.
+        /// </summary>
+        private static string BuildDisabledTarget(string relative, string matchedPrefix,
+            SyncPathUtil.DisabledOrigin origin = SyncPathUtil.DisabledOrigin.MirrorExtra)
         {
             string prefixOriginalCase = relative.Substring(0, matchedPrefix.Length);
             string remainder = relative.Substring(matchedPrefix.Length).TrimStart('/');
-            return prefixOriginalCase + "-disabled/" + remainder;
+            string segment = SyncPathUtil.OriginSegment(origin);
+            return segment == null
+                ? prefixOriginalCase + "-disabled/" + remainder
+                : prefixOriginalCase + "-disabled/" + segment + "/" + remainder;
         }
 
         /// <summary>
@@ -490,6 +659,129 @@ namespace SPT.Launcher.Sync
 
             return targets;
         }
+
+        /// <summary>
+        /// Item 030: alvos config/&lt;rel&gt; de itens de performance LIGADOS. Usado para a precedência
+        /// (performance vence force e config). Item desligado não entra (não suprime nada).
+        /// </summary>
+        private HashSet<string> BuildPerformanceTargets(IReadOnlyList<ManifestFile> files)
+        {
+            var targets = new HashSet<string>(StringComparer.Ordinal);
+
+            foreach (var file in files)
+            {
+                string normalized = SyncPathUtil.Normalize(file.path);
+                if (_resolver.Resolve(normalized, out string matchedPrefix) != SyncFolderRule.PerformanceToConfig)
+                {
+                    continue;
+                }
+                if (!_options.IsPerformanceItemEnabled(file.performanceId ?? string.Empty))
+                {
+                    continue; // só itens ligados vencem
+                }
+
+                string targetRel = SyncPathUtil.DeriveSeedTarget(file.path, matchedPrefix);
+                if (string.IsNullOrEmpty(targetRel)) continue;
+
+                string normalizedTarget = SyncPathUtil.Normalize(targetRel);
+                if (string.Equals(normalizedTarget, normalized, StringComparison.Ordinal)) continue; // self-target
+
+                targets.Add(normalizedTarget);
+            }
+
+            return targets;
+        }
+
+        /// <summary>
+        /// Item 030: alvos config/&lt;rel&gt; que TÊM versão base — origem em config/ (PreserveDivergent) ou
+        /// config-force/ (ForceToConfig). Ao desligar performance de um alvo que está aqui, o fluxo normal
+        /// restaura a base nesta mesma passada; se o alvo NÃO está aqui, ele só existia por causa da
+        /// performance e sai para a quarentena.
+        /// </summary>
+        private HashSet<string> BuildBaseSourcePaths(IReadOnlyList<ManifestFile> files)
+        {
+            var bases = new HashSet<string>(StringComparer.Ordinal);
+
+            foreach (var file in files)
+            {
+                string normalized = SyncPathUtil.Normalize(file.path);
+                var rule = _resolver.Resolve(normalized, out string matchedPrefix);
+
+                if (rule == SyncFolderRule.PreserveDivergent)
+                {
+                    bases.Add(normalized); // o próprio config/<rel> é a base
+                }
+                else if (rule == SyncFolderRule.ForceToConfig)
+                {
+                    string targetRel = SyncPathUtil.DeriveSeedTarget(file.path, matchedPrefix);
+                    if (!string.IsNullOrEmpty(targetRel))
+                    {
+                        bases.Add(SyncPathUtil.Normalize(targetRel));
+                    }
+                }
+            }
+
+            return bases;
+        }
+
+        /// <summary>
+        /// Item 030 (§2.4): para cada arquivo de mod opcional DESLIGADO presente no disco, emite
+        /// MoveToDisabled (origem Optional). Reusa as MESMAS guardas do ScanExtras — a ação explícita não
+        /// pode passar por fora delas: protected/ignored/excluded, Dev Mode (CC-14: não move build local
+        /// do dev) e coop-safe (um plugin Fika oferecido como opcional e desligado quebraria o join —
+        /// preserva + avisa). manifestPaths continua incluindo esses paths, então o ScanExtras não duplica.
+        /// </summary>
+        private void QuarantineDisabledOptionalMods(SyncPlan plan, IReadOnlyList<ManifestFile> manifestFiles, CancellationToken cancellationToken)
+        {
+            foreach (var file in manifestFiles)
+            {
+                if (!file.optional) continue;
+                if (_options.IsOptionalModEnabled(OptionalIdOf(file))) continue; // ligado → fica
+
+                cancellationToken.ThrowIfCancellationRequested();
+
+                string relForward = (file.path ?? string.Empty).Replace('\\', '/');
+                string normalized = SyncPathUtil.Normalize(relForward);
+                string localPath = SyncPathUtil.ToLocalPath(_options.GameRoot, relForward);
+                if (!File.Exists(localPath)) continue; // nada a mover
+
+                if (IsIgnored(normalized)) continue;
+                if (IsExcludedFromCleanup(normalized)) continue;
+                if (_protectedNormalized.Contains(normalized)) continue;
+                if (SyncPathUtil.ContainsDisabledSegment(normalized)) continue;
+
+                var rule = _resolver.Resolve(normalized, out string matchedPrefix);
+
+                if (_options.DevMode)
+                {
+                    plan.Warnings.Add($"Dev Mode: mod opcional desligado NÃO movido para quarentena: {file.path}");
+                    continue;
+                }
+
+                if (SyncCoopSafe.IsCoopEssentialPlugin(normalized))
+                {
+                    plan.Warnings.Add($"coop-safe: mod opcional desligado é plugin essencial — preservado (nunca movido): {file.path}");
+                    continue;
+                }
+
+                plan.Actions.Add(new SyncAction
+                {
+                    RelativePath = relForward,
+                    MoveTargetRelative = BuildDisabledTarget(relForward, matchedPrefix, SyncPathUtil.DisabledOrigin.Optional),
+                    Kind = SyncActionKind.MoveToDisabled,
+                    Rule = rule,
+                    Reason = "mod opcional desligado (movido para quarentena)",
+                });
+            }
+        }
+
+        /// <summary>
+        /// Item 030: id do mod opcional dono do arquivo, com fallback pro campo legado. Enquanto o servidor
+        /// não migrou (ainda emite optionalGroup), o manifesto pode vir sem optionalId — sem o fallback,
+        /// todo opcional viraria "id vazio" → filtrado E quarentenado (regressão). Some na Fase 3.
+        /// </summary>
+        private static string OptionalIdOf(ManifestFile file) =>
+            !string.IsNullOrEmpty(file.optionalId) ? file.optionalId : (file.optionalGroup ?? string.Empty);
 
         private void AddDownload(SyncPlan plan, ManifestFile file, SyncFolderRule rule, string reason)
         {

@@ -239,7 +239,7 @@ namespace SPT.Launcher.ViewModels
                         .Select(p => p.Replace(Path.DirectorySeparatorChar, '/'))
                         .ToList(),
                     ManagedPaths = managedPaths,
-                    IsOptionalGroupEnabled = id => LauncherSettingsProvider.Instance.IsOptionalEnabled(id),
+                    IsOptionalModEnabled = id => LauncherSettingsProvider.Instance.IsOptionalEnabled(id),
                 };
 
                 var planner = new SyncPlanner(resolver, _baseline, options);

@@ -43,6 +43,9 @@ namespace SPT.Launcher.Sync
         /// </summary>
         public int ConfigsBackedUp { get; set; }
 
+        /// <summary>Item 030: configs de performance aplicadas em config/ (item ligado).</summary>
+        public int PerformanceApplied { get; set; }
+
         public int Errors { get; set; }
 
         /// <summary>Disk actions not attempted because the run was cancelled (C4).</summary>
@@ -64,6 +67,7 @@ namespace SPT.Launcher.Sync
 
                 if (Seeded > 0) sb.Append($" · {Seeded} semeados");
                 if (Forced > 0) sb.Append($" · {Forced} configs forçadas");
+                if (PerformanceApplied > 0) sb.Append($" · {PerformanceApplied} configs de performance");
                 if (ConfigsBackedUp > 0) sb.Append($" · {ConfigsBackedUp} config(s) sua(s) preservada(s) em -disabled");
                 if (Deleted > 0) sb.Append($" · {Deleted} removidos");
                 if (Errors > 0) sb.Append($" · {Errors} erros");

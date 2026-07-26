@@ -68,7 +68,8 @@ namespace SPT.Launcher.Tests.Sync
             return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
         }
 
-        public ManifestFile Entry(string path, string content, bool optional = false, string group = null)
+        public ManifestFile Entry(string path, string content, bool optional = false, string group = null,
+            string optionalId = null, string performanceId = null)
         {
             ServerContent[path] = System.Text.Encoding.UTF8.GetBytes(content);
 
@@ -78,7 +79,9 @@ namespace SPT.Launcher.Tests.Sync
                 hash = Md5Of(content),
                 size = content.Length,
                 optional = optional,
-                optionalGroup = group,
+                optionalGroup = group,     // legado — o motor lê optionalId com fallback pra este (item 030)
+                optionalId = optionalId,
+                performanceId = performanceId,
             };
         }
 
@@ -104,11 +107,28 @@ namespace SPT.Launcher.Tests.Sync
                 ["BepInEx/config-server"] = "seed-if-missing",
             });
 
-        public SyncPlannerOptions Options(bool devMode = false) => new()
+        public SyncPlannerOptions Options(
+            bool devMode = false,
+            Func<string, bool> optionalEnabled = null,
+            Func<string, bool> performanceEnabled = null,
+            IReadOnlyCollection<string> justToggled = null) => new()
         {
             GameRoot = Root,
             DevMode = devMode,
+            IsOptionalModEnabled = optionalEnabled ?? (_ => false),
+            IsPerformanceItemEnabled = performanceEnabled ?? (_ => false),
+            JustToggledIds = justToggled ?? Array.Empty<string>(),
         };
+
+        /// <summary>Resolver com config-performance ativo via folderRules explícito (o server real faz isso).</summary>
+        public static SyncRuleResolver ResolverWithPerformance() =>
+            new SyncRuleResolver(new Dictionary<string, string>
+            {
+                ["config-performance"] = "performance-to-config",
+                ["BepInEx/config-performance"] = "performance-to-config",
+                ["config-performance-ref"] = "mirror-reference",
+                ["BepInEx/config-performance-ref"] = "mirror-reference",
+            });
 
         public async Task<(SyncPlan Plan, SyncResult Result, SyncBaseline Baseline)> PlanAndRunAsync(
             IReadOnlyList<ManifestFile> manifest,

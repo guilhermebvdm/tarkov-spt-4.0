@@ -153,7 +153,7 @@ namespace SPT.Launcher.Tests.Sync
         }
 
         [Fact]
-        public async Task Disabled_optional_group_files_are_never_extras()
+        public async Task Disabled_optional_mod_files_are_quarantined_with_optional_origin()
         {
             using var fx = new SyncTestFixture();
             fx.WriteLocal("BepInEx/plugins/Gore/gore.dll", "gore-bytes");
@@ -161,13 +161,36 @@ namespace SPT.Launcher.Tests.Sync
             var manifest = new[]
             {
                 fx.Entry("BepInEx/plugins/Current/cur.dll", "cur"),
-                fx.Entry("BepInEx/plugins/Gore/gore.dll", "gore-bytes", optional: true, group: "gore"),
+                fx.Entry("BepInEx/plugins/Gore/gore.dll", "gore-bytes", optional: true, optionalId: "gore"),
             };
 
-            // group "gore" is NOT enabled (IsOptionalGroupEnabled default = false)
+            // Item 030 (CA-030.8): mod "gore" DESLIGADO (default) + arquivo presente → quarentena
+            // EXPLÍCITA sob a subpasta de origem "optional" (D-14). Nunca deletado como extra (o
+            // ScanExtras não toca — manifestPaths protege optional inativo dele).
             var plan = await PlanAsync(fx, manifest);
 
-            Assert.DoesNotContain(plan.Actions, a => a.RelativePath.Contains("gore.dll")); // CC3
+            var move = Assert.Single(plan.Actions,
+                a => a.Kind == SyncActionKind.MoveToDisabled && a.RelativePath.Contains("gore.dll"));
+            Assert.Equal("BepInEx/plugins-disabled/optional/Gore/gore.dll", move.MoveTargetRelative);
+            Assert.DoesNotContain(plan.Actions, a => a.Kind == SyncActionKind.DeleteExtra);
+        }
+
+        [Fact]
+        public async Task Enabled_optional_mod_files_are_not_quarantined()
+        {
+            using var fx = new SyncTestFixture();
+            fx.WriteLocal("BepInEx/plugins/Gore/gore.dll", "gore-bytes");
+
+            var manifest = new[]
+            {
+                fx.Entry("BepInEx/plugins/Gore/gore.dll", "gore-bytes", optional: true, optionalId: "gore"),
+            };
+
+            // Mod "gore" LIGADO → o arquivo fica (up-to-date), nada é movido para quarentena.
+            var plan = await PlanAsync(fx, manifest,
+                fx.Options(optionalEnabled: id => id == "gore"));
+
+            Assert.DoesNotContain(plan.Actions, a => a.Kind == SyncActionKind.MoveToDisabled);
         }
 
         [Fact]

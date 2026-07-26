@@ -34,6 +34,12 @@ namespace SPT.Launcher.Sync
         /// <summary>Accumulated warnings (e.g. Dev Mode preservation notices).</summary>
         public List<string> Warnings { get; } = new List<string>();
 
+        /// <summary>
+        /// Item 030: entries informativas do relatório que NÃO são ações de disco (ex.:
+        /// "performance-suppressed-force", RN-2). O engine as copia para o relatório sem executar nada.
+        /// </summary>
+        public List<SyncReportEntry> InfoEntries { get; } = new List<SyncReportEntry>();
+
         public int DownloadCount => Actions.Count(a => a.Kind == SyncActionKind.Download);
         public int PreserveCount => Actions.Count(a => a.Kind == SyncActionKind.PreserveCustomized || a.Kind == SyncActionKind.PreserveDevMode);
         public int DeleteCount => Actions.Count(a => a.Kind == SyncActionKind.DeleteExtra);
@@ -45,7 +51,10 @@ namespace SPT.Launcher.Sync
         /// <summary>config-force → config: sobrescritas forçadas (ignoram customização do usuário).</summary>
         public int ForceCount => Actions.Count(a => a.Kind == SyncActionKind.ForceCopy);
 
-        /// <summary>Actions that actually touch the disk (downloads, deletes, moves, seeds, forces).</summary>
-        public int IoActionCount => DownloadCount + DeleteCount + MoveCount + SeedCount + ForceCount;
+        /// <summary>Item 030: config-performance → config aplicadas (item ligado).</summary>
+        public int PerformanceCount => Actions.Count(a => a.Kind == SyncActionKind.PerformanceCopy);
+
+        /// <summary>Actions that actually touch the disk (downloads, deletes, moves, seeds, forces, performance).</summary>
+        public int IoActionCount => DownloadCount + DeleteCount + MoveCount + SeedCount + ForceCount + PerformanceCount;
     }
 }

@@ -44,6 +44,16 @@ namespace SPT.Launcher.Sync
         /// (seed, só se faltar). Não deleta extras; a pasta config-force NUNCA é materializada no cliente.
         /// </summary>
         ForceToConfig = 6,
+
+        /// <summary>
+        /// Item 030: config-performance → config quando o item está LIGADO. Vence config-force e config
+        /// (precedência performance &gt; force &gt; config). Híbrido — NÃO é clone do ForceToConfig, que
+        /// ignora baseline: no momento em que o player alterna o item (ação explícita) aplica/remove mesmo
+        /// divergente, preservando o anterior na quarentena; nos syncs de rotina respeita a customização
+        /// via baseline (preserve-divergent). O SyncEngine grava baseline no <see cref="SyncActionKind.PerformanceCopy"/>
+        /// — sem isso o híbrido não convergiria. A pasta-espelho config-performance-ref (D-18) é MirrorReference.
+        /// </summary>
+        PerformanceToConfig = 7,
     }
 
     public static class SyncFolderRuleParser
@@ -76,6 +86,9 @@ namespace SPT.Launcher.Sync
                     return true;
                 case "force-to-config":
                     rule = SyncFolderRule.ForceToConfig;
+                    return true;
+                case "performance-to-config":
+                    rule = SyncFolderRule.PerformanceToConfig;
                     return true;
                 default:
                     rule = SyncFolderRule.Default;
