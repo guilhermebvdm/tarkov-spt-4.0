@@ -558,7 +558,12 @@ namespace Band_Aid
         /// A coroutine do BandAidController espera as mãos liberarem e tenta com
         /// retry; sem controller disponível, tenta imediato (melhor esforço).
         /// </summary>
-        private static void DiscardItemNetworked(Player doctor, Item item)
+        /// ref: item 013 — promovido de private p/ public: o consumo do desfibrilador no revive
+        /// (FikaRevivePatch) usava Discard(simulate:false) direto, o MESMO padrão que o CR-04/CR-05
+        /// abandonou aqui, e reproduzia o mesmo sintoma (item piscando, slot travado). Reusa este
+        /// ponto em vez de duplicar a decisão "controller disponível → coroutine; senão → tentativa
+        /// única" — um único jeito de remover item consumido no mod inteiro.
+        public static void DiscardItemNetworked(Player doctor, Item item)
         {
             var controller = TRLImmersiveCombatMedicine.BandAidController.Instance;
             if (controller != null)
