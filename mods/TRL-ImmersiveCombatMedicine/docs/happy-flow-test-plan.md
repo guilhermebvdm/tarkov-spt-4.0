@@ -21,8 +21,8 @@ O plano mestre (44 solo + 12 coop) continua sendo a fonte de **corner cases** e 
 
 ## Bloco 0 — Pré-requisitos
 
-- [ ] **P1** — F12 → BepInEx → as versões batem com o que foi implantado. Estado atual: `TRLImmersiveCombatMedicine` **1.12.0** e `TRL Fixes` **1.1.1**. Se não bater, é build velha no jogo: pare aqui.
-- [ ] **P2** — F12 → "6. Trauma 2.0 (Consumidores)": os 5 toggles (Legs / Fall / Arms / Stomach / Blackout 2.0) **Ligados**.
+- [ ] **P1** — F12 → BepInEx → as versões batem com o que foi implantado. Estado atual: `TRLImmersiveCombatMedicine` **1.13.0** e `TRL Fixes` **1.1.1**. Se não bater, é build velha no jogo: pare aqui.
+- [ ] **P2** — F12 → "6. Trauma 2.0 (Consumidores)": os toggles (Legs / Fall / Arms / Stomach / Blackout 2.0 / **Pain Voice**) **Ligados**.
 - [ ] **P3** — ⚠️ **Wire format:** a 1.11.0 reescreveu a serialização dos 6 pacotes Fika do mod (tipos com sufixo `V2`). Um peer em build anterior não fala o mesmo protocolo — o mod degrada de forma contida, mas cura remota e sync de desmaio **não** funcionam entre versões diferentes. **Os dois PCs precisam atualizar juntos**, e o `TRL-Fixes` também tem de estar nos dois.
 - [ ] **P4** — Confirmar no log de cada máquina que os hooks subiram: `TRL-Fixes: Hook no ReviveInteractable.RemoveRagdoll aplicado com sucesso!`. Sem essa linha, o C2 não tem validade.
 - [ ] **P5** — Guardar o `LogOutput.log` de **cada máquina** ao fim da sessão. O Bloco C depende dele, e sem ele três diagnósticos viram chute.
@@ -43,6 +43,7 @@ O plano mestre (44 solo + 12 coop) continua sendo a fonte de **corner cases** e 
 | **H8** | Sair da raid ferido e entrar na próxima | Log mostra a purga com contagem; nenhum efeito **do mod** ativo no spawn. Ferimento vanilla presente é **esperado** | ✅ 1.12.0 |
 | **H9** | Aproximar de um bot ferido a ~3,5 m; trocar o idioma do jogo | Prompt médico aparece a 3,5 m e não a 5-6 m; os textos trocam de idioma sem reiniciar o jogo | — |
 | **H10** | Zerar a 2ª perna **enquanto corre** | Agacha imediatamente **ou** o log registra o cancelamento — nunca uma agachada fantasma segundos depois | item 018 |
+| **H11** | Quebre uma perna (não zere). Depois quebre um braço. Depois zere o estômago | Fala **dedicada** de perna quebrada; depois de mão quebrada; depois grito de dor. Com analgésico ativo: **silêncio**. Bot ferido: sempre silêncio | ✅ 1.13.0 |
 
 ---
 
@@ -113,6 +114,7 @@ Cada cenário deste roteiro e o que ele cobre no backlog. Serve como meta-verifi
 | H8 | **020** (purga), 002 (reset entre raids) | S1b.1, S8.2 |
 | H9 | 010 (distância 3,5 m + i18n) | S7.1, S7.2 |
 | H10 | **018** (TTL do adiamento) | S1.9, achado #8 do 1º teste |
+| H11 | **019** (falas de dor) | S3.2, achado #10 do 1º teste |
 | C1 | **013** (consumo do desfibrilador) | achado #1 do 1º teste |
 | C2 | **TRL-Fixes 002** (hitbox pós-revive) | achado #2 do 1º teste |
 | C3 | **016** (Acordar x Reviver) | achado #4 do 1º teste, CR-01-21 |

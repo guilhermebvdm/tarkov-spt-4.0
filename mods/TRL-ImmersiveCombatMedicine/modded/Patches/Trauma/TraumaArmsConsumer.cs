@@ -294,6 +294,11 @@ namespace TRLImmersiveCombatMedicine.Trauma
             _lockoutVoiceSkipLogged = false;
             _lockoutIncapacitatedLogged = false;
             _aimAnchor = -1f;
+            // ref: item 019 — ESFORÇO no instante em que a mira cai: ofego, não agonia. É a única das quatro
+            // falas do mod antigo cujo nome existia de fato no jogo, e era exatamente neste momento que ele a
+            // tocava. Canal de anti-spam próprio (Kind.Effort), então não disputa a janela com o grito de
+            // agonia do lockout logo em seguida (TryBlockReAds) — os dois momentos são audíveis.
+            TraumaVoice.PlayEffort(p);
             TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo(
                 $"[Trauma2] ads CANCEL {p.ProfileId} line={_localLine} n={LineCancelSeconds(_localLine):0.##} lockout={lockout:0.##}");
         }

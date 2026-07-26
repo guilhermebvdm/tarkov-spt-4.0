@@ -1,4 +1,4 @@
-using BepInEx;
+﻿using BepInEx;
 using BepInEx.Configuration;
 using HarmonyLib;
 using System;
@@ -20,7 +20,7 @@ namespace TRLImmersiveCombatMedicine
     // e os patches são dispensados em silêncio. Funcionava por acidente de ordenação até aqui.
     // Padrão já usado no repo por DiscordRaidMap e MOAR-Client.
     [BepInDependency("com.fika.core", BepInDependency.DependencyFlags.SoftDependency)]
-    [BepInPlugin("com.trl.immersivecombatmedicine", "TRL-ImmersiveCombatMedicine", "1.12.0")]
+    [BepInPlugin("com.trl.immersivecombatmedicine", "TRL-ImmersiveCombatMedicine", "1.13.0")]
     public class TRLImmersiveCombatMedicinePlugin : BaseUnityPlugin
     {
         public static TRLImmersiveCombatMedicinePlugin Instance;
@@ -54,6 +54,7 @@ namespace TRLImmersiveCombatMedicine
         public static ConfigEntry<bool> ConfigConsumerArmsEffects;
         public static ConfigEntry<bool> ConfigConsumerStomachEffects;
         public static ConfigEntry<bool> ConfigConsumerBlackout2;
+        public static ConfigEntry<bool> ConfigPainVoice;      // item 019 — falas de dor
         public static ConfigEntry<bool> ConfigDebugTestConsumer;
 
         // --- Trauma 2.0 — Pernas (spec 003 §3) ---
@@ -170,6 +171,11 @@ namespace TRLImmersiveCombatMedicine
             // de entrada percentual (decisão de design da spec funcional 007).
             ConfigConsumerBlackout2 = Config.Bind("6. Trauma 2.0 (Consumidores)", "Blackout 2.0", true,
                 "Gatilho percentual de desmaio (item 007): tórax ≥50% da vida atual (piso 25 de dano absoluto) rola p=50%, imune sob analgésico; cabeça ≥25% da vida atual (piso 10) rola p=50%, p=25% sob analgésico. Governado pelo master \"Sistema de Desmaio\" — este toggle decide SÓ a lógica de entrada (percentual ou nenhuma); o limiar fixo legado NÃO volta mesmo desligado.");
+            // ref: item 019 — falas de dor por entrada/agravamento de estado. Fica na seção dos consumidores
+            // porque é o mesmo modelo: assina o barramento do motor e pode ser desligado sozinho sem afetar
+            // nenhum efeito de gameplay (é só áudio).
+            ConfigPainVoice = Config.Bind("6. Trauma 2.0 (Consumidores)", "Pain Voice", true,
+                "Falas de dor ao ferir membro (item 019): perna/braço FRATURADO usa a fala dedicada do jogo (a mesma que os bots usam nesse evento); membro zerado e estômago zerado usam o grito de agonia. Analgésico cala a dor e bots são sempre mudos — as duas regras são o comportamento do próprio jogo. Não fala em spawn ferido (é reconhecimento de estado, não ferimento novo) nem ao curar.");
             ConfigDebugTestConsumer = Config.Bind("6. Trauma 2.0 (Consumidores)", "Debug Test Consumer", false,
                 new ConfigDescription("Consumidor de teste SEM efeito de gameplay: registra-se ATIVO para as TRÊS regiões (pernas/braços/estômago), destravando o toast/i18n para validação (AC5 da spec funcional).",
                     null, advanced));
@@ -264,6 +270,11 @@ namespace TRLImmersiveCombatMedicine
             gameObject.AddComponent<TraumaFallCycleConsumer>(); // ciclo de queda (spec 004) — DEPOIS do TraumaEngine (ordem do 003)
             gameObject.AddComponent<TraumaArmsConsumer>(); // consumidor de braços (spec 005) — DEPOIS do TraumaEngine (replay vazio inofensivo — padrão 003)
             gameObject.AddComponent<TraumaStomachConsumer>(); // consumidor de estômago (spec 006) — DEPOIS do TraumaEngine (ordem do 003; replay vazio inofensivo)
+            // ref: item 019 — falas de dor: assinante puro do barramento, sem componente próprio (não tem
+            // estado por frame nem lifecycle de raid — o único dict é o anti-spam, já limpo por
+            // TraumaVoice.Clear() no sweep de raid-end do 004). DEPOIS dos consumidores: a ordem de
+            // assinatura não importa aqui porque a fala não interage com efeito de gameplay.
+            TraumaPainVoice.Subscribe();
             TraumaBotFall.RegisterLayer(); // camada BigBrain do hold de bot — gateada por Chainloader ("xyz.drakia.bigbrain")
 
             // Setup reflection para TrueTrauma

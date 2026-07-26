@@ -629,7 +629,7 @@
       "source_file": "Helpers/VoiceAndHealthUtils.cs",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_helpers_voiceandhealthutils_cs",
+      "id": "helpers_voiceandhealthutils",
       "community": 11,
       "norm_label": "voiceandhealthutils.cs"
     },
@@ -637,87 +637,17 @@
       "label": "TrueTrauma",
       "file_type": "code",
       "source_file": "Helpers/VoiceAndHealthUtils.cs",
-      "source_location": "L7",
+      "source_location": "L5",
       "_origin": "ast",
       "id": "helpers_voiceandhealthutils_truetrauma",
       "community": 11,
       "norm_label": "truetrauma"
     },
     {
-      "label": "HealthUtils",
-      "file_type": "code",
-      "source_file": "Helpers/VoiceAndHealthUtils.cs",
-      "source_location": "L9",
-      "_origin": "ast",
-      "id": "helpers_voiceandhealthutils_healthutils",
-      "community": 11,
-      "norm_label": "healthutils"
-    },
-    {
-      "label": ".IsPartDestroyed()",
-      "file_type": "code",
-      "source_file": "Helpers/VoiceAndHealthUtils.cs",
-      "source_location": "L11",
-      "_origin": "ast",
-      "id": "helpers_voiceandhealthutils_healthutils_ispartdestroyed",
-      "community": 11,
-      "norm_label": ".ispartdestroyed()"
-    },
-    {
-      "label": "Player",
-      "file_type": "code",
-      "source_file": "Helpers/VoiceAndHealthUtils.cs",
-      "source_location": "L11",
-      "_origin": "ast",
-      "id": "helpers_voiceandhealthutils_cs_player",
-      "community": 11,
-      "norm_label": "player"
-    },
-    {
-      "label": "EBodyPart",
-      "file_type": "code",
-      "source_file": "Helpers/VoiceAndHealthUtils.cs",
-      "source_location": "L11",
-      "_origin": "ast",
-      "id": "helpers_voiceandhealthutils_cs_ebodypart",
-      "community": 11,
-      "norm_label": "ebodypart"
-    },
-    {
-      "label": "VoiceHelper",
-      "file_type": "code",
-      "source_file": "Helpers/VoiceAndHealthUtils.cs",
-      "source_location": "L23",
-      "_origin": "ast",
-      "id": "helpers_voiceandhealthutils_voicehelper",
-      "community": 11,
-      "norm_label": "voicehelper"
-    },
-    {
-      "label": ".SafePlayVoice()",
-      "file_type": "code",
-      "source_file": "Helpers/VoiceAndHealthUtils.cs",
-      "source_location": "L25",
-      "_origin": "ast",
-      "id": "helpers_voiceandhealthutils_voicehelper_safeplayvoice",
-      "community": 11,
-      "norm_label": ".safeplayvoice()"
-    },
-    {
-      "label": ".TriggerTraumaVoice()",
-      "file_type": "code",
-      "source_file": "Helpers/VoiceAndHealthUtils.cs",
-      "source_location": "L38",
-      "_origin": "ast",
-      "id": "helpers_voiceandhealthutils_voicehelper_triggertraumavoice",
-      "community": 11,
-      "norm_label": ".triggertraumavoice()"
-    },
-    {
       "label": "SilenceVoicePatch",
       "file_type": "code",
       "source_file": "Helpers/VoiceAndHealthUtils.cs",
-      "source_location": "L63",
+      "source_location": "L28",
       "_origin": "ast",
       "id": "helpers_voiceandhealthutils_silencevoicepatch",
       "community": 11,
@@ -727,17 +657,27 @@
       "label": ".Prefix()",
       "file_type": "code",
       "source_file": "Helpers/VoiceAndHealthUtils.cs",
-      "source_location": "L66",
+      "source_location": "L31",
       "_origin": "ast",
       "id": "helpers_voiceandhealthutils_silencevoicepatch_prefix",
       "community": 11,
       "norm_label": ".prefix()"
     },
     {
+      "label": "Player",
+      "file_type": "code",
+      "source_file": "Helpers/VoiceAndHealthUtils.cs",
+      "source_location": "L31",
+      "_origin": "ast",
+      "id": "helpers_voiceandhealthutils_cs_player",
+      "community": 11,
+      "norm_label": "player"
+    },
+    {
       "label": "EPhraseTrigger",
       "file_type": "code",
       "source_file": "Helpers/VoiceAndHealthUtils.cs",
-      "source_location": "L66",
+      "source_location": "L31",
       "_origin": "ast",
       "id": "ephrasetrigger",
       "community": 11,
@@ -5437,7 +5377,7 @@
       "label": ".TryBlockReAds()",
       "file_type": "code",
       "source_file": "Patches/Trauma/TraumaArmsConsumer.cs",
-      "source_location": "L302",
+      "source_location": "L307",
       "_origin": "ast",
       "id": "trauma_traumaarmsconsumer_traumaarmsconsumer_tryblockreads",
       "community": 42,
@@ -5447,7 +5387,7 @@
       "label": ".OnWorldGone()",
       "file_type": "code",
       "source_file": "Patches/Trauma/TraumaArmsConsumer.cs",
-      "source_location": "L360",
+      "source_location": "L365",
       "_origin": "ast",
       "id": "trauma_traumaarmsconsumer_traumaarmsconsumer_onworldgone",
       "community": 42,
@@ -5457,7 +5397,7 @@
       "label": ".OnWorldSwap()",
       "file_type": "code",
       "source_file": "Patches/Trauma/TraumaArmsConsumer.cs",
-      "source_location": "L370",
+      "source_location": "L375",
       "_origin": "ast",
       "id": "trauma_traumaarmsconsumer_traumaarmsconsumer_onworldswap",
       "community": 42,
@@ -5467,7 +5407,7 @@
       "label": ".OnToggleOff()",
       "file_type": "code",
       "source_file": "Patches/Trauma/TraumaArmsConsumer.cs",
-      "source_location": "L378",
+      "source_location": "L383",
       "_origin": "ast",
       "id": "trauma_traumaarmsconsumer_traumaarmsconsumer_ontoggleoff",
       "community": 42,
@@ -5477,7 +5417,7 @@
       "label": ".OnToggleOn()",
       "file_type": "code",
       "source_file": "Patches/Trauma/TraumaArmsConsumer.cs",
-      "source_location": "L389",
+      "source_location": "L394",
       "_origin": "ast",
       "id": "trauma_traumaarmsconsumer_traumaarmsconsumer_ontoggleon",
       "community": 42,
@@ -5487,7 +5427,7 @@
       "label": ".Update()",
       "file_type": "code",
       "source_file": "Patches/Trauma/TraumaArmsConsumer.cs",
-      "source_location": "L407",
+      "source_location": "L412",
       "_origin": "ast",
       "id": "trauma_traumaarmsconsumer_traumaarmsconsumer_update",
       "community": 42,
@@ -7854,6 +7794,116 @@
       "norm_label": "traumachangereason"
     },
     {
+      "label": "TraumaPainVoice.cs",
+      "file_type": "code",
+      "source_file": "Patches/Trauma/TraumaPainVoice.cs",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "trauma_traumapainvoice",
+      "community": 52,
+      "norm_label": "traumapainvoice.cs"
+    },
+    {
+      "label": "TRLImmersiveCombatMedicine.Trauma",
+      "file_type": "code",
+      "source_file": "Patches/Trauma/TraumaPainVoice.cs",
+      "source_location": "L3",
+      "_origin": "ast",
+      "id": "trauma_traumapainvoice_trlimmersivecombatmedicine_trauma",
+      "community": 52,
+      "norm_label": "trlimmersivecombatmedicine.trauma"
+    },
+    {
+      "label": "TraumaPainVoice",
+      "file_type": "code",
+      "source_file": "Patches/Trauma/TraumaPainVoice.cs",
+      "source_location": "L25",
+      "_origin": "ast",
+      "id": "trauma_traumapainvoice_traumapainvoice",
+      "community": 52,
+      "norm_label": "traumapainvoice"
+    },
+    {
+      "label": "bool",
+      "file_type": "code",
+      "source_file": "Patches/Trauma/TraumaPainVoice.cs",
+      "source_location": "L27",
+      "_origin": "ast",
+      "id": "patches_trauma_traumapainvoice_cs_bool",
+      "community": 52,
+      "norm_label": "bool"
+    },
+    {
+      "label": ".Subscribe()",
+      "file_type": "code",
+      "source_file": "Patches/Trauma/TraumaPainVoice.cs",
+      "source_location": "L29",
+      "_origin": "ast",
+      "id": "trauma_traumapainvoice_traumapainvoice_subscribe",
+      "community": 52,
+      "norm_label": ".subscribe()"
+    },
+    {
+      "label": ".OnTransition()",
+      "file_type": "code",
+      "source_file": "Patches/Trauma/TraumaPainVoice.cs",
+      "source_location": "L39",
+      "_origin": "ast",
+      "id": "trauma_traumapainvoice_traumapainvoice_ontransition",
+      "community": 52,
+      "norm_label": ".ontransition()"
+    },
+    {
+      "label": "TraumaTransition",
+      "file_type": "code",
+      "source_file": "Patches/Trauma/TraumaPainVoice.cs",
+      "source_location": "L39",
+      "_origin": "ast",
+      "id": "patches_trauma_traumapainvoice_cs_traumatransition",
+      "community": 52,
+      "norm_label": "traumatransition"
+    },
+    {
+      "label": ".IsBroken()",
+      "file_type": "code",
+      "source_file": "Patches/Trauma/TraumaPainVoice.cs",
+      "source_location": "L83",
+      "_origin": "ast",
+      "id": "trauma_traumapainvoice_traumapainvoice_isbroken",
+      "community": 52,
+      "norm_label": ".isbroken()"
+    },
+    {
+      "label": "Player",
+      "file_type": "code",
+      "source_file": "Patches/Trauma/TraumaPainVoice.cs",
+      "source_location": "L83",
+      "_origin": "ast",
+      "id": "patches_trauma_traumapainvoice_cs_player",
+      "community": 52,
+      "norm_label": "player"
+    },
+    {
+      "label": "EBodyPart",
+      "file_type": "code",
+      "source_file": "Patches/Trauma/TraumaPainVoice.cs",
+      "source_location": "L83",
+      "_origin": "ast",
+      "id": "patches_trauma_traumapainvoice_cs_ebodypart",
+      "community": 52,
+      "norm_label": "ebodypart"
+    },
+    {
+      "label": ".IsActive()",
+      "file_type": "code",
+      "source_file": "Patches/Trauma/TraumaPainVoice.cs",
+      "source_location": "L89",
+      "_origin": "ast",
+      "id": "trauma_traumapainvoice_traumapainvoice_isactive",
+      "community": 52,
+      "norm_label": ".isactive()"
+    },
+    {
       "label": "TraumaPose.cs",
       "file_type": "code",
       "source_file": "Patches/Trauma/TraumaPose.cs",
@@ -8817,7 +8867,7 @@
       "label": "Dictionary",
       "file_type": "code",
       "source_file": "Patches/Trauma/TraumaVoice.cs",
-      "source_location": "L12",
+      "source_location": "L24",
       "_origin": "ast",
       "id": "patches_trauma_traumavoice_cs_dictionary",
       "community": 41,
@@ -8827,7 +8877,7 @@
       "label": "float",
       "file_type": "code",
       "source_file": "Patches/Trauma/TraumaVoice.cs",
-      "source_location": "L16",
+      "source_location": "L28",
       "_origin": "ast",
       "id": "patches_trauma_traumavoice_cs_float",
       "community": 41,
@@ -8837,7 +8887,7 @@
       "label": ".PlayStrong()",
       "file_type": "code",
       "source_file": "Patches/Trauma/TraumaVoice.cs",
-      "source_location": "L27",
+      "source_location": "L39",
       "_origin": "ast",
       "id": "trauma_traumavoice_traumavoice_playstrong",
       "community": 41,
@@ -8847,17 +8897,57 @@
       "label": "Player",
       "file_type": "code",
       "source_file": "Patches/Trauma/TraumaVoice.cs",
-      "source_location": "L27",
+      "source_location": "L39",
       "_origin": "ast",
       "id": "patches_trauma_traumavoice_cs_player",
       "community": 41,
       "norm_label": "player"
     },
     {
+      "label": ".PlayFracture()",
+      "file_type": "code",
+      "source_file": "Patches/Trauma/TraumaVoice.cs",
+      "source_location": "L55",
+      "_origin": "ast",
+      "id": "trauma_traumavoice_traumavoice_playfracture",
+      "community": 41,
+      "norm_label": ".playfracture()"
+    },
+    {
+      "label": "TraumaRegion",
+      "file_type": "code",
+      "source_file": "Patches/Trauma/TraumaVoice.cs",
+      "source_location": "L55",
+      "_origin": "ast",
+      "id": "patches_trauma_traumavoice_cs_traumaregion",
+      "community": 41,
+      "norm_label": "traumaregion"
+    },
+    {
+      "label": ".PlayZeroed()",
+      "file_type": "code",
+      "source_file": "Patches/Trauma/TraumaVoice.cs",
+      "source_location": "L68",
+      "_origin": "ast",
+      "id": "trauma_traumavoice_traumavoice_playzeroed",
+      "community": 41,
+      "norm_label": ".playzeroed()"
+    },
+    {
+      "label": ".PlayEffort()",
+      "file_type": "code",
+      "source_file": "Patches/Trauma/TraumaVoice.cs",
+      "source_location": "L77",
+      "_origin": "ast",
+      "id": "trauma_traumavoice_traumavoice_playeffort",
+      "community": 41,
+      "norm_label": ".playeffort()"
+    },
+    {
       "label": ".TryPlayStrong()",
       "file_type": "code",
       "source_file": "Patches/Trauma/TraumaVoice.cs",
-      "source_location": "L37",
+      "source_location": "L87",
       "_origin": "ast",
       "id": "trauma_traumavoice_traumavoice_tryplaystrong",
       "community": 41,
@@ -8867,7 +8957,7 @@
       "label": ".PlayLight()",
       "file_type": "code",
       "source_file": "Patches/Trauma/TraumaVoice.cs",
-      "source_location": "L46",
+      "source_location": "L96",
       "_origin": "ast",
       "id": "trauma_traumavoice_traumavoice_playlight",
       "community": 41,
@@ -8877,17 +8967,27 @@
       "label": ".Allowed()",
       "file_type": "code",
       "source_file": "Patches/Trauma/TraumaVoice.cs",
-      "source_location": "L52",
+      "source_location": "L102",
       "_origin": "ast",
       "id": "trauma_traumavoice_traumavoice_allowed",
       "community": 41,
       "norm_label": ".allowed()"
     },
     {
+      "label": "Kind",
+      "file_type": "code",
+      "source_file": "Patches/Trauma/TraumaVoice.cs",
+      "source_location": "L102",
+      "_origin": "ast",
+      "id": "kind",
+      "community": 41,
+      "norm_label": "kind"
+    },
+    {
       "label": ".Clear()",
       "file_type": "code",
       "source_file": "Patches/Trauma/TraumaVoice.cs",
-      "source_location": "L64",
+      "source_location": "L118",
       "_origin": "ast",
       "id": "trauma_traumavoice_traumavoice_clear",
       "community": 41,
@@ -9027,7 +9127,7 @@
       "label": ".Awake()",
       "file_type": "code",
       "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
-      "source_location": "L86",
+      "source_location": "L87",
       "_origin": "ast",
       "id": "trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin_awake",
       "community": 9,
@@ -9037,7 +9137,7 @@
       "label": ".MigrateOrphanedConfigKeys()",
       "file_type": "code",
       "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
-      "source_location": "L332",
+      "source_location": "L343",
       "_origin": "ast",
       "id": "trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin_migrateorphanedconfigkeys",
       "community": 9,
@@ -9047,7 +9147,7 @@
       "label": ".OnRaidStartCleanup()",
       "file_type": "code",
       "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
-      "source_location": "L496",
+      "source_location": "L507",
       "_origin": "ast",
       "id": "trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin_onraidstartcleanup",
       "community": 9,
@@ -9057,7 +9157,7 @@
       "label": "bool",
       "file_type": "code",
       "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
-      "source_location": "L521",
+      "source_location": "L532",
       "_origin": "ast",
       "id": "trlimmersivecombatmedicineplugin_cs_bool",
       "community": 9,
@@ -9067,7 +9167,7 @@
       "label": ".Update()",
       "file_type": "code",
       "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
-      "source_location": "L524",
+      "source_location": "L535",
       "_origin": "ast",
       "id": "trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin_update",
       "community": 9,
@@ -9077,7 +9177,7 @@
       "label": ".WakeLocalPlayer()",
       "file_type": "code",
       "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
-      "source_location": "L611",
+      "source_location": "L622",
       "_origin": "ast",
       "id": "trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin_wakelocalplayer",
       "community": 9,
@@ -9087,7 +9187,7 @@
       "label": "GameWorld",
       "file_type": "code",
       "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
-      "source_location": "L611",
+      "source_location": "L622",
       "_origin": "ast",
       "id": "trlimmersivecombatmedicineplugin_cs_gameworld",
       "community": 9,
@@ -9869,137 +9969,21 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "Helpers/VoiceAndHealthUtils.cs",
-      "source_location": "L9",
+      "source_location": "L28",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_helpers_voiceandhealthutils_cs",
-      "target": "helpers_voiceandhealthutils_healthutils"
+      "source": "helpers_voiceandhealthutils",
+      "target": "helpers_voiceandhealthutils_silencevoicepatch",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "Helpers/VoiceAndHealthUtils.cs",
-      "source_location": "L63",
+      "source_location": "L5",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_helpers_voiceandhealthutils_cs",
-      "target": "helpers_voiceandhealthutils_silencevoicepatch"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "Helpers/VoiceAndHealthUtils.cs",
-      "source_location": "L7",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_helpers_voiceandhealthutils_cs",
-      "target": "helpers_voiceandhealthutils_truetrauma"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "Helpers/VoiceAndHealthUtils.cs",
-      "source_location": "L23",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_helpers_voiceandhealthutils_cs",
-      "target": "helpers_voiceandhealthutils_voicehelper"
-    },
-    {
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "Helpers/VoiceAndHealthUtils.cs",
-      "source_location": "L11",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "helpers_voiceandhealthutils_healthutils",
-      "target": "helpers_voiceandhealthutils_healthutils_ispartdestroyed"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "source_file": "Helpers/VoiceAndHealthUtils.cs",
-      "source_location": "L11",
-      "weight": 1.0,
-      "context": "parameter_type",
-      "confidence_score": 1.0,
-      "source": "helpers_voiceandhealthutils_healthutils_ispartdestroyed",
-      "target": "helpers_voiceandhealthutils_cs_ebodypart"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "source_file": "Helpers/VoiceAndHealthUtils.cs",
-      "source_location": "L11",
-      "weight": 1.0,
-      "context": "parameter_type",
-      "confidence_score": 1.0,
-      "source": "helpers_voiceandhealthutils_healthutils_ispartdestroyed",
-      "target": "helpers_voiceandhealthutils_cs_player"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "source_file": "Helpers/VoiceAndHealthUtils.cs",
-      "source_location": "L66",
-      "weight": 1.0,
-      "context": "parameter_type",
-      "confidence_score": 1.0,
-      "source": "helpers_voiceandhealthutils_silencevoicepatch_prefix",
-      "target": "helpers_voiceandhealthutils_cs_player"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "source_file": "Helpers/VoiceAndHealthUtils.cs",
-      "source_location": "L25",
-      "weight": 1.0,
-      "context": "parameter_type",
-      "confidence_score": 1.0,
-      "source": "helpers_voiceandhealthutils_voicehelper_safeplayvoice",
-      "target": "helpers_voiceandhealthutils_cs_player"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "source_file": "Helpers/VoiceAndHealthUtils.cs",
-      "source_location": "L38",
-      "weight": 1.0,
-      "context": "parameter_type",
-      "confidence_score": 1.0,
-      "source": "helpers_voiceandhealthutils_voicehelper_triggertraumavoice",
-      "target": "helpers_voiceandhealthutils_cs_player"
-    },
-    {
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "Helpers/VoiceAndHealthUtils.cs",
-      "source_location": "L25",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "helpers_voiceandhealthutils_voicehelper",
-      "target": "helpers_voiceandhealthutils_voicehelper_safeplayvoice"
-    },
-    {
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "Helpers/VoiceAndHealthUtils.cs",
-      "source_location": "L38",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "helpers_voiceandhealthutils_voicehelper",
-      "target": "helpers_voiceandhealthutils_voicehelper_triggertraumavoice"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "Helpers/VoiceAndHealthUtils.cs",
-      "source_location": "L57",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "helpers_voiceandhealthutils_voicehelper_triggertraumavoice",
-      "target": "helpers_voiceandhealthutils_voicehelper_safeplayvoice"
+      "source": "helpers_voiceandhealthutils",
+      "target": "helpers_voiceandhealthutils_truetrauma",
+      "confidence_score": 1.0
     },
     {
       "relation": "method",
@@ -10021,6 +10005,17 @@
       "confidence_score": 1.0,
       "source": "helpers_voiceandhealthutils_silencevoicepatch_prefix",
       "target": "ephrasetrigger"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Helpers/VoiceAndHealthUtils.cs",
+      "source_location": "L66",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "confidence_score": 1.0,
+      "source": "helpers_voiceandhealthutils_silencevoicepatch_prefix",
+      "target": "helpers_voiceandhealthutils_cs_player"
     },
     {
       "relation": "contains",
@@ -10751,9 +10746,9 @@
       "source_location": "L71",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "medical_bandaidcontroller_bandaidcontroller_onhealcheckresponsehandler",
-      "target": "patches_medical_bandaidcontroller_cs_bandaidhealcheckresponsepacketv2",
-      "confidence_score": 1.0
+      "target": "patches_medical_bandaidcontroller_cs_bandaidhealcheckresponsepacketv2"
     },
     {
       "relation": "calls",
@@ -11154,9 +11149,9 @@
       "source_file": "Patches/Medical/BandAidHealPacket.cs",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_bandaidhealpacket",
-      "target": "medical_bandaidhealpacket_band_aid",
-      "confidence_score": 1.0
+      "target": "medical_bandaidhealpacket_band_aid"
     },
     {
       "relation": "contains",
@@ -11164,9 +11159,9 @@
       "source_file": "Patches/Medical/BandAidHealPacket.cs",
       "source_location": "L57",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_bandaidhealpacket",
-      "target": "medical_bandaidhealpacket_deserialize",
-      "confidence_score": 1.0
+      "target": "medical_bandaidhealpacket_deserialize"
     },
     {
       "relation": "contains",
@@ -11174,9 +11169,9 @@
       "source_file": "Patches/Medical/BandAidHealPacket.cs",
       "source_location": "L40",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_bandaidhealpacket",
-      "target": "medical_bandaidhealpacket_serialize",
-      "confidence_score": 1.0
+      "target": "medical_bandaidhealpacket_serialize"
     },
     {
       "relation": "references",
@@ -11227,9 +11222,9 @@
       "source_location": "L106",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "medical_bandaidnetworkhandler_bandaidnetworkhandler",
-      "target": "hashset_type",
-      "confidence_score": 1.0
+      "target": "hashset_type"
     },
     {
       "relation": "method",
@@ -11327,9 +11322,9 @@
       "source_file": "Patches/Medical/BandAidNetworkHandler.cs",
       "source_location": "L109",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_bandaidnetworkhandler_bandaidnetworkhandler",
-      "target": "medical_bandaidnetworkhandler_bandaidnetworkhandler_logerrorthrottled",
-      "confidence_score": 1.0
+      "target": "medical_bandaidnetworkhandler_bandaidnetworkhandler_logerrorthrottled"
     },
     {
       "relation": "method",
@@ -11337,9 +11332,9 @@
       "source_file": "Patches/Medical/BandAidNetworkHandler.cs",
       "source_location": "L91",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_bandaidnetworkhandler_bandaidnetworkhandler",
-      "target": "medical_bandaidnetworkhandler_bandaidnetworkhandler_logversionmismatch",
-      "confidence_score": 1.0
+      "target": "medical_bandaidnetworkhandler_bandaidnetworkhandler_logversionmismatch"
     },
     {
       "relation": "method",
@@ -11437,9 +11432,9 @@
       "source_file": "Patches/Medical/BandAidNetworkHandler.cs",
       "source_location": "L153",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_bandaidnetworkhandler_bandaidnetworkhandler",
-      "target": "medical_bandaidnetworkhandler_bandaidnetworkhandler_sendpacket",
-      "confidence_score": 1.0
+      "target": "medical_bandaidnetworkhandler_bandaidnetworkhandler_sendpacket"
     },
     {
       "relation": "method",
@@ -11509,9 +11504,9 @@
       "source_location": "L46",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "medical_bandaidnetworkhandler_bandaidnetworkhandler",
-      "target": "patches_medical_bandaidnetworkhandler_cs_ifikanetworkmanager",
-      "confidence_score": 1.0
+      "target": "patches_medical_bandaidnetworkhandler_cs_ifikanetworkmanager"
     },
     {
       "relation": "references",
@@ -11520,9 +11515,9 @@
       "source_location": "L105",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "medical_bandaidnetworkhandler_bandaidnetworkhandler",
-      "target": "patches_medical_bandaidnetworkhandler_cs_int",
-      "confidence_score": 1.0
+      "target": "patches_medical_bandaidnetworkhandler_cs_int"
     },
     {
       "relation": "references",
@@ -11652,9 +11647,9 @@
       "source_file": "Patches/Medical/BandAidNetworkHandler.cs",
       "source_location": "L155",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_bandaidnetworkhandler_bandaidnetworkhandler_sendpacket",
-      "target": "medical_bandaidnetworkhandler_bandaidnetworkhandler_ensurepacketsregistered",
-      "confidence_score": 1.0
+      "target": "medical_bandaidnetworkhandler_bandaidnetworkhandler_ensurepacketsregistered"
     },
     {
       "relation": "calls",
@@ -11696,9 +11691,9 @@
       "source_location": "L109",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "medical_bandaidnetworkhandler_bandaidnetworkhandler_logerrorthrottled",
-      "target": "exception",
-      "confidence_score": 1.0
+      "target": "exception"
     },
     {
       "relation": "calls",
@@ -11707,9 +11702,9 @@
       "source_file": "Patches/Medical/BandAidNetworkHandler.cs",
       "source_location": "L398",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_bandaidnetworkhandler_bandaidnetworkhandler_onbandaidhealpacketreceived",
-      "target": "medical_bandaidnetworkhandler_bandaidnetworkhandler_logerrorthrottled",
-      "confidence_score": 1.0
+      "target": "medical_bandaidnetworkhandler_bandaidnetworkhandler_logerrorthrottled"
     },
     {
       "relation": "calls",
@@ -11718,9 +11713,9 @@
       "source_file": "Patches/Medical/BandAidNetworkHandler.cs",
       "source_location": "L836",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_bandaidnetworkhandler_bandaidnetworkhandler_onhealcheckreceived",
-      "target": "medical_bandaidnetworkhandler_bandaidnetworkhandler_logerrorthrottled",
-      "confidence_score": 1.0
+      "target": "medical_bandaidnetworkhandler_bandaidnetworkhandler_logerrorthrottled"
     },
     {
       "relation": "calls",
@@ -11729,9 +11724,9 @@
       "source_file": "Patches/Medical/BandAidNetworkHandler.cs",
       "source_location": "L1029",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_bandaidnetworkhandler_bandaidnetworkhandler_onhealcheckresponsereceived",
-      "target": "medical_bandaidnetworkhandler_bandaidnetworkhandler_logerrorthrottled",
-      "confidence_score": 1.0
+      "target": "medical_bandaidnetworkhandler_bandaidnetworkhandler_logerrorthrottled"
     },
     {
       "relation": "calls",
@@ -11740,9 +11735,9 @@
       "source_file": "Patches/Medical/BandAidNetworkHandler.cs",
       "source_location": "L736",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_bandaidnetworkhandler_bandaidnetworkhandler_onshouldertapreceived",
-      "target": "medical_bandaidnetworkhandler_bandaidnetworkhandler_logerrorthrottled",
-      "confidence_score": 1.0
+      "target": "medical_bandaidnetworkhandler_bandaidnetworkhandler_logerrorthrottled"
     },
     {
       "relation": "calls",
@@ -11751,9 +11746,9 @@
       "source_file": "Patches/Medical/BandAidNetworkHandler.cs",
       "source_location": "L264",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_bandaidnetworkhandler_bandaidnetworkhandler_ontraumafaintreceived",
-      "target": "medical_bandaidnetworkhandler_bandaidnetworkhandler_logerrorthrottled",
-      "confidence_score": 1.0
+      "target": "medical_bandaidnetworkhandler_bandaidnetworkhandler_logerrorthrottled"
     },
     {
       "relation": "calls",
@@ -11762,9 +11757,9 @@
       "source_file": "Patches/Medical/BandAidNetworkHandler.cs",
       "source_location": "L906",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_bandaidnetworkhandler_bandaidnetworkhandler_ontreatmentreportreceived",
-      "target": "medical_bandaidnetworkhandler_bandaidnetworkhandler_logerrorthrottled",
-      "confidence_score": 1.0
+      "target": "medical_bandaidnetworkhandler_bandaidnetworkhandler_logerrorthrottled"
     },
     {
       "relation": "calls",
@@ -11773,9 +11768,9 @@
       "source_file": "Patches/Medical/BandAidNetworkHandler.cs",
       "source_location": "L175",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_bandaidnetworkhandler_bandaidnetworkhandler_sendpacket",
-      "target": "medical_bandaidnetworkhandler_bandaidnetworkhandler_logerrorthrottled",
-      "confidence_score": 1.0
+      "target": "medical_bandaidnetworkhandler_bandaidnetworkhandler_logerrorthrottled"
     },
     {
       "relation": "calls",
@@ -11784,9 +11779,9 @@
       "source_file": "Patches/Medical/BandAidNetworkHandler.cs",
       "source_location": "L319",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_bandaidnetworkhandler_bandaidnetworkhandler_onbandaidhealpacketreceived",
-      "target": "medical_bandaidnetworkhandler_bandaidnetworkhandler_sendpacket",
-      "confidence_score": 1.0
+      "target": "medical_bandaidnetworkhandler_bandaidnetworkhandler_sendpacket"
     },
     {
       "relation": "calls",
@@ -11795,9 +11790,9 @@
       "source_file": "Patches/Medical/BandAidNetworkHandler.cs",
       "source_location": "L781",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_bandaidnetworkhandler_bandaidnetworkhandler_onhealcheckreceived",
-      "target": "medical_bandaidnetworkhandler_bandaidnetworkhandler_sendpacket",
-      "confidence_score": 1.0
+      "target": "medical_bandaidnetworkhandler_bandaidnetworkhandler_sendpacket"
     },
     {
       "relation": "calls",
@@ -11806,9 +11801,9 @@
       "source_file": "Patches/Medical/BandAidNetworkHandler.cs",
       "source_location": "L1014",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_bandaidnetworkhandler_bandaidnetworkhandler_onhealcheckresponsereceived",
-      "target": "medical_bandaidnetworkhandler_bandaidnetworkhandler_sendpacket",
-      "confidence_score": 1.0
+      "target": "medical_bandaidnetworkhandler_bandaidnetworkhandler_sendpacket"
     },
     {
       "relation": "calls",
@@ -11817,9 +11812,9 @@
       "source_file": "Patches/Medical/BandAidNetworkHandler.cs",
       "source_location": "L720",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_bandaidnetworkhandler_bandaidnetworkhandler_onshouldertapreceived",
-      "target": "medical_bandaidnetworkhandler_bandaidnetworkhandler_sendpacket",
-      "confidence_score": 1.0
+      "target": "medical_bandaidnetworkhandler_bandaidnetworkhandler_sendpacket"
     },
     {
       "relation": "calls",
@@ -11828,9 +11823,9 @@
       "source_file": "Patches/Medical/BandAidNetworkHandler.cs",
       "source_location": "L221",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_bandaidnetworkhandler_bandaidnetworkhandler_ontraumafaintreceived",
-      "target": "medical_bandaidnetworkhandler_bandaidnetworkhandler_sendpacket",
-      "confidence_score": 1.0
+      "target": "medical_bandaidnetworkhandler_bandaidnetworkhandler_sendpacket"
     },
     {
       "relation": "calls",
@@ -11839,9 +11834,9 @@
       "source_file": "Patches/Medical/BandAidNetworkHandler.cs",
       "source_location": "L876",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_bandaidnetworkhandler_bandaidnetworkhandler_ontreatmentreportreceived",
-      "target": "medical_bandaidnetworkhandler_bandaidnetworkhandler_sendpacket",
-      "confidence_score": 1.0
+      "target": "medical_bandaidnetworkhandler_bandaidnetworkhandler_sendpacket"
     },
     {
       "relation": "calls",
@@ -11850,9 +11845,9 @@
       "source_file": "Patches/Medical/BandAidNetworkHandler.cs",
       "source_location": "L757",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_bandaidnetworkhandler_bandaidnetworkhandler_sendhealcheck",
-      "target": "medical_bandaidnetworkhandler_bandaidnetworkhandler_sendpacket",
-      "confidence_score": 1.0
+      "target": "medical_bandaidnetworkhandler_bandaidnetworkhandler_sendpacket"
     },
     {
       "relation": "calls",
@@ -11861,9 +11856,9 @@
       "source_file": "Patches/Medical/BandAidNetworkHandler.cs",
       "source_location": "L292",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_bandaidnetworkhandler_bandaidnetworkhandler_sendhealpacket",
-      "target": "medical_bandaidnetworkhandler_bandaidnetworkhandler_sendpacket",
-      "confidence_score": 1.0
+      "target": "medical_bandaidnetworkhandler_bandaidnetworkhandler_sendpacket"
     },
     {
       "relation": "references",
@@ -11872,9 +11867,9 @@
       "source_location": "L153",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "medical_bandaidnetworkhandler_bandaidnetworkhandler_sendpacket",
-      "target": "t",
-      "confidence_score": 1.0
+      "target": "t"
     },
     {
       "relation": "calls",
@@ -11883,9 +11878,9 @@
       "source_file": "Patches/Medical/BandAidNetworkHandler.cs",
       "source_location": "L704",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_bandaidnetworkhandler_bandaidnetworkhandler_sendshouldertappacket",
-      "target": "medical_bandaidnetworkhandler_bandaidnetworkhandler_sendpacket",
-      "confidence_score": 1.0
+      "target": "medical_bandaidnetworkhandler_bandaidnetworkhandler_sendpacket"
     },
     {
       "relation": "calls",
@@ -11894,9 +11889,9 @@
       "source_file": "Patches/Medical/BandAidNetworkHandler.cs",
       "source_location": "L201",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_bandaidnetworkhandler_bandaidnetworkhandler_sendtraumafaintpacket",
-      "target": "medical_bandaidnetworkhandler_bandaidnetworkhandler_sendpacket",
-      "confidence_score": 1.0
+      "target": "medical_bandaidnetworkhandler_bandaidnetworkhandler_sendpacket"
     },
     {
       "relation": "calls",
@@ -11905,9 +11900,9 @@
       "source_file": "Patches/Medical/BandAidNetworkHandler.cs",
       "source_location": "L858",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_bandaidnetworkhandler_bandaidnetworkhandler_sendtreatmentreport",
-      "target": "medical_bandaidnetworkhandler_bandaidnetworkhandler_sendpacket",
-      "confidence_score": 1.0
+      "target": "medical_bandaidnetworkhandler_bandaidnetworkhandler_sendpacket"
     },
     {
       "relation": "calls",
@@ -11916,9 +11911,9 @@
       "source_file": "Patches/Medical/BandAidNetworkHandler.cs",
       "source_location": "L984",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_bandaidnetworkhandler_bandaidnetworkhandler_tryanswerforlocalbot",
-      "target": "medical_bandaidnetworkhandler_bandaidnetworkhandler_sendpacket",
-      "confidence_score": 1.0
+      "target": "medical_bandaidnetworkhandler_bandaidnetworkhandler_sendpacket"
     },
     {
       "relation": "references",
@@ -11927,9 +11922,9 @@
       "source_location": "L206",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "medical_bandaidnetworkhandler_bandaidnetworkhandler_ontraumafaintreceived",
-      "target": "traumafaintpacketv2",
-      "confidence_score": 1.0
+      "target": "traumafaintpacketv2"
     },
     {
       "relation": "references",
@@ -12070,9 +12065,9 @@
       "source_location": "L297",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "medical_bandaidnetworkhandler_bandaidnetworkhandler_onbandaidhealpacketreceived",
-      "target": "bandaidhealpacketv2",
-      "confidence_score": 1.0
+      "target": "bandaidhealpacketv2"
     },
     {
       "relation": "calls",
@@ -12136,9 +12131,9 @@
       "source_location": "L407",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "medical_bandaidnetworkhandler_bandaidnetworkhandler_applyfulltreatmentlocally",
-      "target": "bandaidhealpacketv2",
-      "confidence_score": 1.0
+      "target": "bandaidhealpacketv2"
     },
     {
       "relation": "references",
@@ -12147,9 +12142,9 @@
       "source_location": "L845",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "medical_bandaidnetworkhandler_bandaidnetworkhandler_sendtreatmentreport",
-      "target": "bandaidhealpacketv2",
-      "confidence_score": 1.0
+      "target": "bandaidhealpacketv2"
     },
     {
       "relation": "references",
@@ -12158,9 +12153,9 @@
       "source_location": "L915",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "medical_bandaidnetworkhandler_bandaidnetworkhandler_tryapplyfulltreatmentonlocalbot",
-      "target": "bandaidhealpacketv2",
-      "confidence_score": 1.0
+      "target": "bandaidhealpacketv2"
     },
     {
       "relation": "calls",
@@ -12378,9 +12373,9 @@
       "source_location": "L707",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "medical_bandaidnetworkhandler_bandaidnetworkhandler_onshouldertapreceived",
-      "target": "bandaidshouldertappacketv2",
-      "confidence_score": 1.0
+      "target": "bandaidshouldertappacketv2"
     },
     {
       "relation": "references",
@@ -12389,9 +12384,9 @@
       "source_location": "L765",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "medical_bandaidnetworkhandler_bandaidnetworkhandler_onhealcheckreceived",
-      "target": "bandaidhealcheckpacketv2",
-      "confidence_score": 1.0
+      "target": "bandaidhealcheckpacketv2"
     },
     {
       "relation": "calls",
@@ -12411,9 +12406,9 @@
       "source_location": "L946",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "medical_bandaidnetworkhandler_bandaidnetworkhandler_tryanswerforlocalbot",
-      "target": "bandaidhealcheckpacketv2",
-      "confidence_score": 1.0
+      "target": "bandaidhealcheckpacketv2"
     },
     {
       "relation": "references",
@@ -12422,9 +12417,9 @@
       "source_location": "L861",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "medical_bandaidnetworkhandler_bandaidnetworkhandler_ontreatmentreportreceived",
-      "target": "bandaidtreatmentreportpacketv2",
-      "confidence_score": 1.0
+      "target": "bandaidtreatmentreportpacketv2"
     },
     {
       "relation": "references",
@@ -12433,9 +12428,9 @@
       "source_location": "L998",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "medical_bandaidnetworkhandler_bandaidnetworkhandler_onhealcheckresponsereceived",
-      "target": "patches_medical_bandaidnetworkhandler_cs_bandaidhealcheckresponsepacketv2",
-      "confidence_score": 1.0
+      "target": "patches_medical_bandaidnetworkhandler_cs_bandaidhealcheckresponsepacketv2"
     },
     {
       "relation": "contains",
@@ -12443,9 +12438,9 @@
       "source_file": "Patches/Medical/BandAidShoulderTapPacket.cs",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_bandaidshouldertappacket",
-      "target": "medical_bandaidshouldertappacket_band_aid",
-      "confidence_score": 1.0
+      "target": "medical_bandaidshouldertappacket_band_aid"
     },
     {
       "relation": "contains",
@@ -12453,9 +12448,9 @@
       "source_file": "Patches/Medical/BandAidShoulderTapPacket.cs",
       "source_location": "L28",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_bandaidshouldertappacket",
-      "target": "medical_bandaidshouldertappacket_deserialize",
-      "confidence_score": 1.0
+      "target": "medical_bandaidshouldertappacket_deserialize"
     },
     {
       "relation": "contains",
@@ -12463,9 +12458,9 @@
       "source_file": "Patches/Medical/BandAidShoulderTapPacket.cs",
       "source_location": "L19",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_bandaidshouldertappacket",
-      "target": "medical_bandaidshouldertappacket_serialize",
-      "confidence_score": 1.0
+      "target": "medical_bandaidshouldertappacket_serialize"
     },
     {
       "relation": "references",
@@ -13258,9 +13253,9 @@
       "source_file": "Patches/Trauma/TraumaPurge.cs",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "trauma_traumapurge",
-      "target": "text",
-      "confidence_score": 1.0
+      "target": "text"
     },
     {
       "relation": "references",
@@ -14328,9 +14323,9 @@
       "source_file": "Patches/Medical/LegacyPackets.cs",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_legacypackets",
-      "target": "medical_legacypackets_band_aid",
-      "confidence_score": 1.0
+      "target": "medical_legacypackets_band_aid"
     },
     {
       "relation": "contains",
@@ -14338,9 +14333,9 @@
       "source_file": "Patches/Medical/LegacyPackets.cs",
       "source_location": "L129",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_legacypackets",
-      "target": "medical_legacypackets_deserialize",
-      "confidence_score": 1.0
+      "target": "medical_legacypackets_deserialize"
     },
     {
       "relation": "contains",
@@ -14348,9 +14343,9 @@
       "source_file": "Patches/Medical/LegacyPackets.cs",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_legacypackets",
-      "target": "medical_legacypackets_legacypacketcompat",
-      "confidence_score": 1.0
+      "target": "medical_legacypackets_legacypacketcompat"
     },
     {
       "relation": "contains",
@@ -14358,9 +14353,9 @@
       "source_file": "Patches/Medical/LegacyPackets.cs",
       "source_location": "L127",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_legacypackets",
-      "target": "medical_legacypackets_serialize",
-      "confidence_score": 1.0
+      "target": "medical_legacypackets_serialize"
     },
     {
       "relation": "method",
@@ -14368,9 +14363,9 @@
       "source_file": "Patches/Medical/LegacyPackets.cs",
       "source_location": "L31",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_legacypackets_legacypacketcompat",
-      "target": "medical_legacypackets_legacypacketcompat_register",
-      "confidence_score": 1.0
+      "target": "medical_legacypackets_legacypacketcompat_register"
     },
     {
       "relation": "method",
@@ -14378,9 +14373,9 @@
       "source_file": "Patches/Medical/LegacyPackets.cs",
       "source_location": "L41",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_legacypackets_legacypacketcompat",
-      "target": "medical_legacypackets_legacypacketcompat_warnonce",
-      "confidence_score": 1.0
+      "target": "medical_legacypackets_legacypacketcompat_warnonce"
     },
     {
       "relation": "references",
@@ -14389,9 +14384,9 @@
       "source_location": "L25",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "medical_legacypackets_legacypacketcompat",
-      "target": "patches_medical_legacypackets_cs_bool",
-      "confidence_score": 1.0
+      "target": "patches_medical_legacypackets_cs_bool"
     },
     {
       "relation": "calls",
@@ -14400,9 +14395,9 @@
       "source_file": "Patches/Medical/LegacyPackets.cs",
       "source_location": "L33",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_legacypackets_legacypacketcompat_register",
-      "target": "medical_legacypackets_legacypacketcompat_warnonce",
-      "confidence_score": 1.0
+      "target": "medical_legacypackets_legacypacketcompat_warnonce"
     },
     {
       "relation": "references",
@@ -14411,9 +14406,9 @@
       "source_location": "L31",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "medical_legacypackets_legacypacketcompat_register",
-      "target": "patches_medical_legacypackets_cs_ifikanetworkmanager",
-      "confidence_score": 1.0
+      "target": "patches_medical_legacypackets_cs_ifikanetworkmanager"
     },
     {
       "relation": "references",
@@ -14422,9 +14417,9 @@
       "source_location": "L127",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "medical_legacypackets_serialize",
-      "target": "patches_medical_legacypackets_cs_netdatawriter",
-      "confidence_score": 1.0
+      "target": "patches_medical_legacypackets_cs_netdatawriter"
     },
     {
       "relation": "references",
@@ -14433,9 +14428,9 @@
       "source_location": "L129",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "medical_legacypackets_deserialize",
-      "target": "patches_medical_legacypackets_cs_netdatareader",
-      "confidence_score": 1.0
+      "target": "patches_medical_legacypackets_cs_netdatareader"
     },
     {
       "relation": "contains",
@@ -16279,9 +16274,9 @@
       "source_file": "Patches/Medical/PacketEnvelope.cs",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_packetenvelope",
-      "target": "medical_packetenvelope_band_aid",
-      "confidence_score": 1.0
+      "target": "medical_packetenvelope_band_aid"
     },
     {
       "relation": "contains",
@@ -16289,9 +16284,9 @@
       "source_file": "Patches/Medical/PacketEnvelope.cs",
       "source_location": "L22",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_packetenvelope",
-      "target": "medical_packetenvelope_packetenvelope",
-      "confidence_score": 1.0
+      "target": "medical_packetenvelope_packetenvelope"
     },
     {
       "relation": "method",
@@ -16299,9 +16294,9 @@
       "source_file": "Patches/Medical/PacketEnvelope.cs",
       "source_location": "L38",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_packetenvelope_packetenvelope",
-      "target": "medical_packetenvelope_packetenvelope_close",
-      "confidence_score": 1.0
+      "target": "medical_packetenvelope_packetenvelope_close"
     },
     {
       "relation": "method",
@@ -16309,9 +16304,9 @@
       "source_file": "Patches/Medical/PacketEnvelope.cs",
       "source_location": "L30",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_packetenvelope_packetenvelope",
-      "target": "medical_packetenvelope_packetenvelope_open",
-      "confidence_score": 1.0
+      "target": "medical_packetenvelope_packetenvelope_open"
     },
     {
       "relation": "method",
@@ -16319,9 +16314,9 @@
       "source_file": "Patches/Medical/PacketEnvelope.cs",
       "source_location": "L49",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_packetenvelope_packetenvelope",
-      "target": "medical_packetenvelope_packetenvelope_tryopen",
-      "confidence_score": 1.0
+      "target": "medical_packetenvelope_packetenvelope_tryopen"
     },
     {
       "relation": "method",
@@ -16329,9 +16324,9 @@
       "source_file": "Patches/Medical/PacketEnvelope.cs",
       "source_location": "L65",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_packetenvelope_packetenvelope",
-      "target": "medical_packetenvelope_packetenvelope_tryreadstring",
-      "confidence_score": 1.0
+      "target": "medical_packetenvelope_packetenvelope_tryreadstring"
     },
     {
       "relation": "references",
@@ -16340,9 +16335,9 @@
       "source_location": "L27",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "medical_packetenvelope_packetenvelope",
-      "target": "patches_medical_packetenvelope_cs_netdatawriter",
-      "confidence_score": 1.0
+      "target": "patches_medical_packetenvelope_cs_netdatawriter"
     },
     {
       "relation": "references",
@@ -16351,9 +16346,9 @@
       "source_location": "L38",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "medical_packetenvelope_packetenvelope_close",
-      "target": "patches_medical_packetenvelope_cs_netdatawriter",
-      "confidence_score": 1.0
+      "target": "patches_medical_packetenvelope_cs_netdatawriter"
     },
     {
       "relation": "references",
@@ -16362,9 +16357,9 @@
       "source_location": "L30",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "medical_packetenvelope_packetenvelope_open",
-      "target": "patches_medical_packetenvelope_cs_netdatawriter",
-      "confidence_score": 1.0
+      "target": "patches_medical_packetenvelope_cs_netdatawriter"
     },
     {
       "relation": "references",
@@ -16373,9 +16368,9 @@
       "source_location": "L49",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "medical_packetenvelope_packetenvelope_tryopen",
-      "target": "patches_medical_packetenvelope_cs_netdatareader",
-      "confidence_score": 1.0
+      "target": "patches_medical_packetenvelope_cs_netdatareader"
     },
     {
       "relation": "references",
@@ -16384,9 +16379,9 @@
       "source_location": "L65",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "medical_packetenvelope_packetenvelope_tryreadstring",
-      "target": "patches_medical_packetenvelope_cs_netdatareader",
-      "confidence_score": 1.0
+      "target": "patches_medical_packetenvelope_cs_netdatareader"
     },
     {
       "relation": "contains",
@@ -17185,9 +17180,9 @@
       "source_file": "Patches/Trauma/FikaRevivePatch.cs",
       "source_location": "L17",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "trauma_fikarevivepatch",
-      "target": "trauma_fikarevivepatch_defibrillatoritem",
-      "confidence_score": 1.0
+      "target": "trauma_fikarevivepatch_defibrillatoritem"
     },
     {
       "relation": "contains",
@@ -17215,9 +17210,9 @@
       "source_file": "Patches/Trauma/FikaRevivePatch.cs",
       "source_location": "L26",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "trauma_fikarevivepatch",
-      "target": "trauma_fikarevivepatch_fikarevivereflection",
-      "confidence_score": 1.0
+      "target": "trauma_fikarevivepatch_fikarevivereflection"
     },
     {
       "relation": "references",
@@ -17226,9 +17221,9 @@
       "source_location": "L19",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "trauma_fikarevivepatch_defibrillatoritem",
-      "target": "patches_trauma_fikarevivepatch_cs_string",
-      "confidence_score": 1.0
+      "target": "patches_trauma_fikarevivepatch_cs_string"
     },
     {
       "relation": "references",
@@ -17237,9 +17232,9 @@
       "source_location": "L28",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "trauma_fikarevivepatch_fikarevivereflection",
-      "target": "patches_trauma_fikarevivepatch_cs_string",
-      "confidence_score": 1.0
+      "target": "patches_trauma_fikarevivepatch_cs_string"
     },
     {
       "relation": "references",
@@ -17248,9 +17243,9 @@
       "source_location": "L32",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "trauma_fikarevivepatch_fikarevivereflection",
-      "target": "patches_trauma_fikarevivepatch_cs_fieldinfo",
-      "confidence_score": 1.0
+      "target": "patches_trauma_fikarevivepatch_cs_fieldinfo"
     },
     {
       "relation": "references",
@@ -17259,9 +17254,9 @@
       "source_location": "L30",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "trauma_fikarevivepatch_fikarevivereflection",
-      "target": "patches_trauma_fikarevivepatch_cs_type",
-      "confidence_score": 1.0
+      "target": "patches_trauma_fikarevivepatch_cs_type"
     },
     {
       "relation": "method",
@@ -23142,6 +23137,132 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "Patches/Trauma/TraumaPainVoice.cs",
+      "source_location": "L25",
+      "weight": 1.0,
+      "source": "trauma_traumapainvoice",
+      "target": "trauma_traumapainvoice_traumapainvoice",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Trauma/TraumaPainVoice.cs",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "trauma_traumapainvoice",
+      "target": "trauma_traumapainvoice_trlimmersivecombatmedicine_trauma",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Trauma/TraumaPainVoice.cs",
+      "source_location": "L27",
+      "weight": 1.0,
+      "context": "field",
+      "source": "trauma_traumapainvoice_traumapainvoice",
+      "target": "patches_trauma_traumapainvoice_cs_bool",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Trauma/TraumaPainVoice.cs",
+      "source_location": "L89",
+      "weight": 1.0,
+      "source": "trauma_traumapainvoice_traumapainvoice",
+      "target": "trauma_traumapainvoice_traumapainvoice_isactive",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Trauma/TraumaPainVoice.cs",
+      "source_location": "L83",
+      "weight": 1.0,
+      "source": "trauma_traumapainvoice_traumapainvoice",
+      "target": "trauma_traumapainvoice_traumapainvoice_isbroken",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Trauma/TraumaPainVoice.cs",
+      "source_location": "L39",
+      "weight": 1.0,
+      "source": "trauma_traumapainvoice_traumapainvoice",
+      "target": "trauma_traumapainvoice_traumapainvoice_ontransition",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Trauma/TraumaPainVoice.cs",
+      "source_location": "L29",
+      "weight": 1.0,
+      "source": "trauma_traumapainvoice_traumapainvoice",
+      "target": "trauma_traumapainvoice_traumapainvoice_subscribe",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Trauma/TraumaPainVoice.cs",
+      "source_location": "L39",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "trauma_traumapainvoice_traumapainvoice_ontransition",
+      "target": "patches_trauma_traumapainvoice_cs_traumatransition",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Trauma/TraumaPainVoice.cs",
+      "source_location": "L41",
+      "weight": 1.0,
+      "source": "trauma_traumapainvoice_traumapainvoice_ontransition",
+      "target": "trauma_traumapainvoice_traumapainvoice_isactive",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Trauma/TraumaPainVoice.cs",
+      "source_location": "L62",
+      "weight": 1.0,
+      "source": "trauma_traumapainvoice_traumapainvoice_ontransition",
+      "target": "trauma_traumapainvoice_traumapainvoice_isbroken",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Trauma/TraumaPainVoice.cs",
+      "source_location": "L83",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "trauma_traumapainvoice_traumapainvoice_isbroken",
+      "target": "patches_trauma_traumapainvoice_cs_ebodypart",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Trauma/TraumaPainVoice.cs",
+      "source_location": "L83",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "trauma_traumapainvoice_traumapainvoice_isbroken",
+      "target": "patches_trauma_traumapainvoice_cs_player",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "Patches/Trauma/TraumaPose.cs",
       "source_location": "L13",
       "weight": 1.0,
@@ -24034,9 +24155,9 @@
       "source_file": "Patches/Trauma/TraumaPurge.cs",
       "source_location": "L31",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "trauma_traumapurge",
-      "target": "trauma_traumapurge_traumapurge",
-      "confidence_score": 1.0
+      "target": "trauma_traumapurge_traumapurge"
     },
     {
       "relation": "contains",
@@ -24044,9 +24165,9 @@
       "source_file": "Patches/Trauma/TraumaPurge.cs",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "trauma_traumapurge",
-      "target": "trauma_traumapurge_trlimmersivecombatmedicine_trauma",
-      "confidence_score": 1.0
+      "target": "trauma_traumapurge_trlimmersivecombatmedicine_trauma"
     },
     {
       "relation": "references",
@@ -24055,9 +24176,9 @@
       "source_location": "L34",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "trauma_traumapurge_traumapurge",
-      "target": "patches_trauma_traumapurge_cs_string",
-      "confidence_score": 1.0
+      "target": "patches_trauma_traumapurge_cs_string"
     },
     {
       "relation": "method",
@@ -24065,9 +24186,9 @@
       "source_file": "Patches/Trauma/TraumaPurge.cs",
       "source_location": "L109",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "trauma_traumapurge_traumapurge",
-      "target": "trauma_traumapurge_traumapurge_append",
-      "confidence_score": 1.0
+      "target": "trauma_traumapurge_traumapurge_append"
     },
     {
       "relation": "method",
@@ -24075,9 +24196,9 @@
       "source_file": "Patches/Trauma/TraumaPurge.cs",
       "source_location": "L41",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "trauma_traumapurge_traumapurge",
-      "target": "trauma_traumapurge_traumapurge_audit",
-      "confidence_score": 1.0
+      "target": "trauma_traumapurge_traumapurge_audit"
     },
     {
       "relation": "calls",
@@ -24086,9 +24207,9 @@
       "source_file": "Patches/Trauma/TraumaPurge.cs",
       "source_location": "L85",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "trauma_traumapurge_traumapurge_audit",
-      "target": "trauma_traumapurge_traumapurge_append",
-      "confidence_score": 1.0
+      "target": "trauma_traumapurge_traumapurge_append"
     },
     {
       "relation": "references",
@@ -24097,9 +24218,9 @@
       "source_location": "L109",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "trauma_traumapurge_traumapurge_append",
-      "target": "stringbuilder",
-      "confidence_score": 1.0
+      "target": "stringbuilder"
     },
     {
       "relation": "contains",
@@ -24768,6 +24889,26 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "Patches/Trauma/TraumaVoice.cs",
+      "source_location": "L77",
+      "weight": 1.0,
+      "source": "trauma_traumavoice_traumavoice",
+      "target": "trauma_traumavoice_traumavoice_playeffort",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Trauma/TraumaVoice.cs",
+      "source_location": "L55",
+      "weight": 1.0,
+      "source": "trauma_traumavoice_traumavoice",
+      "target": "trauma_traumavoice_traumavoice_playfracture",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Trauma/TraumaVoice.cs",
       "source_location": "L27",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -24783,6 +24924,16 @@
       "confidence_score": 1.0,
       "source": "trauma_traumavoice_traumavoice",
       "target": "trauma_traumavoice_traumavoice_playstrong"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Trauma/TraumaVoice.cs",
+      "source_location": "L68",
+      "weight": 1.0,
+      "source": "trauma_traumavoice_traumavoice",
+      "target": "trauma_traumavoice_traumavoice_playzeroed",
+      "confidence_score": 1.0
     },
     {
       "relation": "method",
@@ -24831,12 +24982,45 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Patches/Trauma/TraumaVoice.cs",
+      "source_location": "L77",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "trauma_traumavoice_traumavoice_playeffort",
+      "target": "patches_trauma_traumavoice_cs_player",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Trauma/TraumaVoice.cs",
+      "source_location": "L55",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "trauma_traumavoice_traumavoice_playfracture",
+      "target": "patches_trauma_traumavoice_cs_player",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Trauma/TraumaVoice.cs",
       "source_location": "L27",
       "weight": 1.0,
       "context": "parameter_type",
       "confidence_score": 1.0,
       "source": "trauma_traumavoice_traumavoice_playlight",
       "target": "patches_trauma_traumavoice_cs_player"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Trauma/TraumaVoice.cs",
+      "source_location": "L68",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "trauma_traumavoice_traumavoice_playzeroed",
+      "target": "patches_trauma_traumavoice_cs_player",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -24850,6 +25034,50 @@
       "target": "patches_trauma_traumavoice_cs_player"
     },
     {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Trauma/TraumaVoice.cs",
+      "source_location": "L55",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "trauma_traumavoice_traumavoice_playfracture",
+      "target": "patches_trauma_traumavoice_cs_traumaregion",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Trauma/TraumaVoice.cs",
+      "source_location": "L57",
+      "weight": 1.0,
+      "source": "trauma_traumavoice_traumavoice_playfracture",
+      "target": "trauma_traumavoice_traumavoice_allowed",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Trauma/TraumaVoice.cs",
+      "source_location": "L70",
+      "weight": 1.0,
+      "source": "trauma_traumavoice_traumavoice_playzeroed",
+      "target": "trauma_traumavoice_traumavoice_allowed",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Trauma/TraumaVoice.cs",
+      "source_location": "L79",
+      "weight": 1.0,
+      "source": "trauma_traumavoice_traumavoice_playeffort",
+      "target": "trauma_traumavoice_traumavoice_allowed",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
@@ -24859,6 +25087,17 @@
       "confidence_score": 1.0,
       "source": "trauma_traumavoice_traumavoice_playlight",
       "target": "trauma_traumavoice_traumavoice_allowed"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Trauma/TraumaVoice.cs",
+      "source_location": "L102",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "trauma_traumavoice_traumavoice_allowed",
+      "target": "kind",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -25075,5 +25314,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "8fc70a6136a91e6a18566ee018f6d6215f6e8141"
+  "built_at_commit": "c2dacf67b02b16b9da19f5a418e19d4095ace867"
 }

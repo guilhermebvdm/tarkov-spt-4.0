@@ -9,7 +9,19 @@ namespace TRLImmersiveCombatMedicine.Trauma
     /// filtro LocalPhrases). Anti-spam próprio ≥2s por (player, tipo). Reusável pelo 005 (P9).</summary>
     internal static class TraumaVoice
     {
-        private static readonly Dictionary<(string, bool), float> _nextAllowed = new Dictionary<(string, bool), float>();
+        /// <summary>ref: item 019 — canal de anti-spam. Era `bool strong`, o que dava DOIS canais; o mod antigo
+        /// era pior ainda (canal ÚNICO por jogador, então grito de perna calava grito de braço por 2s). Com um
+        /// canal por tipo, uma perna quebrada e um braço quebrado no mesmo instante produzem as DUAS falas.</summary>
+        internal enum Kind
+        {
+            Strong,    // OnAgony — queda executada, tentativa de levantar negada
+            Light,     // OnBeingHurt — liberação do bloqueio
+            Fracture,  // LegBroken / HandBroken — membro FRATURADO
+            Zeroed,    // OnAgony — membro zerado sem fratura (canal próprio p/ não competir com Strong)
+            Effort     // OnBreath — esforço/ofego ao perder a mira
+        }
+
+        private static readonly Dictionary<(string, Kind), float> _nextAllowed = new Dictionary<(string, Kind), float>();
 
         /// <summary>ref: item 020 — janelas de anti-spam de voz sobreviventes.</summary>
         internal static int ResidualCount => _nextAllowed.Count;
@@ -26,8 +38,46 @@ namespace TRLImmersiveCombatMedicine.Trauma
         /// nenhuma camada adicional foi criada por cima dessa garantia (spec funcional 009 corner A3).</summary>
         internal static void PlayStrong(Player p)
         {
-            if (!Allowed(p, strong: true)) return;
+            if (!Allowed(p, Kind.Strong)) return;
             p.Speaker?.Play(EPhraseTrigger.OnAgony, ETagStatus.Combat | ETagStatus.Dying, demand: true, importance: 100);
+        }
+
+        /// <summary>ref: item 019 — FRATURA de membro. `LegBroken`/`HandBroken` são exatamente os gatilhos que o
+        /// jogo usa para o mesmo evento: BotMemoryClass.cs:640-654 reage ao efeito de fratura falando LegBroken
+        /// para perna e HandBroken para braço. Os dois também estão no menu de voz do jogador, grupo
+        /// "HEALTH STATUS" (GesturesMenu.cs:469), o que garante que existe clipe de voz de jogador.
+        ///
+        /// ATENÇÃO HISTÓRICA: o mod antigo tentava `OnLegBroken`/`OnHandBroken` — nomes que NÃO EXISTEM no enum.
+        /// Ele resolvia por `Enum.Parse` de string dentro de um `catch {}` vazio (VoiceAndHealthUtils.cs:25-36),
+        /// então metade das falas de perna/braço e TODAS as de estômago (`OnPain`, também inexistente) eram
+        /// silêncio absoluto, sem nada no log. Só o OnAgony do sorteio 50/50 tocava. Usar o enum tipado aqui é
+        /// o que impede o bug de voltar.</summary>
+        internal static void PlayFracture(Player p, TraumaRegion region)
+        {
+            if (!Allowed(p, Kind.Fracture)) return;
+            EPhraseTrigger trigger = region == TraumaRegion.Arms
+                ? EPhraseTrigger.HandBroken   // ref: EPhraseTrigger.cs:47 (48)
+                : EPhraseTrigger.LegBroken;   // ref: EPhraseTrigger.cs:48 (49)
+            // Sem importance: fala de status, não de agonia — não deve furar a fila de combate como o OnAgony.
+            p.Say(trigger, demand: true);
+        }
+
+        /// <summary>ref: item 019 — membro ZERADO sem fratura. O jogo não tem gatilho dedicado para "membro
+        /// destruído" (só para fratura), então reusa OnAgony — mas em canal de anti-spam próprio, para não
+        /// consumir a janela do Strong (queda) nem ser consumido por ela.</summary>
+        internal static void PlayZeroed(Player p)
+        {
+            if (!Allowed(p, Kind.Zeroed)) return;
+            p.Speaker?.Play(EPhraseTrigger.OnAgony, ETagStatus.Combat | ETagStatus.Dying, demand: true, importance: 100);
+        }
+
+        /// <summary>ref: item 019 — ESFORÇO/ofego, não agonia: usado quando a mira cai por fraqueza do braço.
+        /// É a fala que o mod antigo tocava nesse momento (o único dos quatro nomes dele que existia de fato).
+        /// ref: EPhraseTrigger.cs:26 (29); Player.cs:27588 usa o mesmo trigger p/ respiração pesada.</summary>
+        internal static void PlayEffort(Player p)
+        {
+            if (!Allowed(p, Kind.Effort)) return;
+            p.Say(EPhraseTrigger.OnBreath, demand: true);
         }
 
         /// <summary>FORTE accept-gated (item 005 — lockout de re-ADS): mesmo trigger/tags do PlayStrong, SEM o
@@ -45,14 +95,18 @@ namespace TRLImmersiveCombatMedicine.Trauma
         /// ref: Player.cs:28799-28829; EPhraseTrigger.cs:12.</summary>
         internal static void PlayLight(Player p)
         {
-            if (!Allowed(p, strong: false)) return;
+            if (!Allowed(p, Kind.Light)) return;
             p.Say(EPhraseTrigger.OnBeingHurt, demand: true);
         }
 
-        private static bool Allowed(Player p, bool strong)
+        private static bool Allowed(Player p, Kind kind)
         {
             if (p is null || p.ProfileId == null) return false;
-            var key = (p.ProfileId, strong);
+            // ref: item 019 — bots são MUDOS por decisão do usuário (2026-07-26): o mod antigo não filtrava IA e
+            // os bots gritavam, o que polui o áudio e atrapalha identificar quem está ferido de verdade. Hoje
+            // nenhum call site passa bot, então é guard defensivo — e é o ponto único onde a decisão vive.
+            if (p.IsAI) return false;
+            var key = (p.ProfileId, kind);
             if (_nextAllowed.TryGetValue(key, out float next) && Time.time < next) return false;
             _nextAllowed[key] = Time.time + SpamCooldown;
             return true;
