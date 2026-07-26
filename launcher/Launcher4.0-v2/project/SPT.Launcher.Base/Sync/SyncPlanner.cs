@@ -792,13 +792,8 @@ namespace SPT.Launcher.Sync
             }
         }
 
-        /// <summary>
-        /// Item 030: id do mod opcional dono do arquivo, com fallback pro campo legado. Enquanto o servidor
-        /// não migrou (ainda emite optionalGroup), o manifesto pode vir sem optionalId — sem o fallback,
-        /// todo opcional viraria "id vazio" → filtrado E quarentenado (regressão). Some na Fase 3.
-        /// </summary>
-        private static string OptionalIdOf(ManifestFile file) =>
-            !string.IsNullOrEmpty(file.optionalId) ? file.optionalId : (file.optionalGroup ?? string.Empty);
+        /// <summary>Item 030: id do mod opcional dono do arquivo (vazio se não taggeado).</summary>
+        private static string OptionalIdOf(ManifestFile file) => file.optionalId ?? string.Empty;
 
         private void AddDownload(SyncPlan plan, ManifestFile file, SyncFolderRule rule, string reason)
         {

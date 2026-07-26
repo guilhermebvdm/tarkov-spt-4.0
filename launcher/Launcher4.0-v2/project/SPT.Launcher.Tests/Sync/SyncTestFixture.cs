@@ -68,7 +68,7 @@ namespace SPT.Launcher.Tests.Sync
             return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
         }
 
-        public ManifestFile Entry(string path, string content, bool optional = false, string group = null,
+        public ManifestFile Entry(string path, string content, bool optional = false,
             string optionalId = null, string performanceId = null)
         {
             ServerContent[path] = System.Text.Encoding.UTF8.GetBytes(content);
@@ -79,7 +79,6 @@ namespace SPT.Launcher.Tests.Sync
                 hash = Md5Of(content),
                 size = content.Length,
                 optional = optional,
-                optionalGroup = group,     // legado — o motor lê optionalId com fallback pra este (item 030)
                 optionalId = optionalId,
                 performanceId = performanceId,
             };

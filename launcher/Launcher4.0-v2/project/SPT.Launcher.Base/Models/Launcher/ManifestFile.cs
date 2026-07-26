@@ -13,14 +13,7 @@ namespace SPT.Launcher.Models.Launcher
         public long size { get; set; }
         public bool optional { get; set; }
 
-        /// <summary>
-        /// Legado (modelo antigo de mods opcionais, itens 009/021). Substituído por <see cref="optionalId"/>
-        /// no item 030 — mantido enquanto o OptionalModsHelper/SyncManifestOverlay ainda existem (removidos
-        /// na Fase 3). O motor de sync novo lê <see cref="optionalId"/>.
-        /// </summary>
-        public string optionalGroup { get; set; }
-
-        /// <summary>Item 030: id do MOD opcional dono deste arquivo (rename semântico de <see cref="optionalGroup"/>).</summary>
+        /// <summary>Item 030: id do MOD opcional dono deste arquivo.</summary>
         public string optionalId { get; set; }
 
         /// <summary>Item 030: id do ITEM de config de performance dono deste arquivo (quando sob config-performance/).</summary>
