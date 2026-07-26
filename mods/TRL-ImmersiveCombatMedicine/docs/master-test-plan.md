@@ -3,7 +3,15 @@
 > **Data:** 2026-07-25<br>
 > **Status:** 🟢 Vivo<br>
 > **Responsáveis:** Guilherme<br>
-> **Referências:** [trauma-behavior-matrix.md](./trauma-behavior-matrix.md), [trauma-coop-test-protocol.md](./trauma-coop-test-protocol.md), [trauma-compat-suite.md](./trauma-compat-suite.md)<br>
+> **Referências:** [happy-flow-test-plan.md](./happy-flow-test-plan.md), [trauma-behavior-matrix.md](./trauma-behavior-matrix.md), [trauma-coop-test-protocol.md](./trauma-coop-test-protocol.md), [trauma-compat-suite.md](./trauma-compat-suite.md)<br>
+
+---
+
+## ⚠️ Este documento é a referência de CORNER CASES, não o roteiro de sessão
+
+O 1º teste in-game (2026-07-25/26) tentou seguir este plano e **parou no meio**: 44 cenários solo + 12 coop não é executável numa sessão de jogo. O roteiro de sessão passou a ser o [happy-flow-test-plan.md](./happy-flow-test-plan.md) — um cenário por comportamento, ~10 solo + 6 coop.
+
+Este documento **continua válido e não foi revogado**. Ele é a fonte de cobertura formal e o lugar de onde se puxa um cenário específico quando um comportamento fica sob suspeita. O que mudou é o uso: consulta dirigida, não leitura sequencial.
 
 ---
 
@@ -225,3 +233,4 @@ Ordem sugerida: sistemas mais simples/isolados primeiro, sistemas com mais estad
 |---|---|---|
 | 2026-07-25 | Guilherme (com Claude) | Criação — consolida `trauma-behavior-matrix.md` §5 (44 cenários, itens 002-008) + `trauma-coop-test-protocol.md` (B1/B2, item 009) numa sequência única, mais cenários novos do item 010. |
 | 2026-07-25 | Guilherme (com Claude) | Revisão adversarial (releitura cética das 9 specs funcionais + matriz completa): recuperados 3 cenários dropados silenciosamente na consolidação (fila de adiados multi-região, roll de estômago durante desmaio, migração fracionária pt-BR — risco de cultura já documentado em memória); nova fase S1b (persistência entre raids, gap em 5 sistemas); S3.7 fecha o único gap de toggle-OFF entre os 4 consumidores de estado contínuo; 4 cenários coop novos (reconexão Fika, cura remota cross-peer, DOWNED durante ciclo de queda, médico desconectando mid-cura); 2 cenários novos do item 010 (distância em ações secundárias, config órfã no `.cfg`); instruções explícitas de "curar antes de avançar" entre fases solo; C3.1 dividido em 2 modos de falha distintos. |
+| 2026-07-26 | Guilherme | Repositionado como **referência de corner cases** (item 014): o 1º teste in-game parou no meio por excesso de cenários, e o roteiro de sessão passou a ser o `happy-flow-test-plan.md`. Nenhum cenário removido nem revogado — só mudou o uso, de leitura sequencial para consulta dirigida. |
