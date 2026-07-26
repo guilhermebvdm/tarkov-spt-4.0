@@ -9,8 +9,8 @@
 // import * as https from "https";
 // import CUSTOM_POSTS from "./targramPostStrings";
 // 
-// const SUPABASE_URL = "https://xpvppamneubxmrzjvotw.supabase.co";
-// const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhwdnBwYW1uZXVieG1yemp2b3R3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NDMyNTQ5NiwiZXhwIjoyMDg5OTAxNDk2fQ.-ZBEMbEHKsBiBPCN15DNB7nLfoALjX5XR2Dv6cizERs"; // service_role — NUNCA expor no frontend
+// const SUPABASE_URL = "<REDACTED>";   // projeto Supabase desligado — credenciais removidas em 2026-07-26
+// const SUPABASE_KEY = "<REDACTED>";   // era uma chave de service_role; nunca reintroduzir valor real aqui
 // 
 // const HIDEOUT_AREA_NAMES = {
 //     0: "Ventilação", 1: "Segurança", 2: "Banheiro", 3: "Armazém (estoque)",

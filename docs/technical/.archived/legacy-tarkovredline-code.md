@@ -9,7 +9,11 @@ authors: Guilherme + agente
 
 > ⚫ **Arquivado em 2026-07-26.** Código TypeScript da era SPT 3.x (servidor Node.js), arquitetura descontinuada no SPT 4.0 — ver [spt3-to-spt4-mod-migration.md](../spt3-to-spt4-mod-migration.md). Mantido apenas como referência histórica das lógicas do `TarkovRedLine-ServerMod`. **Não seguir como modelo.**
 >
-> 🔐 **Nota de segurança.** Este arquivo continha, em claro, a `SUPABASE_URL` e uma chave **`service_role`** do Supabase (que ignora Row Level Security). Os valores foram substituídos por `<REDACTED>` nesta data. O repositório é **público** e a chave esteve exposta em `origin/main` desde 2026-06-07 (`cbf3fc87`) — **a chave foi/deve ser rotacionada no painel do Supabase**; a redação aqui não desfaz a exposição no histórico do git.
+> 🔐 **Nota de segurança.** Este arquivo continha, em claro, a `SUPABASE_URL` e uma chave `service_role` do Supabase. Os valores foram substituídos por `<REDACTED>` em 2026-07-26, junto com as duas cópias comentadas em `mods/TarkovRedLine{3.11,4.0}/Server/TarkovRedLine-ServerMod/src/targramSync.ts`.
+>
+> **Sem impacto:** o projeto Supabase (Targram) foi desligado — a credencial é inerte. A limpeza é higiene, não contenção. O histórico do git ainda contém os valores; como a chave não abre mais nada, não se justifica reescrever o histórico de um repositório público.
+>
+> **Regra que fica:** credencial não entra no repo, nem comentada. Comentar não protege — varredura automática lê igual.
 
 Este arquivo foi gerado para salvar as lógicas extraídas do mod `TarkovRedLine-ServerMod` que não farão parte da migração imediata para o SPT 4.0, para que possam ser reaproveitadas em mods futuros.
 
@@ -367,3 +371,4 @@ export { startSyncLoop, supabaseRequest };
 |---|---|---|
 | 2026-07-06 | Guilherme | chore(launcher): remove empty placeholder diff.txt |
 | 2026-07-26 | Guilherme + agente | Arquivado. Código TS da era SPT 3.x, arquitetura descontinuada no 4.0 e sem inbound link no repo. Credenciais Supabase (`SUPABASE_URL` + chave `service_role`) redigidas para `<REDACTED>`; frontmatter adicionado (o arquivo falhava o `validate-doc-header.sh` e bloqueava qualquer commit que o tocasse). Substituído, como referência de migração, por [spt3-to-spt4-mod-migration.md](../spt3-to-spt4-mod-migration.md). |
+| 2026-07-26 | Guilherme | chore(CustomClasses): regen code graph after 085 (Adrenaline Reload fix) |
