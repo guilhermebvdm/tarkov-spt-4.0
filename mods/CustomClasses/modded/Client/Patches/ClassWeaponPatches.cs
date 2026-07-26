@@ -285,6 +285,65 @@ internal class AimPunchPatch : ModulePatch
 }
 
 /// <summary>
+///     080 — 🔫 <b>Saque Rápido</b> (Caçador + Fuzileiro + Furtivo): sacar a arma do slot <b>HOLSTER</b> mais rápido.
+///     Postfix em <c>Player.FirearmController.GetWeaponDrawSpeedMultiplier</c> (Player.cs:12591) — o análogo do
+///     <c>GetWeaponReloadAnimationSpeed</c> p/ o SAQUE (retorna a VELOCIDADE do parâmetro <c>draw</c> do animator;
+///     maior = mais rápido). Gate: só o HandsController do MainPlayer local + classe + a arma sacada vem do slot
+///     Holster (padrão canônico do EFT, Player.cs:12637). <c>__result /= tempo</c> (tempo 0.8 → speed ×1.25).
+/// </summary>
+internal class HolsterDrawSpeedPatch : ModulePatch
+{
+    protected override MethodBase GetTargetMethod()
+    {
+        return AccessTools.Method(typeof(Player.FirearmController), nameof(Player.FirearmController.GetWeaponDrawSpeedMultiplier));
+    }
+
+    [PatchPostfix]
+    private static void Postfix(Player.FirearmController __instance, Weapon weapon, ref float __result)
+    {
+        try
+        {
+            if (PerksConfig.QuickDrawEnabled?.Value != true)
+            {
+                return;
+            }
+
+            var mainPlayer = Singleton<GameWorld>.Instance?.MainPlayer;
+            if (mainPlayer == null || !ReferenceEquals(__instance, mainPlayer.HandsController))
+            {
+                return;   // só a arma do player local
+            }
+
+            if (!(SkillMultipliers.IsLocalClass("Hunter")
+                  || SkillMultipliers.IsLocalClass("Rifleman")
+                  || SkillMultipliers.IsLocalClass("Stealth")))
+            {
+                return;
+            }
+
+            // Só quando a arma sacada vem do slot HOLSTER (padrão canônico do EFT — Player.cs:12637).
+            // CurrentAddress é o accessor SEGURO (o getter .Parent pode lançar).
+            var holster = mainPlayer.Inventory?.Equipment?.GetSlot(EquipmentSlot.Holster);
+            var container = weapon?.CurrentAddress?.Container;
+            if (holster == null || container == null || !ReferenceEquals(container, holster))
+            {
+                return;
+            }
+
+            var t = PerksConfig.QuickDrawTime?.Value ?? 1f;   // TEMPO de saque (0.8 = 20% mais rápido)
+            if (t > 0f && t < 1f)
+            {
+                __result /= t;   // speed maior = saque mais rápido
+            }
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log?.LogError($"[CustomClasses] (080) quick draw falhou: {ex.Message}");
+        }
+    }
+}
+
+/// <summary>
 ///     (review fix 2026-06-24) Captura o tipo do último dano recebido pelo player LOCAL, pra o
 ///     <c>AimPunchPatch</c> (Rattled/Cool Under Fire) NÃO disparar em dano de QUEDA. Prefix em
 ///     <c>Player.ApplyDamageInfo</c> — roda antes do <c>EffectsController</c>→<c>ForceEffector.AddForce</c>.

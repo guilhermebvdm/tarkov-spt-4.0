@@ -10,7 +10,7 @@ namespace CustomClasses.Client;
 ///     Busca os fatores do server (rota /customclasses/skill-multipliers) e faz Prefix em
 ///     AbstractSkillClass.OnTrigger. UI (linha+tooltip) vem na Fatia 2.
 /// </summary>
-[BepInPlugin("customclasses.mdj.client", "CustomClasses", "0.7.1")]
+[BepInPlugin("customclasses.mdj.client", "CustomClasses", "0.8.0")]
 [BepInDependency("com.SPT.core", "4.0.0")]
 [BepInDependency("me.sol.sain", BepInDependency.DependencyFlags.SoftDependency)]   // (050.4 SAIN) carrega após o SAIN se presente
 public class Plugin : BaseUnityPlugin
@@ -167,6 +167,7 @@ public class Plugin : BaseUnityPlugin
         new RecoilFloorApplyPatch().Enable();               // (B15) clampa o produto maestria × perks no piso
         new ShootRecoilPatch().Enable();                    // (050.2) 🔻 Médico — recuo ×1.25 (Shaky Hands) + Adrenaline ×0.7
         new AimPunchPatch().Enable();                       // (050.2) 🔻 Furtivo — aim-punch ×1.5 (Rattled)
+        new HolsterDrawSpeedPatch().Enable();               // (080) 🔫 Caçador/Fuzileiro/Furtivo — saque do holster mais rápido
         new LocalHitTypePatch().Enable();                   // (review) captura tipo do dano local (barra aim-punch em queda)
         try
         {

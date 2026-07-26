@@ -178,6 +178,11 @@ internal static class PerksCatalog
         {
             P("Loud Looter", "Saque Barulhento", "interaction/loot volume", "volume de interação/loot", ValueFormat.Percent, 1.3f, Polarity.LowerBetter, EBuffId.CovertMovementSoundVolume, live: () => PerksConfig.LoudLooterVolume?.Value ?? 1.3f),
         }),
+        // 080 — Saque Rápido (Caçador + Fuzileiro + Furtivo): saque da arma do coldre (Holster) mais rápido.
+        ["quick_draw"] = G("Quick Draw", "Saque Rápido", ESkillId.DrawMaster, new[]
+        {
+            P("Quick Draw", "Saque Rápido", "holster draw time", "tempo de saque do coldre", ValueFormat.Percent, 0.8f, Polarity.LowerBetter, EBuffId.AimMasterSpeed, live: () => PerksConfig.QuickDrawTime?.Value ?? 0.8f),
+        }),
 
         // 🛡️ Tanque
         // Pack Mule desdobrado por classe (2026-07-10): cada card lê a config DA SUA classe (B4: o F12 é o bônus cru → card = 1 + bônus).
@@ -217,9 +222,9 @@ internal static class PerksCatalog
     private static readonly Dictionary<string, string[]> ByClass = new(StringComparer.OrdinalIgnoreCase)
     {
         ["Combat Medic"] = new[] { "combat_medic", "efficient_metabolism", "shaky_hands", "rattled" },   // 079: −Mobile Surgery, +Abalado
-        ["Rifleman"]     = new[] { "cool_under_fire", "adrenaline", "loud_operator_rifleman", "loud_looter" },   // 079: +Saque Barulhento
-        ["Hunter"]       = new[] { "sharpshooter", "iron_lungs", "stalker", "rooted", "light_frame" },   // 079: +Estrutura Leve
-        ["Stealth"]      = new[] { "ghost_step", "execution", "rattled", "light_frame" },   // 079: +Estrutura Leve
+        ["Rifleman"]     = new[] { "cool_under_fire", "adrenaline", "loud_operator_rifleman", "loud_looter", "quick_draw" },   // 079 +Saque Barulhento · 080 +Saque Rápido
+        ["Hunter"]       = new[] { "sharpshooter", "iron_lungs", "stalker", "rooted", "light_frame", "quick_draw" },   // 079 +Estrutura Leve · 080 +Saque Rápido
+        ["Stealth"]      = new[] { "ghost_step", "execution", "rattled", "light_frame", "quick_draw" },   // 079 +Estrutura Leve · 080 +Saque Rápido
         ["Scavenger"]    = new[] { "quick_hands", "silent_looter", "pack_mule_scav", "shaky_hands" },   // 079: −Overladen, +Falta de habilidade
         ["Tank"]         = new[] { "pack_mule_tank", "bulwark", "bunker", "heavy_frame", "loud_operator_tank" },   // Pack Mule + Loud Operator próprios (desdobrados 2026-07-10)
     };

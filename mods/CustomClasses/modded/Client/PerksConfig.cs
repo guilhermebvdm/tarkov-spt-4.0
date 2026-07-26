@@ -127,6 +127,8 @@ internal static class PerksConfig
     internal static ConfigEntry<float>? LightFrameCarryPenalty;   // 079
     internal static ConfigEntry<bool>? LoudLooterEnabled;         // 079 Fuzileiro (loot barulhento)
     internal static ConfigEntry<float>? LoudLooterVolume;         // 079
+    internal static ConfigEntry<bool>? QuickDrawEnabled;          // 080 Caçador+Fuzileiro+Furtivo (saque do holster)
+    internal static ConfigEntry<float>? QuickDrawTime;            // 080
 
     // 7 · Tank
     internal static ConfigEntry<bool>? BulwarkEnabled;
@@ -442,6 +444,16 @@ internal static class PerksConfig
             new ConfigDescription(
                 "Multiplicador do volume de interação/loot (1.30 = +30%). / Interaction/loot volume multiplier (1.30 = +30%).",
                 new AcceptableValueRange<float>(1f, 2f)));
+        // 080 — Saque Rápido (Caçador + Fuzileiro + Furtivo): sacar a arma do slot HOLSTER mais rápido. Config
+        // compartilhada (mesmo valor p/ as 3 classes; seção do F12 vem do 1º arg SecHunter).
+        QuickDrawEnabled = config.Bind(
+            SecHunter, "Quick Draw — Enabled", true,
+            "Caçador/Fuzileiro/Furtivo: sacar a arma do coldre (slot Holster) mais rápido. / Hunter/Rifleman/Stealth: faster draw from the Holster slot.");
+        QuickDrawTime = config.Bind(
+            SecHunter, "Quick Draw — Draw time mult", 0.8f,
+            new ConfigDescription(
+                "Multiplicador do tempo de saque do coldre (0.8 = 20% mais rápido). / Holster draw-time multiplier (0.8 = 20% faster).",
+                new AcceptableValueRange<float>(0.3f, 1f)));
         BindClassColor(config, SecScavenger, "Scavenger", "#c4ad45");   // 067
 
         // ───────────────────────── 7 · Tank ─────────────────────────
