@@ -214,13 +214,16 @@ public class ModUpdaterController : ControllerBase
 
     /// <summary>
     /// Item 030 (S-4): lê mods_repo/BepInEx/plugins-optional.json e devolve o array optionalMods
-    /// (id/name/description) para o manifesto, preenchendo <paramref name="pathToOptionalId"/>
-    /// (path normalizado → id do mod dono). Validações S-5: recusa o mod inteiro se algum path está
-    /// sob user/mods (client-only, D-15) ou já pertence a outro mod (D-19); o motivo vai pro log.
+    /// (id/name/description) para o manifesto, preenchendo <paramref name="optionalPrefixes"/> — lista de
+    /// (prefixo normalizado → id do mod dono). Cada entrada de "paths" pode ser um ARQUIVO (`Foo.dll`) OU
+    /// uma PASTA (`FooMod`): o matching no scan é por igualdade OU sob-a-pasta, então uma pasta cobre
+    /// TODOS os arquivos dela (mod-pasta desligado → nada da pasta é sincronizado; ligado → tudo baixa).
+    /// Validações S-5: recusa o mod inteiro se algum path está sob user/mods (client-only, D-15) ou se
+    /// sobrepõe outro mod (D-19); o motivo vai pro log.
     /// </summary>
-    private static object[] LoadOptionalDefs(string modsPath, out Dictionary<string, string> pathToOptionalId, List<string> warnings)
+    private static object[] LoadOptionalDefs(string modsPath, out List<(string prefix, string id)> optionalPrefixes, List<string> warnings)
     {
-        pathToOptionalId = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        optionalPrefixes = new List<(string prefix, string id)>();
         var mods = new List<object>();
 
         string defsPath = Path.Combine(modsPath, "BepInEx", "plugins-optional.json");
@@ -241,29 +244,32 @@ public class ModUpdaterController : ControllerBase
                 if (string.IsNullOrWhiteSpace(id)) continue;
                 if (!mod.TryGetProperty("paths", out var pathsP) || pathsP.ValueKind != JsonValueKind.Array) continue;
 
-                var validPaths = new List<string>();
+                var validPrefixes = new List<string>();
                 bool rejected = false;
                 foreach (var p in pathsP.EnumerateArray())
                 {
                     if (p.ValueKind != JsonValueKind.String) continue;
-                    string relNorm = (p.GetString() ?? "").Replace("\\", "/").TrimStart('/').ToLowerInvariant();
-                    if (relNorm.Length == 0) continue;
+                    // Trim('/') (não TrimStart): aceita "FooMod/" (pasta com barra) e "Foo.dll" igual.
+                    string prefixNorm = (p.GetString() ?? "").Replace("\\", "/").Trim('/').ToLowerInvariant();
+                    if (prefixNorm.Length == 0) continue;
 
-                    if (relNorm.StartsWith("user/mods/", StringComparison.Ordinal))
+                    if (prefixNorm == "user/mods" || prefixNorm.StartsWith("user/mods/", StringComparison.Ordinal))
                     {
-                        warnings.Add($"mod opcional '{id}' referencia '{relNorm}' sob user/mods — RECUSADO (mod opcional é client-only, D-15)");
+                        warnings.Add($"mod opcional '{id}' referencia '{prefixNorm}' sob user/mods — RECUSADO (mod opcional é client-only, D-15)");
                         rejected = true; break;
                     }
-                    if (pathToOptionalId.TryGetValue(relNorm, out var owner))
+                    // D-19: sobreposição com outro mod (igualdade OU um contém o outro como pasta).
+                    var clash = optionalPrefixes.FirstOrDefault(e => PrefixOverlaps(prefixNorm, e.prefix));
+                    if (clash.id != null)
                     {
-                        warnings.Add($"arquivo '{relNorm}' está em dois mods opcionais ('{owner}' e '{id}') — mod '{id}' RECUSADO (D-19)");
+                        warnings.Add($"'{prefixNorm}' se sobrepõe a '{clash.prefix}' (mod '{clash.id}') — mod '{id}' RECUSADO (D-19)");
                         rejected = true; break;
                     }
-                    validPaths.Add(relNorm);
+                    validPrefixes.Add(prefixNorm);
                 }
                 if (rejected) continue;
 
-                foreach (var rn in validPaths) pathToOptionalId[rn] = id;
+                foreach (var pn in validPrefixes) optionalPrefixes.Add((pn, id));
 
                 object name = mod.TryGetProperty("name", out var nP) ? nP.Clone() : (object)id;
                 object description = mod.TryGetProperty("description", out var dP) ? dP.Clone() : null;
@@ -277,6 +283,16 @@ public class ModUpdaterController : ControllerBase
 
         return mods.ToArray();
     }
+
+    /// <summary>Item 030: dois prefixos se sobrepõem se são iguais ou um é pasta-mãe do outro.</summary>
+    private static bool PrefixOverlaps(string a, string b) =>
+        a == b
+        || a.StartsWith(b + "/", StringComparison.Ordinal)
+        || b.StartsWith(a + "/", StringComparison.Ordinal);
+
+    /// <summary>Item 030: um path pertence a um prefixo de mod se é igual a ele OU está sob a pasta.</summary>
+    private static bool IsUnderOrEqual(string relNorm, string prefix) =>
+        relNorm == prefix || relNorm.StartsWith(prefix + "/", StringComparison.Ordinal);
 
     /// <summary>
     /// Item 030 (S-4): lê mods_repo/BepInEx/config-performance/performance.json e devolve performanceItems
@@ -384,7 +400,7 @@ public class ModUpdaterController : ControllerBase
             // performanceId. Validações de conteúdo (S-5): recusa path sob user/mods (mod opcional é
             // client-only, D-15) e arquivo repetido em dois itens (D-19). As mensagens vão pro log.
             var contentWarnings = new List<string>();
-            var optionalMods = LoadOptionalDefs(modsPath, out var pathToOptionalId, contentWarnings);
+            var optionalMods = LoadOptionalDefs(modsPath, out var optionalPrefixes, contentWarnings);
             var performanceItems = LoadPerformanceDefs(out var pathToPerformanceId, contentWarnings);
 
             const string PerfPrefix = "bepinex/config-performance/";
@@ -428,7 +444,16 @@ public class ModUpdaterController : ControllerBase
                     continue;
                 }
 
-                if (pathToOptionalId.TryGetValue(relNorm, out var optId))
+                // Matching por PREFIXO: o arquivo pertence a um mod opcional se é igual a um path do mod OU
+                // está sob uma pasta listada. Assim um mod-pasta cobre TODOS os seus arquivos (nada da pasta
+                // vaza como obrigatório, e desligar leva a pasta inteira pra quarentena).
+                string optId = null;
+                foreach (var (prefix, oid) in optionalPrefixes)
+                {
+                    if (IsUnderOrEqual(relNorm, prefix)) { optId = oid; break; }
+                }
+
+                if (optId != null)
                 {
                     files.Add(new { path = relPath, hash, size, optional = true, optionalId = optId });
                 }

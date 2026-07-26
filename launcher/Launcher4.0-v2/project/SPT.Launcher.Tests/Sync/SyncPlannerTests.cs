@@ -176,6 +176,29 @@ namespace SPT.Launcher.Tests.Sync
         }
 
         [Fact]
+        public async Task Disabled_optional_mod_folder_quarantines_all_its_files()
+        {
+            using var fx = new SyncTestFixture();
+            // Mod-PASTA: o servidor taggeia todos os arquivos da pasta com o mesmo optionalId.
+            fx.WriteLocal("BepInEx/plugins/FooMod/main.dll", "a");
+            fx.WriteLocal("BepInEx/plugins/FooMod/data.bundle", "b");
+
+            var manifest = new[]
+            {
+                fx.Entry("BepInEx/plugins/FooMod/main.dll", "a", optional: true, optionalId: "foomod"),
+                fx.Entry("BepInEx/plugins/FooMod/data.bundle", "b", optional: true, optionalId: "foomod"),
+            };
+
+            // Desligado → TODOS os arquivos da pasta vão pra quarentena (nada da pasta fica no jogo).
+            var plan = await PlanAsync(fx, manifest);
+
+            var moves = plan.Actions.Where(a => a.Kind == SyncActionKind.MoveToDisabled).ToList();
+            Assert.Equal(2, moves.Count);
+            Assert.Contains(moves, m => m.MoveTargetRelative == "BepInEx/plugins-disabled/optional/FooMod/main.dll");
+            Assert.Contains(moves, m => m.MoveTargetRelative == "BepInEx/plugins-disabled/optional/FooMod/data.bundle");
+        }
+
+        [Fact]
         public async Task Disabled_optional_mod_in_default_rule_folder_does_not_crash()
         {
             using var fx = new SyncTestFixture();
