@@ -58,6 +58,7 @@ O plano mestre (44 solo + 12 coop) continua sendo a fonte de **corner cases** e 
 | **C4** | A manca, cai e agacha; A grita de dor | B vê a manqueira, a queda e o agachar, e ouve o grito. B **não** vê o tremor de A — isso é o comportamento correto, não é bug | — |
 | **C5** | A desmaia perto de bots, e B atira em A | Os bots perdem o alvo de A; o tiro de B **aplica dano** | item 015 |
 | **C6** | A com o jogo em PT aplica torniquete; B com o jogo em EN observa | B vê a notificação **em inglês** — a tradução acontece em quem exibe, não em quem originou | — |
+| **C7** | A **desmaia** (não é coma). B chega perto e olha o que o jogo oferece | Se aparecer **"Reviver"** num desmaio, é o bug CR-01-21 confirmado — anotar. Custa 5 segundos e resolve um achado que só existe no papel | — |
 
 ---
 
@@ -83,14 +84,16 @@ Não são cenários de jogo. São três diagnósticos que só o log responde.
 
 ---
 
-## Observação pendente do 1º teste
+## Vocabulário (fechado com o usuário em 2026-07-26)
 
-Uma pergunta do teste anterior ficou sem resposta e muda o veredito de um achado. No momento em que **"o Umbigo te reviveu"**:
+Dois estados diferentes, e a confusão entre eles atrapalhou o 1º diagnóstico:
 
-- havia prompt de revive disponível enquanto você estava **consciente-mas-imóvel** (desmaio do mod sendo revivido → é o bug CR-01-21, e é o mesmo evento que gastou o desfibrilador à toa); **ou**
-- você estava **efetivamente morto**, com tela de morte (coma do Fika → comportamento correto, nada a corrigir)?
+| Estado | De onde vem | Como sai | Nome que usamos |
+|---|---|---|---|
+| **Coma** | Fika — substitui a morte quando o HP acaba | aliado com desfibrilador | **Reviver** |
+| **Desmaio** | este mod — gatilho por dano forte no tórax/cabeça | sozinho, quando o tempo passa | **Acordar** |
 
-Se der para reproduzir na próxima sessão, anotar qual dos dois. A partir da Leva 2 a pergunta perde sentido: o desmaio deixa de oferecer revive.
+**Ambiguidade do 1º teste: RESOLVIDA.** O "o umbigo me reviveu" foi **coma**, não desmaio — portanto comportamento correto, nada a corrigir. O bug CR-01-21 (um desmaio oferecendo revive, porque o desmaio hoje usa o estado de coma do Fika por baixo) **continua existindo no código**, mas nunca foi observado em jogo. Observação barata para a próxima sessão, no C7 abaixo.
 
 ---
 
