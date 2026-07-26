@@ -129,6 +129,8 @@ internal static class PerksConfig
     internal static ConfigEntry<float>? LoudLooterVolume;         // 079
     internal static ConfigEntry<bool>? QuickDrawEnabled;          // 080 Caçador+Fuzileiro+Furtivo (saque do holster)
     internal static ConfigEntry<float>? QuickDrawTime;            // 080
+    internal static ConfigEntry<bool>? LebreEnabled;             // 081 Saqueador (velocidade quando leve)
+    internal static ConfigEntry<float>? LebreSpeed;              // 081
 
     // 7 · Tank
     internal static ConfigEntry<bool>? BulwarkEnabled;
@@ -454,6 +456,15 @@ internal static class PerksConfig
             new ConfigDescription(
                 "Multiplicador do tempo de saque do coldre (0.8 = 20% mais rápido). / Holster draw-time multiplier (0.8 = 20% faster).",
                 new AcceptableValueRange<float>(0.3f, 1f)));
+        // 081 — Lebre (Saqueador): +velocidade de movimento enquanto NÃO estiver pesado (Overweight nativo == 0).
+        LebreEnabled = config.Bind(
+            SecScavenger, "Lebre — Enabled", true,
+            "Saqueador: +velocidade de movimento enquanto NÃO estiver pesado (sem o ícone de sobrepeso/bigorna). / Scavenger: +move speed while NOT overweight (no overweight icon).");
+        LebreSpeed = config.Bind(
+            SecScavenger, "Lebre — Move speed mult", 1.30f,
+            new ConfigDescription(
+                "Multiplicador de velocidade quando leve (1.30 = +30%). Desliga automaticamente ao ficar pesado. / Move-speed multiplier while light (1.30 = +30%). Auto-off when overweight.",
+                new AcceptableValueRange<float>(1f, 1.5f)));
         BindClassColor(config, SecScavenger, "Scavenger", "#c4ad45");   // 067
 
         // ───────────────────────── 7 · Tank ─────────────────────────

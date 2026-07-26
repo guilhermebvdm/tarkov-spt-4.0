@@ -67,6 +67,15 @@ internal static class ClassMoveSpeed
                 m *= PerksConfig.ExecutionMoveSpeed?.Value ?? 1f;
             }
 
+            // 🔧 Lebre (Saqueador — 081): +velocidade enquanto NÃO está pesado. Usa o overweight NATIVO do EFT
+            // (BasePhysicalClass.Overweight == 0 = sem o ícone de bigorna). Lido fresco a cada getter → reativo ao
+            // peso (lootou e ficou pesado → desliga sozinho). Não acumula (getter sem estado, ver doc acima).
+            if (PerksConfig.LebreEnabled?.Value == true && SkillMultipliers.IsLocalClass("Scavenger")
+                && p.Physical != null && p.Physical.Overweight <= 0f)
+            {
+                m *= PerksConfig.LebreSpeed?.Value ?? 1f;
+            }
+
             if (m == 1f)
             {
                 return;   // nenhum lever ativo (classes Tank/Stealth são mutuamente exclusivas → 1 multiplicador)

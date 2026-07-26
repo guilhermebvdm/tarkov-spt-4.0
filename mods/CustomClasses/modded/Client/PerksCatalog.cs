@@ -183,6 +183,11 @@ internal static class PerksCatalog
         {
             P("Quick Draw", "Saque Rápido", "holster draw time", "tempo de saque do coldre", ValueFormat.Percent, 0.8f, Polarity.LowerBetter, EBuffId.AimMasterSpeed, live: () => PerksConfig.QuickDrawTime?.Value ?? 0.8f),
         }),
+        // 081 — Lebre (Saqueador): +velocidade de movimento enquanto NÃO está pesado (overweight nativo == 0).
+        ["lebre"] = G("Hare", "Lebre", ESkillId.Endurance, new[]
+        {
+            P("Hare", "Lebre", "move speed when light", "velocidade quando leve", ValueFormat.Percent, 1.3f, Polarity.HigherBetter, EBuffId.StrengthBuffSprintSpeedInc, live: () => PerksConfig.LebreSpeed?.Value ?? 1.3f),
+        }),
 
         // 🛡️ Tanque
         // Pack Mule desdobrado por classe (2026-07-10): cada card lê a config DA SUA classe (B4: o F12 é o bônus cru → card = 1 + bônus).
@@ -225,7 +230,7 @@ internal static class PerksCatalog
         ["Rifleman"]     = new[] { "cool_under_fire", "adrenaline", "loud_operator_rifleman", "loud_looter", "quick_draw" },   // 079 +Saque Barulhento · 080 +Saque Rápido
         ["Hunter"]       = new[] { "sharpshooter", "iron_lungs", "stalker", "rooted", "light_frame", "quick_draw" },   // 079 +Estrutura Leve · 080 +Saque Rápido
         ["Stealth"]      = new[] { "ghost_step", "execution", "rattled", "light_frame", "quick_draw" },   // 079 +Estrutura Leve · 080 +Saque Rápido
-        ["Scavenger"]    = new[] { "quick_hands", "silent_looter", "pack_mule_scav", "shaky_hands" },   // 079: −Overladen, +Falta de habilidade
+        ["Scavenger"]    = new[] { "quick_hands", "silent_looter", "pack_mule_scav", "lebre", "shaky_hands" },   // 079 −Overladen +Falta de habilidade · 081 +Lebre
         ["Tank"]         = new[] { "pack_mule_tank", "bulwark", "bunker", "heavy_frame", "loud_operator_tank" },   // Pack Mule + Loud Operator próprios (desdobrados 2026-07-10)
     };
 

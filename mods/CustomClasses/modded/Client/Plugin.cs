@@ -10,7 +10,7 @@ namespace CustomClasses.Client;
 ///     Busca os fatores do server (rota /customclasses/skill-multipliers) e faz Prefix em
 ///     AbstractSkillClass.OnTrigger. UI (linha+tooltip) vem na Fatia 2.
 /// </summary>
-[BepInPlugin("customclasses.mdj.client", "CustomClasses", "0.8.0")]
+[BepInPlugin("customclasses.mdj.client", "CustomClasses", "0.9.0")]
 [BepInDependency("com.SPT.core", "4.0.0")]
 [BepInDependency("me.sol.sain", BepInDependency.DependencyFlags.SoftDependency)]   // (050.4 SAIN) carrega após o SAIN se presente
 public class Plugin : BaseUnityPlugin
