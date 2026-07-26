@@ -15,7 +15,7 @@ O plano mestre (44 solo + 12 coop) continua sendo a fonte de **corner cases** e 
 
 **Nada aqui inventa cenário novo:** cada linha rastreia para um teste do mestre ou para um achado do 1º teste in-game. A tabela de rastreabilidade no fim é a prova.
 
-**Coluna `Leva`:** qual entrega precisa estar implantada para o cenário fazer sentido. `—` = já testável na v1.10.0. Ver [plano de correções](../backlog/mod-backlog.md) itens 013–021.
+**Coluna `Requer`:** o que precisa estar implantado para o cenário fazer sentido. `—` = já era testável antes das correções. `✅` = entregue e testável agora. Um número de item = ainda não entregue, não teste. Ver [backlog](../backlog/mod-backlog.md) itens 013–021.
 
 ---
 
@@ -31,18 +31,18 @@ O plano mestre (44 solo + 12 coop) continua sendo a fonte de **corner cases** e 
 
 ## Bloco A — SOLO
 
-| | Cenário | Resultado esperado | Leva |
+| | Cenário | Resultado esperado | Requer |
 |---|---|---|---|
 | **H1** | Zerar 1 perna; depois curar | Manca; ao curar volta ao normal em ≤1s | — |
-| **H2** | Zerar 2 pernas; depois tomar analgésico | Agacha 1× **na hora**, manca forte e **não corre** — e continua sem correr com o analgésico ativo | 3 |
+| **H2** | Zerar 2 pernas; depois tomar analgésico | Agacha 1× **na hora**, manca forte e **não corre** — e continua sem correr com o analgésico ativo | ✅ 1.11.2 |
 | **H3** | Quebrar 2 pernas sem analgésico | Cai; levanta e após ~3s de pé cai sozinho; tentar levantar durante o bloqueio dá grito de dor e é negado; ao liberar, levanta devagar | — |
 | **H4** | Zerar 2 braços e segurar a mira | Tremor visível; a mira cai sozinha em ~4s; re-mirar em seguida é bloqueado, com grito | — |
 | **H5** | Zerar o estômago 4× (curando entre cada) | Agachou na maioria das vezes; o log mostra um roll por zerada | — |
 | **H6** | Tomar um tiro forte no tórax sem analgésico | Desmaia; a duração bate com a config; acorda e recupera o controle sem prone fantasma | — |
-| **H7** | Já desmaiado, tomar dano até zerar o HP | O dano **aplica**; ao zerar, entra em **coma** — não morre | 2 |
-| **H8** | Sair da raid ferido e entrar na próxima | Log mostra a purga com contagem; nenhum efeito **do mod** ativo no spawn. Ferimento vanilla presente é **esperado** | 3 |
+| **H7** | Já desmaiado, tomar dano até zerar o HP | O dano **aplica**; ao zerar, entra em **coma** — não morre | item 015 |
+| **H8** | Sair da raid ferido e entrar na próxima | Log mostra a purga com contagem; nenhum efeito **do mod** ativo no spawn. Ferimento vanilla presente é **esperado** | item 020 |
 | **H9** | Aproximar de um bot ferido a ~3,5 m; trocar o idioma do jogo | Prompt médico aparece a 3,5 m e não a 5-6 m; os textos trocam de idioma sem reiniciar o jogo | — |
-| **H10** | Zerar a 2ª perna **enquanto corre** | Agacha imediatamente **ou** o log registra o cancelamento — nunca uma agachada fantasma segundos depois | 3 |
+| **H10** | Zerar a 2ª perna **enquanto corre** | Agacha imediatamente **ou** o log registra o cancelamento — nunca uma agachada fantasma segundos depois | item 018 |
 
 ---
 
@@ -50,13 +50,13 @@ O plano mestre (44 solo + 12 coop) continua sendo a fonte de **corner cases** e 
 
 `A` = quem sofre. `B` = quem observa/age.
 
-| | Cenário | Resultado esperado | Leva |
+| | Cenário | Resultado esperado | Requer |
 |---|---|---|---|
-| **C1** | B revive A **em coma** usando desfibrilador | O desfibrilador sai do inventário de B, sem piscar, e o espaço é liberado — confirmar nos **dois** PCs | 1 |
-| **C2** | **Hitbox pós-revive** — A em coma, B revive A, e então, na mesma janela: (a) **B atira** em A; (b) um **bot** atira em A | Depois do fix, **as duas** fontes aplicam dano. Repetir invertendo os papéis — o defeito é por-observador. Anotar (a) e (b) **separadamente**: se divergirem, ler a nota abaixo | 1 |
-| **C3** | B se aproxima de A **desmaiado**; depois de A **em coma** | Desmaiado → ação **"Acordar"**, sem item, e A acorda. Coma → ação **"Reviver"**, exige desfibrilador. Nunca as duas ao mesmo tempo | 2 |
+| **C1** | B revive A **em coma** usando desfibrilador | O desfibrilador sai do inventário de B, sem piscar, e o espaço é liberado — confirmar nos **dois** PCs | ✅ 1.11.1 |
+| **C2** | **Hitbox pós-revive** — A em coma, B revive A, e então, na mesma janela: (a) **B atira** em A; (b) um **bot** atira em A | Depois do fix, **as duas** fontes aplicam dano. Repetir invertendo os papéis — o defeito é por-observador. Anotar (a) e (b) **separadamente**: se divergirem, ler a nota abaixo | ✅ Fixes 1.1.1 |
+| **C3** | B se aproxima de A **desmaiado**; depois de A **em coma** | Desmaiado → ação **"Acordar"**, sem item, e A acorda. Coma → ação **"Reviver"**, exige desfibrilador. Nunca as duas ao mesmo tempo | item 016 |
 | **C4** | A manca, cai e agacha; A grita de dor | B vê a manqueira, a queda e o agachar, e ouve o grito. B **não** vê o tremor de A — isso é o comportamento correto, não é bug | — |
-| **C5** | A desmaia perto de bots, e B atira em A | Os bots perdem o alvo de A; o tiro de B **aplica dano** | 2 |
+| **C5** | A desmaia perto de bots, e B atira em A | Os bots perdem o alvo de A; o tiro de B **aplica dano** | item 015 |
 | **C6** | A com o jogo em PT aplica torniquete; B com o jogo em EN observa | B vê a notificação **em inglês** — a tradução acontece em quem exibe, não em quem originou | — |
 
 ---
