@@ -7,7 +7,7 @@
 | # | Título | Resumo | Pasta | Status |
 |---|---|---|---|---|
 | 001 | Fika PoolManager NullReferenceException | Recarga cartucho-a-cartucho de jogador remoto chamava `PoolManagerClass.CreateItem` de 4 parâmetros, que depende de referências de câmera nulas no cliente observador — NRE derrubava a conexão do jogador local. Redireciona para a sobrecarga de 2 parâmetros quando a origem é remota. | [001-fika-poolmanager-nre/](./001-fika-poolmanager-nre/) | 🟢 |
-| 002 | Fika: hitbox perdida após revive | `ReviveInteractable.RemoveRagdoll` devolve a hierarquia inteira para a layer `Player` e nunca re-promove os `BodyPartCollider` para `HitCollider` — que é a layer que a máscara balística enxerga. O jogador revivido fica visível mas atravessável por bala/faca. As placas de armadura, desativadas pelo ragdoll, também não voltam. | [002-fika-revive-hitbox/](./002-fika-revive-hitbox/) | ⚪ |
+| 002 | Fika: hitbox perdida após revive | `ReviveInteractable.RemoveRagdoll` devolvia a hierarquia inteira para a layer `Player` e nunca re-promovia os `BodyPartCollider` para `HitCollider` — que é a layer que a máscara balística enxerga. O jogador revivido ficava visível mas atravessável por bala/faca até o fim da raid. Postfix restaura o par `SetupHitColliders()` + `RecalculateEquipmentParams()` que o `Player.Init` do vanilla nunca separa. Entregue em v1.1.1; **pendente de validação in-game** (cenário C2 do roteiro do ICM) e da explicação da divergência bot × jogador. | [002-fika-revive-hitbox/](./002-fika-revive-hitbox/) | 🟢 |
 
 ## Legenda
 

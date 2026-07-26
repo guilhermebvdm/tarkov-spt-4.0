@@ -21,10 +21,11 @@ O plano mestre (44 solo + 12 coop) continua sendo a fonte de **corner cases** e 
 
 ## Bloco 0 — Pré-requisitos
 
-- [ ] **P1** — F12 → BepInEx → a versão de `TRLImmersiveCombatMedicine` bate com a que você acabou de implantar. Se não bater, é build velha no jogo: pare aqui.
+- [ ] **P1** — F12 → BepInEx → as versões batem com o que foi implantado. Após a Leva 1: `TRLImmersiveCombatMedicine` **1.11.1** e `TRL Fixes` **1.1.1**. Se não bater, é build velha no jogo: pare aqui.
 - [ ] **P2** — F12 → "6. Trauma 2.0 (Consumidores)": os 5 toggles (Legs / Fall / Arms / Stomach / Blackout 2.0) **Ligados**.
-- [ ] **P3** — Em coop: **todos** os PCs na mesma build, e o `TRL-Fixes` implantado nos dois (a partir da Leva 1).
-- [ ] **P4** — Guardar o `LogOutput.log` de **cada máquina** ao fim da sessão. O Bloco C depende dele, e sem ele três diagnósticos viram chute.
+- [ ] **P3** — ⚠️ **Wire format:** a 1.11.0 reescreveu a serialização dos 6 pacotes Fika do mod (tipos com sufixo `V2`). Um peer em build anterior não fala o mesmo protocolo — o mod degrada de forma contida, mas cura remota e sync de desmaio **não** funcionam entre versões diferentes. **Os dois PCs precisam atualizar juntos**, e o `TRL-Fixes` também tem de estar nos dois.
+- [ ] **P4** — Confirmar no log de cada máquina que os hooks subiram: `TRL-Fixes: Hook no ReviveInteractable.RemoveRagdoll aplicado com sucesso!`. Sem essa linha, o C2 não tem validade.
+- [ ] **P5** — Guardar o `LogOutput.log` de **cada máquina** ao fim da sessão. O Bloco C depende dele, e sem ele três diagnósticos viram chute.
 
 ---
 
@@ -52,11 +53,21 @@ O plano mestre (44 solo + 12 coop) continua sendo a fonte de **corner cases** e 
 | | Cenário | Resultado esperado | Leva |
 |---|---|---|---|
 | **C1** | B revive A **em coma** usando desfibrilador | O desfibrilador sai do inventário de B, sem piscar, e o espaço é liberado — confirmar nos **dois** PCs | 1 |
-| **C2** | **Bissecção da hitbox** — A em coma, B revive A, e B atira em A: (a) **imediatamente**, sem A tocar em nada; (b) depois de A trocar de arma | Registrar (a) e (b) **separadamente**: dano aplica ou atravessa? Repetir invertendo os papéis. Confirmar também se os bots acertam A | 1 |
+| **C2** | **Hitbox pós-revive** — A em coma, B revive A, e então, na mesma janela: (a) **B atira** em A; (b) um **bot** atira em A | Depois do fix, **as duas** fontes aplicam dano. Repetir invertendo os papéis — o defeito é por-observador. Anotar (a) e (b) **separadamente**: se divergirem, ler a nota abaixo | 1 |
 | **C3** | B se aproxima de A **desmaiado**; depois de A **em coma** | Desmaiado → ação **"Acordar"**, sem item, e A acorda. Coma → ação **"Reviver"**, exige desfibrilador. Nunca as duas ao mesmo tempo | 2 |
 | **C4** | A manca, cai e agacha; A grita de dor | B vê a manqueira, a queda e o agachar, e ouve o grito. B **não** vê o tremor de A — isso é o comportamento correto, não é bug | — |
 | **C5** | A desmaia perto de bots, e B atira em A | Os bots perdem o alvo de A; o tiro de B **aplica dano** | 2 |
 | **C6** | A com o jogo em PT aplica torniquete; B com o jogo em EN observa | B vê a notificação **em inglês** — a tradução acontece em quem exibe, não em quem originou | — |
+
+---
+
+### Nota sobre o C2 — divergência ainda sem explicação
+
+O relato do 1º teste tem um ponto que a leitura do código **não** explica: os bots pareciam acertar o jogador revivido, enquanto outro jogador não conseguia. Os bots rodam no host, que também é um observador e portanto está sujeito ao mesmo defeito de layer.
+
+A hipótese que reconciliaria as duas observações — de que uma troca de equipamento restauraria a hitbox, deixando só uma janela curta quebrada — foi **refutada** na leitura do Assembly: o recálculo de equipamento reativa as placas de armadura, mas nunca repromove as hitboxes balísticas. Não existe caminho de auto-recuperação; sem o fix, a hitbox fica quebrada até o fim da raid.
+
+Por isso (a) e (b) precisam ser anotados separadamente. Se ainda divergirem **depois** do fix, existe um segundo mecanismo em jogo e o item volta para investigação.
 
 ---
 
