@@ -205,18 +205,56 @@ namespace TRLDynamicSpawn.Components
                     break;
                 }
 
-                Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Waiting {_delayBeforeFirstWave}s for initial warmup (Attempt {attempt})...");
-                _nextWaveTime = Time.time + _delayBeforeFirstWave;
-                
-                float wait = Mathf.Max(1f, _delayBeforeFirstWave - 1f);
-                yield return new WaitForSeconds(wait);
-                ClearSptQueue();
-                yield return new WaitForSeconds(1f);
+                if (attempt == 1)
+                {
+                    Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Waiting {_delayBeforeFirstWave}s for initial warmup (Attempt 1)...");
+                    _nextWaveTime = Time.time + _delayBeforeFirstWave;
+                    
+                    float wait = Mathf.Max(1f, _delayBeforeFirstWave - 1f);
+                    yield return new WaitForSeconds(wait);
+                    ClearSptQueue();
+                    yield return new WaitForSeconds(1f);
 
-                if (_activeWaveCoroutine != null) StopCoroutine(_activeWaveCoroutine);
-                _activeWaveCoroutine = StartCoroutine(ProcessWave(true));
+                    if (_activeWaveCoroutine != null) StopCoroutine(_activeWaveCoroutine);
+                    _activeWaveCoroutine = StartCoroutine(ProcessWave(true));
 
-                attempt++;
+                    attempt++;
+                }
+                else
+                {
+                    int retryInterval = 30;
+                    Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Max cap not reached yet ({aliveBots}/{maxCap}). Retrying warmup wave in {retryInterval}s (Attempt {attempt})...");
+                    _nextWaveTime = Time.time + retryInterval;
+
+                    bool earlyCapReached = false;
+                    for (int elapsed = 0; elapsed < retryInterval; elapsed++)
+                    {
+                        yield return new WaitForSeconds(1f);
+                        currentMap = GetCurrentMapName();
+                        maxCap = Settings.GetMapCap(currentMap);
+                        aliveBots = _botsController.AliveAndLoadingBotsCount;
+
+                        if (aliveBots >= maxCap)
+                        {
+                            Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Max cap reached early during warmup ({aliveBots}/{maxCap}) at {elapsed + 1}s. Finishing warmup.");
+                            earlyCapReached = true;
+                            break;
+                        }
+                    }
+
+                    if (earlyCapReached)
+                    {
+                        break;
+                    }
+
+                    ClearSptQueue();
+                    yield return new WaitForSeconds(1f);
+
+                    if (_activeWaveCoroutine != null) StopCoroutine(_activeWaveCoroutine);
+                    _activeWaveCoroutine = StartCoroutine(ProcessWave(true));
+
+                    attempt++;
+                }
             }
 
             IsWarmupActive = false;
@@ -226,18 +264,13 @@ namespace TRLDynamicSpawn.Components
                 string currentMap = GetCurrentMapName();
                 _secondsBetweenWaves = GetSecondsBetweenWavesForMap(currentMap);
 
-                Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Next full wave interval for map '{currentMap}': {_secondsBetweenWaves}s...");
+                Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Cooldown active. Next fill check for map '{currentMap}' in {_secondsBetweenWaves}s...");
                 _nextWaveTime = Time.time + _secondsBetweenWaves;
                 
-                float waitNormal = Mathf.Max(1f, _secondsBetweenWaves - 1f);
+                float waitNormal = Mathf.Max(1f, _secondsBetweenWaves);
                 yield return new WaitForSeconds(waitNormal);
-                ClearSptQueue();
-                yield return new WaitForSeconds(1f);
 
-                if (_activeWaveCoroutine != null) StopCoroutine(_activeWaveCoroutine);
-                _activeWaveCoroutine = StartCoroutine(ProcessWave(false));
-
-                // Loop para continuar batendo na porta de 60 em 60 seg até encher o mapa
+                // Loop para continuar batendo na porta de 30 em 30 seg até encher 100% do mapa (Top-Off)
                 int topOffAttempt = 1;
                 while (true)
                 {
@@ -247,20 +280,41 @@ namespace TRLDynamicSpawn.Components
                     
                     if (aliveBots >= maxCap)
                     {
-                        Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Max cap reached ({aliveBots}/{maxCap}) after {topOffAttempt} top-off waves. Resuming long interval.");
+                        Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Map is 100% full ({aliveBots}/{maxCap}). Resuming {_secondsBetweenWaves}s cooldown.");
                         break;
                     }
 
-                    Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Max cap not reached yet ({aliveBots}/{maxCap}). Topping off in {_delayBeforeFirstWave}s (Attempt {topOffAttempt})...");
-                    _nextWaveTime = Time.time + _delayBeforeFirstWave;
+                    int topOffInterval = 30;
+                    Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Map needs bots ({aliveBots}/{maxCap}). Dispatching fill wave in {topOffInterval}s loop (Attempt {topOffAttempt})...");
                     
-                    float waitTopOff = Mathf.Max(1f, _delayBeforeFirstWave - 1f);
-                    yield return new WaitForSeconds(waitTopOff);
                     ClearSptQueue();
                     yield return new WaitForSeconds(1f);
 
                     if (_activeWaveCoroutine != null) StopCoroutine(_activeWaveCoroutine);
                     _activeWaveCoroutine = StartCoroutine(ProcessWave(false));
+
+                    _nextWaveTime = Time.time + topOffInterval;
+
+                    bool topOffCapReached = false;
+                    for (int elapsed = 0; elapsed < topOffInterval; elapsed++)
+                    {
+                        yield return new WaitForSeconds(1f);
+                        currentMap = GetCurrentMapName();
+                        maxCap = Settings.GetMapCap(currentMap);
+                        aliveBots = _botsController.AliveAndLoadingBotsCount;
+
+                        if (aliveBots >= maxCap)
+                        {
+                            Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Max cap reached early during top-off ({aliveBots}/{maxCap}) at {elapsed + 1}s. Resuming {_secondsBetweenWaves}s cooldown.");
+                            topOffCapReached = true;
+                            break;
+                        }
+                    }
+
+                    if (topOffCapReached)
+                    {
+                        break;
+                    }
 
                     topOffAttempt++;
                 }
@@ -550,8 +604,9 @@ namespace TRLDynamicSpawn.Components
                             if (playersList == null || playersList.Count == 0) return true;
                             foreach(var p in playersList)
                             {
+                                if (p == null) continue;
                                 if (p.IsAI && !p.IsYourPlayer) continue;
-                                if (UnityEngine.Application.isBatchMode && p.IsYourPlayer) continue;
+                                if (IsHeadlessPlayer(p)) continue;
                                 if (Vector3.Distance(p.Position, z.transform.position) <= maxDistBuffer) return true;
                             }
                             return false;
@@ -657,12 +712,8 @@ namespace TRLDynamicSpawn.Components
             {
                 if (p == null || p.Profile == null || p.Profile.Info == null) continue;
                 if (p.IsAI && !p.IsYourPlayer) continue;
+                if (IsHeadlessPlayer(p)) continue;
 
-                // Ignora o Headless Player no host dedicado para não bloquear o spawn de bots
-                if (UnityEngine.Application.isBatchMode && p.IsYourPlayer)
-                {
-                    continue;
-                }
                 players.Add(p);
             }
 
@@ -1148,6 +1199,87 @@ namespace TRLDynamicSpawn.Components
             {
                 Plugin.LogSource.LogError($"[TRL-DynamicSpawn] Error checking Fika client status via reflection: {ex.Message}");
             }
+            return false;
+        }
+
+        private static bool _fikaReflectionEvaluated = false;
+        private static System.Reflection.PropertyInfo _fikaIsHeadlessProperty = null;
+
+        public static string SanitizeMongoId(string input)
+        {
+            if (string.IsNullOrEmpty(input)) return MongoID.Generate();
+            string trimmed = input.Trim().ToLowerInvariant();
+            if (trimmed.Length == 24 && IsValidHex24(trimmed))
+            {
+                return trimmed;
+            }
+            if (trimmed.Length > 24) return trimmed.Substring(0, 24);
+            return trimmed.PadRight(24, '0');
+        }
+
+        private static bool IsValidHex24(string s)
+        {
+            for (int i = 0; i < 24; i++)
+            {
+                char c = s[i];
+                if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f')))
+                    return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Checks if a player is the Headless Server host instance.
+        /// References: fika-plugin/Fika.Core/Main/Utils/FikaBackendUtils.cs (IsHeadless)
+        /// and fika-headless/Fika.Headless/Patches/ConsoleScreen_OnProfileReceive_Patch.cs (headless_).
+        /// </summary>
+        public static bool IsHeadlessPlayer(Player p)
+        {
+            if (p == null) return false;
+
+            if (p.IsYourPlayer)
+            {
+                if (UnityEngine.Application.isBatchMode) return true;
+
+                if (!_fikaReflectionEvaluated)
+                {
+                    _fikaReflectionEvaluated = true;
+                    try
+                    {
+                        var assembly = System.AppDomain.CurrentDomain.GetAssemblies()
+                            .FirstOrDefault(a => a.GetName().Name == "Fika.Core");
+                        if (assembly != null)
+                        {
+                            var type = assembly.GetType("Fika.Core.Main.Utils.FikaBackendUtils");
+                            if (type != null)
+                            {
+                                _fikaIsHeadlessProperty = type.GetProperty("IsHeadless", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+                            }
+                        }
+                    }
+                    catch { }
+                }
+
+                if (_fikaIsHeadlessProperty != null)
+                {
+                    try
+                    {
+                        if ((bool)_fikaIsHeadlessProperty.GetValue(null)) return true;
+                    }
+                    catch { }
+                }
+            }
+
+            if (p.Profile != null)
+            {
+                string nickname = p.Profile.Nickname?.ToLower() ?? "";
+                string accountId = p.Profile.AccountId?.ToLower() ?? "";
+                if (nickname.Contains("headless") || accountId.Contains("headless"))
+                {
+                    return true;
+                }
+            }
+
             return false;
         }
     }

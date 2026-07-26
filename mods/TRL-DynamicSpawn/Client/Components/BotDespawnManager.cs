@@ -21,6 +21,7 @@ namespace TRLDynamicSpawn.Components
         
         // This keeps track of our current map and if it has despawn enabled.
         private string _currentLocation;
+        private static readonly Dictionary<string, float> _teleportCooldowns = new Dictionary<string, float>();
 
         public static void Enable()
         {
@@ -32,6 +33,7 @@ namespace TRLDynamicSpawn.Components
 
         private void Start()
         {
+            _teleportCooldowns.Clear();
             _despawnRoutine = StartCoroutine(DespawnLoop());
         }
 
@@ -57,10 +59,9 @@ namespace TRLDynamicSpawn.Components
                 if (!string.IsNullOrEmpty(_currentLocation) && _serverConfig.MapConfigs.TryGetValue(_currentLocation, out var currentMapSettings))
                 {
                     if (currentMapSettings.EnableDespawn)
-                    {
                         interval = currentMapSettings.DespawnInterval;
-                    }
                 }
+                
                 if (interval < 5f) interval = 5f;
                 
                 yield return new WaitForSeconds(interval);
@@ -85,11 +86,15 @@ namespace TRLDynamicSpawn.Components
                         continue;
 
                     // Get current location
-                    _currentLocation = gameWorld.MainPlayer?.Location;
-                    if (string.IsNullOrEmpty(_currentLocation))
+                    string loc = gameWorld.MainPlayer?.Location?.ToLower();
+                    if (string.IsNullOrEmpty(loc))
                         continue;
-                        
-                    _currentLocation = _currentLocation.ToLower();
+
+                    if (_currentLocation != loc)
+                    {
+                        _currentLocation = loc;
+                        _teleportCooldowns.Clear();
+                    }
                     
                     if (!_serverConfig.MapConfigs.TryGetValue(_currentLocation, out var mapSettings))
                     {
@@ -115,11 +120,12 @@ namespace TRLDynamicSpawn.Components
                         var p = gameWorld.AllAlivePlayersList[i];
                         if (p != null && (p.IsYourPlayer || !p.IsAI))
                         {
+                            if (DynamicSpawnManager.IsHeadlessPlayer(p)) continue;
                             alivePlayers.Add(p);
                         }
                     }
                     
-                    if (alivePlayers.Count == 0 && gameWorld.MainPlayer != null)
+                    if (alivePlayers.Count == 0 && gameWorld.MainPlayer != null && !DynamicSpawnManager.IsHeadlessPlayer(gameWorld.MainPlayer))
                     {
                         alivePlayers.Add(gameWorld.MainPlayer);
                     }
@@ -383,7 +389,7 @@ namespace TRLDynamicSpawn.Components
                 {
                     if (p == null || p.Profile == null) continue;
                     if (p.IsAI && !p.IsYourPlayer) continue;
-                    if (UnityEngine.Application.isBatchMode && p.IsYourPlayer) continue;
+                    if (DynamicSpawnManager.IsHeadlessPlayer(p)) continue;
                     players.Add(p);
                 }
             }
@@ -499,10 +505,22 @@ namespace TRLDynamicSpawn.Components
 
         private bool AttemptToTeleportBot(BotOwner bot)
         {
+            if (bot == null || bot.Profile == null || bot.GetPlayer == null) return false;
+
             try
             {
                 var gameWorld = Singleton<GameWorld>.Instance;
                 if (gameWorld == null || DynamicSpawnManager.Instance == null) return false;
+
+                string botId = DynamicSpawnManager.SanitizeMongoId(bot.Profile.Id);
+                if (_teleportCooldowns.TryGetValue(botId, out float lastTime))
+                {
+                    if (Time.time - lastTime < 30f)
+                    {
+                        // Respeita a trava de 30s de cooldown para evitar re-teleportar o mesmo bot em rajada
+                        return false;
+                    }
+                }
 
                 string mapName = gameWorld.MainPlayer?.Location?.ToLower() ?? "";
                 var role = bot.Profile.Info.Settings.Role;
@@ -559,7 +577,10 @@ namespace TRLDynamicSpawn.Components
                 // 3. Teleporta fisicamente usando a API nativa do EFT que lida com o NavMesh/Solo automaticamente
                 bot.GetPlayer.Teleport(targetPos, true);
 
-                // 4. Força a retomar a patrulha no novo local
+                // 4. Registrar o timestamp do teletransporte de forma bem-sucedida
+                _teleportCooldowns[botId] = Time.time;
+
+                // 5. Força a retomar a patrulha no novo local
                 ForceBackToPatrol(bot);
 
                 return true;
