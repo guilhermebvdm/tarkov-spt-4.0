@@ -131,6 +131,10 @@ internal static class PerksConfig
     internal static ConfigEntry<float>? QuickDrawTime;            // 080
     internal static ConfigEntry<bool>? LebreEnabled;             // 081 Saqueador (velocidade quando leve)
     internal static ConfigEntry<float>? LebreSpeed;              // 081
+    internal static ConfigEntry<bool>? MedrosoEnabled;           // 082 Saqueador (tremor sob fogo)
+    internal static ConfigEntry<float>? MedrosoDuration;         // 082
+    internal static ConfigEntry<float>? MedrosoCooldown;         // 082
+    internal static ConfigEntry<float>? MedrosoSuppressDistance; // 082
 
     // 7 · Tank
     internal static ConfigEntry<bool>? BulwarkEnabled;
@@ -465,6 +469,20 @@ internal static class PerksConfig
             new ConfigDescription(
                 "Multiplicador de velocidade quando leve (1.30 = +30%). Desliga automaticamente ao ficar pesado. / Move-speed multiplier while light (1.30 = +30%). Auto-off when overweight.",
                 new AcceptableValueRange<float>(1f, 1.5f)));
+        // 082 — Medroso (Saqueador): mãos trêmulas SOB FOGO (levar tiro OU bala passar perto). Porta a lógica do
+        // mod UnderFire (o UnderFire global deve ser desativado — senão TODOS ganham o tremor, não só o Scav).
+        MedrosoEnabled = config.Bind(
+            SecScavenger, "Medroso — Enabled", true,
+            "Saqueador: mãos trêmulas (tremor) ao levar tiro OU sob supressão (bala passa perto). / Scavenger: shaky hands (tremor) when shot OR suppressed (bullet fly-by).");
+        MedrosoDuration = config.Bind(
+            SecScavenger, "Medroso — Tremor duration (s)", 6f,
+            new ConfigDescription("Duração do tremor (segundos). / Tremor duration (seconds).", new AcceptableValueRange<float>(1f, 20f)));
+        MedrosoCooldown = config.Bind(
+            SecScavenger, "Medroso — Cooldown (s)", 8f,
+            new ConfigDescription("Espera antes de o tremor poder re-disparar. / Cooldown before the tremor can re-trigger.", new AcceptableValueRange<float>(0f, 30f)));
+        MedrosoSuppressDistance = config.Bind(
+            SecScavenger, "Medroso — Suppression distance (m)", 4f,
+            new ConfigDescription("Distância (m) que a bala passa perto p/ contar como supressão (0 = só ao levar tiro). / Bullet fly-by distance (m) counting as suppression (0 = only when hit).", new AcceptableValueRange<float>(0f, 20f)));
         BindClassColor(config, SecScavenger, "Scavenger", "#c4ad45");   // 067
 
         // ───────────────────────── 7 · Tank ─────────────────────────
