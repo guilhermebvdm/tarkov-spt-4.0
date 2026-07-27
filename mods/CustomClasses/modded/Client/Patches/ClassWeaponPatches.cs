@@ -320,32 +320,34 @@ internal class AimPunchPatch : ModulePatch
 
 /// <summary>
 ///     080 — 🔫 <b>Saque Rápido</b> (Caçador + Fuzileiro + Furtivo): sacar a arma do slot <b>HOLSTER</b> mais rápido.
-///     Postfix em <c>Player.FirearmController.GetWeaponDrawSpeedMultiplier</c> (Player.cs:12591) — o análogo do
-///     <c>GetWeaponReloadAnimationSpeed</c> p/ o SAQUE (retorna a VELOCIDADE do parâmetro <c>draw</c> do animator;
-///     maior = mais rápido). Gate: só o HandsController do MainPlayer local + classe + a arma sacada vem do slot
-///     Holster (padrão canônico do EFT, Player.cs:12637). <c>__result /= tempo</c> (tempo 0.8 → speed ×1.25).
+///     <b>CORRIGIDO (report do usuário: "não senti diferença ao sacar")</b>: o alvo antigo
+///     <c>GetWeaponDrawSpeedMultiplier</c> está VIVO, mas só é lido no <b>quickdraw-fast</b> (double-tap de troca com
+///     <c>FastSlotSelection</c>, arma do holster, fora de prone — Player.cs:10091 e :12648). O <b>saque NORMAL</b>
+///     (trocar de slot pela tecla) cai no ramo <c>else</c> de <c>SetAnimatorAndProceduralValues</c> (Player.cs:12661)
+///     e usa o CAMPO push-based <c>BuffInfo.SwapSpeed</c> (→ float <c>SpeedDraw</c> do animator) — que o patch antigo
+///     NÃO tocava. Migrado para o mesmo funil do 084/085: Prefix escala <c>BuffInfo.SwapSpeed ÷ t</c> antes do push
+///     (arma+corpo em lockstep), Postfix restaura. Cobre o saque comum do holster (o quickdraw-fast já é
+///     intrinsecamente rápido). Ref: [[reference_eft_reload_speed_getter_dead]] (mesma natureza push-based).
+///     <para>Gate: MainPlayer local (075) + classe (Caçador/Fuzileiro/Furtivo) + a arma nas mãos veio do slot
+///     HOLSTER (<c>Item.CurrentAddress.Container == Equipment[Holster]</c>). Coexiste com 084/085 no mesmo método:
+///     este mexe em <c>SwapSpeed</c>, eles em <c>ReloadSpeed</c> (campos distintos → sem conflito de <c>__state</c>).</para>
 /// </summary>
 internal class HolsterDrawSpeedPatch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return AccessTools.Method(typeof(Player.FirearmController), nameof(Player.FirearmController.GetWeaponDrawSpeedMultiplier));
+        return AccessTools.Method(typeof(Player.FirearmController), "SetAnimatorAndProceduralValues");
     }
 
-    [PatchPostfix]
-    private static void Postfix(Player.FirearmController __instance, Weapon weapon, ref float __result)
+    [PatchPrefix]
+    private static void Prefix(Player.FirearmController __instance, out float __state)
     {
+        __state = float.NaN;
         try
         {
             if (PerksConfig.QuickDrawEnabled?.Value != true)
             {
                 return;
-            }
-
-            var mainPlayer = Singleton<GameWorld>.Instance?.MainPlayer;
-            if (mainPlayer == null || !ReferenceEquals(__instance, mainPlayer.HandsController))
-            {
-                return;   // só a arma do player local
             }
 
             if (!(SkillMultipliers.IsLocalClass("Hunter")
@@ -355,11 +357,23 @@ internal class HolsterDrawSpeedPatch : ModulePatch
                 return;
             }
 
-            // Só quando a arma sacada vem do slot HOLSTER (padrão canônico do EFT — Player.cs:12637).
-            // CurrentAddress é o accessor SEGURO (o getter .Parent pode lançar).
+            var mainPlayer = Singleton<GameWorld>.Instance?.MainPlayer;
+            if (mainPlayer == null || !ReferenceEquals(__instance, mainPlayer.HandsController))
+            {
+                return;   // só a arma do player local (075)
+            }
+
+            // Só quando a arma nas mãos veio do slot HOLSTER (pistola/secundária). CurrentAddress é o accessor
+            // SEGURO (o getter .Parent pode lançar). O item não sai do slot ao ser empunhado → Container = Holster.
             var holster = mainPlayer.Inventory?.Equipment?.GetSlot(EquipmentSlot.Holster);
-            var container = weapon?.CurrentAddress?.Container;
+            var container = __instance.Item?.CurrentAddress?.Container;
             if (holster == null || container == null || !ReferenceEquals(container, holster))
+            {
+                return;
+            }
+
+            var buff = __instance.BuffInfo;
+            if (buff == null)
             {
                 return;
             }
@@ -367,12 +381,29 @@ internal class HolsterDrawSpeedPatch : ModulePatch
             var t = PerksConfig.QuickDrawTime?.Value ?? 1f;   // TEMPO de saque (0.8 = 20% mais rápido)
             if (t > 0f && t < 1f)
             {
-                __result /= t;   // speed maior = saque mais rápido
+                __state = buff.SwapSpeed;
+                buff.SwapSpeed /= t;   // arma+corpo recebem draw ×(1/t) em lockstep (0.8 → ×1.25)
             }
         }
         catch (Exception ex)
         {
-            Plugin.Log?.LogError($"[CustomClasses] (080) quick draw falhou: {ex.Message}");
+            Plugin.Log?.LogError($"[CustomClasses] (080) quick draw (pre) falhou: {ex.Message}");
+        }
+    }
+
+    [PatchPostfix]
+    private static void Postfix(Player.FirearmController __instance, float __state)
+    {
+        try
+        {
+            if (!float.IsNaN(__state) && __instance.BuffInfo != null)
+            {
+                __instance.BuffInfo.SwapSpeed = __state;
+            }
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log?.LogError($"[CustomClasses] (080) quick draw (post) falhou: {ex.Message}");
         }
     }
 }
