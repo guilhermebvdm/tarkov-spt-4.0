@@ -83,8 +83,27 @@ código.** Para cada item:
   destacar isso como **pré-requisito do teste**, separado da descrição do comportamento esperado.
 - Agrupar por **tema/feature**, não por ID de sessão — o usuário pensa em "a mira", "as posturas", "a velocidade
   ao andar", não em "Sessão 11 cont. 6".
+- **Cada item cabe em uma frase.** O relatório é uma tabela (§7) — uma linha por item, sem sub-bullets. Se a
+  explicação não couber em ~100 caracteres, encurtar para o essencial e jogar o resto numa nota abaixo da tabela
+  (§7, "Notas de linha").
 
-### 5. Obter timestamp e versão atual
+### 5. Marcar o texto (`código` e **negrito**)
+
+O relatório é lido em terminal, escaneando. A marcação existe para o olho parar no lugar certo — marcação demais
+tem o mesmo efeito de marcação nenhuma. Duas regras, sem exceção:
+
+| Marcação | Usar para | Exemplos |
+|---|---|---|
+| `` `código` `` | Tudo que é **literal** e copiável: teclas, nomes de config/arquivo/pasta, valores, códigos de item e referências internas | `Alt + V`, `LeanSpeed`, `config.json`, `P-11.6`, `034`, `v1.4.2` |
+| **negrito** | O **conceito de domínio** ou o **verbo da decisão** — o que o usuário reconhece do jogo, e o estado do item | **Pronto Alto**, **Inclinar**, **não investigado**, **já corrigido**, **trava** |
+
+- **Máximo 2 negritos por célula.** Se tudo está em negrito, nada está.
+- **Nunca** negrito em referência interna (`P-11.6` é `código`, não negrito) nem em frase inteira.
+- Nome de classe, método ou hash de commit **não entram no relatório** — nem em `código`. São jargão de dev; a §4
+  já manda traduzir para comportamento observável. A única referência técnica permitida é o ID da pendência ou do
+  item de backlog, na coluna `Ref`.
+
+### 6. Obter timestamp e versão atual
 
 Antes de montar o relatório:
 
@@ -95,49 +114,69 @@ Antes de montar o relatório:
    tentar o `BepInPlugin`/`.csproj` do mod (`Version`/`AssemblyVersion`) como fallback; se nenhum dos dois existir,
    escrever "versão não identificada" em vez de adivinhar.
 
-### 6. Montar o relatório
+### 7. Montar o relatório
 
-Formato de saída (em português, para o usuário — não para outro agente):
+Saída em **uma tabela única**, em português, para o usuário — não para outro agente.
+
+#### Códigos de linha
+
+Cada item ganha um código curto, que serve para o usuário responder ("vamos fazer o `D-2`", "o `T-1` passou"):
+
+- `T-1`, `T-2`, … — **pendente de teste** (código pronto, falta confirmar no jogo).
+- `D-1`, `D-2`, … — **pendente de desenvolvimento** (falta construir).
+
+Numerar sequencialmente na ordem de apresentação, começando em 1 em cada prefixo. **O código é local a este
+relatório** — vale para a conversa de agora, não é ID persistente e não vai para arquivo nenhum. A rastreabilidade
+de verdade é a coluna `Ref`; se o usuário citar um código numa sessão futura, reconferir na tabela atual.
+
+#### Colunas
+
+| Coluna | Conteúdo | Alvo de tamanho |
+|---|---|---|
+| `#` | `🧪 T-N` ou `🔧 D-N` | fixo |
+| `Tema` | Feature em linguagem de jogo: Mira, Posturas, Câmara, Velocidade | ≤ 14 caracteres |
+| `O que testar / o que falta` | Uma frase, critério de aceite quando for teste | ≤ 100 caracteres |
+| `Pré-req` | Passo prévio necessário (tecla a bindar, config a ligar), ou `—` | ≤ 20 caracteres |
+| `Ref` | ID da pendência de memória ou do item de backlog, em `código` | ≤ 12 caracteres |
+
+Ordem das linhas: **todos os `T-*` primeiro**, depois os `D-*`; dentro de cada bloco, agrupados por tema.
+
+#### Formato
 
 ```markdown
-# Status de <nome do mod, em linguagem natural> — para você conferir
+# <nome do mod, em linguagem natural> — status
 
-> **Horário deste resumo:** YYYY-MM-DD HH:MM (horário de Brasília)<br>
-> **Versão atual:** vX.Y.Z<br>
+> **Resumo de:** YYYY-MM-DD HH:MM (Brasília) · **Versão atual:** `vX.Y.Z`<br>
+> 🧪 **pronto, falta testar:** N · 🔧 **ainda por fazer:** M<br>
 
-## 🧪 Pendente de teste (já está pronto, falta você confirmar no jogo)
+| # | Tema | O que testar / o que falta | Pré-req | Ref |
+|---|---|---|---|---|
+| 🧪 `T-1` | Mira | Mirando do **Pronto Alto**, a subida deve seguir o tempo daquela postura | `Alt + V` | `P-11.6` |
+| 🧪 `T-2` | Câmara | Ferrolho manual mostra "sem munição" no mesmo painel do carregador | — | `P-12.1` |
+| 🔧 `D-1` | Posturas | **Inclinar** **trava** ao subir escada — causa ainda **não investigada** | — | `034` |
+| 🔧 `D-2` | Velocidade | Peso da mochila não afeta o passo lateral | — | `041` |
 
-### <Tema 1>
-- **O que testar:** <descrição observável, critério de aceite>.
-  <se houver pré-requisito: "Antes: <pré-requisito>.">
-  (ref. interna: <ID>)
+**Legenda:** 🧪 pronto, falta você confirmar no jogo · 🔧 ainda falta construir
 
-### <Tema 2>
-- ...
+### Notas de linha
+- `T-1`: <detalhe que não coube na linha — passo extra de teste, ressalva, dependência>
 
-(Se nada estiver pendente de teste: "Nada pendente de teste agora — tudo que foi entregue já foi validado.")
-
-## 🔧 Pendente de desenvolvimento (ainda por fazer)
-
-### <Tema 1>
-- **O que falta:** <descrição em linguagem de produto, sem jargão>.
-  (ref. interna: <ID ou item de backlog>)
-
-### <Tema 2>
-- ...
-
-(Se nada estiver pendente: "Nada pendente de desenvolvimento agora — todo o backlog conhecido foi entregue.")
-
-## Notas
-- <observações que não cabem nos critérios acima: memória desatualizada, backlog ausente, itens cancelados
-  relevantes ao contexto, etc. — opcional>
+### Notas
+- <observações fora dos dois grupos: memória desatualizada, backlog ausente, item cancelado relevante>
 ```
 
-- Não incluir seções vazias além da mensagem de "nada pendente" — não forçar uma seção "Notas" vazia.
-- **Não é uma tabela técnica.** Prosa curta com bullets, como se estivesse explicando para alguém que não vai
-  abrir o código.
+- **Uma linha por item.** Item com parte pronta e parte por fazer vira **duas linhas** (um `T-*` e um `D-*`) com a
+  mesma `Ref`, e o texto de cada uma deixa claro qual metade é.
+- **"Notas de linha" é escape, não regra** — só quando a frase realmente não cabe. Se metade das linhas tiver nota,
+  as frases estão longas demais: encurtar em vez de anotar.
+- **Grupo vazio não vira seção vazia** — sai como linha de texto abaixo da tabela: "Nada pendente de teste agora —
+  tudo que foi entregue já foi validado." / "Nada pendente de desenvolvimento — todo o backlog conhecido foi
+  entregue." Se **os dois** estiverem vazios, não montar tabela nenhuma: só as duas frases.
+- **É uma tabela de produto, não técnica.** A coluna do meio se lê como uma frase que o usuário consegue responder
+  sim/não depois de entrar no jogo — não como um resumo de commit.
+- Não forçar a seção "Notas" quando não há observação.
 
-### 7. Não modificar nada
+### 8. Não modificar nada
 
 Este command é read-only. Se durante a leitura for notado que a memória ou o backlog parecem desatualizados
 (ex.: um item 🟢 no backlog mas a memória ainda lista pendência de teste antiga, ou uma pendência sem data), citar
@@ -149,6 +188,10 @@ que fazem isso.
 - **Só leitura** — nunca grava em `sessions.md` ou `mod-backlog.md`.
 - **Linguagem de produto sempre** — se uma frase do relatório teria que ser explicada para o usuário entender,
   reescrever antes de mostrar.
+- **Uma tabela, uma linha por item** (§7) — nada de bullets aninhados ou parágrafo dentro de célula.
+- **`código` para literal, negrito para conceito** (§5), no máximo 2 negritos por célula.
+- **Códigos `T-N`/`D-N` são locais ao relatório** — servem para o usuário apontar um item na conversa, não são IDs
+  persistentes e nunca são gravados.
 - **Um mod por vez.** Sem flag `--all` — se o usuário quiser vários mods, rodar o command de novo para cada um.
 - **Itens cancelados (🔴) ficam fora** dos dois grupos por padrão.
 - **Se um dos dois arquivos-fonte não existir**, seguir com o que houver e avisar na seção "Notas" — não é erro
