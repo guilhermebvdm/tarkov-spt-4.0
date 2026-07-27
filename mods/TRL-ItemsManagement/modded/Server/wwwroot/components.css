@@ -265,6 +265,8 @@ body::before {
   border-radius: var(--radius-sm);
   font-size: 10px; font-weight: 700;
 }
+/* CR-A-05: exclusive-mode marker on the collapsed Trader filter — brighter badge with a ring. */
+.dropdown.is-exclusive .dropdown__badge { background: var(--accent); box-shadow: 0 0 0 1.5px var(--accent-bright); }
 
 .dropdown__panel {
   position: absolute;
@@ -317,7 +319,7 @@ body::before {
 .dropdown__search:focus { outline: none; border-color: var(--accent-dim); }
 
 .dropdown__actions {
-  display: flex; gap: var(--space-2);
+  display: flex; flex-wrap: wrap; gap: var(--space-2);
   padding: 0 var(--space-3) var(--space-2);
   border-bottom: 1px solid var(--border-subtle);
   margin-bottom: var(--space-2);
@@ -334,6 +336,10 @@ body::before {
   transition: color var(--transition-fast), border-color var(--transition-fast);
 }
 .dropdown__action:hover { color: var(--fg-primary); border-color: var(--border-strong); }
+/* B-10: exclusive-match toggle — full-width row under Clear/All, accent when on. */
+.dropdown__action--toggle { flex: 1 1 100%; white-space: nowrap; }
+.dropdown__action--toggle.is-on { color: var(--fg-on-accent); background: var(--accent); border-color: var(--accent); }
+.dropdown__action--toggle.is-on:hover { filter: brightness(1.1); color: var(--fg-on-accent); }
 
 .dropdown__option {
   display: flex; align-items: center; gap: var(--space-3);
@@ -472,12 +478,14 @@ select.pill { -webkit-appearance: none; appearance: none; padding-right: var(--s
 /* Chevron behaves like the dropdown trigger: points DOWN when closed, UP
  * when open. Smooth 150ms cubic-bezier transition between the two states. */
 .tree-node .chev {
-  width: 12px; height: 12px;
+  width: 20px; height: 20px;          /* B-12: larger hit-target — the chevron expands on its own now */
+  margin: -4px -3px -4px -4px;        /* grow the click area without shifting the glyph/layout */
   display: inline-flex; align-items: center; justify-content: center;
   flex-shrink: 0;
-  color: var(--fg-dim);
-  transition: transform 150ms cubic-bezier(.4, 0, .2, 1), color var(--transition-fast);
+  color: var(--fg-dim); border-radius: var(--radius-sm);
+  transition: transform 150ms cubic-bezier(.4, 0, .2, 1), color var(--transition-fast), background var(--transition-fast);
 }
+.tree-node.has-children .chev:hover { color: var(--accent-bright); background: var(--bg-hover); }
 .tree-node:hover .chev { color: var(--fg-secondary); }
 .tree-node.is-active .chev { color: var(--accent); }
 .tree-node:not(.has-children) .chev { visibility: hidden; }
@@ -773,6 +781,8 @@ select.pill { -webkit-appearance: none; appearance: none; padding-right: var(--s
   font-weight: 700;
   letter-spacing: .3px;
 }
+/* B-11 / CR-C-04: LL overridden on the cheapest seller — accent it like the popover/detail-row marker. */
+.cell-trader__ll.is-capped { color: var(--accent-bright); }
 /* Trader buy override in the item row: accent the value + a compact OVR badge. */
 .cell-trader__num.is-overridden { color: var(--accent-bright); font-weight: 600; }
 .badge.cell-trader__ovr { font-size: 8px; padding: 0 3px; line-height: 1.4; }
@@ -862,6 +872,10 @@ select.pill { -webkit-appearance: none; appearance: none; padding-right: var(--s
 .trader-pop__name { flex: 1; color: var(--fg-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .trader-pop__item.is-best .trader-pop__name { font-weight: 600; }
 .trader-pop__ll { font-size: 9px; font-weight: 700; color: var(--fg-secondary); background: var(--bg-base, #181712); border-radius: var(--radius-sm); padding: 0 4px; }
+/* B-11: loyalty-level override highlight (inline trader-row meta + hover popover). */
+.trader-pop__ll.is-capped { color: var(--accent-bright); }
+.vendor-ll.is-capped { color: var(--accent-bright); font-weight: 600; }
+.vendor-ll s { opacity: .5; font-weight: 400; margin-left: 1px; }
 .trader-pop__price { font-variant-numeric: tabular-nums; color: var(--fg-primary); font-weight: 600; white-space: nowrap; }
 .trader-pop__price.is-overridden { color: var(--accent-bright); }
 
@@ -1624,6 +1638,13 @@ select.pill { -webkit-appearance: none; appearance: none; padding-right: var(--s
   text-align: right; font-variant-numeric: tabular-nums;
 }
 .tea-panel input[type=number]:disabled { opacity: .4; cursor: not-allowed; }
+/* B-11: loyalty-level picker — matches the number inputs (left-aligned; a select can't be right-aligned). */
+.tea-panel select.tef-loyalty {
+  width: 100%; padding: 4px 6px; background: var(--bg-base, #181712); color: var(--fg-primary);
+  border: 1px solid var(--accent); border-radius: var(--radius-sm); font: inherit; font-size: var(--fs-sm);
+  cursor: pointer;
+}
+.tea-panel select.tef-loyalty:disabled { opacity: .4; cursor: not-allowed; }
 .tef-preview { font-size: 9px; color: var(--accent-bright); text-align: right; min-height: 11px; font-variant-numeric: tabular-nums; }
 .tef-preview:empty { display: none; }
 
@@ -1648,6 +1669,7 @@ select.pill { -webkit-appearance: none; appearance: none; padding-right: var(--s
 .trader-edit-accordion.is-sale-off .tea-off-note { display: block; }
 .trader-edit-accordion.is-sale-off .tea-cell--stock,
 .trader-edit-accordion.is-sale-off .tea-cell--limit,
+.trader-edit-accordion.is-sale-off .tea-cell--loyalty,
 .trader-edit-accordion.is-sale-off .tea-cell--price { opacity: .45; }
 
 /* actions row */

@@ -45,7 +45,8 @@ internal static class StockApplier
         }
 
         var traders = databaseService.GetTraders();
-        int stockApplied = 0, limitApplied = 0, disabledApplied = 0, tplNotSold = 0, badTrader = 0, badTpl = 0;
+        int stockApplied = 0, limitApplied = 0, loyaltyApplied = 0, disabledApplied = 0, tplNotSold = 0, badTrader = 0, badTpl = 0;
+        int badLoyalty = 0, loyaltySkipped = 0; // CR-B-01/03: out-of-range LL rejected / trader has no loyalty dict
 
         foreach (var (traderIdStr, tplMap) in raw)
         {
@@ -108,6 +109,29 @@ internal static class StockApplier
 
                 var hit = false;
 
+                // B-11: validate the loyalty override ONCE per tpl (not per root offer, so the counters
+                // stay meaningful). The config is hand-editable and StockApplier trusts the raw file, so an
+                // out-of-range level (e.g. 99) must be rejected here — it would otherwise gate the offer
+                // behind a tier no player can reach, removing it for everyone (in the shop AND the flea
+                // mirror) with no `disabled` flag, i.e. a silent phantom-bug. Mirrors StockController's 1-4
+                // guard. A trader without a LoyalLevelItems dict (some custom traders) has nothing to retarget.
+                int? applyLoyalty = null;
+                if (ovr.LoyaltyLevel is { } rawLl)
+                {
+                    if (rawLl < 1 || rawLl > 4)
+                    {
+                        badLoyalty++;
+                    }
+                    else if (trader.Assort.LoyalLevelItems is null)
+                    {
+                        loyaltySkipped++;
+                    }
+                    else
+                    {
+                        applyLoyalty = rawLl;
+                    }
+                }
+
                 // Every ROOT sellable assort entry of this tpl (SlotId "hideout"; children are mods) —
                 // a tpl can appear across loyalty tiers. Flat stock per tpl per trader, same all-tiers
                 // model SellPriceApplier uses.
@@ -133,6 +157,16 @@ internal static class StockApplier
                         limitApplied++;
                     }
 
+                    // B-11: retarget the loyalty tier that unlocks this root offer. LoyalLevelItems is keyed
+                    // by the ROOT item.Id (a MongoId → int LL). The mutation persists across refresh cycles
+                    // because TraderAssortHelper.ResetExpiredTrader only reassigns Assort.Items and never
+                    // touches LoyalLevelItems — the cloned Items keep the same root Ids, so the keys match.
+                    if (applyLoyalty is { } ll)
+                    {
+                        trader.Assort.LoyalLevelItems![item.Id] = ll;
+                        loyaltyApplied++;
+                    }
+
                     hit = true;
                 }
 
@@ -144,6 +178,6 @@ internal static class StockApplier
         }
 
         logger.Info(
-            $"[TRLItemsManagement] stock: {stockApplied} stock + {limitApplied} buy-limit + {disabledApplied} disabled-sale entr(ies) applied (badTrader {badTrader}, badTpl {badTpl}, tplNotSold {tplNotSold}).");
+            $"[TRLItemsManagement] stock: {stockApplied} stock + {limitApplied} buy-limit + {loyaltyApplied} loyalty-level + {disabledApplied} disabled-sale entr(ies) applied (badTrader {badTrader}, badTpl {badTpl}, tplNotSold {tplNotSold}, badLoyalty {badLoyalty}, loyaltyNoDict {loyaltySkipped}).");
     }
 }

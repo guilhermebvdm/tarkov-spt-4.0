@@ -176,6 +176,9 @@ public sealed class DebugController(
                     stock = item.Upd?.StackObjectsCount,
                     buyLimit = item.Upd?.BuyRestrictionMax,
                     unlimited = item.Upd?.UnlimitedCount,
+                    // B-11: live loyalty tier from LoyalLevelItems[rootId] — reflects StockApplier's boot
+                    // mutation, so a loyalty-level override is confirmed to have taken effect the same way.
+                    loyaltyLevel = assort.LoyalLevelItems is not null && assort.LoyalLevelItems.TryGetValue(item.Id, out var ll) ? ll : (int?)null,
                 });
             }
         }
