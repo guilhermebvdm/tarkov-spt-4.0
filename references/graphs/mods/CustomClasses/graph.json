@@ -420,7 +420,7 @@
       "source_location": "",
       "_origin": "ast",
       "id": "modulepatch",
-      "community": 90,
+      "community": 47,
       "norm_label": "modulepatch"
     },
     {
@@ -2420,7 +2420,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "client_patches_classweaponpatches_cs_patchprefix",
-      "community": 111,
+      "community": 114,
       "norm_label": "patchprefix"
     },
     {
@@ -2430,7 +2430,7 @@
       "source_location": "L87",
       "_origin": "ast",
       "id": "patches_classweaponpatches_reloadspeedpatch",
-      "community": 111,
+      "community": 114,
       "norm_label": "reloadspeedpatch"
     },
     {
@@ -2440,7 +2440,7 @@
       "source_location": "L89",
       "_origin": "ast",
       "id": "patches_classweaponpatches_reloadspeedpatch_gettargetmethod",
-      "community": 111,
+      "community": 114,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -2450,7 +2450,7 @@
       "source_location": "L94",
       "_origin": "ast",
       "id": "patches_classweaponpatches_reloadspeedpatch_prefix",
-      "community": 111,
+      "community": 114,
       "norm_label": ".prefix()"
     },
     {
@@ -2520,7 +2520,7 @@
       "source_location": "L202",
       "_origin": "ast",
       "id": "patches_classweaponpatches_heavyweaponergopatch",
-      "community": 114,
+      "community": 111,
       "norm_label": "heavyweaponergopatch"
     },
     {
@@ -2530,7 +2530,7 @@
       "source_location": "L204",
       "_origin": "ast",
       "id": "patches_classweaponpatches_heavyweaponergopatch_gettargetmethod",
-      "community": 114,
+      "community": 111,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -2540,7 +2540,7 @@
       "source_location": "L209",
       "_origin": "ast",
       "id": "patches_classweaponpatches_heavyweaponergopatch_postfix",
-      "community": 114,
+      "community": 111,
       "norm_label": ".postfix()"
     },
     {
@@ -2550,7 +2550,7 @@
       "source_location": "L237",
       "_origin": "ast",
       "id": "patches_classweaponpatches_heavyweapon",
-      "community": 114,
+      "community": 111,
       "norm_label": "heavyweapon"
     },
     {
@@ -2560,7 +2560,7 @@
       "source_location": "L239",
       "_origin": "ast",
       "id": "patches_classweaponpatches_heavyweapon_isheavy",
-      "community": 114,
+      "community": 111,
       "norm_label": ".isheavy()"
     },
     {
@@ -2580,7 +2580,7 @@
       "source_location": "L252",
       "_origin": "ast",
       "id": "patches_classweaponpatches_heavyweapon_inhand",
-      "community": 114,
+      "community": 111,
       "norm_label": ".inhand()"
     },
     {
@@ -2590,7 +2590,7 @@
       "source_location": "L252",
       "_origin": "ast",
       "id": "client_patches_classweaponpatches_cs_player",
-      "community": 117,
+      "community": 111,
       "norm_label": "player"
     },
     {
@@ -2637,27 +2637,37 @@
       "label": "HolsterDrawSpeedPatch",
       "file_type": "code",
       "source_file": "Client/Patches/ClassWeaponPatches.cs",
-      "source_location": "L328",
+      "source_location": "L335",
       "_origin": "ast",
       "id": "patches_classweaponpatches_holsterdrawspeedpatch",
-      "community": 111,
+      "community": 114,
       "norm_label": "holsterdrawspeedpatch"
     },
     {
       "label": ".GetTargetMethod()",
       "file_type": "code",
       "source_file": "Client/Patches/ClassWeaponPatches.cs",
-      "source_location": "L330",
+      "source_location": "L337",
       "_origin": "ast",
       "id": "patches_classweaponpatches_holsterdrawspeedpatch_gettargetmethod",
-      "community": 111,
+      "community": 114,
       "norm_label": ".gettargetmethod()"
+    },
+    {
+      "label": ".Prefix()",
+      "file_type": "code",
+      "source_file": "Client/Patches/ClassWeaponPatches.cs",
+      "source_location": "L342",
+      "_origin": "ast",
+      "id": "patches_classweaponpatches_holsterdrawspeedpatch_prefix",
+      "community": 114,
+      "norm_label": ".prefix()"
     },
     {
       "label": ".Postfix()",
       "file_type": "code",
       "source_file": "Client/Patches/ClassWeaponPatches.cs",
-      "source_location": "L335",
+      "source_location": "L394",
       "_origin": "ast",
       "id": "patches_classweaponpatches_holsterdrawspeedpatch_postfix",
       "community": 114,
@@ -2667,57 +2677,57 @@
       "label": "LocalHitTypePatch",
       "file_type": "code",
       "source_file": "Client/Patches/ClassWeaponPatches.cs",
-      "source_location": "L385",
+      "source_location": "L416",
       "_origin": "ast",
       "id": "patches_classweaponpatches_localhittypepatch",
-      "community": 117,
+      "community": 111,
       "norm_label": "localhittypepatch"
     },
     {
       "label": "float",
       "file_type": "code",
       "source_file": "Client/Patches/ClassWeaponPatches.cs",
-      "source_location": "L390",
+      "source_location": "L421",
       "_origin": "ast",
       "id": "client_patches_classweaponpatches_cs_float",
-      "community": 117,
+      "community": 111,
       "norm_label": "float"
     },
     {
       "label": ".GetTargetMethod()",
       "file_type": "code",
       "source_file": "Client/Patches/ClassWeaponPatches.cs",
-      "source_location": "L392",
+      "source_location": "L423",
       "_origin": "ast",
       "id": "patches_classweaponpatches_localhittypepatch_gettargetmethod",
-      "community": 117,
+      "community": 111,
       "norm_label": ".gettargetmethod()"
     },
     {
       "label": ".Prefix()",
       "file_type": "code",
       "source_file": "Client/Patches/ClassWeaponPatches.cs",
-      "source_location": "L397",
+      "source_location": "L428",
       "_origin": "ast",
       "id": "patches_classweaponpatches_localhittypepatch_prefix",
-      "community": 117,
+      "community": 111,
       "norm_label": ".prefix()"
     },
     {
       "label": "ShotgunReloadPatch",
       "file_type": "code",
       "source_file": "Client/Patches/ClassWeaponPatches.cs",
-      "source_location": "L433",
+      "source_location": "L464",
       "_origin": "ast",
       "id": "patches_classweaponpatches_shotgunreloadpatch",
-      "community": 111,
+      "community": 114,
       "norm_label": "shotgunreloadpatch"
     },
     {
       "label": ".GetTargetMethod()",
       "file_type": "code",
       "source_file": "Client/Patches/ClassWeaponPatches.cs",
-      "source_location": "L435",
+      "source_location": "L466",
       "_origin": "ast",
       "id": "patches_classweaponpatches_shotgunreloadpatch_gettargetmethod",
       "community": 111,
@@ -2727,17 +2737,17 @@
       "label": ".Prefix()",
       "file_type": "code",
       "source_file": "Client/Patches/ClassWeaponPatches.cs",
-      "source_location": "L441",
+      "source_location": "L472",
       "_origin": "ast",
       "id": "patches_classweaponpatches_shotgunreloadpatch_prefix",
-      "community": 111,
+      "community": 114,
       "norm_label": ".prefix()"
     },
     {
       "label": ".Postfix()",
       "file_type": "code",
       "source_file": "Client/Patches/ClassWeaponPatches.cs",
-      "source_location": "L483",
+      "source_location": "L514",
       "_origin": "ast",
       "id": "patches_classweaponpatches_shotgunreloadpatch_postfix",
       "community": 114,
@@ -17931,9 +17941,9 @@
       "source_file": "Client/AdrenalineState.cs",
       "source_location": "L57",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "client_adrenalinestate_adrenalinestate",
-      "target": "client_adrenalinestate_adrenalinestate_ensurereloadresync",
-      "confidence_score": 1.0
+      "target": "client_adrenalinestate_adrenalinestate_ensurereloadresync"
     },
     {
       "relation": "method",
@@ -17941,9 +17951,9 @@
       "source_file": "Client/AdrenalineState.cs",
       "source_location": "L79",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "client_adrenalinestate_adrenalinestate",
-      "target": "client_adrenalinestate_adrenalinestate_forcereloadresync",
-      "confidence_score": 1.0
+      "target": "client_adrenalinestate_adrenalinestate_forcereloadresync"
     },
     {
       "relation": "method",
@@ -17971,9 +17981,9 @@
       "source_file": "Client/AdrenalineState.cs",
       "source_location": "L67",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "client_adrenalinestate_adrenalinestate",
-      "target": "client_adrenalinestate_adrenalinestate_watchwindow",
-      "confidence_score": 1.0
+      "target": "client_adrenalinestate_adrenalinestate_watchwindow"
     },
     {
       "relation": "references",
@@ -17982,9 +17992,9 @@
       "source_location": "L20",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "client_adrenalinestate_adrenalinestate",
-      "target": "client_adrenalinestate_cs_coroutine",
-      "confidence_score": 1.0
+      "target": "client_adrenalinestate_cs_coroutine"
     },
     {
       "relation": "references",
@@ -18004,9 +18014,9 @@
       "source_file": "Client/AdrenalineState.cs",
       "source_location": "L64",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "client_adrenalinestate_adrenalinestate_ensurereloadresync",
-      "target": "client_adrenalinestate_adrenalinestate_watchwindow",
-      "confidence_score": 1.0
+      "target": "client_adrenalinestate_adrenalinestate_watchwindow"
     },
     {
       "relation": "calls",
@@ -18015,9 +18025,9 @@
       "source_file": "Client/AdrenalineState.cs",
       "source_location": "L69",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "client_adrenalinestate_adrenalinestate_watchwindow",
-      "target": "client_adrenalinestate_adrenalinestate_forcereloadresync",
-      "confidence_score": 1.0
+      "target": "client_adrenalinestate_adrenalinestate_forcereloadresync"
     },
     {
       "relation": "references",
@@ -18026,9 +18036,9 @@
       "source_location": "L67",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "client_adrenalinestate_adrenalinestate_watchwindow",
-      "target": "client_adrenalinestate_cs_ienumerator",
-      "confidence_score": 1.0
+      "target": "client_adrenalinestate_cs_ienumerator"
     },
     {
       "relation": "contains",
@@ -21930,6 +21940,17 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Client/Patches/ClassWeaponPatches.cs",
+      "source_location": "L342",
+      "weight": 1.0,
+      "context": "attribute",
+      "source": "patches_classweaponpatches_holsterdrawspeedpatch_prefix",
+      "target": "client_patches_classweaponpatches_cs_patchprefix",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/ClassWeaponPatches.cs",
       "source_location": "L294",
       "weight": 1.0,
       "context": "attribute",
@@ -21944,9 +21965,9 @@
       "source_location": "L94",
       "weight": 1.0,
       "context": "attribute",
+      "confidence_score": 1.0,
       "source": "patches_classweaponpatches_reloadspeedpatch_prefix",
-      "target": "client_patches_classweaponpatches_cs_patchprefix",
-      "confidence_score": 1.0
+      "target": "client_patches_classweaponpatches_cs_patchprefix"
     },
     {
       "relation": "references",
@@ -21985,9 +22006,9 @@
       "source_file": "Client/Patches/ClassWeaponPatches.cs",
       "source_location": "L94",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_classweaponpatches_reloadspeedpatch",
-      "target": "patches_classweaponpatches_reloadspeedpatch_prefix",
-      "confidence_score": 1.0
+      "target": "patches_classweaponpatches_reloadspeedpatch_prefix"
     },
     {
       "relation": "references",
@@ -21996,9 +22017,9 @@
       "source_location": "L94",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "patches_classweaponpatches_reloadspeedpatch_prefix",
-      "target": "client_patches_classweaponpatches_cs_firearmcontroller",
-      "confidence_score": 1.0
+      "target": "client_patches_classweaponpatches_cs_firearmcontroller"
     },
     {
       "relation": "references",
@@ -22021,6 +22042,17 @@
       "confidence_score": 1.0,
       "source": "patches_classweaponpatches_holsterdrawspeedpatch_postfix",
       "target": "client_patches_classweaponpatches_cs_firearmcontroller"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/ClassWeaponPatches.cs",
+      "source_location": "L342",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "patches_classweaponpatches_holsterdrawspeedpatch_prefix",
+      "target": "client_patches_classweaponpatches_cs_firearmcontroller",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -22286,6 +22318,16 @@
       "confidence_score": 1.0,
       "source": "patches_classweaponpatches_holsterdrawspeedpatch",
       "target": "patches_classweaponpatches_holsterdrawspeedpatch_postfix"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/ClassWeaponPatches.cs",
+      "source_location": "L342",
+      "weight": 1.0,
+      "source": "patches_classweaponpatches_holsterdrawspeedpatch",
+      "target": "patches_classweaponpatches_holsterdrawspeedpatch_prefix",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -22626,9 +22668,9 @@
       "source_location": "L30",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "patches_menuclassidentitypatch_menuclassidentitypatch",
-      "target": "client_patches_menuclassidentitypatch_cs_coroutine",
-      "confidence_score": 1.0
+      "target": "client_patches_menuclassidentitypatch_cs_coroutine"
     },
     {
       "relation": "references",
@@ -41982,5 +42024,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "53c2fdc29f3284171aa84b0cdbb972572544daa6"
+  "built_at_commit": "c519a991ffb1c24af7d82e0018f8b474bed753b5"
 }
