@@ -319,30 +319,43 @@ internal class AimPunchPatch : ModulePatch
 }
 
 /// <summary>
-///     080 — 🔫 <b>Saque Rápido</b> (Caçador + Fuzileiro + Furtivo): sacar a arma do slot <b>HOLSTER</b> mais rápido.
-///     <b>CORRIGIDO (report do usuário: "não senti diferença ao sacar")</b>: o alvo antigo
-///     <c>GetWeaponDrawSpeedMultiplier</c> está VIVO, mas só é lido no <b>quickdraw-fast</b> (double-tap de troca com
-///     <c>FastSlotSelection</c>, arma do holster, fora de prone — Player.cs:10091 e :12648). O <b>saque NORMAL</b>
-///     (trocar de slot pela tecla) cai no ramo <c>else</c> de <c>SetAnimatorAndProceduralValues</c> (Player.cs:12661)
-///     e usa o CAMPO push-based <c>BuffInfo.SwapSpeed</c> (→ float <c>SpeedDraw</c> do animator) — que o patch antigo
-///     NÃO tocava. Migrado para o mesmo funil do 084/085: Prefix escala <c>BuffInfo.SwapSpeed ÷ t</c> antes do push
-///     (arma+corpo em lockstep), Postfix restaura. Cobre o saque comum do holster (o quickdraw-fast já é
-///     intrinsecamente rápido). Ref: [[reference_eft_reload_speed_getter_dead]] (mesma natureza push-based).
-///     <para>Gate: MainPlayer local (075) + classe (Caçador/Fuzileiro/Furtivo) + a arma nas mãos veio do slot
-///     HOLSTER (<c>Item.CurrentAddress.Container == Equipment[Holster]</c>). Coexiste com 084/085 no mesmo método:
-///     este mexe em <c>SwapSpeed</c>, eles em <c>ReloadSpeed</c> (campos distintos → sem conflito de <c>__state</c>).</para>
+///     080 — 🔫 <b>Saque Rápido</b> (Caçador + Fuzileiro + Furtivo): SACAR a arma do slot <b>HOLSTER</b> mais rápido.
+///     <b>CORRIGIDO 2× (087, report in-game: "acelerou a SAÍDA da pistola, não o saque")</b>. Diagnóstico do
+///     decompile: na troca de arma há DOIS controles independentes —
+///     <list type="bullet">
+///     <item><b>DRAW-IN</b> (sacar/trazer à mão): o <c>Animator.speed</c> GLOBAL, via o arg <c>animationSpeed</c> de
+///     <c>FirearmController.Spawn</c> (Player.cs:13495 → estado "SPAWN" via GClass2055). No vanilla é sempre <c>1f</c>
+///     — o saque NUNCA acelera por skill.</item>
+///     <item><b>PUT-AWAY</b> (guardar): o float <c>SpeedDraw</c> (= <c>SwapSpeed</c>), via
+///     <c>SetAnimatorAndProceduralValues</c>. A skill de arma só acelera ISTO.</item>
+///     </list>
+///     As tentativas anteriores (getter <c>GetWeaponDrawSpeedMultiplier</c> = só quickdraw-fast; escalar
+///     <c>SwapSpeed</c> = só put-away) mexeram no controle ERRADO. O ponto certo do saque é o <c>animationSpeed</c>
+///     do <c>Spawn</c>. Prova BSG: <c>GClass2949</c> (spawn) seta só <c>Animator.speed</c>; <c>GClass2944</c>
+///     (put-away) seta <c>SpeedDraw</c>.
+///     <para>
+///     ⚠️ <c>Animator.speed</c> é GLOBAL e NÃO é resetado ao fim do draw-in (no vanilla nunca incomoda porque Spawn
+///     sempre passa 1f). Se só escalássemos, a pistola dispararia/recarregaria/idle acelerada até a próxima troca.
+///     Por isso o <see cref="HolsterDrawResetPatch"/> restaura <c>speed = 1f</c> assim que o saque termina (no 1º
+///     <c>SetAnimatorAndProceduralValues</c> pós-Spawn = <c>GClass2055.WeaponAppeared</c>). Gate: MainPlayer local
+///     (075) + classe + a arma que ENTRA vem do Holster.
+///     </para>
 /// </summary>
 internal class HolsterDrawSpeedPatch : ModulePatch
 {
+    /// <summary>087: marca que o draw-in foi acelerado (Animator.speed global) → o <see cref="HolsterDrawResetPatch"/>
+    /// precisa restaurar 1f no fim do saque. Estático porque o boost (Spawn) e o reset (SetAnimator…) são métodos diferentes.</summary>
+    internal static bool BoostedDraw;
+
     protected override MethodBase GetTargetMethod()
     {
-        return AccessTools.Method(typeof(Player.FirearmController), "SetAnimatorAndProceduralValues");
+        // Spawn(float animationSpeed, Action callback) — desambigua pelos tipos (é override de AbstractHandsController).
+        return AccessTools.Method(typeof(Player.FirearmController), "Spawn", new[] { typeof(float), typeof(Action) });
     }
 
     [PatchPrefix]
-    private static void Prefix(Player.FirearmController __instance, out float __state)
+    private static void Prefix(Player.FirearmController __instance, ref float animationSpeed)
     {
-        __state = float.NaN;
         try
         {
             if (PerksConfig.QuickDrawEnabled?.Value != true)
@@ -360,11 +373,10 @@ internal class HolsterDrawSpeedPatch : ModulePatch
             var mainPlayer = Singleton<GameWorld>.Instance?.MainPlayer;
             if (mainPlayer == null || !ReferenceEquals(__instance, mainPlayer.HandsController))
             {
-                return;   // só a arma do player local (075)
+                return;   // só a arma do player local (075) — SpawnController seta HandsController ANTES de Spawn
             }
 
-            // Só quando a arma nas mãos veio do slot HOLSTER (pistola/secundária). CurrentAddress é o accessor
-            // SEGURO (o getter .Parent pode lançar). O item não sai do slot ao ser empunhado → Container = Holster.
+            // A arma que está ENTRANDO (sendo sacada) vem do slot HOLSTER? CurrentAddress é o accessor SEGURO.
             var holster = mainPlayer.Inventory?.Equipment?.GetSlot(EquipmentSlot.Holster);
             var container = __instance.Item?.CurrentAddress?.Container;
             if (holster == null || container == null || !ReferenceEquals(container, holster))
@@ -372,17 +384,11 @@ internal class HolsterDrawSpeedPatch : ModulePatch
                 return;
             }
 
-            var buff = __instance.BuffInfo;
-            if (buff == null)
-            {
-                return;
-            }
-
             var t = PerksConfig.QuickDrawTime?.Value ?? 1f;   // TEMPO de saque (0.8 = 20% mais rápido)
             if (t > 0f && t < 1f)
             {
-                __state = buff.SwapSpeed;
-                buff.SwapSpeed /= t;   // arma+corpo recebem draw ×(1/t) em lockstep (0.8 → ×1.25)
+                animationSpeed /= t;    // draw-in mais rápido (Animator.speed global do estado SPAWN; 0.8 → ×1.25)
+                BoostedDraw = true;     // marca p/ o reset restaurar 1f no fim do saque
             }
         }
         catch (Exception ex)
@@ -390,20 +396,44 @@ internal class HolsterDrawSpeedPatch : ModulePatch
             Plugin.Log?.LogError($"[CustomClasses] (080) quick draw (pre) falhou: {ex.Message}");
         }
     }
+}
+
+/// <summary>
+///     087 — parceiro do <see cref="HolsterDrawSpeedPatch"/>: restaura o <c>Animator.speed</c> GLOBAL para <c>1f</c>
+///     assim que o saque acelerado termina. O <c>Spawn</c> deixa o speed global elevado e NÃO o reseta; o 1º
+///     <c>SetAnimatorAndProceduralValues</c> após o Spawn roda em <c>GClass2055.WeaponAppeared</c> (fim do estado
+///     SPAWN / draw-in) — momento certo p/ zerar. Só age se o draw-in foi de fato acelerado (flag <c>BoostedDraw</c>)
+///     e no MainPlayer local. Sem isso, a pistola operaria acelerada (tiro/reload/idle) até a próxima troca. Espelha
+///     o vanilla observado (GClass2944 reseta <c>SetAnimationSpeed(1f)</c> no put-away).
+/// </summary>
+internal class HolsterDrawResetPatch : ModulePatch
+{
+    protected override MethodBase GetTargetMethod()
+    {
+        return AccessTools.Method(typeof(Player.FirearmController), "SetAnimatorAndProceduralValues");
+    }
 
     [PatchPostfix]
-    private static void Postfix(Player.FirearmController __instance, float __state)
+    private static void Postfix(Player.FirearmController __instance)
     {
         try
         {
-            if (!float.IsNaN(__state) && __instance.BuffInfo != null)
+            if (!HolsterDrawSpeedPatch.BoostedDraw)
             {
-                __instance.BuffInfo.SwapSpeed = __state;
+                return;
             }
+
+            if (!ReferenceEquals(__instance, Singleton<GameWorld>.Instance?.MainPlayer?.HandsController))
+            {
+                return;   // só o player local
+            }
+
+            __instance.FirearmsAnimator?.SetAnimationSpeed(1f);   // restaura o speed global pós draw-in (getter público)
+            HolsterDrawSpeedPatch.BoostedDraw = false;
         }
         catch (Exception ex)
         {
-            Plugin.Log?.LogError($"[CustomClasses] (080) quick draw (post) falhou: {ex.Message}");
+            Plugin.Log?.LogError($"[CustomClasses] (080) quick draw (reset) falhou: {ex.Message}");
         }
     }
 }
