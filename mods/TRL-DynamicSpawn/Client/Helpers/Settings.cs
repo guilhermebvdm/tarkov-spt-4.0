@@ -28,6 +28,11 @@ namespace TRLDynamicSpawn.Helpers
         public static ConfigEntry<bool> replaceDespawnedBots;
         public static ConfigEntry<bool> enableSpawnBubble;
 
+        public static ConfigEntry<bool> enableMapOverlay;
+        public static ConfigEntry<bool> showSafeZoneCircle;
+        public static ConfigEntry<bool> showSpawnBubbleCircle;
+        public static ConfigEntry<bool> showLoSCone;
+
         public static void Init(ConfigFile config)
         {
             string section = "Host Performance Caps";
@@ -90,6 +95,19 @@ namespace TRLDynamicSpawn.Helpers
             string bubbleSection = "Spawn Bubble Settings";
             enableSpawnBubble = config.Bind(bubbleSection, "Enable Spawn Bubble", true, 
                 new ConfigDescription("Forces Scavs and PMCs to spawn only within the radius of Despawn Distance from players, improving performance."));
+
+            string overlaySection = "Map Overlay (SPT-DynamicMaps)";
+            enableMapOverlay = config.Bind(overlaySection, "Enable Map Overlay", true, 
+                new ConfigDescription("Master toggle for visual circles and LoS cone overlay on SPT-DynamicMaps."));
+
+            showSafeZoneCircle = config.Bind(overlaySection, "Show Safe Zone Circle", true, 
+                new ConfigDescription("Displays the red inner Safe Zone circle around the player on the map."));
+
+            showSpawnBubbleCircle = config.Bind(overlaySection, "Show Spawn Bubble Circle", true, 
+                new ConfigDescription("Displays the cyan outer Spawn Bubble circle around the player on the map."));
+
+            showLoSCone = config.Bind(overlaySection, "Show LoS / FOV Cone", true, 
+                new ConfigDescription("Displays the yellow player Field of View (LoS) cone on the map."));
         }
 
         public static int GetMapCap(string mapId)

@@ -40,8 +40,9 @@ namespace TRLDynamicSpawn
             new TryToSpawnInZoneAndDelayPatch().Enable();
             new ChooseProfilePatch().Enable();
 
-            // Enable Despawn Manager Component
+            // Enable Despawn Manager & Map Overlay Components
             TRLDynamicSpawn.Components.BotDespawnManager.Enable();
+            TRLDynamicSpawn.Components.TRLMapBubbleOverlay.Enable();
         }
 
         private void Update()
