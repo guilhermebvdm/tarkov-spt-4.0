@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Visceral Combat</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <TargetFramework>netstandard2.1</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <LangVersion>12.0</LangVersion>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemGroup />
+  <ItemGroup>
+    <Reference Include="BepInEx" />
+    <Reference Include="UnityEngine.AssetBundleModule" />
+    <Reference Include="UnityEngine.CoreModule" />
+    <Reference Include="Assembly-CSharp" />
+    <Reference Include="UnityEngine.PhysicsModule" />
+    <Reference Include="Fika.Core" />
+    <Reference Include="spt-reflection" />
+    <Reference Include="UnityEngine.AnimationModule" />
+    <Reference Include="UnityEngine.DirectorModule" />
+    <Reference Include="UnityEngine.ParticleSystemModule" />
+    <Reference Include="UnityEngine.ClothModule" />
+    <Reference Include="UnityEngine.AIModule" />
+    <Reference Include="VolumetricBloodFX">
+      <HintPath>..\..\..\..\..\..\..\Drive\Google Drive\Users\Erick Saraiva\Downloads\Visceral Combat 3.7.0 (SPT 4.0 - Fika 2.2.6) (1)\BepInEx\plugins\VolumetricBloodFX.dll</HintPath>
+    </Reference>
+    <Reference Include="bsg.console.core" />
+    <Reference Include="Comfort" />
+    <Reference Include="Newtonsoft.Json" />
+    <Reference Include="0Harmony" />
+    <Reference Include="nexus-bundleloader" />
+    <Reference Include="AnimationSystem.Types" />
+  </ItemGroup>
+</Project>
