@@ -23,6 +23,11 @@ namespace TRLDynamicSpawn.Components
         private string _currentLocation;
         private static readonly Dictionary<string, float> _teleportCooldowns = new Dictionary<string, float>();
 
+        // Histórico de pontos de teleporte e alternância de BotZone
+        private static Queue<Vector3> _lastTeleportPositions = new Queue<Vector3>();
+        private static int _maxHistoryTeleportPoint = 6;
+        private static BotZone _lastTeleportZone;
+
         // Cache estático de reflexão para CR-01-01 (BotsGroup.Members)
         private static PropertyInfo _botsGroupMembersProp;
         private static FieldInfo _botsGroupMembersField;
@@ -60,15 +65,29 @@ namespace TRLDynamicSpawn.Components
                     continue;
                 }
 
-                float interval = 5f;
+                // Resolve a localização atual do jogador no início do ciclo
+                string loc = null;
+                if (Singleton<GameWorld>.Instantiated && Singleton<GameWorld>.Instance?.MainPlayer != null)
+                {
+                    loc = Singleton<GameWorld>.Instance.MainPlayer.Location?.ToLower();
+                }
+
+                if (!string.IsNullOrEmpty(loc) && _currentLocation != loc)
+                {
+                    _currentLocation = loc;
+                    _teleportCooldowns.Clear();
+                }
+
+                // Obter intervalo do mapa (Check Interval em segundos) configurado no servidor
+                float interval = 30f;
                 var currentMapSettings = MapNameHelper.GetMapSettings(_serverConfig, _currentLocation);
-                if (currentMapSettings != null && currentMapSettings.EnableDespawn)
+                if (currentMapSettings != null && currentMapSettings.EnableDespawn && currentMapSettings.DespawnInterval > 0)
                 {
                     interval = currentMapSettings.DespawnInterval;
                 }
-                
+
                 if (interval < 5f) interval = 5f;
-                
+
                 yield return new WaitForSeconds(interval);
 
                 try
@@ -76,7 +95,7 @@ namespace TRLDynamicSpawn.Components
                     // Ensure GameWorld exists
                     if (!Singleton<GameWorld>.Instantiated)
                         continue;
-                        
+
                     var gameWorld = Singleton<GameWorld>.Instance;
                     if (gameWorld == null)
                         continue;
@@ -84,23 +103,12 @@ namespace TRLDynamicSpawn.Components
                     // Ensure BotsController exists
                     if (!Singleton<IBotGame>.Instantiated)
                         continue;
-                        
+
                     var botGame = Singleton<IBotGame>.Instance;
                     var botsController = botGame?.BotsController;
                     if (botsController == null)
                         continue;
 
-                    // Get current location
-                    string loc = gameWorld.MainPlayer?.Location?.ToLower();
-                    if (string.IsNullOrEmpty(loc))
-                        continue;
-
-                    if (_currentLocation != loc)
-                    {
-                        _currentLocation = loc;
-                        _teleportCooldowns.Clear();
-                    }
-                    
                     var mapSettings = MapNameHelper.GetMapSettings(_serverConfig, _currentLocation);
                     if (mapSettings == null || !mapSettings.EnableDespawn)
                     {
@@ -126,18 +134,26 @@ namespace TRLDynamicSpawn.Components
                             alivePlayers.Add(p);
                         }
                     }
-                    
+
                     if (alivePlayers.Count == 0 && gameWorld.MainPlayer != null && !DynamicSpawnManager.IsHeadlessPlayer(gameWorld.MainPlayer))
                     {
                         alivePlayers.Add(gameWorld.MainPlayer);
                     }
-                    
+
                     if (alivePlayers.Count == 0)
                         continue;
 
-                    // Attempt despawning bots
-                    float despawnDist = mapSettings.DespawnDistance;
+                    // Distância da Bolha de Spawn para teletransporte:
+                    // Bots com distância < despawnDist (dentro da bolha/zona segura) NUNCA são teleportados.
+                    // Apenas bots com distância >= despawnDist (fora da bolha) são teleportados.
+                    float despawnDist = (float)mapSettings.SpawnBubbleDistance;
+                    if (despawnDist <= 0) despawnDist = 300f;
                     bool despawnPmcs = mapSettings.DespawnPMCs;
+
+                    if (TRLDynamicSpawn.Helpers.Settings.enableDebugLogs.Value)
+                    {
+                        Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Teleport Scan for '{_currentLocation}': Interval={interval}s, Bubble Radius={despawnDist}m, PMC Despawn={despawnPmcs}.");
+                    }
 
                     // Iterate backwards or use array to avoid collection modified
                     var allBots = botsController.Bots.BotOwners.ToArray();
@@ -151,7 +167,7 @@ namespace TRLDynamicSpawn.Components
                         string botId = DynamicSpawnManager.SanitizeMongoId(bot.Profile.Id);
                         if (processedInLoop.Contains(botId))
                             continue;
-                            
+
                         // Don't despawn special bots (bosses, followers, snipers, etc)
                         if (IsSpecialBot(bot))
                             continue;
@@ -167,6 +183,8 @@ namespace TRLDynamicSpawn.Components
                         {
                             if (human == null) continue;
                             float dist = Vector3.Distance(bot.Position, human.Position);
+                            
+                            // Se o bot estiver dentro da bolha (< despawnDist), ele NUNCA é teleportado
                             if (dist < despawnDist)
                             {
                                 canDespawn = false;
@@ -412,17 +430,36 @@ namespace TRLDynamicSpawn.Components
             float losDist = TRLDynamicSpawn.Helpers.Settings.losCullingDistance.Value;
             float heightLimit = (mapName == "factory4_day" || mapName == "factory4_night" || mapName == "sandbox" || mapName == "sandbox_high") ? 5.0f : 15.0f;
 
-            List<ISpawnPoint> validPoints = new List<ISpawnPoint>();
+            List<ISpawnPoint> strictPoints = new List<ISpawnPoint>();
+            List<ISpawnPoint> fallbackStrictPoints = new List<ISpawnPoint>();
+            List<ISpawnPoint> noBubblePoints = new List<ISpawnPoint>();
+            List<ISpawnPoint> fallbackNoBubblePoints = new List<ISpawnPoint>();
+
             Dictionary<ISpawnPoint, BotZone> pointToZoneMap = new Dictionary<ISpawnPoint, BotZone>();
 
-            foreach (var z in allZones)
+            // Prioriza BotZones diferentes da última zona teleportada (_lastTeleportZone)
+            var availableZones = allZones.Where(z => !z.SnipeZone && z.SpawnPoints != null && z.SpawnPoints.Length > 0).ToList();
+            var nonRecentZones = availableZones.Where(z => z != _lastTeleportZone).ToList();
+            if (nonRecentZones.Count > 0)
             {
-                if (z.SnipeZone) continue;
-                if (z.SpawnPoints == null) continue;
+                availableZones = nonRecentZones;
+            }
 
+            foreach (var z in availableZones)
+            {
                 foreach (var sp in z.SpawnPoints)
                 {
                     if (sp == null) continue;
+
+                    bool tooCloseToRecent = false;
+                    foreach (var recentPos in _lastTeleportPositions)
+                    {
+                        if (Vector3.Distance(sp.Position, recentPos) < 50f)
+                        {
+                            tooCloseToRecent = true;
+                            break;
+                        }
+                    }
 
                     bool insideBubble = false;
                     bool outsideSafe = true;
@@ -440,9 +477,7 @@ namespace TRLDynamicSpawn.Components
                             }
                         }
 
-                        if (!insideBubble) continue;
-
-                        // 2. Check Safe dist (Min dist)
+                        // 2. Check Safe dist (Min dist) - INVIOLÁVEL (100m)
                         foreach (var p in players)
                         {
                             float dx = p.Position.x - sp.Position.x;
@@ -459,9 +494,10 @@ namespace TRLDynamicSpawn.Components
                             }
                         }
 
+                        // OBRIGATÓRIO: Se o ponto estiver dentro da SafeZone (100m), descarta sumariamente!
                         if (!outsideSafe) continue;
 
-                        // 3. Check LoS
+                        // 3. Check LoS - INVIOLÁVEL
                         if (enableLos)
                         {
                             foreach (var p in players)
@@ -494,22 +530,46 @@ namespace TRLDynamicSpawn.Components
                             }
                         }
 
+                        // OBRIGATÓRIO: Se o ponto tiver visão direta (LoS), descarta sumariamente!
                         if (hasLoS) continue;
+                    }
+
+                    // Categorizar pontos que passaram 100% nas travas da SafeZone e LoS
+                    if (insideBubble)
+                    {
+                        if (tooCloseToRecent) fallbackStrictPoints.Add(sp);
+                        else strictPoints.Add(sp);
                     }
                     else
                     {
-                        // No players = valid anywhere
+                        if (tooCloseToRecent) fallbackNoBubblePoints.Add(sp);
+                        else noBubblePoints.Add(sp);
                     }
 
-                    // If it passed all filters, it's valid
-                    validPoints.Add(sp);
                     pointToZoneMap[sp] = z;
                 }
             }
 
-            if (validPoints.Count > 0)
+            // SELEÇÃO EM CASCATA COM MASTER FALLBACK EM ÚLTIMA INSTÂNCIA:
+            List<ISpawnPoint> chosenList = null;
+            if (strictPoints.Count > 0) chosenList = strictPoints;
+            else if (fallbackStrictPoints.Count > 0) chosenList = fallbackStrictPoints;
+            // MASTER FALLBACK: Somente acionado se NENHUM ponto na bolha funcionar!
+            else if (noBubblePoints.Count > 0)
             {
-                // Bias Direcional 100% Frontal (na direção onde o jogador está andando/olhando)
+                Plugin.LogSource.LogWarning("[TRL-DynamicSpawn] MASTER FALLBACK LEVEL 1 (Teleport): Selecting point outside bubble.");
+                chosenList = noBubblePoints;
+            }
+            else if (fallbackNoBubblePoints.Count > 0)
+            {
+                Plugin.LogSource.LogWarning("[TRL-DynamicSpawn] MASTER FALLBACK LEVEL 2 (Teleport): Selecting point outside bubble with history.");
+                chosenList = fallbackNoBubblePoints;
+            }
+
+            if (chosenList != null && chosenList.Count > 0)
+            {
+                // Bias Direcional 100% Frontal
+                ISpawnPoint selectedPoint = null;
                 if (players.Count > 0 && players[0] != null)
                 {
                     var mainPlayer = players[0];
@@ -517,7 +577,7 @@ namespace TRLDynamicSpawn.Components
                                            ? mainPlayer.MovementContext.Velocity.normalized
                                            : mainPlayer.LookDirection;
 
-                    var forwardPoints = validPoints.Where(sp =>
+                    var forwardPoints = chosenList.Where(sp =>
                     {
                         Vector3 dirToPoint = (sp.Position - mainPlayer.Position).normalized;
                         return Vector3.Dot(playerMoveDir, dirToPoint) > 0f;
@@ -525,15 +585,25 @@ namespace TRLDynamicSpawn.Components
 
                     if (forwardPoints.Count > 0)
                     {
-                        var chosenForward = forwardPoints[UnityEngine.Random.Range(0, forwardPoints.Count)];
-                        targetZone = pointToZoneMap[chosenForward];
-                        return chosenForward;
+                        selectedPoint = forwardPoints[UnityEngine.Random.Range(0, forwardPoints.Count)];
                     }
                 }
 
-                var chosen = validPoints[UnityEngine.Random.Range(0, validPoints.Count)];
-                targetZone = pointToZoneMap[chosen];
-                return chosen;
+                if (selectedPoint == null)
+                {
+                    selectedPoint = chosenList[UnityEngine.Random.Range(0, chosenList.Count)];
+                }
+
+                targetZone = pointToZoneMap[selectedPoint];
+                _lastTeleportZone = targetZone;
+
+                _lastTeleportPositions.Enqueue(selectedPoint.Position);
+                if (_lastTeleportPositions.Count > _maxHistoryTeleportPoint)
+                {
+                    _lastTeleportPositions.Dequeue();
+                }
+
+                return selectedPoint;
             }
 
             return null;

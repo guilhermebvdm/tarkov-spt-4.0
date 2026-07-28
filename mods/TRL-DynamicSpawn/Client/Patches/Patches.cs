@@ -660,23 +660,19 @@ namespace TRLDynamicSpawn.Patches
 
                 List<ISpawnPoint> chosenList = null;
                 if (strictPoints.Count > 0) chosenList = strictPoints;
+                else if (fallbackStrictPoints.Count > 0) chosenList = fallbackStrictPoints;
                 else if (noLosPoints.Count > 0) chosenList = noLosPoints;
-                // noBubblePoints: só aceita se a bolha estiver desabilitada (bug #1 fix)
-                else if (!isBubbleEnabled && noBubblePoints.Count > 0) chosenList = noBubblePoints;
-                else if (fallbackStrictPoints.Count > 0)
-                {
-                    Plugin.LogSource.LogWarning($"[TRL-DynamicSpawn] Fallback: Ignored _maxHistorySpawnPoint rule in {botZone.NameZone} to find a safe point.");
-                    chosenList = fallbackStrictPoints;
-                }
                 else if (fallbackNoLosPoints.Count > 0) chosenList = fallbackNoLosPoints;
-                // fallbackNoBubblePoints: só aceita se a bolha estiver desabilitada (bug #1 fix)
-                else if (!isBubbleEnabled && fallbackNoBubblePoints.Count > 0) chosenList = fallbackNoBubblePoints;
-                else if (isBubbleEnabled)
+                // MASTER FALLBACK: Acionado APENAS em última instância se nenhum ponto na bolha funcionar!
+                else if (noBubblePoints.Count > 0)
                 {
-                    // Bolha ativa mas nenhum ponto dentro dela nesta zona — não forçar spawn fora da bolha.
-                    // Deixar pointsToSpawn null: o SPT usará o ponto default da zona, que é menos grave do que spawnar a 600m+.
-                    if (TRLDynamicSpawn.Helpers.Settings.enableDebugLogs.Value)
-                        Plugin.LogSource.LogWarning($"[TRL-DynamicSpawn] SpawnBubble: No in-bubble points found in {botZone.NameZone}. Skipping point override.");
+                    Plugin.LogSource.LogWarning($"[TRL-DynamicSpawn] MASTER FALLBACK LEVEL 1: Spawning outside bubble in {botZone.NameZone} to prevent spawn drop.");
+                    chosenList = noBubblePoints;
+                }
+                else if (fallbackNoBubblePoints.Count > 0)
+                {
+                    Plugin.LogSource.LogWarning($"[TRL-DynamicSpawn] MASTER FALLBACK LEVEL 2: Spawning outside bubble with history in {botZone.NameZone}.");
+                    chosenList = fallbackNoBubblePoints;
                 }
 
                 if (chosenList != null && chosenList.Count > 0)

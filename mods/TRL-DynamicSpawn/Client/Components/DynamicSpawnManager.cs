@@ -190,135 +190,96 @@ namespace TRLDynamicSpawn.Components
 
         private IEnumerator SpawnHordeLoop()
         {
-            int attempt = 1;
+            // 1. Janela Vanilla Inicial (0s a 60s / DelayBeforeFirstWave)
             IsWarmupActive = true;
 
+            string mapName = GetCurrentMapName();
+            var mapSettings = MapNameHelper.GetMapSettings(_serverConfig, mapName);
+            int initialDelay = (_serverConfig?.MapTimers != null && _serverConfig.MapTimers.ContainsKey("global"))
+                ? _serverConfig.MapTimers["global"].DelayBeforeFirstWave
+                : 60;
+
+            // Garantir o mínimo de 60s para permitir a janela vanilla inicial
+            if (initialDelay < 60) initialDelay = 60;
+            _delayBeforeFirstWave = initialDelay;
+
+            Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Initial Vanilla Window active. Waiting {_delayBeforeFirstWave}s before taking control...");
+            _nextWaveTime = Time.time + _delayBeforeFirstWave;
+
+            yield return new WaitForSeconds(_delayBeforeFirstWave);
+
+            // 2. Trava do Spawn Vanilla após os 60s iniciais
+            IsWarmupActive = false;
+            Plugin.LogSource.LogInfo("[TRL-DynamicSpawn] Initial 60s elapsed. Vanilla normal spawns LOCKED. DynamicSpawn taking 100% control.");
+
+            // 3. Loop Contínuo do Mod (Warmup de 30s <-> Cooldown de 600s)
             while (true)
             {
                 string currentMap = GetCurrentMapName();
                 int maxCap = Settings.GetMapCap(currentMap);
                 int aliveBots = _botsController.AliveAndLoadingBotsCount;
-                
-                // Se não é a primeira tentativa e já batemos o limite, termina o warmup
-                if (attempt > 1 && aliveBots >= maxCap)
-                {
-                    Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Max cap reached ({aliveBots}/{maxCap}) after {attempt - 1} warmup attempts. Finishing warmup.");
-                    break;
-                }
-
-                if (attempt == 1)
-                {
-                    Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Waiting {_delayBeforeFirstWave}s for initial warmup (Attempt 1)...");
-                    _nextWaveTime = Time.time + _delayBeforeFirstWave;
-                    
-                    float wait = Mathf.Max(1f, _delayBeforeFirstWave - 1f);
-                    yield return new WaitForSeconds(wait);
-                    ClearSptQueue();
-                    yield return new WaitForSeconds(1f);
-
-                    if (_activeWaveCoroutine != null) StopCoroutine(_activeWaveCoroutine);
-                    _activeWaveCoroutine = StartCoroutine(ProcessWave(true));
-
-                    attempt++;
-                }
-                else
-                {
-                    int retryInterval = 30;
-                    Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Max cap not reached yet ({aliveBots}/{maxCap}). Retrying warmup wave in {retryInterval}s (Attempt {attempt})...");
-                    _nextWaveTime = Time.time + retryInterval;
-
-                    bool earlyCapReached = false;
-                    for (int elapsed = 0; elapsed < retryInterval; elapsed++)
-                    {
-                        yield return new WaitForSeconds(1f);
-                        currentMap = GetCurrentMapName();
-                        maxCap = Settings.GetMapCap(currentMap);
-                        aliveBots = _botsController.AliveAndLoadingBotsCount;
-
-                        if (aliveBots >= maxCap)
-                        {
-                            Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Max cap reached early during warmup ({aliveBots}/{maxCap}) at {elapsed + 1}s. Finishing warmup.");
-                            earlyCapReached = true;
-                            break;
-                        }
-                    }
-
-                    if (earlyCapReached)
-                    {
-                        break;
-                    }
-
-                    ClearSptQueue();
-                    yield return new WaitForSeconds(1f);
-
-                    if (_activeWaveCoroutine != null) StopCoroutine(_activeWaveCoroutine);
-                    _activeWaveCoroutine = StartCoroutine(ProcessWave(true));
-
-                    attempt++;
-                }
-            }
-
-            IsWarmupActive = false;
-
-            while (true)
-            {
-                string currentMap = GetCurrentMapName();
                 _secondsBetweenWaves = GetSecondsBetweenWavesForMap(currentMap);
 
-                Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Cooldown active. Next fill check for map '{currentMap}' in {_secondsBetweenWaves}s...");
-                _nextWaveTime = Time.time + _secondsBetweenWaves;
-                
-                float waitNormal = Mathf.Max(1f, _secondsBetweenWaves);
-                yield return new WaitForSeconds(waitNormal);
-
-                // Loop para continuar batendo na porta de 30 em 30 seg até encher 100% do mapa (Top-Off)
-                int topOffAttempt = 1;
-                while (true)
+                // ESTÁGIO A: Se o mapa precisa de bots, roda o Warmup de 30 em 30 segundos
+                if (aliveBots < maxCap)
                 {
-                    currentMap = GetCurrentMapName();
-                    int maxCap = Settings.GetMapCap(currentMap);
-                    int aliveBots = _botsController.AliveAndLoadingBotsCount;
-                    
-                    if (aliveBots >= maxCap)
+                    int warmupAttempt = 1;
+                    while (true)
                     {
-                        Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Map is 100% full ({aliveBots}/{maxCap}). Resuming {_secondsBetweenWaves}s cooldown.");
-                        break;
-                    }
-
-                    int topOffInterval = 30;
-                    Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Map needs bots ({aliveBots}/{maxCap}). Dispatching fill wave in {topOffInterval}s loop (Attempt {topOffAttempt})...");
-                    
-                    ClearSptQueue();
-                    yield return new WaitForSeconds(1f);
-
-                    if (_activeWaveCoroutine != null) StopCoroutine(_activeWaveCoroutine);
-                    _activeWaveCoroutine = StartCoroutine(ProcessWave(false));
-
-                    _nextWaveTime = Time.time + topOffInterval;
-
-                    bool topOffCapReached = false;
-                    for (int elapsed = 0; elapsed < topOffInterval; elapsed++)
-                    {
+                        // Limpa qualquer perfil preso/pendente na fila do SPT antes de contar os bots
+                        ClearSptQueue();
                         yield return new WaitForSeconds(1f);
+
                         currentMap = GetCurrentMapName();
                         maxCap = Settings.GetMapCap(currentMap);
                         aliveBots = _botsController.AliveAndLoadingBotsCount;
 
                         if (aliveBots >= maxCap)
                         {
-                            Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Max cap reached early during top-off ({aliveBots}/{maxCap}) at {elapsed + 1}s. Resuming {_secondsBetweenWaves}s cooldown.");
-                            topOffCapReached = true;
+                            Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Map is 100% full ({aliveBots}/{maxCap}). Stopping 30s Warmup loop.");
                             break;
                         }
-                    }
 
-                    if (topOffCapReached)
-                    {
-                        break;
-                    }
+                        int warmupInterval = 30;
+                        Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Map needs bots ({aliveBots}/{maxCap}). Triggering 30s Warmup Wave (Attempt {warmupAttempt})...");
 
-                    topOffAttempt++;
+                        if (_activeWaveCoroutine != null) StopCoroutine(_activeWaveCoroutine);
+                        _activeWaveCoroutine = StartCoroutine(ProcessWave(false));
+
+                        _nextWaveTime = Time.time + warmupInterval;
+
+                        bool capReached = false;
+                        for (int elapsed = 0; elapsed < warmupInterval; elapsed++)
+                        {
+                            yield return new WaitForSeconds(1f);
+                            currentMap = GetCurrentMapName();
+                            maxCap = Settings.GetMapCap(currentMap);
+                            aliveBots = _botsController.AliveAndLoadingBotsCount;
+
+                            if (aliveBots >= maxCap)
+                            {
+                                Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Max cap reached early ({aliveBots}/{maxCap}) at {elapsed + 1}s during Warmup.");
+                                capReached = true;
+                                break;
+                            }
+                        }
+
+                        if (capReached) break;
+                        warmupAttempt++;
+                    }
                 }
+
+                // ESTÁGIO B: Mapa 100% cheio -> Entra no Cooldown Longo (SecondsBetweenWaves, ex: 600s)
+                currentMap = GetCurrentMapName();
+                maxCap = Settings.GetMapCap(currentMap);
+                aliveBots = _botsController.AliveAndLoadingBotsCount;
+                _secondsBetweenWaves = GetSecondsBetweenWavesForMap(currentMap);
+
+                Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Map is 100% full ({aliveBots}/{maxCap}). Wave Cooldown active for '{currentMap}'. Next Warmup check in {_secondsBetweenWaves}s...");
+                _nextWaveTime = Time.time + _secondsBetweenWaves;
+
+                float waitNormal = Mathf.Max(1f, _secondsBetweenWaves);
+                yield return new WaitForSeconds(waitNormal);
             }
         }
 
