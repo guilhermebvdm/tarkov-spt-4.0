@@ -617,6 +617,26 @@ namespace TRLDynamicSpawn.Components
                         
                         if (roughZones.Count > 0)
                         {
+                            // Bias Direcional 100% Frontal na seleção de ondas (na direção onde o jogador está andando/olhando)
+                            Player mainPlayer = _gameWorld.MainPlayer;
+                            if (mainPlayer != null)
+                            {
+                                Vector3 moveDir = (mainPlayer.MovementContext != null && mainPlayer.MovementContext.Velocity.sqrMagnitude > 0.1f)
+                                                  ? mainPlayer.MovementContext.Velocity.normalized
+                                                  : mainPlayer.LookDirection;
+
+                                var forwardZones = roughZones.Where(z =>
+                                {
+                                    Vector3 dirToZone = (z.transform.position - mainPlayer.Position).normalized;
+                                    return Vector3.Dot(moveDir, dirToZone) > 0f;
+                                }).ToList();
+
+                                if (forwardZones.Count > 0)
+                                {
+                                    roughZones = forwardZones;
+                                }
+                            }
+
                             var filteredZones = roughZones.Where(z => z != _lastSelectedZone).ToList();
                             if (filteredZones.Count == 0)
                             {

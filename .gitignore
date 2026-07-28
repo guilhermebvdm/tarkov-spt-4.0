@@ -70,6 +70,9 @@ references/fika-server/
 references/fika-plugin/
 references/fika-headless/
 
+# DrakiaXYZ BigBrain source - vendored read-only reference
+references/spt-bigbrain/
+
 # EFT decompiled dump — 8.683 arquivos (~53 MB), gerado por scripts/decompile-eft.sh a partir
 # da Assembly-CSharp.dll do jogo instalado. NÃO é re-fetchável sem o jogo (ver references/README.md).
 # O que fica VERSIONADO ao lado (não ignorar!): types-index.json, .provenance.json, README.md —

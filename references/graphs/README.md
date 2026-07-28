@@ -12,6 +12,7 @@ Grafos de conhecimento extraídos por [graphify](https://github.com/safishamsi/g
 | `eft-decompiled/` | `references/eft-decompiled/Assembly-CSharp/` | grafo do cliente EFT decompilado (~58k nós) |
 | `fika-plugin/`, `fika-server/`, `fika-headless/` | `references/fika-*/` | grafos do FIKA |
 | `spt-source/` | `references/spt-source/` | grafo do servidor SPT |
+| `spt-bigbrain/` | `references/spt-bigbrain/` | grafo do mod DrakiaXYZ-BigBrain |
 
 Cada pasta tem `graph.json` (dados, consumido pelo MCP e pela CLI), `GRAPH_REPORT.md` (resumo legível: comunidades, hubs) e — só para grafos pequenos — `graph.html` (visualização). O `update-graphs.sh` **não versiona `graph.html` acima de 1.5MB** (gere local com `graphify` se precisar da visualização de um grafo grande).
 

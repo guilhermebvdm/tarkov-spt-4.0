@@ -109,6 +109,23 @@
       "vendoredAt": "2026-07-20",
       "license": "GPL-3.0",
       "note": "Fonte original da rnnoise.dll usada pelo SpeakFromTarkov. Implementação baseada no Xiph RNNoise mas empacotada como VST/Standalone. Útil para verificar assinaturas de funções e comportamento de gate/VAD nativo."
+    },
+    {
+      "id": "spt-bigbrain",
+      "path": "references/spt-bigbrain",
+      "role": "client-mod-reference",
+      "tier": 2,
+      "fetch": true,
+      "tracked": false,
+      "upstream": "https://github.com/DrakiaXYZ/SPT-BigBrain.git",
+      "pin": { "type": "commit", "ref": "9a44f045bc6775cf7584984ada1df12b86d2c039" },
+      "branch": "master",
+      "lfs": false,
+      "stripGit": false,
+      "modVersion": "1.4.0",
+      "vendoredAt": "2026-07-28",
+      "license": "MIT (© DrakiaXYZ)",
+      "note": "Código do mod/framework DrakiaXYZ-BigBrain (plugin client BepInEx) vendorizado como referência para injeção e controle de inteligência artificial/brains de bots no SPT. Pin 9a44f04 = tag v1.4.0."
     }
   ]
 }

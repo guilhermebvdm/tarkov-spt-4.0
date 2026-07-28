@@ -20,9 +20,13 @@ namespace TRLDynamicSpawn.Components
         private Coroutine _despawnRoutine;
         private TRLConfig _serverConfig;
         
-        // This keeps track of our current map and if it has despawn enabled.
         private string _currentLocation;
         private static readonly Dictionary<string, float> _teleportCooldowns = new Dictionary<string, float>();
+
+        // Cache estático de reflexão para CR-01-01 (BotsGroup.Members)
+        private static PropertyInfo _botsGroupMembersProp;
+        private static FieldInfo _botsGroupMembersField;
+        private static bool _botsGroupMembersReflectionDone = false;
 
         public static void Enable()
         {
@@ -505,12 +509,71 @@ namespace TRLDynamicSpawn.Components
 
             if (validPoints.Count > 0)
             {
+                // Bias Direcional 100% Frontal (na direção onde o jogador está andando/olhando)
+                if (players.Count > 0 && players[0] != null)
+                {
+                    var mainPlayer = players[0];
+                    Vector3 playerMoveDir = (mainPlayer.MovementContext != null && mainPlayer.MovementContext.Velocity.sqrMagnitude > 0.1f)
+                                           ? mainPlayer.MovementContext.Velocity.normalized
+                                           : mainPlayer.LookDirection;
+
+                    var forwardPoints = validPoints.Where(sp =>
+                    {
+                        Vector3 dirToPoint = (sp.Position - mainPlayer.Position).normalized;
+                        return Vector3.Dot(playerMoveDir, dirToPoint) > 0f;
+                    }).ToList();
+
+                    if (forwardPoints.Count > 0)
+                    {
+                        var chosenForward = forwardPoints[UnityEngine.Random.Range(0, forwardPoints.Count)];
+                        targetZone = pointToZoneMap[chosenForward];
+                        return chosenForward;
+                    }
+                }
+
                 var chosen = validPoints[UnityEngine.Random.Range(0, validPoints.Count)];
                 targetZone = pointToZoneMap[chosen];
                 return chosen;
             }
 
             return null;
+        }
+
+        private static void SafeResetBotForTeleport(BotOwner bot)
+        {
+            if (bot == null || bot.GetPlayer == null || bot.HealthController == null || !bot.HealthController.IsAlive)
+                return;
+
+            // 1. Limpeza cirúrgica do alvo ativo de combate (GoalEnemy e tiro/mira)
+            try
+            {
+                if (bot.Memory != null)
+                {
+                    bot.Memory.GoalEnemy = null;
+                    WipeMemoryResidue(bot.Memory);
+                    bot.Memory.LastTimeHit = -1000f;
+                }
+                bot.ShootData?.EndShoot();
+                if (bot.AimingManager?.CurrentAiming != null)
+                {
+                    bot.AimingManager.CurrentAiming.LoseTarget();
+                }
+            }
+            catch { }
+
+            // 2. Parar navegação física antiga no NavMesh
+            try
+            {
+                bot.Mover?.Stop();
+            }
+            catch { }
+
+            // 3. Forçar a reconvocação de patrulha nativa na nova BotZone
+            try
+            {
+                ForceBackToPatrol(bot);
+            }
+            catch { }
         }
 
         private List<BotOwner> GetGroupMembers(BotOwner bot)
@@ -521,17 +584,22 @@ namespace TRLDynamicSpawn.Components
 
             members.Add(bot);
 
-            // 1. Tentar obter membros através do BotsGroup
+            // 1. Tentar obter membros através do BotsGroup (com cache estático de reflexão CR-01-01)
             if (bot.BotsGroup != null)
             {
                 try
                 {
-                    var propInfo = bot.BotsGroup.GetType().GetProperty("Members", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-                    var fieldInfo = bot.BotsGroup.GetType().GetField("Members", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                    if (!_botsGroupMembersReflectionDone)
+                    {
+                        var bgType = bot.BotsGroup.GetType();
+                        _botsGroupMembersProp = bgType.GetProperty("Members", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                        _botsGroupMembersField = bgType.GetField("Members", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                        _botsGroupMembersReflectionDone = true;
+                    }
 
                     System.Collections.IEnumerable groupList = null;
-                    if (propInfo != null) groupList = propInfo.GetValue(bot.BotsGroup) as System.Collections.IEnumerable;
-                    else if (fieldInfo != null) groupList = fieldInfo.GetValue(bot.BotsGroup) as System.Collections.IEnumerable;
+                    if (_botsGroupMembersProp != null) groupList = _botsGroupMembersProp.GetValue(bot.BotsGroup) as System.Collections.IEnumerable;
+                    else if (_botsGroupMembersField != null) groupList = _botsGroupMembersField.GetValue(bot.BotsGroup) as System.Collections.IEnumerable;
 
                     if (groupList != null)
                     {
@@ -645,38 +713,15 @@ namespace TRLDynamicSpawn.Components
                     Vector3 offset = (i == 0) ? Vector3.zero : new Vector3(UnityEngine.Random.Range(-1.5f, 1.5f), 0f, UnityEngine.Random.Range(-1.5f, 1.5f));
                     Vector3 targetPos = spawnPoint.Position + offset;
 
-                    if (m.Memory != null)
-                    {
-                        m.Memory.GoalEnemy = null;
-                        WipeMemoryResidue(m.Memory);
-
-                        if (m.BotsGroup != null && m.BotsGroup.Enemies != null)
-                        {
-                            var enemyList = m.BotsGroup.Enemies.Keys.ToList();
-                            foreach (var enemy in enemyList)
-                            {
-                                if (enemy != null)
-                                {
-                                    m.BotsGroup.RemoveEnemy(enemy);
-                                    m.Memory.DeleteInfoAboutEnemy(enemy);
-                                }
-                            }
-                        }
-                        m.Memory.LastTimeHit = -1000f;
-                    }
-
-                    m.ShootData?.EndShoot();
-                    if (m.AimingManager?.CurrentAiming != null)
-                    {
-                        m.AimingManager.CurrentAiming.LoseTarget();
-                    }
-
+                    // Teleporta fisicamente o bot para a nova posição no NavMesh
                     m.GetPlayer.Teleport(targetPos, true);
+
+                    // Reset de segurança defensivo da mente/combate do bot
+                    SafeResetBotForTeleport(m);
 
                     string mId = DynamicSpawnManager.SanitizeMongoId(m.Profile.Id);
                     _teleportCooldowns[mId] = Time.time;
 
-                    ForceBackToPatrol(m);
                     teleportedList.Add(m);
                 }
             }

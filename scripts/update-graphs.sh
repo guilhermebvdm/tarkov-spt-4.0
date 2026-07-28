@@ -26,11 +26,16 @@ cd "$REPO_ROOT"
 # graphify lives in ~/.local/bin when installed via `uv tool install graphifyy`
 export PATH="$HOME/.local/bin:$PATH"
 
-if ! command -v graphify >/dev/null 2>&1; then
-  echo "❌ graphify não encontrado no PATH."
-  echo "   Instale com: python -m pip install --user uv && python -m uv tool install graphifyy"
-  echo "   (binários vão para ~/.local/bin — rode 'python -m uv tool update-shell' uma vez)"
-  exit 1
+GRAPHIFY_CMD="graphify"
+if ! command -v graphify >/dev/null 2>&1 || ! graphify --version >/dev/null 2>&1; then
+  if command -v uv >/dev/null 2>&1; then
+    GRAPHIFY_CMD="uv tool run --from graphifyy graphify"
+  else
+    echo "❌ graphify não encontrado no PATH."
+    echo "   Instale com: python -m pip install --user uv && python -m uv tool install graphifyy"
+    echo "   (binários vão para ~/.local/bin — rode 'python -m uv tool update-shell' uma vez)"
+    exit 1
+  fi
 fi
 
 GRAPHS_DIR="references/graphs"
@@ -45,7 +50,7 @@ scope() {
   fi
   echo "▶ $id ($path)"
   local result
-  result="$(graphify update "$path" 2>&1 | grep -E "Rebuilt|No code" || true)"
+  result="$($GRAPHIFY_CMD update "$path" 2>&1 | grep -E "Rebuilt|No code" || true)"
   echo "$result"
   if echo "$result" | grep -qE "Rebuilt: 0 nodes|No code files found"; then
     echo "⏭️  $id — sem código-fonte (mod binário/configs?), pulando publicação."
@@ -103,10 +108,11 @@ matches "fika-plugin"    && { scope "fika-plugin"    "references/fika-plugin";  
 matches "fika-server"    && { scope "fika-server"    "references/fika-server";    RAN=1; }
 matches "fika-headless"  && { scope "fika-headless"  "references/fika-headless";  RAN=1; }
 matches "spt-source"     && { scope "spt-source"     "references/spt-source";     RAN=1; }
+matches "spt-bigbrain"   && { scope "spt-bigbrain"   "references/spt-bigbrain";   RAN=1; }
 
 if [ "$RAN" = "0" ]; then
   echo "❌ Escopo '$FILTER' não encontrado. Use um nome de mod (pasta em mods/) ou:"
-  echo "   eft-decompiled · fika-plugin · fika-server · fika-headless · spt-source"
+  echo "   eft-decompiled · fika-plugin · fika-server · fika-headless · spt-source · spt-bigbrain"
   exit 1
 fi
 
