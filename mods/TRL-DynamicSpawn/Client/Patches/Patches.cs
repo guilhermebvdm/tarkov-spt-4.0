@@ -523,12 +523,8 @@ namespace TRLDynamicSpawn.Patches
                 if (gameWorld == null) return true;
                 string mapName = gameWorld.MainPlayer?.Location?.ToLower() ?? "";
 
-                double safeDist = 30.0;
-                if (TRLDynamicSpawn.Components.DynamicSpawnManager.Instance != null && TRLDynamicSpawn.Components.DynamicSpawnManager.Instance.ServerConfig != null)
-                {
-                    var cfg = TRLDynamicSpawn.Components.DynamicSpawnManager.Instance.ServerConfig;
-                    safeDist = cfg.MapConfigs?.ContainsKey(mapName) == true ? cfg.MapConfigs[mapName].SafeZoneDistance : (mapName.Contains("factory") || mapName.Contains("sandbox") || mapName.Contains("laboratory") ? 15.0 : 30.0);
-                }
+                var mapSettings = TRLDynamicSpawn.Components.DynamicSpawnManager.Instance != null ? MapNameHelper.GetMapSettings(TRLDynamicSpawn.Components.DynamicSpawnManager.Instance.ServerConfig, mapName) : null;
+                double safeDist = mapSettings != null ? mapSettings.SafeZoneDistance : (mapName.Contains("factory") || mapName.Contains("sandbox") || mapName.Contains("laboratory") ? 15.0 : 30.0);
 
                 bool enableLos = TRLDynamicSpawn.Helpers.Settings.enableLoSCulling.Value;
                 float losDist = TRLDynamicSpawn.Helpers.Settings.losCullingDistance.Value;
@@ -557,14 +553,10 @@ namespace TRLDynamicSpawn.Patches
                 float maxDist = 300f;
                 bool isBubbleEnabled = TRLDynamicSpawn.Helpers.Settings.enableSpawnBubble.Value;
 
-                if (TRLDynamicSpawn.Components.DynamicSpawnManager.Instance != null && TRLDynamicSpawn.Components.DynamicSpawnManager.Instance.ServerConfig != null)
+                if (mapSettings != null)
                 {
-                    var cfg = TRLDynamicSpawn.Components.DynamicSpawnManager.Instance.ServerConfig;
-                    if (cfg.MapConfigs?.TryGetValue(mapName, out var mapSettings) == true)
-                    {
-                        isBubbleEnabled = isBubbleEnabled && mapSettings.EnableSpawnBubble;
-                        maxDist = mapSettings.SpawnBubbleDistance;
-                    }
+                    isBubbleEnabled = isBubbleEnabled && mapSettings.EnableSpawnBubble;
+                    maxDist = mapSettings.SpawnBubbleDistance;
                 }
 
                 foreach (var checkPoint in allPoints)
@@ -669,14 +661,23 @@ namespace TRLDynamicSpawn.Patches
                 List<ISpawnPoint> chosenList = null;
                 if (strictPoints.Count > 0) chosenList = strictPoints;
                 else if (noLosPoints.Count > 0) chosenList = noLosPoints;
-                else if (noBubblePoints.Count > 0) chosenList = noBubblePoints;
+                // noBubblePoints: só aceita se a bolha estiver desabilitada (bug #1 fix)
+                else if (!isBubbleEnabled && noBubblePoints.Count > 0) chosenList = noBubblePoints;
                 else if (fallbackStrictPoints.Count > 0)
                 {
                     Plugin.LogSource.LogWarning($"[TRL-DynamicSpawn] Fallback: Ignored _maxHistorySpawnPoint rule in {botZone.NameZone} to find a safe point.");
                     chosenList = fallbackStrictPoints;
                 }
                 else if (fallbackNoLosPoints.Count > 0) chosenList = fallbackNoLosPoints;
-                else chosenList = fallbackNoBubblePoints;
+                // fallbackNoBubblePoints: só aceita se a bolha estiver desabilitada (bug #1 fix)
+                else if (!isBubbleEnabled && fallbackNoBubblePoints.Count > 0) chosenList = fallbackNoBubblePoints;
+                else if (isBubbleEnabled)
+                {
+                    // Bolha ativa mas nenhum ponto dentro dela nesta zona — não forçar spawn fora da bolha.
+                    // Deixar pointsToSpawn null: o SPT usará o ponto default da zona, que é menos grave do que spawnar a 600m+.
+                    if (TRLDynamicSpawn.Helpers.Settings.enableDebugLogs.Value)
+                        Plugin.LogSource.LogWarning($"[TRL-DynamicSpawn] SpawnBubble: No in-bubble points found in {botZone.NameZone}. Skipping point override.");
+                }
 
                 if (chosenList != null && chosenList.Count > 0)
                 {

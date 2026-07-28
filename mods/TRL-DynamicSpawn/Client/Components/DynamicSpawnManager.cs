@@ -166,9 +166,10 @@ namespace TRLDynamicSpawn.Components
         private int GetSecondsBetweenWavesForMap(string mapName)
         {
             int seconds = 360;
-            if (_serverConfig?.MapConfigs != null && _serverConfig.MapConfigs.ContainsKey(mapName) && _serverConfig.MapConfigs[mapName].SecondsBetweenWaves > 0)
+            var mapSettings = MapNameHelper.GetMapSettings(_serverConfig, mapName);
+            if (mapSettings != null && mapSettings.SecondsBetweenWaves > 0)
             {
-                seconds = _serverConfig.MapConfigs[mapName].SecondsBetweenWaves;
+                seconds = mapSettings.SecondsBetweenWaves;
             }
             else if (_serverConfig?.MapTimers != null && _serverConfig.MapTimers.ContainsKey("global") && _serverConfig.MapTimers["global"].SecondsBetweenWaves > 0)
             {
@@ -493,7 +494,8 @@ namespace TRLDynamicSpawn.Components
                 GenerateAndEnqueueGroups(WildSpawnType.pmcBEAR, BotDifficulty.normal, bearSlots, eliteConfig?.Bear);
                 
                 int sniperCount = 0;
-                int mapSniperChance = _serverConfig?.MapConfigs?.ContainsKey(mapName) == true ? _serverConfig.MapConfigs[mapName].SniperChance : 30;
+                var currentMapSettings = MapNameHelper.GetMapSettings(_serverConfig, mapName);
+                int mapSniperChance = currentMapSettings != null ? currentMapSettings.SniperChance : 30;
                 if (isFirstWave && UnityEngine.Random.Range(1, 101) <= mapSniperChance && normalScavSlots > 0)
                 {
                     sniperCount = 1;
@@ -591,7 +593,8 @@ namespace TRLDynamicSpawn.Components
                     {
                         var nonSnipeZones = LocationScene.GetAllObjects<BotZone>().Where(z => !z.SnipeZone).ToList();
                         float maxDistBuffer = 300f + 50f; // Bubble default + margem (REDUZIDO de 250 para 50 para evitar zonas fora da bolha)
-                        if (_serverConfig?.MapConfigs?.TryGetValue(mapName, out var mapSettings) == true)
+                        var mapSettings = MapNameHelper.GetMapSettings(_serverConfig, mapName);
+                        if (mapSettings != null)
                         {
                             maxDistBuffer = mapSettings.SpawnBubbleDistance + 50f;
                         }
@@ -620,7 +623,20 @@ namespace TRLDynamicSpawn.Components
                                 // Fallback: Apenas 1 zona válida na bolha
                                 filteredZones = roughZones;
                             }
-                            selectedZone = filteredZones[UnityEngine.Random.Range(0, filteredZones.Count)];
+
+                            // Bug #2 fix: validar zona com IsValidSpawnZone (checa bolha precisa no centro da zona)
+                            var rngZone = new System.Random();
+                            BotZone validatedZone = null;
+                            foreach (var candidate in filteredZones.OrderBy(_ => rngZone.Next()))
+                            {
+                                if (IsValidSpawnZone(candidate, mapName, gData.Role))
+                                {
+                                    validatedZone = candidate;
+                                    break;
+                                }
+                            }
+                            // Se nenhuma passou na validação rigorosa, usa a primeira da lista (já está dentro do buffer da bolha)
+                            selectedZone = validatedZone ?? filteredZones[0];
                             _lastSelectedZone = selectedZone;
                         }
                         else
@@ -633,14 +649,7 @@ namespace TRLDynamicSpawn.Components
 
                 if (selectedZone != null)
                 {
-                    var spawnTask = DirectSpawnBots(gData.Role, gData.Difficulty, gData.GroupSize, selectedZone);
-                    float timeout = Time.time + 15f; // Máximo de 15s esperando o SPT gerar o perfil do bot
-                    yield return new UnityEngine.WaitUntil(() => spawnTask.IsCompleted || spawnTask.IsFaulted || spawnTask.IsCanceled || Time.time > timeout);
-                    
-                    if (Time.time > timeout)
-                    {
-                        Plugin.LogSource.LogWarning($"[TRL-DynamicSpawn] Bot generation timed out! SPT took too long. Skipping to next bot...");
-                    }
+                    yield return StartCoroutine(SpawnGroupBotsCoroutine(gData.Role, gData.Difficulty, gData.GroupSize, selectedZone));
                 }
                 else
                 {
@@ -668,39 +677,45 @@ namespace TRLDynamicSpawn.Components
             public EliteLocationInfo Info;
         }
 
-        private async Task<bool> DirectSpawnBots(WildSpawnType role, BotDifficulty diff, int groupSize, BotZone zone)
+        private IEnumerator SpawnGroupBotsCoroutine(WildSpawnType role, BotDifficulty diff, int groupSize, BotZone zone)
         {
-            if (zone == null || groupSize <= 0) return false;
-            try
-            {
-                EPlayerSide side = EPlayerSide.Savage;
-                if (role == WildSpawnType.pmcUSEC) side = EPlayerSide.Usec;
-                else if (role == WildSpawnType.pmcBEAR) side = EPlayerSide.Bear;
+            if (zone == null || groupSize <= 0) yield break;
 
-                BotSpawnParams spawnParams = new BotSpawnParams();
-                var botProfile = new BotProfileDataClass(side, role, diff, 0f, spawnParams);
-                var creationData = await BotCreationDataClass.Create(botProfile, _botCreator, groupSize, _botsController.BotSpawner);
-                if (creationData != null)
+            EPlayerSide side = EPlayerSide.Savage;
+            if (role == WildSpawnType.pmcUSEC) side = EPlayerSide.Usec;
+            else if (role == WildSpawnType.pmcBEAR) side = EPlayerSide.Bear;
+
+            BotSpawnParams spawnParams = new BotSpawnParams();
+            var botProfile = new BotProfileDataClass(side, role, diff, 0f, spawnParams);
+
+            for (int i = 0; i < groupSize; i++)
+            {
+                var task = BotCreationDataClass.Create(botProfile, _botCreator, 1, _botsController.BotSpawner);
+                while (!task.IsCompleted)
                 {
-                    Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] DIRECT SPAWN SUCCESS: Spawning group (Size: {groupSize}, Type: {role}) in zone {zone.NameZone}...");
-                    // forcedSpawn = true garante que o patch saiba que é a NOSSA wave e libere o Fallback 2 (nascer fora da bolha)
-                    // se for estritamente necessário para não perder o bot.
-                    _botsController.BotSpawner.TryToSpawnInZoneAndDelay(zone, creationData, false, true, null, true);
-                    return true;
+                    yield return null;
+                }
+
+                if (task.Result != null)
+                {
+                    Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] DIRECT SPAWN SUCCESS ({i + 1}/{groupSize}): Spawning {role} in zone {zone.NameZone}...");
+                    _botsController.BotSpawner.TryToSpawnInZoneAndDelay(zone, task.Result, false, true, null, true);
+                }
+
+                if (i < groupSize - 1)
+                {
+                    float delay = UnityEngine.Random.Range(1.0f, 3.0f);
+                    yield return new WaitForSeconds(delay);
                 }
             }
-            catch (Exception ex)
-            {
-                Plugin.LogSource.LogError($"[TRL-DynamicSpawn] Direct spawn failed for {role}: {ex.Message}\n{ex.StackTrace}");
-            }
-            return false;
         }
 
         public bool IsValidSpawnZone(BotZone zone, string mapName, WildSpawnType? role = null, Vector3? overridePosition = null, double? overrideSafeDistance = null)
         {
             if (zone == null && overridePosition == null) return false;
 
-            double safeDist = overrideSafeDistance ?? (_serverConfig?.MapConfigs?.ContainsKey(mapName) == true ? (double)_serverConfig.MapConfigs[mapName].SafeZoneDistance : (mapName == "factory4_day" || mapName == "factory4_night" || mapName == "sandbox" || mapName == "sandbox_high" ? 15.0 : 30.0));
+            var mapSettings = MapNameHelper.GetMapSettings(_serverConfig, mapName);
+            double safeDist = overrideSafeDistance ?? (mapSettings != null ? mapSettings.SafeZoneDistance : (mapName == "factory4_day" || mapName == "factory4_night" || mapName == "sandbox" || mapName == "sandbox_high" ? 15.0 : 30.0));
             bool enableLos = TRLDynamicSpawn.Helpers.Settings.enableLoSCulling.Value;
             float losDist = TRLDynamicSpawn.Helpers.Settings.losCullingDistance.Value;
 
@@ -732,7 +747,7 @@ namespace TRLDynamicSpawn.Components
                     float maxDist = 300f;
                     bool isBubbleEnabled = TRLDynamicSpawn.Helpers.Settings.enableSpawnBubble.Value;
 
-                    if (_serverConfig?.MapConfigs?.TryGetValue(mapName, out var mapSettings) == true)
+                    if (mapSettings != null)
                     {
                         isBubbleEnabled = isBubbleEnabled && mapSettings.EnableSpawnBubble;
                         maxDist = mapSettings.SpawnBubbleDistance;

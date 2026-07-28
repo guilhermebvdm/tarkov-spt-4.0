@@ -10,6 +10,7 @@ using EFT.Game.Spawning;
 using SPT.Common.Http;
 using Newtonsoft.Json;
 using TRLDynamicSpawn.Models;
+using TRLDynamicSpawn.Helpers;
 
 namespace TRLDynamicSpawn.Components
 {
@@ -56,10 +57,10 @@ namespace TRLDynamicSpawn.Components
                 }
 
                 float interval = 5f;
-                if (!string.IsNullOrEmpty(_currentLocation) && _serverConfig.MapConfigs.TryGetValue(_currentLocation, out var currentMapSettings))
+                var currentMapSettings = MapNameHelper.GetMapSettings(_serverConfig, _currentLocation);
+                if (currentMapSettings != null && currentMapSettings.EnableDespawn)
                 {
-                    if (currentMapSettings.EnableDespawn)
-                        interval = currentMapSettings.DespawnInterval;
+                    interval = currentMapSettings.DespawnInterval;
                 }
                 
                 if (interval < 5f) interval = 5f;
@@ -96,14 +97,11 @@ namespace TRLDynamicSpawn.Components
                         _teleportCooldowns.Clear();
                     }
                     
-                    if (!_serverConfig.MapConfigs.TryGetValue(_currentLocation, out var mapSettings))
+                    var mapSettings = MapNameHelper.GetMapSettings(_serverConfig, _currentLocation);
+                    if (mapSettings == null || !mapSettings.EnableDespawn)
                     {
                         continue;
                     }
-
-                    // Check if despawn is enabled for this map
-                    if (!mapSettings.EnableDespawn)
-                        continue;
 
                     // For Fika compatibility, we only run this on the Host or Solo
                     if (!IsHostOrSolo())
@@ -528,7 +526,8 @@ namespace TRLDynamicSpawn.Components
                 double minTeleportDist = 100.0;
                 double maxTeleportDist = 300.0;
 
-                if (DynamicSpawnManager.Instance.ServerConfig?.MapConfigs?.TryGetValue(mapName, out var mapSettings) == true)
+                var mapSettings = MapNameHelper.GetMapSettings(DynamicSpawnManager.Instance?.ServerConfig, mapName);
+                if (mapSettings != null)
                 {
                     minTeleportDist = mapSettings.TeleportMinDistance;
                     maxTeleportDist = mapSettings.SpawnBubbleDistance;
