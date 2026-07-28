@@ -137,10 +137,15 @@ namespace TRLDynamicSpawn.Components
 
                     // Iterate backwards or use array to avoid collection modified
                     var allBots = botsController.Bots.BotOwners.ToArray();
+                    var processedInLoop = new HashSet<string>();
 
                     foreach (var bot in allBots)
                     {
                         if (bot == null || bot.GetPlayer == null || bot.HealthController == null || !bot.HealthController.IsAlive)
+                            continue;
+
+                        string botId = DynamicSpawnManager.SanitizeMongoId(bot.Profile.Id);
+                        if (processedInLoop.Contains(botId))
                             continue;
                             
                         // Don't despawn special bots (bosses, followers, snipers, etc)
@@ -173,7 +178,14 @@ namespace TRLDynamicSpawn.Components
 
                         if (canDespawn)
                         {
-                            AttemptToTeleportBot(bot);
+                            var teleportedGroup = AttemptToTeleportGroup(bot);
+                            foreach (var member in teleportedGroup)
+                            {
+                                if (member != null && member.Profile != null)
+                                {
+                                    processedInLoop.Add(DynamicSpawnManager.SanitizeMongoId(member.Profile.Id));
+                                }
+                            }
                         }
                     }
                 }
@@ -501,22 +513,101 @@ namespace TRLDynamicSpawn.Components
             return null;
         }
 
-        private bool AttemptToTeleportBot(BotOwner bot)
+        private List<BotOwner> GetGroupMembers(BotOwner bot)
         {
-            if (bot == null || bot.Profile == null || bot.GetPlayer == null) return false;
+            var members = new List<BotOwner>();
+            if (bot == null || bot.GetPlayer == null || bot.HealthController == null || !bot.HealthController.IsAlive)
+                return members;
+
+            members.Add(bot);
+
+            // 1. Tentar obter membros através do BotsGroup
+            if (bot.BotsGroup != null)
+            {
+                try
+                {
+                    var propInfo = bot.BotsGroup.GetType().GetProperty("Members", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                    var fieldInfo = bot.BotsGroup.GetType().GetField("Members", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+
+                    System.Collections.IEnumerable groupList = null;
+                    if (propInfo != null) groupList = propInfo.GetValue(bot.BotsGroup) as System.Collections.IEnumerable;
+                    else if (fieldInfo != null) groupList = fieldInfo.GetValue(bot.BotsGroup) as System.Collections.IEnumerable;
+
+                    if (groupList != null)
+                    {
+                        foreach (var item in groupList)
+                        {
+                            if (item is BotOwner memberOwner && memberOwner != null && memberOwner.GetPlayer != null)
+                            {
+                                if (memberOwner.HealthController != null && memberOwner.HealthController.IsAlive && !members.Contains(memberOwner))
+                                {
+                                    members.Add(memberOwner);
+                                }
+                            }
+                        }
+                    }
+                }
+                catch { }
+            }
+
+            // 2. Tentar obter seguidores se este bot for um Boss/Líder
+            if (bot.Boss != null && bot.Boss.Followers != null)
+            {
+                foreach (var follower in bot.Boss.Followers)
+                {
+                    if (follower != null && follower.GetPlayer != null && follower.HealthController != null && follower.HealthController.IsAlive && !members.Contains(follower))
+                    {
+                        members.Add(follower);
+                    }
+                }
+            }
+
+            // 3. Tentar obter o líder e seus outros seguidores se este bot for um seguidor
+            if (bot.BotFollower != null && bot.BotFollower.HaveBoss && bot.BotFollower.BossToFollow != null)
+            {
+                var bossOwner = bot.BotFollower.BossToFollow as BotOwner;
+                if (bossOwner != null && bossOwner.GetPlayer != null && bossOwner.HealthController != null && bossOwner.HealthController.IsAlive && !members.Contains(bossOwner))
+                {
+                    members.Add(bossOwner);
+                    if (bossOwner.Boss != null && bossOwner.Boss.Followers != null)
+                    {
+                        foreach (var f in bossOwner.Boss.Followers)
+                        {
+                            if (f != null && f.GetPlayer != null && f.HealthController != null && f.HealthController.IsAlive && !members.Contains(f))
+                            {
+                                members.Add(f);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return members;
+        }
+
+        private List<BotOwner> AttemptToTeleportGroup(BotOwner bot)
+        {
+            var teleportedList = new List<BotOwner>();
+            if (bot == null || bot.Profile == null || bot.GetPlayer == null) return teleportedList;
 
             try
             {
                 var gameWorld = Singleton<GameWorld>.Instance;
-                if (gameWorld == null || DynamicSpawnManager.Instance == null) return false;
+                if (gameWorld == null || DynamicSpawnManager.Instance == null) return teleportedList;
 
-                string botId = DynamicSpawnManager.SanitizeMongoId(bot.Profile.Id);
-                if (_teleportCooldowns.TryGetValue(botId, out float lastTime))
+                var groupMembers = GetGroupMembers(bot);
+                if (groupMembers.Count == 0) return teleportedList;
+
+                // Checa se algum membro do grupo ainda está em cooldown de 30s
+                foreach (var member in groupMembers)
                 {
-                    if (Time.time - lastTime < 30f)
+                    string memberId = DynamicSpawnManager.SanitizeMongoId(member.Profile.Id);
+                    if (_teleportCooldowns.TryGetValue(memberId, out float lastTime))
                     {
-                        // Respeita a trava de 30s de cooldown para evitar re-teleportar o mesmo bot em rajada
-                        return false;
+                        if (Time.time - lastTime < 30f)
+                        {
+                            return teleportedList;
+                        }
                     }
                 }
 
@@ -538,57 +629,62 @@ namespace TRLDynamicSpawn.Components
 
                 if (spawnPoint == null || selectedZone == null)
                 {
-                    Plugin.LogSource.LogWarning($"[TRL] Teleport failed: could not find a valid target spawn point for {bot.GetPlayer.Profile.Nickname} within Bubble({maxTeleportDist}m) / Safe({minTeleportDist}m).");
-                    return false;
+                    Plugin.LogSource.LogWarning($"[TRL] Group teleport failed: could not find a valid target spawn point for group {bot.GetPlayer.Profile.Nickname} ({groupMembers.Count} bots) within Bubble({maxTeleportDist}m) / Safe({minTeleportDist}m).");
+                    return teleportedList;
                 }
 
-                Vector3 targetPos = spawnPoint.Position;
-                Plugin.LogSource.LogInfo($"[TRL] Teleporting bot {bot.GetPlayer.Profile.Nickname} ({role}) from {bot.Position} to {selectedZone.NameZone} ({targetPos})...");
+                Plugin.LogSource.LogInfo($"[TRL] Teleporting GROUP (Size: {groupMembers.Count}, Role: {role}) from {bot.Position} to {selectedZone.NameZone} ({spawnPoint.Position})...");
 
-                // 2. Limpar de forma ultra segura toda a memória de combate e aggro (ICM + SAIN)
-                if (bot.Memory != null)
+                for (int i = 0; i < groupMembers.Count; i++)
                 {
-                    bot.Memory.GoalEnemy = null;
-                    WipeMemoryResidue(bot.Memory);
+                    var m = groupMembers[i];
+                    if (m == null || m.GetPlayer == null || m.HealthController == null || !m.HealthController.IsAlive)
+                        continue;
 
-                    if (bot.BotsGroup != null && bot.BotsGroup.Enemies != null)
+                    // Aplica pequenos desvios radiais de 1.5m para os seguidores não nascerem colados/clipando
+                    Vector3 offset = (i == 0) ? Vector3.zero : new Vector3(UnityEngine.Random.Range(-1.5f, 1.5f), 0f, UnityEngine.Random.Range(-1.5f, 1.5f));
+                    Vector3 targetPos = spawnPoint.Position + offset;
+
+                    if (m.Memory != null)
                     {
-                        var enemyList = bot.BotsGroup.Enemies.Keys.ToList();
-                        foreach (var enemy in enemyList)
+                        m.Memory.GoalEnemy = null;
+                        WipeMemoryResidue(m.Memory);
+
+                        if (m.BotsGroup != null && m.BotsGroup.Enemies != null)
                         {
-                            if (enemy != null)
+                            var enemyList = m.BotsGroup.Enemies.Keys.ToList();
+                            foreach (var enemy in enemyList)
                             {
-                                bot.BotsGroup.RemoveEnemy(enemy);
-                                bot.Memory.DeleteInfoAboutEnemy(enemy);
+                                if (enemy != null)
+                                {
+                                    m.BotsGroup.RemoveEnemy(enemy);
+                                    m.Memory.DeleteInfoAboutEnemy(enemy);
+                                }
                             }
                         }
+                        m.Memory.LastTimeHit = -1000f;
                     }
-                    bot.Memory.LastTimeHit = -1000f;
+
+                    m.ShootData?.EndShoot();
+                    if (m.AimingManager?.CurrentAiming != null)
+                    {
+                        m.AimingManager.CurrentAiming.LoseTarget();
+                    }
+
+                    m.GetPlayer.Teleport(targetPos, true);
+
+                    string mId = DynamicSpawnManager.SanitizeMongoId(m.Profile.Id);
+                    _teleportCooldowns[mId] = Time.time;
+
+                    ForceBackToPatrol(m);
+                    teleportedList.Add(m);
                 }
-
-                // Para disparos e alvos
-                bot.ShootData?.EndShoot();
-                if (bot.AimingManager?.CurrentAiming != null)
-                {
-                    bot.AimingManager.CurrentAiming.LoseTarget();
-                }
-
-                // 3. Teleporta fisicamente usando a API nativa do EFT que lida com o NavMesh/Solo automaticamente
-                bot.GetPlayer.Teleport(targetPos, true);
-
-                // 4. Registrar o timestamp do teletransporte de forma bem-sucedida
-                _teleportCooldowns[botId] = Time.time;
-
-                // 5. Força a retomar a patrulha no novo local
-                ForceBackToPatrol(bot);
-
-                return true;
             }
             catch (System.Exception ex)
             {
-                Plugin.LogSource.LogError($"[TRL] Error during bot teleport: {ex.Message}\n{ex.StackTrace}");
+                Plugin.LogSource.LogError($"[TRL] Error during group teleport: {ex.Message}\n{ex.StackTrace}");
             }
-            return false;
+            return teleportedList;
         }
     }
 }

@@ -37,3 +37,24 @@
 - **Decodificação Multithread:** Deslocar o `OpusDecoder.Decode` para *ThreadPool* paralela.
 - **HUD Minimalista de Gameplay:** Além do painel completo de debug (`F9`), criar um indicador visual sutil e discreto no canto da tela (pequeno ícone de microfone/alto-falante + sigla do canal e modo PTT/VAD ativo) para usar em partidas normais.
 - **Controle Individual de Volume:** Slider no menu F12 para ajustar o volume de cada parceiro da party individualmente.
+
+## 7. Otimizações de Rede, Desempenho e Coexistência (LiteNetLib & GC)
+- **Otimização de Serialização e Redução de Overhead UDP (`SftAudioPacket.cs`)**:
+  - *Diagnóstico:* O pacote `SftAudioPacket` serializa uma `string ProfileId` (GUID de ~36 caracteres) 50 vezes por segundo para cada jogador falando, gerando overhead no tamanho do pacote e alocação de memória no Garbage Collector (GC).
+  - *Detalhamento de Implementação:*
+    - Criar um mapeamento de handshake no início da raid (`SftHandshakePacket`) que vincula o `ProfileId (string)` do jogador a um `PlayerNetId (byte)` único (0 a 255).
+    - No `SftAudioPacket`, substituir `public string ProfileId` por `public byte PlayerNetId`.
+    - Economia: Redução de ~35 bytes por pacote e eliminação total da alocação/deserialização de strings no loop de alta frequência.
+- **Zero-Allocation no Transmissor de Áudio Opus (`VoipProcessor.cs`)**:
+  - *Diagnóstico:* Na função `Transmit()`, a chamada `byte[] finalData = new byte[len]; Array.Copy(opusBuffer, finalData, len);` aloca um novo `byte[]` na memória a cada 20ms de áudio.
+  - *Detalhamento de Implementação:*
+    - Substituir a alocação direta pelo uso do pool de arrays do .NET (`System.Buffers.ArrayPool<byte>.Shared.Rent(len)`) ou por uma estrutura de buffer rotativo prealocado.
+    - Atualizar o evento `OnOpusDataEncoded` para passar `ArraySegment<byte>` ou devolver o buffer ao pool assim que o `SendData` do LiteNetLib concluir o envio.
+    - Benefício: Eliminação da pressão sobre o Garbage Collector da Unity no envio de voz.
+- **Agrupamento Dinâmico de Frames de Áudio (Frame Sizing / Packing)**:
+  - *Diagnóstico:* O mod transmite quadros de 20ms (50 pacotes UDP por segundo). Em conexões P2P instáveis ou com perdas de pacotes, 50 pps pode ser excessivo para o LiteNetLib do FIKA.
+  - *Detalhamento de Implementação:*
+    - Adicionar suporte configurável no F12 para quadros de **40ms** (25 pacotes/s) ou **60ms** (~16 pacotes/s).
+    - Como a biblioteca Concentus (Opus) suporta nativamente pacotes de 40ms/60ms alterando `frameSize = sampleRate * (frameMs / 1000)`, ajustar o `MicrophoneCapturer` para acumular a quantidade exata de amostras antes do enquadramento.
+    - Benefício: Redução de até 68% no volume total de pacotes por segundo na rede sem perda perceptível de clareza de áudio.
+
