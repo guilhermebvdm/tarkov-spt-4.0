@@ -263,25 +263,27 @@ namespace TRLDynamicSpawn.Components
 
                         if (_activeWaveCoroutine != null) StopCoroutine(_activeWaveCoroutine);
                         _activeWaveCoroutine = StartCoroutine(ProcessWave(false));
-
                         _nextWaveTime = Time.time + warmupInterval;
 
-                        // Aguarda os 30s da onda de warmup para os bots entrarem fisicamente na cena
+                        bool capReachedEarly = false;
                         for (int elapsed = 0; elapsed < warmupInterval; elapsed++)
                         {
                             yield return new WaitForSeconds(1f);
+
+                            currentMap = GetCurrentMapName();
+                            maxCap = Settings.GetMapCap(currentMap);
+                            aliveRealBots = GetRealAliveBotsCount();
+
+                            if (aliveRealBots >= maxCap)
+                            {
+                                Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Max cap reached early with REAL alive bots ({aliveRealBots}/{maxCap}) at {elapsed + 1}s during Warmup. Interrupting 30s timer immediately.");
+                                capReachedEarly = true;
+                                break;
+                            }
                         }
 
-                        // Checagem no final do ciclo de 30s (quando resta 1s/fim do timer)
-                        currentMap = GetCurrentMapName();
-                        maxCap = Settings.GetMapCap(currentMap);
-                        aliveRealBots = GetRealAliveBotsCount();
-
-                        Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Warmup check (Attempt {warmupAttempt}): {aliveRealBots}/{maxCap} REAL alive bots in map.");
-
-                        if (aliveRealBots >= maxCap)
+                        if (capReachedEarly)
                         {
-                            Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Max cap reached with REAL alive bots ({aliveRealBots}/{maxCap}). Stopping 30s Warmup loop.");
                             break;
                         }
 
