@@ -482,10 +482,11 @@ namespace TRLDynamicSpawn.Patches
 
             string name = wave.BossName.ToLower();
 
-            // Bloqueia PMCs e Scavs normais do vanilla para que o nosso mod controle a proporção de horda exclusiva
-            if (name == "pmcbear" || name == "pmcusec" || 
-                name == "sptbear" || name == "sptusec" || 
-                name == "assault" || name == "savage")
+            // Bloqueia PMCs e Scavs normais (incluindo cursedassault, assaultgroup, etc. do Ground Zero)
+            bool isPmcOrScav = (name.Contains("assault") || name.Contains("savage") || name.Contains("scav") || name.Contains("bear") || name.Contains("usec"))
+                               && name != "pmcbot" && name != "exusec";
+
+            if (isPmcOrScav)
             {
                 if (TRLDynamicSpawn.Helpers.Settings.enableDebugLogs.Value)
                 {
@@ -494,7 +495,7 @@ namespace TRLDynamicSpawn.Patches
                 return false;
             }
 
-            // Permite todos os outros bosses reais, elites, snipers, raiders, rogues e cultistas nativos
+            // Permite todos os outros bosses reais, elites, snipers, raiders (pmcbot), rogues (exusec) e cultistas nativos
             return true;
         }
     }
