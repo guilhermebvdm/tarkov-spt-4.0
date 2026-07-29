@@ -1,0 +1,11 @@
+{
+  "name": "agonysfx",
+  "upstream_url": "https://github.com/ppowa/agonysfx",
+  "upstream_sha": "2db2856805d6a78f684b30eee82b06ef6e8dd8a3",
+  "upstream_branch": "main",
+  "forge_url": "",
+  "license": "MIT",
+  "version_base": "1.1.5",
+  "spt_version": "4.0.0",
+  "created_at": "2026-07-29T00:03:00Z"
+}
