@@ -447,20 +447,24 @@ namespace TRLDynamicSpawn.Patches
         [PatchPrefix]
         private static bool PatchPrefix(BotWaveDataClass wave, ref System.Threading.Tasks.Task __result)
         {
-            if (TRLDynamicSpawn.Components.DynamicSpawnManager.IsWarmupActive) return true; // Let vanilla run during warmup!
             if (TRLDynamicSpawn.Components.DynamicSpawnManager.IsGeneratingDynamicWave) return true; // Let our wave run!
             
-            if (wave != null && (wave.WildSpawnType == WildSpawnType.pmcUSEC || wave.WildSpawnType == WildSpawnType.pmcBEAR))
+            // Se for Scav comum ou PMC do vanilla, bloqueia 100% (inclusive no 1º minuto) para o DynamicSpawn controlar
+            if (wave != null && (wave.WildSpawnType == WildSpawnType.assault || 
+                                wave.WildSpawnType == WildSpawnType.cursedAssault || 
+                                wave.WildSpawnType == WildSpawnType.pmcUSEC || 
+                                wave.WildSpawnType == WildSpawnType.pmcBEAR))
             {
-                return true; // Let any PMC wave pass!
+                if (TRLDynamicSpawn.Helpers.Settings.enableDebugLogs.Value)
+                {
+                    Plugin.LogSource.LogInfo($"[TRLDynamicSpawn] Blocked Vanilla Normal Wave ({wave.WildSpawnType}) to give 100% control to DynamicSpawn.");
+                }
+                __result = System.Threading.Tasks.Task.CompletedTask;
+                return false;
             }
 
-            if (TRLDynamicSpawn.Helpers.Settings.enableDebugLogs.Value)
-            {
-                Plugin.LogSource.LogInfo("[TRLDynamicSpawn] Blocked Vanilla Normal Wave to give 100% control to DynamicSpawn.");
-            }
-            __result = System.Threading.Tasks.Task.CompletedTask;
-            return false;
+            // Permite Scav Snipers (marksman), Raiders, Rogues e outros tipos nativos passarem livremente
+            return true;
         }
     }
 
