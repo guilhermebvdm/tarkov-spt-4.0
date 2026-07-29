@@ -208,27 +208,27 @@ namespace TRLDynamicSpawn.Components
 
         private IEnumerator SpawnHordeLoop()
         {
-            // 1. Janela Vanilla Inicial (0s a 60s / DelayBeforeFirstWave)
+            // 1. Janela Vanilla Inicial (0s a 30s / DelayBeforeFirstWave)
             IsWarmupActive = true;
 
             string mapName = GetCurrentMapName();
             var mapSettings = MapNameHelper.GetMapSettings(_serverConfig, mapName);
             int initialDelay = (_serverConfig?.MapTimers != null && _serverConfig.MapTimers.ContainsKey("global"))
                 ? _serverConfig.MapTimers["global"].DelayBeforeFirstWave
-                : 60;
+                : 30;
 
-            // Garantir o mínimo de 60s para permitir a janela vanilla inicial
-            if (initialDelay < 60) initialDelay = 60;
+            // Garantir o mínimo de 30s para permitir a janela inicial de bosses/snipers nativos
+            if (initialDelay < 30) initialDelay = 30;
             _delayBeforeFirstWave = initialDelay;
 
-            Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Initial Vanilla Window active. Waiting {_delayBeforeFirstWave}s before taking control...");
+            Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Initial Vanilla Window active. Waiting {_delayBeforeFirstWave}s for native bosses/snipers before taking control...");
             _nextWaveTime = Time.time + _delayBeforeFirstWave;
 
             yield return new WaitForSeconds(_delayBeforeFirstWave);
 
-            // 2. Trava do Spawn Vanilla após os 60s iniciais
+            // 2. Trava do Spawn Vanilla após os 30s iniciais
             IsWarmupActive = false;
-            Plugin.LogSource.LogInfo("[TRL-DynamicSpawn] Initial 60s elapsed. Vanilla normal spawns LOCKED. DynamicSpawn taking 100% control.");
+            Plugin.LogSource.LogInfo("[TRL-DynamicSpawn] Initial 30s elapsed. Vanilla normal spawns LOCKED. DynamicSpawn taking 100% control.");
 
             // 3. Loop Contínuo do Mod (Warmup de 30s <-> Cooldown de 600s)
             while (true)
@@ -468,10 +468,10 @@ namespace TRLDynamicSpawn.Components
                 int pScavSlots = Mathf.RoundToInt(scavSlots * 0.5f);
                 int normalScavSlots = scavSlots - pScavSlots;
 
-                Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Horde Breakdown (Preset: {_activePreset}):");
-                Plugin.LogSource.LogInfo($"  Alive Bots: {aliveBotsTotal} | PMCs: {alivePMCs} ({aliveBears} BEAR, {aliveUsecs} USEC) | Rest of World: {aliveScavs}");
-                Plugin.LogSource.LogInfo($"  Spawning PMCs: {pmcSlots} ({bearSlots} BEAR, {usecSlots} USEC)");
-                Plugin.LogSource.LogInfo($"  Spawning Scavs: {scavSlots} ({normalScavSlots} Normal, {pScavSlots} pScav)");
+                Plugin.LogSource.LogWarning($"[TRL-DynamicSpawn] Horde Breakdown (Preset: {_activePreset}):");
+                Plugin.LogSource.LogWarning($"  Alive Bots: {aliveBotsTotal} | PMCs: {alivePMCs} ({aliveBears} BEAR, {aliveUsecs} USEC) | Rest of World: {aliveScavs}");
+                Plugin.LogSource.LogWarning($"  Spawning PMCs: {pmcSlots} ({bearSlots} BEAR, {usecSlots} USEC)");
+                Plugin.LogSource.LogWarning($"  Spawning Scavs: {scavSlots} ({normalScavSlots} Normal, {pScavSlots} pScav)");
 
                 GenerateAndEnqueueGroups(WildSpawnType.pmcUSEC, BotDifficulty.normal, usecSlots, eliteConfig?.Usec);
                 GenerateAndEnqueueGroups(WildSpawnType.pmcBEAR, BotDifficulty.normal, bearSlots, eliteConfig?.Bear);
