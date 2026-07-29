@@ -148,13 +148,38 @@ namespace TRL_SpeakFromTarkov.Audio
             currentDistanceTarget = maxBase * distanceMultiplier;
         }
 
+        private bool isEmergency2DMode = false;
+
+        public void SetEmergency2DMode(bool active)
+        {
+            if (isEmergency2DMode == active) return;
+            isEmergency2DMode = active;
+
+            if (audioSource != null)
+            {
+                audioSource.spatialBlend = active ? 0f : currentSpatialBlend;
+                audioSource.spatialize = !active && (currentSpatialBlend > 0f);
+            }
+        }
+
         void Update()
         {
             try
             {
                 if (audioSource != null)
                 {
+                    if (float.IsNaN(currentDistanceTarget) || float.IsInfinity(currentDistanceTarget) || currentDistanceTarget <= 0f)
+                    {
+                        currentDistanceTarget = 30f;
+                    }
+
+                    if (float.IsNaN(smoothedDistance) || float.IsInfinity(smoothedDistance) || smoothedDistance <= 0f)
+                    {
+                        smoothedDistance = currentDistanceTarget;
+                    }
+
                     smoothedDistance = Mathf.Lerp(smoothedDistance, currentDistanceTarget, Time.deltaTime * 5f);
+                    smoothedDistance = Mathf.Clamp(smoothedDistance, 1f, 150f);
                     audioSource.maxDistance = smoothedDistance;
 
                     // Força o Play caso o jogo tenha pausado ou o AudioSource tenha falhado no Awake
@@ -279,6 +304,9 @@ namespace TRL_SpeakFromTarkov.Audio
             }
 
             float volumeMult = audioSource != null ? audioSource.volume : 1.0f;
+            if (float.IsNaN(distanceAttenuation) || float.IsInfinity(distanceAttenuation)) distanceAttenuation = 1.0f;
+            if (float.IsNaN(volumeMult) || float.IsInfinity(volumeMult)) volumeMult = 1.0f;
+
             float finalAttenuation = distanceAttenuation * volumeMult;
 
             // ── CÁLCULO DE PANNING 3D ESTÉREO (DIREÇÃO ESQUERDA / DIREITA) ──
@@ -312,6 +340,9 @@ namespace TRL_SpeakFromTarkov.Audio
                     panRightGain = Mathf.Sin(angle);
                 }
             }
+
+            if (float.IsNaN(panLeftGain) || float.IsInfinity(panLeftGain)) panLeftGain = 1.0f;
+            if (float.IsNaN(panRightGain) || float.IsInfinity(panRightGain)) panRightGain = 1.0f;
 
             for (int i = 0; i < data.Length; i += channels)
             {

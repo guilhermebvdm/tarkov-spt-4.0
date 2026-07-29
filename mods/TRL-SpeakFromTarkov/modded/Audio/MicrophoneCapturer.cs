@@ -102,10 +102,10 @@ namespace TRL_SpeakFromTarkov.Audio
                 return false;
             }
 
-            captureFrameSize = (int)Math.Round(actualSampleRate * 0.02);
+            captureFrameSize = (int)Math.Round(actualSampleRate * 0.040);
             captureBuffer = new float[captureFrameSize];
             
-            ringBuffer = new float[actualSampleRate * 2];
+            ringBuffer = new float[Math.Max(actualSampleRate * 2, 4096)];
             writePos = 0;
             readPos = 0;
             availableSamples = 0;

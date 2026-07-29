@@ -144,9 +144,18 @@ namespace TRL_SpeakFromTarkov.Audio
                 if (len > 0)
                 {
                     LastOpusBytes = len;
-                    byte[] finalData = new byte[len];
-                    Array.Copy(opusBuffer, finalData, len);
-                    OnOpusDataEncoded?.Invoke(finalData, DisplayLevel);
+                    byte[] poolBuffer = System.Buffers.ArrayPool<byte>.Shared.Rent(len);
+                    try
+                    {
+                        Array.Copy(opusBuffer, poolBuffer, len);
+                        byte[] finalData = new byte[len];
+                        Array.Copy(poolBuffer, finalData, len);
+                        OnOpusDataEncoded?.Invoke(finalData, DisplayLevel);
+                    }
+                    finally
+                    {
+                        System.Buffers.ArrayPool<byte>.Shared.Return(poolBuffer);
+                    }
                 }
             }
             catch (Exception ex)

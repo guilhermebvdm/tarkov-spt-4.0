@@ -13,12 +13,15 @@ namespace TRL_SpeakFromTarkov.Network
     {
         private ManualLogSource Log => VoIPPlugin.Log;
         private Dictionary<string, RemoteSpeaker> remoteSpeakers = new Dictionary<string, RemoteSpeaker>();
-        
+        private Dictionary<byte, string> netIdToProfile = new Dictionary<byte, string>();
+        private Dictionary<string, byte> profileToNetId = new Dictionary<string, byte>();
+        private byte nextNetId = 1;
+
         public bool IsSessionActive { get; private set; } = false;
         public string LocalSessionId { get; private set; } = System.Guid.NewGuid().ToString();
         private int sampleRate;
         private int frameSize;
-        
+
         public void Initialize(int sampleRate, int frameSize)
         {
             this.sampleRate = sampleRate;
@@ -42,14 +45,48 @@ namespace TRL_SpeakFromTarkov.Network
                     try
                     {
                         currentManager.RegisterPacket<SftAudioPacket>(OnReceiveVoipData);
+                        currentManager.RegisterPacket<SftHandshakePacket>(OnReceiveHandshake);
                         registeredManagerInstance = currentManager;
-                        Log.LogInfo("[SFT] SftAudioPacket registrado com sucesso no NetPacketProcessor do FIKA.");
+                        Log.LogInfo("[SFT] SftAudioPacket e SftHandshakePacket registrados com sucesso no FIKA.");
                     }
                     catch (System.Exception ex)
                     {
-                        Log.LogWarning($"[SFT] Aviso ao registrar pacote no FIKA: {ex.Message}");
+                        Log.LogWarning($"[SFT] Aviso ao registrar pacotes no FIKA: {ex.Message}");
                     }
                 }
+            }
+        }
+
+        private byte GetOrCreateNetId(string profileId)
+        {
+            if (profileToNetId.TryGetValue(profileId, out byte id))
+                return id;
+
+            id = nextNetId++;
+            if (nextNetId == 0) nextNetId = 1; // Wrap seguro de 1 a 255
+
+            profileToNetId[profileId] = id;
+            netIdToProfile[id] = profileId;
+
+            // Transmite Handshake confiável (Channel 0 Reliable) para notificar todos os pares
+            SftHandshakePacket handshake = new SftHandshakePacket
+            {
+                PlayerNetId = id,
+                ProfileId = profileId
+            };
+            if (Singleton<IFikaNetworkManager>.Instantiated)
+            {
+                Singleton<IFikaNetworkManager>.Instance.SendData(ref handshake, Fika.Core.Networking.LiteNetLib.DeliveryMethod.ReliableOrdered, broadcast: true);
+            }
+            return id;
+        }
+
+        private void OnReceiveHandshake(SftHandshakePacket packet)
+        {
+            if (packet.PlayerNetId > 0 && !string.IsNullOrEmpty(packet.ProfileId))
+            {
+                netIdToProfile[packet.PlayerNetId] = packet.ProfileId;
+                profileToNetId[packet.ProfileId] = packet.PlayerNetId;
             }
         }
 
@@ -67,8 +104,7 @@ namespace TRL_SpeakFromTarkov.Network
                 EnsurePacketRegistered();
                 if (!IsSessionActive || !Singleton<IFikaNetworkManager>.Instantiated) return;
                 if (VoIPPlugin.EnableMod != null && !VoIPPlugin.EnableMod.Value) return;
-                
-                // Se o nível de áudio for desprezível (< 0.002f), ignora o envio (evita flood de silêncio no LiteNetLib)
+
                 if (voiceLevel < 0.002f) return;
 
                 string myProfileId = LocalSessionId;
@@ -78,13 +114,16 @@ namespace TRL_SpeakFromTarkov.Network
                     if (!string.IsNullOrEmpty(pId)) myProfileId = pId;
                 }
 
-                SftAudioPacket packet = new SftAudioPacket 
-                { 
-                    ProfileId = myProfileId,
-                    Channel = channel, 
+                byte netId = GetOrCreateNetId(myProfileId);
+
+                SftAudioPacket packet = new SftAudioPacket
+                {
+                    PlayerNetId = netId,
+                    Channel = channel,
                     AudioData = opusData,
                     VoiceLevel = voiceLevel
                 };
+
                 Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, Fika.Core.Networking.LiteNetLib.DeliveryMethod.Unreliable, broadcast: true);
             }
             catch (System.Exception ex)
@@ -99,32 +138,42 @@ namespace TRL_SpeakFromTarkov.Network
             {
                 if (!Singleton<GameWorld>.Instantiated) return;
                 if (VoIPPlugin.EnableMod != null && !VoIPPlugin.EnableMod.Value) return;
-                
+                if (packet.Magic != SftAudioPacket.MAGIC_HEADER) return;
+                if (packet.AudioData == null || packet.AudioData.Length == 0) return;
+
+                // Resolve o ProfileId pelo PlayerNetId
+                string senderProfileId = null;
+                if (packet.PlayerNetId > 0)
+                {
+                    netIdToProfile.TryGetValue(packet.PlayerNetId, out senderProfileId);
+                }
+
+                if (string.IsNullOrEmpty(senderProfileId)) return;
+
                 // Rejeita pacotes próprios (Eco loopback local)
-                if (packet.ProfileId == LocalSessionId) return;
+                if (senderProfileId == LocalSessionId) return;
                 if (Singleton<GameWorld>.Instantiated && Singleton<GameWorld>.Instance.MainPlayer != null)
                 {
-                    if (packet.ProfileId == Singleton<GameWorld>.Instance.MainPlayer.ProfileId)
+                    if (senderProfileId == Singleton<GameWorld>.Instance.MainPlayer.ProfileId)
                         return;
                 }
 
-                // A validação de Canal deve ser feita pelo Controller no futuro, mas para MVP fica aqui
-                if (Core.VoipController.Instance != null && packet.Channel != Core.VoipController.Instance.CurrentChannel) 
+                if (Core.VoipController.Instance != null && packet.Channel != Core.VoipController.Instance.CurrentChannel)
                     return;
 
                 RemoteSpeaker speaker;
-                if (!remoteSpeakers.TryGetValue(packet.ProfileId, out speaker) || speaker == null)
+                if (!remoteSpeakers.TryGetValue(senderProfileId, out speaker) || speaker == null)
                 {
-                    speaker = CreateRemoteSpeaker(packet.ProfileId);
+                    speaker = CreateRemoteSpeaker(senderProfileId);
                     if (speaker == null) return;
-                    remoteSpeakers[packet.ProfileId] = speaker;
+                    remoteSpeakers[senderProfileId] = speaker;
                 }
-                
+
                 // Atualiza ancoragem do alto-falante 3D na cabeça/corpo do jogador
                 if (Singleton<GameWorld>.Instantiated)
                 {
-                    var player = Singleton<GameWorld>.Instance.AllAlivePlayersList?.FirstOrDefault(p => p != null && p.ProfileId == packet.ProfileId);
-                    if (player != null)
+                    var player = Singleton<GameWorld>.Instance.AllAlivePlayersList?.FirstOrDefault(p => p != null && p.ProfileId == senderProfileId);
+                    if (player != null && player.Transform != null)
                     {
                         Transform targetBone = player.PlayerBones != null && player.PlayerBones.Head != null ? player.PlayerBones.Head.Original : player.Transform.Original;
                         if (speaker.transform.parent != targetBone)
@@ -132,6 +181,12 @@ namespace TRL_SpeakFromTarkov.Network
                             speaker.transform.SetParent(targetBone, false);
                             speaker.transform.localPosition = targetBone == player.Transform.Original ? Vector3.up * 1.6f : Vector3.zero;
                         }
+                        speaker.SetEmergency2DMode(false);
+                    }
+                    else
+                    {
+                        // Em desync posicional ou avatar ausente, ativa o modo 2D de emergência para manter o áudio audível
+                        speaker.SetEmergency2DMode(true);
                     }
                 }
 
@@ -154,19 +209,16 @@ namespace TRL_SpeakFromTarkov.Network
         public void StopSession()
         {
             IsSessionActive = false;
-            
-            // NUNCA chamamos UnregisterPacket<SftAudioPacket>() aqui!
-            // Desregistrar a classe de pacote do FIKA faz com que o NetPacketProcessor do FIKA lance
-            // 'ParseException: Undefined packet in NetDataReader: 20270', o que interrompe a leitura de rede
-            // do FIKA e causa desync total de movimento/posições dos jogadores no jogo!
 
-            // Limpa todos os falantes remotos (evita memory leak)
             foreach (var kvp in remoteSpeakers)
             {
                 if (kvp.Value != null)
                     Destroy(kvp.Value.gameObject);
             }
             remoteSpeakers.Clear();
+            netIdToProfile.Clear();
+            profileToNetId.Clear();
+            nextNetId = 1;
         }
 
         void OnDestroy()

@@ -58,3 +58,30 @@
     - Como a biblioteca Concentus (Opus) suporta nativamente pacotes de 40ms/60ms alterando `frameSize = sampleRate * (frameMs / 1000)`, ajustar o `MicrophoneCapturer` para acumular a quantidade exata de amostras antes do enquadramento.
     - Benefício: Redução de até 68% no volume total de pacotes por segundo na rede sem perda perceptível de clareza de áudio.
 
+## 8. Arquitetura de Isolamento de Rede (RawData no Canal 1 / Resiliência de Leitura)
+
+> ⚠️ **Diretriz de Segurança do FIKA:** O VOIP transmite pacotes de voz em alta frequência (~50 pps). Se esses pacotes forem processados no `NetPacketProcessor` padrão do FIKA e sofrerem truncamento ou perda de pacotes na internet, qualquer exceção no `Deserialize` deixa o ponteiro de leitura do `NetDataReader` deslocado, causando o erro `ParseException: Undefined packet in NetDataReader` e corrompendo a sincronização de inventário (`HandleInventoryPacket`) e movimentação da partida.
+
+### 8.1 Isolamento de Processamento via `RawData` no Canal 1 (`DeliveryMethod.Unreliable`)
+- **Conceito:** Em vez de usar `IFikaNetworkManager.RegisterPacket<SftAudioPacket>()` (que obriga o pacote a passar pelo `NetPacketProcessor` com leitor de hash compartilhado do FIKA), utilizar a transmissão de dados brutos (**RawData**) no **Canal 1** do LiteNetLib.
+- **Como Implementar:**
+  1. No lado do transmissor (`SftNetwork.cs`), enviar o payload de voz usando a API de envio do LiteNetLib especificando `Channel = 1` com `DeliveryMethod.Unreliable`.
+  2. No lado do receptor, escutar a recepção de dados brutos no callback nativo de rede do LiteNetLib (`OnNetworkReceive` / `ReceiveRawData`) filtrando `channelNumber == 1`.
+  3. Deserializar manualmente os bytes do pacote em um método dedicado `DeserializeRawVoip(NetDataReader reader)`.
+- **Benefícios de Segurança e Estabilidade:**
+  - **Bypassa 100% o `NetPacketProcessor` do FIKA:** O leitor principal do FIKA nem chega a ver os bytes de voz.
+  - **Isolamento de Erros:** Se o pacote de voz sofrer truncamento ou perda de pacote na internet, ele é descartado instantaneamente no `Channel 1` **sem afetar o `Channel 0`** (onde trafegam o movimento, tiros e inventário do jogo).
+  - **Eliminação de Desync:** Elimina o risco do erro `ParseException: Undefined packet in NetDataReader` e impede qualquer corrupção na fila de inventário.
+
+### 8.2 Praticidade de Conexão (Zero Portas Extras / Zero VPN Obrigatória)
+- **Aproveitamento de Socket Existente:** Como a transmissão de `RawData` no `Channel 1` viaja pela mesma porta UDP que o FIKA já estabeleceu com o Host/Server:
+  - **Não exige abrir portas adicionais** no roteador físico do Host nem dos convidados.
+  - **Não exige VPN obrigatória** (Radmin VPN / Tailscale), funcionando no modo "Plug and Play" tanto em conexões por IP direto quanto em LAN/VPN.
+
+### 8.3 Protocolo de Leitura Segura de Stream (Stream Alignment Guard)
+- **Instruções de Implementação:** No método de deserialização de voz (`DeserializeRawVoip`):
+  1. Ler o tamanho do payload declarado no cabeçalho inicial do pacote.
+  2. Encapsular a leitura em um bloco `try/catch`. Caso ocorra qualquer exceção na leitura do array Opus (ex: array truncado pela internet), o leitor **DEVE forçar o reposicionamento do ponteiro (`reader.SetPosition(endPosition)`)** consumindo exatamente a quantidade de bytes declarada no cabeçalho.
+  3. **Regra de Ouro:** NUNCA engolir uma exceção de leitura deixando o `reader.Position` no meio do buffer.
+
+

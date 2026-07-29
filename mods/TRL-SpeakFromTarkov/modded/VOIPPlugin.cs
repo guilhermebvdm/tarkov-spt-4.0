@@ -8,7 +8,7 @@ using UnityEngine.SceneManagement;
 
 namespace TRL_SpeakFromTarkov
 {
-    [BepInPlugin("trl.speakfromtarkov", "TRL-SpeakFromTarkov", "1.3.1")]
+    [BepInPlugin("trl.speakfromtarkov", "TRL-SpeakFromTarkov", "1.5.0")]
     [BepInDependency("com.fika.core", BepInDependency.DependencyFlags.HardDependency)]
     public class VoIPPlugin : BaseUnityPlugin
     {
@@ -62,7 +62,7 @@ namespace TRL_SpeakFromTarkov
         public static ConfigEntry<float> RNNoiseGateHoldMs    { get; private set; }
         public static ConfigEntry<int> RNNoiseLatency       { get; private set; }
 
-        public static int FrameSize => (int)Math.Round(SampleRate.Value * 0.02);
+        public static int FrameSize => (int)Math.Round(SampleRate.Value * 0.040);
 
         [System.Runtime.InteropServices.DllImport("kernel32.dll", CharSet = System.Runtime.InteropServices.CharSet.Auto, SetLastError = true)]
         private static extern IntPtr LoadLibrary(string libname);
