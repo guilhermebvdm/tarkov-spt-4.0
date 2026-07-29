@@ -713,10 +713,29 @@ namespace TRLDynamicSpawn.Patches
         [PatchPrefix]
         private static bool PatchPrefix(ref Profile __result, BotProfileDataClass __instance, List<Profile> profiles2Select, bool withDelete)
         {
-            // Se for PMC, ignoramos a checagem rigorosa de Dificuldade e Side, garantindo que o bot não retorne nulo.
+            if (profiles2Select == null || profiles2Select.Count == 0) return true;
+
+            // Se for PMC (USEC ou BEAR), aceitamos qualquer perfil de PMC cujo Side seja USEC/BEAR ou cuja Role seja sptUsec/sptBear/pmcUSEC/pmcBEAR.
             if (__instance.WildSpawnType_0 == WildSpawnType.pmcUSEC || __instance.WildSpawnType_0 == WildSpawnType.pmcBEAR)
             {
-                var list = profiles2Select.Where(x => x.Info.Settings.Role == __instance.WildSpawnType_0).ToList();
+                bool isUsec = __instance.WildSpawnType_0 == WildSpawnType.pmcUSEC;
+                EPlayerSide targetSide = isUsec ? EPlayerSide.Usec : EPlayerSide.Bear;
+
+                var list = profiles2Select.Where(x => 
+                    x != null && x.Info != null && (
+                        x.Info.Side == targetSide || 
+                        x.Info.Settings?.Role == __instance.WildSpawnType_0 ||
+                        (isUsec && (x.Info.Settings?.Role.ToString().ToLower().Contains("usec") ?? false)) ||
+                        (!isUsec && (x.Info.Settings?.Role.ToString().ToLower().Contains("bear") ?? false))
+                    )
+                ).ToList();
+
+                if (list.Count == 0)
+                {
+                    // Fallback: se não achar pelo Side exato, pega qualquer perfil PMC disponível em profiles2Select
+                    list = profiles2Select.Where(x => x != null && x.Info != null && (x.Info.Side == EPlayerSide.Usec || x.Info.Side == EPlayerSide.Bear)).ToList();
+                }
+
                 if (list.Count > 0)
                 {
                     Profile profile = list[UnityEngine.Random.Range(0, list.Count)];
@@ -725,6 +744,10 @@ namespace TRLDynamicSpawn.Patches
                         profiles2Select.Remove(profile);
                     }
                     __result = profile;
+                    if (TRLDynamicSpawn.Helpers.Settings.enableDebugLogs.Value)
+                    {
+                        Plugin.LogSource.LogInfo($"[TRLDynamicSpawn] ChooseProfilePatch assigned PMC profile '{profile.Nickname}' (Side: {profile.Info.Side}, Role: {profile.Info.Settings?.Role}) for {__instance.WildSpawnType_0}");
+                    }
                     return false; // Skips original method
                 }
             }
