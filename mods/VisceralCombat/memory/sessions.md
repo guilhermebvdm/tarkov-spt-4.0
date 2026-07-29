@@ -5,7 +5,7 @@
 - **Estado:** Código C# extraído das DLLs originais e estruturado no repositório.
 - **Pendências:** 🟢 Nenhuma pendência blocker registrada.
 
-## Sessão 2026-07-28 — Extração e Inicialização do Mod
-- **Decisão:** Extração direta via `ilspycmd` (versão 9.0) das DLLs `VisceralCombat.dll`, `VolumetricBloodFX.dll` e `bundleloader.dll`.
-- **Organização:** Código salvo intacto em `original/` e duplicado em `modded/` para correções ativas.
-- **Observação:** O mod faz uso direto das APIs de rede do FIKA (`FikaEventDispatcher`, `RegisterPacket<DismembermentPacket>`, `RegisterPacket<RagdollSyncPacket>`).
+## Sessão 2026-07-28 — Code Review e Roadmap de Refatoração
+- **Análise:** Realizado code-review minucioso identificando gargalos de FPS, vazamentos de RAM, corrotinas descontroladas, thread-safety bugs (`async void`) e 15+ propriedades fantasma no F12.
+- **Entregável:** Criado o roadmap detalhado de refatoração em `docs/refactor-roadmap.md`.
+- **Regra:** Todas as correções serão realizadas em `modded/` sem alterar a pasta `original/`.
