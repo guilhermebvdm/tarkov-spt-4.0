@@ -10,7 +10,7 @@ namespace CustomClasses.Client;
 ///     Busca os fatores do server (rota /customclasses/skill-multipliers) e faz Prefix em
 ///     AbstractSkillClass.OnTrigger. UI (linha+tooltip) vem na Fatia 2.
 /// </summary>
-[BepInPlugin("customclasses.mdj.client", "CustomClasses", "0.13.2")]
+[BepInPlugin("customclasses.mdj.client", "CustomClasses", "0.14.0")]
 [BepInDependency("com.SPT.core", "4.0.0")]
 [BepInDependency("me.sol.sain", BepInDependency.DependencyFlags.SoftDependency)]   // (050.4 SAIN) carrega após o SAIN se presente
 public class Plugin : BaseUnityPlugin
@@ -169,6 +169,7 @@ public class Plugin : BaseUnityPlugin
         new AimPunchPatch().Enable();                       // (050.2) 🔻 Furtivo — aim-punch ×1.5 (Rattled)
         new HolsterDrawSpeedPatch().Enable();               // (080/087) 🔫 Caçador/Fuzileiro/Furtivo — saque (draw-in) do holster mais rápido
         new HolsterDrawResetPatch().Enable();               // (087) restaura o Animator.speed global após o saque acelerado
+        new HolsterPutAwaySpeedPatch().Enable();            // (088) 🔫 acelera o put-away da troca quando a arma que entra vem do holster
         new ShotgunReloadPatch().Enable();                  // (084) 🔫 Tanque — recarga de escopeta tubular mais rápida
         new MedrosoDamagePatch().Enable();                  // (082) 🔻 Saqueador — tremor ao levar tiro
         Medroso.Init();                                     // (082) hook de supressão/near-miss (GClass897.OnShoot)

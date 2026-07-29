@@ -439,6 +439,78 @@ internal class HolsterDrawResetPatch : ModulePatch
 }
 
 /// <summary>
+///     088 — 🔫 <b>Saque Rápido, fase 1</b> (put-away): acelera também o GUARDAR da arma que SAI quando a arma que
+///     ENTRA vem do Holster, para a TROCA INTEIRA acelerar (não só o draw-in). Feedback in-game: com só a fase 3
+///     acelerada, o começo da troca (guardar a primária + transição) ficava lento e destoava.
+///     <para>
+///     Prefix em <c>FirearmController.Drop(animationSpeed, callback, fastDrop, nextControllerItem)</c> (Player.cs:13506):
+///     <c>SetAnimationSpeed(animationSpeed)</c> é o <c>Animator.speed</c> GLOBAL do controller que SAI → escalar
+///     acelera o put-away inteiro. A <b>fase 2 (transição) encurta de brinde</b>: o callback do <c>Drop</c> dispara no
+///     evento de animação <c>OnWeapOut</c> do put-away, então acelerá-lo antecipa todo o encadeamento
+///     create→spawn (não há timer/WaitSeconds a remover). <b>SEM reset</b>: o controller que sai é destruído logo
+///     depois (<c>DestroyController</c>) — ao contrário da fase 3. ⚠️ CR-088: o prefab da arma vai pro POOL (não é
+///     literalmente destruído), então o <c>Animator.speed</c> boostado sobrevive no pool; a garantia de "sem vazamento"
+///     é que TODO <c>Spawn</c> reescreve o speed incondicionalmente (Player.cs:13497) → o próximo saque zera o resíduo.
+///     Se um dia o <c>Spawn</c> parar de chamar <c>SetAnimationSpeed</c>, essa premissa quebra.
+///     </para>
+///     <para>⚠️ Gate INVERTIDO vs. a fase 3: aqui <c>__instance.Item</c> é a arma que SAI (primária); quem está no
+///     Holster é o <c>nextControllerItem</c> (a arma que ENTRA). Gate: MainPlayer local (075, ainda é o HandsController
+///     atual no Drop) + classe + <c>nextControllerItem</c> vem do Holster. Usa o mesmo <c>QuickDrawTime</c> da fase 3.</para>
+/// </summary>
+internal class HolsterPutAwaySpeedPatch : ModulePatch
+{
+    protected override MethodBase GetTargetMethod()
+    {
+        // Drop(float animationSpeed, Action callback, bool fastDrop, Item nextControllerItem)
+        return AccessTools.Method(typeof(Player.FirearmController), "Drop",
+            new[] { typeof(float), typeof(Action), typeof(bool), typeof(Item) });
+    }
+
+    [PatchPrefix]
+    private static void Prefix(Player.FirearmController __instance, ref float animationSpeed, Item nextControllerItem)
+    {
+        try
+        {
+            if (PerksConfig.QuickDrawEnabled?.Value != true)
+            {
+                return;
+            }
+
+            if (!(SkillMultipliers.IsLocalClass("Hunter")
+                  || SkillMultipliers.IsLocalClass("Rifleman")
+                  || SkillMultipliers.IsLocalClass("Stealth")))
+            {
+                return;
+            }
+
+            var mainPlayer = Singleton<GameWorld>.Instance?.MainPlayer;
+            if (mainPlayer == null || !ReferenceEquals(__instance, mainPlayer.HandsController))
+            {
+                return;   // só o player local (075) — no Drop, o HandsController ainda é a arma que sai
+            }
+
+            // A arma que ENTRA (nextControllerItem, não __instance.Item!) vem do slot HOLSTER?
+            var holster = mainPlayer.Inventory?.Equipment?.GetSlot(EquipmentSlot.Holster);
+            var container = (nextControllerItem as Weapon)?.CurrentAddress?.Container;
+            if (holster == null || container == null || !ReferenceEquals(container, holster))
+            {
+                return;
+            }
+
+            var t = PerksConfig.QuickDrawTime?.Value ?? 1f;   // mesmo fator da fase 3 (draw-in)
+            if (t > 0f && t < 1f)
+            {
+                animationSpeed /= t;   // put-away mais rápido (sem reset — controller destruído logo após)
+            }
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log?.LogError($"[CustomClasses] (088) quick draw put-away falhou: {ex.Message}");
+        }
+    }
+}
+
+/// <summary>
 ///     (review fix 2026-06-24) Captura o tipo do último dano recebido pelo player LOCAL, pra o
 ///     <c>AimPunchPatch</c> (Rattled/Cool Under Fire) NÃO disparar em dano de QUEDA. Prefix em
 ///     <c>Player.ApplyDamageInfo</c> — roda antes do <c>EffectsController</c>→<c>ForceEffector.AddForce</c>.
