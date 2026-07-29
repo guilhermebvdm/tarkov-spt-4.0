@@ -188,6 +188,24 @@ namespace TRLDynamicSpawn.Components
             return seconds;
         }
 
+        public int GetRealAliveBotsCount()
+        {
+            if (_botsController == null || _botsController.Bots == null || _botsController.Bots.BotOwners == null)
+                return 0;
+
+            int count = 0;
+            var botArray = _botsController.Bots.BotOwners.ToArray();
+            for (int i = 0; i < botArray.Length; i++)
+            {
+                var b = botArray[i];
+                if (b != null && b.GetPlayer != null && b.HealthController != null && b.HealthController.IsAlive)
+                {
+                    count++;
+                }
+            }
+            return count;
+        }
+
         private IEnumerator SpawnHordeLoop()
         {
             // 1. Janela Vanilla Inicial (0s a 60s / DelayBeforeFirstWave)
@@ -217,65 +235,67 @@ namespace TRLDynamicSpawn.Components
             {
                 string currentMap = GetCurrentMapName();
                 int maxCap = Settings.GetMapCap(currentMap);
-                int aliveBots = _botsController.AliveAndLoadingBotsCount;
+                int aliveRealBots = GetRealAliveBotsCount();
                 _secondsBetweenWaves = GetSecondsBetweenWavesForMap(currentMap);
 
-                // ESTÁGIO A: Se o mapa precisa de bots, roda o Warmup de 30 em 30 segundos
-                if (aliveBots < maxCap)
+                // ESTÁGIO A: Se os BOTS REALMENTE VIVOS forem menores que o maxCap, roda o Warmup de 30 em 30 segundos
+                if (aliveRealBots < maxCap)
                 {
                     int warmupAttempt = 1;
                     while (true)
                     {
-                        // Limpa qualquer perfil preso/pendente na fila do SPT antes de contar os bots
+                        // Limpa qualquer perfil preso/pendente na fila do SPT antes de iniciar a onda
                         ClearSptQueue();
                         yield return new WaitForSeconds(1f);
 
                         currentMap = GetCurrentMapName();
                         maxCap = Settings.GetMapCap(currentMap);
-                        aliveBots = _botsController.AliveAndLoadingBotsCount;
+                        aliveRealBots = GetRealAliveBotsCount();
 
-                        if (aliveBots >= maxCap)
+                        if (aliveRealBots >= maxCap)
                         {
-                            Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Map is 100% full ({aliveBots}/{maxCap}). Stopping 30s Warmup loop.");
+                            Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Map is 100% full of REAL alive bots ({aliveRealBots}/{maxCap}). Stopping 30s Warmup loop.");
                             break;
                         }
 
                         int warmupInterval = 30;
-                        Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Map needs bots ({aliveBots}/{maxCap}). Triggering 30s Warmup Wave (Attempt {warmupAttempt})...");
+                        Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Map needs bots (REAL Alive: {aliveRealBots}/{maxCap}). Triggering 30s Warmup Wave (Attempt {warmupAttempt})...");
 
                         if (_activeWaveCoroutine != null) StopCoroutine(_activeWaveCoroutine);
                         _activeWaveCoroutine = StartCoroutine(ProcessWave(false));
 
                         _nextWaveTime = Time.time + warmupInterval;
 
-                        bool capReached = false;
+                        // Aguarda os 30s da onda de warmup para os bots entrarem fisicamente na cena
                         for (int elapsed = 0; elapsed < warmupInterval; elapsed++)
                         {
                             yield return new WaitForSeconds(1f);
-                            currentMap = GetCurrentMapName();
-                            maxCap = Settings.GetMapCap(currentMap);
-                            aliveBots = _botsController.AliveAndLoadingBotsCount;
-
-                            if (aliveBots >= maxCap)
-                            {
-                                Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Max cap reached early ({aliveBots}/{maxCap}) at {elapsed + 1}s during Warmup.");
-                                capReached = true;
-                                break;
-                            }
                         }
 
-                        if (capReached) break;
+                        // Checagem no final do ciclo de 30s (quando resta 1s/fim do timer)
+                        currentMap = GetCurrentMapName();
+                        maxCap = Settings.GetMapCap(currentMap);
+                        aliveRealBots = GetRealAliveBotsCount();
+
+                        Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Warmup check (Attempt {warmupAttempt}): {aliveRealBots}/{maxCap} REAL alive bots in map.");
+
+                        if (aliveRealBots >= maxCap)
+                        {
+                            Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Max cap reached with REAL alive bots ({aliveRealBots}/{maxCap}). Stopping 30s Warmup loop.");
+                            break;
+                        }
+
                         warmupAttempt++;
                     }
                 }
 
-                // ESTÁGIO B: Mapa 100% cheio -> Entra no Cooldown Longo (SecondsBetweenWaves, ex: 600s)
+                // ESTÁGIO B: Mapa 100% cheio de BOTS REAIS -> Entra no Cooldown Longo (SecondsBetweenWaves, ex: 600s)
                 currentMap = GetCurrentMapName();
                 maxCap = Settings.GetMapCap(currentMap);
-                aliveBots = _botsController.AliveAndLoadingBotsCount;
+                aliveRealBots = GetRealAliveBotsCount();
                 _secondsBetweenWaves = GetSecondsBetweenWavesForMap(currentMap);
 
-                Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Map is 100% full ({aliveBots}/{maxCap}). Wave Cooldown active for '{currentMap}'. Next Warmup check in {_secondsBetweenWaves}s...");
+                Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Map is 100% full with REAL alive bots ({aliveRealBots}/{maxCap}). Wave Cooldown active for '{currentMap}'. Next Warmup check in {_secondsBetweenWaves}s...");
                 _nextWaveTime = Time.time + _secondsBetweenWaves;
 
                 float waitNormal = Mathf.Max(1f, _secondsBetweenWaves);
@@ -308,7 +328,7 @@ namespace TRLDynamicSpawn.Components
 
             string currentMap = GetCurrentMapName();
             int maxCap = Settings.GetMapCap(currentMap);
-            int aliveBots = _botsController.AliveAndLoadingBotsCount;
+            int aliveBots = GetRealAliveBotsCount();
             int availableSlots = maxCap - aliveBots;
 
             Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Calculating Wave: MaxCap={maxCap}, Alive={aliveBots}, Available={availableSlots}");

@@ -79,4 +79,10 @@ A organização da pasta do mod varia dependendo do tipo de origem:
 - `backlog/`: Especificações funcionais/técnicas e artefatos de tarefas.
 - `docs/`: Documentação técnica e relatórios do mod.
 
+## Versionamento e Compilação de Mods
+
+- **Bump de Versão (SemVer):** Toda compilação deve evoluir a versão `x.y.z` do mod (sincronizada no `Plugin.cs`, `.csproj` e/ou `package.json`). `z` (patch) para ajustes/fixes; `y` (minor) para novas features; `x` (major) para breaking changes.
+- **Isolamento da Pasta do Jogo:** A compilação por assistentes de IA gera binários (`.dll`) **exclusivamente na pasta do mod** (`mods/<mod>/builds/` ou `mods/<mod>/modded/bin/Release/`). Nunca copiar ou instalar automaticamente na pasta do jogo (`D:/SPT` ou `.spt-path`), priorizando o fluxo de versionamento e controle local no workspace.
+
+
 
