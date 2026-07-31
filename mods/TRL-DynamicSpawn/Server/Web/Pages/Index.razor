@@ -353,10 +353,10 @@ html, body {
 <div class="trl-shell">
     <!-- TOPBAR -->
     <header class="trl-topbar">
-        <a href="#" class="trl-brand">
+        <div class="trl-brand">
             <span>TRL-DYNAMIC SPAWN</span>
             <span class="trl-brand__version">v1.0.0</span>
-        </a>
+        </div>
         <div class="trl-topbar__sep"></div>
         
         <div class="trl-screen-bar" style="border-bottom: none; background: transparent; padding: 0;">
@@ -706,8 +706,18 @@ html, body {
     async function fetchConfig() {
         try {
             const res = await fetch("/trldynamicspawn/getConfig");
-            if (!res.ok) throw new Error("Erro na requisição");
-            const data = await res.json();
+            if (!res.ok) throw new Error("Erro na requisição HTTP " + res.status);
+            const rawText = await res.text();
+            let data;
+            try {
+                data = JSON.parse(rawText);
+                if (data && typeof data === 'object' && 'err' in data && 'data' in data) {
+                    data = typeof data.data === 'string' ? JSON.parse(data.data) : data.data;
+                }
+            } catch (e) {
+                showToast("error", "ERRO", "Resposta do servidor em formato inválido");
+                return;
+            }
             stateInitial = JSON.parse(JSON.stringify(data));
             stateCurrent = JSON.parse(JSON.stringify(data));
             renderUI();
