@@ -22,60 +22,10 @@ public class TRLRouters : StaticRouter
         _ = TRLDynamicSpawnServer.Globals.TRLConfigManager.LoadConfig();
     }
 
-    private static string GetStaticFile(string relativePath)
-    {
-        try
-        {
-            var asmPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
-            var modDir = System.IO.Path.GetDirectoryName(asmPath) ?? "";
-            
-            string[] candidateDirs = new string[]
-            {
-                System.IO.Path.Combine(modDir, "wwwroot"),
-                System.IO.Path.Combine(modDir, "..", "wwwroot"),
-                System.IO.Path.Combine(modDir, "..", "..", "wwwroot"),
-                System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "user", "mods", "TRL-DynamicSpawn", "Server", "wwwroot"),
-                System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "user", "mods", "TRL-DynamicSpawn", "wwwroot")
-            };
-
-            foreach (var dir in candidateDirs)
-            {
-                string fullPath = System.IO.Path.Combine(dir, relativePath.Replace('/', System.IO.Path.DirectorySeparatorChar));
-                if (System.IO.File.Exists(fullPath))
-                {
-                    return System.IO.File.ReadAllText(fullPath);
-                }
-            }
-        }
-        catch { }
-        return string.Empty;
-    }
-
     private static List<RouteAction> GetCustomRoutes()
     {
         return new List<RouteAction>
         {
-            new RouteAction("/trldynamicspawn",
-                async (url, info, sessionID, output) => await new ValueTask<string>(GetStaticFile("index.html"))
-            ),
-            new RouteAction("/trldynamicspawn/",
-                async (url, info, sessionID, output) => await new ValueTask<string>(GetStaticFile("index.html"))
-            ),
-            new RouteAction("/trldynamicspawn/index.html",
-                async (url, info, sessionID, output) => await new ValueTask<string>(GetStaticFile("index.html"))
-            ),
-            new RouteAction("/trldynamicspawn/css/trl-tokens.css",
-                async (url, info, sessionID, output) => await new ValueTask<string>(GetStaticFile("css/trl-tokens.css"))
-            ),
-            new RouteAction("/trldynamicspawn/css/trl-components.css",
-                async (url, info, sessionID, output) => await new ValueTask<string>(GetStaticFile("css/trl-components.css"))
-            ),
-            new RouteAction("/trldynamicspawn/css/trl-utilities.css",
-                async (url, info, sessionID, output) => await new ValueTask<string>(GetStaticFile("css/trl-utilities.css"))
-            ),
-            new RouteAction("/trldynamicspawn/fonts/bender.css",
-                async (url, info, sessionID, output) => await new ValueTask<string>(GetStaticFile("fonts/bender.css"))
-            ),
             new RouteAction("/trldynamicspawn/getConfig",
                 async (url, info, sessionID, output) =>
                 {
