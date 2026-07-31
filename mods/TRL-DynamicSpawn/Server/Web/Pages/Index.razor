@@ -707,17 +707,36 @@ html, body {
         try {
             const res = await fetch("/trldynamicspawn/getConfig");
             if (!res.ok) throw new Error("Erro na requisição HTTP " + res.status);
-            const rawText = await res.text();
-            let data;
-            try {
-                data = JSON.parse(rawText);
-                if (data && typeof data === 'object' && 'err' in data && 'data' in data) {
-                    data = typeof data.data === 'string' ? JSON.parse(data.data) : data.data;
+            let rawText = await res.text();
+            let data = rawText;
+
+            // Desempacotar iterativamente strings JSON escapadas
+            while (typeof data === 'string') {
+                try {
+                    const parsed = JSON.parse(data);
+                    data = parsed;
+                } catch (e) {
+                    break;
                 }
-            } catch (e) {
-                showToast("error", "ERRO", "Resposta do servidor em formato inválido");
-                return;
             }
+
+            // Se a resposta veio no envelope de API do SPT: { err: 0, errmsg: null, data: ... }
+            if (data && typeof data === 'object' && 'data' in data && data.data !== null && data.data !== undefined) {
+                let innerData = data.data;
+                while (typeof innerData === 'string') {
+                    try {
+                        innerData = JSON.parse(innerData);
+                    } catch (e) {
+                        break;
+                    }
+                }
+                data = innerData;
+            }
+
+            if (!data || typeof data !== 'object') {
+                throw new Error("Formato de dados JSON inválido");
+            }
+
             stateInitial = JSON.parse(JSON.stringify(data));
             stateCurrent = JSON.parse(JSON.stringify(data));
             renderUI();
