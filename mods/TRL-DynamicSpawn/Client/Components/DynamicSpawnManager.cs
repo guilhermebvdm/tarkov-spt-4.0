@@ -208,6 +208,27 @@ namespace TRLDynamicSpawn.Components
 
         private IEnumerator SpawnHordeLoop()
         {
+            // 0. Checagem de desativação global de bots via RaidSettings (AI amount = "None" / EBotAmount.NoBots)
+            try
+            {
+                var app = Comfort.Common.Singleton<ClientApplication<ISession>>.Instance as TarkovApplication;
+                if (app != null)
+                {
+                    var field = typeof(TarkovApplication).GetField("_raidSettings", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+                    var raidSettings = field?.GetValue(app) as RaidSettings;
+                    if (raidSettings != null && (raidSettings.BotSettings.BotAmount == EFT.Bots.EBotAmount.NoBots || raidSettings.WavesSettings.BotAmount == EFT.Bots.EBotAmount.NoBots))
+                    {
+                        Plugin.LogSource.LogInfo("[TRL-DynamicSpawn] AI Amount set to 'None' (NoBots) in Raid Settings. DynamicSpawn is DISABLED for this raid.");
+                        IsWarmupActive = false;
+                        yield break;
+                    }
+                }
+            }
+            catch (System.Exception ex)
+            {
+                Plugin.LogSource.LogError($"[TRL-DynamicSpawn] Error checking RaidSettings BotAmount: {ex.Message}");
+            }
+
             // 1. Janela Vanilla Inicial (0s a 30s / DelayBeforeFirstWave)
             IsWarmupActive = true;
 
