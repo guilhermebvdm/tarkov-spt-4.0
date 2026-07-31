@@ -1,0 +1,958 @@
+@page "/trldynamicspawn"
+@page "/trldynamicspawn/{*path}"
+
+<style>
+/* TRL DESIGN SYSTEM TOKENS & COMPONENTS INLINED */
+:root {
+  --trl-ground-deep: #0d0d0e;
+  --trl-ground:      #131314;
+  --trl-surface-1:   #1b1b1d;
+  --trl-surface-2:   #222225;
+  --trl-surface-3:   #29292c;
+  --trl-surface-4:   #303034;
+
+  --trl-tan-100: #e8ddc4;
+  --trl-tan-200: #d8c9a4;
+  --trl-tan-300: #c7b48a;
+  --trl-tan-400: #ab9a71;
+  --trl-tan-500: #8f8560;
+  --trl-tan-600: #6b6247;
+  --trl-tan-700: #453f2d;
+  --trl-tan-800: #2b2719;
+
+  --trl-red-brand: #ff0000;
+  --trl-red-300:   #ff6b60;
+  --trl-red-400:   #f04438;
+  --trl-red-500:   #d92c20;
+  --trl-red-600:   #a8231a;
+  --trl-red-700:   #711712;
+  --trl-red-soft:  #d27a7a;
+
+  --trl-green-400: #9ad27a;
+  --trl-green-600: #5f8a49;
+  --trl-amber-400: #cc9a3e;
+  --trl-amber-600: #8a6a2c;
+  --trl-blue-400:  #6f93bd;
+
+  --trl-ink:         #e8e7e4;
+  --trl-ink-muted:   #9b9a96;
+  --trl-ink-faint:   #706f6b;
+  --trl-ink-ghost:   #464541;
+  --trl-ink-inverse: #131314;
+
+  --trl-font-display: 'Bender', 'Bahnschrift', 'Segoe UI', system-ui, sans-serif;
+  --trl-font-body:    'Segoe UI', system-ui, -apple-system, sans-serif;
+  --trl-font-mono:    'Cascadia Mono', 'Consolas', ui-monospace, monospace;
+
+  --trl-text-2xs: 10px;
+  --trl-text-xs:  11px;
+  --trl-text-sm:  12px;
+  --trl-text-md:  13px;
+  --trl-text-lg:  15px;
+  --trl-text-xl:  18px;
+  --trl-text-2xl: 22px;
+  --trl-text-3xl: 28px;
+
+  --trl-track-wide:   .08em;
+  --trl-track-wider:  .14em;
+  --trl-track-widest: .22em;
+
+  --trl-weight-regular:  400;
+  --trl-weight-semibold: 600;
+  --trl-weight-bold:     700;
+
+  --trl-leading-tight: 1.2;
+  --trl-leading-base:  1.45;
+
+  --trl-space-0:  0;
+  --trl-space-h:  2px;
+  --trl-space-1:  4px;
+  --trl-space-2:  8px;
+  --trl-space-3:  12px;
+  --trl-space-4:  16px;
+  --trl-space-5:  20px;
+  --trl-space-6:  24px;
+  --trl-space-8:  32px;
+
+  --trl-border-w:     1px;
+  --trl-accent-bar-w: 2px;
+  --trl-radius:       0;
+
+  --trl-shadow-1: 0 2px 8px rgba(0, 0, 0, .35);
+  --trl-shadow-2: 0 8px 24px rgba(0, 0, 0, .5);
+
+  --trl-glow-tan:   0 0 6px rgba(199, 180, 138, .35);
+  --trl-glow-green: 0 0 6px rgba(154, 210, 122, .55);
+  --trl-glow-amber: 0 0 6px rgba(204, 154, 62, .55);
+  --trl-glow-red:   0 0 8px rgba(255, 0, 0, .45);
+
+  --trl-z-nav:     50;
+  --trl-z-popover: 120;
+  --trl-z-toast:   200;
+
+  --trl-dur-1: 100ms;
+  --trl-dur-2: 160ms;
+  --trl-dur-3: 260ms;
+  --trl-ease: cubic-bezier(.2, .7, .3, 1);
+
+  --trl-sidebar-w:    280px;
+  --trl-topbar-h:     48px;
+
+  --trl-bg-app:     var(--trl-ground);
+  --trl-bg-panel:   var(--trl-surface-1);
+  --trl-bg-raised:  var(--trl-surface-2);
+  --trl-bg-input:   var(--trl-ground-deep);
+  --trl-bg-hover:   rgba(199, 180, 138, .08);
+  --trl-bg-active:  rgba(199, 180, 138, .14);
+
+  --trl-edge:        rgba(255, 255, 255, .09);
+  --trl-edge-strong: rgba(255, 255, 255, .20);
+
+  --trl-fg:           var(--trl-ink);
+  --trl-fg-muted:     var(--trl-ink-muted);
+  --trl-fg-faint:     var(--trl-ink-faint);
+  --trl-fg-label:     var(--trl-ink-muted);
+  --trl-fg-on-accent: var(--trl-ink-inverse);
+
+  --trl-accent:        var(--trl-tan-300);
+  --trl-accent-strong: var(--trl-tan-200);
+  --trl-accent-dim:    var(--trl-tan-500);
+
+  --trl-danger:        var(--trl-red-soft);
+  --trl-danger-strong: var(--trl-red-500);
+  --trl-success:       var(--trl-green-400);
+
+  --trl-laser: linear-gradient(90deg, transparent, rgba(255, 0, 0, .55) 22%, #ff0000 50%, rgba(255, 0, 0, .55) 78%, transparent);
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  background-color: var(--trl-ground);
+  color: var(--trl-fg);
+  font-family: var(--trl-font-body);
+  font-size: var(--trl-text-md);
+  overflow: hidden;
+}
+
+.trl-shell {
+  display: grid;
+  grid-template-rows: var(--trl-topbar-h) 1fr;
+  grid-template-columns: var(--trl-sidebar-w) 1fr;
+  grid-template-areas: "topbar topbar" "sidebar main";
+  height: 100vh;
+}
+
+.trl-topbar {
+  grid-area: topbar;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--trl-space-4);
+  padding: 0 var(--trl-space-4);
+  background: var(--trl-ground-deep);
+  border-bottom: 1px solid var(--trl-edge);
+  z-index: var(--trl-z-nav);
+}
+
+.trl-topbar::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -1px;
+  height: 1px;
+  background: var(--trl-laser);
+  box-shadow: var(--trl-glow-red);
+}
+
+.trl-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--trl-space-2);
+  font-family: var(--trl-font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--trl-track-wider);
+  font-size: var(--trl-text-md);
+  color: var(--trl-ink);
+  text-decoration: none;
+}
+
+.trl-brand__version {
+  font-family: var(--trl-font-mono);
+  font-size: var(--trl-text-2xs);
+  color: var(--trl-fg-faint);
+}
+
+.trl-topbar__sep { width: 1px; height: 20px; background: var(--trl-edge); }
+.trl-topbar__spacer { margin-left: auto; }
+
+.trl-sidebar {
+  grid-area: sidebar;
+  background: var(--trl-bg-panel);
+  border-right: 1px solid var(--trl-edge);
+  overflow-y: auto;
+  padding: var(--trl-space-3) 0;
+}
+
+.trl-main {
+  grid-area: main;
+  overflow-y: auto;
+  padding: var(--trl-space-6);
+}
+
+.trl-nav { display: flex; flex-direction: column; gap: 2px; }
+.trl-nav__label {
+  padding: var(--trl-space-3) var(--trl-space-3) var(--trl-space-1);
+  font-family: var(--trl-font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--trl-track-widest);
+  font-size: var(--trl-text-2xs);
+  color: var(--trl-fg-faint);
+}
+
+.trl-nav__item {
+  display: flex;
+  align-items: center;
+  gap: var(--trl-space-2);
+  padding: var(--trl-space-2) var(--trl-space-3);
+  border-left: 2px solid transparent;
+  color: var(--trl-fg-muted);
+  font-size: var(--trl-text-md);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all var(--trl-dur-1) var(--trl-ease);
+}
+
+.trl-nav__item:hover { background: var(--trl-bg-hover); color: var(--trl-fg); }
+.trl-nav__item.is-active { border-left-color: var(--trl-accent); background: var(--trl-bg-active); color: var(--trl-fg); }
+
+.trl-panel {
+  background: var(--trl-bg-panel);
+  border: 1px solid var(--trl-edge);
+}
+
+.trl-screen-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--trl-space-2);
+  height: 34px;
+  padding: 0 var(--trl-space-3);
+  background: rgba(0, 0, 0, .25);
+  border-bottom: 1px solid var(--trl-edge);
+  font-family: var(--trl-font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--trl-track-wider);
+  font-size: var(--trl-text-xs);
+  color: var(--trl-fg-faint);
+}
+
+.trl-screen-bar__title { color: var(--trl-accent); }
+.trl-screen-bar__meta { margin-left: auto; font-family: var(--trl-font-mono); }
+.trl-screen-bar__dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+.trl-screen-bar__dot--ok { background: var(--trl-success); box-shadow: var(--trl-glow-green); }
+.trl-screen-bar__dot--live { background: var(--trl-red-brand); box-shadow: var(--trl-glow-red); animation: trl-pulse 1.6s var(--trl-ease) infinite; }
+
+.trl-panel__body { padding: var(--trl-space-3); }
+
+.trl-btn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--trl-space-2);
+  height: 30px;
+  padding: 0 var(--trl-space-4);
+  background: transparent;
+  border: 1px solid var(--trl-edge-strong);
+  color: var(--trl-fg-muted);
+  font-family: var(--trl-font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--trl-track-wide);
+  font-size: var(--trl-text-sm);
+  cursor: pointer;
+  transition: all var(--trl-dur-1) var(--trl-ease);
+}
+
+.trl-btn:hover { background: var(--trl-bg-hover); color: var(--trl-fg); }
+.trl-btn--primary { background: var(--trl-accent); border-color: var(--trl-accent); color: var(--trl-fg-on-accent); font-weight: bold; }
+.trl-btn--primary:hover { background: var(--trl-accent-strong); box-shadow: var(--trl-glow-tan); }
+.trl-btn--danger { background: var(--trl-danger-strong); border-color: var(--trl-danger-strong); color: #fff; font-weight: bold; }
+.trl-btn--ghost { border-color: transparent; }
+
+.trl-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--trl-space-3) var(--trl-space-4); }
+.trl-form-grid__full { grid-column: 1 / -1; }
+
+.trl-field { display: flex; flex-direction: column; gap: var(--trl-space-1); }
+.trl-field__label { font-family: var(--trl-font-display); text-transform: uppercase; font-size: var(--trl-text-xs); color: var(--trl-fg-label); }
+
+.trl-slider { appearance: none; width: 100%; height: 4px; background: rgba(255, 255, 255, .06); outline: none; cursor: pointer; }
+.trl-slider::-webkit-slider-thumb { appearance: none; width: 12px; height: 12px; background: var(--trl-accent); border: 1px solid var(--trl-tan-100); }
+.trl-slider-val { font-family: var(--trl-font-mono); font-weight: bold; color: var(--trl-accent); margin-left: var(--trl-space-2); }
+
+.trl-select {
+  appearance: none; width: 100%; height: 30px; padding: 0 var(--trl-space-2);
+  background: var(--trl-bg-input); border: 1px solid var(--trl-edge); color: var(--trl-fg); font-size: var(--trl-text-md);
+}
+
+.trl-switch { display: inline-flex; align-items: center; gap: var(--trl-space-2); font-size: var(--trl-text-md); color: var(--trl-fg-muted); cursor: pointer; }
+.trl-switch input { appearance: none; width: 32px; height: 16px; background: var(--trl-bg-input); border: 1px solid var(--trl-edge-strong); position: relative; cursor: pointer; }
+.trl-switch input::before { content: ""; position: absolute; top: 2px; left: 2px; width: 10px; height: 10px; background: var(--trl-fg-faint); transition: transform var(--trl-dur-2) var(--trl-ease); }
+.trl-switch input:checked { background: var(--trl-bg-active); border-color: var(--trl-accent); }
+.trl-switch input:checked::before { transform: translateX(16px); background: var(--trl-accent); }
+
+.trl-view-section { display: none; }
+.trl-view-section.is-active { display: block; }
+.trl-subtabs { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: var(--trl-space-4); border-bottom: 1px solid var(--trl-edge); padding-bottom: 4px; }
+.trl-subtab-btn { background: transparent; border: 1px solid var(--trl-edge); color: var(--trl-fg-muted); font-family: var(--trl-font-display); font-size: var(--trl-text-xs); text-transform: uppercase; padding: 6px 12px; cursor: pointer; }
+.trl-subtab-btn.is-active { border-color: var(--trl-accent); background: var(--trl-bg-active); color: var(--trl-accent); }
+
+.trl-boss-card { background: var(--trl-surface-1); border: 1px solid var(--trl-edge); padding: var(--trl-space-3); margin-bottom: var(--trl-space-3); border-left: 2px solid var(--trl-accent); }
+.trl-boss-card__title { font-family: var(--trl-font-display); font-size: var(--trl-text-sm); text-transform: uppercase; color: var(--trl-fg); margin-bottom: var(--trl-space-2); }
+
+.trl-toast-container { position: fixed; right: var(--trl-space-4); bottom: var(--trl-space-4); display: flex; flex-direction: column; gap: var(--trl-space-2); z-index: var(--trl-z-toast); }
+.trl-toast { min-width: 260px; max-width: 380px; background: var(--trl-surface-2); border: 1px solid var(--trl-edge-strong); border-left: 3px solid var(--trl-accent); padding: var(--trl-space-2) var(--trl-space-3); }
+.trl-toast--ok { border-left-color: var(--trl-success); }
+.trl-toast--warn { border-left-color: var(--trl-amber-400); }
+.trl-toast--error { border-left-color: var(--trl-danger-strong); }
+.trl-toast__title { font-family: var(--trl-font-display); text-transform: uppercase; font-size: var(--trl-text-xs); color: var(--trl-fg); }
+.trl-toast__msg { font-size: var(--trl-text-sm); color: var(--trl-fg-muted); }
+
+.trl-h3 { font-family: var(--trl-font-display); font-size: var(--trl-text-xl); color: var(--trl-fg); margin: 0 0 var(--trl-space-2); }
+.trl-divider { border: none; height: 1px; background: var(--trl-edge); margin: var(--trl-space-4) 0; }
+
+@@keyframes trl-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+</style>
+
+<div class="trl-shell">
+    <!-- TOPBAR -->
+    <header class="trl-topbar">
+        <a href="#" class="trl-brand">
+            <span>TRL-DYNAMIC SPAWN</span>
+            <span class="trl-brand__version">v1.0.0</span>
+        </a>
+        <div class="trl-topbar__sep"></div>
+        
+        <div class="trl-screen-bar" style="border-bottom: none; background: transparent; padding: 0;">
+            <span id="syncDot" class="trl-screen-bar__dot trl-screen-bar__dot--ok"></span>
+            <span id="syncText" class="trl-screen-bar__meta" style="color: var(--trl-fg-muted);">SYNCED</span>
+        </div>
+
+        <div class="trl-topbar__spacer"></div>
+
+        <div style="display:flex; gap:8px; align-items:center;">
+            <select id="langSelect" class="trl-select" style="width: auto; height: 30px;">
+                <option value="pt">PT-BR</option>
+                <option value="en">EN-US</option>
+            </select>
+
+            <button id="btnUndo" class="trl-btn trl-btn--ghost" disabled title="Desfazer alterações locais">
+                <span data-i18n="undo">DESFAZER</span>
+            </button>
+
+            <button id="btnReset" class="trl-btn trl-btn--danger" title="Restaurar padrões de fábrica">
+                <span data-i18n="reset">PADRÃO</span>
+            </button>
+
+            <button id="btnReload" class="trl-btn" title="Recarregar do servidor">
+                <span data-i18n="reload">RECARREGAR</span>
+            </button>
+
+            <button id="btnSave" class="trl-btn trl-btn--primary">
+                <span data-i18n="save">SALVAR CONFIGURAÇÃO</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- SIDEBAR NAV -->
+    <aside class="trl-sidebar">
+        <nav class="trl-nav">
+            <div class="trl-nav__label" data-i18n="nav_label">GERENCIADOR DE SPAWN</div>
+            <a href="#map-configs" class="trl-nav__item is-active" data-nav="map-configs">
+                <span data-i18n="nav_maps">CONFIGURAÇÃO DE MAPAS</span>
+            </a>
+            <a href="#boss-config" class="trl-nav__item" data-nav="boss-config">
+                <span data-i18n="nav_bosses">CONFIGURAÇÃO DE BOSSES</span>
+            </a>
+            <a href="#difficulty-config" class="trl-nav__item" data-nav="difficulty-config">
+                <span data-i18n="nav_difficulty">DIFICULDADE DE BOTS</span>
+            </a>
+            <a href="#events-config" class="trl-nav__item" data-nav="events-config">
+                <span data-i18n="nav_events">EVENTOS & INVASÕES</span>
+            </a>
+            <a href="#custom-spawns" class="trl-nav__item" data-nav="custom-spawns">
+                <span data-i18n="nav_custom">SPAWNS CUSTOMIZADOS</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- MAIN WORKSPACE -->
+    <main class="trl-main">
+        <!-- 1. MAP CONFIGS -->
+        <section id="sec-map-configs" class="trl-view-section is-active">
+            <div class="trl-panel">
+                <div class="trl-screen-bar">
+                    <span class="trl-screen-bar__title" data-i18n="title_maps">PARÂMETROS DA HORDA POR MAPA</span>
+                </div>
+                <div class="trl-panel__body">
+                    <div id="mapSubtabs" class="trl-subtabs"></div>
+
+                    <div class="trl-form-grid">
+                        <div class="trl-field trl-form-grid__full">
+                            <label class="trl-field__label" data-i18n="active_preset">PRESET DE HORDA ATIVO</label>
+                            <select id="activePreset" class="trl-select">
+                                <option value="Balanced">Equilibrado (50% PMCs / 50% Scavs)</option>
+                                <option value="PMC War">Guerra de PMCs (70% PMCs / 30% Scavs)</option>
+                                <option value="Scav Infestation">Infestação de Scavs (30% PMCs / 70% Scavs)</option>
+                                <option value="Random">Aleatório</option>
+                            </select>
+                        </div>
+
+                        <div class="trl-field">
+                            <label class="trl-field__label">
+                                <span data-i18n="max_alive_bots">LIMITE DE BOTS VIVOS (MAX ALIVE)</span>
+                                <span id="val_maxAliveBots" class="trl-slider-val">15</span>
+                            </label>
+                            <input type="range" id="maxAliveBots" class="trl-slider" min="1" max="40" value="15">
+                        </div>
+
+                        <div class="trl-field">
+                            <label class="trl-field__label">
+                                <span data-i18n="min_alive_bots">MÍNIMO DE BOTS VIVOS (MIN ALIVE)</span>
+                                <span id="val_minAliveBots" class="trl-slider-val">3</span>
+                            </label>
+                            <input type="range" id="minAliveBots" class="trl-slider" min="0" max="20" value="3">
+                        </div>
+
+                        <div class="trl-field">
+                            <label class="trl-field__label">
+                                <span data-i18n="delay_first_wave">ESPERA INICIAL VANILLA (SEGUNDOS)</span>
+                                <span id="val_delayBeforeFirstWave" class="trl-slider-val">30</span>
+                            </label>
+                            <input type="range" id="delayBeforeFirstWave" class="trl-slider" min="10" max="180" value="30">
+                        </div>
+
+                        <div class="trl-field">
+                            <label class="trl-field__label">
+                                <span data-i18n="seconds_between_waves">INTERVALO ENTRE ONDAS (SEGUNDOS)</span>
+                                <span id="val_secondsBetweenWaves" class="trl-slider-val">600</span>
+                            </label>
+                            <input type="range" id="secondsBetweenWaves" class="trl-slider" min="30" max="1200" step="10" value="600">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. BOSS CONFIG -->
+        <section id="sec-boss-config" class="trl-view-section">
+            <div class="trl-panel">
+                <div class="trl-screen-bar">
+                    <span class="trl-screen-bar__title" data-i18n="title_bosses">CONFIGURAÇÃO DE BOSSES & CHEFÕES</span>
+                </div>
+                <div class="trl-panel__body">
+                    <div class="trl-form-grid" style="margin-bottom:16px;">
+                        <label class="trl-switch">
+                            <input type="checkbox" id="disableBosses">
+                            <span data-i18n="disable_bosses">Desativar Todos os Bosses</span>
+                        </label>
+                        <label class="trl-switch">
+                            <input type="checkbox" id="bossOpenZones">
+                            <span data-i18n="boss_open_zones">Permitir Bosses em Qualquer Zona</span>
+                        </label>
+                        <label class="trl-switch">
+                            <input type="checkbox" id="randomRaiderGroup">
+                            <span data-i18n="random_raiders">Grupo Aleatório de Raiders</span>
+                        </label>
+                        <label class="trl-switch">
+                            <input type="checkbox" id="randomRogueGroup">
+                            <span data-i18n="random_rogues">Grupo Aleatório de Rogues</span>
+                        </label>
+                    </div>
+
+                    <div id="bossListContainer"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. DIFFICULTY CONFIG -->
+        <section id="sec-difficulty-config" class="trl-view-section">
+            <div class="trl-panel">
+                <div class="trl-screen-bar">
+                    <span class="trl-screen-bar__title" data-i18n="title_difficulty">DISTRIBUIÇÃO DE DIFICULDADE DA IA</span>
+                </div>
+                <div class="trl-panel__body">
+                    <div class="trl-h3" data-i18n="diff_pmc">DIFICULDADE DE PMCS</div>
+                    <div class="trl-form-grid" style="margin-bottom:16px;">
+                        <div class="trl-field">
+                            <label class="trl-field__label">Fácil (Easy) % <span id="val_pmc_easy" class="trl-slider-val">10</span></label>
+                            <input type="range" id="pmc_easy" class="trl-slider" min="0" max="100" value="10">
+                        </div>
+                        <div class="trl-field">
+                            <label class="trl-field__label">Normal % <span id="val_pmc_normal" class="trl-slider-val">50</span></label>
+                            <input type="range" id="pmc_normal" class="trl-slider" min="0" max="100" value="50">
+                        </div>
+                        <div class="trl-field">
+                            <label class="trl-field__label">Difícil (Hard) % <span id="val_pmc_hard" class="trl-slider-val">30</span></label>
+                            <input type="range" id="pmc_hard" class="trl-slider" min="0" max="100" value="30">
+                        </div>
+                        <div class="trl-field">
+                            <label class="trl-field__label">Impossível % <span id="val_pmc_impossible" class="trl-slider-val">10</span></label>
+                            <input type="range" id="pmc_impossible" class="trl-slider" min="0" max="100" value="10">
+                        </div>
+                    </div>
+
+                    <div class="trl-divider"></div>
+
+                    <div class="trl-h3" data-i18n="diff_scav">DIFICULDADE DE SCAVS</div>
+                    <div class="trl-form-grid">
+                        <div class="trl-field">
+                            <label class="trl-field__label">Fácil (Easy) % <span id="val_scav_easy" class="trl-slider-val">10</span></label>
+                            <input type="range" id="scav_easy" class="trl-slider" min="0" max="100" value="10">
+                        </div>
+                        <div class="trl-field">
+                            <label class="trl-field__label">Normal % <span id="val_scav_normal" class="trl-slider-val">50</span></label>
+                            <input type="range" id="scav_normal" class="trl-slider" min="0" max="100" value="50">
+                        </div>
+                        <div class="trl-field">
+                            <label class="trl-field__label">Difícil (Hard) % <span id="val_scav_hard" class="trl-slider-val">30</span></label>
+                            <input type="range" id="scav_hard" class="trl-slider" min="0" max="100" value="30">
+                        </div>
+                        <div class="trl-field">
+                            <label class="trl-field__label">Impossível % <span id="val_scav_impossible" class="trl-slider-val">10</span></label>
+                            <input type="range" id="scav_impossible" class="trl-slider" min="0" max="100" value="10">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. EVENTS -->
+        <section id="sec-events-config" class="trl-view-section">
+            <div class="trl-panel">
+                <div class="trl-screen-bar">
+                    <span class="trl-screen-bar__title" data-i18n="title_events">EVENTOS E INVASÕES ESPECIAIS</span>
+                </div>
+                <div class="trl-panel__body">
+                    <div class="trl-form-grid">
+                        <label class="trl-switch">
+                            <input type="checkbox" id="evt_raiders_invasion">
+                            <span data-i18n="evt_raiders">Invasão de Raiders em Todos os Mapas</span>
+                        </label>
+                        <label class="trl-switch">
+                            <input type="checkbox" id="evt_rogues_invasion">
+                            <span data-i18n="evt_rogues">Invasão de Rogues em Todos os Mapas</span>
+                        </label>
+                        <label class="trl-switch">
+                            <input type="checkbox" id="evt_scav_wars">
+                            <span data-i18n="evt_scav_wars">Scav Wars (Scavs Atacam Outros Scavs)</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. CUSTOM SPAWNS -->
+        <section id="sec-custom-spawns" class="trl-view-section">
+            <div class="trl-panel">
+                <div class="trl-screen-bar">
+                    <span class="trl-screen-bar__title" data-i18n="title_custom">SPAWNS CUSTOMIZADOS E COORDENADAS</span>
+                </div>
+                <div class="trl-panel__body">
+                    <div class="trl-form-grid" style="margin-bottom:16px;">
+                        <label class="trl-switch">
+                            <input type="checkbox" id="enableCustomPmcSpawns">
+                            <span data-i18n="custom_pmc">Ativar Spawns Customizados de PMCs</span>
+                        </label>
+                        <label class="trl-switch">
+                            <input type="checkbox" id="enableCustomScavSpawns">
+                            <span data-i18n="custom_scav">Ativar Spawns Customizados de Scavs</span>
+                        </label>
+                        <label class="trl-switch">
+                            <input type="checkbox" id="enableCustomSniperSpawns">
+                            <span data-i18n="custom_sniper">Ativar Spawns Customizados de Snipers</span>
+                        </label>
+                    </div>
+
+                    <div class="trl-divider"></div>
+
+                    <div class="trl-field">
+                        <label class="trl-field__label">
+                            <span data-i18n="overlap_distance">DISTÂNCIA MÍNIMA ANTI-OVERLAP (METROS)</span>
+                            <span id="val_globalAntiOverlapDistance" class="trl-slider-val">5.0</span>
+                        </label>
+                        <input type="range" id="globalAntiOverlapDistance" class="trl-slider" min="1" max="20" step="0.5" value="5.0">
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<div id="toastContainer" class="trl-toast-container"></div>
+
+<script>
+    const I18N = {
+        pt: {
+            nav_label: "GERENCIADOR DE SPAWN", nav_maps: "CONFIGURAÇÃO DE MAPAS", nav_bosses: "CONFIGURAÇÃO DE BOSSES",
+            nav_difficulty: "DIFICULDADE DE BOTS", nav_events: "EVENTOS & INVASÕES", nav_custom: "SPAWNS CUSTOMIZADOS",
+            title_maps: "PARÂMETROS DA HORDA POR MAPA", title_bosses: "CONFIGURAÇÃO DE BOSSES & CHEFÕES",
+            title_difficulty: "DISTRIBUIÇÃO DE DIFICULDADE DA IA", title_events: "EVENTOS E INVASÕES ESPECIAIS",
+            title_custom: "SPAWNS CUSTOMIZADOS E COORDENADAS", undo: "DESFAZER", reset: "PADRÃO", reload: "RECARREGAR", save: "SALVAR CONFIGURAÇÃO",
+            active_preset: "PRESET DE HORDA ATIVO", max_alive_bots: "LIMITE DE BOTS VIVOS (MAX ALIVE)", min_alive_bots: "MÍNIMO DE BOTS VIVOS (MIN ALIVE)",
+            delay_first_wave: "ESPERA INICIAL VANILLA (SEGUNDOS)", seconds_between_waves: "INTERVALO ENTRE ONDAS (SEGUNDOS)",
+            disable_bosses: "Desativar Todos os Bosses", boss_open_zones: "Permitir Bosses em Qualquer Zona", random_raiders: "Grupo Aleatório de Raiders",
+            random_rogues: "Grupo Aleatório de Rogues", diff_pmc: "DIFICULDADE DE PMCS", diff_scav: "DIFICULDADE DE SCAVS",
+            evt_raiders: "Invasão de Raiders em Todos os Mapas", evt_rogues: "Invasão de Rogues em Todos os Mapas", evt_scav_wars: "Scav Wars (Scavs Atacam Outros Scavs)",
+            custom_pmc: "Ativar Spawns Customizados de PMCs", custom_scav: "Ativar Spawns Customizados de Scavs", custom_sniper: "Ativar Spawns Customizados de Snipers",
+            overlap_distance: "DISTÂNCIA MÍNIMA ANTI-OVERLAP (METROS)"
+        },
+        en: {
+            nav_label: "SPAWN MANAGER", nav_maps: "MAP CONFIGURATIONS", nav_bosses: "BOSS CONFIGURATION",
+            nav_difficulty: "BOT DIFFICULTY", nav_events: "EVENTS & INVASIONS", nav_custom: "CUSTOM SPAWNS",
+            title_maps: "PER-MAP HORDE PARAMETERS", title_bosses: "BOSS & ELITE BOT CONFIGURATION",
+            title_difficulty: "AI DIFFICULTY DISTRIBUTION", title_events: "EVENTS & SPECIAL INVASIONS",
+            title_custom: "CUSTOM SPAWNS & COORDINATES", undo: "UNDO", reset: "DEFAULT", reload: "RELOAD", save: "SAVE CONFIGURATION",
+            active_preset: "ACTIVE HORDE PRESET", max_alive_bots: "MAX ALIVE BOTS LIMIT", min_alive_bots: "MIN ALIVE BOTS LIMIT",
+            delay_first_wave: "INITIAL VANILLA DELAY (SECONDS)", seconds_between_waves: "WAVE INTERVAL (SECONDS)",
+            disable_bosses: "Disable All Bosses", boss_open_zones: "Allow Bosses in Any Zone", random_raiders: "Random Raider Group",
+            random_rogues: "Random Rogue Group", diff_pmc: "PMC DIFFICULTY", diff_scav: "SCAV DIFFICULTY",
+            evt_raiders: "Raider Invasion on All Maps", evt_rogues: "Rogue Invasion on All Maps", evt_scav_wars: "Scav Wars (Scavs Attack Scavs)",
+            custom_pmc: "Enable Custom PMC Spawns", custom_scav: "Enable Custom Scav Spawns", custom_sniper: "Enable Custom Sniper Spawns",
+            overlap_distance: "MINIMUM ANTI-OVERLAP DISTANCE (METERS)"
+        }
+    };
+
+    const MAP_KEYS = [
+        { id: "global", name: "Global" }, { id: "woods", name: "Woods" }, { id: "factory4_day", name: "Factory (Dia)" },
+        { id: "factory4_night", name: "Factory (Noite)" }, { id: "sandbox", name: "Ground Zero" }, { id: "bigmap", name: "Customs" },
+        { id: "shoreline", name: "Shoreline" }, { id: "interchange", name: "Interchange" }, { id: "lighthouse", name: "Lighthouse" },
+        { id: "rezervbase", name: "Reserve" }, { id: "tarkovstreets", name: "Streets" }, { id: "laboratory", name: "The Lab" }
+    ];
+
+    const BOSS_KEYS = [
+        { key: "bossKnight", name: "The Goons (Knight/Pipe/Birdeye)" }, { key: "bossTagilla", name: "Tagilla" },
+        { key: "bossKilla", name: "Killa" }, { key: "bossShturman", name: "Shturman" }, { key: "bossReshala", name: "Reshala" },
+        { key: "bossSanitar", name: "Sanitar" }, { key: "bossGluhar", name: "Glukhar" }, { key: "bossBoar", name: "Kaban" },
+        { key: "bossKolontay", name: "Kollontay" }, { key: "bossZryachiy", name: "Zryachiy" }
+    ];
+
+    let stateInitial = null;
+    let stateCurrent = null;
+    let activeMapId = "woods";
+
+    function showToast(kind, title, msg) {
+        const container = document.getElementById("toastContainer");
+        const toast = document.createElement("div");
+        toast.className = `trl-toast trl-toast--${kind}`;
+        toast.innerHTML = `<div class="trl-toast__title">${title}</div><div class="trl-toast__msg">${msg}</div>`;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 4000);
+    }
+
+    function setLanguage(lang) {
+        const dict = I18N[lang] || I18N.pt;
+        document.querySelectorAll("[data-i18n]").forEach(el => {
+            const key = el.getAttribute("data-i18n");
+            if (dict[key]) el.textContent = dict[key];
+        });
+    }
+
+    function markDirty(dirty) {
+        const syncDot = document.getElementById("syncDot");
+        const syncText = document.getElementById("syncText");
+        const btnUndo = document.getElementById("btnUndo");
+
+        if (dirty) {
+            syncDot.className = "trl-screen-bar__dot trl-screen-bar__dot--live";
+            syncText.textContent = "UNSAVED CHANGES";
+            syncText.style.color = "var(--trl-red-300)";
+            btnUndo.removeAttribute("disabled");
+        } else {
+            syncDot.className = "trl-screen-bar__dot trl-screen-bar__dot--ok";
+            syncText.textContent = "SYNCED";
+            syncText.style.color = "var(--trl-fg-muted)";
+            btnUndo.setAttribute("disabled", "true");
+        }
+    }
+
+    async function fetchConfig() {
+        try {
+            const res = await fetch("/trldynamicspawn/getConfig");
+            if (!res.ok) throw new Error("Erro na requisição");
+            const data = await res.json();
+            stateInitial = JSON.parse(JSON.stringify(data));
+            stateCurrent = JSON.parse(JSON.stringify(data));
+            renderUI();
+            markDirty(false);
+        } catch (err) {
+            showToast("error", "ERRO", "Falha ao carregar configuração: " + err.message);
+        }
+    }
+
+    async function saveConfig() {
+        try {
+            const res = await fetch("/trldynamicspawn/saveConfig", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(stateCurrent)
+            });
+            const result = await res.json();
+            if (result.status === "success") {
+                stateInitial = JSON.parse(JSON.stringify(stateCurrent));
+                markDirty(false);
+                showToast("ok", "SUCESSO", "Configuração salva com sucesso no servidor!");
+            } else {
+                throw new Error(result.message);
+            }
+        } catch (err) {
+            showToast("error", "ERRO", "Falha ao salvar: " + err.message);
+        }
+    }
+
+    async function resetConfig() {
+        try {
+            const res = await fetch("/trldynamicspawn/resetConfig", { method: "POST" });
+            const result = await res.json();
+            if (result.status === "success") {
+                await fetchConfig();
+                showToast("warn", "PADRÃO", "Configuração restaurada para os padrões originais.");
+            }
+        } catch (err) {
+            showToast("error", "ERRO", "Falha ao restaurar padrões: " + err.message);
+        }
+    }
+
+    function renderSubtabs() {
+        const container = document.getElementById("mapSubtabs");
+        container.innerHTML = "";
+        MAP_KEYS.forEach(m => {
+            const btn = document.createElement("button");
+            btn.className = `trl-subtab-btn ${m.id === activeMapId ? 'is-active' : ''}`;
+            btn.textContent = m.name;
+            btn.onclick = () => {
+                activeMapId = m.id;
+                renderSubtabs();
+                loadMapValues();
+            };
+            container.appendChild(btn);
+        });
+    }
+
+    function loadMapValues() {
+        if (!stateCurrent) return;
+        const mc = (stateCurrent.mapConfigs && stateCurrent.mapConfigs[activeMapId]) || {};
+        const mt = (stateCurrent.mapTimers && stateCurrent.mapTimers[activeMapId]) || (stateCurrent.mapTimers && stateCurrent.mapTimers["global"]) || {};
+
+        document.getElementById("activePreset").value = stateCurrent.activePreset || "Balanced";
+        document.getElementById("maxAliveBots").value = mc.maxAliveBots || 15;
+        document.getElementById("val_maxAliveBots").textContent = mc.maxAliveBots || 15;
+        document.getElementById("minAliveBots").value = mc.minAliveBots || 3;
+        document.getElementById("val_minAliveBots").textContent = mc.minAliveBots || 3;
+        document.getElementById("delayBeforeFirstWave").value = mt.delayBeforeFirstWave || 30;
+        document.getElementById("val_delayBeforeFirstWave").textContent = mt.delayBeforeFirstWave || 30;
+        document.getElementById("secondsBetweenWaves").value = mt.secondsBetweenWaves || 600;
+        document.getElementById("val_secondsBetweenWaves").textContent = mt.secondsBetweenWaves || 600;
+    }
+
+    function renderBossList() {
+        const container = document.getElementById("bossListContainer");
+        container.innerHTML = "";
+        if (!stateCurrent || !stateCurrent.eliteConfig) return;
+
+        BOSS_KEYS.forEach(b => {
+            const bossData = stateCurrent.eliteConfig[b.key] || {};
+            const chanceVal = typeof bossData.chance !== "undefined" ? bossData.chance : 30;
+            const card = document.createElement("div");
+            card.className = "trl-boss-card";
+            card.innerHTML = `
+                <div class="trl-boss-card__title"><span>${b.name}</span></div>
+                <div class="trl-form-grid">
+                    <div class="trl-field">
+                        <label class="trl-field__label">Chance de Spawn % <span class="trl-slider-val" id="val_${b.key}_chance">${chanceVal}</span></label>
+                        <input type="range" class="trl-slider boss-chance" data-boss="${b.key}" min="0" max="100" value="${chanceVal}">
+                    </div>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+
+        document.querySelectorAll(".boss-chance").forEach(inp => {
+            inp.oninput = (e) => {
+                const bossKey = e.target.getAttribute("data-boss");
+                const val = parseInt(e.target.value);
+                document.getElementById(`val_${bossKey}_chance`).textContent = val;
+                if (!stateCurrent.eliteConfig[bossKey]) stateCurrent.eliteConfig[bossKey] = {};
+                stateCurrent.eliteConfig[bossKey].chance = val;
+                markDirty(true);
+            };
+        });
+    }
+
+    function renderUI() {
+        if (!stateCurrent) return;
+        renderSubtabs();
+        loadMapValues();
+        renderBossList();
+
+        if (stateCurrent.pmcDifficulty) {
+            ["easy", "normal", "hard", "impossible"].forEach(k => {
+                const el = document.getElementById(`pmc_${k}`);
+                if (el) {
+                    el.value = stateCurrent.pmcDifficulty[k] || 0;
+                    document.getElementById(`val_pmc_${k}`).textContent = el.value;
+                }
+            });
+        }
+        if (stateCurrent.scavDifficulty) {
+            ["easy", "normal", "hard", "impossible"].forEach(k => {
+                const el = document.getElementById(`scav_${k}`);
+                if (el) {
+                    el.value = stateCurrent.scavDifficulty[k] || 0;
+                    document.getElementById(`val_scav_${k}`).textContent = el.value;
+                }
+            });
+        }
+
+        if (stateCurrent.eliteConfig) {
+            document.getElementById("disableBosses").checked = !!stateCurrent.eliteConfig.disableBosses;
+            document.getElementById("bossOpenZones").checked = !!stateCurrent.eliteConfig.bossOpenZones;
+            document.getElementById("randomRaiderGroup").checked = !!stateCurrent.eliteConfig.randomRaiderGroup;
+            document.getElementById("randomRogueGroup").checked = !!stateCurrent.eliteConfig.randomRogueGroup;
+        }
+
+        if (stateCurrent.customSpawnsConfig) {
+            document.getElementById("enableCustomPmcSpawns").checked = !!stateCurrent.customSpawnsConfig.enableCustomPmcSpawns;
+            document.getElementById("enableCustomScavSpawns").checked = !!stateCurrent.customSpawnsConfig.enableCustomScavSpawns;
+            document.getElementById("enableCustomSniperSpawns").checked = !!stateCurrent.customSpawnsConfig.enableCustomSniperSpawns;
+        }
+
+        const overlapInp = document.getElementById("globalAntiOverlapDistance");
+        if (overlapInp) {
+            overlapInp.value = stateCurrent.globalAntiOverlapDistance || 5.0;
+            document.getElementById("val_globalAntiOverlapDistance").textContent = overlapInp.value;
+        }
+    }
+
+    setTimeout(() => {
+        fetchConfig();
+
+        document.querySelectorAll(".trl-nav__item").forEach(item => {
+            item.onclick = (e) => {
+                e.preventDefault();
+                document.querySelectorAll(".trl-nav__item").forEach(i => i.classList.remove("is-active"));
+                document.querySelectorAll(".trl-view-section").forEach(s => s.classList.remove("is-active"));
+                item.classList.add("is-active");
+                const targetId = "sec-" + item.getAttribute("data-nav");
+                document.getElementById(targetId).classList.add("is-active");
+            };
+        });
+
+        ["maxAliveBots", "minAliveBots", "delayBeforeFirstWave", "secondsBetweenWaves"].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.oninput = (e) => {
+                    const val = parseInt(e.target.value);
+                    document.getElementById(`val_${id}`).textContent = val;
+                    if (!stateCurrent.mapConfigs) stateCurrent.mapConfigs = {};
+                    if (!stateCurrent.mapConfigs[activeMapId]) stateCurrent.mapConfigs[activeMapId] = {};
+                    if (id === "maxAliveBots" || id === "minAliveBots") stateCurrent.mapConfigs[activeMapId][id] = val;
+                    if (!stateCurrent.mapTimers) stateCurrent.mapTimers = {};
+                    if (!stateCurrent.mapTimers[activeMapId]) stateCurrent.mapTimers[activeMapId] = {};
+                    if (id === "delayBeforeFirstWave" || id === "secondsBetweenWaves") stateCurrent.mapTimers[activeMapId][id] = val;
+                    markDirty(true);
+                };
+            }
+        });
+
+        ["easy", "normal", "hard", "impossible"].forEach(k => {
+            const pmcInp = document.getElementById(`pmc_${k}`);
+            if (pmcInp) {
+                pmcInp.oninput = (e) => {
+                    const val = parseInt(e.target.value);
+                    document.getElementById(`val_pmc_${k}`).textContent = val;
+                    if (!stateCurrent.pmcDifficulty) stateCurrent.pmcDifficulty = {};
+                    stateCurrent.pmcDifficulty[k] = val;
+                    markDirty(true);
+                };
+            }
+            const scavInp = document.getElementById(`scav_${k}`);
+            if (scavInp) {
+                scavInp.oninput = (e) => {
+                    const val = parseInt(e.target.value);
+                    document.getElementById(`val_scav_${k}`).textContent = val;
+                    if (!stateCurrent.scavDifficulty) stateCurrent.scavDifficulty = {};
+                    stateCurrent.scavDifficulty[k] = val;
+                    markDirty(true);
+                };
+            }
+        });
+
+        ["disableBosses", "bossOpenZones", "randomRaiderGroup", "randomRogueGroup"].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.onchange = (e) => {
+                    if (!stateCurrent.eliteConfig) stateCurrent.eliteConfig = {};
+                    stateCurrent.eliteConfig[id] = e.target.checked;
+                    markDirty(true);
+                };
+            }
+        });
+
+        [
+            { id: "evt_raiders_invasion", key: "raidersInvasion" },
+            { id: "evt_rogues_invasion", key: "roguesInvasion" },
+            { id: "evt_scav_wars", key: "scavWars" }
+        ].forEach(item => {
+            const el = document.getElementById(item.id);
+            if (el) {
+                el.onchange = (e) => {
+                    if (!stateCurrent.eventsConfig) stateCurrent.eventsConfig = {};
+                    stateCurrent.eventsConfig[item.key] = e.target.checked;
+                    markDirty(true);
+                };
+            }
+        });
+
+        ["enableCustomPmcSpawns", "enableCustomScavSpawns", "enableCustomSniperSpawns"].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.onchange = (e) => {
+                    if (!stateCurrent.customSpawnsConfig) stateCurrent.customSpawnsConfig = {};
+                    stateCurrent.customSpawnsConfig[id] = e.target.checked;
+                    markDirty(true);
+                };
+            }
+        });
+
+        const overlapInp = document.getElementById("globalAntiOverlapDistance");
+        if (overlapInp) {
+            overlapInp.oninput = (e) => {
+                const val = parseFloat(e.target.value);
+                document.getElementById("val_globalAntiOverlapDistance").textContent = val;
+                stateCurrent.globalAntiOverlapDistance = val;
+                markDirty(true);
+            };
+        }
+
+        document.getElementById("activePreset").onchange = (e) => {
+            stateCurrent.activePreset = e.target.value;
+            markDirty(true);
+        };
+
+        document.getElementById("btnSave").onclick = saveConfig;
+        document.getElementById("btnReload").onclick = fetchConfig;
+        document.getElementById("btnReset").onclick = resetConfig;
+        document.getElementById("btnUndo").onclick = () => {
+            if (stateInitial) {
+                stateCurrent = JSON.parse(JSON.stringify(stateInitial));
+                renderUI();
+                markDirty(false);
+                showToast("info", "UNDO", "Alterações locais desfeitas.");
+            }
+        };
+
+        document.getElementById("langSelect").onchange = (e) => {
+            setLanguage(e.target.value);
+        };
+    }, 100);
+</script>
