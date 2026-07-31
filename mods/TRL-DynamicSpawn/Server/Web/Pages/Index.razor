@@ -320,6 +320,33 @@ html, body {
 .trl-h3 { font-family: var(--trl-font-display); font-size: var(--trl-text-xl); color: var(--trl-fg); margin: 0 0 var(--trl-space-2); }
 .trl-divider { border: none; height: 1px; background: var(--trl-edge); margin: var(--trl-space-4) 0; }
 
+/* CUSTOMIZAÇÃO TRL DO MODAL DE RECONEXÃO NATIVO DO BLAZOR */
+#components-reconnect-modal {
+  position: fixed;
+  top: 0; right: 0; bottom: 0; left: 0;
+  background: rgba(13, 13, 14, 0.85) !important;
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+#components-reconnect-modal > div,
+.components-reconnect-show {
+  background: var(--trl-surface-1) !important;
+  border: 1px solid var(--trl-edge-strong) !important;
+  border-left: 3px solid var(--trl-red-brand) !important;
+  color: var(--trl-ink) !important;
+  font-family: var(--trl-font-display) !important;
+  text-transform: uppercase;
+  letter-spacing: var(--trl-track-wide);
+  padding: var(--trl-space-6) var(--trl-space-8) !important;
+  box-shadow: var(--trl-shadow-2) !important;
+  border-radius: 0 !important;
+  text-align: center;
+}
+
 @@keyframes trl-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
 </style>
 
