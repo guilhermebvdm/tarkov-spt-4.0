@@ -615,6 +615,7 @@
 
             BOSS_KEYS.forEach(b => {
                 const bossData = stateCurrent.eliteConfig[b.key] || {};
+                const chanceVal = typeof bossData.chance !== "undefined" ? bossData.chance : 30;
                 const card = document.createElement("div");
                 card.className = "trl-boss-card";
                 card.innerHTML = `
@@ -623,8 +624,8 @@
                     </div>
                     <div class="trl-form-grid">
                         <div class="trl-field">
-                            <label class="trl-field__label">Chance de Spawn % <span class="trl-slider-val" id="val_${b.key}_chance">30</span></label>
-                            <input type="range" class="trl-slider boss-chance" data-boss="${b.key}" min="0" max="100" value="30">
+                            <label class="trl-field__label">Chance de Spawn % <span class="trl-slider-val" id="val_${b.key}_chance">${chanceVal}</span></label>
+                            <input type="range" class="trl-slider boss-chance" data-boss="${b.key}" min="0" max="100" value="${chanceVal}">
                         </div>
                     </div>
                 `;
@@ -636,6 +637,8 @@
                     const bossKey = e.target.getAttribute("data-boss");
                     const val = parseInt(e.target.value);
                     document.getElementById(`val_${bossKey}_chance`).textContent = val;
+                    if (!stateCurrent.eliteConfig[bossKey]) stateCurrent.eliteConfig[bossKey] = {};
+                    stateCurrent.eliteConfig[bossKey].chance = val;
                     markDirty(true);
                 };
             });
@@ -729,6 +732,80 @@
                     };
                 }
             });
+
+            // Difficulty Sliders
+            ["easy", "normal", "hard", "impossible"].forEach(k => {
+                const pmcInp = document.getElementById(`pmc_${k}`);
+                if (pmcInp) {
+                    pmcInp.oninput = (e) => {
+                        const val = parseInt(e.target.value);
+                        document.getElementById(`val_pmc_${k}`).textContent = val;
+                        if (!stateCurrent.pmcDifficulty) stateCurrent.pmcDifficulty = {};
+                        stateCurrent.pmcDifficulty[k] = val;
+                        markDirty(true);
+                    };
+                }
+                const scavInp = document.getElementById(`scav_${k}`);
+                if (scavInp) {
+                    scavInp.oninput = (e) => {
+                        const val = parseInt(e.target.value);
+                        document.getElementById(`val_scav_${k}`).textContent = val;
+                        if (!stateCurrent.scavDifficulty) stateCurrent.scavDifficulty = {};
+                        stateCurrent.scavDifficulty[k] = val;
+                        markDirty(true);
+                    };
+                }
+            });
+
+            // Elite Boss Toggles
+            ["disableBosses", "bossOpenZones", "randomRaiderGroup", "randomRogueGroup"].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.onchange = (e) => {
+                        if (!stateCurrent.eliteConfig) stateCurrent.eliteConfig = {};
+                        stateCurrent.eliteConfig[id] = e.target.checked;
+                        markDirty(true);
+                    };
+                }
+            });
+
+            // Event Toggles
+            [
+                { id: "evt_raiders_invasion", key: "raidersInvasion" },
+                { id: "evt_rogues_invasion", key: "roguesInvasion" },
+                { id: "evt_scav_wars", key: "scavWars" }
+            ].forEach(item => {
+                const el = document.getElementById(item.id);
+                if (el) {
+                    el.onchange = (e) => {
+                        if (!stateCurrent.eventsConfig) stateCurrent.eventsConfig = {};
+                        stateCurrent.eventsConfig[item.key] = e.target.checked;
+                        markDirty(true);
+                    };
+                }
+            });
+
+            // Custom Spawns Toggles & Overlap
+            ["enableCustomPmcSpawns", "enableCustomScavSpawns", "enableCustomSniperSpawns"].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.onchange = (e) => {
+                        if (!stateCurrent.customSpawnsConfig) stateCurrent.customSpawnsConfig = {};
+                        stateCurrent.customSpawnsConfig[id] = e.target.checked;
+                        markDirty(true);
+                    };
+                }
+            });
+
+            const overlapInp = document.getElementById("globalAntiOverlapDistance");
+            if (overlapInp) {
+                overlapInp.oninput = (e) => {
+                    const val = parseFloat(e.target.value);
+                    document.getElementById("val_globalAntiOverlapDistance").textContent = val;
+                    stateCurrent.globalAntiOverlapDistance = val;
+                    markDirty(true);
+                };
+            }
 
             // Preset Change
             document.getElementById("activePreset").onchange = (e) => {
