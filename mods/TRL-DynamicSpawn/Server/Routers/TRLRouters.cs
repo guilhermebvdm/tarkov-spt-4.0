@@ -55,6 +55,40 @@ public class TRLRouters : StaticRouter
                 {
                     return await new ValueTask<string>(_jsonUtil.Serialize(TRLDynamicSpawnServer.Helpers.SpawnPointsManager.PlayerSpawns));
                 }
+            ),
+            new RouteAction<TRLConfig>("/trldynamicspawn/saveConfig",
+                async (url, info, sessionID, output) =>
+                {
+                    try
+                    {
+                        if (info != null)
+                        {
+                            CurrentConfig = info;
+                            await TRLDynamicSpawnServer.Globals.TRLConfigManager.SaveConfig();
+                            return await new ValueTask<string>(_jsonUtil.Serialize(new { status = "success", message = "Config saved successfully" }));
+                        }
+                    }
+                    catch (System.Exception ex)
+                    {
+                        return await new ValueTask<string>(_jsonUtil.Serialize(new { status = "error", message = ex.Message }));
+                    }
+                    return await new ValueTask<string>(_jsonUtil.Serialize(new { status = "error", message = "Invalid payload" }));
+                }
+            ),
+            new RouteAction<SPTarkov.Server.Core.Models.Eft.Common.EmptyRequestData>("/trldynamicspawn/resetConfig",
+                async (url, info, sessionID, output) =>
+                {
+                    try
+                    {
+                        CurrentConfig = new TRLConfig();
+                        await TRLDynamicSpawnServer.Globals.TRLConfigManager.SaveConfig();
+                        return await new ValueTask<string>(_jsonUtil.Serialize(new { status = "success", message = "Config reset to defaults" }));
+                    }
+                    catch (System.Exception ex)
+                    {
+                        return await new ValueTask<string>(_jsonUtil.Serialize(new { status = "error", message = ex.Message }));
+                    }
+                }
             )
         };
     }

@@ -1,0 +1,32 @@
+Bender — font provenance and license note
+==========================================
+
+Font:      Bender (Regular 400, Bold 700), WOFF2
+Designers: Oleg Zhuravlev, Ivan Gladkikh (Jovanny Lemonad) — 2009
+Embedded copyright: "Copyright (c) 2009 by Oleg Zhuravlev, Gladkikh Ivan.
+All rights reserved." (no license record embedded in the binaries)
+
+Source of these files
+---------------------
+Downloaded 2026-07-03 from the open-source tarkov.dev project:
+https://github.com/the-hideout/tarkov-dev (public/fonts/bender*.woff2)
+
+License status (as verified on 2026-07-03)
+------------------------------------------
+No authoritative license text could be confirmed. Evidence collected:
+- Font Squirrel lists Bender in its catalog, which only admits fonts that
+  are free for commercial use (https://www.fontsquirrel.com/fonts/bender).
+- Fontstorage labels it "Freeware".
+- Some aggregators (FontGet) report it as SIL OFL — unverified.
+- The font is publicly redistributed by open-source projects in this same
+  community: FIKA (FikaWebApp bundles bender.otf) and tarkov.dev (woff2).
+- The binaries embed no license restriction text (name IDs 13/14 absent).
+
+Conclusion: distributed everywhere as freeware / free for commercial use;
+treated here as such for TRL community (non-commercial) tooling.
+
+If a formal restriction ever surfaces
+-------------------------------------
+Delete the .woff2 files and the <link> to bender.css. The design system
+degrades cleanly to Bahnschrift (Windows 10+ system font) — the display
+stack in tokens.css already lists it as first fallback.
