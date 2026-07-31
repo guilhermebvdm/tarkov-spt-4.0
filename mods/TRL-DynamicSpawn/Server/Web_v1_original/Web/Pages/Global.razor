@@ -1,0 +1,16 @@
+@page "/trldynamicspawn/global"
+@layout MainLayout
+@inject NavigationManager NavigationManager
+
+@code {
+    protected override void OnInitialized()
+    {
+        NavigationManager.NavigateTo("/trldynamicspawn/mapconfigs", true);
+    }
+}
+
+
+
+
+
+
