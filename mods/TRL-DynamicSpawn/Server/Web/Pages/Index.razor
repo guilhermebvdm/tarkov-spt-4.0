@@ -370,7 +370,7 @@ html, body {
         
         <div class="trl-screen-bar" style="border-bottom: none; background: transparent; padding: 0;">
             <span id="syncDot" class="trl-screen-bar__dot trl-screen-bar__dot--ok"></span>
-            <span id="syncText" class="trl-screen-bar__meta" style="color: var(--trl-fg-muted);">SYNCED</span>
+            <span id="syncText" class="trl-screen-bar__meta" style="color: var(--trl-fg-muted);" data-i18n="synced">SYNCED</span>
         </div>
 
         <div class="trl-topbar__spacer"></div>
@@ -641,7 +641,7 @@ html, body {
             sub_global_bosses: "CONTROLES GLOBAIS DE BOSSES", sub_boss_invasion: "SISTEMA DE INVASÃO DE BOSSES (BOSS INVASION)", enable_boss_invasion: "Ativar Sistema de Invasão de Bosses", invasion_map_chance: "CHANCE DE INVASÃO NO MAPA (%)", invasion_boss_chance: "CHANCE DE SPAWN DE CADA BOSS (%)", allowed_invasion_bosses: "BOSSES PERMITIDOS NA INVASÃO", allowed_invasion_maps: "MAPAS PERMITIDOS NA INVASÃO", sub_raiders_rogues: "GRUPOS DE RAIDERS E ROGUES ALEATÓRIOS", raider_chance: "CHANCE DE RAIDERS (%)", rogue_chance: "CHANCE DE ROGUES (%)",
             waves_interval: "INTERVALO ENTRE ONDAS (SEGUNDOS)", sniper_chance: "CHANCE DE SPAWN DE SNIPER (%)", spawn_radius_sub: "RAIO DE SPAWN E BOLHA DE LIMITAÇÃO", min_safe_dist: "DISTÂNCIA MÍNIMA SEGURA DOS JOGADORES (M)", enable_bubble: "Ativar Bolha Máxima de Spawn/Despawn", max_bubble_dist: "DISTÂNCIA MÁXIMA DA BOLHA (M)", teleport_sub: "TELEPORT DE BOTS E DESPAWN DENSITÁRIO", enable_teleport: "Ativar Teleport de Bots Distantes", include_pmcs: "Incluir PMCs no Teleport / Despawn", teleport_min_dist: "DISTÂNCIA MÍNIMA DE ALVO DO TELEPORT (M)", teleport_check_interval: "INTERVALO DE VERIFICAÇÃO DO TELEPORT (SEGUNDOS)",
             enable_bot_server: "Ativar Bot / Boss no Servidor", disable_followers: "Desativar Seguidores / Guardas", group_spawn_sub: "CONFIGURAÇÃO DE GRUPOS DE BOTS (GROUP SPAWN)", bot_group_chance: "CHANCE DE GRUPO DE BOTS (%)", max_group_size: "TAMANHO MÁXIMO DO GRUPO", boss_matrix_sub: "CHANCE E SELEÇÃO DE ZONAS POR MAPA", hotzone_chance: "HOTZONE CHANCE (%)", spawn_chance: "CHANCE DE SPAWN (%)", allowed_zones_label: "ZONAS PERMITIDAS DE SPAWN:",
-            diff_easy: "FÁCIL %", diff_normal: "NORMAL %", diff_hard: "DIFÍCIL %", diff_impossible: "IMPOSSÍVEL %",
+            diff_easy: "FÁCIL %", diff_normal: "NORMAL %", diff_hard: "DIFÍCIL %", diff_impossible: "IMPOSSÍVEL %", diff_bosses_tab: "CHEFÕES / BOSSES",
             toast_success: "SUCESSO", toast_saved: "Configuração salva com sucesso no servidor!", toast_reset: "PADRÃO", toast_reset_msg: "Configuração restaurada para os padrões originais.", toast_undo: "DESFAZER", toast_undo_msg: "Alterações locais desfeitas."
         },
         en: {
@@ -657,11 +657,11 @@ html, body {
             evt_raiders: "Random Raiders on Any Map", evt_rogues: "Random Rogues on Any Map",
             custom_pmc: "Enable Custom PMC Spawns", custom_scav: "Enable Custom Scav Spawns", custom_sniper: "Enable Custom Sniper Spawns", custom_player: "Enable Custom Player Spawns",
             overlap_distance: "MINIMUM ANTI-OVERLAP DISTANCE (METERS)", enable_overlap: "Enable Map Overlap Culling",
-            opt_balanced: "Balanced (50% PMC / 50% Scav)", opt_pmc_war: "PMC War (70% PMC / 30% Scav)", opt_scav_infestation: "Scav Infestation (20% PMC / 80% Scav)", opt_quiet_raid: "Quiet Raid (Low Density)", opt_warzone: "Warzone (High Density & Aggression)", opt_random: "Random per Match",
+            opt_balanced: "Balanced (50% PMC / 50% Scav)", opt_pmc_war: "PMC War (70% PMC / 30% Scav)", opt_scav_infestation: "Scav Infestation (20% PMC / 80% Scav)", opt_quiet_raid: "Quiet Raid (Low Density)", opt_warzone: "Warzone (High Density)", opt_random: "Random per Match",
             sub_global_bosses: "GLOBAL BOSS CONTROLS", sub_boss_invasion: "BOSS INVASION SYSTEM", enable_boss_invasion: "Enable Boss Invasion System", invasion_map_chance: "MAP INVASION CHANCE (%)", invasion_boss_chance: "EACH BOSS SPAWN CHANCE (%)", allowed_invasion_bosses: "ALLOWED INVASION BOSSES", allowed_invasion_maps: "ALLOWED INVASION MAPS", sub_raiders_rogues: "RANDOM RAIDER & ROGUE GROUPS", raider_chance: "RAIDER SPAWN CHANCE (%)", rogue_chance: "ROGUE SPAWN CHANCE (%)",
             waves_interval: "SECONDS BETWEEN WAVES (SECONDS)", sniper_chance: "SNIPER SPAWN CHANCE (%)", spawn_radius_sub: "SPAWN RADIUS & LIMITING BUBBLE", min_safe_dist: "MIN SAFE DISTANCE FROM PLAYERS (M)", enable_bubble: "Enable Max Spawn/Despawn Bubble", max_bubble_dist: "MAX BUBBLE LIMIT DISTANCE (M)", teleport_sub: "BOT TELEPORT & DENSITY DESPAWN", enable_teleport: "Enable Teleport for Distant Bots", include_pmcs: "Include PMCs in Teleport / Despawn", teleport_min_dist: "MINIMUM TARGET TELEPORT DISTANCE (M)", teleport_check_interval: "TELEPORT CHECK INTERVAL (SECONDS)",
             enable_bot_server: "Enable Bot / Boss on Server", disable_followers: "Disable Followers / Guards", group_spawn_sub: "BOT GROUP SPAWN CONFIGURATION", bot_group_chance: "BOT GROUP SPAWN CHANCE (%)", max_group_size: "MAX GROUP SIZE", boss_matrix_sub: "PER-MAP SPAWN CHANCE & ZONE SELECTION", hotzone_chance: "HOTZONE CHANCE (%)", spawn_chance: "SPAWN CHANCE (%)", allowed_zones_label: "ALLOWED SPAWN ZONES:",
-            diff_easy: "EASY %", diff_normal: "NORMAL %", diff_hard: "HARD %", diff_impossible: "IMPOSSIBLE %",
+            diff_easy: "EASY %", diff_normal: "NORMAL %", diff_hard: "HARD %", diff_impossible: "IMPOSSIBLE %", diff_bosses_tab: "BOSSES / ELITES",
             toast_success: "SUCCESS", toast_saved: "Config saved successfully on server!", toast_reset: "DEFAULT", toast_reset_msg: "Config reset to original defaults.", toast_undo: "UNDO", toast_undo_msg: "Local changes undone."
         }
     };
@@ -894,9 +894,11 @@ html, body {
 
         // 1. MAP GLOBALS
         const activePresetEl = document.getElementById("activePreset");
-        activePresetEl.value = stateCurrent.activePreset || "Balanced";
-        const descDict = PRESET_DESCRIPTIONS[currentLang] || PRESET_DESCRIPTIONS.pt;
-        document.getElementById("presetDescriptionText").textContent = descDict[activePresetEl.value] || "";
+        if (activePresetEl) {
+            activePresetEl.value = stateCurrent.activePreset || "Balanced";
+            const descDict = PRESET_DESCRIPTIONS[currentLang] || PRESET_DESCRIPTIONS.pt;
+            document.getElementById("presetDescriptionText").textContent = descDict[activePresetEl.value] || "";
+        }
 
         const globalTimer = stateCurrent.mapTimers?.bigmap?.delayBeforeFirstWave ?? 60;
         setSliderVal("delayBeforeFirstWave", globalTimer);
@@ -1269,7 +1271,7 @@ html, body {
         const factions = [
             { id: "pmc", name: "PMCs (USEC / BEAR)", prop: "pmcDifficulty" },
             { id: "scav", name: "SCAVs", prop: "scavDifficulty" },
-            { id: "boss", name: currentLang === 'en' ? "BOSSES / ELITES" : "CHEFÕES / BOSSES", prop: "bossDifficulty" }
+            { id: "boss", name: t('diff_bosses_tab'), prop: "bossDifficulty" }
         ];
 
         factions.forEach(f => {
@@ -1412,14 +1414,15 @@ html, body {
 
     function setLanguage(lang) {
         currentLang = lang;
+        renderUI();
+
         const dict = I18N[lang] || I18N.pt;
         document.querySelectorAll("[data-i18n]").forEach(el => {
             const key = el.getAttribute("data-i18n");
-            if (dict[key]) el.textContent = dict[key];
+            if (dict[key]) {
+                el.textContent = dict[key];
+            }
         });
-
-        // Re-render dynamic elements when language changes
-        renderUI();
     }
 
     // INICIALIZAÇÃO EVENT LISTENERS
