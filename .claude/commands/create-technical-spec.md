@@ -33,6 +33,7 @@ Fonte de verdade desta ordem: [.agents/resources.md](../../.agents/resources.md)
 
 4. **Ler contexto:**
    - **Memória do mod** — topo de `mods/<mod>/memory/sessions.md` (snapshot + pendências) + entradas que citam o item `<NNN>`. Aplicar `memory-curation` § "Consumo de memória por commands" (§14): reportar pendências que afetam esta tarefa; pendência 🔴 do item/mod → alertar antes de prosseguir. Se o arquivo não existir, registrar "sem memória prévia".
+   - **Contexto técnico do repo** — consultar [docs/technical/README.md](../../docs/technical/README.md) e ler **os docs cujo gatilho esta tarefa dispara** (`spt-antipatterns.md` dispara sempre). Doc canônico ignorado quando o gatilho se aplica = ponto Categoria C na review. Reportar quais foram lidos.
    - A spec funcional inteira (critérios de aceite e corner cases pautam a busca).
    - `mods/<mod>/modded/Plugin.cs` e `mods/<mod>/modded/Patches/` — entender padrões já usados pelo mod.
    - `mods/<mod>/PROPRIEDADES.md` se existir.
@@ -68,7 +69,8 @@ Fonte de verdade desta ordem: [.agents/resources.md](../../.agents/resources.md)
    Refs ao Assembly: N (verificadas)
    Stubs C# compiláveis: N
    Memória consultada: snapshot de YYYY-MM-DD (Sessão N) · pendências que afetam: [P-N.M ...] / nenhuma
-   Conformidade: 8/8 checks ✅ ou N/A justificado
+   Docs técnicos lidos (gatilho disparado): spt-antipatterns.md[, ...] / só o obrigatório
+   Conformidade: N ✅ · M N/A justificado · 0 ❌
    Próximo: rode /review-technical-spec <ref> para análise crítica
    ```
 

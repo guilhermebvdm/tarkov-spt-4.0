@@ -50,6 +50,10 @@ namespace SPT.Launcher.Sync
             var result = new SyncResult();
             result.Warnings.AddRange(plan.Warnings);
 
+            // Item 030: entries informativas do planner (ex.: optional-config-suppressed-force, RN-2) —
+            // não são ações de disco, apenas registram algo no relatório.
+            result.Entries.AddRange(plan.InfoEntries);
+
             // Seed the baseline with confirmed up-to-date files (CC7 — safe: local == server).
             foreach (var upToDate in plan.UpToDate)
             {
@@ -155,7 +159,11 @@ namespace SPT.Launcher.Sync
                                 _baseline.Remove(action.RelativePath);
                                 result.MovedToDisabled++;
                                 ioDone++;
-                                AddEntry(result, action.RelativePath, "moved-to-disabled", action.MoveTargetRelative);
+                                // Item 030: mesma ação (MoveToDisabled) com label próprio quando é reversão
+                                // de config de performance — separa "removi um extra" de "desliguei performance".
+                                AddEntry(result, action.RelativePath,
+                                    action.Rule == SyncFolderRule.OptionalConfigToConfig ? "optional-config-reverted" : "moved-to-disabled",
+                                    action.MoveTargetRelative);
                             }
                             catch (Exception ex)
                             {
@@ -276,6 +284,61 @@ namespace SPT.Launcher.Sync
                                 ioDone++;
                                 AddEntry(result, action.SeedTargetRelative, "error", ex.Message);
                                 _log($"[Sync] Falha ao forçar {action.SeedTargetRelative}: {ex.Message}");
+                            }
+
+                            break;
+
+                        case SyncActionKind.OptionalConfigCopy:
+                            try
+                            {
+                                // Item 030: config-optional → config. Mesma mecânica não-destrutiva do
+                                // ForceCopy (baixa primeiro; preserva o anterior na quarentena antes de
+                                // sobrescrever), com UMA diferença central: grava BASELINE do que aplicou.
+                                string perfDestination = ResolveUnderRoot(action.SeedTargetRelative); // ref: CR-01-05
+
+                                byte[] perfData = await _downloader(action.RelativePath, cancellationToken); // FONTE (config-optional)
+
+                                bool perfTargetExists = File.Exists(perfDestination);
+                                if (perfTargetExists && string.IsNullOrEmpty(action.MoveTargetRelative))
+                                {
+                                    throw new InvalidOperationException(
+                                        $"performance abortada: sem destino de backup para {action.SeedTargetRelative} — a config do jogador foi mantida intacta");
+                                }
+
+                                string perfBackupRel = null;
+                                if (perfTargetExists)
+                                {
+                                    perfBackupRel = ResolveFreeBackupRelative(action.MoveTargetRelative, perfDestination);
+                                    string perfBackupAbs = ResolveUnderRoot(perfBackupRel);
+                                    string backupDir = Path.GetDirectoryName(perfBackupAbs);
+                                    if (!string.IsNullOrEmpty(backupDir)) Directory.CreateDirectory(backupDir);
+                                    File.Copy(perfDestination, perfBackupAbs, overwrite: true);
+                                    _log($"[Sync] Config do jogador preservada em {perfBackupRel} antes da performance");
+                                }
+
+                                SyncFileOps.WriteAtomic(perfDestination, perfData);
+
+                                // 🔴 A DIFERENÇA vs ForceCopy: grava baseline do que aplicou (no destino real).
+                                // Sem isto o próximo sync veria "sem baseline" e trataria como customizado
+                                // para sempre (SyncPlanner: R1.5) — o híbrido nunca convergiria.
+                                _baseline.SetHash(action.SeedTargetRelative, SyncPathUtil.ComputeMd5(perfData));
+
+                                result.OptionalConfigApplied++;
+                                if (perfBackupRel != null) result.ConfigsBackedUp++;
+                                ioDone++;
+                                AddEntry(result, action.SeedTargetRelative, "optional-config-applied",
+                                    perfBackupRel != null ? $"{action.Reason} · backup: {perfBackupRel}" : action.Reason);
+                            }
+                            catch (OperationCanceledException)
+                            {
+                                throw;
+                            }
+                            catch (Exception ex)
+                            {
+                                result.Errors++;
+                                ioDone++;
+                                AddEntry(result, action.SeedTargetRelative, "error", ex.Message);
+                                _log($"[Sync] Falha ao aplicar performance {action.SeedTargetRelative}: {ex.Message}");
                             }
 
                             break;

@@ -10,8 +10,10 @@ namespace Band_Aid
     /// ItemDatabase). Alimenta o feedback visual do HUD do médico E o consumo
     /// autoritativo do item (ref: CR-05 — o médico debita o que o PACIENTE
     /// efetivamente aplicou, não uma estimativa da saúde observada).
+    ///
+    /// Corpo dentro de um envelope de comprimento (ver <see cref="PacketEnvelope"/>).
     /// </summary>
-    public struct BandAidTreatmentReportPacket : INetSerializable
+    public struct BandAidTreatmentReportPacketV2 : INetSerializable
     {
         public string DoctorProfileId;
         public string PatientProfileId;
@@ -20,24 +22,41 @@ namespace Band_Aid
         public float HealedAmount;
         public float CostAmount;   // recurso a debitar do item do médico (CR-05)
 
+        /// <summary>NÃO serializado. Falso quando o corpo veio truncado — ver BandAidHealPacketV2.Valid.</summary>
+        internal bool Valid;
+
         public void Serialize(NetDataWriter writer)
         {
-            writer.Put(DoctorProfileId);
-            writer.Put(PatientProfileId);
-            writer.Put(ItemTemplateId);
-            writer.Put(BodyPart);
-            writer.Put(HealedAmount);
-            writer.Put(CostAmount);
+            var inner = PacketEnvelope.Open();
+            inner.Put(DoctorProfileId ?? string.Empty);
+            inner.Put(PatientProfileId ?? string.Empty);
+            inner.Put(ItemTemplateId ?? string.Empty);
+            inner.Put(BodyPart);
+            inner.Put(HealedAmount);
+            inner.Put(CostAmount);
+            PacketEnvelope.Close(writer, inner);
         }
 
         public void Deserialize(NetDataReader reader)
         {
-            DoctorProfileId = reader.GetString();
-            PatientProfileId = reader.GetString();
-            ItemTemplateId = reader.GetString();
-            BodyPart = reader.GetByte();
-            HealedAmount = reader.GetFloat();
-            CostAmount = reader.GetFloat();
+            DoctorProfileId = string.Empty;
+            PatientProfileId = string.Empty;
+            ItemTemplateId = string.Empty;
+            BodyPart = 0;
+            HealedAmount = 0f;
+            CostAmount = 0f;
+            Valid = false;
+
+            if (!PacketEnvelope.TryOpen(reader, out var inner)) return;
+
+            if (!PacketEnvelope.TryReadString(inner, out DoctorProfileId)) return;
+            if (!PacketEnvelope.TryReadString(inner, out PatientProfileId)) return;
+            if (!PacketEnvelope.TryReadString(inner, out ItemTemplateId)) return;
+            if (!inner.TryGetByte(out BodyPart)) return;
+            if (!inner.TryGetFloat(out HealedAmount)) return;
+            if (!inner.TryGetFloat(out CostAmount)) return;
+
+            Valid = true;
         }
     }
 }

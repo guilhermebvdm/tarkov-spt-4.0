@@ -1,0 +1,142 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:cc="using:SPT.Launcher.CustomControls"
+             xmlns:helpers="using:SPT.Launcher.Helpers"
+             mc:Ignorable="d" d:DesignWidth="1024" d:DesignHeight="720"
+             x:Class="SPT.Launcher.Views.ModsConfigsView">
+
+    <Grid ColumnDefinitions="Auto, *">
+
+        <!-- SIDEBAR (mesmo chrome da ProfileView/SettingsView) -->
+        <cc:TrlSidebarNav Grid.Column="0">
+            <Grid RowDefinitions="Auto, *, Auto">
+                <Image Grid.Row="0" Source="/Assets/logo-redline.png" Stretch="Uniform" MaxHeight="52" HorizontalAlignment="Center" Margin="24,56,24,16"/>
+
+                <StackPanel Grid.Row="1" Spacing="2" Margin="0,28,0,0">
+                    <Button Classes="nav" Cursor="Hand" Command="{Binding SaveAndReturnCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <Path Data="{StaticResource TrlIconHome}" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=nav_launcher}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Classes="nav active" Cursor="Hand">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <Path Data="{StaticResource TrlIconMenu2}" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=nav_mods_configs}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </cc:TrlSidebarNav>
+
+        <!-- ÁREA CENTRAL -->
+        <ScrollViewer Grid.Column="1" Margin="30,64,30,30" VerticalScrollBarVisibility="Auto">
+            <StackPanel Spacing="18" MaxWidth="1000">
+
+                <TextBlock Classes="trl-h1" Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=mods_configs_title}"/>
+                <TextBlock Classes="trl-muted" TextWrapping="Wrap"
+                           Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=mods_configs_intro}"/>
+
+                <!-- 2 COLUNAS -->
+                <Grid ColumnDefinitions="*, 20, *">
+
+                    <!-- COLUNA: MODS OPCIONAIS (agrupada por categoria) -->
+                    <cc:TrlPanel Grid.Column="0" Title="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=mods_configs_optional_column}">
+                        <StackPanel Spacing="10">
+                            <Button Classes="ghost sm" Cursor="Hand" HorizontalAlignment="Left"
+                                    IsVisible="{Binding HasOptionalMods}"
+                                    Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=mods_configs_toggle_all}"
+                                    Command="{Binding ToggleAllOptionalCommand}"/>
+
+                            <TextBlock Classes="trl-faint" TextWrapping="Wrap" IsVisible="{Binding !HasOptionalMods}"
+                                       Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=mods_configs_empty_optional}"/>
+
+                            <ItemsControl ItemsSource="{Binding OptionalModGroups}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Spacing="4" Margin="0,4,0,10">
+                                            <TextBlock Text="{Binding Name}" Classes="trl-label" FontWeight="Bold"
+                                                       IsVisible="{Binding HasName}" Margin="0,0,0,2"/>
+                                            <ItemsControl ItemsSource="{Binding Items}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <StackPanel Spacing="2" Margin="0,0,0,8">
+                                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                                <CheckBox Content="{Binding Name}" Cursor="Hand" IsChecked="{Binding IsEnabled}"/>
+                                                                <Border Background="{DynamicResource TrlAccentBrush}" CornerRadius="0" Padding="5,1"
+                                                                        VerticalAlignment="Center" IsVisible="{Binding IsNew}">
+                                                                    <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=mods_configs_new_badge}"
+                                                                               FontSize="{DynamicResource TrlText2Xs}" FontWeight="Bold"
+                                                                               Foreground="{DynamicResource TrlBgBrush}"/>
+                                                                </Border>
+                                                            </StackPanel>
+                                                            <TextBlock Classes="trl-muted" FontSize="{DynamicResource TrlTextXs}" TextWrapping="Wrap"
+                                                                       Margin="26,0,0,0" Text="{Binding Description}"
+                                                                       IsVisible="{Binding Description, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+                                                        </StackPanel>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </cc:TrlPanel>
+
+                    <!-- COLUNA: CONFIGS OPCIONAIS (agrupada por categoria) -->
+                    <cc:TrlPanel Grid.Column="2" Title="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=mods_configs_optional_config_column}">
+                        <StackPanel Spacing="10">
+                            <Button Classes="ghost sm" Cursor="Hand" HorizontalAlignment="Left"
+                                    IsVisible="{Binding HasOptionalConfigs}"
+                                    Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=mods_configs_toggle_all}"
+                                    Command="{Binding ToggleAllOptionalConfigCommand}"/>
+
+                            <TextBlock Classes="trl-faint" TextWrapping="Wrap" IsVisible="{Binding !HasOptionalConfigs}"
+                                       Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=mods_configs_empty_optional_config}"/>
+
+                            <ItemsControl ItemsSource="{Binding OptionalConfigGroups}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Spacing="4" Margin="0,4,0,10">
+                                            <TextBlock Text="{Binding Name}" Classes="trl-label" FontWeight="Bold"
+                                                       IsVisible="{Binding HasName}" Margin="0,0,0,2"/>
+                                            <ItemsControl ItemsSource="{Binding Items}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <StackPanel Spacing="2" Margin="0,0,0,8">
+                                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                                <CheckBox Content="{Binding Name}" Cursor="Hand" IsChecked="{Binding IsEnabled}"/>
+                                                                <Border Background="{DynamicResource TrlAccentBrush}" CornerRadius="0" Padding="5,1"
+                                                                        VerticalAlignment="Center" IsVisible="{Binding IsNew}">
+                                                                    <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=mods_configs_new_badge}"
+                                                                               FontSize="{DynamicResource TrlText2Xs}" FontWeight="Bold"
+                                                                               Foreground="{DynamicResource TrlBgBrush}"/>
+                                                                </Border>
+                                                            </StackPanel>
+                                                            <TextBlock Classes="trl-muted" FontSize="{DynamicResource TrlTextXs}" TextWrapping="Wrap"
+                                                                       Margin="26,0,0,0" Text="{Binding Description}"
+                                                                       IsVisible="{Binding Description, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+                                                        </StackPanel>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </cc:TrlPanel>
+                </Grid>
+
+                <!-- SALVAR E VOLTAR -->
+                <Button Classes="primary" Cursor="Hand" HorizontalAlignment="Right" Padding="18,10"
+                        Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=save_and_go_back}"
+                        Command="{Binding SaveAndReturnCommand}"/>
+
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

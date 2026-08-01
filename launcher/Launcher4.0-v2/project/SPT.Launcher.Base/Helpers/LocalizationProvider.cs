@@ -333,6 +333,38 @@ namespace SPT.Launcher.Helpers
         public string profile_id { get => _profile_id; set => SetProperty(ref _profile_id, value); }
         private string _profile_faction;
         public string profile_faction { get => _profile_faction; set => SetProperty(ref _profile_faction, value); }
+
+        // Item 030: tela "Mods e Configs"
+        private string _nav_mods_configs;
+        public string nav_mods_configs { get => _nav_mods_configs; set => SetProperty(ref _nav_mods_configs, value); }
+        private string _mods_configs_title;
+        public string mods_configs_title { get => _mods_configs_title; set => SetProperty(ref _mods_configs_title, value); }
+        private string _mods_configs_intro;
+        public string mods_configs_intro { get => _mods_configs_intro; set => SetProperty(ref _mods_configs_intro, value); }
+        private string _mods_configs_optional_column;
+        public string mods_configs_optional_column { get => _mods_configs_optional_column; set => SetProperty(ref _mods_configs_optional_column, value); }
+        private string _mods_configs_optional_config_column;
+        public string mods_configs_optional_config_column { get => _mods_configs_optional_config_column; set => SetProperty(ref _mods_configs_optional_config_column, value); }
+        private string _mods_configs_toggle_all;
+        public string mods_configs_toggle_all { get => _mods_configs_toggle_all; set => SetProperty(ref _mods_configs_toggle_all, value); }
+        private string _mods_configs_empty_optional;
+        public string mods_configs_empty_optional { get => _mods_configs_empty_optional; set => SetProperty(ref _mods_configs_empty_optional, value); }
+        private string _mods_configs_empty_optional_config;
+        public string mods_configs_empty_optional_config { get => _mods_configs_empty_optional_config; set => SetProperty(ref _mods_configs_empty_optional_config, value); }
+        private string _mods_configs_uncategorized;
+        public string mods_configs_uncategorized { get => _mods_configs_uncategorized; set => SetProperty(ref _mods_configs_uncategorized, value); }
+        private string _mods_configs_new_badge;
+        public string mods_configs_new_badge { get => _mods_configs_new_badge; set => SetProperty(ref _mods_configs_new_badge, value); }
+        private string _mods_configs_summary_format;
+        public string mods_configs_summary_format { get => _mods_configs_summary_format; set => SetProperty(ref _mods_configs_summary_format, value); }
+        private string _mods_configs_game_running;
+        public string mods_configs_game_running { get => _mods_configs_game_running; set => SetProperty(ref _mods_configs_game_running, value); }
+        private string _onboarding_title;
+        public string onboarding_title { get => _onboarding_title; set => SetProperty(ref _onboarding_title, value); }
+        private string _onboarding_body;
+        public string onboarding_body { get => _onboarding_body; set => SetProperty(ref _onboarding_body, value); }
+        private string _onboarding_ok;
+        public string onboarding_ok { get => _onboarding_ok; set => SetProperty(ref _onboarding_ok, value); }
         #endregion
         
         #region dev_mode

@@ -1,0 +1,19 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:dialogHost="clr-namespace:DialogHostAvalonia;assembly=DialogHost.Avalonia"
+             xmlns:cc="using:SPT.Launcher.CustomControls"
+             mc:Ignorable="d" d:DesignWidth="460" d:DesignHeight="260"
+             x:Class="SPT.Launcher.Views.Dialogs.OnboardingDialogView"
+             MaxWidth="500">
+
+  <cc:TrlDialogChrome Title="{Binding Title}">
+    <StackPanel Spacing="18">
+      <TextBlock Text="{Binding Body}" TextWrapping="Wrap" FontSize="{DynamicResource TrlTextMd}"/>
+
+      <Button Content="{Binding OkText}" Classes="primary" Cursor="Hand" HorizontalAlignment="Right"
+              Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=dialogHost:DialogHost}, Path=CloseDialogCommand}"/>
+    </StackPanel>
+  </cc:TrlDialogChrome>
+</UserControl>

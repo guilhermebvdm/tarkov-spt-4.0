@@ -12,6 +12,11 @@ namespace SPT.Launcher.Models.Launcher
         public string hash { get; set; }
         public long size { get; set; }
         public bool optional { get; set; }
-        public string optionalGroup { get; set; }
+
+        /// <summary>Item 030: id do MOD opcional dono deste arquivo.</summary>
+        public string optionalId { get; set; }
+
+        /// <summary>Item 030: id do ITEM de config de performance dono deste arquivo (quando sob config-optional/).</summary>
+        public string optionalConfigId { get; set; }
     }
 }

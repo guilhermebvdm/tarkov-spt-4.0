@@ -102,6 +102,13 @@ let STOCK_OVERRIDES = {};  // B-6: traderId → { tpl → { stock?, buyLimit? } 
 let BUY_MOD_INSTALLED = true;  // companion mod TRLTraderPrices (buy-price half) present?
 let CURRENCY_RATES = { RUB: 1 };  // { RUB:1, USD, EUR, GP } rubles-per-native-unit (from meta.json)
 const FENCE_ID = '579dc571d53a0658a154fbec'; // Fence — dynamic assort, not editable
+// CR-A-02: Fence's nickname, resolved once from TRADERS (which keys by nickname). Used to drop Fence
+// from the exclusive trader filter's offerer sets. Recomputes until TRADERS is populated (returns '').
+let _fenceName = '';
+function fenceName() {
+  if (!_fenceName) _fenceName = Object.keys(TRADERS).find(n => TRADERS[n] && TRADERS[n].id === FENCE_ID) || '';
+  return _fenceName;
+}
 let META = null;
 // Set by initFleaCapToggle() below — lets the audit-log undo path (which calls POST /flea-cap
 // directly, bypassing the toggle button's own click handler) resync the topbar indicator instead
@@ -114,7 +121,9 @@ const selectedConditions = new Set();  // conditionType values selected
 const selectedBans       = new Set();  // ban filter values: 'ok' | 'bsg' | 'custom'
 const selectedEdited     = new Set();  // edited filter values: 'flea' | 'trader' | 'none'
 const selectedMods       = new Set();  // modSource names selected (custom items from mods)
+const VANILLA_FILTER     = '__vanilla__'; // B-9: sentinel in selectedMods meaning "base items only (no modSource)"
 const selectedTraders    = new Set();  // trader filter values: 'S:<name>' (sells) | 'B:<name>' (buys)
+let   traderExclusive    = false;      // B-10: on = only items offered EXCLUSIVELY by the selected traders
 const DELTA_STORAGE_KEY  = 'trl-items-management.delta';
 let deltaSource = 'dev';   // 'dev' | 'market'
 let deltaMin    = null;    // number or null
@@ -145,7 +154,7 @@ function urlListOverride(paramKey, storageKey, targetSet) {
 // Reusable dropdown component (single or multi-select). Options shape:
 //   [{ value: string, label: string, icon?: string, count?: number }]
 // Returns { root, getValue, setValue, refresh } where value is an array.
-function createDropdown({ placeholder, options, multi = false, searchable = false, onChange }) {
+function createDropdown({ placeholder, options, multi = false, searchable = false, onChange, exclusiveToggle = null }) {
   const selected = new Set();
   const root = document.createElement('div');
   root.className = 'dropdown' + (multi ? ' dropdown--multi' : '');
@@ -182,6 +191,27 @@ function createDropdown({ placeholder, options, multi = false, searchable = fals
     selectAllBtn.onclick = (e) => { e.stopPropagation(); options.forEach(o => selected.add(o.value)); refresh(); emit(); };
     actions.appendChild(clearBtn);
     actions.appendChild(selectAllBtn);
+    // B-10: optional exclusive-match toggle (Trader filter) — sits with Clear/All in the panel.
+    if (exclusiveToggle) {
+      const exBtn = document.createElement('button');
+      exBtn.type = 'button'; exBtn.className = 'dropdown__action dropdown__action--toggle';
+      exBtn.title = exclusiveToggle.tip || '';
+      const syncEx = () => {
+        const on = exclusiveToggle.isOn();
+        exBtn.classList.toggle('is-on', on);
+        exBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+        exBtn.textContent = (on ? '☑ ' : '☐ ') + exclusiveToggle.label;
+        // CR-A-05: keep the collapsed-trigger marker in sync here too — toggling exclusive does NOT go
+        // through refresh() (only selection changes do), so the badge accent would otherwise lag.
+        const exBadge = root.querySelector('.dropdown__badge');
+        const exOn = on && selected.size > 0;
+        root.classList.toggle('is-exclusive', exOn);
+        if (exBadge) exBadge.title = exOn ? 'Exclusive — only items offered solely by these traders' : '';
+      };
+      exBtn.onclick = (e) => { e.stopPropagation(); exclusiveToggle.onToggle(); syncEx(); };
+      syncEx();
+      actions.appendChild(exBtn);
+    }
     panel.appendChild(actions);
   }
 
@@ -255,6 +285,12 @@ function createDropdown({ placeholder, options, multi = false, searchable = fals
     for (const el of optionsList.querySelectorAll('.dropdown__option')) {
       el.classList.toggle('is-selected', selected.has(el.dataset.value));
     }
+    // CR-A-05: surface exclusive mode on the COLLAPSED trigger (accented badge + tooltip) so the user
+    // knows the toggle is on without opening the panel — matters most when it was re-armed from a shared
+    // ?trExcl=1 link. No-op for dropdowns without an exclusiveToggle.
+    const exOn = !!(exclusiveToggle && selected.size > 0 && exclusiveToggle.isOn());
+    root.classList.toggle('is-exclusive', exOn);
+    if (badge) badge.title = exOn ? 'Exclusive — only items offered solely by these traders' : '';
   }
 
   function emit() { if (onChange) onChange([...selected]); }
@@ -555,6 +591,7 @@ const BAN_STORAGE_KEY       = 'trl-items-management.bans';
 const EDITED_STORAGE_KEY    = 'trl.editedFilter';
 const MOD_STORAGE_KEY       = 'trl-items-management.mods';
 const TRADER_STORAGE_KEY    = 'trl-items-management.traders';
+const TRADER_EXCL_KEY       = 'trl-items-management.traderExclusive';
 let groupDropdown = null;
 let traderDropdown = null;
 let conditionDropdown = null;
@@ -777,7 +814,10 @@ function sellSideRows(it) {
       const ovCount = ov != null ? ((typeof ov === 'object') ? ov.count : ov) : null;
       const rate = CURRENCY_RATES[t.currency] != null ? CURRENCY_RATES[t.currency] : 1;
       const effPriceRUB = ovCount != null ? Math.round(ovCount * rate) : t.priceRUB;
-      return { name: t.name, traderId: tid, effPriceRUB, loyaltyLevel: t.loyaltyLevel, questLocked: !!t.questLocked, overridden: ovCount != null };
+      // B-11: a loyalty-level override retargets the tier the offer unlocks at — reflect it in the
+      // group-avatar / popover LL immediately, same as the sell-price override on effPriceRUB.
+      const effLL = (so && so.loyaltyLevel != null) ? so.loyaltyLevel : t.loyaltyLevel;
+      return { name: t.name, traderId: tid, effPriceRUB, loyaltyLevel: effLL, loyaltyOverridden: !!(so && so.loyaltyLevel != null), questLocked: !!t.questLocked, overridden: ovCount != null };
     })
     .filter(Boolean)
     .sort((a, b) => a.effPriceRUB - b.effPriceRUB);
@@ -833,7 +873,7 @@ function traderLineMarkup(rows, side) {
   const avatars = ordered.map(r => traderAvatarImg(r.name, '')).join('');
   const moreChip = hidden > 0 ? `<span class="trader-avatars__more" title="${hidden} more">+${hidden}</span>` : '';
   const ll = (side === 'sell' && best.loyaltyLevel != null)
-    ? `<small class="cell-trader__ll">LL${best.loyaltyLevel}${best.questLocked ? ` <span class="trader-lock" data-tip="Quest-locked — an override applies only after you unlock the quest">🔒</span>` : ''}</small>`
+    ? `<small class="cell-trader__ll${best.loyaltyOverridden ? ' is-capped' : ''}"${best.loyaltyOverridden ? ' data-tip="Loyalty-level override — restart SPT to apply"' : ''}>LL${best.loyaltyLevel}${best.questLocked ? ` <span class="trader-lock" data-tip="Quest-locked — an override applies only after you unlock the quest">🔒</span>` : ''}</small>`
     : '';
   // No data-tip on the line — the hover popover (with S/B headers) is the full explanation, and a
   // tooltip here would just double up with it (CR-T-01).
@@ -929,10 +969,13 @@ function buildModFilter() {
   // Custom items added by server mods (modSource set in load-spt from
   // user/mods/*/db/CustomItems/). No mod items → no filter rendered.
   const counts = {};
-  for (const it of ITEM_LIST) { if (it.modSource) counts[it.modSource] = (counts[it.modSource] || 0) + 1; }
+  let vanillaCount = 0;
+  for (const it of ITEM_LIST) { if (it.modSource) counts[it.modSource] = (counts[it.modSource] || 0) + 1; else vanillaCount++; }
   const names = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
   if (names.length === 0) return;
   const options = names.map(n => ({ value: n, label: n, count: counts[n] }));
+  // B-9: "Vanilla" pseudo-option — the inverse of picking a mod: base EFT/SPT items with no modSource.
+  if (vanillaCount) options.unshift({ value: VANILLA_FILTER, label: 'Vanilla (no mod)', count: vanillaCount });
 
   urlListOverride('mod', MOD_STORAGE_KEY, selectedMods);
 
@@ -971,6 +1014,15 @@ function buildTraderFilter() {
   }
 
   urlListOverride('trader', TRADER_STORAGE_KEY, selectedTraders);
+  // B-10: exclusive-match flag from URL (?trExcl=1) or localStorage. CR-A-01: CONSUME the URL param on
+  // first read (like urlListOverride does) — buildTraderFilter re-runs on every trader edit via
+  // refreshConflictFilter, so a retained ?trExcl=1 would keep re-forcing the toggle back on and defeat
+  // the user turning it off. After the delete, subsequent rebuilds fall through to localStorage (the
+  // live source of truth the toggle writes).
+  const exFromUrl = URL_INITIAL.get('trExcl');
+  URL_INITIAL.delete('trExcl');
+  traderExclusive = exFromUrl === '1'
+    || (exFromUrl == null && (() => { try { return localStorage.getItem(TRADER_EXCL_KEY) === '1'; } catch (e) { return false; } })());
 
   traderDropdown = createDropdown({
     placeholder: 'Trader',
@@ -982,6 +1034,16 @@ function buildTraderFilter() {
       vals.forEach(v => selectedTraders.add(v));
       try { localStorage.setItem(TRADER_STORAGE_KEY, JSON.stringify(vals)); } catch (e) {}
       render();
+    },
+    exclusiveToggle: {
+      label: 'only these',
+      tip: 'Show only items offered EXCLUSIVELY by the selected traders — no trader outside the selection offers them.',
+      isOn: () => traderExclusive,
+      onToggle: () => {
+        traderExclusive = !traderExclusive;
+        try { localStorage.setItem(TRADER_EXCL_KEY, traderExclusive ? '1' : '0'); } catch (e) {}
+        render();
+      },
     },
   });
   traderDropdown.setValue([...selectedTraders]);
@@ -1168,9 +1230,12 @@ function renderCatNode(parent, node, depth) {
 
   el.onclick = (e) => {
     e.stopPropagation();
-    if (hasChildren) {
+    // B-12: the chevron only expands/collapses; clicking anywhere else on the row (icon/label/count)
+    // selects the category. Leaf nodes have no chevron, so their whole row selects.
+    if (hasChildren && e.target.closest('.chev')) {
       el.classList.toggle('is-open');
       childrenWrap.classList.toggle('is-hidden');
+      return;
     }
     activeCategoryId = node.id;
     render();
@@ -1340,6 +1405,8 @@ function filterStateKey() {
     [...selectedEdited].sort().join(','),
     [...selectedMods].sort().join(','),
     [...selectedTraders].sort().join(','),
+    traderExclusive, // B-10: the exclusive toggle changes the trader-filter outcome without touching the
+                     // selection set, so it must be part of the cache key or a toggle returns a stale list.
     deltaMin, deltaMax, deltaSource, activeCategoryId, _dataVersion,
   ].join('|');
 }
@@ -1383,19 +1450,49 @@ function filterItems() {
       if (!match) continue;
     }
     if (selectedMods.size > 0) {
-      if (!it.modSource || !selectedMods.has(it.modSource)) continue;
+      // B-9: OR of the picked mods and (optionally) the Vanilla pseudo-option (items with no modSource).
+      const vanillaMatch = selectedMods.has(VANILLA_FILTER) && !it.modSource;
+      const modMatch = it.modSource && selectedMods.has(it.modSource);
+      if (!vanillaMatch && !modMatch) continue;
     }
     if (selectedTraders.size > 0) {
-      // OR within the filter: item passes if it matches ANY selected [S]/[B]:trader. Sell/buy sets use
-      // the same resolution as the row (disabled sellers excluded, so a disabled trader filters out).
+      // Sell/buy sets use the same resolution as the row (disabled sellers excluded, so a disabled
+      // trader filters out).
       const sellers = new Set(sellSideRows(it).map(r => r.name));
       const buyers  = new Set(buySideRows(it).map(r => r.name));
-      let match = false;
-      for (const sel of selectedTraders) {
-        const name = sel.slice(2);
-        if ((sel[0] === 'S' && sellers.has(name)) || (sel[0] === 'B' && buyers.has(name))) { match = true; break; }
+      if (traderExclusive) {
+        // B-10 exclusive: for each side (S/B) that has a selection, ALL of the item's offerers on that
+        // side must be within the selection (and non-empty) — i.e. no trader outside the selection
+        // offers it. AND across the two sides (a side with no selection is not constrained).
+        const selSell = new Set(), selBuy = new Set();
+        for (const sel of selectedTraders) (sel[0] === 'S' ? selSell : selBuy).add(sel.slice(2));
+        // CR-A-02: the Fence is the dynamic black market, not a curated trader — it buys ~every item, so
+        // counting it here would break exclusivity for almost everything and make the [B] exclusive filter
+        // useless. Ignore Fence as an offerer UNLESS the user explicitly picked it. `≥1 real offerer within
+        // the selection` (any) still required, so an item offered ONLY by an ignored Fence doesn't match.
+        const subsetIgnoringFence = (offerers, selSet) => {
+          const fence = fenceName();
+          let any = false;
+          for (const n of offerers) {
+            if (n === fence && !selSet.has(fence)) continue; // Fence ignored unless selected
+            any = true;
+            if (!selSet.has(n)) return false;
+          }
+          return any;
+        };
+        const okSell = selSell.size === 0 ? null : subsetIgnoringFence(sellers, selSell);
+        const okBuy  = selBuy.size  === 0 ? null : subsetIgnoringFence(buyers, selBuy);
+        const checks = [okSell, okBuy].filter(v => v !== null);
+        if (!(checks.length > 0 && checks.every(Boolean))) continue;
+      } else {
+        // OR: item passes if it matches ANY selected [S]/[B]:trader.
+        let match = false;
+        for (const sel of selectedTraders) {
+          const name = sel.slice(2);
+          if ((sel[0] === 'S' && sellers.has(name)) || (sel[0] === 'B' && buyers.has(name))) { match = true; break; }
+        }
+        if (!match) continue;
       }
-      if (!match) continue;
     }
     if (deltaMin !== null || deltaMax !== null) {
       const c  = it.consolidated;
@@ -1487,6 +1584,7 @@ function syncUrlFromState() {
   if (selectedEdited.size) p.set('edited', [...selectedEdited].join(','));
   if (selectedMods.size) p.set('mod', [...selectedMods].join(','));
   if (selectedTraders.size) p.set('trader', [...selectedTraders].join(','));
+  if (traderExclusive && selectedTraders.size) p.set('trExcl', '1');
   if (deltaMin !== null || deltaMax !== null) {
     p.set('deltaSrc', deltaSource);
     if (deltaMin !== null) p.set('deltaMin', deltaMin);
@@ -1868,7 +1966,7 @@ function openTraderPopover(anchor, it) {
   if (!sRows.length && !bRows.length) return;
   const line = (r, best, side) => {
     const ll = (side === 'sell' && r.loyaltyLevel != null)
-      ? `<span class="trader-pop__ll">LL${r.loyaltyLevel}${r.questLocked ? ' 🔒' : ''}</span>` : '';
+      ? `<span class="trader-pop__ll${r.loyaltyOverridden ? ' is-capped' : ''}"${r.loyaltyOverridden ? ' data-tip="Loyalty-level override — restart SPT to apply"' : ''}>LL${r.loyaltyLevel}${r.questLocked ? ' 🔒' : ''}</span>` : '';
     return `<li class="trader-pop__item${r === best ? ' is-best' : ''}">` +
       traderAvatarImg(r.name, '') +
       `<span class="trader-pop__name">${escapeHtml(r.name || '?')}</span>${ll}` +
@@ -2649,10 +2747,10 @@ function undoApplyTrader(isBuy, tpl, traderId, count, currency) {
   if (isBuy) updateBuyTopbar(); else { updateTraderTopbar(); refreshTraderOverrideFilter(); }
 }
 
-// B-6: optimistic STOCK_OVERRIDES update after an undo. entry = { stock?, buyLimit? } to restore, or
-// null to clear. Re-renders the trader row in the (possibly open) detail panel + the main row.
+// B-6/B-11: optimistic STOCK_OVERRIDES update after an undo. entry = { stock?, buyLimit?, loyaltyLevel? }
+// to restore, or null to clear. Re-renders the trader row in the (possibly open) detail panel + the main row.
 function undoApplyStock(tpl, traderId, entry) {
-  if (entry == null || (entry.stock == null && entry.buyLimit == null && entry.disabled == null)) {
+  if (entry == null || (entry.stock == null && entry.buyLimit == null && entry.loyaltyLevel == null && entry.disabled == null)) {
     if (STOCK_OVERRIDES[traderId]) {
       delete STOCK_OVERRIDES[traderId][tpl];
       if (Object.keys(STOCK_OVERRIDES[traderId]).length === 0) delete STOCK_OVERRIDES[traderId];
@@ -2662,9 +2760,11 @@ function undoApplyStock(tpl, traderId, entry) {
     const e2 = {};
     if (entry.stock != null) e2.stock = entry.stock;
     if (entry.buyLimit != null) e2.buyLimit = entry.buyLimit;
+    if (entry.loyaltyLevel != null) e2.loyaltyLevel = entry.loyaltyLevel;
     if (entry.disabled != null) e2.disabled = entry.disabled;
     STOCK_OVERRIDES[traderId][tpl] = e2;
   }
+  _dataVersion++; // CR-C-01: invalidate the sellSideRows memo before rerenderMainRow re-reads it (LL avatar)
   const esc = (v) => (window.CSS && CSS.escape) ? CSS.escape(v) : v;
   const row = document.querySelector(`tr.trader-row[data-trader-tpl="${esc(tpl)}"][data-trader-id="${esc(traderId)}"]`);
   if (row) rerenderTraderRowEl(row, false);
@@ -2672,12 +2772,14 @@ function undoApplyStock(tpl, traderId, entry) {
   refreshConflictFilter();
 }
 
-// Human-readable summary of a stock / buyLimit / disabled entry for the audit feed. Any field absent.
+// Human-readable summary of a stock / buyLimit / loyaltyLevel / disabled entry for the audit feed.
+// Any field absent.
 function auditAvail(o) {
   if (o && o.disabled) return 'sale disabled';
   const parts = [];
   if (o && o.stock != null) parts.push(`stock ${o.stock.toLocaleString('en-US')}`);
   if (o && o.buyLimit != null) parts.push(`buy ${o.buyLimit.toLocaleString('en-US')}/cyc`);
+  if (o && o.loyaltyLevel != null) parts.push(`LL${o.loyaltyLevel}`);
   return parts.length ? parts.join(', ') : 'default';
 }
 
@@ -2776,7 +2878,7 @@ function describeAuditEntry(e) {
     }
     case 'trader-stock/set': {
       const traderName = escapeHtml(auditTraderName(x.traderId));
-      const hadPrev = b.stock != null || b.buyLimit != null || b.disabled != null; // override to restore?
+      const hadPrev = b.stock != null || b.buyLimit != null || b.loyaltyLevel != null || b.disabled != null; // override to restore?
       return {
         desc: `Availability for <b>${traderName}</b> changed: ${auditAvail(b)} → ${auditAvail(a)}`,
         undo: {
@@ -2789,9 +2891,10 @@ function describeAuditEntry(e) {
               const body = { tpl: e.tpl, traderId: x.traderId };
               if (b.stock != null) body.stock = b.stock;
               if (b.buyLimit != null) body.buyLimit = b.buyLimit;
+              if (b.loyaltyLevel != null) body.loyaltyLevel = b.loyaltyLevel;
               if (b.disabled) body.disabled = true;
               data = await auditApiCall('PATCH', '/trader-stock', body);
-              undoApplyStock(e.tpl, x.traderId, { stock: b.stock ?? null, buyLimit: b.buyLimit ?? null, disabled: b.disabled ?? null });
+              undoApplyStock(e.tpl, x.traderId, { stock: b.stock ?? null, buyLimit: b.buyLimit ?? null, loyaltyLevel: b.loyaltyLevel ?? null, disabled: b.disabled ?? null });
             }
             return data;
           },
@@ -2800,7 +2903,7 @@ function describeAuditEntry(e) {
     }
     case 'trader-stock/delete': {
       const traderName = escapeHtml(auditTraderName(x.traderId));
-      const hadPrev = b.stock != null || b.buyLimit != null || b.disabled != null;
+      const hadPrev = b.stock != null || b.buyLimit != null || b.loyaltyLevel != null || b.disabled != null;
       return {
         desc: `Availability for <b>${traderName}</b> reset to default`,
         undo: !hadPrev ? null : {
@@ -2808,9 +2911,10 @@ function describeAuditEntry(e) {
             const body = { tpl: e.tpl, traderId: x.traderId };
             if (b.stock != null) body.stock = b.stock;
             if (b.buyLimit != null) body.buyLimit = b.buyLimit;
+            if (b.loyaltyLevel != null) body.loyaltyLevel = b.loyaltyLevel;
             if (b.disabled) body.disabled = true;
             const data = await auditApiCall('PATCH', '/trader-stock', body);
-            undoApplyStock(e.tpl, x.traderId, { stock: b.stock ?? null, buyLimit: b.buyLimit ?? null, disabled: b.disabled ?? null });
+            undoApplyStock(e.tpl, x.traderId, { stock: b.stock ?? null, buyLimit: b.buyLimit ?? null, loyaltyLevel: b.loyaltyLevel ?? null, disabled: b.disabled ?? null });
             return data;
           },
         },
@@ -3447,13 +3551,14 @@ function traderOverrideFor(traderId, tpl) {
   return byTrader[tpl];
 }
 
-// B-6: resolve the stock override for a (trader, tpl) as { stock?, buyLimit?, disabled? }, or null. An
-// entry with no meaningful field is treated as no override (defensive — the backend never writes empty).
+// B-6/B-11: resolve the stock override for a (trader, tpl) as { stock?, buyLimit?, loyaltyLevel?,
+// disabled? }, or null. An entry with no meaningful field is treated as no override (defensive — the
+// backend never writes empty).
 function stockOverrideFor(traderId, tpl) {
   if (!traderId) return null;
   const byTrader = STOCK_OVERRIDES[traderId];
   const ovr = byTrader && byTrader[tpl];
-  if (ovr == null || (ovr.stock == null && ovr.buyLimit == null && ovr.disabled == null)) return null;
+  if (ovr == null || (ovr.stock == null && ovr.buyLimit == null && ovr.loyaltyLevel == null && ovr.disabled == null)) return null;
   return ovr;
 }
 
@@ -3504,6 +3609,7 @@ function rubHintMarkup(native, cur) {
 const TRADER_AVAIL_TIP = {
   stock:   'Stock — the total pool that exists to sell, shared by all players. Every purchase eats into it, and a trader refresh does NOT restock — only a server restart refills it back to this cap. ∞ = unlimited.',
   limit:   'Buy / cycle — how many ONE player can buy per trader refresh. The refresh is random per trader (~30 min–4 h), and each player\'s cap resets when it fires. ∞ = no per-cycle cap (only Stock limits the total).',
+  loyalty: 'Loyalty level — the trader tier (1–4) you must reach for this offer to unlock. Raising it gates the item behind more reputation; lowering it makes it available sooner. Restart SPT to apply.',
   sale:    'Whether this trader sells the item at all. Disabling removes it from the shop entirely. Restart SPT to apply.',
   saleOff: 'Sale disabled — this trader no longer sells the item (removed from its assort). Restart SPT to apply.',
 };
@@ -3536,9 +3642,19 @@ function renderTraderRow(it, t) {
   const limitTxt = effLimit == null ? '∞' : effLimit.toLocaleString('en-US');
   const dfltStockTxt = vanillaStock == null ? '?' : (vanillaStock === Infinity ? '∞' : vanillaStock.toLocaleString('en-US'));
 
+  // B-11: loyalty tier that unlocks this offer. Vanilla from the cache (t.loyaltyLevel); a config
+  // override (applied at boot, pending until restart) supersedes it.
+  const vanillaLL = t.loyaltyLevel;
+  const effLL = (stockOvr && stockOvr.loyaltyLevel != null) ? stockOvr.loyaltyLevel : vanillaLL;
+  const llChanged = effLL != null && vanillaLL != null && effLL !== vanillaLL;
+
   // Quest-lock 🔒 gets its own tooltip so it isn't confused with Fence's marker.
   const lockGlyph = t.questLocked ? ` · <span class="trader-lock" data-tip="Quest-locked — an override here applies only after you unlock the quest (until then the item sits in the trader's quest assort, not the live one)">🔒</span>` : '';
-  const meta = `<small class="vendor">${escapeHtml(t.currency || '?')} · L${t.loyaltyLevel}${lockGlyph}</small>`;
+  const llMeta = effLL == null ? ''
+    : llChanged
+      ? ` · <span class="vendor-ll is-capped" data-tip="${escapeAttr('Loyalty level override — unlocks at LL' + effLL + ' (default LL' + vanillaLL + '). Restart SPT to apply.')}">L${effLL}<s>${vanillaLL}</s></span>`
+      : ` · L${effLL}`;
+  const meta = `<small class="vendor">${escapeHtml(t.currency || '?')}${llMeta}${lockGlyph}</small>`;
   const nameCell = `<td class="k">${escapeHtml(t.name)} ${meta}</td>`;
 
   // Muted em-dash for a missing effective price.
@@ -3599,7 +3715,7 @@ function renderTraderRow(it, t) {
       `</span>`;
   const priceBlock = `<span class="trader-price-block${disabled?' is-off':''}">${priceMarkup}${badge}</span>`;
 
-  return `<tr class="trader-row is-editable${hasOvr?' is-overridden':''}${stockCapped?' is-stock-capped':''}${disabled?' is-sale-off':''}" data-trader-id="${escapeAttr(traderId||'')}" data-trader-tpl="${escapeAttr(tpl)}" data-trader-base="${base!=null?base:''}" data-trader-cur="${escapeAttr(t.currency||'')}" data-trader-stock="${t.stock!=null?t.stock:''}" data-trader-unlimited="${t.unlimited?'1':''}" data-trader-buylimit="${t.buyLimit!=null?t.buyLimit:''}" data-trader-disabled="${disabled?'1':''}">` +
+  return `<tr class="trader-row is-editable${hasOvr?' is-overridden':''}${stockCapped?' is-stock-capped':''}${llChanged?' is-ll-capped':''}${disabled?' is-sale-off':''}" data-trader-id="${escapeAttr(traderId||'')}" data-trader-tpl="${escapeAttr(tpl)}" data-trader-base="${base!=null?base:''}" data-trader-cur="${escapeAttr(t.currency||'')}" data-trader-stock="${t.stock!=null?t.stock:''}" data-trader-unlimited="${t.unlimited?'1':''}" data-trader-buylimit="${t.buyLimit!=null?t.buyLimit:''}" data-trader-ll="${vanillaLL!=null?vanillaLL:''}" data-trader-disabled="${disabled?'1':''}">` +
     nameCell +
     `<td class="v trader-edit-cell" data-tip="Click to edit sell price, stock &amp; availability" tabindex="0" role="button" aria-label="Edit trader sell price and availability">` +
       availInline + priceBlock + restoreBtn +
@@ -3711,15 +3827,30 @@ function openTraderEdit(row, focusField) {
   const rawStock = row.dataset.traderStock;
   const unlimited = row.dataset.traderUnlimited === '1';
   const rawLimit = row.dataset.traderBuylimit;
+  const rawLL = row.dataset.traderLl;
   const vanillaStock = (rawStock !== '' && rawStock != null) ? Number(rawStock) : (unlimited ? Infinity : null);
   const vanillaLimit = (rawLimit !== '' && rawLimit != null) ? Number(rawLimit) : null;
+  const vanillaLL = (rawLL !== '' && rawLL != null) ? Number(rawLL) : null;
   const stockOvr = stockOverrideFor(traderId, tpl);
   const curOvrStock = (stockOvr && stockOvr.stock != null) ? stockOvr.stock : null;
   const curOvrLimit = (stockOvr && stockOvr.buyLimit != null) ? stockOvr.buyLimit : null;
+  const curOvrLL = (stockOvr && stockOvr.loyaltyLevel != null) ? stockOvr.loyaltyLevel : null;
   const disabledBefore = !!(stockOvr && stockOvr.disabled === true);
   const hasStockOvr = stockOvr != null;
   const dfltStockTxt = vanillaStock == null ? 'n/a' : (vanillaStock === Infinity ? '∞' : vanillaStock.toLocaleString('en-US'));
   const dfltLimitTxt = vanillaLimit == null ? '∞' : vanillaLimit.toLocaleString('en-US');
+  // B-11: loyalty-level picker. Only shown when the offer has a vanilla tier (all editable money
+  // sellers do). SPT traders top out at LL4; the picker offers 1-4 with the vanilla marked "(default)".
+  // CR-C-03: also show the picker when there's an LL override but the cache lacks the vanilla tier, so
+  // the override stays editable (not just removable via ↺). CR-C-02: build the option set from 1-4 PLUS
+  // any out-of-range vanilla/current value, so the selected option ALWAYS exists — otherwise the browser
+  // silently falls back to LL1 and a plain Save would write a spurious LL1 override.
+  const showLL = vanillaLL != null || curOvrLL != null;
+  const effLLInit = curOvrLL != null ? curOvrLL : vanillaLL;
+  const llValues = [...new Set([1, 2, 3, 4, vanillaLL, effLLInit].filter(v => v != null && Number.isFinite(v)))].sort((a, b) => a - b);
+  const llOptions = showLL
+    ? llValues.map(n => `<option value="${n}"${n === effLLInit ? ' selected' : ''}>LL${n}${n === vanillaLL ? ' (default)' : ''}</option>`).join('')
+    : '';
 
   const isRub = cur === 'RUB';
   const rate = CURRENCY_RATES[cur];
@@ -3754,6 +3885,10 @@ function openTraderEdit(row, focusField) {
           `<label class="tea-label">Buy / cycle ${qMark(TRADER_AVAIL_TIP.limit)}<span class="tea-dflt">def ${escapeHtml(dfltLimitTxt)}</span></label>` +
           `<input class="tef-limit" type="number" min="0" step="1" value="${curOvrLimit != null ? curOvrLimit : ''}" placeholder="${escapeAttr(dfltLimitTxt)}" aria-label="Buy limit per refresh cycle (default ${escapeAttr(dfltLimitTxt)})">` +
         `</div>` +
+        (showLL ? `<div class="tea-cell tea-cell--loyalty">` +
+          `<label class="tea-label">Loyalty level ${qMark(TRADER_AVAIL_TIP.loyalty)}${vanillaLL != null ? `<span class="tea-dflt">def L${vanillaLL}</span>` : ''}</label>` +
+          `<select class="tef-loyalty" aria-label="Loyalty level${vanillaLL != null ? ` (default LL${vanillaLL})` : ''}">${llOptions}</select>` +
+        `</div>` : '') +
       `</div>` +
       `<div class="tef-avail-note" aria-live="polite"></div>` +
       `<div class="tea-actions">` +
@@ -3768,6 +3903,7 @@ function openTraderEdit(row, focusField) {
   const input        = acc.querySelector('.tef-price');
   const stockInput   = acc.querySelector('.tef-stock');
   const limitInput   = acc.querySelector('.tef-limit');
+  const loyaltySelect = acc.querySelector('.tef-loyalty');
   const preview      = acc.querySelector('.tef-preview');
   const availNote    = acc.querySelector('.tef-avail-note');
   const saleBtn      = acc.querySelector('.tea-sale');
@@ -3785,6 +3921,7 @@ function openTraderEdit(row, focusField) {
     saleBtn.innerHTML = saleOn ? '● Sale enabled' : '⊘ Sale disabled';
     acc.classList.toggle('is-sale-off', !saleOn);
     input.disabled = stockInput.disabled = limitInput.disabled = !saleOn;
+    if (loyaltySelect) loyaltySelect.disabled = !saleOn; // a removed offer has no tier to gate
   }
   saleBtn.onclick = () => { saleOn = !saleOn; renderSale(); if (saleOn) input.focus(); };
 
@@ -3826,7 +3963,10 @@ function openTraderEdit(row, focusField) {
     if (docClickHandler) document.removeEventListener('mousedown', docClickHandler, true);
   }
   function rerenderRow() { return rerenderTraderRowEl(row, true); }
-  function reflectAll() { closeForm(); rerenderRow(); rerenderMainRow(tpl); refreshTraderOverrideFilter(); refreshConflictFilter(); updateTraderTopbar(); }
+  // CR-C-01: bump _dataVersion BEFORE rerenderMainRow so the memoized sellSideRows() (which now carries the
+  // effective LL for the group-avatar) is recomputed with the just-saved override. Otherwise the collapsed
+  // avatar keeps the stale LL until a later scroll/filter re-render, disagreeing with the detail row.
+  function reflectAll() { _dataVersion++; closeForm(); rerenderRow(); rerenderMainRow(tpl); refreshTraderOverrideFilter(); refreshConflictFilter(); updateTraderTopbar(); }
   function setBusy(v) {
     save.disabled = cancel.disabled = saleBtn.disabled = v;
     if (restorePrice) restorePrice.disabled = v;
@@ -3839,6 +3979,7 @@ function openTraderEdit(row, focusField) {
     if (ev.key === 'Enter')  { ev.preventDefault(); save.click(); }
   };
   input.onkeydown = onKey; stockInput.onkeydown = onKey; limitInput.onkeydown = onKey;
+  if (loyaltySelect) loyaltySelect.onkeydown = onKey;
   docClickHandler = (ev) => { if (!row.contains(ev.target) && !acc.contains(ev.target)) closeForm(); };
   setTimeout(() => document.addEventListener('mousedown', docClickHandler, true), 0);
 
@@ -3862,19 +4003,26 @@ function openTraderEdit(row, focusField) {
       toast('Buy limit must be a whole number ≥ 0', 'err'); limitInput.focus(); return;
     }
 
+    // B-11: only a loyalty level DIFFERENT from vanilla is a real override (picking the default just
+    // clears any prior LL override). Ignored when the sale is being disabled (removed offer has no tier).
+    const llSel = (saleOn && loyaltySelect) ? parseInt(loyaltySelect.value, 10) : null;
+    const llOverride = (llSel != null && Number.isFinite(llSel) && llSel !== vanillaLL) ? llSel : null;
+
     // ── desired stock-override state (null = no override) ─────────────────────────────
     let desired = null;
     if (!saleOn) {
       desired = { disabled: true };
-    } else if (stockVal != null || limitVal != null) {
+    } else if (stockVal != null || limitVal != null || llOverride != null) {
       desired = {};
       if (stockVal != null) desired.stock = stockVal;
       if (limitVal != null) desired.buyLimit = limitVal;
+      if (llOverride != null) desired.loyaltyLevel = llOverride;
     }
     const sameOvr = (a, b) =>
       (a == null && b == null) ||
       (a != null && b != null && (a.stock ?? null) === (b.stock ?? null)
-        && (a.buyLimit ?? null) === (b.buyLimit ?? null) && (!!a.disabled) === (!!b.disabled));
+        && (a.buyLimit ?? null) === (b.buyLimit ?? null)
+        && (a.loyaltyLevel ?? null) === (b.loyaltyLevel ?? null) && (!!a.disabled) === (!!b.disabled));
 
     // Price only changes when the sale is (staying) on.
     const priceChanged = saleOn && priceVal != null && priceVal !== (ovrCount != null ? ovrCount : base);
@@ -3914,6 +4062,7 @@ function openTraderEdit(row, focusField) {
         const body = { tpl, traderId };
         if (desired.stock != null) body.stock = desired.stock;
         if (desired.buyLimit != null) body.buyLimit = desired.buyLimit;
+        if (desired.loyaltyLevel != null) body.loyaltyLevel = desired.loyaltyLevel;
         if (desired.disabled) body.disabled = true;
         const r = await fetch(API_BASE + '/trader-stock', {
           method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
@@ -3928,6 +4077,7 @@ function openTraderEdit(row, focusField) {
           const parts = [];
           if (desired.stock != null) parts.push(`stock ${desired.stock.toLocaleString('en-US')}`);
           if (desired.buyLimit != null) parts.push(`buy limit ${desired.buyLimit.toLocaleString('en-US')}/cycle`);
+          if (desired.loyaltyLevel != null) parts.push(`unlock at LL${desired.loyaltyLevel}`);
           msgs.push(parts.join(' · '));
           if (desired.stock === 0) { anyWarn = true; msgs[msgs.length - 1] += ' (out of stock)'; }
         }

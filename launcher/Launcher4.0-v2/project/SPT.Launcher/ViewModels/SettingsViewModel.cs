@@ -52,23 +52,8 @@ namespace SPT.Launcher.ViewModels
         // IsDevMode, tokens TrlSuccessBrush/TrlFgFaintBrush). A VM só expõe o texto do tooltip.
         public string DevModeStatusText => LauncherSettingsProvider.Instance.IsDevMode ? LocalizationProvider.Instance.dev_mode_status_active : LocalizationProvider.Instance.dev_mode_status_inactive;
 
-        /// <summary>
-        /// Item 008: toggle "USAR CONFIGS PERFORMANCE" — persiste imediatamente; o efeito
-        /// acontece na próxima verificação de arquivos (overlay via motor de sync do 007).
-        /// </summary>
-        public bool UsePerformanceConfigs
-        {
-            get => LauncherSettingsProvider.Instance.UsePerformanceConfigs;
-            set
-            {
-                if (LauncherSettingsProvider.Instance.UsePerformanceConfigs == value) return;
-
-                LauncherSettingsProvider.Instance.UsePerformanceConfigs = value;
-                LauncherSettingsProvider.Instance.SaveSettings();
-                this.RaisePropertyChanged(nameof(UsePerformanceConfigs));
-                LogManager.Instance.Info($"[Settings] Configs performance {(value ? "ativadas" : "desativadas")} — aplica na próxima verificação de arquivos");
-            }
-        }
+        // Item 030 (D-12): UsePerformanceConfigs removido — a performance agora é por item na tela
+        // "Mods e Configs", não um toggle global aqui.
 
         private const string LocalServerUrl = "https://127.0.0.1:6969";
 

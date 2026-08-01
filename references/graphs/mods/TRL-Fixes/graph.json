@@ -1,0 +1,698 @@
+{
+  "directed": false,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {
+      "label": "FlashbangBotPatch.cs",
+      "file_type": "code",
+      "source_file": "Patches/FlashbangBotPatch.cs",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "patches_flashbangbotpatch",
+      "community": 4,
+      "norm_label": "flashbangbotpatch.cs"
+    },
+    {
+      "label": "TRLFixes.Patches",
+      "file_type": "code",
+      "source_file": "Patches/FlashbangBotPatch.cs",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "patches_flashbangbotpatch_trlfixes_patches",
+      "community": 4,
+      "norm_label": "trlfixes.patches"
+    },
+    {
+      "label": "FlashbangBotPatch",
+      "file_type": "code",
+      "source_file": "Patches/FlashbangBotPatch.cs",
+      "source_location": "L9",
+      "_origin": "ast",
+      "id": "patches_flashbangbotpatch_flashbangbotpatch",
+      "community": 4,
+      "norm_label": "flashbangbotpatch"
+    },
+    {
+      "label": ".Enable()",
+      "file_type": "code",
+      "source_file": "Patches/FlashbangBotPatch.cs",
+      "source_location": "L11",
+      "_origin": "ast",
+      "id": "patches_flashbangbotpatch_flashbangbotpatch_enable",
+      "community": 4,
+      "norm_label": ".enable()"
+    },
+    {
+      "label": ".Prefix()",
+      "file_type": "code",
+      "source_file": "Patches/FlashbangBotPatch.cs",
+      "source_location": "L34",
+      "_origin": "ast",
+      "id": "patches_flashbangbotpatch_flashbangbotpatch_prefix",
+      "community": 4,
+      "norm_label": ".prefix()"
+    },
+    {
+      "label": "FlashbangRadiusPatch.cs",
+      "file_type": "code",
+      "source_file": "Patches/FlashbangRadiusPatch.cs",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "patches_flashbangradiuspatch",
+      "community": 1,
+      "norm_label": "flashbangradiuspatch.cs"
+    },
+    {
+      "label": "TRLFixes.Patches",
+      "file_type": "code",
+      "source_file": "Patches/FlashbangRadiusPatch.cs",
+      "source_location": "L8",
+      "_origin": "ast",
+      "id": "patches_flashbangradiuspatch_trlfixes_patches",
+      "community": 1,
+      "norm_label": "trlfixes.patches"
+    },
+    {
+      "label": "FlashbangRadiusPatch",
+      "file_type": "code",
+      "source_file": "Patches/FlashbangRadiusPatch.cs",
+      "source_location": "L10",
+      "_origin": "ast",
+      "id": "patches_flashbangradiuspatch_flashbangradiuspatch",
+      "community": 1,
+      "norm_label": "flashbangradiuspatch"
+    },
+    {
+      "label": ".Enable()",
+      "file_type": "code",
+      "source_file": "Patches/FlashbangRadiusPatch.cs",
+      "source_location": "L12",
+      "_origin": "ast",
+      "id": "patches_flashbangradiuspatch_flashbangradiuspatch_enable",
+      "community": 1,
+      "norm_label": ".enable()"
+    },
+    {
+      "label": ".Postfix()",
+      "file_type": "code",
+      "source_file": "Patches/FlashbangRadiusPatch.cs",
+      "source_location": "L30",
+      "_origin": "ast",
+      "id": "patches_flashbangradiuspatch_flashbangradiuspatch_postfix",
+      "community": 1,
+      "norm_label": ".postfix()"
+    },
+    {
+      "label": "IExplosiveItem",
+      "file_type": "code",
+      "source_file": "Patches/FlashbangRadiusPatch.cs",
+      "source_location": "L30",
+      "_origin": "ast",
+      "id": "iexplosiveitem",
+      "community": 1,
+      "norm_label": "iexplosiveitem"
+    },
+    {
+      "label": "Vector3",
+      "file_type": "code",
+      "source_file": "Patches/FlashbangRadiusPatch.cs",
+      "source_location": "L30",
+      "_origin": "ast",
+      "id": "vector3",
+      "community": 1,
+      "norm_label": "vector3"
+    },
+    {
+      "label": "Patch_FikaReviveHitbox.cs",
+      "file_type": "code",
+      "source_file": "Patches/Patch_FikaReviveHitbox.cs",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "patches_patch_fikarevivehitbox",
+      "community": 0,
+      "norm_label": "patch_fikarevivehitbox.cs"
+    },
+    {
+      "label": "TRLFixes.Patches",
+      "file_type": "code",
+      "source_file": "Patches/Patch_FikaReviveHitbox.cs",
+      "source_location": "L6",
+      "_origin": "ast",
+      "id": "patches_patch_fikarevivehitbox_trlfixes_patches",
+      "community": 0,
+      "norm_label": "trlfixes.patches"
+    },
+    {
+      "label": "Patch_FikaReviveHitbox",
+      "file_type": "code",
+      "source_file": "Patches/Patch_FikaReviveHitbox.cs",
+      "source_location": "L22",
+      "_origin": "ast",
+      "id": "patches_patch_fikarevivehitbox_patch_fikarevivehitbox",
+      "community": 0,
+      "norm_label": "patch_fikarevivehitbox"
+    },
+    {
+      "label": "string",
+      "file_type": "code",
+      "source_file": "Patches/Patch_FikaReviveHitbox.cs",
+      "source_location": "L24",
+      "_origin": "ast",
+      "id": "string",
+      "community": 0,
+      "norm_label": "string"
+    },
+    {
+      "label": "FieldInfo",
+      "file_type": "code",
+      "source_file": "Patches/Patch_FikaReviveHitbox.cs",
+      "source_location": "L26",
+      "_origin": "ast",
+      "id": "fieldinfo",
+      "community": 0,
+      "norm_label": "fieldinfo"
+    },
+    {
+      "label": ".Enable()",
+      "file_type": "code",
+      "source_file": "Patches/Patch_FikaReviveHitbox.cs",
+      "source_location": "L28",
+      "_origin": "ast",
+      "id": "patches_patch_fikarevivehitbox_patch_fikarevivehitbox_enable",
+      "community": 0,
+      "norm_label": ".enable()"
+    },
+    {
+      "label": ".Postfix()",
+      "file_type": "code",
+      "source_file": "Patches/Patch_FikaReviveHitbox.cs",
+      "source_location": "L76",
+      "_origin": "ast",
+      "id": "patches_patch_fikarevivehitbox_patch_fikarevivehitbox_postfix",
+      "community": 0,
+      "norm_label": ".postfix()"
+    },
+    {
+      "label": "Patch_PoolManagerCreateItem.cs",
+      "file_type": "code",
+      "source_file": "Patches/Patch_PoolManagerCreateItem.cs",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "patches_patch_poolmanagercreateitem",
+      "community": 5,
+      "norm_label": "patch_poolmanagercreateitem.cs"
+    },
+    {
+      "label": "TRLFixes.Patches",
+      "file_type": "code",
+      "source_file": "Patches/Patch_PoolManagerCreateItem.cs",
+      "source_location": "L10",
+      "_origin": "ast",
+      "id": "patches_patch_poolmanagercreateitem_trlfixes_patches",
+      "community": 5,
+      "norm_label": "trlfixes.patches"
+    },
+    {
+      "label": "Patch_PoolManagerCreateItem",
+      "file_type": "code",
+      "source_file": "Patches/Patch_PoolManagerCreateItem.cs",
+      "source_location": "L12",
+      "_origin": "ast",
+      "id": "patches_patch_poolmanagercreateitem_patch_poolmanagercreateitem",
+      "community": 5,
+      "norm_label": "patch_poolmanagercreateitem"
+    },
+    {
+      "label": ".Enable()",
+      "file_type": "code",
+      "source_file": "Patches/Patch_PoolManagerCreateItem.cs",
+      "source_location": "L14",
+      "_origin": "ast",
+      "id": "patches_patch_poolmanagercreateitem_patch_poolmanagercreateitem_enable",
+      "community": 5,
+      "norm_label": ".enable()"
+    },
+    {
+      "label": ".Prefix()",
+      "file_type": "code",
+      "source_file": "Patches/Patch_PoolManagerCreateItem.cs",
+      "source_location": "L42",
+      "_origin": "ast",
+      "id": "patches_patch_poolmanagercreateitem_patch_poolmanagercreateitem_prefix",
+      "community": 3,
+      "norm_label": ".prefix()"
+    },
+    {
+      "label": "GameObject",
+      "file_type": "code",
+      "source_file": "Patches/Patch_PoolManagerCreateItem.cs",
+      "source_location": "L42",
+      "_origin": "ast",
+      "id": "gameobject",
+      "community": 3,
+      "norm_label": "gameobject"
+    },
+    {
+      "label": "Item",
+      "file_type": "code",
+      "source_file": "Patches/Patch_PoolManagerCreateItem.cs",
+      "source_location": "L42",
+      "_origin": "ast",
+      "id": "item",
+      "community": 3,
+      "norm_label": "item"
+    },
+    {
+      "label": "ECameraType",
+      "file_type": "code",
+      "source_file": "Patches/Patch_PoolManagerCreateItem.cs",
+      "source_location": "L42",
+      "_origin": "ast",
+      "id": "ecameratype",
+      "community": 3,
+      "norm_label": "ecameratype"
+    },
+    {
+      "label": "IPlayer",
+      "file_type": "code",
+      "source_file": "Patches/Patch_PoolManagerCreateItem.cs",
+      "source_location": "L42",
+      "_origin": "ast",
+      "id": "iplayer",
+      "community": 3,
+      "norm_label": "iplayer"
+    },
+    {
+      "label": "Plugin.cs",
+      "file_type": "code",
+      "source_file": "Plugin.cs",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "plugin",
+      "community": 2,
+      "norm_label": "plugin.cs"
+    },
+    {
+      "label": "TRLFixes",
+      "file_type": "code",
+      "source_file": "Plugin.cs",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "plugin_trlfixes",
+      "community": 2,
+      "norm_label": "trlfixes"
+    },
+    {
+      "label": "Plugin",
+      "file_type": "code",
+      "source_file": "Plugin.cs",
+      "source_location": "L13",
+      "_origin": "ast",
+      "id": "plugin_plugin",
+      "community": 2,
+      "norm_label": "plugin"
+    },
+    {
+      "label": "BaseUnityPlugin",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "baseunityplugin",
+      "community": 2,
+      "norm_label": "baseunityplugin"
+    },
+    {
+      "label": "ManualLogSource",
+      "file_type": "code",
+      "source_file": "Plugin.cs",
+      "source_location": "L20",
+      "_origin": "ast",
+      "id": "manuallogsource",
+      "community": 2,
+      "norm_label": "manuallogsource"
+    },
+    {
+      "label": ".Awake()",
+      "file_type": "code",
+      "source_file": "Plugin.cs",
+      "source_location": "L22",
+      "_origin": "ast",
+      "id": "plugin_plugin_awake",
+      "community": 2,
+      "norm_label": ".awake()"
+    },
+    {
+      "label": "TRLFixes.csproj",
+      "file_type": "code",
+      "source_file": "TRLFixes.csproj",
+      "source_location": null,
+      "_origin": "ast",
+      "id": "trlfixes",
+      "community": 6,
+      "norm_label": "trlfixes.csproj"
+    },
+    {
+      "label": "net472",
+      "file_type": "concept",
+      "source_file": "TRLFixes.csproj",
+      "source_location": null,
+      "_origin": "ast",
+      "id": "framework_net472",
+      "community": 6,
+      "norm_label": "net472"
+    },
+    {
+      "label": "Microsoft.NET.Sdk",
+      "file_type": "concept",
+      "source_file": "TRLFixes.csproj",
+      "source_location": null,
+      "_origin": "ast",
+      "id": "sdk_microsoft_net_sdk",
+      "community": 6,
+      "norm_label": "microsoft.net.sdk"
+    }
+  ],
+  "links": [
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/FlashbangBotPatch.cs",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "patches_flashbangbotpatch",
+      "target": "patches_flashbangbotpatch_flashbangbotpatch",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/FlashbangBotPatch.cs",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "patches_flashbangbotpatch",
+      "target": "patches_flashbangbotpatch_trlfixes_patches",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/FlashbangBotPatch.cs",
+      "source_location": "L11",
+      "weight": 1.0,
+      "source": "patches_flashbangbotpatch_flashbangbotpatch",
+      "target": "patches_flashbangbotpatch_flashbangbotpatch_enable",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/FlashbangBotPatch.cs",
+      "source_location": "L34",
+      "weight": 1.0,
+      "source": "patches_flashbangbotpatch_flashbangbotpatch",
+      "target": "patches_flashbangbotpatch_flashbangbotpatch_prefix",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/FlashbangRadiusPatch.cs",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "patches_flashbangradiuspatch",
+      "target": "patches_flashbangradiuspatch_flashbangradiuspatch",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/FlashbangRadiusPatch.cs",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "patches_flashbangradiuspatch",
+      "target": "patches_flashbangradiuspatch_trlfixes_patches",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/FlashbangRadiusPatch.cs",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "patches_flashbangradiuspatch_flashbangradiuspatch",
+      "target": "patches_flashbangradiuspatch_flashbangradiuspatch_enable",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/FlashbangRadiusPatch.cs",
+      "source_location": "L30",
+      "weight": 1.0,
+      "source": "patches_flashbangradiuspatch_flashbangradiuspatch",
+      "target": "patches_flashbangradiuspatch_flashbangradiuspatch_postfix",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/FlashbangRadiusPatch.cs",
+      "source_location": "L30",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "patches_flashbangradiuspatch_flashbangradiuspatch_postfix",
+      "target": "iexplosiveitem",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/FlashbangRadiusPatch.cs",
+      "source_location": "L30",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "patches_flashbangradiuspatch_flashbangradiuspatch_postfix",
+      "target": "vector3",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Patch_FikaReviveHitbox.cs",
+      "source_location": "L22",
+      "weight": 1.0,
+      "source": "patches_patch_fikarevivehitbox",
+      "target": "patches_patch_fikarevivehitbox_patch_fikarevivehitbox",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Patch_FikaReviveHitbox.cs",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "patches_patch_fikarevivehitbox",
+      "target": "patches_patch_fikarevivehitbox_trlfixes_patches",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Patch_FikaReviveHitbox.cs",
+      "source_location": "L26",
+      "weight": 1.0,
+      "context": "field",
+      "source": "patches_patch_fikarevivehitbox_patch_fikarevivehitbox",
+      "target": "fieldinfo",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Patch_FikaReviveHitbox.cs",
+      "source_location": "L28",
+      "weight": 1.0,
+      "source": "patches_patch_fikarevivehitbox_patch_fikarevivehitbox",
+      "target": "patches_patch_fikarevivehitbox_patch_fikarevivehitbox_enable",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Patch_FikaReviveHitbox.cs",
+      "source_location": "L76",
+      "weight": 1.0,
+      "source": "patches_patch_fikarevivehitbox_patch_fikarevivehitbox",
+      "target": "patches_patch_fikarevivehitbox_patch_fikarevivehitbox_postfix",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Patch_FikaReviveHitbox.cs",
+      "source_location": "L24",
+      "weight": 1.0,
+      "context": "field",
+      "source": "patches_patch_fikarevivehitbox_patch_fikarevivehitbox",
+      "target": "string",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Patch_PoolManagerCreateItem.cs",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "patches_patch_poolmanagercreateitem",
+      "target": "patches_patch_poolmanagercreateitem_patch_poolmanagercreateitem",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Patch_PoolManagerCreateItem.cs",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "patches_patch_poolmanagercreateitem",
+      "target": "patches_patch_poolmanagercreateitem_trlfixes_patches",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Patch_PoolManagerCreateItem.cs",
+      "source_location": "L14",
+      "weight": 1.0,
+      "source": "patches_patch_poolmanagercreateitem_patch_poolmanagercreateitem",
+      "target": "patches_patch_poolmanagercreateitem_patch_poolmanagercreateitem_enable",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Patch_PoolManagerCreateItem.cs",
+      "source_location": "L42",
+      "weight": 1.0,
+      "source": "patches_patch_poolmanagercreateitem_patch_poolmanagercreateitem",
+      "target": "patches_patch_poolmanagercreateitem_patch_poolmanagercreateitem_prefix",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Patch_PoolManagerCreateItem.cs",
+      "source_location": "L42",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "patches_patch_poolmanagercreateitem_patch_poolmanagercreateitem_prefix",
+      "target": "ecameratype",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Patch_PoolManagerCreateItem.cs",
+      "source_location": "L42",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "patches_patch_poolmanagercreateitem_patch_poolmanagercreateitem_prefix",
+      "target": "gameobject",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Patch_PoolManagerCreateItem.cs",
+      "source_location": "L42",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "patches_patch_poolmanagercreateitem_patch_poolmanagercreateitem_prefix",
+      "target": "iplayer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Patch_PoolManagerCreateItem.cs",
+      "source_location": "L42",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "patches_patch_poolmanagercreateitem_patch_poolmanagercreateitem_prefix",
+      "target": "item",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Plugin.cs",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "plugin",
+      "target": "plugin_plugin",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Plugin.cs",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "plugin",
+      "target": "plugin_trlfixes",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "Plugin.cs",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "plugin_plugin",
+      "target": "baseunityplugin",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Plugin.cs",
+      "source_location": "L20",
+      "weight": 1.0,
+      "context": "field",
+      "source": "plugin_plugin",
+      "target": "manuallogsource",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Plugin.cs",
+      "source_location": "L22",
+      "weight": 1.0,
+      "source": "plugin_plugin",
+      "target": "plugin_plugin_awake",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "TRLFixes.csproj",
+      "weight": 1.0,
+      "source": "trlfixes",
+      "target": "framework_net472",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "TRLFixes.csproj",
+      "weight": 1.0,
+      "source": "trlfixes",
+      "target": "sdk_microsoft_net_sdk",
+      "confidence_score": 1.0
+    }
+  ],
+  "hyperedges": [],
+  "built_at_commit": "8fc70a6136a91e6a18566ee018f6d6215f6e8141"
+}

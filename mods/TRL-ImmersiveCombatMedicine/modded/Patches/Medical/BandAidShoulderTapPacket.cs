@@ -3,24 +3,42 @@ using Fika.Core.Networking;
 
 namespace Band_Aid
 {
-    public struct BandAidShoulderTapPacket : INetSerializable
+    /// <summary>
+    /// Toque no ombro: sinaliza a um aliado que o remetente quer tratá-lo.
+    /// Corpo dentro de um envelope de comprimento (ver <see cref="PacketEnvelope"/>).
+    /// </summary>
+    public struct BandAidShoulderTapPacketV2 : INetSerializable
     {
         public string SenderProfileId;
         public string SenderNickname;
         public string TargetProfileId;
 
+        /// <summary>NÃO serializado. Falso quando o corpo veio truncado — ver BandAidHealPacketV2.Valid.</summary>
+        internal bool Valid;
+
         public void Serialize(NetDataWriter writer)
         {
-            writer.Put(SenderProfileId);
-            writer.Put(SenderNickname);
-            writer.Put(TargetProfileId);
+            var inner = PacketEnvelope.Open();
+            inner.Put(SenderProfileId ?? string.Empty);
+            inner.Put(SenderNickname ?? string.Empty);
+            inner.Put(TargetProfileId ?? string.Empty);
+            PacketEnvelope.Close(writer, inner);
         }
 
         public void Deserialize(NetDataReader reader)
         {
-            SenderProfileId = reader.GetString();
-            SenderNickname = reader.GetString();
-            TargetProfileId = reader.GetString();
+            SenderProfileId = string.Empty;
+            SenderNickname = string.Empty;
+            TargetProfileId = string.Empty;
+            Valid = false;
+
+            if (!PacketEnvelope.TryOpen(reader, out var inner)) return;
+
+            if (!PacketEnvelope.TryReadString(inner, out SenderProfileId)) return;
+            if (!PacketEnvelope.TryReadString(inner, out SenderNickname)) return;
+            if (!PacketEnvelope.TryReadString(inner, out TargetProfileId)) return;
+
+            Valid = true;
         }
     }
 }

@@ -103,6 +103,31 @@
 - **Como (provável):** adicionar uma opção **"Vanilla"** (ou "sem mod") ao próprio dropdown "Mod" — selecionada, o filtro casa `it => !it.modSource`, com contagem própria. Reaproveita 100% a infra do filtro Mod atual (é literalmente o inverso do que ele já faz); um valor sentinela (ex. `__vanilla__`) em `selectedMods`, tratado no ramo de Mod do `filterItems`, evita um dropdown novo.
 - **Esforço:** pequeno — UI-only (`index.html`), sem backend. O dado (`it.modSource` presente/ausente) já está no cache e o badge "MOD" na listagem já distingue os dois grupos.
 - **Depende de:** nada — o filtro Mod já existe; esta feature é só o complemento "nenhum mod".
+- **Status:** ✅ Concluído (2026-07-26) — pseudo-opção "Vanilla (no mod)" no topo do dropdown Mod (`VANILLA_FILTER='__vanilla__'`); validado (count 5738, `?mod=__vanilla__`). Review: [code-review-b9-b12](../../mods/TRL-ItemsManagement/docs/code-review-b9-b12-vanilla-exclusive-loyalty-tree.md).
+
+### B-10 · Toggle "exclusivo" no filtro Trader
+- **O quê:** o filtro "Trader" (`buildTraderFilter`/`selectedTraders`, opções `[S]`/`[B]` por trader) hoje é **OR** — o item aparece se QUALQUER trader selecionado o oferece. Falta um modo pra achar exclusividades.
+- **Decisão travada (2026-07-25):** o toggle é **exclusivo** — mostra só itens que **nenhum trader de fora** oferece (o conjunto de traders que oferecem o item ⊆ conjunto selecionado). Fala dos traders de FORA, não exige que todos os selecionados vendam. Com 1 trader selecionado = "só ele oferece". (Descartados: AND/interseção e "exatamente os selecionados".)
+- **Como (provável):** um toggle no widget do filtro Trader (ex.: chip "só estes" ao lado do dropdown) que muta o ramo de Trader do `filterItems`: em vez de "algum selecionado oferece", passa "todos os que oferecem estão na seleção". Reaproveita `sellSideRows`/`buySideRows` (já dão o conjunto S/B por item, já excluindo disabled/Fence/barter).
+- **Esforço:** pequeno-médio — UI-only (`index.html`), sem backend.
+- **Depende de:** nada — o filtro Trader já existe (v1.1.0).
+- **Status:** ✅ Concluído (2026-07-26) — toggle "only these" (`traderExclusive`); semântica ⊆ AND-entre-lados S/B, **Fence ignorada** na exclusividade (decisão do usuário). Validado (exclusivo ON = 0 violações; co-Fence aparece). 2 bugs corrigidos: cache stale (`filterStateKey`) + re-ligamento por URL (CR-A-01). Review: [code-review-b9-b12](../../mods/TRL-ItemsManagement/docs/code-review-b9-b12-vanilla-exclusive-loyalty-tree.md).
+
+### B-11 · Editar o loyalty level (LL) de venda de um item por trader
+- **O quê:** o editor de trader (accordion em TRADER SELL) hoje edita preço / estoque / buy-limit / disable-sale, mas **não** o **loyalty level** em que aquele trader vende o item. Poder mover um item de, ex., LL1 → LL3 na loja do trader (rebalanceamento de acesso).
+- **Decisão travada (2026-07-25):** escopo = **só mudar o LL** de uma venda existente (não adicionar/remover item do trader — isso é o disable-sale, já feito). O alvo é entre os LLs que o trader tem (tipicamente 1–4).
+- **Como (provável):** backend muta `trader.Assort.LoyalLevelItems[<rootId>]` no boot, mesmo mecanismo do `StockApplier` (mutação do assort live, persiste no refresh, reseta no restart) — provável novo campo no `stock-overrides.json` (ex.: `loyaltyLevel`) ou um `loyalty-overrides.json` próprio + endpoint. UI: um campo/dropdown LL na seção Availability do editor accordion. "Restart SPT to apply" como as outras edições.
+- **A validar:** o `LoyalLevelItems` é chaveado por **itemId (rootId do assort)**, não por tpl — mapear (trader, tpl) → rootId(s) na edição (um tpl pode ter mais de uma entry). Confirmar se o cliente/EFT aceita o LL mudado sem reindexar o assort. Faixa válida de LL por trader (o trader tem N loyalty levels no `base.json`).
+- **Esforço:** médio — backend (applier + config + API) + UI, análogo ao B-6.
+- **Depende de:** nada — reusa a infra de override/`StockApplier` e o editor accordion.
+- **Status:** ✅ Concluído (2026-07-26) — campo `loyaltyLevel` em `stock-overrides.json`; `StockApplier` muta `LoyalLevelItems[rootId]` no boot (valida 1-4, contadores `badLoyalty`/`loyaltyNoDict`); picker LL1-4 no editor accordion + audit/undo. Validado end-to-end: LL3→LL1 gravou config, boot aplicou aos 3 root offers, `/debug` confirmou LL live=1. Review: [code-review-b9-b12](../../mods/TRL-ItemsManagement/docs/code-review-b9-b12-vanilla-exclusive-loyalty-tree.md).
+
+### B-12 · Árvore lateral: clique no chevron só expande, não seleciona
+- **O quê:** na árvore de categorias da sidebar esquerda, clicar no chevron (▸/▾) hoje **seleciona a categoria E expande**. Deveria: o chevron **só** expande/colapsa; a **seleção** da categoria só ocorre ao clicar na área da linha **à direita** do chevron (o rótulo/contagem).
+- **Como (provável):** separar o hit-target do chevron do resto da linha (`.tree-node`) — o handler do chevron faz `stopPropagation` + só toggle de expand; o handler do rótulo faz a seleção/filtro por categoria. UI-only.
+- **Esforço:** pequeno — UI-only (`index.html`).
+- **Depende de:** nada.
+- **Status:** ✅ Concluído (2026-07-26) — chevron (`.chev`) só expande; seleção só no rótulo. Validado (chevron expande sem selecionar; rótulo → `?cat=...` sem alterar expansão). a11y por teclado da árvore deferida (dívida pré-existente, escopo `trl-ds-validation`). Review: [code-review-b9-b12](../../mods/TRL-ItemsManagement/docs/code-review-b9-b12-vanilla-exclusive-loyalty-tree.md).
 
 ---
 

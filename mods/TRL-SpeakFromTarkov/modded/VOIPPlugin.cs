@@ -70,7 +70,10 @@ namespace TRL_SpeakFromTarkov
         void Awake()
         {
             Log = base.Logger;
-            Log.LogInfo($"[SFT] Iniciando TRL-SpeakFromTarkov v1.3.0...");
+            // Versão vem do BepInPlugin (fonte canônica) — hardcodar aqui já fez o log mentir
+            // sobre a build em campo, e a paridade de versão entre peers é diagnóstico crítico
+            // de rede (o hash do pacote deriva do nome do tipo, não da versão).
+            Log.LogInfo($"[SFT] Iniciando TRL-SpeakFromTarkov v{Info.Metadata.Version}...");
 
             // Carrega explicitamente a rnnoise.dll da pasta do plugin
             try
@@ -272,6 +275,18 @@ namespace TRL_SpeakFromTarkov
             if (display != null && MicRealNames.TryGetValue(display, out string realName))
                 return realName;
             return display;
+        }
+
+        /// <summary>
+        /// Redundância defensiva do registro de pacotes, exigida pelo guia canônico de rede FIKA
+        /// (o Ensure deve estar no Update do próprio plugin). O SftNetwork já chama o mesmo método
+        /// no Update dele e nasce no mesmo frame — AddComponent executa Awake sincronamente — então
+        /// não há janela de frames entre os dois. O valor aqui é cobrir o caso de o SftNetwork ter
+        /// sido destruído: o registro segue vivo na instância ativa do IFikaNetworkManager.
+        /// </summary>
+        void Update()
+        {
+            TRL_SpeakFromTarkov.Network.SftNetwork.EnsurePacketsRegistered();
         }
 
         void OnDestroy() {}

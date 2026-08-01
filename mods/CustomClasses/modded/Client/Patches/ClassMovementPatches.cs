@@ -67,6 +67,15 @@ internal static class ClassMoveSpeed
                 m *= PerksConfig.ExecutionMoveSpeed?.Value ?? 1f;
             }
 
+            // 🔧 Lebre (Saqueador — 081): +velocidade enquanto NÃO está pesado. Usa o overweight NATIVO do EFT
+            // (BasePhysicalClass.Overweight == 0 = sem o ícone de bigorna). Lido fresco a cada getter → reativo ao
+            // peso (lootou e ficou pesado → desliga sozinho). Não acumula (getter sem estado, ver doc acima).
+            if (PerksConfig.LebreEnabled?.Value == true && SkillMultipliers.IsLocalClass("Scavenger")
+                && p.Physical != null && p.Physical.Overweight <= 0f)
+            {
+                m *= PerksConfig.LebreSpeed?.Value ?? 1f;
+            }
+
             if (m == 1f)
             {
                 return;   // nenhum lever ativo (classes Tank/Stealth são mutuamente exclusivas → 1 multiplicador)
@@ -133,58 +142,7 @@ internal class SprintingSpeedPatch : ModulePatch
     }
 }
 
-/// <summary>🔻 Overladen (Saqueador): inércia escala mais com o peso (movimento clunky carregado).</summary>
-internal class OverladenInertiaPatch : ModulePatch
-{
-    protected override MethodBase GetTargetMethod()
-    {
-        // 074/F5 (2026-07-18, auditoria de eficácia): o patch mirava BasePhysicalClass.OnWeightUpdated, mas
-        // PlayerPhysicalClass SOBRESCREVE o método (corpo próprio) e NÃO chama base, e o player local usa
-        // new PlayerPhysicalClass() (Player.CreatePhysical) → o patch na BASE NUNCA rodava pro player (AP-03,
-        // override de alvo virtual). Mira a OVERRIDE de PlayerPhysicalClass (mesmo tipo que o IronLungsPatch usa).
-        return AccessTools.Method(typeof(PlayerPhysicalClass), nameof(PlayerPhysicalClass.OnWeightUpdated));
-    }
-
-    [PatchPostfix]
-    private static void Postfix(BasePhysicalClass __instance)
-    {
-        try
-        {
-            if (PerksConfig.OverladenEnabled?.Value != true)
-            {
-                return;
-            }
-
-            var p = Singleton<GameWorld>.Instance?.MainPlayer;
-            if (p == null || !ReferenceEquals(__instance, p.Physical))
-            {
-                return;   // só o player local
-            }
-
-            if (!SkillMultipliers.IsLocalClass("Scavenger"))
-            {
-                return;
-            }
-
-            // 074/F5: com o alvo corrigido (PlayerPhysicalClass), o Postfix roda pro player. Multiplica o Inertia
-            // LIVE — relido por MovementContext.Inertia → coef de ré (Single_0), tilt (Single_2), tilt de arma
-            // (TiltInertia). É recomputado fresco a cada OnWeightUpdated → o `*=` NÃO empilha (aplica sobre valor
-            // novo por chamada).
-            // ⚠️ LIMITAÇÃO CONHECIDA (validar in-game): SprintAcceleration/PreSprintAcceleration e o
-            // MovementAccelerationRange são DERIVADOS de Inertia DENTRO do override, ANTES deste Postfix — então o
-            // momentum/aceleração NÃO reflete o boost. Re-derivá-los exigiria duplicar a fórmula BSG com tipos
-            // obfuscados (GClass2298/InertiaSettings) — deferido; só se o feel ficar fraco (074, Lote 1).
-            var m = PerksConfig.OverladenInertia?.Value ?? 1f;
-            __instance.Inertia *= m;
-            __instance.MoveSideInertia *= m;        // (audit: getters sem consumidor vivo hoje — harmless/forward-safe)
-            __instance.MoveDiagonalInertia *= m;
-        }
-        catch (Exception ex)
-        {
-            Plugin.Log?.LogError($"[CustomClasses] overladen falhou: {ex.Message}");
-        }
-    }
-}
+// 079: OverladenInertiaPatch REMOVIDO — substituído pela Lebre (item 081).
 
 /// <summary>
 ///     🔻 Rooted (Caçador) — −15% de velocidade enquanto MIRA (ADS). 074/F1 (2026-07-18, auditoria de eficácia):

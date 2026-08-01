@@ -105,6 +105,18 @@ Catálogo dos erros que **já cometemos neste repo**, com o caso real, a causa r
 - **Prevenção:** antes de escolher uma skill como lever, confirmar que ela **não é inerte** (`globals.json` `SkillsSettings` não-`[]`, ou efeito real no `SkillManager`); skill inerte → entregar o efeito por **patch direto (perk)**, não pela skill. Lista atual no catálogo do mod, não no antipattern (evita stale).
 - **Onde é checado:** `/create-technical-spec` (ao decidir lever skill vs patch); skill `spt-mod-best-practices`.
 
+## AP-11 — Pacote FIKA que desalinha ou corrompe o stream compartilhado
+
+- **Sintoma:** `ParseException: Undefined packet in NetDataReader: <número>` no log, jogadores patinando/congelados, dessincronização de posição. O número do erro **não corresponde a nenhum tipo de pacote real**, e o mod que aparece no log geralmente não é o culpado.
+- **Causa raiz:** três mecanismos distintos, todos terminando no mesmo lugar — uma exceção que sobe até `LiteNetManager.PollEvents`, que percorre a fila de eventos pendentes **sem `try/catch`** e por isso descarta **todos** os eventos daquele frame, de todos os peers e mods, inclusive os `PlayerState` de movimento:
+  1. **Assimetria `Serialize`/`Deserialize`** — `ReadAllPackets` roda `while (AvailableBytes > 0)`; consumir bytes a mais/menos desalinha o reader e a iteração seguinte lê lixo como hash de pacote.
+  2. **`SendData` fora da main thread** — `FikaClient`/`FikaServer` reusam um único `_dataWriter` sem lock; enviar de uma thread de background intercala escritas com o `SendPlayerState` da main thread e coloca um datagrama malformado na rede.
+  3. **Formato mudado sem renomear o tipo** — a hash é CRC-16 de `typeof(T).ToString()`, não depende da versão do mod; peers de versões diferentes aceitam o pacote um do outro e desalinham em silêncio.
+- **Exemplo real:** sessão 2026-07-26 — `TRL-SpeakFromTarkov` transmitia áudio (~50 pacotes/s) da thread de captura do Opus, corrompendo o buffer de envio do FIKA; e o `SftAudioPacket.Deserialize` tinha um `try/catch` que engolia a falha sem consumir o payload. O hash `20270` registrado no código **não bate com nenhum tipo existente** — era lixo de posição desalinhada. Corrigido em `TRL-SpeakFromTarkov` v1.4.0, `stancesAndCameraPositionSPT4.0.11` v2.11.0 e `TRL-ImmersiveCombatMedicine` v1.11.0.
+  > 🔢 **Dois números, duas grandezas — não confundir.** A forense do `20270` calculou o CRC-16 sobre **521 tipos**: todo o `Fika.Core` mais os pacotes dos mods, universo amplo justamente para provar que o hash não pertencia a nada. Já os **52** reportados por `node scripts/check-packet-hashes.js` (34 do FIKA + 18 dos mods) são só os que implementam `INetSerializable` — a população que realmente disputa o espaço de 16 bits. O script é a fonte reproduzível do segundo número.
+- **Prevenção:** envelope de comprimento em todo `INetSerializable`, leitura só com `TryGet*`, flag `Valid` para não retransmitir corpo truncado, envio sempre da main thread (background enfileira), airbag `try/catch` com throttle em todo callback, e renomear o tipo (`V2`) ao mudar formato. Detalhes e código pronto: [fika-packet-desync-prevention-plan.md](fika-packet-desync-prevention-plan.md).
+- **Onde é checado:** `node scripts/check-packet-hashes.js` (colisão de CRC-16); `/code-review` e `/code-mod` via skill `spt-mod-best-practices` §9; checklist §7 do guia canônico.
+
 ---
 
 ## Mapa: antipattern → onde o harness checa
@@ -119,8 +131,9 @@ Catálogo dos erros que **já cometemos neste repo**, com o caso real, a causa r
 | AP-06 | — | — | `/apply-code-review` (output) | repo-workflow (artefato 06) | `fix.md.tmpl`; gate `check-delivered-validation.sh` |
 | AP-07 | — | check 7 | `/review-technical-spec` Cat. C | C# checklist 13 (reentrância) | — |
 | AP-08 | — | check 8 | `/code-review` Cat. B | C# checklist 12 (estado stale) | grafo de código (`affected`) |
-| AP-09 | — | reconfirmar patch-point | `/create-technical-spec`; `/code-mod` | `graph-code-navigation`; SPT | `ilspycmd`/`dnSpy` vs `Assembly-CSharp.dll` |
-| AP-10 | — | lever skill vs patch | `/create-technical-spec` | SPT | catálogo de skills do mod (`globals.json` `SkillsSettings`) |
+| AP-09 | — | **check 9** (reconfirmar patch-point) | `/create-technical-spec`; `/code-mod` | `graph-code-navigation`; SPT | `types-index.json`; `ilspycmd` nos 3 casos legítimos |
+| AP-10 | — | **check 10** (lever skill vs patch) | `/create-technical-spec` | SPT | catálogo de skills do mod (`globals.json` `SkillsSettings`) |
+| AP-11 | critério padrão Fika/multiplayer | **check 11** (pacote próprio) | `/code-review` Cat. A/B | SPT §9, checklist 11 | `scripts/check-packet-hashes.js`; [guia de rede FIKA](fika-packet-desync-prevention-plan.md) |
 
 ## Histórico de Alterações
 
@@ -134,3 +147,6 @@ Catálogo dos erros que **já cometemos neste repo**, com o caso real, a causa r
 | 2026-06-23 | Guilherme | Adicionados AP-09 (recon/decompile curado tratado como verdade — item 005 + CustomClasses S10) e AP-10 (buffar skill EFT inerte — CustomClasses S8/S10), promovidos da memória do CustomClasses (memory-curation §15) |
 | 2026-06-23 | Guilherme | feat(CustomClasses): implement 050 signature perks/drawbacks (client) |
 | 2026-07-19 | Guilherme | docs(launcher): review 01 da spec tecnica do 030 — 3 bloqueadores |
+| 2026-07-26 | Guilherme | chore(harness): faixa AP-NN em vez de AP-01..AP-10 e regra de rename de doc em conventions |
+| 2026-07-26 | Guilherme | docs(technical): corrige guia FIKA contra o codigo vendorizado e fecha a auditoria dos 6 mods com pacote |
+| 2026-08-01 | Guilherme | docs(launcher): backlog items 031/032 — sync-notification and download-speed reports (2026-07-28) |

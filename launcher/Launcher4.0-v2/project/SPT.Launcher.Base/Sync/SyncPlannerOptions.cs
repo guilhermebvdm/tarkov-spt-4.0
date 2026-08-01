@@ -31,7 +31,26 @@ namespace SPT.Launcher.Sync
         /// <summary>Manifest "managedPaths" — Default-rule folders whose extras are deleted (legacy behavior).</summary>
         public IReadOnlyList<string> ManagedPaths { get; set; } = Array.Empty<string>();
 
-        /// <summary>Returns whether an optional group is enabled (its files are then checked/downloaded).</summary>
-        public Func<string, bool> IsOptionalGroupEnabled { get; set; } = _ => false;
+        /// <summary>
+        /// Item 030: um MOD opcional (id) está ligado? Ligado → seus arquivos são baixados/mantidos;
+        /// desligado → seus arquivos são movidos para a quarentena. Rename de IsOptionalGroupEnabled.
+        /// PERMANECE (não é removido): sem este filtro os arquivos de mod desligado voltariam a Download
+        /// e criariam loop download↔quarentena a cada sync.
+        /// </summary>
+        public Func<string, bool> IsOptionalModEnabled { get; set; } = _ => false;
+
+        /// <summary>
+        /// Item 030: um ITEM de config de performance (id) está ligado? Não existia no motor antigo —
+        /// sem isto o planner não distingue ligar de desligar no canal OptionalConfigToConfig.
+        /// </summary>
+        public Func<string, bool> IsOptionalConfigEnabled { get; set; } = _ => false;
+
+        /// <summary>
+        /// Item 030: ids que o player ACABOU de alternar (vem de PendingApply, persistido). Para eles a
+        /// aplicação/remoção é EXPLÍCITA: ignora divergência e aplica/remove sempre, com quarentena do
+        /// que havia. Fora deste conjunto o canal de performance respeita a customização (baseline).
+        /// Cobre os dois eixos (mods e performance); vazio = sync de rotina.
+        /// </summary>
+        public IReadOnlyCollection<string> JustToggledIds { get; set; } = Array.Empty<string>();
     }
 }

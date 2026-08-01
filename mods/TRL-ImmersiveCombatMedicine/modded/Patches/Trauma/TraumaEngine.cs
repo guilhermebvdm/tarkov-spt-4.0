@@ -33,6 +33,11 @@ namespace TRLImmersiveCombatMedicine.Trauma
 
         private GameWorld _trackedWorld;      // padrão N1 do repo (BandAidController): null-detect de GameWorld
         private bool _raidStarted;            // fronteira de ativação: SÓ OnRaidStarted arma; zerado no reset (review 1, achado 2)
+
+        /// <summary>ref: item 020 — resíduo do motor para a auditoria de fronteira de raid: records vivos +
+        /// cooldowns de one-shot. Instância nula = motor nunca criado; 0 é a resposta correta aí.</summary>
+        internal static int ResidualRecords => _instance?._records.Count ?? 0;
+        internal static int ResidualCooldowns => _instance?._cooldownUntil.Count ?? 0;
         private bool _personAddSubscribed;    // rastreamento ativo (subscribe OnPersonAdd + records vivos)
         private float _pollAccumulator;
         private bool _debugConsumerSubscribed; // stub AC6: SubscribeWithSnapshot tardio 1x na 1ª ativação do Debug Test Consumer

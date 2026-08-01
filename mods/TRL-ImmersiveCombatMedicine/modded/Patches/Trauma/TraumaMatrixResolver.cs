@@ -11,19 +11,27 @@ namespace TRLImmersiveCombatMedicine.Trauma
         //   Z0  b2 pk=F → b>=1:N1, b>=2:FallCycle                    → LegsFallCycle
         //   Z2  b2 pk=F → ...z2q2:FallCycle                          → LegsFallCycle
         //   Z2  b1 pk=F → z>=1:N1, b>=1:N1, z1q1:N2, z>=2:Crouch+N2  → LegsCrouchPlusLimpN2 (combo misto do stub)
-        //   Z2  b1 pk=T → z1q1:N1, z>=2:N1                           → LegsLimpN1 (combo misto do stub)
-        //   Z2  b2 pk=T → z1q1:N1, z>=2:N1, b>=2:N1, z2q2:N2         → LegsLimpN2
+        //   Z2  b0 pk=T → z>=1:None, z>=2:N2                         → LegsLimpN2  (item 017)
+        //   Z2  b1 pk=T → z1q1:N1, z>=2:N2                           → LegsLimpN2  (item 017 — era N1)
+        //   Z2  b2 pk=T → z1q1:N1, z>=2:N2, b>=2:N1, z2q2:N2         → LegsLimpN2
         //   Z1  b0 pk=T → z>=1:None                                  → None
         internal static TraumaLine ResolveLegs(int zeroed, int broken, bool painkiller)
         {
             TraumaLine best = TraumaLine.None;
 
             // Sem analgésico:  Z1→N1 | Q1→N1 | Z1+Q1→N2 | Z2→CrouchPlusLimpN2 | Q2→FallCycle | Z2+Q2→FallCycle
-            // Com analgésico:  Z1→None | Q1→None | Z1+Q1→N1 | Z2→N1 | Q2→N1 | Z2+Q2→N2
+            // Com analgésico:  Z1→None | Q1→None | Z1+Q1→N1 | Z2→N2 | Q2→N1 | Z2+Q2→N2
             if (zeroed >= 1) best = Max(best, painkiller ? TraumaLine.None : TraumaLine.LegsLimpN1);
             if (broken >= 1) best = Max(best, painkiller ? TraumaLine.None : TraumaLine.LegsLimpN1);
             if (zeroed >= 1 && broken >= 1) best = Max(best, painkiller ? TraumaLine.LegsLimpN1 : TraumaLine.LegsLimpN2);
-            if (zeroed >= 2) best = Max(best, painkiller ? TraumaLine.LegsLimpN1 : TraumaLine.LegsCrouchPlusLimpN2);
+            // ref: item 017 (achado S1.7 do 1º teste in-game) — Z2 sob analgésico era rebaixado a LegsLimpN1,
+            // e o bloqueio de sprint só vale no tier N2 (IsN2Tier), então duas pernas zeradas com analgésico
+            // LIBERAVAM correr. Agora resolve para LegsLimpN2: mesma manqueira severa e mesmo bloqueio de
+            // sprint do caso sem analgésico, mas SEM o one-shot de agachar — só LegsCrouchPlusLimpN2 publica
+            // o one-shot, e a decisão do usuário é que o analgésico continue removendo o agachar involuntário.
+            // LegsLimpN2 já existia (produzido por Z2+Q2 sob analgésico), já é tier N2 e já mapeia em
+            // LineTargetPercent — nenhum valor de enum, locale ou mapeamento novo.
+            if (zeroed >= 2) best = Max(best, painkiller ? TraumaLine.LegsLimpN2 : TraumaLine.LegsCrouchPlusLimpN2);
             if (broken >= 2) best = Max(best, painkiller ? TraumaLine.LegsLimpN1 : TraumaLine.LegsFallCycle);
             if (zeroed >= 2 && broken >= 2) best = Max(best, painkiller ? TraumaLine.LegsLimpN2 : TraumaLine.LegsFallCycle);
 

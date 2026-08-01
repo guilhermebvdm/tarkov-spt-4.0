@@ -68,7 +68,8 @@ namespace SPT.Launcher.Tests.Sync
             return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
         }
 
-        public ManifestFile Entry(string path, string content, bool optional = false, string group = null)
+        public ManifestFile Entry(string path, string content, bool optional = false,
+            string optionalId = null, string optionalConfigId = null)
         {
             ServerContent[path] = System.Text.Encoding.UTF8.GetBytes(content);
 
@@ -78,7 +79,8 @@ namespace SPT.Launcher.Tests.Sync
                 hash = Md5Of(content),
                 size = content.Length,
                 optional = optional,
-                optionalGroup = group,
+                optionalId = optionalId,
+                optionalConfigId = optionalConfigId,
             };
         }
 
@@ -104,11 +106,28 @@ namespace SPT.Launcher.Tests.Sync
                 ["BepInEx/config-server"] = "seed-if-missing",
             });
 
-        public SyncPlannerOptions Options(bool devMode = false) => new()
+        public SyncPlannerOptions Options(
+            bool devMode = false,
+            Func<string, bool> optionalEnabled = null,
+            Func<string, bool> performanceEnabled = null,
+            IReadOnlyCollection<string> justToggled = null) => new()
         {
             GameRoot = Root,
             DevMode = devMode,
+            IsOptionalModEnabled = optionalEnabled ?? (_ => false),
+            IsOptionalConfigEnabled = performanceEnabled ?? (_ => false),
+            JustToggledIds = justToggled ?? Array.Empty<string>(),
         };
+
+        /// <summary>Resolver com config-optional ativo via folderRules explícito (o server real faz isso).</summary>
+        public static SyncRuleResolver ResolverWithPerformance() =>
+            new SyncRuleResolver(new Dictionary<string, string>
+            {
+                ["config-optional"] = "optional-config-to-config",
+                ["BepInEx/config-optional"] = "optional-config-to-config",
+                ["config-optional-ref"] = "mirror-reference",
+                ["BepInEx/config-optional-ref"] = "mirror-reference",
+            });
 
         public async Task<(SyncPlan Plan, SyncResult Result, SyncBaseline Baseline)> PlanAndRunAsync(
             IReadOnlyList<ManifestFile> manifest,

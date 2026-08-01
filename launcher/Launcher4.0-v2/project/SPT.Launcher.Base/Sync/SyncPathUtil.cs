@@ -60,7 +60,26 @@ namespace SPT.Launcher.Sync
         /// NB: o default do config-server (MirrorReference) NÃO usa isto — espelha "config-server/&lt;rel&gt;"
         /// direto, sem derivar alvo em "config/". Hoje só o config-force (e o seed opt-in) derivam alvo.
         /// </summary>
-        private static readonly string[] SourceFolderSuffixes = { "-server", "-force" };
+        private static readonly string[] SourceFolderSuffixes = { "-server", "-force", "-optional" };
+
+        /// <summary>
+        /// Item 030 (D-14/D-20): origem de um arquivo posto em quarentena, para que backups de canais
+        /// diferentes nunca colidam por homonímia dentro de "&lt;pasta&gt;-disabled/".
+        /// Force e MirrorExtra ficam na RAIZ (formato legado, já em produção desde a 2.3.0 — mover
+        /// partiria os backups do force em dois lugares, o oposto do objetivo de D-14). As origens NOVAS
+        /// ganham subpasta: mod opcional (optional), config do player sobrescrita ao ligar performance
+        /// (optional-config/replaced), config do servidor retirada ao desligar (optional-config/removed).
+        /// </summary>
+        public enum DisabledOrigin { MirrorExtra, Force, Optional, OptionalConfigReplaced, OptionalConfigRemoved }
+
+        /// <summary>Segmento de subpasta por origem — null = raiz de "&lt;pasta&gt;-disabled/" (Force/MirrorExtra).</summary>
+        public static string OriginSegment(DisabledOrigin origin) => origin switch
+        {
+            DisabledOrigin.Optional => "optional",
+            DisabledOrigin.OptionalConfigReplaced => "optional-config/replaced",
+            DisabledOrigin.OptionalConfigRemoved => "optional-config/removed",
+            _ => null, // MirrorExtra, Force
+        };
 
         /// <summary>
         /// Maps a SERVER source path (e.g. "BepInEx/config-server/a/x.cfg" ou "BepInEx/config-force/a/x.cfg")
@@ -117,7 +136,16 @@ namespace SPT.Launcher.Sync
         /// "-disabled" nunca são re-sincronizadas nem deletadas (R3.4) — então nada se perde.
         /// Devolve null se não der pra derivar (aí o engine não faz backup).
         /// </summary>
-        public static string DeriveDisabledBackup(string targetPath, string normalizedSourcePrefix)
+        public static string DeriveDisabledBackup(string targetPath, string normalizedSourcePrefix) =>
+            DeriveDisabledBackup(targetPath, normalizedSourcePrefix, DisabledOrigin.Force);
+
+        /// <summary>
+        /// Como o overload acima, mas com a ORIGEM (item 030, D-14/D-20): Force/MirrorExtra caem na raiz
+        /// "&lt;pasta&gt;-disabled/&lt;rel&gt;" (formato legado); as origens novas ganham subpasta
+        /// "&lt;pasta&gt;-disabled/&lt;origem&gt;/&lt;rel&gt;". Assim a quarentena de um mod opcional ou de uma config
+        /// de performance nunca sobrescreve o backup do config-force de mesmo nome.
+        /// </summary>
+        public static string DeriveDisabledBackup(string targetPath, string normalizedSourcePrefix, DisabledOrigin origin)
         {
             if (string.IsNullOrEmpty(targetPath) || string.IsNullOrEmpty(normalizedSourcePrefix))
             {
@@ -148,7 +176,10 @@ namespace SPT.Launcher.Sync
                 return null;
             }
 
-            return prefix + "-disabled/" + remainder;
+            string segment = OriginSegment(origin);
+            return segment == null
+                ? prefix + "-disabled/" + remainder
+                : prefix + "-disabled/" + segment + "/" + remainder;
         }
 
         /// <summary>True when any segment of the path ends with "-disabled" (quarantine folders are never re-synced).</summary>

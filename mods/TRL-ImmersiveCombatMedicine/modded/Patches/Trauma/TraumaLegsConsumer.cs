@@ -38,6 +38,10 @@ namespace TRLImmersiveCombatMedicine.Trauma
 
         private static readonly TraumaRegion[] LegsRegions = { TraumaRegion.Legs };
 
+        /// <summary>ref: item 020 — caps de manqueira ainda aplicados (deveria ser 0 fora de raid).
+        /// Instância nula = consumidor nunca criado; 0 é a resposta correta aí.</summary>
+        internal static int ResidualCount => _instance?._applied.Count ?? 0;
+
         private void Awake()
         {
             _instance = this;

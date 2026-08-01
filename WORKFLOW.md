@@ -68,6 +68,14 @@ Convenção de artefatos: `NNN-<slug>-MM-tipo[-NN].md` — ordem visual = ordem 
 | `graph-code-navigation` | spec técnica, reviews, code — grafo vs Grep, receitas de query, "grafo aponta, leitura prova" |
 | `spt-memory-leak-analysis` | `/analyze-memory-leak` + spec técnica/reviews que alocam estado de raid — taxonomia de leak (mecanismo × taxa de acúmulo), OOM do Fika headless, padrões preventivos de arquitetura |
 
+### Documentação técnica canônica
+
+[docs/technical/](docs/technical/README.md) é insumo declarado do ciclo, não leitura opcional. O roteamento é **por gatilho**: cada doc tem uma condição da tarefa que torna a leitura obrigatória (`spt-antipatterns.md` dispara sempre; o guia FIKA quando o mod declara `INetSerializable`; o de itens quando mexe em inventário/hideout; e assim por diante).
+
+- **Consumo:** `/create-technical-spec`, `/review-technical-spec`, `/code-mod` e `/code-review` têm o passo **"Contexto técnico do repo"** — consultar a tabela do [README](docs/technical/README.md) e ler o que a tarefa dispara. Doc ignorado com gatilho aplicável = Categoria C (spec) / Categoria D (código).
+- **Divisão de trabalho:** as skills são prescritivas e curtas (o *o quê*); os docs guardam evidência, mecanismo e histórico (o *porquê*). Nenhum dos dois substitui ler o `arquivo.cs:linha`.
+- **Manutenção:** doc novo na pasta exige linha na tabela de roteamento; renomear/remover exige o procedimento de [.agents/conventions.md](.agents/conventions.md) § "Renomear ou remover um doc de `docs/technical/`".
+
 ### Memória
 
 - `mods/<mod>/memory/sessions.md` — narrativa por mod: decisões com porquê, **lições/hipóteses descartadas**, pendências `[P-N.M]` (🔴/🟡/🟢), snapshot delta no topo.
@@ -80,4 +88,4 @@ Grafos AST (graphify) de todas as fontes em [references/graphs/](references/grap
 ### Hierarquia de fontes e antipatterns
 
 - Evidência técnica: [.agents/resources.md](.agents/resources.md) § Hierarquia de evidência (Assembly 🥇 → web 🪛).
-- Erros já cometidos: [docs/technical/spt-antipatterns.md](docs/technical/spt-antipatterns.md) (AP-01..AP-10) — leitura obrigatória antes de spec/review técnica; checados na §9 da spec técnica, nos critérios padrão da spec funcional e no checklist do fix.
+- Erros já cometidos: [docs/technical/spt-antipatterns.md](docs/technical/spt-antipatterns.md) (`AP-NN`) — leitura obrigatória antes de spec/review técnica; checados na §9 da spec técnica, nos critérios padrão da spec funcional e no checklist do fix.

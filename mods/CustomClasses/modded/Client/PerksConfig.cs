@@ -73,7 +73,7 @@ internal static class PerksConfig
     internal static ConfigEntry<float>? RapidCareUseTime;         // 072
     internal static ConfigEntry<bool>? SwiftSurgeonEnabled;       // 072
     internal static ConfigEntry<float>? SwiftSurgeonTime;         // 072
-    internal static ConfigEntry<bool>? MobileSurgeryEnabled;      // 072
+    // 079: Mobile Surgery REMOVIDO (decisão do usuário — o Médico não anda mais em cirurgia).
     internal static ConfigEntry<bool>? RestorativeSurgeryEnabled;    // 076
     internal static ConfigEntry<float>? RestorativeSurgeryRetention; // 076 (v0.6.1: piso de HP máx retido, era "penalty mult")
     internal static ConfigEntry<bool>? ShakyHandsEnabled;
@@ -115,6 +115,7 @@ internal static class PerksConfig
     internal static ConfigEntry<float>? GhostStepSoundRadius;
     internal static ConfigEntry<bool>? RattledEnabled;
     internal static ConfigEntry<float>? RattledAimPunch;
+    internal static ConfigEntry<bool>? SilentKnifeEnabled;   // 083 (Morte Silenciosa — faca sem som)
 
     // 6 · Scavenger
     internal static ConfigEntry<bool>? QuickHandsEnabled;   // 061: busca 2 contêineres (bônus elite da Search, antecipado)
@@ -122,8 +123,20 @@ internal static class PerksConfig
     internal static ConfigEntry<float>? SilentLooterVolume;
     internal static ConfigEntry<bool>? PackMuleScavEnabled;       // desdobrado do compartilhado (2026-07-10)
     internal static ConfigEntry<float>? PackMuleScavCarryBonus;
-    internal static ConfigEntry<bool>? OverladenEnabled;
-    internal static ConfigEntry<float>? OverladenInertia;
+    // 079: Overladen REMOVIDO (substituído pela Lebre, item 081). Levers novos do 079:
+    internal static ConfigEntry<bool>? LightFrameEnabled;         // 079 Caçador + Furtivo (carga reduzida)
+    internal static ConfigEntry<float>? LightFrameCarryPenalty;   // 079
+    internal static ConfigEntry<bool>? LoudLooterEnabled;         // 079 Fuzileiro (loot barulhento)
+    internal static ConfigEntry<float>? LoudLooterVolume;         // 079
+    internal static ConfigEntry<bool>? QuickDrawEnabled;          // 080 Caçador+Fuzileiro+Furtivo (saque do holster)
+    internal static ConfigEntry<float>? QuickDrawDrawInTime;      // 087 fase 3 — SACAR a arma (draw-in)
+    internal static ConfigEntry<float>? QuickDrawPutAwayTime;     // 088 fase 1 — GUARDAR a arma anterior (put-away)
+    internal static ConfigEntry<bool>? LebreEnabled;             // 081 Saqueador (velocidade quando leve)
+    internal static ConfigEntry<float>? LebreSpeed;              // 081
+    internal static ConfigEntry<bool>? MedrosoEnabled;           // 082 Saqueador (tremor sob fogo)
+    internal static ConfigEntry<float>? MedrosoDuration;         // 082
+    internal static ConfigEntry<float>? MedrosoCooldown;         // 082
+    internal static ConfigEntry<float>? MedrosoSuppressDistance; // 082
 
     // 7 · Tank
     internal static ConfigEntry<bool>? BulwarkEnabled;
@@ -142,6 +155,8 @@ internal static class PerksConfig
     internal static ConfigEntry<float>? PackMuleTankCarryBonus;
     internal static ConfigEntry<bool>? LoudOperatorTankEnabled;   // desdobrado do compartilhado (2026-07-10)
     internal static ConfigEntry<float>? LoudOperatorTankSoundRadius;
+    internal static ConfigEntry<bool>? ShotgunReloadEnabled;     // 084 (recarga de escopeta tubular mais rápida)
+    internal static ConfigEntry<float>? ShotgunReloadTime;       // 084
 
     // 9 · Vanilla Skill Fixes — Weapon Mastery (058; renumerado 8→9 no 067)
     internal static ConfigEntry<bool>? WeaponMasteryEnabled;
@@ -216,21 +231,19 @@ internal static class PerksConfig
             SecMedic, "Rapid Care — Enabled", true,
             "Médico: curativos e estabilizações são mais rápidos (efeito E animação). / Combat Medic: faster heals and stabilizations (both effect and animation).");
         RapidCareUseTime = config.Bind(
-            SecMedic, "Rapid Care — Use time mult", 0.7f,
+            SecMedic, "Rapid Care — Use time mult", 0.75f,
             new ConfigDescription(
-                "Multiplicador do tempo de uso de itens médicos (0.7 = 30% mais rápido). Não vale para o kit de cirurgia (veja Swift Surgeon). / Medical item use-time multiplier (0.7 = 30% faster). Does not apply to the surgery kit (see Swift Surgeon).",
+                "Multiplicador do tempo de uso de itens médicos (0.75 = 25% mais rápido). Não vale para o kit de cirurgia (veja Swift Surgeon). / Medical item use-time multiplier (0.75 = 25% faster). Does not apply to the surgery kit (see Swift Surgeon).",
                 new AcceptableValueRange<float>(0.3f, 1f)));
         SwiftSurgeonEnabled = config.Bind(
             SecMedic, "Swift Surgeon — Enabled", true,
             "Médico: cirurgia (CMS/Surv12) muito mais rápida. / Combat Medic: much faster surgery (CMS/Surv12).");
         SwiftSurgeonTime = config.Bind(
-            SecMedic, "Swift Surgeon — Surgery time mult", 0.5f,
+            SecMedic, "Swift Surgeon — Surgery time mult", 0.75f,
             new ConfigDescription(
-                "Multiplicador do tempo de cirurgia (0.5 = metade do tempo). A skill Surgery do jogador segue valendo por cima. / Surgery time multiplier (0.5 = half the time). The player's Surgery skill still stacks on top.",
+                "Multiplicador do tempo de cirurgia (0.75 = 25% mais rápido). A skill Surgery do jogador segue valendo por cima. / Surgery time multiplier (0.75 = 25% faster). The player's Surgery skill still stacks on top.",
                 new AcceptableValueRange<float>(0.3f, 1f)));
-        MobileSurgeryEnabled = config.Bind(
-            SecMedic, "Mobile Surgery — Enabled", true,
-            "Médico: pode ANDAR durante a cirurgia (continua sem correr/pular). / Combat Medic: can WALK during surgery (still no sprint/jump).");
+        // 079: Mobile Surgery REMOVIDO (o Médico não anda mais em cirurgia — nem própria nem de aliado).
         // 076 — a cirurgia do Médico não deixa a "cicatriz" permanente de HP máximo. Vale p/ a própria cirurgia
         // (caminho nativo) E p/ aliados operados via ICM (TRL-ImmersiveCombatMedicine), gateado pela classe do OPERADOR.
         RestorativeSurgeryEnabled = config.Bind(
@@ -241,14 +254,15 @@ internal static class PerksConfig
             new ConfigDescription(
                 "Fração MÍNIMA do HP máximo que o membro operado retém (0.80 = volta com 80%). É um PISO: nunca pior que o vanilla, e a skill Surgery do jogador pode melhorar ALÉM disto. / Minimum fraction of the limb's max HP retained after surgery (0.80 = comes back at 80%). It's a FLOOR: never worse than vanilla, and the player's Surgery skill can push beyond it.",
                 new AcceptableValueRange<float>(0f, 1f)));
-        // B1: default OFF até os perks do Médico existirem (hoje o Metabolismo já cobre — mas o recuo fica desligado por padrão).
+        // 079: "Shaky Hands" renomeado p/ "Unskilled" / "Falta de habilidade" + LIGADO (era OFF) + agora
+        // Médico E Saqueador (gate no ShootRecoilPatch). Key F12 renomeada → reseta o valor salvo (changelog).
         ShakyHandsEnabled = config.Bind(
-            SecMedic, "Shaky Hands — Enabled", false,
-            "Médico: +recuo (mãos trêmulas). / Combat Medic: more recoil (shaky hands).");
+            SecMedic, "Unskilled — Enabled", true,
+            "Médico/Saqueador: +recuo por falta de habilidade com armas de fogo. / Combat Medic/Scavenger: more recoil from lack of firearm skill.");
         ShakyHandsRecoil = config.Bind(
-            SecMedic, "Shaky Hands — Recoil mult", 1.25f,
+            SecMedic, "Unskilled — Recoil mult", 1.25f,
             new ConfigDescription(
-                "Multiplicador de recuo do Médico (1.25 = +25%). / Combat Medic recoil multiplier (1.25 = +25%).",
+                "Multiplicador de recuo por falta de habilidade (1.25 = +25%). / Recoil multiplier from lack of skill (1.25 = +25%).",
                 new AcceptableValueRange<float>(1f, 2f)));
         BindClassColor(config, SecMedic, "Combat Medic", "#6f9455");   // 067
 
@@ -285,14 +299,14 @@ internal static class PerksConfig
                 "Multiplicador de recuo na janela (0.70 = −30%). / Recoil multiplier during the window (0.70 = −30%).",
                 new AcceptableValueRange<float>(0.3f, 1f)));
         AdrenalineReloadTime = config.Bind(
-            SecRifleman, "Adrenaline — Reload time mult", 0.80f,
+            SecRifleman, "Adrenaline — Reload time mult", 0.7f,
             new ConfigDescription(
-                "Multiplicador do TEMPO de recarga na janela (0.80 = 20% mais rápido). / Reload time multiplier during the window (0.80 = 20% faster).",
+                "Multiplicador do TEMPO de recarga na janela (0.7 = 30% mais rápido). / Reload time multiplier during the window (0.7 = 30% faster).",
                 new AcceptableValueRange<float>(0.3f, 1f)));
         AdrenalineAdsTime = config.Bind(
-            SecRifleman, "Adrenaline — ADS time mult", 0.80f,
+            SecRifleman, "Adrenaline — ADS time mult", 0.7f,
             new ConfigDescription(
-                "Multiplicador do TEMPO de ADS na janela (0.80 = 20% mais rápido). / ADS time multiplier during the window (0.80 = 20% faster).",
+                "Multiplicador do TEMPO de ADS na janela (0.7 = 30% mais rápido). / ADS time multiplier during the window (0.7 = 30% faster).",
                 new AcceptableValueRange<float>(0.3f, 1f)));
         LoudOperatorRiflemanEnabled = config.Bind(
             SecRifleman, "Loud Operator — Enabled", true,
@@ -329,9 +343,9 @@ internal static class PerksConfig
             "Caçador: segura a respiração por mais tempo. / Hunter: holds breath longer.");
         // B3: dreno ×0.667 ⇒ duração ×1.5 (+50% exatos, o que o card anuncia).
         IronLungsBreathDrain = config.Bind(
-            SecHunter, "Iron Lungs — Breath drain mult", 0.667f,
+            SecHunter, "Iron Lungs — Breath drain mult", 0.7f,
             new ConfigDescription(
-                "Multiplicador do consumo de O₂ ao prender a respiração (0.667 → +50% de duração). / Hold-breath O2 drain multiplier (0.667 → +50% duration).",
+                "Multiplicador do consumo de O₂ ao prender a respiração (0.7 → +43% de duração). / Hold-breath O2 drain multiplier (0.7 → +43% duration).",
                 new AcceptableValueRange<float>(0.2f, 1f)));
         SteadyArmsEnabled = config.Bind(
             SecHunter, "Steady Arms — Enabled", true,
@@ -396,6 +410,12 @@ internal static class PerksConfig
             new ConfigDescription(
                 "Multiplicador do tranco ao levar dano (1.50 = +50%). / Aim-punch multiplier when hit (1.50 = +50%).",
                 new AcceptableValueRange<float>(1f, 3f)));
+        // 083 — Morte Silenciosa (Furtivo): a faca não faz som (sacar + golpe + acerto). Um único choke de áudio
+        // (BaseSoundPlayer.PlayClip) gateado por faca + classe do EMISSOR — cobre coop (você não ouve a faca do peer
+        // Furtivo). A IA nunca foi alertada por SOM de faca no vanilla (só pelo dano), então não há nada a suprimir lá.
+        SilentKnifeEnabled = config.Bind(
+            SecStealth, "Silent Knife — Enabled", true,
+            "Furtivo: a faca não faz barulho (sacar, golpear e acertar são silenciosos). / Stealth: the knife makes no sound (drawing, swinging and hitting are all silent).");
         BindClassColor(config, SecStealth, "Stealth", "#8b8fa3");   // 067
 
         // ───────────────────────── 6 · Scavenger ─────────────────────────
@@ -420,14 +440,65 @@ internal static class PerksConfig
             new ConfigDescription(
                 "Piso do bônus de limite de carga do Saqueador (0.30 = +30%). / Scavenger carry-limit bonus floor (0.30 = +30%).",
                 new AcceptableValueRange<float>(0f, 1f)));
-        OverladenEnabled = config.Bind(
-            SecScavenger, "Overladen — Enabled", true,
-            "Saqueador: inércia escala mais com o peso (movimento clunky carregado). / Scavenger: inertia scales more with weight.");
-        OverladenInertia = config.Bind(
-            SecScavenger, "Overladen — Inertia mult", 1.50f,
+        // 079: Overladen REMOVIDO (substituído pela Lebre, item 081). Aqui entram os 2 levers NOVOS do 079
+        // (a seção no F12 vem do 1º arg SecHunter/SecRifleman, não da posição física no código).
+        // Light Frame (Caçador + Furtivo): limite de carga REDUZIDO. Valor NEGATIVO (teto, não piso — ver PackMulePatch).
+        LightFrameEnabled = config.Bind(
+            SecHunter, "Light Frame — Enabled", true,
+            "Caçador/Furtivo: limite de carga reduzido (estrutura leve — leva menos loot). / Hunter/Stealth: reduced carry limit (light frame).");
+        LightFrameCarryPenalty = config.Bind(
+            SecHunter, "Light Frame — Carry limit penalty", -0.20f,
             new ConfigDescription(
-                "Multiplicador de inércia do Saqueador (1.50 = +50% sobre a inércia já escalada pelo peso). / Scavenger inertia multiplier (1.50).",
-                new AcceptableValueRange<float>(1f, 3f)));
+                "Redução do limite de carga (−0.20 = −20%). Valor NEGATIVO. / Carry-limit reduction (−0.20 = −20%). Negative.",
+                new AcceptableValueRange<float>(-0.5f, 0f)));
+        // Loud Looter / Saque Barulhento (Fuzileiro): som de interação/loot mais ALTO (a IA ouve mais — requer SAIN).
+        LoudLooterEnabled = config.Bind(
+            SecRifleman, "Loud Looter — Enabled", true,
+            "Fuzileiro: som de interação/loot mais ALTO (a IA ouve mais; o canal de IA requer SAIN). / Rifleman: LOUDER interaction/loot sound (AI hears more; AI channel needs SAIN).");
+        LoudLooterVolume = config.Bind(
+            SecRifleman, "Loud Looter — Volume mult", 1.30f,
+            new ConfigDescription(
+                "Multiplicador do volume de interação/loot (1.30 = +30%). / Interaction/loot volume multiplier (1.30 = +30%).",
+                new AcceptableValueRange<float>(1f, 2f)));
+        // 080/087/088 — Saque Rápido (Caçador + Fuzileiro + Furtivo): acelera a TROCA para a arma do slot HOLSTER.
+        // DOIS tempos independentes; a fase 2 (transição) encurta de brinde ao acelerar a fase 1. Seção do F12 vem
+        // do 1º arg SecHunter (mesma config p/ as 3 classes).
+        QuickDrawEnabled = config.Bind(
+            SecHunter, "Quick Draw — Enabled", true,
+            "Caçador/Fuzileiro/Furtivo: acelera a TROCA para a arma do coldre (guardar a anterior + sacar a do coldre). / Hunter/Rifleman/Stealth: faster SWAP to the Holster weapon (put-away + draw-in).");
+        QuickDrawDrawInTime = config.Bind(
+            SecHunter, "Quick Draw — Draw-in time mult (phase 3)", 0.65f,
+            new ConfigDescription(
+                "Fase 3 — TEMPO de SACAR a arma do coldre (trazê-la à mão). 0.65 = 35% mais rápido; 1.0 = desliga. / Phase 3 — time to DRAW the holster weapon (bring to hand). 0.65 = 35% faster; 1.0 = off.",
+                new AcceptableValueRange<float>(0.3f, 1f)));
+        QuickDrawPutAwayTime = config.Bind(
+            SecHunter, "Quick Draw — Put-away time mult (phase 1)", 0.75f,
+            new ConfigDescription(
+                "Fase 1 — TEMPO de GUARDAR a arma anterior ao trocar para o coldre (a transição encurta junto). 0.75 = 25% mais rápido; 1.0 = desliga. / Phase 1 — time to PUT AWAY the previous weapon. 0.75 = 25% faster; 1.0 = off.",
+                new AcceptableValueRange<float>(0.3f, 1f)));
+        // 081 — Lebre (Saqueador): +velocidade de movimento enquanto NÃO estiver pesado (Overweight nativo == 0).
+        LebreEnabled = config.Bind(
+            SecScavenger, "Lebre — Enabled", true,
+            "Saqueador: +velocidade de movimento enquanto NÃO estiver pesado (sem o ícone de sobrepeso/bigorna). / Scavenger: +move speed while NOT overweight (no overweight icon).");
+        LebreSpeed = config.Bind(
+            SecScavenger, "Lebre — Move speed mult", 1.30f,
+            new ConfigDescription(
+                "Multiplicador de velocidade quando leve (1.30 = +30%). Desliga automaticamente ao ficar pesado. / Move-speed multiplier while light (1.30 = +30%). Auto-off when overweight.",
+                new AcceptableValueRange<float>(1f, 1.5f)));
+        // 082 — Medroso (Saqueador): mãos trêmulas SOB FOGO (levar tiro OU bala passar perto). Porta a lógica do
+        // mod UnderFire (o UnderFire global deve ser desativado — senão TODOS ganham o tremor, não só o Scav).
+        MedrosoEnabled = config.Bind(
+            SecScavenger, "Medroso — Enabled", true,
+            "Saqueador: mãos trêmulas (tremor) ao levar tiro OU sob supressão (bala passa perto). / Scavenger: shaky hands (tremor) when shot OR suppressed (bullet fly-by).");
+        MedrosoDuration = config.Bind(
+            SecScavenger, "Medroso — Tremor duration (s)", 6f,
+            new ConfigDescription("Duração do tremor (segundos). / Tremor duration (seconds).", new AcceptableValueRange<float>(1f, 20f)));
+        MedrosoCooldown = config.Bind(
+            SecScavenger, "Medroso — Cooldown (s)", 8f,
+            new ConfigDescription("Espera antes de o tremor poder re-disparar. / Cooldown before the tremor can re-trigger.", new AcceptableValueRange<float>(0f, 30f)));
+        MedrosoSuppressDistance = config.Bind(
+            SecScavenger, "Medroso — Suppression distance (m)", 4f,
+            new ConfigDescription("Distância (m) que a bala passa perto p/ contar como supressão (0 = só ao levar tiro). / Bullet fly-by distance (m) counting as suppression (0 = only when hit).", new AcceptableValueRange<float>(0f, 20f)));
         BindClassColor(config, SecScavenger, "Scavenger", "#c4ad45");   // 067
 
         // ───────────────────────── 7 · Tank ─────────────────────────
@@ -454,9 +525,9 @@ internal static class PerksConfig
             SecTank, "Bunker — Enabled", true,
             "Tanque: com arma pesada (LMG/HMG/GL) na mão, menos recuo e mais ergonomia. / Tank: heavy weapons (LMG/HMG/GL) handle better.");
         BunkerHeavyRecoil = config.Bind(
-            SecTank, "Bunker — Heavy weapon recoil mult", 0.85f,
+            SecTank, "Bunker — Heavy weapon recoil mult", 0.7f,
             new ConfigDescription(
-                "Multiplicador de recuo com arma pesada (0.85 = −15%). / Heavy-weapon recoil multiplier (0.85 = −15%).",
+                "Multiplicador de recuo com arma pesada (0.7 = −30%). / Heavy-weapon recoil multiplier (0.7 = −30%).",
                 new AcceptableValueRange<float>(0.5f, 1f)));
         BunkerHeavyErgo = config.Bind(
             SecTank, "Bunker — Heavy weapon ergo mult", 1.15f,
@@ -469,9 +540,9 @@ internal static class PerksConfig
         // B16 (balance 2026-07-11): 0 → 0.2. Imunidade ABSOLUTA (×0) era outlier — o especialista em mira
         // (Caçador) tem ×0.65. Com 0.2 o braço cansa 5× mais devagar: preserva a fantasia sem imunidade.
         TirelessArmsDrain = config.Bind(
-            SecTank, "Tireless Arms — Heavy arm drain mult", 0.20f,
+            SecTank, "Tireless Arms — Heavy arm drain mult", 0.5f,
             new ConfigDescription(
-                "Multiplicador do dreno de braço do Tanque com arma pesada (0.20 = 5× mais lento; 0 = não drena). Requer o stances mod. / Tank heavy-weapon arm-drain multiplier (0.20 = 5x slower). Requires the stances mod.",
+                "Multiplicador do dreno de braço do Tanque com arma pesada (0.5 = 2× mais lento; 0 = não drena). Requer o stances mod. / Tank heavy-weapon arm-drain multiplier (0.5 = 2x slower). Requires the stances mod.",
                 new AcceptableValueRange<float>(0f, 1f)));
         HeavyFrameEnabled = config.Bind(
             SecTank, "Heavy Frame — Enabled", true,
@@ -482,9 +553,9 @@ internal static class PerksConfig
                 "Multiplicador de velocidade do Tanque (0.90 = −10%). / Tank move speed multiplier (0.90 = −10%).",
                 new AcceptableValueRange<float>(0.5f, 1f)));
         HeavyFrameHungerThirst = config.Bind(
-            SecTank, "Heavy Frame — Hunger/thirst drain", 1.30f,
+            SecTank, "Heavy Frame — Hunger/thirst drain", 1.15f,
             new ConfigDescription(
-                "Multiplicador do dreno de fome/sede do Tanque (1.30 = +30% mais rápido). / Tank hunger/thirst drain multiplier (1.30 = +30% faster).",
+                "Multiplicador do dreno de fome/sede do Tanque (1.15 = +15% mais rápido). / Tank hunger/thirst drain multiplier (1.15 = +15% faster).",
                 new AcceptableValueRange<float>(1f, 2f)));
         PackMuleTankEnabled = config.Bind(
             SecTank, "Pack Mule — Enabled", true,
@@ -502,6 +573,17 @@ internal static class PerksConfig
             new ConfigDescription(
                 "Multiplicador do raio de som de movimento do Tanque (1.30 = +30%). / Tank movement-sound radius multiplier (1.30 = +30%).",
                 new AcceptableValueRange<float>(1f, 2f)));
+        // 084 — Recarga Rápida Escopeta (Tanque): acelera a recarga de escopetas de TUBO (shell-a-shell). A mecânica
+        // elite "2 cartuchos por vez" (Mag Drills) NÃO existe no EFT — o fallback do épico é reduzir o TEMPO. Só
+        // escopeta tubular (Weapon.SupportsInternalReload); Saiga com carregador destacável fica de fora.
+        ShotgunReloadEnabled = config.Bind(
+            SecTank, "Shotgun Reload — Enabled", true,
+            "Tanque: recarrega escopetas de tubo (shell-a-shell) mais rápido. Não afeta escopetas com carregador destacável (Saiga). / Tank: faster tube-fed (shell-by-shell) shotgun reload. Does not affect detachable-magazine shotguns (Saiga).");
+        ShotgunReloadTime = config.Bind(
+            SecTank, "Shotgun Reload — Reload time mult", 0.6f,
+            new ConfigDescription(
+                "Multiplicador do TEMPO de recarga da escopeta (0.6 = 40% mais rápido). / Shotgun reload TIME multiplier (0.6 = 40% faster).",
+                new AcceptableValueRange<float>(0.4f, 1f)));
         BindClassColor(config, SecTank, "Tank", "#6b7280");   // 067
 
         // ───────────────────────── 8 · Naked ─────────────────────────

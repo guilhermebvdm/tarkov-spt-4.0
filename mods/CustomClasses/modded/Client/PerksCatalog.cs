@@ -80,7 +80,7 @@ internal static class PerksCatalog
             // 072 (2026-07-13): os 3 saíram do "em breve" — efeito E animação casados (ver ClassMedicPatches).
             P("Rapid Care", "Cuidado Rápido", "heal/stab use time", "tempo de cura/estabilização", ValueFormat.Percent, 0.7f, Polarity.LowerBetter, EBuffId.VitalityBuffRegeneration, live: () => PerksConfig.RapidCareUseTime?.Value ?? 0.7f),
             P("Swift Surgeon", "Cirurgião Ágil", "surgery time", "tempo de cirurgia", ValueFormat.Percent, 0.5f, Polarity.LowerBetter, EBuffId.SurgerySpeed, live: () => PerksConfig.SwiftSurgeonTime?.Value ?? 0.5f),
-            Flag("Mobile Surgery", "Cirurgia em Movimento", "walk during surgery", "andar durante a cirurgia", isPerk: true, EBuffId.SurgeryReducePenalty),
+            // 079: "Cirurgia em Movimento" (Mobile Surgery) REMOVIDA do Médico.
             // 076 (2026-07-19): a cirurgia restaura o membro a ~80% do HP máximo (piso configurável), em vez da
             // cicatriz grande do vanilla. Vale na auto-cirurgia + aliado via ICM.
             Flag("Restorative Surgery", "Cirurgia Restauradora", "surgery restores ~80% limb max HP", "cirurgia restaura ~80% do HP máx do membro", isPerk: true, EBuffId.SurgeryReducePenalty),
@@ -89,9 +89,10 @@ internal static class PerksCatalog
         {
             P("Efficient Metabolism", "Metabolismo Eficiente", "hunger/thirst drain", "fome/sede", ValueFormat.Percent, 0.85f, Polarity.LowerBetter, EBuffId.MetabolismEnergyExpenses, live: () => PerksConfig.EfficientMetabolismHungerThirst?.Value ?? 0.85f),
         }),
-        ["shaky_hands"] = G("Shaky Hands", "Mãos Trêmulas", ESkillId.RecoilControl, new[]
+        // 079: "Shaky Hands / Mãos Trêmulas" renomeado p/ "Unskilled / Falta de habilidade" — agora Médico E Saqueador.
+        ["shaky_hands"] = G("Unskilled", "Falta de habilidade", ESkillId.RecoilControl, new[]
         {
-            P("Shaky Hands", "Mãos Trêmulas", "recoil", "recuo", ValueFormat.Multiplier, 1.25f, Polarity.LowerBetter, EBuffId.RecoilControlImprove, live: () => PerksConfig.ShakyHandsRecoil?.Value ?? 1.25f),
+            P("Unskilled", "Falta de habilidade", "recoil (lack of skill)", "recuo (falta de habilidade)", ValueFormat.Multiplier, 1.25f, Polarity.LowerBetter, EBuffId.RecoilControlImprove, live: () => PerksConfig.ShakyHandsRecoil?.Value ?? 1.25f),
         }),
 
         // 🔫 Fuzileiro
@@ -155,6 +156,11 @@ internal static class PerksCatalog
         {
             P("Rattled", "Abalado", "aim punch when hit", "tranco na mira ao ser atingido", ValueFormat.Percent, 1.5f, Polarity.LowerBetter, EBuffId.AimMasterWiggle, live: () => PerksConfig.RattledAimPunch?.Value ?? 1.5f),
         }),
+        // 083 — Morte Silenciosa (Furtivo): a faca (sacar/golpe/acerto) não faz som. Perk qualitativo.
+        ["silent_knife"] = G("Silent Kill", "Morte Silenciosa", ESkillId.Melee, new[]
+        {
+            Flag("Silent Kill", "Morte Silenciosa", "knife makes no sound", "a faca não faz barulho", isPerk: true, EBuffId.CovertMovementSoundVolume),
+        }),
 
         // 🎒 Saqueador
         ["quick_hands"] = G("Quick Hands", "Mãos Rápidas", ESkillId.Search, new[]
@@ -166,9 +172,31 @@ internal static class PerksCatalog
         {
             Flag("Silent Looter", "Saque Silencioso", "silent looting", "saque silencioso", isPerk: true, EBuffId.CovertMovementSoundVolume),
         }),
-        ["overladen"] = G("Overladen", "Sobrecarregado", ESkillId.Endurance, new[]
+        // 079: Overladen REMOVIDO (substituído pela Lebre, item 081). Grupos NOVOS do 079:
+        // Light Frame (Caçador + Furtivo): carga reduzida — live = 1 + penalidade negativa (<1 → drawback).
+        ["light_frame"] = G("Light Frame", "Estrutura Leve", ESkillId.Strength, new[]
         {
-            Flag("Overladen", "Sobrecarregado", "inertia scales with weight", "inércia escala com o peso", isPerk: false, EBuffId.StrengthBuffLiftWeightInc),
+            P("Light Frame", "Estrutura Leve", "carry limit", "limite de carga", ValueFormat.Percent, 0.8f, Polarity.HigherBetter, EBuffId.StrengthBuffLiftWeightInc, live: () => 1f + (PerksConfig.LightFrameCarryPenalty?.Value ?? -0.2f)),
+        }),
+        // Loud Looter / Saque Barulhento (Fuzileiro): loot mais alto (>1 → drawback).
+        ["loud_looter"] = G("Loud Looter", "Saque Barulhento", ESkillId.SilentOps, new[]
+        {
+            P("Loud Looter", "Saque Barulhento", "interaction/loot volume", "volume de interação/loot", ValueFormat.Percent, 1.3f, Polarity.LowerBetter, EBuffId.CovertMovementSoundVolume, live: () => PerksConfig.LoudLooterVolume?.Value ?? 1.3f),
+        }),
+        // 080 — Saque Rápido (Caçador + Fuzileiro + Furtivo): saque da arma do coldre (Holster) mais rápido.
+        ["quick_draw"] = G("Quick Draw", "Saque Rápido", ESkillId.DrawMaster, new[]
+        {
+            P("Quick Draw", "Saque Rápido", "holster swap time", "tempo de troca do coldre", ValueFormat.Percent, 0.65f, Polarity.LowerBetter, EBuffId.AimMasterSpeed, live: () => PerksConfig.QuickDrawDrawInTime?.Value ?? 0.65f),
+        }),
+        // 081 — Lebre (Saqueador): +velocidade de movimento enquanto NÃO está pesado (overweight nativo == 0).
+        ["lebre"] = G("Hare", "Lebre", ESkillId.Endurance, new[]
+        {
+            P("Hare", "Lebre", "move speed when light", "velocidade quando leve", ValueFormat.Percent, 1.3f, Polarity.HigherBetter, EBuffId.StrengthBuffSprintSpeedInc, live: () => PerksConfig.LebreSpeed?.Value ?? 1.3f),
+        }),
+        // 082 — Medroso (Saqueador): mãos trêmulas sob fogo (drawback qualitativo).
+        ["medroso"] = G("Nervous", "Medroso", ESkillId.StressResistance, new[]
+        {
+            Flag("Nervous", "Medroso", "shaky hands under fire", "mãos trêmulas sob fogo", isPerk: false, EBuffId.AimMasterWiggle),
         }),
 
         // 🛡️ Tanque
@@ -203,17 +231,23 @@ internal static class PerksCatalog
             P("Heavy Frame", "Estrutura Pesada", "move speed", "velocidade", ValueFormat.Percent, 0.9f, Polarity.HigherBetter, EBuffId.StrengthBuffSprintSpeedInc, live: () => PerksConfig.HeavyFrameMoveSpeed?.Value ?? 0.9f),
             P("Heavy Appetite", "Apetite Pesado", "hunger/thirst drain", "fome/sede", ValueFormat.Percent, 1.3f, Polarity.LowerBetter, EBuffId.MetabolismEnergyExpenses, live: () => PerksConfig.HeavyFrameHungerThirst?.Value ?? 1.3f),
         }),
+        // 084 — Recarga Rápida Escopeta (Tanque): tempo de recarga de escopeta tubular reduzido (fallback do
+        // épico; a mecânica elite "2 por vez" não existe no EFT). Ícone = Mag Drills (skill de recarga).
+        ["shotgun_reload"] = G("Shotgun Reload", "Recarga de Escopeta", ESkillId.MagDrills, new[]
+        {
+            P("Shotgun Reload", "Recarga de Escopeta", "shotgun reload time", "tempo de recarga de escopeta", ValueFormat.Percent, 0.6f, Polarity.LowerBetter, EBuffId.WeaponReloadBuff, live: () => PerksConfig.ShotgunReloadTime?.Value ?? 0.6f),
+        }),
     };
 
     // Composição por classe (chave EN estável = displayName.en). Ordem = ordem de exibição.
     private static readonly Dictionary<string, string[]> ByClass = new(StringComparer.OrdinalIgnoreCase)
     {
-        ["Combat Medic"] = new[] { "combat_medic", "efficient_metabolism", "shaky_hands" },   // B17: perk vivo (Metabolismo)
-        ["Rifleman"]     = new[] { "cool_under_fire", "adrenaline", "loud_operator_rifleman" },
-        ["Hunter"]       = new[] { "sharpshooter", "iron_lungs", "stalker", "rooted" },   // stalker: ruído −20% (2026-07-11)
-        ["Stealth"]      = new[] { "ghost_step", "execution", "rattled" },
-        ["Scavenger"]    = new[] { "quick_hands", "silent_looter", "pack_mule_scav", "overladen" },
-        ["Tank"]         = new[] { "pack_mule_tank", "bulwark", "bunker", "heavy_frame", "loud_operator_tank" },   // Pack Mule + Loud Operator próprios (desdobrados 2026-07-10)
+        ["Combat Medic"] = new[] { "combat_medic", "efficient_metabolism", "shaky_hands", "rattled" },   // 079: −Mobile Surgery, +Abalado
+        ["Rifleman"]     = new[] { "cool_under_fire", "adrenaline", "loud_operator_rifleman", "loud_looter", "quick_draw" },   // 079 +Saque Barulhento · 080 +Saque Rápido
+        ["Hunter"]       = new[] { "sharpshooter", "iron_lungs", "stalker", "rooted", "light_frame", "quick_draw" },   // 079 +Estrutura Leve · 080 +Saque Rápido
+        ["Stealth"]      = new[] { "ghost_step", "execution", "silent_knife", "rattled", "light_frame", "quick_draw" },   // 079 +Estrutura Leve · 080 +Saque Rápido · 083 +Morte Silenciosa
+        ["Scavenger"]    = new[] { "quick_hands", "silent_looter", "pack_mule_scav", "lebre", "shaky_hands", "medroso" },   // 079 −Overladen +Falta · 081 +Lebre · 082 +Medroso
+        ["Tank"]         = new[] { "pack_mule_tank", "bulwark", "bunker", "shotgun_reload", "heavy_frame", "loud_operator_tank" },   // 084 +Recarga Escopeta
     };
 
     private static bool _validated;

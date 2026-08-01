@@ -67,8 +67,8 @@ namespace SPT.Launcher.ViewModels
 
         public ModInfoCollection ModInfoCollection { get; set; } = new ModInfoCollection();
 
-        // === Mods Opcionais Dinâmicos ===
-        public ObservableCollection<OptionalModToggle> OptionalMods { get; } = new ObservableCollection<OptionalModToggle>();
+        // Item 030: a lista de opcionais saiu daqui (era um painel na tela logada); agora vive na tela
+        // "Mods e Configs". A tela logada mostra só o RESUMO (ModsConfigsSummary).
 
         // Fonte canônica: GET /redline/server/version, buscada pelo ServerManager no connect (item 013)
         private string _serverVersion = ServerManager.TrlServerVersion;
@@ -249,218 +249,88 @@ namespace SPT.Launcher.ViewModels
             {
                 Carousel.Start();
                 Disposable.Create(() => Carousel.Stop()).DisposeWith(disposables);
+
+                // Item 030 (PA-01-03/§5.6): ao voltar da tela "Mods e Configs", se há intenção pendente
+                // e o jogo está fechado (CA-030.23), dispara o sync — a tela NÃO sincroniza, quem aplica
+                // é aqui, com o guard de concorrência existente. Se um sync já roda, a pendência persiste.
+                RefreshModsConfigsSummary();
+                if (LauncherSettingsProvider.Instance.PendingApply.Count > 0 && CanStartGame && !IsSyncRunning)
+                {
+                    _ = CheckForUpdates();
+                }
             });
 
             // Auto-check for updates, depois aplica opcionais pendentes
             _ = InitializeAsync();
         }
 
-        private static readonly System.Threading.SemaphoreSlim _optionalToggleSemaphore = new System.Threading.SemaphoreSlim(1, 1);
+        // === Item 030: resumo "Mods e Configs" na tela logada + navegação ===
+
+        private string _modsConfigsSummary = "";
+        public string ModsConfigsSummary
+        {
+            get => _modsConfigsSummary;
+            set => this.RaiseAndSetIfChanged(ref _modsConfigsSummary, value);
+        }
+
+        private bool _hasModsConfigsNew;
+        public bool HasModsConfigsNew
+        {
+            get => _hasModsConfigsNew;
+            set => this.RaiseAndSetIfChanged(ref _hasModsConfigsNew, value);
+        }
+
+        public bool HasModsConfigsSummary => !string.IsNullOrEmpty(ModsConfigsSummary);
 
         /// <summary>
-        /// Chamado quando um toggle de mod opcional muda na UI.
+        /// Item 030 (CA-030.13 / §4.1): resumo a partir do catálogo + preferências. Nunca "0 de 0" por
+        /// ausência de dado — sem itens conhecidos, o resumo fica oculto (string vazia).
         /// </summary>
-        private async Task OnOptionalToggled(OptionalModToggle toggle)
+        private void RefreshModsConfigsSummary()
         {
-            // R-3: disparo programático (revert de falha total, D-021.A) — consome o guard e sai,
-            // sem re-entrar no fluxo (evita o loop "desativar" que tentaria baixar offFolders).
-            if (toggle.SuppressToggleHandler)
+            var settings = LauncherSettingsProvider.Instance;
+            var mods = ModsConfigCatalog.OptionalMods;
+            var perf = ModsConfigCatalog.OptionalConfigs;
+
+            if (mods.Count == 0 && perf.Count == 0)
             {
-                toggle.SuppressToggleHandler = false;
+                ModsConfigsSummary = "";
+                HasModsConfigsNew = false;
+                this.RaisePropertyChanged(nameof(HasModsConfigsSummary));
                 return;
             }
 
-            await _optionalToggleSemaphore.WaitAsync();
+            int modsOn = mods.Count(m => settings.IsOptionalEnabled(m.Id));
+            int perfOn = perf.Count(x => settings.IsOptionalConfigEnabled(x.Id));
+            ModsConfigsSummary = string.Format(LocalizationProvider.Instance.mods_configs_summary_format,
+                modsOn, mods.Count, perfOn, perf.Count);
+            HasModsConfigsNew = mods.Concat(perf).Any(i => !settings.SeenItemIds.Contains(i.Id));
+            this.RaisePropertyChanged(nameof(HasModsConfigsSummary));
+        }
 
-            Action<double> progressHandler = p => Dispatcher.UIThread.Post(() => UpdateProgress = p);
-            Action<string> statusHandler = msg => Dispatcher.UIThread.Post(() => UpdateStatusText = msg);
-            bool enabling = toggle.IsEnabled;
-
-            try
-            {
-                LauncherSettingsProvider.Instance.IsUpdating = true;
-                UpdateMaxProgress = 100;
-                UpdateProgress = 0;
-
-                OptionalModsHelper.OnProgressChanged += progressHandler;
-                OptionalModsHelper.OnStatusMessageChanged += statusHandler;
-
-                // Item 021: a persistência do estado "ligado" saiu daqui (era feita ANTES do download,
-                // fingindo sucesso) — agora é decidida pelo resultado, em ApplyOptionalResult.
-                OptionalOpResult result;
-                if (enabling)
-                {
-                    LogManager.Instance.Info($"[Profile] Ativando mod opcional '{toggle.Id}'...");
-                    result = await OptionalModsHelper.DownloadOptionalGroupAsync(toggle.Id);
-                }
-                else
-                {
-                    LogManager.Instance.Info($"[Profile] Desativando mod opcional '{toggle.Id}'...");
-                    result = await OptionalModsHelper.RemoveOptionalGroupAsync(toggle.Id);
-                }
-
-                ApplyOptionalResult(toggle, enabling, result);
-            }
-            catch (Exception ex)
-            {
-                LogManager.Instance.Error($"[Profile] Erro ao aplicar mod opcional '{toggle.Id}': {ex.Message}");
-                Dispatcher.UIThread.Post(() => UpdateStatusText = string.Format(LocalizationProvider.Instance.optional_apply_error, ex.Message));
-            }
-            finally
-            {
-                OptionalModsHelper.OnProgressChanged -= progressHandler;
-                OptionalModsHelper.OnStatusMessageChanged -= statusHandler;
-                LauncherSettingsProvider.Instance.IsUpdating = false;
-                _optionalToggleSemaphore.Release();
-            }
+        /// <summary>Item 030: abre a tela "Mods e Configs" (resumo clicável / item do menu lateral).</summary>
+        public void OpenModsConfigsCommand()
+        {
+            LauncherSettingsProvider.Instance.AllowSettings = false;
+            NavigateTo(new ModsConfigsViewModel(HostScreen));
         }
 
         /// <summary>
-        /// Item 021 (B / RN-2 / D-021.A): traduz o <see cref="OptionalOpResult"/> em estado persistido + UI.
-        /// Enable pleno → persiste true + "atualizado". Enable parcial (algo aplicou, algo falhou) →
-        /// persiste true + erro visível "N de M". Enable falha TOTAL (nada aplicou / grupo não resolvido)
-        /// → reverte para false, desmarca o toggle (guard R-3) e mostra erro. Disable → persiste false
-        /// (intenção honrada); erro visível se algum arquivo falhou. Nunca mostra o verde silencioso quando
-        /// houve falha (CA-021.4/5/6). Toda mudança de UI é marshalada para a UI thread.
+        /// Item 030 (CA-030.16/16b/CC-14): dispara o onboarding? Sim quando NÃO concluído (a marca é a
+        /// fonte de verdade, D-17 — não repete se o plugins esvaziar depois) E o cliente está sem plugins
+        /// (pasta inexistente ou sem nenhum .dll em qualquer profundidade). Dev Mode não dispara (CC-14).
         /// </summary>
-        private void ApplyOptionalResult(OptionalModToggle toggle, bool enabling, OptionalOpResult result)
+        private static bool ShouldTriggerOnboarding(string gamePath)
         {
-            if (enabling && result.TotalFailure)
-            {
-                // D-021.A — reverter: estado persistido volta a false e o toggle desmarca sem re-disparar.
-                LauncherSettingsProvider.Instance.SetOptionalEnabled(toggle.Id, false);
-                string msg = result.GroupResolved
-                    ? string.Format(LocalizationProvider.Instance.optional_enable_failed_partial, toggle.Id, result.Failed, result.Total)
-                    : string.Format(LocalizationProvider.Instance.optional_enable_failed_group_unavailable, toggle.Id);
-                LogManager.Instance.Error($"[Profile] {msg}");
-                Dispatcher.UIThread.Post(() =>
-                {
-                    // R-3 fix: só armar o guard se a atribuição realmente muda o valor.
-                    // RaiseAndSetIfChanged é no-op quando IsEnabled já é false (usuário desmarcou
-                    // durante o download) → o Subscribe não dispararia e o guard ficaria preso,
-                    // engolindo em silêncio o próximo enable legítimo daquele grupo.
-                    if (toggle.IsEnabled)
-                    {
-                        toggle.SuppressToggleHandler = true;
-                        toggle.IsEnabled = false;
-                    }
-                    UpdateStatusText = msg;
-                    UpdateMaxProgress = 1;
-                    UpdateProgress = 1;
-                });
-                return;
-            }
+            if (LauncherSettingsProvider.Instance.ModsConfigsOnboardingDone) return false;
+            if (LauncherSettingsProvider.Instance.IsDevMode) return false;
 
-            // Persiste a intenção: enable-com-algo-aplicado → true; disable → false.
-            LauncherSettingsProvider.Instance.SetOptionalEnabled(toggle.Id, enabling);
-
-            if (result.Failed > 0)
-            {
-                // Sucesso parcial / disable com falhas — visível como erro, mantém o que aplicou (RN-2).
-                string msg = enabling
-                    ? string.Format(LocalizationProvider.Instance.optional_enabled_with_errors, toggle.Id, result.Failed, result.Total)
-                    : string.Format(LocalizationProvider.Instance.optional_disabled_with_errors, toggle.Id, result.Failed);
-                LogManager.Instance.Warning($"[Profile] {msg}");
-                Dispatcher.UIThread.Post(() =>
-                {
-                    UpdateStatusText = msg;
-                    UpdateMaxProgress = 1;
-                    UpdateProgress = 1;
-                });
-                return;
-            }
-
-            // Sucesso pleno.
-            Dispatcher.UIThread.Post(() =>
-            {
-                UpdateStatusText = LocalizationProvider.Instance.update_up_to_date;
-                UpdateMaxProgress = 1;
-                UpdateProgress = 1;
-            });
-            LogManager.Instance.Info($"[Profile] Mod opcional '{toggle.Id}' {(enabling ? "ativado" : "desativado")} com sucesso.");
+            string pluginsDir = Path.Combine(gamePath, "BepInEx", "plugins");
+            if (!Directory.Exists(pluginsDir)) return true;
+            return !Directory.EnumerateFiles(pluginsDir, "*.dll", SearchOption.AllDirectories).Any();
         }
 
         public bool CanStartGame => LauncherSettingsProvider.Instance.CanStartGame;
-
-        /// <summary>
-        /// Item 009: enriquece os toggles com as descrições do optionals-list
-        /// (description.json por pasta de grupo no server). Join tolerante (spec 009 D2):
-        /// descriptor.id == group.id, OU group.folders contém descriptor.id, OU
-        /// descriptor.name == group.name — tudo case-insensitive. Falha é silenciosa
-        /// (fica a descrição do optionalGroups, comportamento atual).
-        /// </summary>
-        private async Task EnrichOptionalDescriptionsAsync(List<OptionalModsHelper.OptionalGroupInfo> optionalGroups)
-        {
-            try
-            {
-                var descriptors = await OptionalModsHelper.FetchOptionalsListAsync();
-                if (descriptors.Count == 0) return;
-
-                bool preferPt = (LauncherSettingsProvider.Instance.DefaultLocale ?? "")
-                    .StartsWith("Portuguese", StringComparison.OrdinalIgnoreCase);
-
-                Dispatcher.UIThread.Post(() =>
-                {
-                    foreach (var toggle in OptionalMods)
-                    {
-                        var group = optionalGroups.FirstOrDefault(g =>
-                            string.Equals(g.id, toggle.Id, StringComparison.OrdinalIgnoreCase));
-
-                        var descriptor = FindOptionalDescriptor(descriptors, toggle, group);
-                        if (descriptor == null) continue;
-
-                        var text = OptionalModsHelper.ResolveDescription(descriptor, preferPt);
-                        if (!string.IsNullOrWhiteSpace(text))
-                        {
-                            toggle.Description = text;
-                        }
-
-                        // O name do optionalGroups é curado pelo operador — o do descriptor
-                        // só entra quando o grupo não tem nome (spec 009 D1).
-                        if (string.IsNullOrWhiteSpace(toggle.Name) && !string.IsNullOrWhiteSpace(descriptor.Name))
-                        {
-                            toggle.Name = descriptor.Name;
-                        }
-                    }
-                });
-            }
-            catch (Exception ex)
-            {
-                LogManager.Instance.Warning($"[Profile] Falha ao enriquecer descrições dos opcionais: {ex.Message}");
-            }
-        }
-
-        // ref: CR-01-01 (009) — três passadas com precedência GLOBAL (id exato → pastas do
-        // grupo → nome), não first-match por descriptor: a ordem alfabética das pastas no
-        // disco do server não pode decidir o match (grupo multi-pasta herdava a descrição da
-        // primeira pasta alfabética mesmo existindo match mais forte adiante). No desempate
-        // por pastas, vale a ordem de group.folders (curada pelo operador no config.json).
-        private static OptionalModsHelper.OptionalFolderDescriptor FindOptionalDescriptor(
-            List<OptionalModsHelper.OptionalFolderDescriptor> descriptors,
-            OptionalModToggle toggle,
-            OptionalModsHelper.OptionalGroupInfo group)
-        {
-            static bool Eq(string a, string b) => string.Equals(a, b, StringComparison.OrdinalIgnoreCase);
-
-            var byId = descriptors.FirstOrDefault(d => Eq(d.Id, toggle.Id));
-            if (byId != null) return byId;
-
-            if (group?.folders != null)
-            {
-                foreach (var folder in group.folders)
-                {
-                    var byFolder = descriptors.FirstOrDefault(d => Eq(d.Id, folder));
-                    if (byFolder != null) return byFolder;
-                }
-            }
-
-            if (!string.IsNullOrWhiteSpace(group?.name))
-            {
-                return descriptors.FirstOrDefault(d => Eq(d.Name, group.name));
-            }
-
-            return null;
-        }
 
         private async Task InitializeAsync()
         {
@@ -664,37 +534,12 @@ namespace SPT.Launcher.ViewModels
                 var deleteFiles = manifest["deleteFiles"]?.ToObject<List<string>>() ?? new List<string>();
                 var ignoredFiles = manifest["ignoredFiles"]?.ToObject<List<string>>() ?? new List<string>();
                 var folderRules = manifest["folderRules"]?.ToObject<Dictionary<string, string>>();
-                var optionalGroups = manifest["optionalGroups"]?.ToObject<List<OptionalModsHelper.OptionalGroupInfo>>() ?? new List<OptionalModsHelper.OptionalGroupInfo>();
-                var performanceOverlayFiles = manifest["performanceOverlay"]?.ToObject<List<ManifestFile>>() ?? new List<ManifestFile>();
 
-                // Atualizar cache de opcionais e popular toggles na UI
-                var optionalManifestFiles = allFiles
-                    .Where(f => f.optional)
-                    .Select(f => new OptionalModsHelper.ManifestFile { path = f.path, hash = f.hash, size = f.size, optional = f.optional, optionalGroup = f.optionalGroup })
-                    .ToList();
-                OptionalModsHelper.UpdateFromManifest(optionalGroups, optionalManifestFiles);
-
-                // Popular toggles dinâmicos na UI
-                Dispatcher.UIThread.Post(() =>
-                {
-                    OptionalMods.Clear();
-                    foreach (var group in optionalGroups)
-                    {
-                        var toggle = new OptionalModToggle
-                        {
-                            Id = group.id,
-                            Name = group.name,
-                            Description = group.description ?? "",
-                            IsEnabled = LauncherSettingsProvider.Instance.IsOptionalEnabled(group.id)
-                        };
-                        toggle.WhenAnyValue(x => x.IsEnabled).Skip(1).Subscribe(val => { var _ = OnOptionalToggled(toggle); });
-                        OptionalMods.Add(toggle);
-                    }
-                });
-
-                // Item 009: descrições vêm do server (description.json por grupo, via
-                // optionals-list) — enriquecimento assíncrono, não bloqueia a verificação.
-                _ = EnrichOptionalDescriptionsAsync(optionalGroups);
+                // Item 030: catálogo dos itens da tela "Mods e Configs" (mods opcionais + configs de
+                // performance). O resumo na tela logada e a própria tela leem daqui. Substitui o modelo
+                // antigo (optionalGroups/performanceOverlay + toggles inline).
+                ModsConfigCatalog.UpdateFromManifest(manifest["optionalMods"], manifest["optionalConfigs"], manifest["optionalModCategories"], manifest["optionalConfigCategories"]);
+                Dispatcher.UIThread.Post(RefreshModsConfigsSummary);
 
                 // Se as hashes são iguais, já terminamos o trabalho inicial (que era só montar a UI)
                 if (skipFileScan)
@@ -748,18 +593,14 @@ namespace SPT.Launcher.ViewModels
                 var resolver = new SyncRuleResolver(folderRules);
                 var baseline = SyncBaseline.Load(Path.Combine(SyncStateDir, "sync-state.json"));
 
-                // === Item 008: overlay de configs performance como fonte extra do planner ===
-                // Merge (não 2ª passada) — spec 008 D3: o pack sobrepõe o manifesto principal por
-                // path e o engine grava o hash efetivo no baseline, o que torna o OFF reversível.
+                // Item 030: o canal config-optional agora é regra de pasta (optional-config-to-config),
+                // não overlay de manifesto — o SyncManifestOverlay foi aposentado (D-13). Os discriminadores
+                // vêm das preferências: mods opcionais e itens de performance ligados, mais os ids que o
+                // player acabou de alternar (PendingApply) — para estes a aplicação é explícita.
                 IReadOnlyList<ManifestFile> effectiveFiles = allFiles;
-                SyncManifestOverlay performanceOverlay = null;
-
-                if (LauncherSettingsProvider.Instance.UsePerformanceConfigs && performanceOverlayFiles.Count > 0)
-                {
-                    performanceOverlay = SyncManifestOverlay.Merge(allFiles, performanceOverlayFiles);
-                    effectiveFiles = performanceOverlay.Files;
-                    LogManager.Instance.Info($"[Profile] Configs performance ON — overlay com {performanceOverlayFiles.Count} arquivo(s) sobreposto ao manifesto");
-                }
+                var justToggled = LauncherSettingsProvider.Instance.PendingApply
+                    .Where(id => id != SyncTriggers.PendingApplyMarker)
+                    .ToList();
 
                 var plannerOptions = new SyncPlannerOptions
                 {
@@ -767,12 +608,22 @@ namespace SPT.Launcher.ViewModels
                     DevMode = devMode,
                     IgnoredFiles = ignoredFiles,
                     ExcludeFromCleanup = LauncherSettingsProvider.Instance.ExcludeFromCleanup ?? Array.Empty<string>(),
-                    ProtectedPaths = OptionalModsHelper.GetAllKnownOptionalPaths()
-                        .Select(p => p.Replace(Path.DirectorySeparatorChar, '/'))
-                        .ToList(),
                     ManagedPaths = managedPaths,
-                    IsOptionalGroupEnabled = id => LauncherSettingsProvider.Instance.IsOptionalEnabled(id),
+                    IsOptionalModEnabled = id => LauncherSettingsProvider.Instance.IsOptionalEnabled(id),
+                    IsOptionalConfigEnabled = id => LauncherSettingsProvider.Instance.IsOptionalConfigEnabled(id),
+                    JustToggledIds = justToggled,
                 };
+
+                // Item 030 (CA-030.16 / R-10): onboarding do primeiro acesso. Cliente sem plugins e
+                // onboarding não concluído vai direto pra tela "Mods e Configs" ANTES de aplicar — o
+                // catálogo já foi populado acima. Ao sair da tela, a primeira ingestão roda com as
+                // escolhas dele (a tela dispara via PendingApply). Só em full scan (não no skipFileScan).
+                if (ShouldTriggerOnboarding(gamePath))
+                {
+                    LogManager.Instance.Info("[Profile] Onboarding: cliente sem plugins — abrindo tela Mods e Configs antes do primeiro sync");
+                    Dispatcher.UIThread.Post(() => NavigateTo(new ModsConfigsViewModel(HostScreen, onboarding: true)));
+                    return; // não aplica agora; o apply vem quando o player sair da tela (CA-030.19)
+                }
 
                 var planner = new SyncPlanner(resolver, baseline, plannerOptions);
                 var planProgress = new Progress<SyncProgress>(p =>
@@ -787,7 +638,7 @@ namespace SPT.Launcher.ViewModels
                 OutdatedFiles = plan.DownloadCount;
 
                 // === Execução (auto-apply, como o fluxo antigo) — atômica e cancelável ===
-                var engine = BuildSyncEngine(gamePath, baseline, performanceOverlay);
+                var engine = BuildSyncEngine(gamePath, baseline);
                 SyncResult result;
 
                 if (plan.IoActionCount > 0)
@@ -843,6 +694,20 @@ namespace SPT.Launcher.ViewModels
                     LogManager.Instance.Info("[Profile] Todos os mods estão atualizados.");
                 }
 
+                // Item 030 (PA-01-05 + 🟡 CR): a intenção pendente só é limpa quando o sync conclui SEM erro
+                // e sem cancelamento. Remove APENAS o snapshot que ESTE sync aplicou (justToggled + marker),
+                // não Clear() — um toggle registrado por outra tela DURANTE este sync (que ficou pendente
+                // porque o guard de concorrência o pulou) não pode ser descartado sem ter sido aplicado.
+                if (!result.Cancelled && result.Errors == 0)
+                {
+                    var pending = LauncherSettingsProvider.Instance.PendingApply;
+                    int before = pending.Count;
+                    foreach (var id in justToggled) pending.Remove(id);
+                    pending.RemoveAll(x => x == SyncTriggers.PendingApplyMarker);
+                    if (pending.Count != before) LauncherSettingsProvider.Instance.SaveSettings();
+                }
+                Dispatcher.UIThread.Post(RefreshModsConfigsSummary);
+
                 // Salvar manifest hash local (não salvar se cancelado — força rescan no próximo login)
                 try
                 {
@@ -888,19 +753,14 @@ namespace SPT.Launcher.ViewModels
 
         private static string ReportFilePath => Path.Combine(SyncStateDir, SyncReport.DefaultFileName);
 
-        private SyncEngine BuildSyncEngine(string gamePath, SyncBaseline baseline, SyncManifestOverlay performanceOverlay = null)
+        private SyncEngine BuildSyncEngine(string gamePath, SyncBaseline baseline)
         {
+            // Item 030: um downloader só — o canal config-optional virou regra de pasta (as duas
+            // entradas lógicas config-optional/ e config-optional-ref/ baixam do /download comum,
+            // servidas pelo _fileMapCache do servidor). O overlay/performance-download foi aposentado.
             SyncDownloader downloader = (path, ct) => Task.Run(() => RequestHandler.DownloadModFile(path), ct);
 
-            if (performanceOverlay != null)
-            {
-                // Item 008: paths do pack baixam do endpoint performance-download
-                downloader = performanceOverlay.CreateDownloader(
-                    downloader,
-                    (path, ct) => Task.Run(() => RequestHandler.DownloadPerformanceFile(path), ct));
-            }
-
-            // Item 016 — camada MAIS EXTERNA: mede a taxa de todos os downloads (base/overlay/seed).
+            // Item 016 — camada MAIS EXTERNA: mede a taxa de todos os downloads.
             downloader = WithSpeedMeter(downloader);
 
             return new SyncEngine(

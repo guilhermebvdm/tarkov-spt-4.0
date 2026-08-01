@@ -26,6 +26,7 @@ Implementa um item do backlog em `mods/<mod>/modded/`, seguindo a spec técnica 
 
 3. **Ler:**
    - **Memória do mod** — topo de `mods/<mod>/memory/sessions.md` (snapshot + pendências) + entradas que citam o item `<NNN>`. Aplicar `memory-curation` § "Consumo de memória por commands" (§14): reportar pendências que afetam esta tarefa; pendência 🔴 do item/mod → alertar antes de prosseguir. Se o arquivo não existir, registrar "sem memória prévia".
+   - **Contexto técnico do repo** — consultar [docs/technical/README.md](../../docs/technical/README.md) e ler **os docs cujo gatilho esta tarefa dispara** (`spt-antipatterns.md` dispara sempre). São padrões obrigatórios, não sugestão: o guia FIKA traz template copy-paste para pacote próprio, e o de itens/inventário a estrutura correta da árvore. Escrever "de cabeça" o que já está documentado vira achado no `/code-review`.
    - Spec técnica completa.
    - Última review (e quaisquer pontos `🟡`/`🟢` ainda pendentes — registrar para resolver durante).
    - Os arquivos do Assembly citados na spec, **conferindo `arquivo:linha`** antes de escrever código que dependa deles.

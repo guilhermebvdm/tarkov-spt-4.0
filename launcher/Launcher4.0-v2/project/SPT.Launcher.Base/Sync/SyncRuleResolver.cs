@@ -33,6 +33,16 @@ namespace SPT.Launcher.Sync
             // config/<rel> do usuário sempre que divergir (ignora customização). Ver SyncFolderRule.ForceToConfig.
             ["config-force"] = "force-to-config",
             ["BepInEx/config-force"] = "force-to-config",
+            // config-optional: item 030. Aplica em config/ quando o item está ligado, vencendo
+            // config-force e config (precedência performance > force > config). É pasta-FONTE (sufixo
+            // "-optional" derivado em DeriveSeedTarget) — nunca materializada no cliente.
+            ["config-optional"] = "optional-config-to-config",
+            ["BepInEx/config-optional"] = "optional-config-to-config",
+            // config-optional-ref (D-18): MESMOS arquivos físicos, publicados sob 2º prefixo lógico
+            // pelo servidor, espelhados no cliente como biblioteca de referência (o player consulta/copia).
+            // Regra separada porque um prefixo só aceita UMA regra — daí os dois nomes.
+            ["config-optional-ref"] = "mirror-reference",
+            ["BepInEx/config-optional-ref"] = "mirror-reference",
             ["patchers"] = "mirror-move-disabled",
             ["BepInEx/patchers"] = "mirror-move-disabled",
             ["plugins"] = "mirror-move-disabled",

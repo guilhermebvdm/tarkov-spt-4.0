@@ -7,6 +7,28 @@ Versões mais recentes primeiro.
 
 ---
 
+## v2.11.0 (2026-07-26)
+
+### Endurecimento da sincronização de rede FIKA
+
+⚠️ **Release lockstep:** o formato do pacote de stance mudou. Todos os jogadores **e o headless**
+precisam atualizar juntos — um peer em 2.10.0 não entende o pacote novo.
+
+- O corpo do pacote passou a ir dentro de um **envelope de comprimento**. O `NetPacketProcessor` do
+  FIKA lê o datagrama em laço; um `Deserialize` que consumisse um número de bytes diferente do que
+  o `Serialize` escreveu desalinhava o leitor e gerava `ParseException: Undefined packet in
+  NetDataReader`. Como o `PollEvents` do LiteNetLib drena a fila de eventos **sem try/catch**, essa
+  exceção descartava todos os eventos pendentes do frame — inclusive os de posição/movimento do
+  FIKA e os dos outros mods. O envelope torna esse desalinhamento impossível.
+- A leitura passou a usar as variantes `TryGet*` (não lançam) e o callback ganhou guard de
+  `GameWorld.Instantiated` antes de criar o `ObservedStanceAnimator`.
+- `StanceSyncPacket` (formato ≤2.10.0) segue registrado **só para recepção**, então 2.11.0 continua
+  entendendo peers que ainda não subiram.
+- Erros de rede passaram a logar com stack trace na primeira ocorrência de cada tipo e com throttle
+  de 5 s depois, evitando flood no console.
+
+---
+
 ## v2.10.0 (2026-07-19)
 
 ### Nova feature — UI ao checar a câmara (item 019)

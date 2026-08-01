@@ -1,65 +1,30 @@
-using System;
-using UnityEngine;
 using EFT;
 using HarmonyLib;
 using TRLImmersiveCombatMedicine;
 
 namespace TrueTrauma
 {
-    public static class HealthUtils
-    {
-        public static bool IsPartDestroyed(Player p, EBodyPart part)
-        {
-            if (p == null || p.HealthController == null) return false;
-            try
-            {
-                var health = p.HealthController.GetBodyPartHealth(part);
-                return p.HealthController.IsBodyPartBroken(part) || health.Current < 1f;
-            }
-            catch { return false; }
-        }
-    }
+    // ref: item 019 — REMOVIDOS deste arquivo (código morto, zero call sites, confirmado por grep):
+    //
+    //   • VoiceHelper.SafePlayVoice(player, string triggerName)
+    //   • VoiceHelper.TriggerTraumaVoice(player, string type)
+    //   • HealthUtils.IsPartDestroyed(player, part)
+    //
+    // Os dois primeiros eram o sistema de voz do TrueTrauma 3.11 e resolviam o gatilho por
+    // `Enum.Parse(typeof(EPhraseTrigger), nome)` dentro de um `catch {}` VAZIO. Três dos quatro nomes que ele
+    // usava NÃO EXISTEM no enum — `OnLegBroken`, `OnHandBroken` e `OnPain` — então o Parse lançava, o catch
+    // engolia, e o resultado era silêncio absoluto sem nada no log: metade das falas de perna e de braço
+    // (o sorteio 50/50 com OnAgony) e TODAS as de estômago nunca tocaram uma única vez.
+    //
+    // A substituição é TraumaVoice (gatilhos TIPADOS, que não compilam se o nome estiver errado) +
+    // TraumaPainVoice (mapa evento→fala). Os nomes corretos são `LegBroken` (49) e `HandBroken` (48), e para
+    // dor de estômago o jogo não tem gatilho dedicado. Ver EPhraseTrigger.cs:47-48.
+    //
+    // HealthUtils.IsPartDestroyed saiu junto: o motor de estados (item 002) resolve estado de membro pelos
+    // predicados do próprio HealthController, e este helper misturava "zerado" com "quebrado" numa só
+    // resposta — a distinção que o item 019 precisa justamente preservar para escolher a fala certa.
 
-    public static class VoiceHelper
-    {
-        public static void SafePlayVoice(Player player, string triggerName)
-        {
-            if (player == null || !player.HealthController.IsAlive) return;
-            try
-            {
-                Type enumType = typeof(EPhraseTrigger);
-                object triggerValue = Enum.Parse(enumType, triggerName);
-                var sayMethod = player.GetType().GetMethod("Say");
-                sayMethod?.Invoke(player, new object[] { triggerValue, true, 0f, 0, 100, false });
-            }
-            catch { }
-        }
-
-        public static void TriggerTraumaVoice(Player player, string type)
-        {
-            if (player == null) return;
-            string id = player.ProfileId;
-
-            if (TraumaState.VoiceCooldowns.ContainsKey(id))
-            {
-                if (Time.time < TraumaState.VoiceCooldowns[id]) return;
-            }
-
-            string phrase = "OnBreath";
-            switch (type)
-            {
-                case "Leg": phrase = (UnityEngine.Random.value > 0.5f) ? "OnAgony" : "OnLegBroken"; break;
-                case "Arm": phrase = (UnityEngine.Random.value > 0.5f) ? "OnAgony" : "OnHandBroken"; break;
-                case "Gut": phrase = "OnPain"; break;
-                case "TryAim": phrase = "OnBreath"; break;
-            }
-
-            SafePlayVoice(player, phrase);
-            TraumaState.VoiceCooldowns[id] = Time.time + 2f;
-        }
-    }
-
-    // PATCH DE SILÊNCIO (CORRIGIDO)
+    /// <summary>Mordaça de voz durante o desmaio: um jogador inconsciente não fala.</summary>
     [HarmonyPatch(typeof(Player), "Say")]
     class SilenceVoicePatch
     {
@@ -67,19 +32,14 @@ namespace TrueTrauma
         {
             if (!TRLImmersiveCombatMedicinePlugin.ConfigMasterEnabled.Value || !TRLImmersiveCombatMedicinePlugin.ConfigBlackoutEnabled.Value) return true;
 
-            // Se o jogador estiver desmaiado
+            // ref: item 019 — a whitelist de OnYourOwn/OnBreath foi REMOVIDA. Ela existia porque o TrueTrauma
+            // 3.11 não tinha pacote de rede e usava essas duas falas como CANAL DE SINALIZAÇÃO ("desmaiei" /
+            // "acordei"), aproveitando o PhrasePacket nativo do Fika como transporte. O mod novo sincroniza o
+            // desmaio por pacote próprio desde o CR-01-02, então a exceção ficou órfã — e vazava justamente
+            // uma fala de dor (OnBreath, hoje usada pelo item 019 como ofego) de dentro do desmaio.
             if (__instance != null && TraumaState.BlackoutTimers.ContainsKey(__instance.ProfileId))
-            {
-                // --- CORREÇÃO AQUI ---
-                // Se for o nosso sinal secreto de rede (Desmaiei ou Acordei), DEIXA PASSAR!
-                if (phrase == EPhraseTrigger.OnYourOwn || phrase == EPhraseTrigger.OnBreath)
-                {
-                    return true;
-                }
-
-                // Qualquer outra fala (gritos de dor, mumbles manuais) é bloqueada
                 return false;
-            }
+
             return true;
         }
     }

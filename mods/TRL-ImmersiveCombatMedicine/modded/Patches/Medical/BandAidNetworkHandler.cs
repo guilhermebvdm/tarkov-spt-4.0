@@ -5,6 +5,7 @@ using EFT.HealthSystem;
 using EFT.Communications;
 using Fika.Core.Networking;
 using Fika.Core.Networking.LiteNetLib;
+using Fika.Core.Networking.LiteNetLib.Utils; // INetSerializable — constraint do helper SendPacket
 using System;
 using System.Linq;
 using System.Reflection;
@@ -59,27 +60,125 @@ namespace Band_Aid
             {
                 try
                 {
-                    currentManager.RegisterPacket<BandAidHealPacket>(OnBandAidHealPacketReceived);
-                    currentManager.RegisterPacket<BandAidShoulderTapPacket>(OnShoulderTapReceived);
-                    currentManager.RegisterPacket<BandAidHealCheckPacket>(OnHealCheckReceived);
-                    currentManager.RegisterPacket<BandAidHealCheckResponsePacket>(OnHealCheckResponseReceived);
-                    currentManager.RegisterPacket<TraumaFaintPacket>(OnTraumaFaintReceived); // ref: CR-01-02
-                    currentManager.RegisterPacket<BandAidTreatmentReportPacket>(OnTreatmentReportReceived); // feedback membro-alvo
+                    currentManager.RegisterPacket<BandAidHealPacketV2>(OnBandAidHealPacketReceived);
+                    currentManager.RegisterPacket<BandAidShoulderTapPacketV2>(OnShoulderTapReceived);
+                    currentManager.RegisterPacket<BandAidHealCheckPacketV2>(OnHealCheckReceived);
+                    currentManager.RegisterPacket<BandAidHealCheckResponsePacketV2>(OnHealCheckResponseReceived);
+                    currentManager.RegisterPacket<TraumaFaintPacketV2>(OnTraumaFaintReceived); // ref: CR-01-02
+                    currentManager.RegisterPacket<BandAidTreatmentReportPacketV2>(OnTreatmentReportReceived); // feedback membro-alvo
+
+                    // Stubs dos formatos ≤1.10.0: consomem o payload de um peer desatualizado em
+                    // vez de deixá-lo sem handler — sem isso o ParseException derruba a fila de
+                    // eventos do frame para TODOS os mods. Ver LegacyPacketCompat.
+                    LegacyPacketCompat.Register(currentManager);
 
                     _lastRegisteredNetworkManager = currentManager;
                     Logger.LogInfo($"[BandAidNetworkHandler] Registered FIKA network packets on instance: {currentManager.GetType().Name}");
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError($"[BandAidNetworkHandler] Error registering FIKA packets: {ex.Message}");
+                    Logger.LogError($"[BandAidNetworkHandler] Error registering FIKA packets: {ex}");
                 }
             }
         }
 
         public static void CheckInit() => EnsurePacketsRegistered();
 
+        /// <summary>
+        /// Avisa que há peer com versão anterior na raid. Chamado uma única vez pelos stubs de
+        /// compatibilidade — a interação daquele peer não vai funcionar, mas a rede segue sadia.
+        /// </summary>
+        internal static void LogVersionMismatch(string packetName)
+        {
+            Logger.LogWarning(
+                $"[BandAidNetworkHandler] Recebido '{packetName}' no formato ≤1.10.0: há peer com " +
+                "versão anterior do mod na raid. As interações médicas com esse jogador não vão " +
+                "funcionar até que ele atualize (o formato de pacote mudou na 1.11.0).");
+        }
+
+        // Throttle de log: se a falha for sistemática (peer com layout divergente), logar por
+        // pacote encheria o console do BepInEx de stack traces, causando hitching e escondendo o
+        // erro real. Stack completo na primeira ocorrência de CADA TIPO de exceção — um booleano
+        // global esconderia uma falha diferente que aparecesse raids depois.
+        private const int ErrorLogIntervalMs = 5000;
+        private static int _lastErrorLogTick;
+        private static int _suppressedErrors;
+        private static readonly System.Collections.Generic.HashSet<Type> _tracedExceptionTypes
+            = new System.Collections.Generic.HashSet<Type>();
+
+        internal static void LogErrorThrottled(string context, Exception ex)
+        {
+            var now = Environment.TickCount;
+
+            // Esvazia o contador junto com o trace: senão as falhas acumuladas somem do log.
+            var suppressed = _suppressedErrors;
+
+            if (ex != null && _tracedExceptionTypes.Add(ex.GetType()))
+            {
+                _suppressedErrors = 0;
+                _lastErrorLogTick = now;
+                Logger.LogError($"[BandAidNetworkHandler] {context}: {ex}"
+                    + (suppressed > 0 ? $" (+{suppressed} falhas de outros tipos suprimidas)" : string.Empty));
+                return;
+            }
+
+            // Subtração de ints trata o wrap-around de TickCount corretamente.
+            if (now - _lastErrorLogTick < ErrorLogIntervalMs)
+            {
+                _suppressedErrors++;
+                return;
+            }
+
+            _lastErrorLogTick = now;
+            _suppressedErrors = 0;
+            Logger.LogError($"[BandAidNetworkHandler] {context}: {ex?.Message}"
+                + (suppressed > 0 ? $" (+{suppressed} falhas suprimidas nos últimos {ErrorLogIntervalMs / 1000}s)" : string.Empty));
+        }
+
+        /// <summary>
+        /// Ponto ÚNICO de transmissão do mod. Garante o registro dos pacotes antes de qualquer
+        /// envio (a instância do IFikaNetworkManager é recriada a cada transição de sessão) e
+        /// encapsula a assimetria host/client: no servidor todo envio é broadcast; no cliente vai
+        /// para o host, que retransmite.
+        ///
+        /// Centralizar aqui é o que garante a regra de "Ensure antes de enviar" nos ~14 pontos de
+        /// envio do mod, incluindo os relays feitos de dentro dos callbacks.
+        /// </summary>
+        /// <returns>
+        /// O papel deste processo no envio (<c>"Host"</c>/<c>"Client"</c>), ou <c>null</c> se nada
+        /// foi transmitido. Os chamadores logam a partir daí — logar incondicionalmente depois da
+        /// chamada afirmaria um envio que pode ter falhado, justamente no cenário que se quer
+        /// diagnosticar.
+        /// </returns>
+        private static string SendPacket<T>(ref T packet, string context) where T : INetSerializable
+        {
+            EnsurePacketsRegistered();
+
+            try
+            {
+                if (Singleton<FikaServer>.Instantiated)
+                {
+                    Singleton<FikaServer>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+                    return "Host";
+                }
+
+                if (Singleton<FikaClient>.Instantiated)
+                {
+                    Singleton<FikaClient>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+                    return "Client";
+                }
+
+                return null;
+            }
+            catch (Exception ex)
+            {
+                LogErrorThrottled($"Falha ao enviar {typeof(T).Name} ({context})", ex);
+                return null;
+            }
+        }
+
         // === Callback para quando médico recebe resposta do check ===
-        public static event System.Action<BandAidHealCheckResponsePacket> OnHealCheckResponse;
+        public static event System.Action<BandAidHealCheckResponsePacketV2> OnHealCheckResponse;
 
         // ============================================================
         // ref: CR-01-02 — SYNC DE DESMAIO (migrado do TrueTrauma 3.11)
@@ -91,7 +190,7 @@ namespace Band_Aid
             EnsurePacketsRegistered();
             if (_lastRegisteredNetworkManager == null) return; // solo/sem Fika: estado local basta
 
-            var packet = new TraumaFaintPacket
+            var packet = new TraumaFaintPacketV2
             {
                 ProfileId = profileId,
                 IsFainted = isFainted,
@@ -99,22 +198,18 @@ namespace Band_Aid
                 GraceSeconds = graceSeconds
             };
 
-            if (Singleton<FikaServer>.Instantiated)
-            {
-                Singleton<FikaServer>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
-                Logger.LogInfo($"[Faint] Host enviou estado de desmaio: {profileId} = {isFainted} (dur={durationSeconds:F0}s)");
-            }
-            else if (Singleton<FikaClient>.Instantiated)
-            {
-                Singleton<FikaClient>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
-                Logger.LogInfo($"[Faint] Client enviou estado de desmaio: {profileId} = {isFainted} (dur={durationSeconds:F0}s)");
-            }
+            var role = SendPacket(ref packet, "TraumaFaint");
+            if (role != null)
+                Logger.LogInfo($"[Faint] {role} enviou estado de desmaio: {profileId} = {isFainted} (dur={durationSeconds:F0}s)");
         }
 
-        private static void OnTraumaFaintReceived(TraumaFaintPacket packet)
+        private static void OnTraumaFaintReceived(TraumaFaintPacketV2 packet)
         {
             try
             {
+                // Corpo truncado: nao processar NEM retransmitir — o host relayaria lixo re-serializado.
+                if (!packet.Valid) return;
+
                 // Host/headless retransmite (mesmo padrão de relay dos pacotes de heal)
                 if (Singleton<FikaServer>.Instantiated)
                 {
@@ -123,7 +218,7 @@ namespace Band_Aid
                     if (packet.ProfileId != myId)
                     {
                         var relay = packet;
-                        Singleton<FikaServer>.Instance.SendData(ref relay, DeliveryMethod.ReliableOrdered, true);
+                        SendPacket(ref relay, "relay");
                     }
                 }
 
@@ -166,7 +261,7 @@ namespace Band_Aid
             }
             catch (Exception ex)
             {
-                Logger.LogError($"[BandAidNetworkHandler] Error in OnTraumaFaintReceived: {ex.Message}");
+                LogErrorThrottled("Error in OnTraumaFaintReceived", ex);
             }
         }
 
@@ -178,7 +273,7 @@ namespace Band_Aid
             EnsurePacketsRegistered();
             if (_lastRegisteredNetworkManager == null) return;
 
-            var packet = new BandAidHealPacket
+            var packet = new BandAidHealPacketV2
             {
                 DoctorProfileId = doctor.ProfileId,
                 PatientProfileId = patient.ProfileId,
@@ -193,25 +288,20 @@ namespace Band_Aid
                 ApplyFullTreatment = applyFullTreatment
             };
 
-            if (Singleton<FikaServer>.Instantiated)
-            {
-                // Host envia para todos os clients (broadcast)
-                Singleton<FikaServer>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
-                Logger.LogInfo($"Host enviou pacote de cura para {patient.Profile.Nickname} [FullTreatment={applyFullTreatment}]");
-            }
-            else if (Singleton<FikaClient>.Instantiated)
-            {
-                // Client envia para o host (que vai retransmitir para o paciente)
-                Singleton<FikaClient>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
-                Logger.LogInfo($"Client enviou pacote de cura para {patient.Profile.Nickname} [FullTreatment={applyFullTreatment}]");
-            }
+            // Host faz broadcast direto; client envia ao host, que retransmite ao paciente.
+            var role = SendPacket(ref packet, "Heal");
+            if (role != null)
+                Logger.LogInfo($"{role} enviou pacote de cura para {patient.Profile.Nickname} [FullTreatment={applyFullTreatment}]");
         }
 
-        private static void OnBandAidHealPacketReceived(BandAidHealPacket packet)
+        private static void OnBandAidHealPacketReceived(BandAidHealPacketV2 packet)
         {
             try
             {
-                if (Singleton<GameWorld>.Instance == null) return;
+                // Corpo truncado: nao processar NEM retransmitir — o host relayaria lixo re-serializado.
+                if (!packet.Valid) return;
+
+                if (!Singleton<GameWorld>.Instantiated) return;
 
                 CacheTypes();
 
@@ -226,7 +316,7 @@ namespace Band_Aid
                     if (packet.DoctorProfileId != myProfileId)
                     {
                         var retransmit = packet;
-                        Singleton<FikaServer>.Instance.SendData(ref retransmit, DeliveryMethod.ReliableOrdered, true);
+                        SendPacket(ref retransmit, "relay");
                         Logger.LogInfo("Host retransmitiu pacote de cura para clients.");
                     }
 
@@ -305,7 +395,7 @@ namespace Band_Aid
             }
             catch (Exception ex)
             {
-                Logger.LogError($"[BandAidNetworkHandler] Error in OnBandAidHealPacketReceived: {ex.Message}");
+                LogErrorThrottled("Error in OnBandAidHealPacketReceived", ex);
             }
         }
 
@@ -314,7 +404,7 @@ namespace Band_Aid
         /// Chamado quando o paciente recebe um pacote ApplyFullTreatment=true.
         /// O paciente tem ActiveHealthController (CoopClientHealthController), então tudo funciona.
         /// </summary>
-        private static void ApplyFullTreatmentLocally(Player patient, BandAidHealPacket packet)
+        private static void ApplyFullTreatmentLocally(Player patient, BandAidHealPacketV2 packet)
         {
             CacheTypes();
 
@@ -604,30 +694,30 @@ namespace Band_Aid
             var mainPlayer = Singleton<GameWorld>.Instance?.MainPlayer;
             if (mainPlayer == null) return;
 
-            var packet = new BandAidShoulderTapPacket
+            var packet = new BandAidShoulderTapPacketV2
             {
                 SenderProfileId = mainPlayer.ProfileId,
                 SenderNickname = mainPlayer.Profile.Nickname,
                 TargetProfileId = target.ProfileId
             };
 
-            if (Singleton<FikaServer>.Instantiated)
-                Singleton<FikaServer>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
-            else if (Singleton<FikaClient>.Instantiated)
-                Singleton<FikaClient>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+            SendPacket(ref packet, "ShoulderTap");
         }
 
-        private static void OnShoulderTapReceived(BandAidShoulderTapPacket packet)
+        private static void OnShoulderTapReceived(BandAidShoulderTapPacketV2 packet)
         {
             try
             {
+                // Corpo truncado: nao processar NEM retransmitir — o host relayaria lixo re-serializado.
+                if (!packet.Valid) return;
+
                 var mainPlayer = Singleton<GameWorld>.Instance?.MainPlayer;
 
                 // Headless: apenas retransmitir
                 if (Singleton<FikaServer>.Instantiated && (mainPlayer == null || packet.SenderProfileId != mainPlayer?.ProfileId))
                 {
                     var retransmit = packet;
-                    Singleton<FikaServer>.Instance.SendData(ref retransmit, DeliveryMethod.ReliableOrdered, true);
+                    SendPacket(ref retransmit, "relay");
                 }
 
                 if (mainPlayer == null) return;
@@ -643,7 +733,7 @@ namespace Band_Aid
             }
             catch (Exception ex)
             {
-                Logger.LogError($"[BandAidNetworkHandler] Error in OnShoulderTapReceived: {ex.Message}");
+                LogErrorThrottled("Error in OnShoulderTapReceived", ex);
             }
         }
 
@@ -657,28 +747,28 @@ namespace Band_Aid
             EnsurePacketsRegistered();
             if (_lastRegisteredNetworkManager == null) return;
 
-            var packet = new BandAidHealCheckPacket
+            var packet = new BandAidHealCheckPacketV2
             {
                 DoctorProfileId = doctor.ProfileId,
                 PatientProfileId = patient.ProfileId,
                 ItemTemplateId = itemTemplateId
             };
 
-            if (Singleton<FikaServer>.Instantiated)
-                Singleton<FikaServer>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
-            else if (Singleton<FikaClient>.Instantiated)
-                Singleton<FikaClient>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
-
-            Logger.LogInfo($"HealCheck enviado para {patient.Profile.Nickname} | Item: {itemTemplateId}");
+            var role = SendPacket(ref packet, "HealCheck");
+            if (role != null)
+                Logger.LogInfo($"{role} enviou HealCheck para {patient.Profile.Nickname} | Item: {itemTemplateId}");
         }
 
         /// <summary>
         /// Step 2: Paciente recebe check, valida localmente, responde.
         /// </summary>
-        private static void OnHealCheckReceived(BandAidHealCheckPacket packet)
+        private static void OnHealCheckReceived(BandAidHealCheckPacketV2 packet)
         {
             try
             {
+                // Corpo truncado: nao processar NEM retransmitir — o host relayaria lixo re-serializado.
+                if (!packet.Valid) return;
+
                 var mainPlayer = Singleton<GameWorld>.Instance?.MainPlayer;
 
                 // Host/Headless retransmite
@@ -688,7 +778,7 @@ namespace Band_Aid
                     if (packet.DoctorProfileId != myId)
                     {
                         var relay = packet;
-                        Singleton<FikaServer>.Instance.SendData(ref relay, DeliveryMethod.ReliableOrdered, true);
+                        SendPacket(ref relay, "relay");
                     }
 
                     // ref: CR-01-01 — BOTS nunca são MainPlayer de ninguém: o DONO deles
@@ -729,7 +819,7 @@ namespace Band_Aid
                 }
 
                 // Enviar resposta
-                var response = new BandAidHealCheckResponsePacket
+                var response = new BandAidHealCheckResponsePacketV2
                 {
                     DoctorProfileId = packet.DoctorProfileId,
                     PatientProfileId = packet.PatientProfileId,
@@ -739,14 +829,11 @@ namespace Band_Aid
                     ExpectedBodyPart = (byte)expectedPart
                 };
 
-                if (Singleton<FikaServer>.Instantiated)
-                    Singleton<FikaServer>.Instance.SendData(ref response, DeliveryMethod.ReliableOrdered, true);
-                else if (Singleton<FikaClient>.Instantiated)
-                    Singleton<FikaClient>.Instance.SendData(ref response, DeliveryMethod.ReliableOrdered);
+                SendPacket(ref response, "HealCheckResponse");
             }
             catch (Exception ex)
             {
-                Logger.LogError($"[BandAidNetworkHandler] Error in OnHealCheckReceived: {ex.Message}");
+                LogErrorThrottled("Error in OnHealCheckReceived", ex);
             }
         }
 
@@ -755,11 +842,11 @@ namespace Band_Aid
         // ============================================================
 
         /// <summary>Paciente (ou dono do bot) reporta ao médico o membro tratado e o custo real.</summary>
-        private static void SendTreatmentReport(BandAidHealPacket source, EBodyPart part, float healed, float cost)
+        private static void SendTreatmentReport(BandAidHealPacketV2 source, EBodyPart part, float healed, float cost)
         {
             EnsurePacketsRegistered();
             if (_lastRegisteredNetworkManager == null) return;
-            var report = new BandAidTreatmentReportPacket
+            var report = new BandAidTreatmentReportPacketV2
             {
                 DoctorProfileId = source.DoctorProfileId,
                 PatientProfileId = source.PatientProfileId,
@@ -768,16 +855,16 @@ namespace Band_Aid
                 HealedAmount = healed,
                 CostAmount = cost
             };
-            if (Singleton<FikaServer>.Instantiated)
-                Singleton<FikaServer>.Instance.SendData(ref report, DeliveryMethod.ReliableOrdered, true);
-            else if (Singleton<FikaClient>.Instantiated)
-                Singleton<FikaClient>.Instance.SendData(ref report, DeliveryMethod.ReliableOrdered);
+            SendPacket(ref report, "TreatmentReport");
         }
 
-        private static void OnTreatmentReportReceived(BandAidTreatmentReportPacket packet)
+        private static void OnTreatmentReportReceived(BandAidTreatmentReportPacketV2 packet)
         {
             try
             {
+                // Corpo truncado: nao processar NEM retransmitir — o host relayaria lixo re-serializado.
+                if (!packet.Valid) return;
+
                 // Host relayeia reports que não são para ele (mesmo padrão dos demais)
                 if (Singleton<FikaServer>.Instantiated)
                 {
@@ -786,7 +873,7 @@ namespace Band_Aid
                     if (packet.DoctorProfileId != myId)
                     {
                         var relay = packet;
-                        Singleton<FikaServer>.Instance.SendData(ref relay, DeliveryMethod.ReliableOrdered, true);
+                        SendPacket(ref relay, "relay");
                     }
                 }
 
@@ -816,7 +903,7 @@ namespace Band_Aid
             }
             catch (Exception ex)
             {
-                Logger.LogError($"[BandAidNetworkHandler] Error in OnTreatmentReportReceived: {ex.Message}");
+                LogErrorThrottled("Error in OnTreatmentReportReceived", ex);
             }
         }
 
@@ -825,7 +912,7 @@ namespace Band_Aid
         /// local (paciente com ActiveHealthController que não é o MainPlayer).
         /// Retorna false se o paciente não é um bot local deste processo.
         /// </summary>
-        private static bool TryApplyFullTreatmentOnLocalBot(BandAidHealPacket packet)
+        private static bool TryApplyFullTreatmentOnLocalBot(BandAidHealPacketV2 packet)
         {
             try
             {
@@ -856,7 +943,7 @@ namespace Band_Aid
         /// um BOT local (paciente com ActiveHealthController que não é MainPlayer).
         /// Retorna false se o paciente não é um bot local deste processo.
         /// </summary>
-        private static bool TryAnswerForLocalBot(BandAidHealCheckPacket packet)
+        private static bool TryAnswerForLocalBot(BandAidHealCheckPacketV2 packet)
         {
             try
             {
@@ -885,7 +972,7 @@ namespace Band_Aid
                     catch { }
                 }
 
-                var response = new BandAidHealCheckResponsePacket
+                var response = new BandAidHealCheckResponsePacketV2
                 {
                     DoctorProfileId = packet.DoctorProfileId,
                     PatientProfileId = packet.PatientProfileId,
@@ -894,7 +981,7 @@ namespace Band_Aid
                     DenyReasonId = denyReasonId,
                     ExpectedBodyPart = (byte)expectedPart
                 };
-                Singleton<FikaServer>.Instance.SendData(ref response, DeliveryMethod.ReliableOrdered, true);
+                SendPacket(ref response, "HealCheckResponse/bot");
                 Logger.LogInfo($"HealCheck respondido EM NOME do bot {bot.Profile?.Nickname} | Approved={approved}");
                 return true;
             }
@@ -908,10 +995,13 @@ namespace Band_Aid
         /// <summary>
         /// Step 3: Médico recebe resposta do paciente.
         /// </summary>
-        private static void OnHealCheckResponseReceived(BandAidHealCheckResponsePacket packet)
+        private static void OnHealCheckResponseReceived(BandAidHealCheckResponsePacketV2 packet)
         {
             try
             {
+                // Corpo truncado: nao processar NEM retransmitir — o host relayaria lixo re-serializado.
+                if (!packet.Valid) return;
+
                 var mainPlayer = Singleton<GameWorld>.Instance?.MainPlayer;
 
                 // Host/Headless retransmite
@@ -921,7 +1011,7 @@ namespace Band_Aid
                     if (packet.PatientProfileId != myId) // Veio do paciente, retransmitir
                     {
                         var relay = packet;
-                        Singleton<FikaServer>.Instance.SendData(ref relay, DeliveryMethod.ReliableOrdered, true);
+                        SendPacket(ref relay, "relay");
                     }
                     if (mainPlayer == null) return;
                 }
@@ -936,7 +1026,7 @@ namespace Band_Aid
             }
             catch (Exception ex)
             {
-                Logger.LogError($"[BandAidNetworkHandler] Error in OnHealCheckResponseReceived: {ex.Message}");
+                LogErrorThrottled("Error in OnHealCheckResponseReceived", ex);
             }
         }
     }

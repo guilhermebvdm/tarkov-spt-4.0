@@ -1,4 +1,4 @@
-using BepInEx;
+﻿using BepInEx;
 using BepInEx.Configuration;
 using HarmonyLib;
 using System;
@@ -14,7 +14,13 @@ namespace TRLImmersiveCombatMedicine
     // TraumaBotFall.RegisterLayer (sem o atributo, a ordem de load do BepInEx 5 pode falso-negativar
     // PluginInfos com BigBrain instalado). GUID confirmado: bigbrain_full/BigBrainPlugin.cs:10.
     [BepInDependency("xyz.drakia.bigbrain", BepInDependency.DependencyFlags.SoftDependency)]
-    [BepInPlugin("com.trl.immersivecombatmedicine", "TRL-ImmersiveCombatMedicine", "1.10.0")]
+    // ref: item 013 / CR-01-01 — SoftDependency do Fika: FikaRevivePatch e BandAidNetworkHandler
+    // resolvem tipos do Fika por nome (AccessTools.TypeByName). Sem declarar a dependência a ordem
+    // de carga do BepInEx é indeterminada; se este plugin subir antes do Fika, os alvos não resolvem
+    // e os patches são dispensados em silêncio. Funcionava por acidente de ordenação até aqui.
+    // Padrão já usado no repo por DiscordRaidMap e MOAR-Client.
+    [BepInDependency("com.fika.core", BepInDependency.DependencyFlags.SoftDependency)]
+    [BepInPlugin("com.trl.immersivecombatmedicine", "TRL-ImmersiveCombatMedicine", "1.13.1")]
     public class TRLImmersiveCombatMedicinePlugin : BaseUnityPlugin
     {
         public static TRLImmersiveCombatMedicinePlugin Instance;
@@ -48,6 +54,7 @@ namespace TRLImmersiveCombatMedicine
         public static ConfigEntry<bool> ConfigConsumerArmsEffects;
         public static ConfigEntry<bool> ConfigConsumerStomachEffects;
         public static ConfigEntry<bool> ConfigConsumerBlackout2;
+        public static ConfigEntry<bool> ConfigPainVoice;      // item 019 — falas de dor
         public static ConfigEntry<bool> ConfigDebugTestConsumer;
 
         // --- Trauma 2.0 — Pernas (spec 003 §3) ---
@@ -81,7 +88,7 @@ namespace TRLImmersiveCombatMedicine
         {
             Instance = this;
             ModLogger = base.Logger;
-            ModLogger.LogInfo("TRL-ImmersiveCombatMedicine Plugin v1.10.0 carregado.");
+            ModLogger.LogInfo($"TRL-ImmersiveCombatMedicine Plugin v{Info.Metadata.Version} carregado.");
 
             // Inicializações combinadas
             ItemDatabase.Initialize();
@@ -164,6 +171,11 @@ namespace TRLImmersiveCombatMedicine
             // de entrada percentual (decisão de design da spec funcional 007).
             ConfigConsumerBlackout2 = Config.Bind("6. Trauma 2.0 (Consumidores)", "Blackout 2.0", true,
                 "Gatilho percentual de desmaio (item 007): tórax ≥50% da vida atual (piso 25 de dano absoluto) rola p=50%, imune sob analgésico; cabeça ≥25% da vida atual (piso 10) rola p=50%, p=25% sob analgésico. Governado pelo master \"Sistema de Desmaio\" — este toggle decide SÓ a lógica de entrada (percentual ou nenhuma); o limiar fixo legado NÃO volta mesmo desligado.");
+            // ref: item 019 — falas de dor por entrada/agravamento de estado. Fica na seção dos consumidores
+            // porque é o mesmo modelo: assina o barramento do motor e pode ser desligado sozinho sem afetar
+            // nenhum efeito de gameplay (é só áudio).
+            ConfigPainVoice = Config.Bind("6. Trauma 2.0 (Consumidores)", "Pain Voice", true,
+                "Falas de dor ao ferir membro (item 019): perna/braço FRATURADO usa a fala dedicada do jogo (a mesma que os bots usam nesse evento); membro zerado e estômago zerado usam o grito de agonia. Analgésico cala a dor e bots são sempre mudos — as duas regras são o comportamento do próprio jogo. Não fala em spawn ferido (é reconhecimento de estado, não ferimento novo) nem ao curar.");
             ConfigDebugTestConsumer = Config.Bind("6. Trauma 2.0 (Consumidores)", "Debug Test Consumer", false,
                 new ConfigDescription("Consumidor de teste SEM efeito de gameplay: registra-se ATIVO para as TRÊS regiões (pernas/braços/estômago), destravando o toast/i18n para validação (AC5 da spec funcional).",
                     null, advanced));
@@ -258,6 +270,11 @@ namespace TRLImmersiveCombatMedicine
             gameObject.AddComponent<TraumaFallCycleConsumer>(); // ciclo de queda (spec 004) — DEPOIS do TraumaEngine (ordem do 003)
             gameObject.AddComponent<TraumaArmsConsumer>(); // consumidor de braços (spec 005) — DEPOIS do TraumaEngine (replay vazio inofensivo — padrão 003)
             gameObject.AddComponent<TraumaStomachConsumer>(); // consumidor de estômago (spec 006) — DEPOIS do TraumaEngine (ordem do 003; replay vazio inofensivo)
+            // ref: item 019 — falas de dor: assinante puro do barramento, sem componente próprio (não tem
+            // estado por frame nem lifecycle de raid — o único dict é o anti-spam, já limpo por
+            // TraumaVoice.Clear() no sweep de raid-end do 004). DEPOIS dos consumidores: a ordem de
+            // assinatura não importa aqui porque a fala não interage com efeito de gameplay.
+            TraumaPainVoice.Subscribe();
             TraumaBotFall.RegisterLayer(); // camada BigBrain do hold de bot — gateada por Chainloader ("xyz.drakia.bigbrain")
 
             // Setup reflection para TrueTrauma
@@ -489,6 +506,12 @@ namespace TRLImmersiveCombatMedicine
 
         public static void OnRaidStartCleanup()
         {
+            // ref: item 020 — mede ANTES de limpar: qualquer coisa viva aqui é resíduo da raid
+            // anterior, e é o único ponto onde a contagem é confiável (a limpeza de fim de raid é
+            // uma cascata assíncrona por consumidor, medir no meio dela daria falso positivo).
+            // Sem esta linha, o teste do S1b só podia SUPOR que nada vazou.
+            TraumaPurge.Audit(TraumaPurge.PhaseBefore);
+
             // ref: CR-01-09 — ResetAll cobre TODOS os campos (a lista manual antiga
             // esquecia IsFainted e LegPenaltyTimers → prone/wake fantasma na raid seguinte)
             TraumaState.ResetAll();
@@ -497,6 +520,13 @@ namespace TRLImmersiveCombatMedicine
             // inicial estabelecedora; dispara de novo na chegada de transit (novo GameWorld)
             TraumaEngine.OnRaidStarted();
             TraumaState.Logger.LogInfo("TRL-ImmersiveCombatMedicine: Estado limpo para nova raid.");
+
+            // ref: item 020 — confirma que a limpeza desta entrada zerou o estado TRANSITÓRIO
+            // (desmaio, cooldowns, voz, áudio). Resíduo aqui é falha do mecanismo, não da raid
+            // anterior: loga como erro. O sweep estabelecedor do OnRaidStarted acima repovoa
+            // records/caps/tremor de propósito quando o spawn é ferido — estado legítimo, excluído
+            // desta medição (ver a nota de design 2 em TraumaPurge).
+            TraumaPurge.Audit(TraumaPurge.PhaseAfter);
         }
 
         private static bool? _isFikaInstalled;

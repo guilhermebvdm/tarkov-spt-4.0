@@ -26,6 +26,14 @@ internal static class PackMule
             return PerksConfig.PackMuleTankCarryBonus?.Value ?? 0f;
         }
 
+        // 079 — Light Frame (Caçador + Furtivo): limite de carga REDUZIDO. Bônus NEGATIVO → o Postfix aplica
+        // como TETO (não piso), senão um piso < 1 nunca morderia (o modifier vanilla é ≥ 1).
+        if (PerksConfig.LightFrameEnabled?.Value == true
+            && (SkillMultipliers.IsLocalClass("Hunter") || SkillMultipliers.IsLocalClass("Stealth")))
+        {
+            return PerksConfig.LightFrameCarryPenalty?.Value ?? 0f;
+        }
+
         return null;
     }
 }
@@ -65,10 +73,14 @@ internal class PackMulePatch : ModulePatch
                 return;
             }
 
-            var floor = 1f + bonus.Value;
-            if (__result < floor)
+            var target = 1f + bonus.Value;
+            if (bonus.Value >= 0f)
             {
-                __result = floor;   // piso (não soma)
+                if (__result < target) __result = target;   // PISO (Pack Mule: garante o +bônus, não soma)
+            }
+            else
+            {
+                if (__result > target) __result = target;   // TETO (079 Light Frame: reduz o limite de carga)
             }
         }
         catch (Exception ex)

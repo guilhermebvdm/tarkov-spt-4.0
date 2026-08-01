@@ -64,7 +64,7 @@ namespace SPT.Launcher.Helpers
             // Incrementar EXPECTED_CONFIG_VERSION a cada mudança estrutural no config.
             // Quando a versão salva < esperada, força re-save para limpar campos obsoletos
             // e gravar novos campos com defaults, sem perder dados do jogador.
-            const int EXPECTED_CONFIG_VERSION = 4; // v4: HomologMode (cenário homolog namespaced)
+            const int EXPECTED_CONFIG_VERSION = 5; // v5: item 030 — EnabledOptionalConfigs, ModsConfigsOnboardingDone, PendingApply, SeenItemIds
             if (settings.ConfigVersion < EXPECTED_CONFIG_VERSION)
             {
                 LogManager.Instance.Info($"[Settings] Config desatualizado (v{settings.ConfigVersion} → v{EXPECTED_CONFIG_VERSION}). Atualizando...");
@@ -274,6 +274,62 @@ namespace SPT.Launcher.Helpers
             SaveSettings();
         }
 
+        // === Item 030: tela "Mods e Configs" — eixo de configs de performance + onboarding ===
+
+        /// <summary>Item 030: itemId → enabled do eixo de configs de PERFORMANCE (espelha EnabledOptionals).</summary>
+        private Dictionary<string, bool> _enabledOptionalConfigs = new Dictionary<string, bool>();
+        public Dictionary<string, bool> EnabledOptionalConfigs
+        {
+            get => _enabledOptionalConfigs;
+            set => SetProperty(ref _enabledOptionalConfigs, value);
+        }
+
+        /// <summary>Item 030 (D-17/CA-030.16b): fonte de verdade do onboarding — o estado do disco não decide.</summary>
+        private bool _modsConfigsOnboardingDone;
+        public bool ModsConfigsOnboardingDone
+        {
+            get => _modsConfigsOnboardingDone;
+            set => SetProperty(ref _modsConfigsOnboardingDone, value);
+        }
+
+        /// <summary>
+        /// Item 030 (PA-01-05/CC-20): ids alternados pelo player que ainda NÃO foram aplicados. PERSISTIDO
+        /// de propósito (sem [JsonIgnore], ao contrário de PendingOptionalChanges): se o sync falhar ou o
+        /// launcher fechar no meio, a intenção sobrevive e o próximo sync retenta. Um id sai daqui só quando
+        /// a ação dele conclui com sucesso.
+        /// </summary>
+        private List<string> _pendingApply = new List<string>();
+        public List<string> PendingApply
+        {
+            get => _pendingApply;
+            set => SetProperty(ref _pendingApply, value);
+        }
+
+        /// <summary>
+        /// Item 030 (CA-030.11/D-6): ids já apresentados ao player. Item do servidor que não está aqui é
+        /// "novo" — ganha marcador até o player sair da tela.
+        /// </summary>
+        private List<string> _seenItemIds = new List<string>();
+        public List<string> SeenItemIds
+        {
+            get => _seenItemIds;
+            set => SetProperty(ref _seenItemIds, value);
+        }
+
+        /// <summary>Item 030: um item de config de performance está ligado?</summary>
+        public bool IsOptionalConfigEnabled(string itemId)
+        {
+            return !string.IsNullOrEmpty(itemId) && _enabledOptionalConfigs.TryGetValue(itemId, out bool enabled) && enabled;
+        }
+
+        /// <summary>Item 030: define o estado de um item de performance e salva.</summary>
+        public void SetOptionalConfigEnabled(string itemId, bool enabled)
+        {
+            if (string.IsNullOrEmpty(itemId)) return;
+            _enabledOptionalConfigs[itemId] = enabled;
+            SaveSettings();
+        }
+
         private LauncherAction _launcherStartGameAction;
         public LauncherAction LauncherStartGameAction
         {
@@ -323,18 +379,8 @@ namespace SPT.Launcher.Helpers
             set => SetProperty(ref _disableUpdates, value);
         }
 
-        /// <summary>
-        /// Item 008: when true, the file verification applies the server performance-config
-        /// overlay (Launcher-Updater/config-performance) on top of the normal sync — user
-        /// customizations (divergent from baseline) are never overwritten. Turning it off
-        /// makes the next verification restore the server defaults. Per machine (D5).
-        /// </summary>
-        private bool _usePerformanceConfigs;
-        public bool UsePerformanceConfigs
-        {
-            get => _usePerformanceConfigs;
-            set => SetProperty(ref _usePerformanceConfigs, value);
-        }
+        // Item 030 (D-12): UsePerformanceConfigs (overlay global do item 008) removido — a performance
+        // agora é por item na tela "Mods e Configs", como regra de pasta config-optional.
 
         /// <summary>
         /// Modo homolog: quando ligado, as rotas do mod TarkovRedLine ganham o prefixo "/homolog"

@@ -1,7 +1,10 @@
 using BepInEx.Logging;
 using Comfort.Common;
 using Fika.Core.Networking;
+using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 using EFT;
 using System.Linq;
@@ -11,16 +14,102 @@ namespace TRL_SpeakFromTarkov.Network
 {
     public class SftNetwork : MonoBehaviour
     {
-        private ManualLogSource Log => VoIPPlugin.Log;
+        private static ManualLogSource Log => VoIPPlugin.Log;
         private Dictionary<string, RemoteSpeaker> remoteSpeakers = new Dictionary<string, RemoteSpeaker>();
-        private Dictionary<byte, string> netIdToProfile = new Dictionary<byte, string>();
-        private Dictionary<string, byte> profileToNetId = new Dictionary<string, byte>();
-        private byte nextNetId = 1;
 
         public bool IsSessionActive { get; private set; } = false;
         public string LocalSessionId { get; private set; } = System.Guid.NewGuid().ToString();
         private int sampleRate;
         private int frameSize;
+
+        /// <summary>
+        /// Instância viva do componente. O callback de rede é ESTÁTICO (ver EnsurePacketsRegistered):
+        /// o delegate registrado no NetPacketProcessor do FIKA sobrevive à destruição do MonoBehaviour,
+        /// então capturar `this` deixaria um callback apontando para um objeto Unity destruído.
+        /// </summary>
+        private static SftNetwork _instance;
+
+        /// <summary>
+        /// Rastreamento por REFERÊNCIA de instância (não por flag bool): o FIKA destrói e recria o
+        /// IFikaNetworkManager em cada transição menu → lobby → raid, e a nova instância tem o
+        /// NetPacketProcessor vazio. Comparar a referência é o que detecta essa troca.
+        /// </summary>
+        private static IFikaNetworkManager _lastRegisteredManager;
+
+        /// <summary>Frame de áudio aguardando envio na main thread.</summary>
+        private struct PendingAudio
+        {
+            public byte[] Data;
+            public byte Channel;
+            public float VoiceLevel;
+        }
+
+        /// <summary>
+        /// Fila de saída. O encoder Opus roda numa thread de captura em background, mas
+        /// FikaClient/FikaServer serializam TODOS os envios num único NetDataWriter de instância
+        /// (`FikaClient._dataWriter`) sem qualquer lock. Chamar SendData da thread de captura
+        /// enquanto a main thread envia PlayerState corrompe esse buffer compartilhado e coloca
+        /// um datagrama malformado na rede — origem real do
+        /// `ParseException: Undefined packet in NetDataReader` e do desync de posição.
+        /// Por isso a thread de captura apenas ENFILEIRA; quem transmite é o Update (main thread).
+        /// </summary>
+        private readonly ConcurrentQueue<PendingAudio> sendQueue = new ConcurrentQueue<PendingAudio>();
+
+        /// <summary>~500 ms de áudio a 20 ms/frame. Dimensionado para atravessar um hitch típico do
+        /// Tarkov (entrada de jogador, carregamento) sem cortar a fala: só o backlog além disso é
+        /// descartado, frame mais antigo primeiro. Em regime estacionário a fila só satura abaixo
+        /// de ~2 FPS.</summary>
+        private const int MaxQueuedFrames = 25;
+
+        // Throttle de log: os catch de rede ficam em caminhos de ~50 Hz. Sem limite, uma falha
+        // sistemática (peer com formato divergente) despejaria dezenas de stack traces por segundo
+        // no console do BepInEx, causando hitching e escondendo o erro real.
+        private const int ErrorLogIntervalMs = 5000;
+        private static int _lastErrorLogTick;
+        private static int _suppressedErrors;
+
+        /// <summary>
+        /// Tipos de exceção que já renderam stack trace completo. A chave é o TIPO (e não um
+        /// booleano global): uma falha diferente que apareça raids depois ainda precisa do trace,
+        /// caso contrário o throttle esconderia justamente o problema novo.
+        /// </summary>
+        private static readonly HashSet<Type> _tracedExceptionTypes = new HashSet<Type>();
+
+        /// <summary>
+        /// Loga a exceção completa na primeira ocorrência de cada TIPO e, depois, no máximo uma vez
+        /// a cada 5 s com a contagem do que foi suprimido. Usa Environment.TickCount (e não
+        /// Time.time) porque também é chamado da thread de captura, onde a API da Unity não pode
+        /// ser tocada.
+        /// </summary>
+        internal static void LogErrorThrottled(string context, Exception ex)
+        {
+            var now = Environment.TickCount;
+
+            bool firstOfType;
+            lock (_tracedExceptionTypes)
+            {
+                firstOfType = ex != null && _tracedExceptionTypes.Add(ex.GetType());
+            }
+
+            if (firstOfType)
+            {
+                _lastErrorLogTick = now;
+                Log?.LogError($"[SFT] {context}: {ex}");
+                return;
+            }
+
+            // Subtração de ints trata o wrap-around de TickCount corretamente.
+            if (now - _lastErrorLogTick < ErrorLogIntervalMs)
+            {
+                Interlocked.Increment(ref _suppressedErrors);
+                return;
+            }
+
+            _lastErrorLogTick = now;
+            var suppressed = Interlocked.Exchange(ref _suppressedErrors, 0);
+            Log?.LogError($"[SFT] {context}: {ex?.Message}"
+                + (suppressed > 0 ? $" (+{suppressed} falhas suprimidas nos últimos {ErrorLogIntervalMs / 1000}s)" : string.Empty));
+        }
 
         public void Initialize(int sampleRate, int frameSize)
         {
@@ -28,174 +117,215 @@ namespace TRL_SpeakFromTarkov.Network
             this.frameSize = frameSize;
         }
 
-        private IFikaNetworkManager registeredManagerInstance = null;
+        void Awake()
+        {
+            _instance = this;
+        }
 
         void Update()
         {
-            EnsurePacketRegistered();
+            EnsurePacketsRegistered();
+            DrainSendQueue();
         }
 
-        public void EnsurePacketRegistered()
+        /// <summary>
+        /// Garante que o pacote esteja registrado na instância ATIVA do IFikaNetworkManager.
+        /// Chamado no Update do plugin, no Update deste componente e antes de cada envio.
+        /// </summary>
+        public static void EnsurePacketsRegistered()
         {
-            if (Singleton<IFikaNetworkManager>.Instantiated)
+            if (!Singleton<IFikaNetworkManager>.Instantiated)
             {
-                var currentManager = Singleton<IFikaNetworkManager>.Instance;
-                if (registeredManagerInstance != currentManager)
-                {
-                    try
-                    {
-                        currentManager.RegisterPacket<SftAudioPacket>(OnReceiveVoipData);
-                        currentManager.RegisterPacket<SftHandshakePacket>(OnReceiveHandshake);
-                        registeredManagerInstance = currentManager;
-                        Log.LogInfo("[SFT] SftAudioPacket e SftHandshakePacket registrados com sucesso no FIKA.");
-                    }
-                    catch (System.Exception ex)
-                    {
-                        Log.LogWarning($"[SFT] Aviso ao registrar pacotes no FIKA: {ex.Message}");
-                    }
-                }
+                _lastRegisteredManager = null;
+                return;
             }
-        }
 
-        private byte GetOrCreateNetId(string profileId)
-        {
-            if (profileToNetId.TryGetValue(profileId, out byte id))
-                return id;
+            var currentManager = Singleton<IFikaNetworkManager>.Instance;
+            if (currentManager == null) return;
+            if (_lastRegisteredManager == currentManager) return;
 
-            id = nextNetId++;
-            if (nextNetId == 0) nextNetId = 1; // Wrap seguro de 1 a 255
-
-            profileToNetId[profileId] = id;
-            netIdToProfile[id] = profileId;
-
-            // Transmite Handshake confiável (Channel 0 Reliable) para notificar todos os pares
-            SftHandshakePacket handshake = new SftHandshakePacket
+            try
             {
-                PlayerNetId = id,
-                ProfileId = profileId
-            };
-            if (Singleton<IFikaNetworkManager>.Instantiated)
-            {
-                Singleton<IFikaNetworkManager>.Instance.SendData(ref handshake, Fika.Core.Networking.LiteNetLib.DeliveryMethod.ReliableOrdered, broadcast: true);
+                currentManager.RegisterPacket<SftAudioPacketV2>(OnReceiveVoipDataV2);
+                // Formato legado (≤1.3.0): registrado só para RECEPÇÃO, para continuar ouvindo
+                // peers ainda não atualizados. Nunca é enviado.
+                currentManager.RegisterPacket<SftAudioPacket>(OnReceiveVoipDataLegacy);
+
+                _lastRegisteredManager = currentManager;
+                Log?.LogInfo($"[SFT] SftAudioPacketV2 (+legado) registrado no NetPacketProcessor do FIKA ({currentManager.GetType().Name}).");
             }
-            return id;
-        }
-
-        private void OnReceiveHandshake(SftHandshakePacket packet)
-        {
-            if (packet.PlayerNetId > 0 && !string.IsNullOrEmpty(packet.ProfileId))
+            catch (Exception ex)
             {
-                netIdToProfile[packet.PlayerNetId] = packet.ProfileId;
-                profileToNetId[packet.ProfileId] = packet.PlayerNetId;
+                Log?.LogError($"[SFT] Falha ao registrar pacotes no FIKA: {ex}");
             }
         }
 
         public void InitFikaSession()
         {
-            EnsurePacketRegistered();
+            EnsurePacketsRegistered();
             IsSessionActive = true;
-            Log.LogInfo("[SFT] SftNetwork sessão ativada no FIKA.");
+            Log?.LogInfo("[SFT] SftNetwork sessão ativada no FIKA.");
         }
 
+        /// <summary>
+        /// Chamado da THREAD DE CAPTURA. Faz só o mínimo thread-safe: valida e enfileira.
+        /// Nada aqui pode tocar API da Unity, do EFT ou do FIKA — ver comentário de sendQueue.
+        /// </summary>
         public void Broadcast(byte[] opusData, byte channel, float voiceLevel = 0f)
         {
             try
             {
-                EnsurePacketRegistered();
-                if (!IsSessionActive || !Singleton<IFikaNetworkManager>.Instantiated) return;
+                if (!IsSessionActive) return;
                 if (VoIPPlugin.EnableMod != null && !VoIPPlugin.EnableMod.Value) return;
+                if (opusData == null || opusData.Length == 0) return;
 
+                // Nível de áudio desprezível: não transmite silêncio (evita flood no LiteNetLib).
                 if (voiceLevel < 0.002f) return;
 
-                string myProfileId = LocalSessionId;
-                if (Singleton<GameWorld>.Instantiated && Singleton<GameWorld>.Instance.MainPlayer != null)
-                {
-                    string pId = Singleton<GameWorld>.Instance.MainPlayer.ProfileId;
-                    if (!string.IsNullOrEmpty(pId)) myProfileId = pId;
-                }
+                // Descarta o frame mais antigo se a main thread não estiver drenando.
+                while (sendQueue.Count >= MaxQueuedFrames && sendQueue.TryDequeue(out _)) { }
 
-                byte netId = GetOrCreateNetId(myProfileId);
-
-                SftAudioPacket packet = new SftAudioPacket
+                sendQueue.Enqueue(new PendingAudio
                 {
-                    PlayerNetId = netId,
+                    Data = opusData,
                     Channel = channel,
-                    AudioData = opusData,
                     VoiceLevel = voiceLevel
-                };
-
-                Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, Fika.Core.Networking.LiteNetLib.DeliveryMethod.Unreliable, broadcast: true);
+                });
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
-                Log?.LogError($"[SFT] Erro ao enviar Broadcast de áudio: {ex.Message}");
+                LogErrorThrottled("Erro ao enfileirar áudio para envio", ex);
             }
         }
 
-        private void OnReceiveVoipData(SftAudioPacket packet)
+        /// <summary>Transmite os frames enfileirados. SEMPRE na main thread (chamado do Update).</summary>
+        private void DrainSendQueue()
+        {
+            if (sendQueue.IsEmpty) return;
+
+            if (!IsSessionActive || !Singleton<IFikaNetworkManager>.Instantiated)
+            {
+                while (sendQueue.TryDequeue(out _)) { }
+                return;
+            }
+
+            string myProfileId = LocalSessionId;
+            if (Singleton<GameWorld>.Instantiated && Singleton<GameWorld>.Instance.MainPlayer != null)
+            {
+                string pId = Singleton<GameWorld>.Instance.MainPlayer.ProfileId;
+                if (!string.IsNullOrEmpty(pId)) myProfileId = pId;
+            }
+
+            // Fora do laço: o registro depende só da instância do manager, não do frame de áudio.
+            EnsurePacketsRegistered();
+
+            while (sendQueue.TryDequeue(out var pending))
+            {
+                try
+                {
+                    var packet = new SftAudioPacketV2
+                    {
+                        ProfileId = myProfileId,
+                        Channel = pending.Channel,
+                        AudioData = pending.Data,
+                        VoiceLevel = pending.VoiceLevel
+                    };
+                    Singleton<IFikaNetworkManager>.Instance.SendData(
+                        ref packet, Fika.Core.Networking.LiteNetLib.DeliveryMethod.Unreliable, broadcast: true);
+                }
+                catch (Exception ex)
+                {
+                    LogErrorThrottled("Erro ao transmitir frame de áudio", ex);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Airbag de recepção: o corpo inteiro é protegido. Uma exceção que escape daqui sobe pelo
+        /// ReadAllPackets do LiteNetLib e descarta o restante do lote de pacotes daquele frame —
+        /// inclusive os dos outros mods e os de movimento do FIKA.
+        /// </summary>
+        private static void OnReceiveVoipDataV2(SftAudioPacketV2 packet)
+        {
+            DispatchVoipPacket(packet.ProfileId, packet.Channel, packet.AudioData, packet.VoiceLevel,
+                nameof(OnReceiveVoipDataV2));
+        }
+
+        /// <summary>Recepção do formato legado (peer ≤ 1.3.0). Mesmo processamento do V2.</summary>
+        private static void OnReceiveVoipDataLegacy(SftAudioPacket packet)
+        {
+            DispatchVoipPacket(packet.ProfileId, packet.Channel, packet.AudioData, packet.VoiceLevel,
+                nameof(OnReceiveVoipDataLegacy));
+        }
+
+        private static void DispatchVoipPacket(string profileId, byte channel, byte[] audioData, float voiceLevel, string context)
         {
             try
             {
                 if (!Singleton<GameWorld>.Instantiated) return;
                 if (VoIPPlugin.EnableMod != null && !VoIPPlugin.EnableMod.Value) return;
-                if (packet.Magic != SftAudioPacket.MAGIC_HEADER) return;
-                if (packet.AudioData == null || packet.AudioData.Length == 0) return;
 
-                // Resolve o ProfileId pelo PlayerNetId
-                string senderProfileId = null;
-                if (packet.PlayerNetId > 0)
-                {
-                    netIdToProfile.TryGetValue(packet.PlayerNetId, out senderProfileId);
-                }
+                // Headless não reproduz áudio: desserializar já manteve o stream alinhado e o relay
+                // para os demais peers é feito pelo próprio FIKA (FikaServer.OnNetworkReceive
+                // reencaminha os bytes crus antes de parsear). Criar RemoteSpeaker aqui seria
+                // GameObject + AudioSource + decoder Opus puro desperdício no processo que já tem
+                // histórico de OOM neste repo.
+                if (Fika.Core.Main.Utils.FikaBackendUtils.IsHeadless) return;
 
-                if (string.IsNullOrEmpty(senderProfileId)) return;
+                var self = _instance;
+                if (self == null) return;
 
-                // Rejeita pacotes próprios (Eco loopback local)
-                if (senderProfileId == LocalSessionId) return;
-                if (Singleton<GameWorld>.Instantiated && Singleton<GameWorld>.Instance.MainPlayer != null)
-                {
-                    if (senderProfileId == Singleton<GameWorld>.Instance.MainPlayer.ProfileId)
-                        return;
-                }
-
-                if (Core.VoipController.Instance != null && packet.Channel != Core.VoipController.Instance.CurrentChannel)
-                    return;
-
-                RemoteSpeaker speaker;
-                if (!remoteSpeakers.TryGetValue(senderProfileId, out speaker) || speaker == null)
-                {
-                    speaker = CreateRemoteSpeaker(senderProfileId);
-                    if (speaker == null) return;
-                    remoteSpeakers[senderProfileId] = speaker;
-                }
-
-                // Atualiza ancoragem do alto-falante 3D na cabeça/corpo do jogador
-                if (Singleton<GameWorld>.Instantiated)
-                {
-                    var player = Singleton<GameWorld>.Instance.AllAlivePlayersList?.FirstOrDefault(p => p != null && p.ProfileId == senderProfileId);
-                    if (player != null && player.Transform != null)
-                    {
-                        Transform targetBone = player.PlayerBones != null && player.PlayerBones.Head != null ? player.PlayerBones.Head.Original : player.Transform.Original;
-                        if (speaker.transform.parent != targetBone)
-                        {
-                            speaker.transform.SetParent(targetBone, false);
-                            speaker.transform.localPosition = targetBone == player.Transform.Original ? Vector3.up * 1.6f : Vector3.zero;
-                        }
-                        speaker.SetEmergency2DMode(false);
-                    }
-                    else
-                    {
-                        // Em desync posicional ou avatar ausente, ativa o modo 2D de emergência para manter o áudio audível
-                        speaker.SetEmergency2DMode(true);
-                    }
-                }
-
-                speaker.EnqueuePacket(packet.AudioData, packet.VoiceLevel);
+                self.HandleVoipPacket(profileId, channel, audioData, voiceLevel);
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
-                Log?.LogError($"[SFT] Erro no callback OnReceiveVoipData: {ex.Message}");
+                LogErrorThrottled($"Erro no callback {context}", ex);
             }
+        }
+
+        private void HandleVoipPacket(string profileId, byte channel, byte[] audioData, float voiceLevel)
+        {
+            if (audioData == null || audioData.Length == 0) return;
+            if (string.IsNullOrEmpty(profileId)) return;
+
+            // Teto defensivo: o encoder local nunca passa de 1275 bytes. Payload maior veio de peer
+            // bugado ou hostil — não entregar ao decoder Opus.
+            if (audioData.Length > SftAudioPacketV2.MaxAudioBytes) return;
+
+            // Rejeita pacotes próprios (eco loopback local)
+            if (profileId == LocalSessionId) return;
+
+            var gameWorld = Singleton<GameWorld>.Instance;
+            if (gameWorld == null) return;
+
+            if (gameWorld.MainPlayer != null && profileId == gameWorld.MainPlayer.ProfileId) return;
+
+            if (Core.VoipController.Instance != null && channel != Core.VoipController.Instance.CurrentChannel)
+                return;
+
+            RemoteSpeaker speaker;
+            if (!remoteSpeakers.TryGetValue(profileId, out speaker) || speaker == null)
+            {
+                speaker = CreateRemoteSpeaker(profileId);
+                if (speaker == null) return;
+                remoteSpeakers[profileId] = speaker;
+            }
+
+            // Ancoragem do alto-falante 3D na cabeça/corpo do jogador
+            var player = gameWorld.AllAlivePlayersList?.FirstOrDefault(p => p != null && p.ProfileId == profileId);
+            if (player != null)
+            {
+                Transform targetBone = player.PlayerBones != null && player.PlayerBones.Head != null
+                    ? player.PlayerBones.Head.Original
+                    : player.Transform.Original;
+                if (speaker.transform.parent != targetBone)
+                {
+                    speaker.transform.SetParent(targetBone, false);
+                    speaker.transform.localPosition = targetBone == player.Transform.Original ? Vector3.up * 1.6f : Vector3.zero;
+                }
+            }
+
+            speaker.EnqueuePacket(audioData, voiceLevel);
         }
 
         private RemoteSpeaker CreateRemoteSpeaker(string profileId)
@@ -210,19 +340,26 @@ namespace TRL_SpeakFromTarkov.Network
         {
             IsSessionActive = false;
 
+            // NUNCA chamamos UnregisterPacket<SftAudioPacket>() aqui!
+            // Remover a subscrição do NetPacketProcessor compartilhado do FIKA faz com que pacotes
+            // ainda em voo (ou retidos em buffer) cheguem sem handler, lançando
+            // 'ParseException: Undefined packet in NetDataReader' e interrompendo a leitura de rede
+            // do FIKA — o que causa desync total de movimento/posição dos jogadores.
+            // O gate de "fora de raid" é feito por guard clause no callback, não por desregistro.
+
+            while (sendQueue.TryDequeue(out _)) { }
+
             foreach (var kvp in remoteSpeakers)
             {
                 if (kvp.Value != null)
                     Destroy(kvp.Value.gameObject);
             }
             remoteSpeakers.Clear();
-            netIdToProfile.Clear();
-            profileToNetId.Clear();
-            nextNetId = 1;
         }
 
         void OnDestroy()
         {
+            if (_instance == this) _instance = null;
             StopSession();
         }
     }

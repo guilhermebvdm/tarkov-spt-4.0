@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
 using EFT;
@@ -27,6 +27,9 @@ namespace TRLImmersiveCombatMedicine.Trauma
         /// instante permitido. Limpo via ClearPronePending na transição p/ Released e no Disengage.</summary>
         private static readonly Dictionary<Player, float> _pronePending = new Dictionary<Player, float>();
         private static readonly List<Player> _proneScratch = new List<Player>();
+
+        /// <summary>ref: item 020 — resíduo desta primitiva para a auditoria de fronteira de raid.</summary>
+        internal static int ResidualCount => _deferred.Count + _botRestores.Count + _pronePending.Count;
 
         private static int _lastPumpFrame = -1; // PA-01-12: pump idempotente por FRAME, agnóstico ao chamador (003 e 004 chamam)
 
