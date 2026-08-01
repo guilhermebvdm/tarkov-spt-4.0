@@ -729,9 +729,13 @@ namespace TRLDynamicSpawn.Components
                     IsGeneratingDynamicWave = true;
                     try
                     {
-                        List<ISpawnPoint> pointsToUse = (i > 0 && groupAnchorPoints != null && groupAnchorPoints.Count > 0) ? new List<ISpawnPoint>(groupAnchorPoints) : null;
+                        List<ISpawnPoint> pointsToUse = (i > 0 && groupAnchorPoints != null && groupAnchorPoints.Count > 0) 
+                            ? new List<ISpawnPoint>(groupAnchorPoints) 
+                            : new List<ISpawnPoint>();
+
                         _botsController.BotSpawner.TryToSpawnInZoneAndDelay(zone, task.Result, false, true, pointsToUse, true);
-                        if (i == 0 && pointsToUse != null && pointsToUse.Count > 0)
+                        
+                        if (i == 0 && pointsToUse.Count > 0)
                         {
                             groupAnchorPoints = new List<ISpawnPoint>(pointsToUse);
                         }

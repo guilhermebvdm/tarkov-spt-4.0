@@ -599,7 +599,8 @@ namespace TRLDynamicSpawn.Patches
                 if (chosenList != null && chosenList.Count > 0)
                 {
                     var selectedPoint = chosenList[UnityEngine.Random.Range(0, chosenList.Count)];
-                    pointsToSpawn = new List<ISpawnPoint> { selectedPoint };
+                    if (pointsToSpawn == null) pointsToSpawn = new List<ISpawnPoint>();
+                    pointsToSpawn.Add(selectedPoint);
                 }
                 else
                 {
