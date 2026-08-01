@@ -1,0 +1,66 @@
+/* ============================================================================
+ * TRL DESIGN SYSTEM — utilities.css                                    v1.0.0
+ * Deliberately minimal. If you need more than these, the component you
+ * are building probably belongs in components.css instead.
+ * ========================================================================== */
+
+/* ── Numbers & type ─────────────────────────────────────────────────────── */
+.trl-u-num {
+  font-family: var(--trl-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.trl-u-mono   { font-family: var(--trl-font-mono); }
+.trl-u-muted  { color: var(--trl-fg-muted); }
+.trl-u-faint  { color: var(--trl-fg-faint); }
+.trl-u-accent { color: var(--trl-accent); }
+.trl-u-up     { color: var(--trl-success); }
+.trl-u-down   { color: var(--trl-danger); }
+
+.trl-u-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Layout helpers ─────────────────────────────────────────────────────── */
+.trl-u-flex {
+  display: flex;
+  align-items: center;
+}
+
+.trl-u-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.trl-u-gap-1 { gap: var(--trl-space-1); }
+.trl-u-gap-2 { gap: var(--trl-space-2); }
+.trl-u-gap-3 { gap: var(--trl-space-3); }
+.trl-u-gap-4 { gap: var(--trl-space-4); }
+
+.trl-u-mt-1 { margin-top: var(--trl-space-1); }
+.trl-u-mt-2 { margin-top: var(--trl-space-2); }
+.trl-u-mt-3 { margin-top: var(--trl-space-3); }
+.trl-u-mt-4 { margin-top: var(--trl-space-4); }
+
+.trl-u-mb-1 { margin-bottom: var(--trl-space-1); }
+.trl-u-mb-2 { margin-bottom: var(--trl-space-2); }
+.trl-u-mb-3 { margin-bottom: var(--trl-space-3); }
+.trl-u-mb-4 { margin-bottom: var(--trl-space-4); }
+
+.trl-u-grow   { flex: 1; min-width: 0; }
+.trl-u-scroll { overflow: auto; }
+
+/* ── Accessibility ──────────────────────────────────────────────────────── */
+.trl-u-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}

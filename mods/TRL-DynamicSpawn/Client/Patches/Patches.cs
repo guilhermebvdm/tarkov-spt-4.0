@@ -368,75 +368,6 @@ namespace TRLDynamicSpawn.Patches
         }
     }
 
-    public class MapCullingPatch : ModulePatch
-    {
-        protected override MethodBase GetTargetMethod()
-        {
-            return AccessTools.Method(
-                typeof(SpawnPointManagerClass),
-                nameof(SpawnPointManagerClass.smethod_1)
-            );
-        }
-
-        [PatchPostfix]
-        static void Postfix(ref SpawnPointMarker[] __result)
-        {
-            if (__result == null || __result.Length == 0) return;
-
-            try
-            {
-                string json = SPT.Common.Http.RequestHandler.GetJson("/trldynamicspawn/getConfig");
-                if (string.IsNullOrEmpty(json)) return;
-
-                var cfg = Newtonsoft.Json.JsonConvert.DeserializeObject<TRLDynamicSpawn.Models.TRLConfig>(json);
-                if (cfg == null || !cfg.EnableMapOverlapCulling) return;
-                
-                double cullingDist = cfg.GlobalAntiOverlapDistance;
-                if (cullingDist <= 0) return;
-
-                List<SpawnPointMarker> validMarkers = new List<SpawnPointMarker>();
-                int removed = 0;
-
-                foreach (var marker in __result)
-                {
-                    if (marker == null || marker.SpawnPoint == null) continue;
-
-                    bool tooClose = false;
-                    foreach (var valid in validMarkers)
-                    {
-                        if (Vector3.Distance(marker.SpawnPoint.Position, valid.SpawnPoint.Position) < cullingDist)
-                        {
-                            tooClose = true;
-                            break;
-                        }
-                    }
-
-                    if (!tooClose)
-                    {
-                        validMarkers.Add(marker);
-                    }
-                    else
-                    {
-                        removed++;
-                    }
-                }
-
-                if (removed > 0)
-                {
-                    __result = validMarkers.ToArray();
-                    if (TRLDynamicSpawn.Helpers.Settings.enableDebugLogs.Value)
-                    {
-                        Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] MapCulling removed {removed} overlapping spawn points (Min Dist: {cullingDist}m).");
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Plugin.LogSource.LogError($"[TRL-DynamicSpawn] Error in MapCullingPatch: {ex.Message}");
-            }
-        }
-    }
-
     public class DisableVanillaWavesPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
@@ -447,20 +378,24 @@ namespace TRLDynamicSpawn.Patches
         [PatchPrefix]
         private static bool PatchPrefix(BotWaveDataClass wave, ref System.Threading.Tasks.Task __result)
         {
-            if (TRLDynamicSpawn.Components.DynamicSpawnManager.IsWarmupActive) return true; // Let vanilla run during warmup!
             if (TRLDynamicSpawn.Components.DynamicSpawnManager.IsGeneratingDynamicWave) return true; // Let our wave run!
             
-            if (wave != null && (wave.WildSpawnType == WildSpawnType.pmcUSEC || wave.WildSpawnType == WildSpawnType.pmcBEAR))
+            // Se for Scav comum ou PMC do vanilla, bloqueia 100% (inclusive no 1º minuto) para o DynamicSpawn controlar
+            if (wave != null && (wave.WildSpawnType == WildSpawnType.assault || 
+                                wave.WildSpawnType == WildSpawnType.cursedAssault || 
+                                wave.WildSpawnType == WildSpawnType.pmcUSEC || 
+                                wave.WildSpawnType == WildSpawnType.pmcBEAR))
             {
-                return true; // Let any PMC wave pass!
+                if (TRLDynamicSpawn.Helpers.Settings.enableDebugLogs.Value)
+                {
+                    Plugin.LogSource.LogInfo($"[TRLDynamicSpawn] Blocked Vanilla Normal Wave ({wave.WildSpawnType}) to give 100% control to DynamicSpawn.");
+                }
+                __result = System.Threading.Tasks.Task.CompletedTask;
+                return false;
             }
 
-            if (TRLDynamicSpawn.Helpers.Settings.enableDebugLogs.Value)
-            {
-                Plugin.LogSource.LogInfo("[TRLDynamicSpawn] Blocked Vanilla Normal Wave to give 100% control to DynamicSpawn.");
-            }
-            __result = System.Threading.Tasks.Task.CompletedTask;
-            return false;
+            // Permite Scav Snipers (marksman), Raiders, Rogues e outros tipos nativos passarem livremente
+            return true;
         }
     }
 
@@ -478,10 +413,11 @@ namespace TRLDynamicSpawn.Patches
 
             string name = wave.BossName.ToLower();
 
-            // Bloqueia PMCs e Scavs normais do vanilla para que o nosso mod controle a proporção de horda exclusiva
-            if (name == "pmcbear" || name == "pmcusec" || 
-                name == "sptbear" || name == "sptusec" || 
-                name == "assault" || name == "savage")
+            // Bloqueia PMCs e Scavs normais (incluindo cursedassault, assaultgroup, etc. do Ground Zero)
+            bool isPmcOrScav = (name.Contains("assault") || name.Contains("savage") || name.Contains("scav") || name.Contains("bear") || name.Contains("usec"))
+                               && name != "pmcbot" && name != "exusec";
+
+            if (isPmcOrScav)
             {
                 if (TRLDynamicSpawn.Helpers.Settings.enableDebugLogs.Value)
                 {
@@ -490,16 +426,13 @@ namespace TRLDynamicSpawn.Patches
                 return false;
             }
 
-            // Permite todos os outros bosses reais, elites, snipers, raiders, rogues e cultistas nativos
+            // Permite todos os outros bosses reais, elites, snipers, raiders (pmcbot), rogues (exusec) e cultistas nativos
             return true;
         }
     }
 
     public class TryToSpawnInZoneAndDelayPatch : ModulePatch
     {
-        private static Queue<Vector3> _lastSpawnPositions = new Queue<Vector3>();
-        private static int _maxHistorySpawnPoint = 6;
-
         protected override MethodBase GetTargetMethod()
         {
             return AccessTools.Method(
@@ -511,6 +444,25 @@ namespace TRLDynamicSpawn.Patches
         [PatchPrefix]
         private static bool PatchPrefix(BotSpawner __instance, BotZone botZone, BotCreationDataClass data, bool withCheckMinMax, bool newWave, ref List<ISpawnPoint> pointsToSpawn, bool forcedSpawn = false)
         {
+            // Bloqueio cirúrgico de Scavs comuns (assault / cursedAssault) vindos do motor nativo do jogo (vanilla/SPT)
+            if (!TRLDynamicSpawn.Components.DynamicSpawnManager.IsGeneratingDynamicWave)
+            {
+                WildSpawnType role = WildSpawnType.assault;
+                if (data != null && data.Profiles != null && data.Profiles.Count > 0 && data.Profiles[0] != null && data.Profiles[0].Info != null && data.Profiles[0].Info.Settings != null)
+                {
+                    role = data.Profiles[0].Info.Settings.Role;
+                }
+
+                if (role == WildSpawnType.assault || role == WildSpawnType.cursedAssault)
+                {
+                    if (TRLDynamicSpawn.Helpers.Settings.enableDebugLogs.Value)
+                    {
+                        Plugin.LogSource.LogInfo($"[TRLDynamicSpawn] Blocked Vanilla Assault Scav Spawn ({role}) from native game engine.");
+                    }
+                    return false;
+                }
+            }
+
             if (pointsToSpawn != null && pointsToSpawn.Count > 0) return true;
 
             try
@@ -546,10 +498,6 @@ namespace TRLDynamicSpawn.Patches
                 var noLosPoints = new List<ISpawnPoint>();
                 var noBubblePoints = new List<ISpawnPoint>();
 
-                var fallbackStrictPoints = new List<ISpawnPoint>();
-                var fallbackNoLosPoints = new List<ISpawnPoint>();
-                var fallbackNoBubblePoints = new List<ISpawnPoint>();
-
                 float maxDist = 300f;
                 bool isBubbleEnabled = TRLDynamicSpawn.Helpers.Settings.enableSpawnBubble.Value;
 
@@ -562,16 +510,6 @@ namespace TRLDynamicSpawn.Patches
                 foreach (var checkPoint in allPoints)
                 {
                     if (checkPoint == null) continue;
-
-                    bool tooCloseToRecent = false;
-                    foreach (var recentPos in _lastSpawnPositions)
-                    {
-                        if (Vector3.Distance(checkPoint.Position, recentPos) < 50f)
-                        {
-                            tooCloseToRecent = true;
-                            break;
-                        }
-                    }
 
                     bool insideBubble = true;
                     bool outsideSafe = true;
@@ -643,47 +581,26 @@ namespace TRLDynamicSpawn.Patches
 
                     if (outsideSafe)
                     {
-                        if (tooCloseToRecent)
-                        {
-                            if (insideBubble && !hasLoS) fallbackStrictPoints.Add(checkPoint);
-                            if (insideBubble) fallbackNoLosPoints.Add(checkPoint);
-                            if (!hasLoS) fallbackNoBubblePoints.Add(checkPoint);
-                        }
-                        else
-                        {
-                            if (insideBubble && !hasLoS) strictPoints.Add(checkPoint);
-                            if (insideBubble) noLosPoints.Add(checkPoint);
-                            if (!hasLoS) noBubblePoints.Add(checkPoint);
-                        }
+                        if (insideBubble && !hasLoS) strictPoints.Add(checkPoint);
+                        if (insideBubble) noLosPoints.Add(checkPoint);
+                        if (!hasLoS) noBubblePoints.Add(checkPoint);
                     }
                 }
 
                 List<ISpawnPoint> chosenList = null;
                 if (strictPoints.Count > 0) chosenList = strictPoints;
-                else if (fallbackStrictPoints.Count > 0) chosenList = fallbackStrictPoints;
                 else if (noLosPoints.Count > 0) chosenList = noLosPoints;
-                else if (fallbackNoLosPoints.Count > 0) chosenList = fallbackNoLosPoints;
-                // MASTER FALLBACK: Acionado APENAS em última instância se nenhum ponto na bolha funcionar!
                 else if (noBubblePoints.Count > 0)
                 {
-                    Plugin.LogSource.LogWarning($"[TRL-DynamicSpawn] MASTER FALLBACK LEVEL 1: Spawning outside bubble in {botZone.NameZone} to prevent spawn drop.");
+                    Plugin.LogSource.LogWarning($"[TRL-DynamicSpawn] MASTER FALLBACK: Spawning outside bubble in {botZone.NameZone} to prevent spawn drop.");
                     chosenList = noBubblePoints;
-                }
-                else if (fallbackNoBubblePoints.Count > 0)
-                {
-                    Plugin.LogSource.LogWarning($"[TRL-DynamicSpawn] MASTER FALLBACK LEVEL 2: Spawning outside bubble with history in {botZone.NameZone}.");
-                    chosenList = fallbackNoBubblePoints;
                 }
 
                 if (chosenList != null && chosenList.Count > 0)
                 {
                     var selectedPoint = chosenList[UnityEngine.Random.Range(0, chosenList.Count)];
-                    pointsToSpawn = new List<ISpawnPoint> { selectedPoint };
-                    _lastSpawnPositions.Enqueue(selectedPoint.Position);
-                    if (_lastSpawnPositions.Count > _maxHistorySpawnPoint)
-                    {
-                        _lastSpawnPositions.Dequeue();
-                    }
+                    if (pointsToSpawn == null) pointsToSpawn = new List<ISpawnPoint>();
+                    pointsToSpawn.Add(selectedPoint);
                 }
                 else
                 {
@@ -708,10 +625,44 @@ namespace TRLDynamicSpawn.Patches
         [PatchPrefix]
         private static bool PatchPrefix(ref Profile __result, BotProfileDataClass __instance, List<Profile> profiles2Select, bool withDelete)
         {
-            // Se for PMC, ignoramos a checagem rigorosa de Dificuldade e Side, garantindo que o bot não retorne nulo.
+            if (__instance == null) return true;
+
+            string requestedRole = __instance.WildSpawnType_0.ToString();
+            Plugin.LogSource.LogWarning($"[TRLDynamicSpawn Logger] ChooseProfile CALLED for Role: {requestedRole} (profilesInList: {profiles2Select?.Count ?? 0})");
+
+            if (profiles2Select != null && profiles2Select.Count > 0)
+            {
+                int sampleCount = System.Math.Min(5, profiles2Select.Count);
+                for (int i = 0; i < sampleCount; i++)
+                {
+                    var p = profiles2Select[i];
+                    Plugin.LogSource.LogWarning($"   -> Available profile [{i}]: Name='{p?.Nickname}', Side={p?.Info?.Side}, Role={p?.Info?.Settings?.Role}");
+                }
+            }
+
+            if (profiles2Select == null || profiles2Select.Count == 0) return true;
+
+            // Se for PMC (USEC ou BEAR), aceitamos qualquer perfil de PMC cujo Side seja USEC/BEAR ou cuja Role seja sptUsec/sptBear/pmcUSEC/pmcBEAR.
             if (__instance.WildSpawnType_0 == WildSpawnType.pmcUSEC || __instance.WildSpawnType_0 == WildSpawnType.pmcBEAR)
             {
-                var list = profiles2Select.Where(x => x.Info.Settings.Role == __instance.WildSpawnType_0).ToList();
+                bool isUsec = __instance.WildSpawnType_0 == WildSpawnType.pmcUSEC;
+                EPlayerSide targetSide = isUsec ? EPlayerSide.Usec : EPlayerSide.Bear;
+
+                var list = profiles2Select.Where(x => 
+                    x != null && x.Info != null && (
+                        x.Info.Side == targetSide || 
+                        x.Info.Settings?.Role == __instance.WildSpawnType_0 ||
+                        (isUsec && (x.Info.Settings?.Role.ToString().ToLower().Contains("usec") ?? false)) ||
+                        (!isUsec && (x.Info.Settings?.Role.ToString().ToLower().Contains("bear") ?? false))
+                    )
+                ).ToList();
+
+                if (list.Count == 0)
+                {
+                    Plugin.LogSource.LogWarning($"[TRLDynamicSpawn Logger] WARNING: No exact side match for {requestedRole}! Falling back to ANY profile in profiles2Select ({profiles2Select.Count} profiles).");
+                    list = profiles2Select.Where(x => x != null && x.Info != null).ToList();
+                }
+
                 if (list.Count > 0)
                 {
                     Profile profile = list[UnityEngine.Random.Range(0, list.Count)];
@@ -720,6 +671,7 @@ namespace TRLDynamicSpawn.Patches
                         profiles2Select.Remove(profile);
                     }
                     __result = profile;
+                    Plugin.LogSource.LogWarning($"[TRLDynamicSpawn Logger] CHOSEN PMC PROFILE: '{profile.Nickname}' (Side: {profile.Info.Side}, Role: {profile.Info.Settings?.Role}) for {requestedRole}");
                     return false; // Skips original method
                 }
             }

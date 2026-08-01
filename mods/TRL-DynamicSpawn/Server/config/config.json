@@ -1,4 +1,4 @@
-﻿{
+{
   "currentPreset": "Random",
   "enableBotSpawning": true,
   "spawnSmoothing": true,
@@ -23,7 +23,6 @@
   "maxBotCap": 28,
   "maxBotPerZone": 7,
 
-  "globalAntiOverlapDistance": 5,
   "sniperGroupChance": 0.2,
   "scavGroupChance": 0.2,
   "pmcGroupChance": 0.2,

@@ -1,9 +1,10 @@
 using System.Text.Json.Serialization;
 using System.Collections.Generic;
+using SPTarkov.Server.Core.Models.Utils;
 
 namespace TRLDynamicSpawnServer.Models;
 
-public record TRLConfig
+public record TRLConfig : IRequestData
 {
     [JsonPropertyName("activePreset")] 
     public string ActivePreset { get; set; } = "Balanced"; // "Equilibrado", "Guerra de PMCs", "Infestação de Scavs", "Aleatório"
@@ -46,12 +47,6 @@ public record TRLConfig
 
     [JsonPropertyName("mapConfigs")]
     public Dictionary<string, MapSettings> MapConfigs { get; set; } = new();
-
-    [JsonPropertyName("globalAntiOverlapDistance")]
-    public double GlobalAntiOverlapDistance { get; set; } = 5.0;
-
-    [JsonPropertyName("enableMapOverlapCulling")]
-    public bool EnableMapOverlapCulling { get; set; } = true;
 }
 
 public record CustomSpawnsConfig
@@ -177,6 +172,7 @@ public record ValidLocationInt
     [JsonPropertyName("shoreline")] public int Shoreline { get; set; } = 0;
     [JsonPropertyName("tarkovstreets")] public int TarkovStreets { get; set; } = 0;
     [JsonPropertyName("woods")] public int Woods { get; set; } = 0;
+    [JsonPropertyName("labyrinth")] public int Labyrinth { get; set; } = 0;
 }
 
 public record ValidLocationString
@@ -193,6 +189,7 @@ public record ValidLocationString
     [JsonPropertyName("shoreline")] public string Shoreline { get; set; } = "";
     [JsonPropertyName("tarkovstreets")] public string TarkovStreets { get; set; } = "";
     [JsonPropertyName("woods")] public string Woods { get; set; } = "";
+    [JsonPropertyName("labyrinth")] public string Labyrinth { get; set; } = "";
 }
 
 public record MapSettings

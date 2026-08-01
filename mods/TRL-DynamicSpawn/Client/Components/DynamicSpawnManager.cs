@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
+using EFT.Game.Spawning;
 using UnityEngine;
 using TRLDynamicSpawn.Helpers;
 using EFT.Communications;
@@ -208,27 +209,48 @@ namespace TRLDynamicSpawn.Components
 
         private IEnumerator SpawnHordeLoop()
         {
-            // 1. Janela Vanilla Inicial (0s a 60s / DelayBeforeFirstWave)
+            // 0. Checagem de desativação global de bots via RaidSettings (AI amount = "None" / EBotAmount.NoBots)
+            try
+            {
+                var app = Comfort.Common.Singleton<ClientApplication<ISession>>.Instance as TarkovApplication;
+                if (app != null)
+                {
+                    var field = typeof(TarkovApplication).GetField("_raidSettings", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+                    var raidSettings = field?.GetValue(app) as RaidSettings;
+                    if (raidSettings != null && (raidSettings.BotSettings.BotAmount == EFT.Bots.EBotAmount.NoBots || raidSettings.WavesSettings.BotAmount == EFT.Bots.EBotAmount.NoBots))
+                    {
+                        Plugin.LogSource.LogInfo("[TRL-DynamicSpawn] AI Amount set to 'None' (NoBots) in Raid Settings. DynamicSpawn is DISABLED for this raid.");
+                        IsWarmupActive = false;
+                        yield break;
+                    }
+                }
+            }
+            catch (System.Exception ex)
+            {
+                Plugin.LogSource.LogError($"[TRL-DynamicSpawn] Error checking RaidSettings BotAmount: {ex.Message}");
+            }
+
+            // 1. Janela Vanilla Inicial (0s a 30s / DelayBeforeFirstWave)
             IsWarmupActive = true;
 
             string mapName = GetCurrentMapName();
             var mapSettings = MapNameHelper.GetMapSettings(_serverConfig, mapName);
             int initialDelay = (_serverConfig?.MapTimers != null && _serverConfig.MapTimers.ContainsKey("global"))
                 ? _serverConfig.MapTimers["global"].DelayBeforeFirstWave
-                : 60;
+                : 30;
 
-            // Garantir o mínimo de 60s para permitir a janela vanilla inicial
-            if (initialDelay < 60) initialDelay = 60;
+            // Garantir o mínimo de 30s para permitir a janela inicial de bosses/snipers nativos
+            if (initialDelay < 30) initialDelay = 30;
             _delayBeforeFirstWave = initialDelay;
 
-            Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Initial Vanilla Window active. Waiting {_delayBeforeFirstWave}s before taking control...");
+            Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Initial Vanilla Window active. Waiting {_delayBeforeFirstWave}s for native bosses/snipers before taking control...");
             _nextWaveTime = Time.time + _delayBeforeFirstWave;
 
             yield return new WaitForSeconds(_delayBeforeFirstWave);
 
-            // 2. Trava do Spawn Vanilla após os 60s iniciais
+            // 2. Trava do Spawn Vanilla após os 30s iniciais
             IsWarmupActive = false;
-            Plugin.LogSource.LogInfo("[TRL-DynamicSpawn] Initial 60s elapsed. Vanilla normal spawns LOCKED. DynamicSpawn taking 100% control.");
+            Plugin.LogSource.LogInfo("[TRL-DynamicSpawn] Initial 30s elapsed. Vanilla normal spawns LOCKED. DynamicSpawn taking 100% control.");
 
             // 3. Loop Contínuo do Mod (Warmup de 30s <-> Cooldown de 600s)
             while (true)
@@ -468,10 +490,10 @@ namespace TRLDynamicSpawn.Components
                 int pScavSlots = Mathf.RoundToInt(scavSlots * 0.5f);
                 int normalScavSlots = scavSlots - pScavSlots;
 
-                Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Horde Breakdown (Preset: {_activePreset}):");
-                Plugin.LogSource.LogInfo($"  Alive Bots: {aliveBotsTotal} | PMCs: {alivePMCs} ({aliveBears} BEAR, {aliveUsecs} USEC) | Rest of World: {aliveScavs}");
-                Plugin.LogSource.LogInfo($"  Spawning PMCs: {pmcSlots} ({bearSlots} BEAR, {usecSlots} USEC)");
-                Plugin.LogSource.LogInfo($"  Spawning Scavs: {scavSlots} ({normalScavSlots} Normal, {pScavSlots} pScav)");
+                Plugin.LogSource.LogWarning($"[TRL-DynamicSpawn] Horde Breakdown (Preset: {_activePreset}):");
+                Plugin.LogSource.LogWarning($"  Alive Bots: {aliveBotsTotal} | PMCs: {alivePMCs} ({aliveBears} BEAR, {aliveUsecs} USEC) | Rest of World: {aliveScavs}");
+                Plugin.LogSource.LogWarning($"  Spawning PMCs: {pmcSlots} ({bearSlots} BEAR, {usecSlots} USEC)");
+                Plugin.LogSource.LogWarning($"  Spawning Scavs: {scavSlots} ({normalScavSlots} Normal, {pScavSlots} pScav)");
 
                 GenerateAndEnqueueGroups(WildSpawnType.pmcUSEC, BotDifficulty.normal, usecSlots, eliteConfig?.Usec);
                 GenerateAndEnqueueGroups(WildSpawnType.pmcBEAR, BotDifficulty.normal, bearSlots, eliteConfig?.Bear);
@@ -691,6 +713,8 @@ namespace TRLDynamicSpawn.Components
             BotSpawnParams spawnParams = new BotSpawnParams();
             var botProfile = new BotProfileDataClass(side, role, diff, 0f, spawnParams);
 
+            List<ISpawnPoint> groupAnchorPoints = null;
+
             for (int i = 0; i < groupSize; i++)
             {
                 var task = BotCreationDataClass.Create(botProfile, _botCreator, 1, _botsController.BotSpawner);
@@ -701,14 +725,30 @@ namespace TRLDynamicSpawn.Components
 
                 if (task.Result != null)
                 {
-                    Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] DIRECT SPAWN SUCCESS ({i + 1}/{groupSize}): Spawning {role} in zone {zone.NameZone}...");
-                    _botsController.BotSpawner.TryToSpawnInZoneAndDelay(zone, task.Result, false, true, null, true);
+                    Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] SQUAD SPAWN ({i + 1}/{groupSize}): Spawning {role} in zone {zone.NameZone}...");
+                    IsGeneratingDynamicWave = true;
+                    try
+                    {
+                        List<ISpawnPoint> pointsToUse = (i > 0 && groupAnchorPoints != null && groupAnchorPoints.Count > 0) 
+                            ? new List<ISpawnPoint>(groupAnchorPoints) 
+                            : new List<ISpawnPoint>();
+
+                        _botsController.BotSpawner.TryToSpawnInZoneAndDelay(zone, task.Result, false, true, pointsToUse, true);
+                        
+                        if (i == 0 && pointsToUse.Count > 0)
+                        {
+                            groupAnchorPoints = new List<ISpawnPoint>(pointsToUse);
+                        }
+                    }
+                    finally
+                    {
+                        IsGeneratingDynamicWave = false;
+                    }
                 }
 
                 if (i < groupSize - 1)
                 {
-                    float delay = UnityEngine.Random.Range(1.0f, 3.0f);
-                    yield return new WaitForSeconds(delay);
+                    yield return new WaitForSeconds(0.2f);
                 }
             }
         }
@@ -937,7 +977,15 @@ namespace TRLDynamicSpawn.Components
                 if (zoneValid && selectedZone != null)
                 {
                     Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] SUCCESS: Spawning replacement bot ({role}) in {selectedZone.NameZone}...");
-                    _botsController.BotSpawner.TryToSpawnInZoneAndDelay(selectedZone, t.Result, true, true, null, true);
+                    IsGeneratingDynamicWave = true;
+                    try
+                    {
+                        _botsController.BotSpawner.TryToSpawnInZoneAndDelay(selectedZone, t.Result, true, true, null, true);
+                    }
+                    finally
+                    {
+                        IsGeneratingDynamicWave = false;
+                    }
                 }
                 else
                 {

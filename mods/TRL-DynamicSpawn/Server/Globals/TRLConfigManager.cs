@@ -18,6 +18,13 @@ public static class TRLConfigManager
     private static readonly string ConfigPath = Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) ?? AppDomain.CurrentDomain.BaseDirectory, "config", "config.json");
     private static bool _isProcessing = false;
 
+    private static readonly JsonSerializerOptions JsonOpts = new JsonSerializerOptions
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        PropertyNameCaseInsensitive = true,
+        WriteIndented = true
+    };
+
     public static async Task<ConfigOperationResult> LoadConfig()
     {
         if (_isProcessing) return ConfigOperationResult.ActiveProcess;
@@ -31,7 +38,7 @@ public static class TRLConfigManager
             if (File.Exists(ConfigPath))
             {
                 var json = await File.ReadAllTextAsync(ConfigPath);
-                var loaded = JsonSerializer.Deserialize<TRLConfig>(json);
+                var loaded = JsonSerializer.Deserialize<TRLConfig>(json, JsonOpts);
                 if (loaded != null)
                 {
                     TRLDynamicSpawnServer.Routers.TRLRouters.CurrentConfig = loaded;
@@ -84,8 +91,7 @@ public static class TRLConfigManager
             Directory.CreateDirectory(directory);
         }
 
-        var json = JsonSerializer.Serialize(TRLDynamicSpawnServer.Routers.TRLRouters.CurrentConfig, new JsonSerializerOptions { WriteIndented = true });
+        var json = JsonSerializer.Serialize(TRLDynamicSpawnServer.Routers.TRLRouters.CurrentConfig, JsonOpts);
         await File.WriteAllTextAsync(ConfigPath, json);
     }
 }
-

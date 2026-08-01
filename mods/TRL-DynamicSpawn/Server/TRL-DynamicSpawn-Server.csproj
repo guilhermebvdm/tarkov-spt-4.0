@@ -30,6 +30,13 @@
     <Content Update="config\**\*.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Update="wwwroot\**\*.*">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <RazorComponent Remove="Web_v1_original\**\*.*" />
+    <RazorComponent Remove="Web_v2_design_backup\**\*.*" />
+    <Compile Remove="Web_v1_original\**\*.*" />
+    <Compile Remove="Web_v2_design_backup\**\*.*" />
   </ItemGroup>
 
 

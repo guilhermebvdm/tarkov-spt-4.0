@@ -1,0 +1,292 @@
+/* ============================================================================
+ * TRL DESIGN SYSTEM — tokens.css                                       v1.0.0
+ * Tarkov Red Line · dark military UI for SPT mod web editors
+ *
+ * Three tiers, one namespace (--trl-*):
+ *   TIER 1 · PRIMITIVES  raw values on fixed scales. Never consumed directly
+ *                        by product code — they feed tier 2.
+ *   TIER 2 · SEMANTIC    role-based aliases (bg/fg/accent/status). This is
+ *                        the ONLY tier consumers should reference.
+ *   TIER 3 · COMPONENT   multi-use signature values (laser, textures,
+ *                        progress fill) shared by components.css.
+ *
+ * Color model:
+ *   base      = neutral graphite (surfaces, edges, labels) — never tinted
+ *   tan/gold  = meaning accent — active, selected, primary, signatures
+ *   red       = brand — laser line, live dot, rare key moments, destructive
+ *   #ff0000 (red-brand) never colors text; glow/laser/logo only.
+ *
+ * Load order: fonts/bender.css → tokens.css → components.css → utilities.css
+ * ========================================================================== */
+
+:root {
+
+  /* ==========================================================================
+   * TIER 1 — PRIMITIVES
+   * ======================================================================= */
+
+  /* ── Ground & surfaces ─────────────────────────────────────────────────
+   * Neutral graphite scale (like the real EFT UI) — the warmth comes from
+   * the vignette texture and the tan/red ACCENTS, never from the base.
+   * Elevation = lighter surface (never shadows alone). */
+  --trl-ground-deep: #0d0d0e;
+  --trl-ground:      #131314;
+  --trl-surface-1:   #1b1b1d;
+  --trl-surface-2:   #222225;
+  --trl-surface-3:   #29292c;   /* solid elevated blocks (not hovers —
+                                    hovers use --trl-bg-hover wash) */
+  --trl-surface-4:   #303034;
+
+  /* ── Tan / gold ramp (workhorse accent) ────────────────────────────────
+   * 300 is the base. 100–200 for emphasis text, 500 for dimmed labels,
+   * 600–800 for fills and gradient tails. */
+  --trl-tan-100: #e8ddc4;
+  --trl-tan-200: #d8c9a4;
+  --trl-tan-300: #c7b48a;
+  --trl-tan-400: #ab9a71;
+  --trl-tan-500: #8f8560;
+  --trl-tan-600: #6b6247;
+  --trl-tan-700: #453f2d;
+  --trl-tan-800: #2b2719;
+
+  /* ── Red ramp (brand + danger) ──────────────────────────────────────────
+   * red-brand is the logo laser. It is a LIGHT SOURCE, not a pigment:
+   * legal in glows, laser gradients and the logo itself — never as text
+   * or large fills. The 300–700 ramp is the usable UI red. */
+  --trl-red-brand: #ff0000;
+  --trl-red-300:   #ff6b60;
+  --trl-red-400:   #f04438;
+  --trl-red-500:   #d92c20;
+  --trl-red-600:   #a8231a;
+  --trl-red-700:   #711712;
+  --trl-red-soft:  #d27a7a;
+
+  /* ── Status greens & ambers ────────────────────────────────────────── */
+  --trl-green-400: #9ad27a;
+  --trl-green-600: #5f8a49;
+  --trl-amber-400: #cc9a3e;
+  --trl-amber-600: #8a6a2c;
+
+  /* ── Muted blue (faction USEC, informational) ───────────────────────── */
+  --trl-blue-400: #6f93bd;
+  --trl-blue-600: #46617f;
+
+  /* ── Ink (neutral text scale) ───────────────────────────────────────────
+   * ink-faint is decorative-only (see PATTERNS.md · contrast). */
+  --trl-ink:         #e8e7e4;
+  --trl-ink-muted:   #9b9a96;
+  --trl-ink-faint:   #706f6b;
+  --trl-ink-ghost:   #464541;
+  --trl-ink-inverse: #131314;
+
+  /* ── Typography ─────────────────────────────────────────────────────────
+   * display: Bender (EFT official; fonts/bender.css) → Bahnschrift (Win10+).
+   *          Uppercase + tracking; titles, labels, chrome.
+   * body:    Segoe UI — dense data at 12–13px stays readable (see
+   *          PATTERNS.md for why body is NOT Bender).
+   * mono:    numbers, ids, code. Always tabular-nums for aligned digits. */
+  --trl-font-display: 'Bender', 'Bahnschrift', 'Segoe UI', system-ui, sans-serif;
+  --trl-font-body:    'Segoe UI', system-ui, -apple-system, sans-serif;
+  --trl-font-mono:    'Cascadia Mono', 'Consolas', ui-monospace, monospace;
+
+  --trl-text-2xs: 10px;
+  --trl-text-xs:  11px;
+  --trl-text-sm:  12px;
+  --trl-text-md:  13px;
+  --trl-text-lg:  15px;
+  --trl-text-xl:  18px;
+  --trl-text-2xl: 22px;
+  --trl-text-3xl: 28px;
+
+  --trl-track-wide:   .08em;
+  --trl-track-wider:  .14em;
+  --trl-track-widest: .22em;
+
+  --trl-weight-regular:  400;
+  --trl-weight-semibold: 600;
+  --trl-weight-bold:     700;
+
+  --trl-leading-tight: 1.2;
+  --trl-leading-base:  1.45;
+
+  /* ── Spacing (4px grid + 2px half-step) ─────────────────────────────── */
+  --trl-space-0:  0;
+  --trl-space-h:  2px;
+  --trl-space-1:  4px;
+  --trl-space-2:  8px;
+  --trl-space-3:  12px;
+  --trl-space-4:  16px;
+  --trl-space-5:  20px;
+  --trl-space-6:  24px;
+  --trl-space-8:  32px;
+  --trl-space-10: 40px;
+  --trl-space-12: 48px;
+
+  /* ── Borders & radius ───────────────────────────────────────────────────
+   * radius 0 is a RULE (military hardware has no rounded corners) —
+   * tokenized as a single knob so it is set once, everywhere. */
+  --trl-border-w:     1px;
+  --trl-accent-bar-w: 2px;
+  --trl-radius:       0;
+
+  /* ── Shadows (depth) & glows (signals) ──────────────────────────────── */
+  --trl-shadow-1: 0 2px 8px rgba(0, 0, 0, .35);
+  --trl-shadow-2: 0 8px 24px rgba(0, 0, 0, .5);
+  --trl-shadow-3: 0 16px 48px rgba(0, 0, 0, .6);
+
+  --trl-glow-tan:   0 0 6px rgba(199, 180, 138, .35);
+  --trl-glow-green: 0 0 6px rgba(154, 210, 122, .55);
+  --trl-glow-amber: 0 0 6px rgba(204, 154, 62, .55);
+  --trl-glow-red:   0 0 8px rgba(255, 0, 0, .45);
+
+  /* ── Z-index scale ──────────────────────────────────────────────────────
+   * z-overlay: consumer-owned full-screen layers below modal (e.g. loading
+   * veil). z-drag: dragged ghosts/previews (stash grid DnD refactor). */
+  --trl-z-sticky:  10;
+  --trl-z-nav:     50;
+  --trl-z-overlay: 100;
+  --trl-z-modal:   110;
+  --trl-z-popover: 120;
+  --trl-z-toast:   200;
+  --trl-z-drag:    999;
+
+  /* ── Motion ─────────────────────────────────────────────────────────── */
+  --trl-dur-1: 100ms;
+  --trl-dur-2: 160ms;
+  --trl-dur-3: 260ms;
+  --trl-ease: cubic-bezier(.2, .7, .3, 1);
+
+  /* ── Layout geometry ────────────────────────────────────────────────── */
+  --trl-container-md: 1160px;   /* document pages (.trl-container) */
+  --trl-container-lg: 1440px;   /* wide data tools (consumer opt-in) */
+  --trl-sidebar-w:    280px;
+  --trl-topbar-h:     48px;
+  --trl-row-h:        36px;
+
+  /* ==========================================================================
+   * TIER 2 — SEMANTIC (what product code consumes)
+   * Includes edges & washes: they are role-named and part of the public API.
+   * ======================================================================= */
+
+  /* Backgrounds by role — hover/active are the SAME values the DS
+   * components use, so custom consumer CSS matches them by construction */
+  --trl-bg-app:     var(--trl-ground);
+  --trl-bg-panel:   var(--trl-surface-1);
+  --trl-bg-raised:  var(--trl-surface-2);
+  --trl-bg-input:   var(--trl-ground-deep);
+  --trl-bg-hover:   var(--trl-wash-tan);
+  --trl-bg-active:  var(--trl-wash-tan-2);
+  --trl-bg-overlay: rgba(8, 9, 5, .65);
+
+  /* Edges — NEUTRAL hairlines for structure; edge-accent is the tan frame
+   * reserved for accent elements (tags, badges) that must read gold */
+  --trl-edge-faint:  rgba(255, 255, 255, .05);
+  --trl-edge:        rgba(255, 255, 255, .09);
+  --trl-edge-strong: rgba(255, 255, 255, .20);
+  --trl-edge-accent: rgba(199, 180, 138, .42);
+  --trl-edge-red:    rgba(255, 48, 32, .35);
+
+  /* Washes (translucent tint fills for tags, highlights, status blocks) */
+  --trl-wash-tan:    rgba(199, 180, 138, .08);
+  --trl-wash-tan-2:  rgba(199, 180, 138, .14);
+  --trl-wash-green:  rgba(154, 210, 122, .10);
+  --trl-wash-amber:  rgba(204, 154, 62, .12);
+  --trl-wash-red:    rgba(210, 122, 122, .10);
+  --trl-wash-blue:   rgba(111, 147, 189, .10);
+  --trl-wash-brand:  rgba(255, 0, 0, .06);  /* reserved: brand-tinted hero
+                                               surfaces (unused in v1) */
+
+  /* Factions (Tarkov domain) */
+  --trl-faction-usec: var(--trl-blue-400);
+  --trl-faction-bear: var(--trl-red-soft);
+
+  /* Foregrounds by role — fg-label is the CHROME label color (panel
+   * titles, field labels, kv keys, table headers): neutral, so gold stays
+   * a meaning-accent instead of tinting the whole screen */
+  --trl-fg:           var(--trl-ink);
+  --trl-fg-muted:     var(--trl-ink-muted);
+  --trl-fg-faint:     var(--trl-ink-faint);
+  --trl-fg-label:     var(--trl-ink-muted);
+  --trl-fg-on-accent: var(--trl-ink-inverse);
+
+  /* Accent (tan — the working accent) */
+  --trl-accent:        var(--trl-tan-300);
+  --trl-accent-strong: var(--trl-tan-200);
+  --trl-accent-dim:    var(--trl-tan-500);
+
+  /* Brand (red — identity; see red-brand usage rule in tier 1) */
+  --trl-brand: var(--trl-red-brand);
+
+  /* Status */
+  --trl-danger:        var(--trl-red-soft);
+  --trl-danger-strong: var(--trl-red-500);
+  --trl-success:       var(--trl-green-400);
+  --trl-warning:       var(--trl-amber-400);
+
+  /* Focus (keyboard) — inner ground gap + tan ring, works on any surface */
+  --trl-focus-ring: 0 0 0 1px var(--trl-ground), 0 0 0 2px var(--trl-tan-200);
+
+  /* ==========================================================================
+   * TIER 3 — COMPONENT (shared signature values)
+   * ======================================================================= */
+
+  /* Screen-bar (military window chrome) */
+  --trl-screenbar-h: 34px;
+
+  /* Tags & progress */
+  --trl-tag-dot:    7px;
+  --trl-progress-h: 6px;
+  --trl-progress-fill: linear-gradient(90deg, var(--trl-tan-600), var(--trl-tan-300));
+
+  /* Laser line — the brand divider, derived from the TRL logo */
+  --trl-laser: linear-gradient(90deg,
+      transparent,
+      rgba(255, 0, 0, .55) 22%,
+      var(--trl-red-brand) 50%,
+      rgba(255, 0, 0, .55) 78%,
+      transparent);
+
+  /* Ambient textures (pure CSS — no image assets) */
+  --trl-texture-vignette: radial-gradient(120% 80% at 80% -10%,
+      rgba(199, 180, 138, .06), transparent 60%);
+  --trl-texture-scanlines: repeating-linear-gradient(115deg,
+      rgba(0, 0, 0, 0) 0 12px, rgba(255, 255, 255, .010) 12px 13px);
+
+  /* Ambient key-art background (opt-in via .trl-app--photo).
+   * The scrim (~86–93% ground) is what keeps ground-level text AA —
+   * never show the photo without it. Asset provenance: assets/PROVENANCE.txt */
+  --trl-photo: url("assets/bg-ambient.jpg");
+  --trl-scrim: linear-gradient(rgba(19, 19, 20, .86), rgba(19, 19, 20, .93));
+
+  /* Chamfer (EFT corner cut) — solid surfaces only; a clip-path eats the
+   * element's own 1px border, so bordered elements must not use it
+   * (see PATTERNS.md · chamfer). */
+  --trl-chamfer-size: 8px;
+  --trl-chamfer: polygon(
+      var(--trl-chamfer-size) 0, 100% 0,
+      100% calc(100% - var(--trl-chamfer-size)),
+      calc(100% - var(--trl-chamfer-size)) 100%, 0 100%,
+      0 var(--trl-chamfer-size));
+
+  /* Game data (block H): inventory cell unit and 2D-grid line color */
+  --trl-cell-unit:   36px;
+  --trl-grid2d-line: rgba(255, 255, 255, .05);
+
+  /* ── Dataviz (chart series) ──────────────────────────────────────────────
+   * UI colors FAIL as series colors (validated 2026-07-03 with the dataviz
+   * skill script against surface-1: lightness band, chroma floor, CVD).
+   * These pass all checks. Categorical order is FIXED — never cycle, never
+   * repaint survivors on filter; 5th series folds into "Other" (viz-neutral).
+   * Sequential = tan 600→300 (tan-700/800 fail the 2:1 surface floor).
+   * Diverging = viz-cat-3 ↔ viz-neutral ↔ viz-cat-4.
+   * Status colors (success/warning/danger) are reserved — never a series. */
+  --trl-viz-cat-1:   #4a86c8;
+  --trl-viz-cat-2:   #b8892e;
+  --trl-viz-cat-3:   #4f9a6a;
+  --trl-viz-cat-4:   #cf4b3c;
+  --trl-viz-seq-1:   #6b6247;
+  --trl-viz-seq-2:   #8f8560;
+  --trl-viz-seq-3:   #ab9a71;
+  --trl-viz-seq-4:   #c7b48a;
+  --trl-viz-neutral: #7a786e;
+}
