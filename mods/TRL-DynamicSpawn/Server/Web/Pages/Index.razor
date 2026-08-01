@@ -422,12 +422,12 @@ html, body {
                         <div class="trl-field">
                             <label class="trl-field__label"><span data-i18n="active_preset">PRESET DE FACÇÃO ATIVO</span></label>
                             <select id="activePreset" class="trl-select">
-                                <option value="Balanced">Equilibrado (50% PMC / 50% Scav)</option>
-                                <option value="PMC War">Guerra de PMCs (70% PMC / 30% Scav)</option>
-                                <option value="Scav Infestation">Infestação de Scavs (20% PMC / 80% Scav)</option>
-                                <option value="Quiet Raid">Raid Tranquilo (Baixa Densidade)</option>
-                                <option value="Warzone">Zona de Guerra (Alta Densidade e Agressão)</option>
-                                <option value="Random">Aleatório por Match</option>
+                                <option value="Balanced" data-i18n="opt_balanced">Equilibrado (50% PMC / 50% Scav)</option>
+                                <option value="PMC War" data-i18n="opt_pmc_war">Guerra de PMCs (70% PMC / 30% Scav)</option>
+                                <option value="Scav Infestation" data-i18n="opt_scav_infestation">Infestação de Scavs (20% PMC / 80% Scav)</option>
+                                <option value="Quiet Raid" data-i18n="opt_quiet_raid">Raid Tranquilo (Baixa Densidade)</option>
+                                <option value="Warzone" data-i18n="opt_warzone">Zona de Guerra (Alta Densidade e Agressão)</option>
+                                <option value="Random" data-i18n="opt_random">Aleatório por Match</option>
                             </select>
                             <span id="presetDescriptionText" style="font-size:11px; color:var(--trl-accent); margin-top:4px;"></span>
                         </div>
@@ -462,7 +462,7 @@ html, body {
             <!-- PER-MAP CONFIGURATIONS -->
             <div class="trl-panel">
                 <div class="trl-screen-bar">
-                    <span class="trl-screen-bar__title">CONFIGURAÇÕES ESPECÍFICAS DE CADA MAPA</span>
+                    <span class="trl-screen-bar__title" data-i18n="title_per_map">CONFIGURAÇÕES ESPECÍFICAS DE CADA MAPA</span>
                 </div>
                 <div class="trl-panel__body">
                     <div id="mapSubtabs" class="trl-subtabs"></div>
@@ -504,7 +504,7 @@ html, body {
                     <span class="trl-screen-bar__title" data-i18n="title_events">EVENTOS E INVASÕES ESPECIAIS</span>
                 </div>
                 <div class="trl-panel__body">
-                    <div class="trl-h3">CONTROLES GLOBAIS DE BOSSES</div>
+                    <div class="trl-h3" data-i18n="sub_global_bosses">CONTROLES GLOBAIS DE BOSSES</div>
                     <div class="trl-form-grid" style="margin-bottom:16px;">
                         <label class="trl-switch">
                             <input type="checkbox" id="disableBosses">
@@ -518,16 +518,16 @@ html, body {
 
                     <div class="trl-divider"></div>
 
-                    <div class="trl-h3">SISTEMA DE INVASÃO DE BOSSES (BOSS INVASION)</div>
+                    <div class="trl-h3" data-i18n="sub_boss_invasion">SISTEMA DE INVASÃO DE BOSSES (BOSS INVASION)</div>
                     <label class="trl-switch">
                         <input type="checkbox" id="evt_boss_invasion_enable">
-                        <span>Ativar Sistema de Invasão de Bosses</span>
+                        <span data-i18n="enable_boss_invasion">Ativar Sistema de Invasão de Bosses</span>
                     </label>
 
                     <div id="bossInvasionPanel" class="trl-form-grid" style="margin-top:12px; margin-bottom:16px;">
                         <div class="trl-field">
                             <label class="trl-field__label">
-                                <span>CHANCE DE INVASÃO NO MAPA (%)</span>
+                                <span data-i18n="invasion_map_chance">CHANCE DE INVASÃO NO MAPA (%)</span>
                                 <span id="val_evt_boss_invasion_map_chance" class="trl-slider-val">15</span>
                             </label>
                             <input type="range" id="evt_boss_invasion_map_chance" class="trl-slider" min="1" max="100" value="15">
@@ -535,26 +535,26 @@ html, body {
 
                         <div class="trl-field">
                             <label class="trl-field__label">
-                                <span>CHANCE DE SPAWN DE CADA BOSS (%)</span>
+                                <span data-i18n="invasion_boss_chance">CHANCE DE SPAWN DE CADA BOSS (%)</span>
                                 <span id="val_evt_boss_invasion_boss_chance" class="trl-slider-val">15</span>
                             </label>
                             <input type="range" id="evt_boss_invasion_boss_chance" class="trl-slider" min="1" max="100" value="15">
                         </div>
 
                         <div class="trl-field trl-form-grid__full">
-                            <label class="trl-field__label">BOSSES PERMITIDOS NA INVASÃO</label>
+                            <label class="trl-field__label" data-i18n="allowed_invasion_bosses">BOSSES PERMITIDOS NA INVASÃO</label>
                             <div id="invasionBossesMatrix" class="trl-zone-matrix"></div>
                         </div>
 
                         <div class="trl-field trl-form-grid__full">
-                            <label class="trl-field__label">MAPAS PERMITIDOS NA INVASÃO</label>
+                            <label class="trl-field__label" data-i18n="allowed_invasion_maps">MAPAS PERMITIDOS NA INVASÃO</label>
                             <div id="invasionMapsMatrix" class="trl-zone-matrix"></div>
                         </div>
                     </div>
 
                     <div class="trl-divider"></div>
 
-                    <div class="trl-h3">GRUPOS DE RAIDERS E ROGUES ALEATÓRIOS</div>
+                    <div class="trl-h3" data-i18n="sub_raiders_rogues">GRUPOS DE RAIDERS E ROGUES ALEATÓRIOS</div>
                     <div class="trl-form-grid">
                         <div>
                             <label class="trl-switch">
@@ -563,7 +563,7 @@ html, body {
                             </label>
                             <div class="trl-field">
                                 <label class="trl-field__label">
-                                    <span>CHANCE DE RAIDERS (%)</span>
+                                    <span data-i18n="raider_chance">CHANCE DE RAIDERS (%)</span>
                                     <span id="val_evt_raiders_chance" class="trl-slider-val">10</span>
                                 </label>
                                 <input type="range" id="evt_raiders_chance" class="trl-slider" min="1" max="100" value="10">
@@ -577,7 +577,7 @@ html, body {
                             </label>
                             <div class="trl-field">
                                 <label class="trl-field__label">
-                                    <span>CHANCE DE ROGUES (%)</span>
+                                    <span data-i18n="rogue_chance">CHANCE DE ROGUES (%)</span>
                                     <span id="val_evt_rogues_chance" class="trl-slider-val">10</span>
                                 </label>
                                 <input type="range" id="evt_rogues_chance" class="trl-slider" min="1" max="100" value="10">
@@ -610,7 +610,7 @@ html, body {
                         </label>
                         <label class="trl-switch">
                             <input type="checkbox" id="enableCustomPlayerSpawns">
-                            <span>Ativar Spawns Customizados de Jogadores</span>
+                            <span data-i18n="custom_player">Ativar Spawns Customizados de Jogadores</span>
                         </label>
                     </div>
                 </div>
@@ -627,36 +627,62 @@ html, body {
         pt: {
             nav_label: "GERENCIADOR DE SPAWN", nav_maps: "CONFIGURAÇÃO DE MAPAS", nav_bosses: "CONFIGURAÇÃO DE BOSSES",
             nav_difficulty: "DIFICULDADE DE BOTS", nav_events: "EVENTOS & INVASÕES", nav_custom: "SPAWNS CUSTOMIZADOS",
-            title_maps: "PARÂMETROS GLOBAIS DE MAPA", title_bosses: "CONFIGURAÇÃO DE BOSSES, ELITES E BOTS",
-            title_difficulty: "DISTRIBUIÇÃO DE DIFICULDADE DA IA", title_events: "EVENTOS E INVASÕES ESPECIAIS",
-            title_custom: "SPAWNS CUSTOMIZADOS E COORDENADAS", undo: "DESFAZER", reset: "PADRÃO", reload: "RECARREGAR", save: "SALVAR CONFIGURAÇÃO",
+            title_maps: "PARÂMETROS GLOBAIS DE MAPA", title_per_map: "CONFIGURAÇÕES ESPECÍFICAS DE CADA MAPA",
+            title_bosses: "CONFIGURAÇÃO DE BOSSES, ELITES E BOTS", title_difficulty: "DISTRIBUIÇÃO DE DIFICULDADE DA IA",
+            title_events: "EVENTOS E INVASÕES ESPECIAIS", title_custom: "SPAWNS CUSTOMIZADOS E COORDENADAS",
+            undo: "DESFAZER", reset: "PADRÃO", reload: "RECARREGAR", save: "SALVAR CONFIGURAÇÃO",
+            synced: "SINCRONIZADO", unsaved: "ALTERAÇÕES NÃO SALVAS",
             active_preset: "PRESET DE FACÇÃO ATIVO", delay_first_wave: "ESPERA INICIAL DA PRIMEIRA ONDA (SEGUNDOS)",
             disable_bosses: "Desativar Todos os Bosses em Todos os Mapas", boss_open_zones: "Permitir Bosses em Qualquer Zona do Mapa",
             evt_raiders: "Raiders Aleatórios em Qualquer Mapa", evt_rogues: "Rogues Aleatórios em Qualquer Mapa",
-            custom_pmc: "Ativar Spawns Customizados de PMCs", custom_scav: "Ativar Spawns Customizados de Scavs", custom_sniper: "Ativar Spawns Customizados de Snipers",
-            overlap_distance: "DISTÂNCIA MÍNIMA ANTI-OVERLAP (METROS)", enable_overlap: "Ativar Remoção Anti-Overlap de Spawns"
+            custom_pmc: "Ativar Spawns Customizados de PMCs", custom_scav: "Ativar Spawns Customizados de Scavs", custom_sniper: "Ativar Spawns Customizados de Snipers", custom_player: "Ativar Spawns Customizados de Jogadores",
+            overlap_distance: "DISTÂNCIA MÍNIMA ANTI-OVERLAP (METROS)", enable_overlap: "Ativar Remoção Anti-Overlap de Spawns",
+            opt_balanced: "Equilibrado (50% PMC / 50% Scav)", opt_pmc_war: "Guerra de PMCs (70% PMC / 30% Scav)", opt_scav_infestation: "Infestação de Scavs (20% PMC / 80% Scav)", opt_quiet_raid: "Raid Tranquilo (Baixa Densidade)", opt_warzone: "Zona de Guerra (Alta Densidade)", opt_random: "Aleatório por Match",
+            sub_global_bosses: "CONTROLES GLOBAIS DE BOSSES", sub_boss_invasion: "SISTEMA DE INVASÃO DE BOSSES (BOSS INVASION)", enable_boss_invasion: "Ativar Sistema de Invasão de Bosses", invasion_map_chance: "CHANCE DE INVASÃO NO MAPA (%)", invasion_boss_chance: "CHANCE DE SPAWN DE CADA BOSS (%)", allowed_invasion_bosses: "BOSSES PERMITIDOS NA INVASÃO", allowed_invasion_maps: "MAPAS PERMITIDOS NA INVASÃO", sub_raiders_rogues: "GRUPOS DE RAIDERS E ROGUES ALEATÓRIOS", raider_chance: "CHANCE DE RAIDERS (%)", rogue_chance: "CHANCE DE ROGUES (%)",
+            waves_interval: "INTERVALO ENTRE ONDAS (SEGUNDOS)", sniper_chance: "CHANCE DE SPAWN DE SNIPER (%)", spawn_radius_sub: "RAIO DE SPAWN E BOLHA DE LIMITAÇÃO", min_safe_dist: "DISTÂNCIA MÍNIMA SEGURA DOS JOGADORES (M)", enable_bubble: "Ativar Bolha Máxima de Spawn/Despawn", max_bubble_dist: "DISTÂNCIA MÁXIMA DA BOLHA (M)", teleport_sub: "TELEPORT DE BOTS E DESPAWN DENSITÁRIO", enable_teleport: "Ativar Teleport de Bots Distantes", include_pmcs: "Incluir PMCs no Teleport / Despawn", teleport_min_dist: "DISTÂNCIA MÍNIMA DE ALVO DO TELEPORT (M)", teleport_check_interval: "INTERVALO DE VERIFICAÇÃO DO TELEPORT (SEGUNDOS)",
+            enable_bot_server: "Ativar Bot / Boss no Servidor", disable_followers: "Desativar Seguidores / Guardas", group_spawn_sub: "CONFIGURAÇÃO DE GRUPOS DE BOTS (GROUP SPAWN)", bot_group_chance: "CHANCE DE GRUPO DE BOTS (%)", max_group_size: "TAMANHO MÁXIMO DO GRUPO", boss_matrix_sub: "CHANCE E SELEÇÃO DE ZONAS POR MAPA", hotzone_chance: "HOTZONE CHANCE (%)", spawn_chance: "CHANCE DE SPAWN (%)", allowed_zones_label: "ZONAS PERMITIDAS DE SPAWN:",
+            diff_easy: "FÁCIL %", diff_normal: "NORMAL %", diff_hard: "DIFÍCIL %", diff_impossible: "IMPOSSÍVEL %",
+            toast_success: "SUCESSO", toast_saved: "Configuração salva com sucesso no servidor!", toast_reset: "PADRÃO", toast_reset_msg: "Configuração restaurada para os padrões originais.", toast_undo: "DESFAZER", toast_undo_msg: "Alterações locais desfeitas."
         },
         en: {
             nav_label: "SPAWN MANAGER", nav_maps: "MAP CONFIGURATIONS", nav_bosses: "BOSS CONFIGURATION",
             nav_difficulty: "BOT DIFFICULTY", nav_events: "EVENTS & INVASIONS", nav_custom: "CUSTOM SPAWNS",
-            title_maps: "GLOBAL MAP PARAMETERS", title_bosses: "BOSS, ELITE & BOT CONFIGURATION",
-            title_difficulty: "AI DIFFICULTY DISTRIBUTION", title_events: "EVENTS & SPECIAL INVASIONS",
-            title_custom: "CUSTOM SPAWNS & COORDINATES", undo: "UNDO", reset: "DEFAULT", reload: "RELOAD", save: "SAVE CONFIGURATION",
+            title_maps: "GLOBAL MAP PARAMETERS", title_per_map: "PER-MAP SPECIFIC CONFIGURATIONS",
+            title_bosses: "BOSS, ELITE & BOT CONFIGURATION", title_difficulty: "AI DIFFICULTY DISTRIBUTION",
+            title_events: "EVENTS & SPECIAL INVASIONS", title_custom: "CUSTOM SPAWNS & COORDINATES",
+            undo: "UNDO", reset: "DEFAULT", reload: "RELOAD", save: "SAVE CONFIGURATION",
+            synced: "SYNCED", unsaved: "UNSAVED CHANGES",
             active_preset: "ACTIVE FACTION PRESET", delay_first_wave: "INITIAL FIRST WAVE DELAY (SECONDS)",
             disable_bosses: "Disable All Bosses on All Maps", boss_open_zones: "Allow Bosses in Any Map Zone",
             evt_raiders: "Random Raiders on Any Map", evt_rogues: "Random Rogues on Any Map",
-            custom_pmc: "Enable Custom PMC Spawns", custom_scav: "Enable Custom Scav Spawns", custom_sniper: "Enable Custom Sniper Spawns",
-            overlap_distance: "MINIMUM ANTI-OVERLAP DISTANCE (METERS)", enable_overlap: "Enable Map Overlap Culling"
+            custom_pmc: "Enable Custom PMC Spawns", custom_scav: "Enable Custom Scav Spawns", custom_sniper: "Enable Custom Sniper Spawns", custom_player: "Enable Custom Player Spawns",
+            overlap_distance: "MINIMUM ANTI-OVERLAP DISTANCE (METERS)", enable_overlap: "Enable Map Overlap Culling",
+            opt_balanced: "Balanced (50% PMC / 50% Scav)", opt_pmc_war: "PMC War (70% PMC / 30% Scav)", opt_scav_infestation: "Scav Infestation (20% PMC / 80% Scav)", opt_quiet_raid: "Quiet Raid (Low Density)", opt_warzone: "Warzone (High Density & Aggression)", opt_random: "Random per Match",
+            sub_global_bosses: "GLOBAL BOSS CONTROLS", sub_boss_invasion: "BOSS INVASION SYSTEM", enable_boss_invasion: "Enable Boss Invasion System", invasion_map_chance: "MAP INVASION CHANCE (%)", invasion_boss_chance: "EACH BOSS SPAWN CHANCE (%)", allowed_invasion_bosses: "ALLOWED INVASION BOSSES", allowed_invasion_maps: "ALLOWED INVASION MAPS", sub_raiders_rogues: "RANDOM RAIDER & ROGUE GROUPS", raider_chance: "RAIDER SPAWN CHANCE (%)", rogue_chance: "ROGUE SPAWN CHANCE (%)",
+            waves_interval: "SECONDS BETWEEN WAVES (SECONDS)", sniper_chance: "SNIPER SPAWN CHANCE (%)", spawn_radius_sub: "SPAWN RADIUS & LIMITING BUBBLE", min_safe_dist: "MIN SAFE DISTANCE FROM PLAYERS (M)", enable_bubble: "Enable Max Spawn/Despawn Bubble", max_bubble_dist: "MAX BUBBLE LIMIT DISTANCE (M)", teleport_sub: "BOT TELEPORT & DENSITY DESPAWN", enable_teleport: "Enable Teleport for Distant Bots", include_pmcs: "Include PMCs in Teleport / Despawn", teleport_min_dist: "MINIMUM TARGET TELEPORT DISTANCE (M)", teleport_check_interval: "TELEPORT CHECK INTERVAL (SECONDS)",
+            enable_bot_server: "Enable Bot / Boss on Server", disable_followers: "Disable Followers / Guards", group_spawn_sub: "BOT GROUP SPAWN CONFIGURATION", bot_group_chance: "BOT GROUP SPAWN CHANCE (%)", max_group_size: "MAX GROUP SIZE", boss_matrix_sub: "PER-MAP SPAWN CHANCE & ZONE SELECTION", hotzone_chance: "HOTZONE CHANCE (%)", spawn_chance: "SPAWN CHANCE (%)", allowed_zones_label: "ALLOWED SPAWN ZONES:",
+            diff_easy: "EASY %", diff_normal: "NORMAL %", diff_hard: "HARD %", diff_impossible: "IMPOSSIBLE %",
+            toast_success: "SUCCESS", toast_saved: "Config saved successfully on server!", toast_reset: "DEFAULT", toast_reset_msg: "Config reset to original defaults.", toast_undo: "UNDO", toast_undo_msg: "Local changes undone."
         }
     };
 
     const PRESET_DESCRIPTIONS = {
-        "Balanced": "Equilibrado: Proporção standard (50% PMC / 50% Scav). Ideal para o gameplay vanilla com hordas dinâmicas.",
-        "PMC War": "Guerra de PMCs: Foco intenso em combate entre jogadores IA (70% PMC / 30% Scav).",
-        "Scav Infestation": "Infestação de Scavs: Mapa tomado por hordas de Scavs locais (20% PMC / 80% Scav).",
-        "Quiet Raid": "Raid Tranquilo: Baixa densidade geral de bots.",
-        "Warzone": "Zona de Guerra: Máxima densidade e agressividade extrema em todos os cantos.",
-        "Random": "Aleatório: O servidor sorteará um preset diferente no início de cada partida."
+        pt: {
+            "Balanced": "Equilibrado: Proporção standard (50% PMC / 50% Scav). Ideal para o gameplay vanilla com hordas dinâmicas.",
+            "PMC War": "Guerra de PMCs: Foco intenso em combate entre jogadores IA (70% PMC / 30% Scav).",
+            "Scav Infestation": "Infestação de Scavs: Mapa tomado por hordas de Scavs locais (20% PMC / 80% Scav).",
+            "Quiet Raid": "Raid Tranquilo: Baixa densidade geral de bots com ondas bem espaçadas.",
+            "Warzone": "Zona de Guerra: Máxima densidade e agressividade extrema em todos os cantos.",
+            "Random": "Aleatório: O servidor sorteará um preset diferente no início de cada partida."
+        },
+        en: {
+            "Balanced": "Balanced: Standard ratio (50% PMC / 50% Scav). Ideal for classic SPT gameplay with dynamic waves.",
+            "PMC War": "PMC War: Intense focus on AI PMC combat (70% PMC / 30% Scav).",
+            "Scav Infestation": "Scav Infestation: Map taken over by local Scav hordes (20% PMC / 80% Scav).",
+            "Quiet Raid": "Quiet Raid: Low overall bot density with well-spaced waves.",
+            "Warzone": "Warzone: Maximum density and extreme aggression in every area.",
+            "Random": "Random: The server will pick a random preset at the start of each raid."
+        }
     };
 
     const MAP_LIST = [
@@ -675,25 +701,25 @@ html, body {
     ];
 
     const BOT_CATEGORIES = [
-        { prop: "bossReshala", name: "Reshala (Customs)" },
-        { prop: "bossKilla", name: "Killa (Interchange)" },
-        { prop: "bossTagilla", name: "Tagilla (Factory)" },
-        { prop: "bossGluhar", name: "Glukhar (Reserve)" },
-        { prop: "bossSanitar", name: "Sanitar (Shoreline)" },
-        { prop: "bossShturman", name: "Shturman (Woods)" },
-        { prop: "bossZryachiy", name: "Zryachiy (Lighthouse)" },
-        { prop: "bossKaban", name: "Kaban (Streets)" },
-        { prop: "bossKolontay", name: "Kollontay (Ground Zero / Streets)" },
-        { prop: "bossKnight", name: "Goons (Knight, Big Pipe, Birdeye)" },
-        { prop: "bossPartisan", name: "Partisan" },
-        { prop: "pmcBot", name: "Raiders" },
-        { prop: "exUsec", name: "Rogues" },
-        { prop: "arenaFighterEvent", name: "Bloodhounds" },
-        { prop: "sectantPriest", name: "Cultistas" },
-        { prop: "gifter", name: "Santa (Gifter)" },
-        { prop: "sptBear", name: "BEAR (PMCs)" },
-        { prop: "sptUsec", name: "USEC (PMCs)" },
-        { prop: "assault", name: "SCAVs (Assault)" }
+        { prop: "bossReshala", name_pt: "Reshala (Customs)", name_en: "Reshala (Customs)" },
+        { prop: "bossKilla", name_pt: "Killa (Interchange)", name_en: "Killa (Interchange)" },
+        { prop: "bossTagilla", name_pt: "Tagilla (Factory)", name_en: "Tagilla (Factory)" },
+        { prop: "bossGluhar", name_pt: "Glukhar (Reserve)", name_en: "Glukhar (Reserve)" },
+        { prop: "bossSanitar", name_pt: "Sanitar (Shoreline)", name_en: "Sanitar (Shoreline)" },
+        { prop: "bossShturman", name_pt: "Shturman (Woods)", name_en: "Shturman (Woods)" },
+        { prop: "bossZryachiy", name_pt: "Zryachiy (Lighthouse)", name_en: "Zryachiy (Lighthouse)" },
+        { prop: "bossKaban", name_pt: "Kaban (Streets)", name_en: "Kaban (Streets)" },
+        { prop: "bossKolontay", name_pt: "Kollontay (Ground Zero / Streets)", name_en: "Kollontay (Ground Zero / Streets)" },
+        { prop: "bossKnight", name_pt: "Goons (Knight, Big Pipe, Birdeye)", name_en: "Goons (Knight, Big Pipe, Birdeye)" },
+        { prop: "bossPartisan", name_pt: "Partisan", name_en: "Partisan" },
+        { prop: "pmcBot", name_pt: "Raiders", name_en: "Raiders" },
+        { prop: "exUsec", name_pt: "Rogues", name_en: "Rogues" },
+        { prop: "arenaFighterEvent", name_pt: "Bloodhounds", name_en: "Bloodhounds" },
+        { prop: "sectantPriest", name_pt: "Cultistas", name_en: "Cultists" },
+        { prop: "gifter", name_pt: "Santa (Gifter)", name_en: "Santa (Gifter)" },
+        { prop: "sptBear", name_pt: "BEAR (PMCs)", name_en: "BEAR (PMCs)" },
+        { prop: "sptUsec", name_pt: "USEC (PMCs)", name_en: "USEC (PMCs)" },
+        { prop: "assault", name_pt: "SCAVs (Assault)", name_en: "SCAVs (Assault)" }
     ];
 
     const BOT_ZONES_MAP = {
@@ -728,6 +754,11 @@ html, body {
         btn.classList.add("is-active");
     };
 
+    function t(key) {
+        const dict = I18N[currentLang] || I18N.pt;
+        return dict[key] || key;
+    }
+
     function showToast(type, title, msg) {
         const container = document.getElementById("toastContainer");
         const toast = document.createElement("div");
@@ -744,12 +775,12 @@ html, body {
 
         if (dirty) {
             syncDot.className = "trl-screen-bar__dot trl-screen-bar__dot--live";
-            syncText.textContent = "UNSAVED CHANGES";
+            syncText.textContent = t("unsaved");
             syncText.style.color = "var(--trl-red-300)";
             btnUndo.removeAttribute("disabled");
         } else {
             syncDot.className = "trl-screen-bar__dot trl-screen-bar__dot--ok";
-            syncText.textContent = "SYNCED";
+            syncText.textContent = t("synced");
             syncText.style.color = "var(--trl-fg-muted)";
             btnUndo.setAttribute("disabled", "true");
         }
@@ -832,7 +863,7 @@ html, body {
             if (result && (result.status === "success" || result.err === 0)) {
                 stateInitial = JSON.parse(JSON.stringify(stateCurrent));
                 markDirty(false);
-                showToast("ok", "SUCESSO", "Configuração salva com sucesso no servidor!");
+                showToast("ok", t("toast_success"), t("toast_saved"));
             } else {
                 throw new Error(result?.message || result?.errmsg || "Erro do servidor ao salvar");
             }
@@ -844,10 +875,12 @@ html, body {
     async function resetConfig() {
         try {
             const res = await fetch("/trldynamicspawn/resetConfig", { method: "POST" });
-            const result = await res.json();
-            if (result.status === "success" || result.err === 0) {
+            let result = null;
+            try { result = await res.json(); } catch (e) {}
+
+            if (result && (result.status === "success" || result.err === 0)) {
                 await fetchConfig();
-                showToast("warn", "PADRÃO", "Configuração restaurada para os padrões originais.");
+                showToast("warn", t("toast_reset"), t("toast_reset_msg"));
             }
         } catch (err) {
             showToast("error", "ERRO", "Falha ao restaurar padrões: " + err.message);
@@ -862,7 +895,8 @@ html, body {
         // 1. MAP GLOBALS
         const activePresetEl = document.getElementById("activePreset");
         activePresetEl.value = stateCurrent.activePreset || "Balanced";
-        document.getElementById("presetDescriptionText").textContent = PRESET_DESCRIPTIONS[activePresetEl.value] || "";
+        const descDict = PRESET_DESCRIPTIONS[currentLang] || PRESET_DESCRIPTIONS.pt;
+        document.getElementById("presetDescriptionText").textContent = descDict[activePresetEl.value] || "";
 
         const globalTimer = stateCurrent.mapTimers?.bigmap?.delayBeforeFirstWave ?? 60;
         setSliderVal("delayBeforeFirstWave", globalTimer);
@@ -953,7 +987,7 @@ html, body {
             <div class="trl-form-grid">
                 <div class="trl-field">
                     <label class="trl-field__label">
-                        <span>INTERVALO ENTRE ONDAS (SEGUNDOS)</span>
+                        <span>${t('waves_interval')}</span>
                         <span id="val_mc_waves" class="trl-slider-val">${cfg.secondsBetweenWaves ?? 360}</span>
                     </label>
                     <input type="range" id="mc_waves" class="trl-slider" min="30" max="3600" step="10" value="${cfg.secondsBetweenWaves ?? 360}">
@@ -961,7 +995,7 @@ html, body {
 
                 <div class="trl-field">
                     <label class="trl-field__label">
-                        <span>CHANCE DE SPAWN DE SNIPER (%)</span>
+                        <span>${t('sniper_chance')}</span>
                         <span id="val_mc_sniper" class="trl-slider-val">${cfg.sniperChance ?? 30}</span>
                     </label>
                     <input type="range" id="mc_sniper" class="trl-slider" min="0" max="100" value="${cfg.sniperChance ?? 30}">
@@ -970,11 +1004,11 @@ html, body {
 
             <div class="trl-divider"></div>
 
-            <div class="trl-h3">RAIO DE SPAWN E BOLHA DE LIMITAÇÃO</div>
+            <div class="trl-h3">${t('spawn_radius_sub')}</div>
             <div class="trl-form-grid">
                 <div class="trl-field">
                     <label class="trl-field__label">
-                        <span>DISTÂNCIA MÍNIMA SEGURA DOS JOGADORES (M)</span>
+                        <span>${t('min_safe_dist')}</span>
                         <span id="val_mc_safe" class="trl-slider-val">${cfg.safeZoneDistance ?? 30.0}</span>
                     </label>
                     <input type="range" id="mc_safe" class="trl-slider" min="0" max="150" step="5" value="${cfg.safeZoneDistance ?? 30.0}">
@@ -983,11 +1017,11 @@ html, body {
                 <div>
                     <label class="trl-switch">
                         <input type="checkbox" id="mc_bubble_enable" ${cfg.enableSpawnBubble ? 'checked' : ''}>
-                        <span>Ativar Bolha Máxima de Spawn/Despawn</span>
+                        <span>${t('enable_bubble')}</span>
                     </label>
                     <div class="trl-field">
                         <label class="trl-field__label">
-                            <span>DISTÂNCIA MÁXIMA DA BOLHA (M)</span>
+                            <span>${t('max_bubble_dist')}</span>
                             <span id="val_mc_despawn_dist" class="trl-slider-val">${cfg.despawnDistance ?? 300}</span>
                         </label>
                         <input type="range" id="mc_despawn_dist" class="trl-slider" min="50" max="1000" step="10" value="${cfg.despawnDistance ?? 300}">
@@ -997,24 +1031,24 @@ html, body {
 
             <div class="trl-divider"></div>
 
-            <div class="trl-h3">TELEPORT DE BOTS E DESPAWN DENSITÁRIO</div>
+            <div class="trl-h3">${t('teleport_sub')}</div>
             <div class="trl-form-grid">
                 <div>
                     <label class="trl-switch">
                         <input type="checkbox" id="mc_teleport_enable" ${cfg.enableDespawn ? 'checked' : ''}>
-                        <span>Ativar Teleport de Bots Distantes</span>
+                        <span>${t('enable_teleport')}</span>
                     </label>
                     <br>
                     <label class="trl-switch" style="margin-top:8px;">
                         <input type="checkbox" id="mc_despawn_pmcs" ${cfg.despawnPMCs ? 'checked' : ''}>
-                        <span>Incluir PMCs no Teleport / Despawn</span>
+                        <span>${t('include_pmcs')}</span>
                     </label>
                 </div>
 
                 <div>
                     <div class="trl-field">
                         <label class="trl-field__label">
-                            <span>DISTÂNCIA MÍNIMA DE ALVO DO TELEPORT (M)</span>
+                            <span>${t('teleport_min_dist')}</span>
                             <span id="val_mc_teleport_dist" class="trl-slider-val">${cfg.teleportMinDistance ?? 100}</span>
                         </label>
                         <input type="range" id="mc_teleport_dist" class="trl-slider" min="30" max="300" step="10" value="${cfg.teleportMinDistance ?? 100}">
@@ -1022,7 +1056,7 @@ html, body {
 
                     <div class="trl-field">
                         <label class="trl-field__label">
-                            <span>INTERVALO DE VERIFICAÇÃO DO TELEPORT (SEGUNDOS)</span>
+                            <span>${t('teleport_check_interval')}</span>
                             <span id="val_mc_despawn_interval" class="trl-slider-val">${cfg.despawnInterval ?? 20}</span>
                         </label>
                         <input type="range" id="mc_despawn_interval" class="trl-slider" min="5" max="300" step="5" value="${cfg.despawnInterval ?? 20}">
@@ -1072,7 +1106,7 @@ html, body {
         BOT_CATEGORIES.forEach(b => {
             const btn = document.createElement("button");
             btn.className = `trl-subtab-btn ${b.prop === activeBossProp ? 'is-active' : ''}`;
-            btn.textContent = b.name;
+            btn.textContent = currentLang === 'en' ? b.name_en : b.name_pt;
             btn.onclick = () => {
                 activeBossProp = b.prop;
                 renderBossSubtabs();
@@ -1085,31 +1119,32 @@ html, body {
     function renderActiveBossConfig() {
         const container = document.getElementById("bossConfigContainer");
         const botCat = BOT_CATEGORIES.find(b => b.prop === activeBossProp) || BOT_CATEGORIES[0];
+        const botTitle = currentLang === 'en' ? botCat.name_en : botCat.name_pt;
         const bossInfo = stateCurrent.eliteConfig?.[botCat.prop] || {};
         const isRegularBot = (botCat.prop === "sptBear" || botCat.prop === "sptUsec" || botCat.prop === "assault");
 
         container.innerHTML = `
-            <div class="trl-h3" style="color:var(--trl-accent);">${botCat.name.toUpperCase()}</div>
+            <div class="trl-h3" style="color:var(--trl-accent);">${botTitle.toUpperCase()}</div>
             <div class="trl-form-grid" style="margin-bottom:16px;">
                 <label class="trl-switch">
                     <input type="checkbox" id="bc_enable" ${bossInfo.enable !== false ? 'checked' : ''}>
-                    <span>Ativar Bot / Boss no Servidor</span>
+                    <span>${t('enable_bot_server')}</span>
                 </label>
 
                 ${!isRegularBot && botCat.prop !== "pmcBot" ? `
                 <label class="trl-switch">
                     <input type="checkbox" id="bc_disable_followers" ${bossInfo.disableFollowers ? 'checked' : ''}>
-                    <span>Desativar Seguidores / Guardas</span>
+                    <span>${t('disable_followers')}</span>
                 </label>
                 ` : '<div></div>'}
             </div>
 
             ${isRegularBot ? `
-            <div class="trl-h3">CONFIGURAÇÃO DE GRUPOS DE BOTS (GROUP SPAWN)</div>
+            <div class="trl-h3">${t('group_spawn_sub')}</div>
             <div class="trl-form-grid">
                 <div class="trl-field">
                     <label class="trl-field__label">
-                        <span>CHANCE DE GRUPO DE BOTS (%)</span>
+                        <span>${t('bot_group_chance')}</span>
                         <span id="val_bc_group_chance" class="trl-slider-val">${bossInfo.groupChance ?? 30}</span>
                     </label>
                     <input type="range" id="bc_group_chance" class="trl-slider" min="0" max="100" value="${bossInfo.groupChance ?? 30}">
@@ -1117,7 +1152,7 @@ html, body {
 
                 <div class="trl-field">
                     <label class="trl-field__label">
-                        <span>TAMANHO MÁXIMO DO GRUPO</span>
+                        <span>${t('max_group_size')}</span>
                         <span id="val_bc_max_group" class="trl-slider-val">${bossInfo.maxGroupSize ?? 3}</span>
                     </label>
                     <input type="range" id="bc_max_group" class="trl-slider" min="1" max="5" value="${bossInfo.maxGroupSize ?? 3}">
@@ -1126,7 +1161,7 @@ html, body {
             <div class="trl-divider"></div>
             ` : ''}
 
-            <div class="trl-h3">CHANCE E SELEÇÃO DE ZONAS POR MAPA</div>
+            <div class="trl-h3">${t('boss_matrix_sub')}</div>
             <div id="bossMapMatrixContainer"></div>
         `;
 
@@ -1155,7 +1190,7 @@ html, body {
         const container = document.getElementById("bossMapMatrixContainer");
         const bossInfo = ensureBossInfo(bossProp);
         const isRegularBot = (bossProp === "sptBear" || bossProp === "sptUsec" || bossProp === "assault");
-        const chanceLabel = isRegularBot ? "HOTZONE CHANCE (%)" : "CHANCE DE SPAWN (%)";
+        const chanceLabel = isRegularBot ? t('hotzone_chance') : t('spawn_chance');
         container.innerHTML = "";
 
         MAP_LIST.forEach(m => {
@@ -1178,12 +1213,12 @@ html, body {
                 <div class="trl-boss-card__title">${m.name}</div>
                 <div class="trl-field">
                     <label class="trl-field__label">
-                        <span>${chanceLabel} EM ${m.name.toUpperCase()}</span>
+                        <span>${chanceLabel} (${m.name.toUpperCase()})</span>
                         <span id="val_sc_${m.key}" class="trl-slider-val">${chanceVal}</span>
                     </label>
                     <input type="range" id="sc_${m.key}" class="trl-slider" min="0" max="100" value="${chanceVal}">
                 </div>
-                <div style="font-size:11px; color:var(--trl-fg-muted); margin-bottom:4px; text-transform:uppercase;">ZONAS PERMITIDAS DE SPAWN:</div>
+                <div style="font-size:11px; color:var(--trl-fg-muted); margin-bottom:4px; text-transform:uppercase;">${t('allowed_zones_label')}</div>
                 <div class="trl-zone-matrix">${zonesHtml}</div>
             `;
 
@@ -1234,7 +1269,7 @@ html, body {
         const factions = [
             { id: "pmc", name: "PMCs (USEC / BEAR)", prop: "pmcDifficulty" },
             { id: "scav", name: "SCAVs", prop: "scavDifficulty" },
-            { id: "boss", name: "CHEFÕES / BOSSES", prop: "bossDifficulty" }
+            { id: "boss", name: currentLang === 'en' ? "BOSSES / ELITES" : "CHEFÕES / BOSSES", prop: "bossDifficulty" }
         ];
 
         factions.forEach(f => {
@@ -1258,19 +1293,19 @@ html, body {
         container.innerHTML = `
             <div class="trl-form-grid">
                 <div class="trl-field">
-                    <label class="trl-field__label">FÁCIL (EASY) % <span id="val_df_easy" class="trl-slider-val">${diffObj.easy ?? 10}</span></label>
+                    <label class="trl-field__label">${t('diff_easy')} <span id="val_df_easy" class="trl-slider-val">${diffObj.easy ?? 10}</span></label>
                     <input type="range" id="df_easy" class="trl-slider" min="0" max="100" value="${diffObj.easy ?? 10}">
                 </div>
                 <div class="trl-field">
-                    <label class="trl-field__label">NORMAL % <span id="val_df_normal" class="trl-slider-val">${diffObj.normal ?? 50}</span></label>
+                    <label class="trl-field__label">${t('diff_normal')} <span id="val_df_normal" class="trl-slider-val">${diffObj.normal ?? 50}</span></label>
                     <input type="range" id="df_normal" class="trl-slider" min="0" max="100" value="${diffObj.normal ?? 50}">
                 </div>
                 <div class="trl-field">
-                    <label class="trl-field__label">DIFÍCIL (HARD) % <span id="val_df_hard" class="trl-slider-val">${diffObj.hard ?? 30}</span></label>
+                    <label class="trl-field__label">${t('diff_hard')} <span id="val_df_hard" class="trl-slider-val">${diffObj.hard ?? 30}</span></label>
                     <input type="range" id="df_hard" class="trl-slider" min="0" max="100" value="${diffObj.hard ?? 30}">
                 </div>
                 <div class="trl-field">
-                    <label class="trl-field__label">IMPOSSÍVEL % <span id="val_df_impossible" class="trl-slider-val">${diffObj.impossible ?? 10}</span></label>
+                    <label class="trl-field__label">${t('diff_impossible')} <span id="val_df_impossible" class="trl-slider-val">${diffObj.impossible ?? 10}</span></label>
                     <input type="range" id="df_impossible" class="trl-slider" min="0" max="100" value="${diffObj.impossible ?? 10}">
                 </div>
             </div>
@@ -1382,6 +1417,9 @@ html, body {
             const key = el.getAttribute("data-i18n");
             if (dict[key]) el.textContent = dict[key];
         });
+
+        // Re-render dynamic elements when language changes
+        renderUI();
     }
 
     // INICIALIZAÇÃO EVENT LISTENERS
@@ -1390,7 +1428,8 @@ html, body {
         fetchConfig();
 
         document.getElementById("activePreset").onchange = (e) => {
-            document.getElementById("presetDescriptionText").textContent = PRESET_DESCRIPTIONS[e.target.value] || "";
+            const descDict = PRESET_DESCRIPTIONS[currentLang] || PRESET_DESCRIPTIONS.pt;
+            document.getElementById("presetDescriptionText").textContent = descDict[e.target.value] || "";
             markDirty(true);
         };
 
@@ -1430,7 +1469,7 @@ html, body {
                 stateCurrent = JSON.parse(JSON.stringify(stateInitial));
                 renderUI();
                 markDirty(false);
-                showToast("info", "UNDO", "Alterações locais desfeitas.");
+                showToast("info", t("toast_undo"), t("toast_undo_msg"));
             }
         };
 
