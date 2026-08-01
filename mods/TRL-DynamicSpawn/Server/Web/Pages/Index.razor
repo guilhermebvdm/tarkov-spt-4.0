@@ -442,6 +442,47 @@ html, body {
 
                     <div class="trl-divider"></div>
 
+                    <!-- A UNIÃO: MOAR + ABPS -->
+                    <div class="trl-h3" data-i18n="home_union_title">A UNIÃO: LÓGICA MOAR + CONTROLE ABPS</div>
+                    <p style="color: var(--trl-fg-muted); line-height: 1.6; margin-bottom: var(--trl-space-3);" data-i18n="home_union_body">
+                        Este projeto nasceu da fusão das duas melhores filosofias de mods de spawn do SPTarkov:
+                    </p>
+                    <div class="trl-form-grid" style="margin-bottom: var(--trl-space-4);">
+                        <div style="background: var(--trl-surface-1); border: 1px solid var(--trl-edge); padding: 14px;">
+                            <div style="font-family:var(--trl-font-display); text-transform:uppercase; font-weight:bold; color:var(--trl-accent); margin-bottom:6px;" data-i18n="home_moar_title">A Lógica do MOAR:</div>
+                            <div style="font-size:12px; color:var(--trl-fg-muted); line-height:1.5;" data-i18n="home_moar_desc">Herda o conceito de ondas contínuas de reforços e o sistema de Custom Spawns. O mod decide a distribuição de facções e envia reforços à medida que os bots morrem.</div>
+                        </div>
+
+                        <div style="background: var(--trl-surface-1); border: 1px solid var(--trl-edge); padding: 14px;">
+                            <div style="font-family:var(--trl-font-display); text-transform:uppercase; font-weight:bold; color:var(--trl-accent); margin-bottom:6px;" data-i18n="home_abps_title">O Controle do ABPS (Advanced Bot Placement System):</div>
+                            <div style="font-size:12px; color:var(--trl-fg-muted); line-height:1.5;" data-i18n="home_abps_desc">Traz a interface avançada e um nível de controle absurdo sobre Bosses e Elites. Você pode configurar as chances de spawn e, mais importante, exatamente em quais zonas específicas cada Boss tem permissão para aparecer em cada mapa.</div>
+                        </div>
+                    </div>
+
+                    <div class="trl-divider"></div>
+
+                    <!-- SISTEMA DE HORDAS E LIMITES (BOTCAP) -->
+                    <div class="trl-h3" data-i18n="home_horde_title">SISTEMA DE HORDAS E LIMITES (BOTCAP)</div>
+                    <p style="color: var(--trl-fg-muted); line-height: 1.6; margin-bottom: var(--trl-space-3);" data-i18n="home_horde_body">
+                        O mod utiliza o sistema de spawn em hordas (Spawn Wave). Veja como funciona:
+                    </p>
+                    <div style="display:flex; flex-direction:column; gap:10px; margin-bottom: var(--trl-space-4);">
+                        <div style="background: var(--trl-surface-1); border: 1px solid var(--trl-edge); padding: 12px 14px;">
+                            <strong style="color:var(--trl-amber-400);" data-i18n="home_horde_timers_title">Temporizadores:</strong>
+                            <span style="font-size:12px; color:var(--trl-fg-muted);" data-i18n="home_horde_timers_desc"> Você configura na página de Mapas o tempo para a primeira onda (Delay Before First Wave) e o intervalo entre as ondas subsequentes (Seconds Between Waves).</span>
+                        </div>
+                        <div style="background: var(--trl-surface-1); border: 1px solid var(--trl-edge); padding: 12px 14px;">
+                            <strong style="color:var(--trl-amber-400);" data-i18n="home_horde_fill_title">Preenchimento Inteligente:</strong>
+                            <span style="font-size:12px; color:var(--trl-fg-muted);" data-i18n="home_horde_fill_desc"> A cada ciclo, o mod verifica quantos bots estão vivos. Se o mapa suporta 20 bots e só tem 10 vivos, a próxima onda tentará gerar 10 novos bots para preencher o mapa novamente.</span>
+                        </div>
+                        <div style="background: var(--trl-surface-1); border: 1px solid var(--trl-edge); padding: 12px 14px;">
+                            <strong style="color:var(--trl-amber-400);" data-i18n="home_horde_elite_title">Prioridade de Elites:</strong>
+                            <span style="font-size:12px; color:var(--trl-fg-muted);" data-i18n="home_horde_elite_desc"> Bosses, Rogues, Raiders e Cultistas sempre aparecem primeiro, assim que o mapa carrega. Se Reshala tiver 100% de chance no Dorms, ele e seus guardas reservam suas vagas no BotCap imediatamente.</span>
+                        </div>
+                    </div>
+
+                    <div class="trl-divider"></div>
+
                     <!-- INSTRUÇÕES E GUIA RÁPIDO -->
                     <div class="trl-h3" data-i18n="home_section_guide_title">INSTRUÇÕES E GUIA RÁPIDO</div>
                     <div class="trl-form-grid" style="margin-bottom: var(--trl-space-4);">
@@ -718,6 +759,13 @@ html, body {
             diff_easy: "FÁCIL %", diff_normal: "NORMAL %", diff_hard: "DIFÍCIL %", diff_impossible: "IMPOSSÍVEL %", diff_bosses_tab: "CHEFÕES / BOSSES",
             home_hero_title: "TRL - DYNAMIC SPAWN SYSTEM", home_hero_subtitle: "Gerenciador Avançado de Ondas, Injeção Dinâmica de Bots e Controle em Tempo Real para SPT Tarkov 4.0",
             home_section_desc_title: "SOBRE O TRL-DYNAMIC SPAWN", home_desc_body: "O TRL-DynamicSpawn é um sistema de controle de spawns de alta performance projetado para Single Player Tarkov. Ele substitui os geradores rígidos de ondas nativos por um motor reativo que equilibra a densidade de PMCs, Scavs e Chefões, prevenindo o surgimento de bots visíveis ou sobrepostos (overlap) e garantindo uma experiência de combate dinâmica sem comprometer o desempenho do servidor.",
+            home_union_title: "A UNIÃO: LÓGICA MOAR + CONTROLE ABPS", home_union_body: "Este projeto nasceu da fusão das duas melhores filosofias de mods de spawn do SPTarkov:",
+            home_moar_title: "A Lógica do MOAR:", home_moar_desc: "Herda o conceito de ondas contínuas de reforços e o sistema de Custom Spawns. O mod decide a distribuição de facções e envia reforços à medida que os bots morrem.",
+            home_abps_title: "O Controle do ABPS (Advanced Bot Placement System):", home_abps_desc: "Traz a interface avançada e um nível de controle absurdo sobre Bosses e Elites. Você pode configurar as chances de spawn e, mais importante, exatamente em quais zonas específicas cada Boss tem permissão para aparecer em cada mapa.",
+            home_horde_title: "SISTEMA DE HORDAS E LIMITES (BOTCAP)", home_horde_body: "O mod utiliza o sistema de spawn em hordas (Spawn Wave). Veja como funciona:",
+            home_horde_timers_title: "Temporizadores:", home_horde_timers_desc: "Você configura na página de Mapas o tempo para a primeira onda (Delay Before First Wave) e o intervalo entre as ondas subsequentes (Seconds Between Waves).",
+            home_horde_fill_title: "Preenchimento Inteligente:", home_horde_fill_desc: "A cada ciclo, o mod verifica quantos bots estão vivos. Se o mapa suporta 20 bots e só tem 10 vivos, a próxima onda tentará gerar 10 novos bots para preencher o mapa novamente.",
+            home_horde_elite_title: "Prioridade de Elites:", home_horde_elite_desc: "Bosses, Rogues, Raiders e Cultistas sempre aparecem primeiro, assim que o mapa carrega. Se Reshala tiver 100% de chance no Dorms, ele e seus guardas reservam suas vagas no BotCap imediatamente.",
             home_section_guide_title: "INSTRUÇÕES E GUIA RÁPIDO", guide_step1_title: "1. CONFIGURAÇÃO DE MAPAS", guide_step1_desc: "Ajuste o preset global de facções (Guerra de PMCs, Equilibrado, Infestação de Scavs) e defina o intervalo entre ondas, raio de segurança e distância de remoção anti-overlap para cada mapa individualmente.",
             guide_step2_title: "2. CONTROLE DE BOSSES E ELITES", guide_step2_desc: "Gerencie a chance de spawn de cada chefão por mapa e defina as zonas de patrulha nativas de forma visual. É possível desativar guardas/seguidores ou ajustar spawns em grupo para Scavs e PMCs.",
             guide_step3_title: "3. DIFICULDADE DA IA", guide_step3_desc: "Personalize os pesos percentuais de dificuldade (Fácil, Normal, Difícil, Impossível) para PMCs, Scavs e Chefões. O servidor sorteia a dificuldade de cada bot com base nessa curva.",
@@ -747,6 +795,13 @@ html, body {
             diff_easy: "EASY %", diff_normal: "NORMAL %", diff_hard: "HARD %", diff_impossible: "IMPOSSIBLE %", diff_bosses_tab: "BOSSES / ELITES",
             home_hero_title: "TRL - DYNAMIC SPAWN SYSTEM", home_hero_subtitle: "Advanced Wave Manager, Dynamic Bot Injection & Real-Time Control for SPT Tarkov 4.0",
             home_section_desc_title: "ABOUT TRL-DYNAMIC SPAWN", home_desc_body: "TRL-DynamicSpawn is a high-performance spawn management system designed for Single Player Tarkov. It replaces rigid native wave generators with a reactive engine that balances PMC, Scav, and Boss density, preventing visible or overlapping bot spawns and delivering a dynamic combat experience without sacrificing server performance.",
+            home_union_title: "THE UNION: MOAR LOGIC + ABPS CONTROL", home_union_body: "This project was born from the idea of merging two great philosophies of spawn mods:",
+            home_moar_title: "The Logic of MOAR:", home_moar_desc: "Inherits the concept of continuous waves and the Custom Spawns system. The mod decides faction distribution and keeps sending reinforcements as bots die.",
+            home_abps_title: "The Control of ABPS (Advanced Bot Placement System):", home_abps_desc: "Brings the incredible interface and absurd level of control over Bosses and Elites. You can configure spawn chances and, most importantly, in exactly which specific zones each Boss is allowed to appear on each map.",
+            home_horde_title: "HORDE SYSTEM & LIMITS (BOTCAP)", home_horde_body: "The mod uses the horde spawn system (Spawn Wave). Here is how it works:",
+            home_horde_timers_title: "Timers:", home_horde_timers_desc: "You configure in the Map Configs page the time for the first wave (Delay Before First Wave) and the interval between subsequent waves (Seconds Between Waves).",
+            home_horde_fill_title: "Smart Filling:", home_horde_fill_desc: "At each cycle, the mod checks how many bots are alive. If the map supports 20 bots and only has 10 alive, the next wave will try to generate 10 new bots to fill the map again.",
+            home_horde_elite_title: "Elite Priority:", home_horde_elite_desc: "Bosses, Rogues, Raiders, and Cultists always spawn first, as soon as the map loads. If Reshala has a 100% chance to spawn at Dorms, he and his guards will reserve their spots in the BotCap immediately.",
             home_section_guide_title: "INSTRUCTIONS & QUICK START GUIDE", guide_step1_title: "1. MAP CONFIGURATIONS", guide_step1_desc: "Adjust global faction presets (PMC War, Balanced, Scav Infestation) and configure wave intervals, min safe radius, and anti-overlap culling per map.",
             guide_step2_title: "2. BOSS & ELITE CONTROLS", guide_step2_desc: "Manage individual boss spawn chances per map and graphically select native patrol zones. Toggle followers/guards or configure bot group spawn sizes.",
             guide_step3_title: "3. AI DIFFICULTY DISTRIBUTION", guide_step3_desc: "Customize difficulty weight percentages (Easy, Normal, Hard, Impossible) for PMCs, Scavs, and Bosses. The server selects bot difficulty using this distribution.",
