@@ -391,7 +391,10 @@ html, body {
     <aside class="trl-sidebar">
         <nav class="trl-nav">
             <div class="trl-nav__label" data-i18n="nav_label">GERENCIADOR DE SPAWN</div>
-            <button type="button" class="trl-nav__item is-active" onclick="switchMainTab('sec-map-configs', this)">
+            <button type="button" class="trl-nav__item is-active" onclick="switchMainTab('sec-home', this)">
+                <span data-i18n="nav_home">INÍCIO</span>
+            </button>
+            <button type="button" class="trl-nav__item" onclick="switchMainTab('sec-map-configs', this)">
                 <span data-i18n="nav_maps">CONFIGURAÇÃO DE MAPAS</span>
             </button>
             <button type="button" class="trl-nav__item" onclick="switchMainTab('sec-boss-config', this)">
@@ -411,8 +414,80 @@ html, body {
 
     <!-- MAIN CONTENT AREA -->
     <main class="trl-main">
+        <!-- 0. HOME / INÍCIO -->
+        <section id="sec-home" class="trl-view-section is-active">
+            <div class="trl-panel">
+                <div class="trl-screen-bar">
+                    <span class="trl-screen-bar__title" data-i18n="title_home">VISÃO GERAL DO MOD & INSTRUÇÕES</span>
+                </div>
+                <div class="trl-panel__body">
+                    <!-- HERO BANNER -->
+                    <div style="background: var(--trl-surface-2); border: 1px solid var(--trl-edge); border-left: 3px solid var(--trl-accent); padding: var(--trl-space-4); margin-bottom: var(--trl-space-4);">
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+                            <div>
+                                <h2 style="font-family: var(--trl-font-display); text-transform: uppercase; margin: 0 0 6px 0; font-size: 20px; color: var(--trl-ink);" data-i18n="home_hero_title">TRL - DYNAMIC SPAWN SYSTEM</h2>
+                                <div style="color: var(--trl-fg-muted); font-size: 13px;" data-i18n="home_hero_subtitle">Gerenciador Avançado de Ondas, Injeção Dinâmica de Bots e Controle em Tempo Real para SPT Tarkov 4.0</div>
+                            </div>
+                            <div style="display:flex; gap:8px;">
+                                <span style="background:var(--trl-ground-deep); border:1px solid var(--trl-edge); padding:4px 8px; font-family:var(--trl-font-mono); font-size:11px; color:var(--trl-success);">SPT 4.0.x READY</span>
+                                <span style="background:var(--trl-ground-deep); border:1px solid var(--trl-edge); padding:4px 8px; font-family:var(--trl-font-mono); font-size:11px; color:var(--trl-accent);">v1.0.0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- DESCRIÇÃO DO MOD -->
+                    <div class="trl-h3" data-i18n="home_section_desc_title">SOBRE O TRL-DYNAMIC SPAWN</div>
+                    <p style="color: var(--trl-fg-muted); line-height: 1.6; margin-bottom: var(--trl-space-4);" data-i18n="home_desc_body">
+                        O <strong>TRL-DynamicSpawn</strong> é um sistema de controle de spawns de alta performance projetado para Single Player Tarkov. Ele substitui os geradores rígidos de ondas nativos por um motor reativo que equilibra a densidade de PMCs, Scavs e Chefões, prevenindo o surgimento de bots visíveis ou sobrepostos (overlap) e garantindo uma experiência de combate dinâmica sem comprometer o desempenho do servidor.
+                    </p>
+
+                    <div class="trl-divider"></div>
+
+                    <!-- INSTRUÇÕES E GUIA RÁPIDO -->
+                    <div class="trl-h3" data-i18n="home_section_guide_title">INSTRUÇÕES E GUIA RÁPIDO</div>
+                    <div class="trl-form-grid" style="margin-bottom: var(--trl-space-4);">
+                        <div style="background: var(--trl-surface-1); border: 1px solid var(--trl-edge); padding: 14px;">
+                            <div style="font-family:var(--trl-font-display); text-transform:uppercase; font-weight:bold; color:var(--trl-accent); margin-bottom:6px;" data-i18n="guide_step1_title">1. CONFIGURAÇÃO DE MAPAS</div>
+                            <div style="font-size:12px; color:var(--trl-fg-muted); line-height:1.5;" data-i18n="guide_step1_desc">Ajuste o preset global de facções (Guerra de PMCs, Equilibrado, Infestação de Scavs) e defina o intervalo entre ondas, raio de segurança e distância de remoção anti-overlap para cada mapa individualmente.</div>
+                        </div>
+
+                        <div style="background: var(--trl-surface-1); border: 1px solid var(--trl-edge); padding: 14px;">
+                            <div style="font-family:var(--trl-font-display); text-transform:uppercase; font-weight:bold; color:var(--trl-accent); margin-bottom:6px;" data-i18n="guide_step2_title">2. CONTROLE DE BOSSES E ELITES</div>
+                            <div style="font-size:12px; color:var(--trl-fg-muted); line-height:1.5;" data-i18n="guide_step2_desc">Gerencie a chance de spawn de cada chefão por mapa e defina as zonas de patrulha nativas de forma visual. É possível desativar guardas/seguidores ou ajustar spawns em grupo para Scavs e PMCs.</div>
+                        </div>
+
+                        <div style="background: var(--trl-surface-1); border: 1px solid var(--trl-edge); padding: 14px;">
+                            <div style="font-family:var(--trl-font-display); text-transform:uppercase; font-weight:bold; color:var(--trl-accent); margin-bottom:6px;" data-i18n="guide_step3_title">3. DIFICULDADE DA IA</div>
+                            <div style="font-size:12px; color:var(--trl-fg-muted); line-height:1.5;" data-i18n="guide_step3_desc">Personalize os pesos percentuais de dificuldade (Fácil, Normal, Difícil, Impossível) para PMCs, Scavs e Chefões. O servidor sorteia a dificuldade de cada bot com base nessa curva.</div>
+                        </div>
+
+                        <div style="background: var(--trl-surface-1); border: 1px solid var(--trl-edge); padding: 14px;">
+                            <div style="font-family:var(--trl-font-display); text-transform:uppercase; font-weight:bold; color:var(--trl-accent); margin-bottom:6px;" data-i18n="guide_step4_title">4. EVENTOS E INVASÕES</div>
+                            <div style="font-size:12px; color:var(--trl-fg-muted); line-height:1.5;" data-i18n="guide_step4_desc">Configure o sistema de Invasão de Bosses para permitir que chefões apareçam em mapas não nativos, além de habilitar grupos aleatórios de Raiders e Rogues em qualquer localização.</div>
+                        </div>
+                    </div>
+
+                    <div class="trl-divider"></div>
+
+                    <!-- DICAS E RECOMENDAÇÕES DE DESEMPENHO -->
+                    <div class="trl-h3" data-i18n="home_section_tips_title">DICAS E RECOMENDAÇÕES DE DESEMPENHO</div>
+                    <div style="display:flex; flex-direction:column; gap:10px;">
+                        <div style="background: rgba(154, 210, 122, 0.08); border-left: 3px solid var(--trl-success); padding: 10px 14px; font-size: 12px; color: var(--trl-ink);">
+                            <strong style="color:var(--trl-success);" data-i18n="tip_perf_title">💡 Otimização de FPS (Teleport & Despawn):</strong>
+                            <span data-i18n="tip_perf_desc"> Mantenha o 'Teleport de Bots Distantes' ativado. Isso recicla automaticamente bots que se distanciaram demais do combate, preservando a taxa de quadros (FPS) em mapas grandes como Streets e Lighthouse.</span>
+                        </div>
+
+                        <div style="background: rgba(204, 154, 62, 0.08); border-left: 3px solid var(--trl-amber-400); padding: 10px 14px; font-size: 12px; color: var(--trl-ink);">
+                            <strong style="color:var(--trl-amber-400);" data-i18n="tip_save_title">⚠️ Persistência sem Reiniciar:</strong>
+                            <span data-i18n="tip_save_desc"> Ao salvar suas configurações pelo painel, as alterações são gravadas diretamente no servidor (config/config.json) e aplicadas na próxima partida ou onda de spawn imediatamente!</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- 1. MAP CONFIGS -->
-        <section id="sec-map-configs" class="trl-view-section is-active">
+        <section id="sec-map-configs" class="trl-view-section">
             <div class="trl-panel">
                 <div class="trl-screen-bar">
                     <span class="trl-screen-bar__title" data-i18n="title_maps">PARÂMETROS GLOBAIS DE MAPA</span>
@@ -625,9 +700,9 @@ html, body {
 (function() {
     const I18N = {
         pt: {
-            nav_label: "GERENCIADOR DE SPAWN", nav_maps: "CONFIGURAÇÃO DE MAPAS", nav_bosses: "CONFIGURAÇÃO DE BOSSES",
+            nav_label: "GERENCIADOR DE SPAWN", nav_home: "INÍCIO", nav_maps: "CONFIGURAÇÃO DE MAPAS", nav_bosses: "CONFIGURAÇÃO DE BOSSES",
             nav_difficulty: "DIFICULDADE DE BOTS", nav_events: "EVENTOS & INVASÕES", nav_custom: "SPAWNS CUSTOMIZADOS",
-            title_maps: "PARÂMETROS GLOBAIS DE MAPA", title_per_map: "CONFIGURAÇÕES ESPECÍFICAS DE CADA MAPA",
+            title_home: "VISÃO GERAL DO MOD & INSTRUÇÕES", title_maps: "PARÂMETROS GLOBAIS DE MAPA", title_per_map: "CONFIGURAÇÕES ESPECÍFICAS DE CADA MAPA",
             title_bosses: "CONFIGURAÇÃO DE BOSSES, ELITES E BOTS", title_difficulty: "DISTRIBUIÇÃO DE DIFICULDADE DA IA",
             title_events: "EVENTOS E INVASÕES ESPECIAIS", title_custom: "SPAWNS CUSTOMIZADOS E COORDENADAS",
             undo: "DESFAZER", reset: "PADRÃO", reload: "RECARREGAR", save: "SALVAR CONFIGURAÇÃO",
@@ -642,12 +717,20 @@ html, body {
             waves_interval: "INTERVALO ENTRE ONDAS (SEGUNDOS)", sniper_chance: "CHANCE DE SPAWN DE SNIPER (%)", spawn_radius_sub: "RAIO DE SPAWN E BOLHA DE LIMITAÇÃO", min_safe_dist: "DISTÂNCIA MÍNIMA SEGURA DOS JOGADORES (M)", enable_bubble: "Ativar Bolha Máxima de Spawn/Despawn", max_bubble_dist: "DISTÂNCIA MÁXIMA DA BOLHA (M)", teleport_sub: "TELEPORT DE BOTS E DESPAWN DENSITÁRIO", enable_teleport: "Ativar Teleport de Bots Distantes", include_pmcs: "Incluir PMCs no Teleport / Despawn", teleport_min_dist: "DISTÂNCIA MÍNIMA DE ALVO DO TELEPORT (M)", teleport_check_interval: "INTERVALO DE VERIFICAÇÃO DO TELEPORT (SEGUNDOS)",
             enable_bot_server: "Ativar Bot / Boss no Servidor", disable_followers: "Desativar Seguidores / Guardas", group_spawn_sub: "CONFIGURAÇÃO DE GRUPOS DE BOTS (GROUP SPAWN)", bot_group_chance: "CHANCE DE GRUPO DE BOTS (%)", max_group_size: "TAMANHO MÁXIMO DO GRUPO", boss_matrix_sub: "CHANCE E SELEÇÃO DE ZONAS POR MAPA", hotzone_chance: "HOTZONE CHANCE (%)", spawn_chance: "CHANCE DE SPAWN (%)", allowed_zones_label: "ZONAS PERMITIDAS DE SPAWN:",
             diff_easy: "FÁCIL %", diff_normal: "NORMAL %", diff_hard: "DIFÍCIL %", diff_impossible: "IMPOSSÍVEL %", diff_bosses_tab: "CHEFÕES / BOSSES",
+            home_hero_title: "TRL - DYNAMIC SPAWN SYSTEM", home_hero_subtitle: "Gerenciador Avançado de Ondas, Injeção Dinâmica de Bots e Controle em Tempo Real para SPT Tarkov 4.0",
+            home_section_desc_title: "SOBRE O TRL-DYNAMIC SPAWN", home_desc_body: "O TRL-DynamicSpawn é um sistema de controle de spawns de alta performance projetado para Single Player Tarkov. Ele substitui os geradores rígidos de ondas nativos por um motor reativo que equilibra a densidade de PMCs, Scavs e Chefões, prevenindo o surgimento de bots visíveis ou sobrepostos (overlap) e garantindo uma experiência de combate dinâmica sem comprometer o desempenho do servidor.",
+            home_section_guide_title: "INSTRUÇÕES E GUIA RÁPIDO", guide_step1_title: "1. CONFIGURAÇÃO DE MAPAS", guide_step1_desc: "Ajuste o preset global de facções (Guerra de PMCs, Equilibrado, Infestação de Scavs) e defina o intervalo entre ondas, raio de segurança e distância de remoção anti-overlap para cada mapa individualmente.",
+            guide_step2_title: "2. CONTROLE DE BOSSES E ELITES", guide_step2_desc: "Gerencie a chance de spawn de cada chefão por mapa e defina as zonas de patrulha nativas de forma visual. É possível desativar guardas/seguidores ou ajustar spawns em grupo para Scavs e PMCs.",
+            guide_step3_title: "3. DIFICULDADE DA IA", guide_step3_desc: "Personalize os pesos percentuais de dificuldade (Fácil, Normal, Difícil, Impossível) para PMCs, Scavs e Chefões. O servidor sorteia a dificuldade de cada bot com base nessa curva.",
+            guide_step4_title: "4. EVENTOS E INVASÕES", guide_step4_desc: "Configure o sistema de Invasão de Bosses para permitir que chefões apareçam em mapas não nativos, além de habilitar grupos aleatórios de Raiders e Rogues em qualquer localização.",
+            home_section_tips_title: "DICAS E RECOMENDAÇÕES DE DESEMPENHO", tip_perf_title: "💡 Otimização de FPS (Teleport & Despawn):", tip_perf_desc: " Mantenha o 'Teleport de Bots Distantes' ativado. Isso recicla automaticamente bots que se distanciaram demais do combate, preservando a taxa de quadros (FPS) em mapas grandes como Streets e Lighthouse.",
+            tip_save_title: "⚠️ Persistência sem Reiniciar:", tip_save_desc: " Ao salvar suas configurações pelo painel, as alterações são gravadas diretamente no servidor (config/config.json) e aplicadas na próxima partida ou onda de spawn imediatamente!",
             toast_success: "SUCESSO", toast_saved: "Configuração salva com sucesso no servidor!", toast_reset: "PADRÃO", toast_reset_msg: "Configuração restaurada para os padrões originais.", toast_undo: "DESFAZER", toast_undo_msg: "Alterações locais desfeitas."
         },
         en: {
-            nav_label: "SPAWN MANAGER", nav_maps: "MAP CONFIGURATIONS", nav_bosses: "BOSS CONFIGURATION",
+            nav_label: "SPAWN MANAGER", nav_home: "HOME", nav_maps: "MAP CONFIGURATIONS", nav_bosses: "BOSS CONFIGURATION",
             nav_difficulty: "BOT DIFFICULTY", nav_events: "EVENTS & INVASIONS", nav_custom: "CUSTOM SPAWNS",
-            title_maps: "GLOBAL MAP PARAMETERS", title_per_map: "PER-MAP SPECIFIC CONFIGURATIONS",
+            title_home: "MOD OVERVIEW & INSTRUCTIONS", title_maps: "GLOBAL MAP PARAMETERS", title_per_map: "PER-MAP SPECIFIC CONFIGURATIONS",
             title_bosses: "BOSS, ELITE & BOT CONFIGURATION", title_difficulty: "AI DIFFICULTY DISTRIBUTION",
             title_events: "EVENTS & SPECIAL INVASIONS", title_custom: "CUSTOM SPAWNS & COORDINATES",
             undo: "UNDO", reset: "DEFAULT", reload: "RELOAD", save: "SAVE CONFIGURATION",
@@ -662,6 +745,14 @@ html, body {
             waves_interval: "SECONDS BETWEEN WAVES (SECONDS)", sniper_chance: "SNIPER SPAWN CHANCE (%)", spawn_radius_sub: "SPAWN RADIUS & LIMITING BUBBLE", min_safe_dist: "MIN SAFE DISTANCE FROM PLAYERS (M)", enable_bubble: "Enable Max Spawn/Despawn Bubble", max_bubble_dist: "MAX BUBBLE LIMIT DISTANCE (M)", teleport_sub: "BOT TELEPORT & DENSITY DESPAWN", enable_teleport: "Enable Teleport for Distant Bots", include_pmcs: "Include PMCs in Teleport / Despawn", teleport_min_dist: "MINIMUM TARGET TELEPORT DISTANCE (M)", teleport_check_interval: "TELEPORT CHECK INTERVAL (SECONDS)",
             enable_bot_server: "Enable Bot / Boss on Server", disable_followers: "Disable Followers / Guards", group_spawn_sub: "BOT GROUP SPAWN CONFIGURATION", bot_group_chance: "BOT GROUP SPAWN CHANCE (%)", max_group_size: "MAX GROUP SIZE", boss_matrix_sub: "PER-MAP SPAWN CHANCE & ZONE SELECTION", hotzone_chance: "HOTZONE CHANCE (%)", spawn_chance: "SPAWN CHANCE (%)", allowed_zones_label: "ALLOWED SPAWN ZONES:",
             diff_easy: "EASY %", diff_normal: "NORMAL %", diff_hard: "HARD %", diff_impossible: "IMPOSSIBLE %", diff_bosses_tab: "BOSSES / ELITES",
+            home_hero_title: "TRL - DYNAMIC SPAWN SYSTEM", home_hero_subtitle: "Advanced Wave Manager, Dynamic Bot Injection & Real-Time Control for SPT Tarkov 4.0",
+            home_section_desc_title: "ABOUT TRL-DYNAMIC SPAWN", home_desc_body: "TRL-DynamicSpawn is a high-performance spawn management system designed for Single Player Tarkov. It replaces rigid native wave generators with a reactive engine that balances PMC, Scav, and Boss density, preventing visible or overlapping bot spawns and delivering a dynamic combat experience without sacrificing server performance.",
+            home_section_guide_title: "INSTRUCTIONS & QUICK START GUIDE", guide_step1_title: "1. MAP CONFIGURATIONS", guide_step1_desc: "Adjust global faction presets (PMC War, Balanced, Scav Infestation) and configure wave intervals, min safe radius, and anti-overlap culling per map.",
+            guide_step2_title: "2. BOSS & ELITE CONTROLS", guide_step2_desc: "Manage individual boss spawn chances per map and graphically select native patrol zones. Toggle followers/guards or configure bot group spawn sizes.",
+            guide_step3_title: "3. AI DIFFICULTY DISTRIBUTION", guide_step3_desc: "Customize difficulty weight percentages (Easy, Normal, Hard, Impossible) for PMCs, Scavs, and Bosses. The server selects bot difficulty using this distribution.",
+            guide_step4_title: "4. EVENTS & INVASIONS", guide_step4_desc: "Configure the Boss Invasion system to spawn bosses in non-native maps, and enable random Raider or Rogue groups in any raid location.",
+            home_section_tips_title: "PERFORMANCE TIPS & RECOMMENDATIONS", tip_perf_title: "💡 FPS Optimization (Teleport & Despawn):", tip_perf_desc: " Keep 'Teleport for Distant Bots' enabled. It automatically recycles bots out of combat range, preserving high frame rates (FPS) on large maps like Streets and Lighthouse.",
+            tip_save_title: "⚠️ Instant Save without Restarting:", tip_save_desc: " Saving configurations via the web panel updates server files (config/config.json) immediately for the next raid or wave without restarting the game!",
             toast_success: "SUCCESS", toast_saved: "Config saved successfully on server!", toast_reset: "DEFAULT", toast_reset_msg: "Config reset to original defaults.", toast_undo: "UNDO", toast_undo_msg: "Local changes undone."
         }
     };
