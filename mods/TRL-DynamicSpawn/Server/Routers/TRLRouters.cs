@@ -67,20 +67,16 @@ public class TRLRouters : StaticRouter
                     return await new ValueTask<string>(json);
                 }
             ),
-            new RouteAction<string>("/trldynamicspawn/saveConfig",
+            new RouteAction<TRLConfig>("/trldynamicspawn/saveConfig",
                 async (url, info, sessionID, output) =>
                 {
                     try
                     {
-                        if (!string.IsNullOrWhiteSpace(info))
+                        if (info != null)
                         {
-                            var loaded = JsonSerializer.Deserialize<TRLConfig>(info, JsonOpts);
-                            if (loaded != null)
-                            {
-                                CurrentConfig = loaded;
-                                await TRLDynamicSpawnServer.Globals.TRLConfigManager.SaveConfig();
-                                return await new ValueTask<string>("{\"status\":\"success\",\"message\":\"Config saved successfully\"}");
-                            }
+                            CurrentConfig = info;
+                            await TRLDynamicSpawnServer.Globals.TRLConfigManager.SaveConfig();
+                            return await new ValueTask<string>("{\"status\":\"success\",\"message\":\"Config saved successfully\"}");
                         }
                     }
                     catch (System.Exception ex)
