@@ -909,46 +909,49 @@ html, body {
         }
     }
 
+    async function parseResponseBody(res) {
+        let rawText = "";
+        try {
+            const ds = new DecompressionStream('deflate');
+            const decompressedStream = res.clone().body.pipeThrough(ds);
+            const reader = decompressedStream.getReader();
+            const bytes = [];
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                bytes.push(...value);
+            }
+            rawText = new TextDecoder().decode(new Uint8Array(bytes));
+        } catch (zlibErr) {
+            try {
+                rawText = await res.clone().text();
+            } catch (e) {
+                rawText = "";
+            }
+        }
+
+        let data = rawText;
+        while (typeof data === 'string') {
+            try { data = JSON.parse(data); } catch (e) { break; }
+        }
+
+        if (data && typeof data === 'object' && 'data' in data && data.data !== null && data.data !== undefined) {
+            let innerData = data.data;
+            while (typeof innerData === 'string') {
+                try { innerData = JSON.parse(innerData); } catch (e) { break; }
+            }
+            data = innerData;
+        }
+
+        return data;
+    }
+
     async function fetchConfig() {
         try {
             const res = await fetch("/trldynamicspawn/getConfig");
             if (!res.ok) throw new Error("Erro na requisição HTTP " + res.status);
             
-            let data = null;
-            let rawText = "";
-
-            try {
-                const ds = new DecompressionStream('deflate');
-                const decompressedStream = res.clone().body.pipeThrough(ds);
-                const reader = decompressedStream.getReader();
-                const bytes = [];
-                while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
-                    bytes.push(...value);
-                }
-                rawText = new TextDecoder().decode(new Uint8Array(bytes));
-                data = JSON.parse(rawText);
-            } catch (zlibErr) {
-                try {
-                    rawText = await res.text();
-                    data = JSON.parse(rawText);
-                } catch (e) {
-                    data = rawText;
-                }
-            }
-
-            while (typeof data === 'string') {
-                try { data = JSON.parse(data); } catch (e) { break; }
-            }
-
-            if (data && typeof data === 'object' && 'data' in data && data.data !== null && data.data !== undefined) {
-                let innerData = data.data;
-                while (typeof innerData === 'string') {
-                    try { innerData = JSON.parse(innerData); } catch (e) { break; }
-                }
-                data = innerData;
-            }
+            const data = await parseResponseBody(res);
 
             if (!data || typeof data !== 'object') {
                 throw new Error("Formato de dados JSON inválido");
@@ -979,14 +982,10 @@ html, body {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(stateCurrent)
             });
-            
-            let result = null;
-            try {
-                result = await res.json();
-            } catch (e) {
-                const text = await res.text();
-                try { result = JSON.parse(text); } catch (e2) { result = text; }
-            }
+
+            if (!res.ok) throw new Error("Erro HTTP ao salvar " + res.status);
+
+            const result = await parseResponseBody(res);
 
             if (result && (result.status === "success" || result.err === 0)) {
                 stateInitial = JSON.parse(JSON.stringify(stateCurrent));
