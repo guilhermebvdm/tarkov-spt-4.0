@@ -516,6 +516,25 @@ namespace TRLDynamicSpawn.Patches
         [PatchPrefix]
         private static bool PatchPrefix(BotSpawner __instance, BotZone botZone, BotCreationDataClass data, bool withCheckMinMax, bool newWave, ref List<ISpawnPoint> pointsToSpawn, bool forcedSpawn = false)
         {
+            // Bloqueio cirúrgico de Scavs comuns (assault / cursedAssault) vindos do motor nativo do jogo (vanilla/SPT)
+            if (!TRLDynamicSpawn.Components.DynamicSpawnManager.IsGeneratingDynamicWave)
+            {
+                WildSpawnType role = WildSpawnType.assault;
+                if (data != null && data.Profiles != null && data.Profiles.Count > 0 && data.Profiles[0] != null && data.Profiles[0].Info != null && data.Profiles[0].Info.Settings != null)
+                {
+                    role = data.Profiles[0].Info.Settings.Role;
+                }
+
+                if (role == WildSpawnType.assault || role == WildSpawnType.cursedAssault)
+                {
+                    if (TRLDynamicSpawn.Helpers.Settings.enableDebugLogs.Value)
+                    {
+                        Plugin.LogSource.LogInfo($"[TRLDynamicSpawn] Blocked Vanilla Assault Scav Spawn ({role}) from native game engine.");
+                    }
+                    return false;
+                }
+            }
+
             if (pointsToSpawn != null && pointsToSpawn.Count > 0) return true;
 
             try
