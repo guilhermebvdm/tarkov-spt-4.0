@@ -177,6 +177,7 @@ public record ValidLocationInt
     [JsonPropertyName("shoreline")] public int Shoreline { get; set; } = 0;
     [JsonPropertyName("tarkovstreets")] public int TarkovStreets { get; set; } = 0;
     [JsonPropertyName("woods")] public int Woods { get; set; } = 0;
+    [JsonPropertyName("labyrinth")] public int Labyrinth { get; set; } = 0;
 }
 
 public record ValidLocationString
@@ -193,6 +194,7 @@ public record ValidLocationString
     [JsonPropertyName("shoreline")] public string Shoreline { get; set; } = "";
     [JsonPropertyName("tarkovstreets")] public string TarkovStreets { get; set; } = "";
     [JsonPropertyName("woods")] public string Woods { get; set; } = "";
+    [JsonPropertyName("labyrinth")] public string Labyrinth { get; set; } = "";
 }
 
 public record MapSettings

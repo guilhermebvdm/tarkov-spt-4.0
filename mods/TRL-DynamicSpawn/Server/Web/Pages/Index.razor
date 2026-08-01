@@ -788,7 +788,8 @@ html, body {
         { id: "tarkovstreets", key: "tarkovstreets", name: "Streets" },
         { id: "sandbox", key: "sandbox", name: "Ground Zero" },
         { id: "sandbox_high", key: "sandbox_high", name: "Ground Zero (High)" },
-        { id: "woods", key: "woods", name: "Woods" }
+        { id: "woods", key: "woods", name: "Woods" },
+        { id: "labyrinth", key: "labyrinth", name: "Labyrinth (Labrys)" }
     ];
 
     const BOT_CATEGORIES = [
@@ -825,11 +826,12 @@ html, body {
         tarkovstreets: ["ZoneMVD", "ZoneHotel", "ZoneCardi", "ZoneFactory", "ZoneConcordia_1", "ZoneConcordia_2", "ZonePinewood", "ZoneCinema", "ZoneSniper1", "ZoneSniper2", "ZoneSniper3"],
         woods: ["ZoneRedHouse", "ZoneWoodCutter", "ZoneHouse", "ZoneBigCutter", "ZoneMiniHouse", "ZoneClear", "ZoneScavBase", "ZoneVillage", "ZoneBrokenVill", "ZoneHighRocks"],
         sandbox: ["ZoneSandbox"],
-        sandbox_high: ["ZoneSandbox"]
+        sandbox_high: ["ZoneSandbox"],
+        labyrinth: ["BotZone"]
     };
 
     const INVASION_BOSS_OPTIONS = ["All", "Random", "bossKnight", "bossTagilla", "bossKilla", "bossGluhar", "bossSanitar", "bossKolontay", "bossBully", "bossBoar", "bossPartisan", "gifter"];
-    const INVASION_MAP_OPTIONS = ["All", "Random", "bigmap", "factory4_day", "factory4_night", "interchange", "laboratory", "lighthouse", "rezervbase", "shoreline", "tarkovstreets", "woods", "sandbox"];
+    const INVASION_MAP_OPTIONS = ["All", "Random", "bigmap", "factory4_day", "factory4_night", "interchange", "laboratory", "lighthouse", "rezervbase", "shoreline", "tarkovstreets", "woods", "sandbox", "labyrinth"];
 
     let currentLang = "pt";
     let stateInitial = null;
