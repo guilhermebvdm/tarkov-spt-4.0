@@ -409,3 +409,4 @@ Aplicação: trocar cada `config.Bind(sec, key, def, "tip")` por `BindOrdered(co
 | Data | Evento |
 |---|---|
 | 2026-08-01 | Review de propriedades 01 criada via `/review-mod-properties` |
+| 2026-08-01 | **Aplicados (v0.16.1):** MP-01-01/02 (helper `BindOrdered` → Order automático, Enabled no topo + cor junta, não-breaking) · MP-01-10 (Diagnostics → IsAdvanced) · MP-01-03/04/07/08 (renames BREAKING: Weapon Mastery, Execution, 10 PascalCase, Hare/Nervous — valores calibrados MIGRADOS no `.cfg` do usuário) · MP-01-05 (PROPRIEDADES.md + PROPERTIES.md regenerados). **Mantidos:** MP-01-06 (tooltips `PT / EN` — convenção do mod) · MP-01-09 quirk: compartilhados (Loud Looter/Light Frame/Quick Draw) bindados no bloco Scav caem abaixo da cor em Rifleman/Hunter (documentado nos .md; corrigível dando Order fixo baixo à cor). |

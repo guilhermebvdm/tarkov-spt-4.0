@@ -20,7 +20,7 @@ public enum ScrollMode
     Linear,
 }
 
-[BepInPlugin("com.shwng.fpscamerastances", "shwngFpsCameraStances4", "2.12.1")]
+[BepInPlugin("com.shwng.fpscamerastances", "shwngFpsCameraStances4", "2.13.0")]
 public class Plugin : BaseUnityPlugin
 {
     public static Plugin Instance { get; private set; }
@@ -207,6 +207,7 @@ public class Plugin : BaseUnityPlugin
     public static ConfigEntry<float> _PassiveSwayMultiplier;
     public static ConfigEntry<bool> _PassiveStaminaSave;
     public static ConfigEntry<bool> _DebugStaminaState;   // item 012 — toggle do overlay/log de estado de stamina
+    public static ConfigEntry<bool> _DebugAdsSpeed;       // item 017 F3 — overlay nativo→comprimido do ADS speed
     public static ConfigEntry<bool> _ShowMountIcon;
 
     // Animation Settings (Item 005)
@@ -465,7 +466,9 @@ public class Plugin : BaseUnityPlugin
             "ADS Kick Delay (In)",
             0.15f,
             new ConfigDescription("Delay in seconds before the kick is applied when entering ADS. Use this to sync the kick with the end of the ADS animation.\n\nAtraso em segundos antes de aplicar o kick ao entrar em ADS. Use para sincronizar o kick com o fim da animação de mira.",
-            new AcceptableValueRange<float>(0f, 1f),
+            // MP-02-06: faixa 0–2 (não 0–1). O ConfigurationManager renderiza todo float de faixa
+            // exatamente 0–1 como PORCENTAGEM sem caixa de valor — o slider mostrava "15%" para 0,15 s.
+            new AcceptableValueRange<float>(0f, 2f),
             new ConfigurationManagerAttributes { Order = 96 }));
 
         _StanceOvershootDamping = Config.Bind(
@@ -973,14 +976,18 @@ public class Plugin : BaseUnityPlugin
             new AcceptableValueRange<float>(0.1f, 2.0f),
             new ConfigurationManagerAttributes { Order = 1 }));
 
-        const string ActionStanceSection = "Action Stances";
+        // v2.13.0 — a seção própria "Action Stances" (1 única entry) foi absorvida por
+        // "Stance Cycle & Hotkeys": é uma troca AUTOMÁTICA de postura, mora junto das outras formas de trocar
+        // de postura. Order 46 = abaixo de Snap Stale Timeout (47), rodapé da seção.
+        // ⚠️ Mudar de seção = a entry antiga vira órfã no .cfg e o valor volta ao default (o BepInEx casa por
+        // (seção, chave) literal). Coberto pela redistribuição do .cfg via config-server do launcher.
         _EnableActionStanceSwap = Config.Bind(
-            ActionStanceSection,
+            Settings,
             "Enable Action Stance Swap",
             true,
             new ConfigDescription("Automatically raises the weapon to Stance 0 (Ready) when reloading, checking ammo/chamber, examining the weapon, checking fire mode and UNLOADING THE CHAMBER — and returns to the previous stance when done. Real time.\n\nLevanta a arma para a Stance 0 (Pronto) automaticamente ao recarregar, checar munição/câmara, examinar a arma, checar modo de fogo e ESVAZIAR A CÂMARA — e retorna à postura anterior ao fim. Tempo real.",
             null,
-            new ConfigurationManagerAttributes { Order = 1 }));
+            new ConfigurationManagerAttributes { Order = 46 }));
 
 
         _LeanSpeedMultiplier = Config.Bind(
@@ -1094,7 +1101,8 @@ public class Plugin : BaseUnityPlugin
             "Tac Sprint Reset Delay",
             0.35f,
             new ConfigDescription("Delay (seconds) after sprint ends before weapon returns to normal size. 0 = instant. Prevents jarring snap-back.\n\nAtraso (segundos) após o fim do sprint antes da arma voltar ao tamanho normal. 0 = instantâneo. Evita o snap-back brusco.",
-            new AcceptableValueRange<float>(0f, 1f),
+            // MP-02-06: faixa 0–2 (não 0–1) — ver nota em ADS Kick Delay (In).
+            new AcceptableValueRange<float>(0f, 2f),
             new ConfigurationManagerAttributes { IsAdvanced = true, Order = 3 }));
 
         // FIELD OF VIEW — REMOVIDO na v2.5.0 (decisão do usuário).
@@ -1131,6 +1139,25 @@ public class Plugin : BaseUnityPlugin
                 "a partida) | tempo de assentamento | dt médio. Custo ~zero desligado.",
                 null,
                 new ConfigurationManagerAttributes { IsAdvanced = true, Order = -2 }));
+
+        // Item 017 (F3) — overlay do par nativo→comprimido do ADS speed. Sem ele a compressão é invisível:
+        // o efeito é uma mudança de velocidade que só aparece na sensação, e o pivô default (1.5) fica ACIMA
+        // da faixa real das armas longas (~0.57 LMG .. ~1.9 pistola, derivada de globals.Aiming), o que faz
+        // uma compressão moderada parecer "não estar aplicando". Ver AdsSpeedDebugUI.
+        _DebugAdsSpeed = Config.Bind(
+            DebugSettings,
+            "Debug ADS Speed",
+            false,
+            new ConfigDescription(
+                "Shows on screen the aim speed of the weapon in hands, native -> compressed, plus the aim time " +
+                "in seconds. Use it to calibrate 'ADS Speed Pivot': set the pivot near the CENTER of the values " +
+                "you see across your weapons, otherwise the compression pushes every gun the same way instead " +
+                "of pulling the extremes together.\n\nMostra na tela a velocidade de mira da arma em mãos, " +
+                "nativa -> comprimida, e o tempo de mira em segundos. Use para calibrar o 'ADS Speed Pivot': " +
+                "ponha o pivô perto do CENTRO dos valores que você vê nas suas armas, senão a compressão empurra " +
+                "todas para o mesmo lado em vez de aproximar os extremos.",
+                null,
+                new ConfigurationManagerAttributes { IsAdvanced = true, Order = -3 }));
 
         // ========================================
         // STANCE STAMINA + VELOCIDADE (backlog 001) — 5 props × 4 stances
@@ -1317,6 +1344,9 @@ public class Plugin : BaseUnityPlugin
 
         // Item 012: overlay de debug do cenário de stamina (toggle no F12).
         gameObject.AddComponent<StaminaDebugUI>();
+
+        // Item 017 (F3): overlay de debug do ADS speed nativo→comprimido (toggle no F12).
+        gameObject.AddComponent<AdsSpeedDebugUI>();
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]

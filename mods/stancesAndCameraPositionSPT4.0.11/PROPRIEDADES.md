@@ -1,7 +1,12 @@
 # Propriedades F12 — stancesAndCameraPositionSPT4.0.11
 
 > Todas as opções do menu **F12** (BepInEx ConfigurationManager). **19 seções · 111 opções.**
-> Regenerado de `modded/Plugin.cs` em **2026-07-12** (fonte de verdade), para a **v2.5.0**. Os tooltips do jogo são bilíngues (EN + PT); aqui a coluna **Descrição** traz a versão em português resumida.
+> Regenerado de `modded/Plugin.cs` em **2026-07-12** (fonte de verdade), para a **v2.5.0**.
+>
+> ⚠️ **A contagem acima é da v2.5.0.** As versões 2.6.0–2.13.0 acrescentaram opções (waypoint de ADS por
+> postura, compressão de ADS-speed, UI de checagem de câmara, `Debug ADS Speed`) e removeram a seção
+> `Action Stances`. O documento recebeu edições pontuais, mas **só volta a bater exatamente com o jogo na
+> próxima regeneração completa** — prevista na faxina de preparação para publicação. Os tooltips do jogo são bilíngues (EN + PT); aqui a coluna **Descrição** traz a versão em português resumida.
 >
 > **v2.2.0 corrigiu os eixos Yaw/Roll** (estavam trocados em todas as stances e no ADS — a rotação é aplicada nos eixos LOCAIS da arma, onde Y = cano/roll e Z = vertical/yaw) e **traduziu os nomes para inglês**. Tooltips seguem bilíngues.
 >
@@ -17,7 +22,7 @@
 | [B. Poses e mira (ADS)](#b--poses-e-mira-ads) | Stance 0/1/2/3 · ADS Default Values |
 | [C. Mount e stamina](#c--mount-e-stamina) | Weapon Mount (Active) · Weapon Mount (Passive) · Stamina Management |
 | [D. Movimento](#d--movimento) | Movement & Inertia · Tac Sprint · Animation Speed |
-| [E. Mecânicas de arma](#e--mecânicas-de-arma) | Manual Chambering · Action Stances |
+| [E. Mecânicas de arma](#e--mecânicas-de-arma) | Manual Chambering |
 | [F. Respiração, UI e debug](#f--respiração-ui-e-debug) | Hold Breath · Oxygen Bar (UI) · Debug |
 
 ---
@@ -43,6 +48,7 @@
 | Snap Fire Threshold (ms) | int | `600` | 50 – 1000 | Tempo máx. entre pressionar e soltar (ms) classificado como clique único. Clique = snap p/ Stance 0 sem atirar; segurar = snap + 1 tiro natural. |
 | Snap Stale Timeout (s) | float | `2` | 0.5 – 10 | Tempo máx. (s) que o intercept do snap fica ativo sem soltar o botão antes de auto-limpar. Reduz risco de estado preso em troca de arma durante o hold. |
 | Start In Low Ready On Raid Begin | bool | `true` | — | Começa toda raid já na Stance 2 - Low Ready, sem animação (set imediato). Vale mesmo se a Stance 2 estiver fora do ciclo. |
+| Enable Action Stance Swap | bool | `true` | — | Levanta a arma para a Stance 0 (Pronto) automaticamente ao recarregar, checar munição/câmara, examinar a arma, checar modo de fogo e esvaziar a câmara — e retorna à postura anterior ao fim. (Origem: item 008 do backlog.) |
 
 ### Stance Transition & Kick
 
@@ -51,7 +57,7 @@
 | Stance Transition Speed | float | `1.0` | 0.1 – 5.0 | Velocidade da troca **entre posturas** (e volta à visão padrão). **Não** afeta a mira. |
 | ADS Transition Speed | float | `1.0` | 0.1 – 5.0 | Velocidade de **levantar/baixar a mira** (entrar e sair do ADS). Separada do Stance Transition Speed na v2.4.0. |
 | Stance Kick Intensity (Toward the Chest) | float | `-0.05` | -0.3 – 0.3 | Quanto a arma recua contra o peito ao trocar de postura ou mirar (ADS). Negativo puxa a arma em sua direção. |
-| ADS Kick Delay (In) | float | `0.15` | 0 – 1 | Atraso (s) antes de aplicar o kick ao entrar em ADS. Sincroniza o kick com o fim da animação de mira. |
+| ADS Kick Delay (In) | float | `0.15` | 0 – 2 | Atraso (s) antes de aplicar o kick ao entrar em ADS. Sincroniza o kick com o fim da animação de mira. |
 | Stance Overshoot Damping (Lower Means More Bounce) | float | `12.0` | 1 – 30.0 | Amortecimento da física de mola. Menor = mais overshoot/quicada. Padrão 12. |
 
 ### Camera Position
@@ -151,13 +157,17 @@ gated em `isInStance` — o branch era inalcançável. Para ajuste de posição 
 
 ## C — Mount e stamina
 
-### Weapon Mount (Active) — Item 015
+### Weapon Mount (Active)
+
+> Origem: item 015 do backlog.
 
 | Propriedade (EN) | Tipo | Padrão | Faixa | Descrição |
 |---|---|---|---|---|
 | Block Active Mount In Stance | bool | `true` | — | Impede apoiar a arma em superfícies (mount) em Stance 1/2/3 sem mirar. Em Stance 0, mirando ou deitado (prone), funciona normal. |
 
-### Weapon Mount (Passive) — Item 011
+### Weapon Mount (Passive)
+
+> Origem: item 011 do backlog.
 
 | Propriedade (EN) | Tipo | Padrão | Faixa | Descrição |
 |---|---|---|---|---|
@@ -167,7 +177,9 @@ gated em `isInStance` — o branch era inalcançável. Para ajuste de posição 
 | Passive Stamina Save | bool | `true` | — | Enquanto apoiado, pausa/reduz o drain de stamina de braço (mais fraco que o mount nativo). |
 | Show Mount Icon | bool | `true` | — | Mostra o ícone direcional (esq/dir/baixo) no canto inferior direito quando o apoio passivo está ativo. |
 
-### Stamina Management — Item 012
+### Stamina Management
+
+> Origem: item 012 do backlog.
 
 Multiplicador de stamina de braço por cenário. Semântica: **< 1 drena · 1 mantém · > 1 recupera.**
 
@@ -194,7 +206,9 @@ Multiplicador de stamina de braço por cenário. Semântica: **< 1 drena · 1 ma
 
 ## D — Movimento
 
-### Movement & Inertia — Item 007
+### Movement & Inertia
+
+> Origem: item 007 do backlog.
 
 | Propriedade (EN) | Tipo | Padrão | Faixa | Descrição |
 |---|---|---|---|---|
@@ -210,9 +224,11 @@ Multiplicador de stamina de braço por cenário. Semântica: **< 1 drena · 1 ma
 | Tac Sprint Weight Limit (Bullpup) | float | `5.75` | 1 – 15 | Peso máx. (kg) para bullpups permitirem tac sprint (limite maior). |
 | Tac Sprint Length Limit | int | `6` | 1 – 10 | Comprimento máx. da arma (células de inventário). |
 | Tac Sprint Ergo Limit | float | `35` | 0 – 100 | Ergonomia mínima da arma para permitir tac sprint. |
-| Tac Sprint Reset Delay | float | `0.35` | 0 – 1 | Atraso (s) após o fim do sprint antes da arma voltar ao tamanho normal. 0 = instantâneo. |
+| Tac Sprint Reset Delay | float | `0.35` | 0 – 2 | Atraso (s) após o fim do sprint antes da arma voltar ao tamanho normal. 0 = instantâneo. |
 
-### Animation Speed — Item 005
+### Animation Speed
+
+> Origem: item 005 do backlog.
 
 | Propriedade (EN) | Tipo | Padrão | Faixa | Descrição |
 |---|---|---|---|---|
@@ -223,21 +239,15 @@ Multiplicador de stamina de braço por cenário. Semântica: **< 1 drena · 1 ma
 
 ## E — Mecânicas de arma
 
-### Manual Chambering — Item 010
+### Manual Chambering
+
+> Origem: item 010 do backlog.
 
 | Propriedade (EN) | Tipo | Padrão | Faixa | Descrição |
 |---|---|---|---|---|
 | Enable Manual Chambering | bool | `true` | — | Interruptor mestre. Desligado = vanilla em TODOS os cenários (kill-switch seguro). Puxe o ferrolho com a tecla nativa 'Chamber/Unload' quando a câmara estiver vazia e houver munição no carregador. |
 | Manual Chambering On Raid Start | bool | `true` | — | Arma que inicia a raid com câmara vazia NÃO carrega a 1ª bala no spawn — puxe manualmente. Efetivo na PRÓXIMA raid. |
 | Manual Chambering On Reload | bool | `true` | — | Recarregar com câmara vazia NÃO carrega a 1ª bala automaticamente após inserir o carregador — puxe manualmente. Tempo real. |
-
-### Action Stances — Item 008
-
-| Propriedade (EN) | Tipo | Padrão | Faixa | Descrição |
-|---|---|---|---|---|
-| Enable Action Stance Swap | bool | `true` | — | Levanta a arma para a Stance 0 (Pronto) automaticamente ao recarregar, checar munição/câmara, examinar a arma, checar modo de fogo e esvaziar a câmara — e retorna à postura anterior ao fim. |
-
----
 
 ## F — Respiração, UI e debug
 
@@ -266,6 +276,7 @@ Multiplicador de stamina de braço por cenário. Semântica: **< 1 drena · 1 ma
 | Propriedade (EN) | Tipo | Padrão | Faixa | Descrição |
 |---|---|---|---|---|
 | Debug Apply In Hideout | bool | `false` | — | Permite os efeitos de stamina/velocidade rodarem no hideout (estande de tiro). Útil para testes offline; DESATIVE para o jogo normal. |
+| Debug ADS Speed | bool | `false` | — | Mostra na tela a velocidade de mira da arma em mãos, nativa → comprimida, e o tempo de mira em segundos. Use para calibrar o `ADS Speed Pivot`. |
 
 ---
 
@@ -273,7 +284,10 @@ Multiplicador de stamina de braço por cenário. Semântica: **< 1 drena · 1 ma
 
 A ordem real das seções no ConfigurationManager (por ordem de descoberta no `Plugin.cs`):
 
-1. Manual Chambering · 2. Camera Position · 3. Stance Cycle & Hotkeys · 4. Stance Transition & Kick · 5. ADS Default Values (Advanced) · 6. Stance 0 - Vanilla · 7. Stance 1 - High Ready · 8. Stance 2 - Low Ready · 9. Stance 3 - Custom · 10. Weapon Mount (Active) · 11. Weapon Mount (Passive) · 12. Stamina Management · 13. Hold Breath · 14. Oxygen Bar (UI) · 15. Animation Speed · 16. Movement & Inertia · 17. Action Stances · 18. Tac Sprint Settings (Advanced) · 20. Debug (Advanced)
+1. Manual Chambering · 2. Camera Position · 3. Stance Cycle & Hotkeys · 4. Stance Transition & Kick · 5. ADS Default Values (Advanced) · 6. Stance 0 - Vanilla · 7. Stance 1 - High Ready · 8. Stance 2 - Low Ready · 9. Stance 3 - Custom · 10. Weapon Mount (Active) · 11. Weapon Mount (Passive) · 12. Stamina Management · 13. Hold Breath · 14. Oxygen Bar (UI) · 15. Animation Speed · 16. Movement & Inertia · 17. Tac Sprint Settings (Advanced) · 18. Debug (Advanced)
+
+> A seção `Action Stances` deixou de existir na **v2.13.0** — sua única opção (`Enable Action Stance Swap`)
+> foi absorvida pelo rodapé de `Stance Cycle & Hotkeys`.
 
 ## Histórico de Alterações
 

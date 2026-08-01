@@ -7,6 +7,43 @@ Versões mais recentes primeiro.
 
 ---
 
+## v2.13.0 (2026-08-01)
+
+### A compressão de ADS-speed ficou visível e confiável
+
+- **Nova opção `Debug ADS Speed`** (seção `Debug (Advanced)`): mostra na tela a velocidade de mira da arma em
+  mãos, **nativa → comprimida**, com o tempo de mira em segundos. Sem ela a compressão era invisível — o efeito
+  só aparecia na sensação, e não havia como saber se estava aplicando.
+- ⚠️ **O `ADS Speed Pivot` default (1.5) está acima da faixa real das armas.** Derivando de `globals.Aiming`
+  (pesos 0,6–9 kg e tempos 0,35–2,4 s), a velocidade interna vai de **~0,57 (LMG) a ~1,9 (pistola)**, com fuzis
+  em ~1,0. Com o pivô em 1,5, a compressão **acelera as armas pesadas** em vez de segurar as leves, e uma
+  compressão moderada parece não fazer nada. O centro real é **~1,0–1,1**. O default não foi alterado (mudá-lo
+  agora mexeria na calibração de quem já ajustou) — use o overlay para calibrar.
+- **Corrigido: a compressão podia acumular sobre si mesma.** A proteção contra recomprimir checava o campo
+  `_firearmController`, mas o EFT decide se recalcula o valor nativo olhando `_firearmAnimationData.Weapon`.
+  Na janela em que existe controlador sem dados de arma, o mod comprimia por cima do já comprimido. O guard
+  agora é idêntico ao do jogo.
+
+### F12
+
+- **A seção `Action Stances` deixou de existir.** Sua única opção (`Enable Action Stance Swap`) passou para o
+  **rodapé de `Stance Cycle & Hotkeys`** — é uma troca automática de postura, mora junto das outras formas de
+  trocar de postura. ⚠️ **A opção volta ao padrão (ligada)** para quem atualizar: o BepInEx identifica cada
+  ajuste pelo par (seção, chave), e a entrada antiga vira órfã. Coberto pela redistribuição do `.cfg` pelo
+  launcher.
+- **`ADS Kick Delay (In)` e `Tac Sprint Reset Delay` voltaram a ser exibidos em segundos.** Ambos são tempos,
+  mas tinham faixa 0–1, e o ConfigurationManager renderiza toda faixa exatamente 0–1 como **porcentagem sem
+  caixa de digitação** — apareciam como "15%" e "35%". Faixa alargada para 0–2: volta o valor em segundos, com
+  caixa para digitar, e agora aceita atrasos acima de 1 s. Valores salvos continuam válidos.
+
+### Documentação
+
+- `PROPRIEDADES.md`: 7 títulos de seção traziam um sufixo `— Item NNN` que **não existe no F12** — quem
+  buscasse pelo nome do documento não achava a seção no jogo. O código do item de backlog saiu do título e
+  virou uma linha `> Origem: item NNN do backlog.` logo abaixo.
+
+---
+
 ## v2.11.0 (2026-07-26)
 
 ### Endurecimento da sincronização de rede FIKA

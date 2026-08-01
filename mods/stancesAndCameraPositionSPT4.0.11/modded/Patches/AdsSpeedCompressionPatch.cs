@@ -21,16 +21,23 @@ namespace CameraRotationMod.Patches
     public class AdsSpeedCompressionPatch : ModulePatch
     {
         private static FieldInfo _aimingSpeedField;
-        private static FieldInfo _firearmControllerField;
+        private static FieldInfo _firearmAnimationDataField;
+        private static PropertyInfo _weaponProperty;
 
         // Para reaplicar ao mexer no slider (calibração reflete na hora, sem re-sacar a arma).
         private static ProceduralWeaponAnimation _lastPwa;
         private static float _lastNative;
 
+        /// <summary>Último par nativo→comprimido observado, para o overlay de debug (Debug ADS Speed).</summary>
+        public static float LastNative => _lastNative;
+        public static float LastCompressed { get; private set; }
+
         protected override MethodBase GetTargetMethod()
         {
             _aimingSpeedField = AccessTools.Field(typeof(ProceduralWeaponAnimation), "_aimingSpeed");
-            _firearmControllerField = AccessTools.Field(typeof(ProceduralWeaponAnimation), "_firearmController");
+            // Guard idêntico ao do EFT (ver Postfix): _firearmAnimationData != null && .Weapon != null.
+            _firearmAnimationDataField = AccessTools.Field(typeof(ProceduralWeaponAnimation), "_firearmAnimationData");
+            _weaponProperty = _firearmAnimationDataField?.FieldType.GetProperty("Weapon");
             return AccessTools.Method(typeof(ProceduralWeaponAnimation), nameof(ProceduralWeaponAnimation.UpdateWeaponVariables));
         }
 
@@ -41,8 +48,14 @@ namespace CameraRotationMod.Patches
 
             // code-review F3 #1: UpdateWeaponVariables também roda SEM arma em mãos (ex.: trocar colete/mochila
             // com faca/granada) — nesse caso o EFT NÃO recalcula o _aimingSpeed nativo, então ler o campo aqui
-            // pegaria o valor JÁ comprimido e comprimiria de novo. Só agir com arma (mesmo guard do EFT).
-            if (_firearmControllerField != null && _firearmControllerField.GetValue(__instance) == null) return;
+            // pegaria o valor JÁ comprimido e comprimiria de novo.
+            //
+            // O guard TEM que ser o mesmo que o EFT usa para decidir se recalcula (`_firearmAnimationData != null
+            // && _firearmAnimationData.Weapon != null` — ProceduralWeaponAnimation.UpdateWeaponVariables:1196).
+            // Até a 2.12.1 checávamos `_firearmController`, que é OUTRO campo: numa janela em que existe
+            // controller mas ainda não há dados de arma, o EFT não recalculava e nós comprimíamos por cima do
+            // já comprimido — a compressão acumulava e a calibração virava areia movediça.
+            if (!HasWeapon(__instance)) return;
 
             // O EFT acabou de escrever o _aimingSpeed nativo (peso+ergo). Guarda o nativo e comprime.
             float native = (float)_aimingSpeedField.GetValue(__instance);
@@ -51,11 +64,19 @@ namespace CameraRotationMod.Patches
             Apply(__instance, native);
         }
 
+        private static bool HasWeapon(ProceduralWeaponAnimation pwa)
+        {
+            if (_firearmAnimationDataField == null || _weaponProperty == null) return true; // sem reflection, não bloqueia
+            object data = _firearmAnimationDataField.GetValue(pwa);
+            return data != null && _weaponProperty.GetValue(data, null) != null;
+        }
+
         /// <summary>Reset de raid (StanceManager.ResetState) — esquece o último PWA, igual aos resets irmãos.</summary>
         public static void Reset()
         {
             _lastPwa = null;
             _lastNative = 0f;
+            LastCompressed = 0f;
         }
 
         /// <summary>Reaplica com a config atual (chamado pelos SettingChanged dos sliders — calibração ao vivo).</summary>
@@ -69,6 +90,7 @@ namespace CameraRotationMod.Patches
         {
             float compressed = Compress(native);
             _aimingSpeedField.SetValue(pwa, compressed);
+            LastCompressed = compressed;
             // Coordena com o gate da F1: se estiver segurando este PWA, o valor a restaurar passa a ser o novo.
             ApplyComplexRotationPatch.OnBaseAimSpeedChanged(pwa, compressed);
         }

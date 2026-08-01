@@ -1,0 +1,11 @@
+{
+  "name": "PlayerLives",
+  "upstream_url": "https://github.com/gitTerebi/PlayerLives.git",
+  "upstream_sha": "712ad338d1250d36c4904ce8845700564039783e",
+  "upstream_branch": "main",
+  "forge_url": "",
+  "license": "see LICENSE",
+  "version_base": "1.2.5",
+  "spt_version": "",
+  "created_at": "2026-08-01T23:24:12Z"
+}
