@@ -723,7 +723,15 @@ namespace TRLDynamicSpawn.Components
                 if (task.Result != null)
                 {
                     Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] DIRECT SPAWN SUCCESS ({i + 1}/{groupSize}): Spawning {role} in zone {zone.NameZone}...");
-                    _botsController.BotSpawner.TryToSpawnInZoneAndDelay(zone, task.Result, false, true, null, true);
+                    IsGeneratingDynamicWave = true;
+                    try
+                    {
+                        _botsController.BotSpawner.TryToSpawnInZoneAndDelay(zone, task.Result, false, true, null, true);
+                    }
+                    finally
+                    {
+                        IsGeneratingDynamicWave = false;
+                    }
                 }
 
                 if (i < groupSize - 1)
@@ -958,7 +966,15 @@ namespace TRLDynamicSpawn.Components
                 if (zoneValid && selectedZone != null)
                 {
                     Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] SUCCESS: Spawning replacement bot ({role}) in {selectedZone.NameZone}...");
-                    _botsController.BotSpawner.TryToSpawnInZoneAndDelay(selectedZone, t.Result, true, true, null, true);
+                    IsGeneratingDynamicWave = true;
+                    try
+                    {
+                        _botsController.BotSpawner.TryToSpawnInZoneAndDelay(selectedZone, t.Result, true, true, null, true);
+                    }
+                    finally
+                    {
+                        IsGeneratingDynamicWave = false;
+                    }
                 }
                 else
                 {
