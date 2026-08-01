@@ -759,8 +759,30 @@ html, body {
         try {
             const res = await fetch("/trldynamicspawn/getConfig");
             if (!res.ok) throw new Error("Erro na requisição HTTP " + res.status);
-            let rawText = await res.text();
-            let data = rawText;
+            
+            let data = null;
+            let rawText = "";
+
+            try {
+                const ds = new DecompressionStream('deflate');
+                const decompressedStream = res.clone().body.pipeThrough(ds);
+                const reader = decompressedStream.getReader();
+                const bytes = [];
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    bytes.push(...value);
+                }
+                rawText = new TextDecoder().decode(new Uint8Array(bytes));
+                data = JSON.parse(rawText);
+            } catch (zlibErr) {
+                try {
+                    rawText = await res.text();
+                    data = JSON.parse(rawText);
+                } catch (e) {
+                    data = rawText;
+                }
+            }
 
             while (typeof data === 'string') {
                 try { data = JSON.parse(data); } catch (e) { break; }
@@ -790,18 +812,29 @@ html, body {
     async function saveConfig() {
         try {
             collectUI();
+            if (!stateCurrent) {
+                throw new Error("Objeto de configuração não inicializado.");
+            }
             const res = await fetch("/trldynamicspawn/saveConfig", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(stateCurrent)
             });
-            const result = await res.json();
-            if (result.status === "success" || result.err === 0) {
+            
+            let result = null;
+            try {
+                result = await res.json();
+            } catch (e) {
+                const text = await res.text();
+                try { result = JSON.parse(text); } catch (e2) { result = text; }
+            }
+
+            if (result && (result.status === "success" || result.err === 0)) {
                 stateInitial = JSON.parse(JSON.stringify(stateCurrent));
                 markDirty(false);
                 showToast("ok", "SUCESSO", "Configuração salva com sucesso no servidor!");
             } else {
-                throw new Error(result.message || "Erro do servidor ao salvar");
+                throw new Error(result?.message || result?.errmsg || "Erro do servidor ao salvar");
             }
         } catch (err) {
             showToast("error", "ERRO", "Falha ao salvar: " + err.message);
