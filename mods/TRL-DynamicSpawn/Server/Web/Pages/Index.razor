@@ -725,7 +725,8 @@ html, body {
             guide_step4_title: "4. EVENTOS E INVASÕES", guide_step4_desc: "Configure o sistema de Invasão de Bosses para permitir que chefões apareçam em mapas não nativos, além de habilitar grupos aleatórios de Raiders e Rogues em qualquer localização.",
             home_section_tips_title: "DICAS E RECOMENDAÇÕES DE DESEMPENHO", tip_perf_title: "💡 Otimização de FPS (Teleport & Despawn):", tip_perf_desc: " Mantenha o 'Teleport de Bots Distantes' ativado. Isso recicla automaticamente bots que se distanciaram demais do combate, preservando a taxa de quadros (FPS) em mapas grandes como Streets e Lighthouse.",
             tip_save_title: "⚠️ Persistência sem Reiniciar:", tip_save_desc: " Ao salvar suas configurações pelo painel, as alterações são gravadas diretamente no servidor (config/config.json) e aplicadas na próxima partida ou onda de spawn imediatamente!",
-            toast_success: "SUCESSO", toast_saved: "Configuração salva com sucesso no servidor!", toast_reset: "PADRÃO", toast_reset_msg: "Configuração restaurada para os padrões originais.", toast_undo: "DESFAZER", toast_undo_msg: "Alterações locais desfeitas."
+            toast_success: "SUCESSO", toast_saved: "Configuração salva com sucesso no servidor!", toast_reset: "PADRÃO", toast_reset_msg: "Configuração restaurada para os padrões originais.", toast_undo: "DESFAZER", toast_undo_msg: "Alterações locais desfeitas.",
+            saving: "SALVANDO...", unsaved: "SALVANDO EM 1S..."
         },
         en: {
             nav_label: "SPAWN MANAGER", nav_home: "HOME", nav_maps: "MAP CONFIGURATIONS", nav_bosses: "BOSS CONFIGURATION",
@@ -734,7 +735,7 @@ html, body {
             title_bosses: "BOSS, ELITE & BOT CONFIGURATION", title_difficulty: "AI DIFFICULTY DISTRIBUTION",
             title_events: "EVENTS & SPECIAL INVASIONS", title_custom: "CUSTOM SPAWNS & COORDINATES",
             undo: "UNDO", reset: "DEFAULT", reload: "RELOAD", save: "SAVE CONFIGURATION",
-            synced: "SYNCED", unsaved: "UNSAVED CHANGES",
+            synced: "SYNCED", unsaved: "SAVING IN 1S...",
             active_preset: "ACTIVE FACTION PRESET", delay_first_wave: "INITIAL FIRST WAVE DELAY (SECONDS)",
             disable_bosses: "Disable All Bosses on All Maps", boss_open_zones: "Allow Bosses in Any Map Zone",
             evt_raiders: "Random Raiders on Any Map", evt_rogues: "Random Rogues on Any Map",
@@ -753,7 +754,8 @@ html, body {
             guide_step4_title: "4. EVENTS & INVASIONS", guide_step4_desc: "Configure the Boss Invasion system to spawn bosses in non-native maps, and enable random Raider or Rogue groups in any raid location.",
             home_section_tips_title: "PERFORMANCE TIPS & RECOMMENDATIONS", tip_perf_title: "💡 FPS Optimization (Teleport & Despawn):", tip_perf_desc: " Keep 'Teleport for Distant Bots' enabled. It automatically recycles bots out of combat range, preserving high frame rates (FPS) on large maps like Streets and Lighthouse.",
             tip_save_title: "⚠️ Instant Save without Restarting:", tip_save_desc: " Saving configurations via the web panel updates server files (config/config.json) immediately for the next raid or wave without restarting the game!",
-            toast_success: "SUCCESS", toast_saved: "Config saved successfully on server!", toast_reset: "DEFAULT", toast_reset_msg: "Config reset to original defaults.", toast_undo: "UNDO", toast_undo_msg: "Local changes undone."
+            toast_success: "SUCCESS", toast_saved: "Config saved successfully on server!", toast_reset: "DEFAULT", toast_reset_msg: "Config reset to original defaults.", toast_undo: "UNDO", toast_undo_msg: "Local changes undone.",
+            saving: "SAVING...", unsaved: "SAVING IN 1S..."
         }
     };
 
@@ -839,6 +841,7 @@ html, body {
     let activeMapId = "bigmap";
     let activeBossProp = "bossReshala";
     let activeDiffFaction = "pmc";
+    let autoSaveTimer = null;
 
     window.switchMainTab = function(sectionId, btn) {
         document.querySelectorAll(".trl-view-section").forEach(s => s.classList.remove("is-active"));
@@ -861,18 +864,45 @@ html, body {
         setTimeout(() => toast.remove(), 4000);
     }
 
-    function markDirty(dirty) {
+    function triggerAutoSave() {
+        markDirty("pending");
+        if (autoSaveTimer) clearTimeout(autoSaveTimer);
+        autoSaveTimer = setTimeout(() => {
+            saveConfig(true);
+        }, 1000);
+    }
+
+    function markDirty(status) {
         const syncDot = document.getElementById("syncDot");
         const syncText = document.getElementById("syncText");
         const btnUndo = document.getElementById("btnUndo");
 
-        if (dirty) {
+        if (status === "saving") {
             syncDot.className = "trl-screen-bar__dot trl-screen-bar__dot--live";
+            syncDot.style.background = "var(--trl-amber-400)";
+            syncDot.style.boxShadow = "var(--trl-glow-amber)";
+            syncText.textContent = t("saving");
+            syncText.style.color = "var(--trl-amber-400)";
+        } else if (status === "pending" || status === true) {
+            syncDot.className = "trl-screen-bar__dot trl-screen-bar__dot--live";
+            syncDot.style.background = "";
+            syncDot.style.boxShadow = "";
             syncText.textContent = t("unsaved");
             syncText.style.color = "var(--trl-red-300)";
             btnUndo.removeAttribute("disabled");
+
+            if (autoSaveTimer) clearTimeout(autoSaveTimer);
+            autoSaveTimer = setTimeout(() => {
+                saveConfig(true);
+            }, 1000);
         } else {
+            if (autoSaveTimer) {
+                clearTimeout(autoSaveTimer);
+                autoSaveTimer = null;
+            }
             syncDot.className = "trl-screen-bar__dot trl-screen-bar__dot--ok";
+            syncDot.style.background = "";
+            syncDot.style.boxShadow = "";
             syncText.textContent = t("synced");
             syncText.style.color = "var(--trl-fg-muted)";
             btnUndo.setAttribute("disabled", "true");
@@ -933,7 +963,12 @@ html, body {
         }
     }
 
-    async function saveConfig() {
+    async function saveConfig(isAutoSave = false) {
+        if (autoSaveTimer) {
+            clearTimeout(autoSaveTimer);
+            autoSaveTimer = null;
+        }
+        markDirty("saving");
         try {
             collectUI();
             if (!stateCurrent) {
@@ -956,11 +991,14 @@ html, body {
             if (result && (result.status === "success" || result.err === 0)) {
                 stateInitial = JSON.parse(JSON.stringify(stateCurrent));
                 markDirty(false);
-                showToast("ok", t("toast_success"), t("toast_saved"));
+                if (!isAutoSave) {
+                    showToast("ok", t("toast_success"), t("toast_saved"));
+                }
             } else {
                 throw new Error(result?.message || result?.errmsg || "Erro do servidor ao salvar");
             }
         } catch (err) {
+            markDirty(true);
             showToast("error", "ERRO", "Falha ao salvar: " + err.message);
         }
     }
