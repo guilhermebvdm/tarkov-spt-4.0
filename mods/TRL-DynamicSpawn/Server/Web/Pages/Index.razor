@@ -979,7 +979,10 @@ html, body {
             }
             const res = await fetch("/trldynamicspawn/saveConfig", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "requestcompressed": "0"
+                },
                 body: JSON.stringify(stateCurrent)
             });
 
@@ -1004,9 +1007,14 @@ html, body {
 
     async function resetConfig() {
         try {
-            const res = await fetch("/trldynamicspawn/resetConfig", { method: "POST" });
+            const res = await fetch("/trldynamicspawn/resetConfig", {
+                method: "POST",
+                headers: {
+                    "requestcompressed": "0"
+                }
+            });
             let result = null;
-            try { result = await res.json(); } catch (e) {}
+            try { result = await parseResponseBody(res); } catch (e) {}
 
             if (result && (result.status === "success" || result.err === 0)) {
                 await fetchConfig();
