@@ -1,9 +1,10 @@
 using System.Text.Json.Serialization;
 using System.Collections.Generic;
+using SPTarkov.Server.Core.Models.Utils;
 
 namespace TRLDynamicSpawnServer.Models;
 
-public record TRLConfig
+public record TRLConfig : IRequestData
 {
     [JsonPropertyName("activePreset")] 
     public string ActivePreset { get; set; } = "Balanced"; // "Equilibrado", "Guerra de PMCs", "Infestação de Scavs", "Aleatório"
