@@ -96,3 +96,4 @@ graphify-out/
 # Release bundles produced by tools/trl-items-management/scripts/package-release.sh
 # (default OUTDIR). Build artifacts — never committed.
 /dist/
+mods/*/modded-bkcp/
