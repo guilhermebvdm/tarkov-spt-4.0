@@ -47,12 +47,6 @@ public record TRLConfig : IRequestData
 
     [JsonPropertyName("mapConfigs")]
     public Dictionary<string, MapSettings> MapConfigs { get; set; } = new();
-
-    [JsonPropertyName("globalAntiOverlapDistance")]
-    public double GlobalAntiOverlapDistance { get; set; } = 5.0;
-
-    [JsonPropertyName("enableMapOverlapCulling")]
-    public bool EnableMapOverlapCulling { get; set; } = true;
 }
 
 public record CustomSpawnsConfig

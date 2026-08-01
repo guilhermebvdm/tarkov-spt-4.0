@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
+using EFT.Game.Spawning;
 using UnityEngine;
 using TRLDynamicSpawn.Helpers;
 using EFT.Communications;
@@ -712,6 +713,8 @@ namespace TRLDynamicSpawn.Components
             BotSpawnParams spawnParams = new BotSpawnParams();
             var botProfile = new BotProfileDataClass(side, role, diff, 0f, spawnParams);
 
+            List<ISpawnPoint> groupAnchorPoints = null;
+
             for (int i = 0; i < groupSize; i++)
             {
                 var task = BotCreationDataClass.Create(botProfile, _botCreator, 1, _botsController.BotSpawner);
@@ -722,11 +725,16 @@ namespace TRLDynamicSpawn.Components
 
                 if (task.Result != null)
                 {
-                    Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] DIRECT SPAWN SUCCESS ({i + 1}/{groupSize}): Spawning {role} in zone {zone.NameZone}...");
+                    Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] SQUAD SPAWN ({i + 1}/{groupSize}): Spawning {role} in zone {zone.NameZone}...");
                     IsGeneratingDynamicWave = true;
                     try
                     {
-                        _botsController.BotSpawner.TryToSpawnInZoneAndDelay(zone, task.Result, false, true, null, true);
+                        List<ISpawnPoint> pointsToUse = (i > 0 && groupAnchorPoints != null && groupAnchorPoints.Count > 0) ? new List<ISpawnPoint>(groupAnchorPoints) : null;
+                        _botsController.BotSpawner.TryToSpawnInZoneAndDelay(zone, task.Result, false, true, pointsToUse, true);
+                        if (i == 0 && pointsToUse != null && pointsToUse.Count > 0)
+                        {
+                            groupAnchorPoints = new List<ISpawnPoint>(pointsToUse);
+                        }
                     }
                     finally
                     {
@@ -736,8 +744,7 @@ namespace TRLDynamicSpawn.Components
 
                 if (i < groupSize - 1)
                 {
-                    float delay = UnityEngine.Random.Range(1.0f, 3.0f);
-                    yield return new WaitForSeconds(delay);
+                    yield return new WaitForSeconds(0.2f);
                 }
             }
         }

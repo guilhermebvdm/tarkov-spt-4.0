@@ -1,4 +1,4 @@
-﻿{
+{
   "activePreset": "Balanced",
   "pmcDifficulty": {
     "easy": 10,
@@ -78,7 +78,5 @@
     "enableCustomSniperSpawns": false,
     "enableCustomPlayerSpawns": false
   },
-  "mapConfigs": {},
-  "globalAntiOverlapDistance": 5.0,
-  "enableMapOverlapCulling": true
+  "mapConfigs": {}
 }

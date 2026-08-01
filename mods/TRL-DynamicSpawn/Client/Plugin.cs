@@ -9,7 +9,7 @@ using TRLDynamicSpawn.Patches;
 namespace TRLDynamicSpawn
 {
     [
-        BepInPlugin("TRLDynamicSpawn.settings", "TRLDynamicSpawn", "3.1.4"),
+        BepInPlugin("TRLDynamicSpawn.settings", "TRLDynamicSpawn", "3.1.5"),
         BepInDependency("com.fika.core", BepInDependency.DependencyFlags.SoftDependency)
     ]
     public class Plugin : BaseUnityPlugin
@@ -33,7 +33,6 @@ namespace TRLDynamicSpawn
             new RefreshLocation().Enable();
             new SetMaxBotCountPatch().Enable();
             new BotSpawnLoggerPatch().Enable();
-            new MapCullingPatch().Enable();
             new DisableVanillaWavesPatch().Enable();
             new DisableVanillaBossWavesPatch().Enable();
             new DynamicSpawnManagerPatch().Enable();

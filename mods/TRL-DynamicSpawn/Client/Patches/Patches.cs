@@ -368,75 +368,6 @@ namespace TRLDynamicSpawn.Patches
         }
     }
 
-    public class MapCullingPatch : ModulePatch
-    {
-        protected override MethodBase GetTargetMethod()
-        {
-            return AccessTools.Method(
-                typeof(SpawnPointManagerClass),
-                nameof(SpawnPointManagerClass.smethod_1)
-            );
-        }
-
-        [PatchPostfix]
-        static void Postfix(ref SpawnPointMarker[] __result)
-        {
-            if (__result == null || __result.Length == 0) return;
-
-            try
-            {
-                string json = SPT.Common.Http.RequestHandler.GetJson("/trldynamicspawn/getConfig");
-                if (string.IsNullOrEmpty(json)) return;
-
-                var cfg = Newtonsoft.Json.JsonConvert.DeserializeObject<TRLDynamicSpawn.Models.TRLConfig>(json);
-                if (cfg == null || !cfg.EnableMapOverlapCulling) return;
-                
-                double cullingDist = cfg.GlobalAntiOverlapDistance;
-                if (cullingDist <= 0) return;
-
-                List<SpawnPointMarker> validMarkers = new List<SpawnPointMarker>();
-                int removed = 0;
-
-                foreach (var marker in __result)
-                {
-                    if (marker == null || marker.SpawnPoint == null) continue;
-
-                    bool tooClose = false;
-                    foreach (var valid in validMarkers)
-                    {
-                        if (Vector3.Distance(marker.SpawnPoint.Position, valid.SpawnPoint.Position) < cullingDist)
-                        {
-                            tooClose = true;
-                            break;
-                        }
-                    }
-
-                    if (!tooClose)
-                    {
-                        validMarkers.Add(marker);
-                    }
-                    else
-                    {
-                        removed++;
-                    }
-                }
-
-                if (removed > 0)
-                {
-                    __result = validMarkers.ToArray();
-                    if (TRLDynamicSpawn.Helpers.Settings.enableDebugLogs.Value)
-                    {
-                        Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] MapCulling removed {removed} overlapping spawn points (Min Dist: {cullingDist}m).");
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Plugin.LogSource.LogError($"[TRL-DynamicSpawn] Error in MapCullingPatch: {ex.Message}");
-            }
-        }
-    }
-
     public class DisableVanillaWavesPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
@@ -502,9 +433,6 @@ namespace TRLDynamicSpawn.Patches
 
     public class TryToSpawnInZoneAndDelayPatch : ModulePatch
     {
-        private static Queue<Vector3> _lastSpawnPositions = new Queue<Vector3>();
-        private static int _maxHistorySpawnPoint = 6;
-
         protected override MethodBase GetTargetMethod()
         {
             return AccessTools.Method(
@@ -570,10 +498,6 @@ namespace TRLDynamicSpawn.Patches
                 var noLosPoints = new List<ISpawnPoint>();
                 var noBubblePoints = new List<ISpawnPoint>();
 
-                var fallbackStrictPoints = new List<ISpawnPoint>();
-                var fallbackNoLosPoints = new List<ISpawnPoint>();
-                var fallbackNoBubblePoints = new List<ISpawnPoint>();
-
                 float maxDist = 300f;
                 bool isBubbleEnabled = TRLDynamicSpawn.Helpers.Settings.enableSpawnBubble.Value;
 
@@ -586,16 +510,6 @@ namespace TRLDynamicSpawn.Patches
                 foreach (var checkPoint in allPoints)
                 {
                     if (checkPoint == null) continue;
-
-                    bool tooCloseToRecent = false;
-                    foreach (var recentPos in _lastSpawnPositions)
-                    {
-                        if (Vector3.Distance(checkPoint.Position, recentPos) < 50f)
-                        {
-                            tooCloseToRecent = true;
-                            break;
-                        }
-                    }
 
                     bool insideBubble = true;
                     bool outsideSafe = true;
@@ -667,47 +581,25 @@ namespace TRLDynamicSpawn.Patches
 
                     if (outsideSafe)
                     {
-                        if (tooCloseToRecent)
-                        {
-                            if (insideBubble && !hasLoS) fallbackStrictPoints.Add(checkPoint);
-                            if (insideBubble) fallbackNoLosPoints.Add(checkPoint);
-                            if (!hasLoS) fallbackNoBubblePoints.Add(checkPoint);
-                        }
-                        else
-                        {
-                            if (insideBubble && !hasLoS) strictPoints.Add(checkPoint);
-                            if (insideBubble) noLosPoints.Add(checkPoint);
-                            if (!hasLoS) noBubblePoints.Add(checkPoint);
-                        }
+                        if (insideBubble && !hasLoS) strictPoints.Add(checkPoint);
+                        if (insideBubble) noLosPoints.Add(checkPoint);
+                        if (!hasLoS) noBubblePoints.Add(checkPoint);
                     }
                 }
 
                 List<ISpawnPoint> chosenList = null;
                 if (strictPoints.Count > 0) chosenList = strictPoints;
-                else if (fallbackStrictPoints.Count > 0) chosenList = fallbackStrictPoints;
                 else if (noLosPoints.Count > 0) chosenList = noLosPoints;
-                else if (fallbackNoLosPoints.Count > 0) chosenList = fallbackNoLosPoints;
-                // MASTER FALLBACK: Acionado APENAS em última instância se nenhum ponto na bolha funcionar!
                 else if (noBubblePoints.Count > 0)
                 {
-                    Plugin.LogSource.LogWarning($"[TRL-DynamicSpawn] MASTER FALLBACK LEVEL 1: Spawning outside bubble in {botZone.NameZone} to prevent spawn drop.");
+                    Plugin.LogSource.LogWarning($"[TRL-DynamicSpawn] MASTER FALLBACK: Spawning outside bubble in {botZone.NameZone} to prevent spawn drop.");
                     chosenList = noBubblePoints;
-                }
-                else if (fallbackNoBubblePoints.Count > 0)
-                {
-                    Plugin.LogSource.LogWarning($"[TRL-DynamicSpawn] MASTER FALLBACK LEVEL 2: Spawning outside bubble with history in {botZone.NameZone}.");
-                    chosenList = fallbackNoBubblePoints;
                 }
 
                 if (chosenList != null && chosenList.Count > 0)
                 {
                     var selectedPoint = chosenList[UnityEngine.Random.Range(0, chosenList.Count)];
                     pointsToSpawn = new List<ISpawnPoint> { selectedPoint };
-                    _lastSpawnPositions.Enqueue(selectedPoint.Position);
-                    if (_lastSpawnPositions.Count > _maxHistorySpawnPoint)
-                    {
-                        _lastSpawnPositions.Dequeue();
-                    }
                 }
                 else
                 {
