@@ -420,7 +420,7 @@
       "source_location": "",
       "_origin": "ast",
       "id": "modulepatch",
-      "community": 90,
+      "community": 83,
       "norm_label": "modulepatch"
     },
     {
@@ -2640,7 +2640,7 @@
       "source_location": "L344",
       "_origin": "ast",
       "id": "patches_classweaponpatches_holsterdrawspeedpatch",
-      "community": 118,
+      "community": 114,
       "norm_label": "holsterdrawspeedpatch"
     },
     {
@@ -2650,7 +2650,7 @@
       "source_location": "L348",
       "_origin": "ast",
       "id": "client_patches_classweaponpatches_cs_bool",
-      "community": 118,
+      "community": 114,
       "norm_label": "bool"
     },
     {
@@ -2660,7 +2660,7 @@
       "source_location": "L350",
       "_origin": "ast",
       "id": "patches_classweaponpatches_holsterdrawspeedpatch_gettargetmethod",
-      "community": 118,
+      "community": 114,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -2670,7 +2670,7 @@
       "source_location": "L356",
       "_origin": "ast",
       "id": "patches_classweaponpatches_holsterdrawspeedpatch_prefix",
-      "community": 118,
+      "community": 114,
       "norm_label": ".prefix()"
     },
     {
@@ -2680,7 +2680,7 @@
       "source_location": "L409",
       "_origin": "ast",
       "id": "patches_classweaponpatches_holsterdrawresetpatch",
-      "community": 114,
+      "community": 111,
       "norm_label": "holsterdrawresetpatch"
     },
     {
@@ -2700,7 +2700,7 @@
       "source_location": "L416",
       "_origin": "ast",
       "id": "patches_classweaponpatches_holsterdrawresetpatch_postfix",
-      "community": 114,
+      "community": 111,
       "norm_label": ".postfix()"
     },
     {
@@ -2710,7 +2710,7 @@
       "source_location": "L460",
       "_origin": "ast",
       "id": "patches_classweaponpatches_holsterputawayspeedpatch",
-      "community": 114,
+      "community": 111,
       "norm_label": "holsterputawayspeedpatch"
     },
     {
@@ -2720,7 +2720,7 @@
       "source_location": "L462",
       "_origin": "ast",
       "id": "patches_classweaponpatches_holsterputawayspeedpatch_gettargetmethod",
-      "community": 114,
+      "community": 111,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -5834,30 +5834,90 @@
       "norm_label": "dictionary"
     },
     {
-      "label": ".Bind()",
+      "label": "ConfigurationManagerAttributes",
       "file_type": "code",
       "source_file": "Client/PerksConfig.cs",
-      "source_location": "L166",
+      "source_location": "L63",
       "_origin": "ast",
-      "id": "client_perksconfig_perksconfig_bind",
+      "id": "client_perksconfig_configurationmanagerattributes",
       "community": 88,
-      "norm_label": ".bind()"
+      "norm_label": "configurationmanagerattributes"
+    },
+    {
+      "label": "int",
+      "file_type": "code",
+      "source_file": "Client/PerksConfig.cs",
+      "source_location": "L65",
+      "_origin": "ast",
+      "id": "client_perksconfig_cs_int",
+      "community": 88,
+      "norm_label": "int"
+    },
+    {
+      "label": "bool",
+      "file_type": "code",
+      "source_file": "Client/PerksConfig.cs",
+      "source_location": "L66",
+      "_origin": "ast",
+      "id": "client_perksconfig_cs_bool",
+      "community": 88,
+      "norm_label": "bool"
+    },
+    {
+      "label": ".BindOrdered()",
+      "file_type": "code",
+      "source_file": "Client/PerksConfig.cs",
+      "source_location": "L72",
+      "_origin": "ast",
+      "id": "client_perksconfig_perksconfig_bindordered",
+      "community": 88,
+      "norm_label": ".bindordered()"
     },
     {
       "label": "ConfigFile",
       "file_type": "code",
       "source_file": "Client/PerksConfig.cs",
-      "source_location": "L166",
+      "source_location": "L72",
       "_origin": "ast",
       "id": "configfile",
       "community": 88,
       "norm_label": "configfile"
     },
     {
+      "label": "T",
+      "file_type": "code",
+      "source_file": "Client/PerksConfig.cs",
+      "source_location": "L72",
+      "_origin": "ast",
+      "id": "t",
+      "community": 88,
+      "norm_label": "t"
+    },
+    {
+      "label": "ConfigDescription",
+      "file_type": "code",
+      "source_file": "Client/PerksConfig.cs",
+      "source_location": "L79",
+      "_origin": "ast",
+      "id": "configdescription",
+      "community": 88,
+      "norm_label": "configdescription"
+    },
+    {
+      "label": ".Bind()",
+      "file_type": "code",
+      "source_file": "Client/PerksConfig.cs",
+      "source_location": "L208",
+      "_origin": "ast",
+      "id": "client_perksconfig_perksconfig_bind",
+      "community": 88,
+      "norm_label": ".bind()"
+    },
+    {
       "label": ".BindClassColor()",
       "file_type": "code",
       "source_file": "Client/PerksConfig.cs",
-      "source_location": "L614",
+      "source_location": "L663",
       "_origin": "ast",
       "id": "client_perksconfig_perksconfig_bindclasscolor",
       "community": 88,
@@ -5867,7 +5927,7 @@
       "label": ".Hex()",
       "file_type": "code",
       "source_file": "Client/PerksConfig.cs",
-      "source_location": "L629",
+      "source_location": "L678",
       "_origin": "ast",
       "id": "client_perksconfig_perksconfig_hex",
       "community": 88,
@@ -5877,7 +5937,7 @@
       "label": "Color",
       "file_type": "code",
       "source_file": "Client/PerksConfig.cs",
-      "source_location": "L629",
+      "source_location": "L678",
       "_origin": "ast",
       "id": "client_perksconfig_cs_color",
       "community": 88,
@@ -5887,7 +5947,7 @@
       "label": ".EnsureColorConverter()",
       "file_type": "code",
       "source_file": "Client/PerksConfig.cs",
-      "source_location": "L641",
+      "source_location": "L690",
       "_origin": "ast",
       "id": "client_perksconfig_perksconfig_ensurecolorconverter",
       "community": 88,
@@ -18869,9 +18929,9 @@
       "source_file": "Client/Patches/ClassWeaponPatches.cs",
       "source_location": "L460",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_classweaponpatches_holsterputawayspeedpatch",
-      "target": "modulepatch",
-      "confidence_score": 1.0
+      "target": "modulepatch"
     },
     {
       "relation": "inherits",
@@ -21839,9 +21899,9 @@
       "source_file": "Client/Patches/ClassWeaponPatches.cs",
       "source_location": "L460",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_classweaponpatches",
-      "target": "patches_classweaponpatches_holsterputawayspeedpatch",
-      "confidence_score": 1.0
+      "target": "patches_classweaponpatches_holsterputawayspeedpatch"
     },
     {
       "relation": "contains",
@@ -21976,9 +22036,9 @@
       "source_location": "L462",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "patches_classweaponpatches_holsterputawayspeedpatch_gettargetmethod",
-      "target": "client_patches_classweaponpatches_cs_methodbase",
-      "confidence_score": 1.0
+      "target": "client_patches_classweaponpatches_cs_methodbase"
     },
     {
       "relation": "references",
@@ -22086,9 +22146,9 @@
       "source_location": "L469",
       "weight": 1.0,
       "context": "attribute",
+      "confidence_score": 1.0,
       "source": "patches_classweaponpatches_holsterputawayspeedpatch_prefix",
-      "target": "client_patches_classweaponpatches_cs_patchprefix",
-      "confidence_score": 1.0
+      "target": "client_patches_classweaponpatches_cs_patchprefix"
     },
     {
       "relation": "references",
@@ -22204,9 +22264,9 @@
       "source_location": "L469",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "patches_classweaponpatches_holsterputawayspeedpatch_prefix",
-      "target": "client_patches_classweaponpatches_cs_firearmcontroller",
-      "confidence_score": 1.0
+      "target": "client_patches_classweaponpatches_cs_firearmcontroller"
     },
     {
       "relation": "references",
@@ -22499,9 +22559,9 @@
       "source_file": "Client/Patches/ClassWeaponPatches.cs",
       "source_location": "L462",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_classweaponpatches_holsterputawayspeedpatch",
-      "target": "patches_classweaponpatches_holsterputawayspeedpatch_gettargetmethod",
-      "confidence_score": 1.0
+      "target": "patches_classweaponpatches_holsterputawayspeedpatch_gettargetmethod"
     },
     {
       "relation": "method",
@@ -22509,9 +22569,9 @@
       "source_file": "Client/Patches/ClassWeaponPatches.cs",
       "source_location": "L469",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_classweaponpatches_holsterputawayspeedpatch",
-      "target": "patches_classweaponpatches_holsterputawayspeedpatch_prefix",
-      "confidence_score": 1.0
+      "target": "patches_classweaponpatches_holsterputawayspeedpatch_prefix"
     },
     {
       "relation": "references",
@@ -22520,9 +22580,9 @@
       "source_location": "L469",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "patches_classweaponpatches_holsterputawayspeedpatch_prefix",
-      "target": "client_patches_classweaponpatches_cs_item",
-      "confidence_score": 1.0
+      "target": "client_patches_classweaponpatches_cs_item"
     },
     {
       "relation": "references",
@@ -26327,6 +26387,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "Client/PerksConfig.cs",
+      "source_location": "L63",
+      "weight": 1.0,
+      "source": "client_perksconfig",
+      "target": "client_perksconfig_configurationmanagerattributes",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/PerksConfig.cs",
       "source_location": "L10",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -26354,6 +26424,17 @@
       "confidence_score": 1.0,
       "source": "client_perksconfig_perksconfig",
       "target": "client_perksconfig_cs_dictionary"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/PerksConfig.cs",
+      "source_location": "L69",
+      "weight": 1.0,
+      "context": "field",
+      "source": "client_perksconfig_perksconfig",
+      "target": "client_perksconfig_cs_int",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -26390,6 +26471,16 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "Client/PerksConfig.cs",
+      "source_location": "L79",
+      "weight": 1.0,
+      "source": "client_perksconfig_perksconfig",
+      "target": "client_perksconfig_perksconfig_bindordered",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/PerksConfig.cs",
       "source_location": "L554",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -26418,26 +26509,92 @@
       "target": "client_perksconfig_cs_configentry"
     },
     {
-      "relation": "calls",
-      "context": "call",
+      "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Client/PerksConfig.cs",
-      "source_location": "L241",
+      "source_location": "L79",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "client_perksconfig_perksconfig_bind",
-      "target": "client_perksconfig_perksconfig_bindclasscolor"
+      "context": "return_type",
+      "source": "client_perksconfig_perksconfig_bindordered",
+      "target": "client_perksconfig_cs_configentry",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/PerksConfig.cs",
+      "source_location": "L66",
+      "weight": 1.0,
+      "context": "field",
+      "source": "client_perksconfig_configurationmanagerattributes",
+      "target": "client_perksconfig_cs_bool",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/PerksConfig.cs",
+      "source_location": "L65",
+      "weight": 1.0,
+      "context": "field",
+      "source": "client_perksconfig_configurationmanagerattributes",
+      "target": "client_perksconfig_cs_int",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "Client/PerksConfig.cs",
-      "source_location": "L152",
+      "source_location": "L213",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "client_perksconfig_perksconfig_bind",
-      "target": "client_perksconfig_perksconfig_ensurecolorconverter"
+      "target": "client_perksconfig_perksconfig_bindordered",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/PerksConfig.cs",
+      "source_location": "L665",
+      "weight": 1.0,
+      "source": "client_perksconfig_perksconfig_bindclasscolor",
+      "target": "client_perksconfig_perksconfig_bindordered",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/PerksConfig.cs",
+      "source_location": "L79",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "client_perksconfig_perksconfig_bindordered",
+      "target": "configdescription",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/PerksConfig.cs",
+      "source_location": "L79",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "client_perksconfig_perksconfig_bindordered",
+      "target": "configfile",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/PerksConfig.cs",
+      "source_location": "L79",
+      "weight": 1.0,
+      "context": "generic_arg",
+      "source": "client_perksconfig_perksconfig_bindordered",
+      "target": "t",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -26460,6 +26617,28 @@
       "confidence_score": 1.0,
       "source": "client_perksconfig_perksconfig_bindclasscolor",
       "target": "configfile"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/PerksConfig.cs",
+      "source_location": "L241",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "client_perksconfig_perksconfig_bind",
+      "target": "client_perksconfig_perksconfig_bindclasscolor"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/PerksConfig.cs",
+      "source_location": "L152",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "client_perksconfig_perksconfig_bind",
+      "target": "client_perksconfig_perksconfig_ensurecolorconverter"
     },
     {
       "relation": "calls",
@@ -42219,5 +42398,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "8017daeb0e996f51ed0630687573a94b88ecc5d8"
+  "built_at_commit": "3e2bd46a66f80963b90ca2781c2f9b064b5b8255"
 }
