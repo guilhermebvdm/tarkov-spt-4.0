@@ -383,7 +383,6 @@ html, body {
             <button type="button" id="btnUndo" class="trl-btn" disabled><span data-i18n="undo">DESFAZER</span></button>
             <button type="button" id="btnReset" class="trl-btn"><span data-i18n="reset">PADRÃO</span></button>
             <button type="button" id="btnReload" class="trl-btn"><span data-i18n="reload">RECARREGAR</span></button>
-            <button type="button" id="btnSave" class="trl-btn trl-btn--primary"><span data-i18n="save">SALVAR CONFIGURAÇÃO</span></button>
         </div>
     </header>
 
@@ -1602,7 +1601,6 @@ html, body {
         document.getElementById("enableCustomSniperSpawns").onchange = () => markDirty(true);
         document.getElementById("enableCustomPlayerSpawns").onchange = () => markDirty(true);
 
-        document.getElementById("btnSave").onclick = saveConfig;
         document.getElementById("btnReload").onclick = fetchConfig;
         document.getElementById("btnReset").onclick = resetConfig;
         document.getElementById("btnUndo").onclick = () => {
