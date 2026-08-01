@@ -670,6 +670,7 @@ html, body {
         { id: "shoreline", key: "shoreline", name: "Shoreline" },
         { id: "tarkovstreets", key: "tarkovstreets", name: "Streets" },
         { id: "sandbox", key: "sandbox", name: "Ground Zero" },
+        { id: "sandbox_high", key: "sandbox_high", name: "Ground Zero (High)" },
         { id: "woods", key: "woods", name: "Woods" }
     ];
 
@@ -706,7 +707,8 @@ html, body {
         shoreline: ["ZoneSanatorium1", "ZoneSanatorium2", "ZonePassFar", "ZonePassClose", "ZoneTunnel", "ZonePowerStation", "ZoneGasStation", "ZonePort", "ZoneVillage", "ZoneBunker"],
         tarkovstreets: ["ZoneMVD", "ZoneHotel", "ZoneCardi", "ZoneFactory", "ZoneConcordia_1", "ZoneConcordia_2", "ZonePinewood", "ZoneCinema", "ZoneSniper1", "ZoneSniper2", "ZoneSniper3"],
         woods: ["ZoneRedHouse", "ZoneWoodCutter", "ZoneHouse", "ZoneBigCutter", "ZoneMiniHouse", "ZoneClear", "ZoneScavBase", "ZoneVillage", "ZoneBrokenVill", "ZoneHighRocks"],
-        sandbox: ["ZoneSandbox"]
+        sandbox: ["ZoneSandbox"],
+        sandbox_high: ["ZoneSandbox"]
     };
 
     const INVASION_BOSS_OPTIONS = ["All", "Random", "bossKnight", "bossTagilla", "bossKilla", "bossGluhar", "bossSanitar", "bossKolontay", "bossBully", "bossBoar", "bossPartisan", "gifter"];
@@ -964,17 +966,34 @@ html, body {
 
             <div class="trl-h3">TELEPORT DE BOTS E DESPAWN DENSITÁRIO</div>
             <div class="trl-form-grid">
-                <label class="trl-switch">
-                    <input type="checkbox" id="mc_teleport_enable" ${cfg.enableDespawn ? 'checked' : ''}>
-                    <span>Ativar Teleport de Bots Distantes</span>
-                </label>
-
-                <div class="trl-field">
-                    <label class="trl-field__label">
-                        <span>DISTÂNCIA MÍNIMA DE ALVO DO TELEPORT (M)</span>
-                        <span id="val_mc_teleport_dist" class="trl-slider-val">${cfg.teleportMinDistance ?? 100}</span>
+                <div>
+                    <label class="trl-switch">
+                        <input type="checkbox" id="mc_teleport_enable" ${cfg.enableDespawn ? 'checked' : ''}>
+                        <span>Ativar Teleport de Bots Distantes</span>
                     </label>
-                    <input type="range" id="mc_teleport_dist" class="trl-slider" min="30" max="300" step="10" value="${cfg.teleportMinDistance ?? 100}">
+                    <br>
+                    <label class="trl-switch" style="margin-top:8px;">
+                        <input type="checkbox" id="mc_despawn_pmcs" ${cfg.despawnPMCs ? 'checked' : ''}>
+                        <span>Incluir PMCs no Teleport / Despawn</span>
+                    </label>
+                </div>
+
+                <div>
+                    <div class="trl-field">
+                        <label class="trl-field__label">
+                            <span>DISTÂNCIA MÍNIMA DE ALVO DO TELEPORT (M)</span>
+                            <span id="val_mc_teleport_dist" class="trl-slider-val">${cfg.teleportMinDistance ?? 100}</span>
+                        </label>
+                        <input type="range" id="mc_teleport_dist" class="trl-slider" min="30" max="300" step="10" value="${cfg.teleportMinDistance ?? 100}">
+                    </div>
+
+                    <div class="trl-field">
+                        <label class="trl-field__label">
+                            <span>INTERVALO DE VERIFICAÇÃO DO TELEPORT (SEGUNDOS)</span>
+                            <span id="val_mc_despawn_interval" class="trl-slider-val">${cfg.despawnInterval ?? 20}</span>
+                        </label>
+                        <input type="range" id="mc_despawn_interval" class="trl-slider" min="5" max="300" step="5" value="${cfg.despawnInterval ?? 20}">
+                    </div>
                 </div>
             </div>
         `;
@@ -984,6 +1003,7 @@ html, body {
         bindSlider("mc_safe", val => { ensureMapConfig(mapInfo.id).safeZoneDistance = parseFloat(val); });
         bindSlider("mc_despawn_dist", val => { ensureMapConfig(mapInfo.id).despawnDistance = parseFloat(val); });
         bindSlider("mc_teleport_dist", val => { ensureMapConfig(mapInfo.id).teleportMinDistance = parseFloat(val); });
+        bindSlider("mc_despawn_interval", val => { ensureMapConfig(mapInfo.id).despawnInterval = parseFloat(val); });
 
         document.getElementById("mc_bubble_enable").onchange = (e) => {
             ensureMapConfig(mapInfo.id).enableSpawnBubble = e.target.checked;
@@ -991,6 +1011,10 @@ html, body {
         };
         document.getElementById("mc_teleport_enable").onchange = (e) => {
             ensureMapConfig(mapInfo.id).enableDespawn = e.target.checked;
+            markDirty(true);
+        };
+        document.getElementById("mc_despawn_pmcs").onchange = (e) => {
+            ensureMapConfig(mapInfo.id).despawnPMCs = e.target.checked;
             markDirty(true);
         };
     }
@@ -1029,6 +1053,7 @@ html, body {
         const container = document.getElementById("bossConfigContainer");
         const botCat = BOT_CATEGORIES.find(b => b.prop === activeBossProp) || BOT_CATEGORIES[0];
         const bossInfo = stateCurrent.eliteConfig?.[botCat.prop] || {};
+        const isRegularBot = (botCat.prop === "sptBear" || botCat.prop === "sptUsec" || botCat.prop === "assault");
 
         container.innerHTML = `
             <div class="trl-h3" style="color:var(--trl-accent);">${botCat.name.toUpperCase()}</div>
@@ -1038,12 +1063,16 @@ html, body {
                     <span>Ativar Bot / Boss no Servidor</span>
                 </label>
 
+                ${!isRegularBot && botCat.prop !== "pmcBot" ? `
                 <label class="trl-switch">
                     <input type="checkbox" id="bc_disable_followers" ${bossInfo.disableFollowers ? 'checked' : ''}>
                     <span>Desativar Seguidores / Guardas</span>
                 </label>
+                ` : '<div></div>'}
             </div>
 
+            ${isRegularBot ? `
+            <div class="trl-h3">CONFIGURAÇÃO DE GRUPOS DE BOTS (GROUP SPAWN)</div>
             <div class="trl-form-grid">
                 <div class="trl-field">
                     <label class="trl-field__label">
@@ -1061,24 +1090,30 @@ html, body {
                     <input type="range" id="bc_max_group" class="trl-slider" min="1" max="5" value="${bossInfo.maxGroupSize ?? 3}">
                 </div>
             </div>
-
             <div class="trl-divider"></div>
+            ` : ''}
 
             <div class="trl-h3">CHANCE E SELEÇÃO DE ZONAS POR MAPA</div>
             <div id="bossMapMatrixContainer"></div>
         `;
 
-        bindSlider("bc_group_chance", val => { ensureBossInfo(botCat.prop).groupChance = parseInt(val); });
-        bindSlider("bc_max_group", val => { ensureBossInfo(botCat.prop).maxGroupSize = parseInt(val); });
+        if (isRegularBot) {
+            bindSlider("bc_group_chance", val => { ensureBossInfo(botCat.prop).groupChance = parseInt(val); });
+            bindSlider("bc_max_group", val => { ensureBossInfo(botCat.prop).maxGroupSize = parseInt(val); });
+        }
 
         document.getElementById("bc_enable").onchange = (e) => {
             ensureBossInfo(botCat.prop).enable = e.target.checked;
             markDirty(true);
         };
-        document.getElementById("bc_disable_followers").onchange = (e) => {
-            ensureBossInfo(botCat.prop).disableFollowers = e.target.checked;
-            markDirty(true);
-        };
+
+        const followersEl = document.getElementById("bc_disable_followers");
+        if (followersEl) {
+            followersEl.onchange = (e) => {
+                ensureBossInfo(botCat.prop).disableFollowers = e.target.checked;
+                markDirty(true);
+            };
+        }
 
         renderBossMapMatrix(botCat.prop);
     }
@@ -1086,6 +1121,8 @@ html, body {
     function renderBossMapMatrix(bossProp) {
         const container = document.getElementById("bossMapMatrixContainer");
         const bossInfo = ensureBossInfo(bossProp);
+        const isRegularBot = (bossProp === "sptBear" || bossProp === "sptUsec" || bossProp === "assault");
+        const chanceLabel = isRegularBot ? "HOTZONE CHANCE (%)" : "CHANCE DE SPAWN (%)";
         container.innerHTML = "";
 
         MAP_LIST.forEach(m => {
@@ -1108,7 +1145,7 @@ html, body {
                 <div class="trl-boss-card__title">${m.name}</div>
                 <div class="trl-field">
                     <label class="trl-field__label">
-                        <span>CHANCE DE SPAWN EM ${m.name.toUpperCase()} (%)</span>
+                        <span>${chanceLabel} EM ${m.name.toUpperCase()}</span>
                         <span id="val_sc_${m.key}" class="trl-slider-val">${chanceVal}</span>
                     </label>
                     <input type="range" id="sc_${m.key}" class="trl-slider" min="0" max="100" value="${chanceVal}">
@@ -1235,10 +1272,19 @@ html, body {
             chip.textContent = b;
             chip.onclick = () => {
                 let list = invasion.selectedBosses || [];
-                if (list.includes(b)) list = list.filter(x => x !== b);
-                else list.push(b);
+                if (b === "All") {
+                    list = INVASION_BOSS_OPTIONS.filter(x => x !== "Random" && x !== "All");
+                    list.unshift("All");
+                } else if (b === "Random") {
+                    list = ["Random"];
+                } else {
+                    if (list.includes("All")) list = list.filter(x => x !== "All");
+                    if (list.includes("Random")) list = list.filter(x => x !== "Random");
+                    if (list.includes(b)) list = list.filter(x => x !== b);
+                    else list.push(b);
+                }
                 invasion.selectedBosses = list;
-                chip.classList.toggle("is-active");
+                renderInvasionMatrices(invasion);
                 markDirty(true);
             };
             bossContainer.appendChild(chip);
@@ -1251,10 +1297,19 @@ html, body {
             chip.textContent = m;
             chip.onclick = () => {
                 let list = invasion.selectedMaps || [];
-                if (list.includes(m)) list = list.filter(x => x !== m);
-                else list.push(m);
+                if (m === "All") {
+                    list = INVASION_MAP_OPTIONS.filter(x => x !== "Random" && x !== "All");
+                    list.unshift("All");
+                } else if (m === "Random") {
+                    list = ["Random"];
+                } else {
+                    if (list.includes("All")) list = list.filter(x => x !== "All");
+                    if (list.includes("Random")) list = list.filter(x => x !== "Random");
+                    if (list.includes(m)) list = list.filter(x => x !== m);
+                    else list.push(m);
+                }
                 invasion.selectedMaps = list;
-                chip.classList.toggle("is-active");
+                renderInvasionMatrices(invasion);
                 markDirty(true);
             };
             mapContainer.appendChild(chip);
