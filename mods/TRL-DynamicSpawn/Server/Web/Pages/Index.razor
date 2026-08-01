@@ -735,7 +735,6 @@ html, body {
             disable_bosses: "Desativar Todos os Bosses em Todos os Mapas", boss_open_zones: "Permitir Bosses em Qualquer Zona do Mapa",
             evt_raiders: "Raiders Aleatórios em Qualquer Mapa", evt_rogues: "Rogues Aleatórios em Qualquer Mapa",
             custom_pmc: "Ativar Spawns Customizados de PMCs", custom_scav: "Ativar Spawns Customizados de Scavs", custom_sniper: "Ativar Spawns Customizados de Snipers", custom_player: "Ativar Spawns Customizados de Jogadores",
-            overlap_distance: "DISTÂNCIA MÍNIMA ANTI-OVERLAP (METROS)", enable_overlap: "Ativar Remoção Anti-Overlap de Spawns",
             opt_balanced: "Equilibrado (50% PMC / 50% Scav)", opt_pmc_war: "Guerra de PMCs (70% PMC / 30% Scav)", opt_scav_infestation: "Infestação de Scavs (20% PMC / 80% Scav)", opt_quiet_raid: "Raid Tranquilo (Baixa Densidade)", opt_warzone: "Zona de Guerra (Alta Densidade)", opt_random: "Aleatório por Match",
             sub_global_bosses: "CONTROLES GLOBAIS DE BOSSES", sub_boss_invasion: "SISTEMA DE INVASÃO DE BOSSES (BOSS INVASION)", enable_boss_invasion: "Ativar Sistema de Invasão de Bosses", invasion_map_chance: "CHANCE DE INVASÃO NO MAPA (%)", invasion_boss_chance: "CHANCE DE SPAWN DE CADA BOSS (%)", allowed_invasion_bosses: "BOSSES PERMITIDOS NA INVASÃO", allowed_invasion_maps: "MAPAS PERMITIDOS NA INVASÃO", sub_raiders_rogues: "GRUPOS DE RAIDERS E ROGUES ALEATÓRIOS", raider_chance: "CHANCE DE RAIDERS (%)", rogue_chance: "CHANCE DE ROGUES (%)",
             waves_interval: "INTERVALO ENTRE ONDAS (SEGUNDOS)", sniper_chance: "CHANCE DE SPAWN DE SNIPER (%)", spawn_radius_sub: "RAIO DE SPAWN E BOLHA DE LIMITAÇÃO", min_safe_dist: "DISTÂNCIA MÍNIMA SEGURA DOS JOGADORES (M)", enable_bubble: "Ativar Bolha Máxima de Spawn/Despawn", max_bubble_dist: "DISTÂNCIA MÁXIMA DA BOLHA (M)", teleport_sub: "TELEPORT DE BOTS E DESPAWN DENSITÁRIO", enable_teleport: "Ativar Teleport de Bots Distantes", include_pmcs: "Incluir PMCs no Teleport / Despawn", teleport_min_dist: "DISTÂNCIA MÍNIMA DE ALVO DO TELEPORT (M)", teleport_check_interval: "INTERVALO DE VERIFICAÇÃO DO TELEPORT (SEGUNDOS)",
@@ -771,7 +770,6 @@ html, body {
             disable_bosses: "Disable All Bosses on All Maps", boss_open_zones: "Allow Bosses in Any Map Zone",
             evt_raiders: "Random Raiders on Any Map", evt_rogues: "Random Rogues on Any Map",
             custom_pmc: "Enable Custom PMC Spawns", custom_scav: "Enable Custom Scav Spawns", custom_sniper: "Enable Custom Sniper Spawns", custom_player: "Enable Custom Player Spawns",
-            overlap_distance: "MINIMUM ANTI-OVERLAP DISTANCE (METERS)", enable_overlap: "Enable Map Overlap Culling",
             opt_balanced: "Balanced (50% PMC / 50% Scav)", opt_pmc_war: "PMC War (70% PMC / 30% Scav)", opt_scav_infestation: "Scav Infestation (20% PMC / 80% Scav)", opt_quiet_raid: "Quiet Raid (Low Density)", opt_warzone: "Warzone (High Density)", opt_random: "Random per Match",
             sub_global_bosses: "GLOBAL BOSS CONTROLS", sub_boss_invasion: "BOSS INVASION SYSTEM", enable_boss_invasion: "Enable Boss Invasion System", invasion_map_chance: "MAP INVASION CHANCE (%)", invasion_boss_chance: "EACH BOSS SPAWN CHANCE (%)", allowed_invasion_bosses: "ALLOWED INVASION BOSSES", allowed_invasion_maps: "ALLOWED INVASION MAPS", sub_raiders_rogues: "RANDOM RAIDER & ROGUE GROUPS", raider_chance: "RAIDER SPAWN CHANCE (%)", rogue_chance: "ROGUE SPAWN CHANCE (%)",
             waves_interval: "SECONDS BETWEEN WAVES (SECONDS)", sniper_chance: "SNIPER SPAWN CHANCE (%)", spawn_radius_sub: "SPAWN RADIUS & LIMITING BUBBLE", min_safe_dist: "MIN SAFE DISTANCE FROM PLAYERS (M)", enable_bubble: "Enable Max Spawn/Despawn Bubble", max_bubble_dist: "MAX BUBBLE LIMIT DISTANCE (M)", teleport_sub: "BOT TELEPORT & DENSITY DESPAWN", enable_teleport: "Enable Teleport for Distant Bots", include_pmcs: "Include PMCs in Teleport / Despawn", teleport_min_dist: "MINIMUM TARGET TELEPORT DISTANCE (M)", teleport_check_interval: "TELEPORT CHECK INTERVAL (SECONDS)",
@@ -1078,9 +1076,6 @@ html, body {
 
         const globalTimer = stateCurrent.mapTimers?.bigmap?.delayBeforeFirstWave ?? 60;
         setSliderVal("delayBeforeFirstWave", globalTimer);
-
-        document.getElementById("enableMapOverlapCulling").checked = !!stateCurrent.enableMapOverlapCulling;
-        setSliderVal("globalAntiOverlapDistance", stateCurrent.globalAntiOverlapDistance ?? 5.0);
 
         renderMapSubtabs();
         renderActiveMapConfig();
@@ -1568,8 +1563,6 @@ html, body {
         if (!stateCurrent) return;
 
         stateCurrent.activePreset = document.getElementById("activePreset").value;
-        stateCurrent.globalAntiOverlapDistance = parseFloat(document.getElementById("globalAntiOverlapDistance").value);
-        stateCurrent.enableMapOverlapCulling = document.getElementById("enableMapOverlapCulling").checked;
 
         if (!stateCurrent.eliteConfig) stateCurrent.eliteConfig = {};
         stateCurrent.eliteConfig.disableBosses = document.getElementById("disableBosses").checked;
@@ -1617,7 +1610,6 @@ html, body {
             ensureMapConfig(firstMap).delayBeforeFirstWave = parseInt(val);
         });
 
-        bindSlider("globalAntiOverlapDistance", val => { stateCurrent.globalAntiOverlapDistance = parseFloat(val); });
         bindSlider("evt_boss_invasion_map_chance", val => { ensureInvasion().mapChance = parseInt(val); });
         bindSlider("evt_boss_invasion_boss_chance", val => { ensureInvasion().bossChance = parseInt(val); });
         bindSlider("evt_raiders_chance", val => { stateCurrent.eliteConfig.randomRaiderGroupChance = parseInt(val); });
@@ -1629,7 +1621,6 @@ html, body {
             return stateCurrent.eliteConfig.bossInvasion;
         }
 
-        document.getElementById("enableMapOverlapCulling").onchange = () => markDirty(true);
         document.getElementById("disableBosses").onchange = () => markDirty(true);
         document.getElementById("bossOpenZones").onchange = () => markDirty(true);
         document.getElementById("evt_boss_invasion_enable").onchange = () => markDirty(true);

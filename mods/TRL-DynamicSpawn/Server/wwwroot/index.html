@@ -364,16 +364,6 @@
                                 <span data-i18n="custom_sniper">Ativar Spawns Customizados de Snipers</span>
                             </label>
                         </div>
-
-                        <div class="trl-divider"></div>
-
-                        <div class="trl-field">
-                            <label class="trl-field__label">
-                                <span data-i18n="overlap_distance">DISTÂNCIA MÍNIMA ANTI-OVERLAP (METROS)</span>
-                                <span id="val_globalAntiOverlapDistance" class="trl-slider-val">5.0</span>
-                            </label>
-                            <input type="range" id="globalAntiOverlapDistance" class="trl-slider" min="1" max="20" step="0.5" value="5.0">
-                        </div>
                     </div>
                 </div>
             </section>
@@ -683,12 +673,6 @@
                 document.getElementById("enableCustomScavSpawns").checked = !!stateCurrent.customSpawnsConfig.enableCustomScavSpawns;
                 document.getElementById("enableCustomSniperSpawns").checked = !!stateCurrent.customSpawnsConfig.enableCustomSniperSpawns;
             }
-
-            const overlapInp = document.getElementById("globalAntiOverlapDistance");
-            if (overlapInp) {
-                overlapInp.value = stateCurrent.globalAntiOverlapDistance || 5.0;
-                document.getElementById("val_globalAntiOverlapDistance").textContent = overlapInp.value;
-            }
         }
 
         // Setup Events & Listeners
@@ -796,16 +780,6 @@
                     };
                 }
             });
-
-            const overlapInp = document.getElementById("globalAntiOverlapDistance");
-            if (overlapInp) {
-                overlapInp.oninput = (e) => {
-                    const val = parseFloat(e.target.value);
-                    document.getElementById("val_globalAntiOverlapDistance").textContent = val;
-                    stateCurrent.globalAntiOverlapDistance = val;
-                    markDirty(true);
-                };
-            }
 
             // Preset Change
             document.getElementById("activePreset").onchange = (e) => {
