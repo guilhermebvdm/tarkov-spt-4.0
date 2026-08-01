@@ -2,7 +2,7 @@
 title: Installing Mods
 description: General guide on adding mods to your game.
 published: true
-date: 2026-05-01T05:30:00.034Z
+date: 2026-06-15T23:40:33.304Z
 tags: guide, mods
 editor: markdown
 dateCreated: 2025-06-12T18:59:03.228Z
@@ -22,7 +22,7 @@ dateCreated: 2025-06-12T18:59:03.228Z
 
 - [Notepad++](https://notepad-plus-plus.org/) is another useful tool to have installed. It simplifies editing config files, and will let you know if there's any formatting issues with the edits you made.
 
-- Make sure that **you have already loaded SPT up to the main menu** before installing mods.
+- Make sure that **you have loaded your SPT install up to the main menu at least once** before installing mods.
 
 - **Only install mods that are marked compatible with your version of SPT.** Mods for older SPT versions will not work, and will break things. If you are unsure what version of SPT you are on, you can see the SPT version in the top left of the server window or in the bottom left while in-game.
 
@@ -57,6 +57,14 @@ If you are experiencing issues after updating a mod, or a mod has a large number
 
 You can use a tool like [Check Mods](<https://forge.sp-tarkov.com/mod/2471/check-mods>) to see which of your mods require updating.
 
+### Replacing files
+
+When you drag and drop a folder into a directory, which has the same named folders/files, it will merge them and overwrite only duplicate files. **It will not delete any non-duplicates.**
+
+&nbsp;
+<video width="450" height="297" controls style="display: block; margin: 0 auto;">
+	<source src="https://i.imgur.com/Wy5bijG.mp4" type="video/mp4">
+</video>
 
 # See also
 

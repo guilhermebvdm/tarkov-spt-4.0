@@ -14,9 +14,9 @@ Serve como referência local para desenvolver, ajustar e modificar mods do SPT 4
 ## Origem
 
 - **Repo upstream:** `sp-tarkov/wiki` (branch `main`)
-- **Commit do snapshot:** `5c7fb9f4c6dcf018d0771beb0012b9722cc43d25`
-- **Data do snapshot:** 2026-05-01
-- **Importado em:** 2026-05-03
+- **Commit do snapshot:** `8e3c35040799819d58935080d711b98d58d87fe1`
+- **Data do snapshot:** 2026-06-25
+- **Importado em:** 2026-07-01
 
 ## Licença e regras de uso
 
