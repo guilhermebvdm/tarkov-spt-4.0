@@ -1,0 +1,148 @@
+# {{MOD}} — Auditoria de publicação {{AUDIT_NN}}
+
+**Mod:** {{MOD}}
+**Nome canônico proposto:** {{CANONICAL_NAME}}
+**Versão auditada:** {{VERSION}}
+**Data:** {{CREATED_AT}}
+**Destino:** SPT Forge (forge.sp-tarkov.com)
+
+> Auditoria de prontidão para publicação pública, em 5 fases com portão. Cada achado recebe um ID
+> `PUB-{{AUDIT_NN}}-MM` permanente. A **fase 1 é bloqueante**: reprovou, o resto não vale.
+> Regras em `.claude/skills/trl-mod-publishing/SKILL.md`.
+
+## Veredito
+
+> **PUBLICÁVEL / BLOQUEADO** — [motivo em uma linha]
+
+| Fase | Resultado |
+| --- | --- |
+| 1 — Elegibilidade | ⬜ APROVADO / REPROVADO / N decisões humanas |
+| 2 — Código | 🔴 0 · 🟠 0 · 🟡 0 · 🟢 0 |
+| 3 — Identidade e config | 0 divergências · migração: OK / ausente |
+| 4 — Pacote e página | 0 pendências humanas |
+| 5 — Interface web | 0 achados / não se aplica |
+
+## Índice
+
+| ID | Fase | Frente | Impacto | Título | Status |
+| --- | --- | --- | --- | --- | --- |
+
+---
+
+## Fase 1 — Elegibilidade (portão)
+
+> Redação das regras reconferida em <https://forge.sp-tarkov.com/content-guidelines> nesta data: ⬜ sim / ⬜ não.
+> Divergência encontrada vs. a skill `trl-mod-publishing`: [nenhuma / qual]
+
+| Portão | Veredito | Evidência |
+| --- | --- | --- |
+| Licença | ⬜ | |
+| Permissão do autor original (se fork) | ⬜ | |
+| Política de IA declarada | ⬜ | |
+| Origem dos assets | ⬜ | |
+| Sem conteúdo proibido | ⬜ | |
+
+### Decisões humanas
+
+> Respostas do responsável, **reaproveitadas pelas próximas auditorias** — o command não pergunta de novo o que
+> já está preenchido aqui. Registrar quem respondeu e quando.
+
+| Questão | Resposta | Quem / quando |
+| --- | --- | --- |
+| Política de IA — o mod se enquadra em "substantially or entirely written by AI coding agents"? | | |
+| Autorização do autor original (fork) — existe? onde está registrada? | | |
+| Relicenciamento — o autor autoriza publicar sob licença OSI? | | |
+| Origem/licença de cada asset embutido | | |
+
+## Fase 2 — Código
+
+_Frentes: código morto · correção · desempenho · manutenibilidade._
+
+## Fase 3 — Identidade e configuração
+
+| Onde | Atual | Esperado | OK? |
+| --- | --- | --- | --- |
+| Nome canônico | | | |
+| GUID (`BepInPlugin`) | | | |
+| Nome do plugin (`BepInPlugin`) | | | |
+| `AssemblyName` | | | |
+| Pasta em `BepInEx/plugins/` | | | |
+| Arquivo de config | | | |
+| Pasta do mod no repo | | | |
+| Prefixo de log | | | |
+| Namespace C# | | | |
+| `mod.json` (`forge_url`, `license`, `spt_version`) | | | |
+| Versão (`BepInPlugin` / `.csproj` / `CHANGELOG`) | | | |
+
+**Opções do F12:** [`PROPRIEDADES-review-NN.md`](../PROPRIEDADES-review-NN.md) — criada nesta auditoria /
+reusada (de YYYY-MM-DD) / não se aplica. Achados bloqueantes trazidos para cá pelos IDs `MP-NN-MM`; o restante
+fica lá.
+
+**Plano de migração de config:** [qual `.cfg`, por qual canal, aviso no changelog — ou "não se aplica"].
+Precisa cobrir **todo** rename proposto aqui e no `PROPRIEDADES-review-NN.md`.
+
+## Fase 4 — Pacote e página
+
+**Árvore do pacote proposto:**
+
+```text
+(raiz do SPT)
+└── ...
+```
+
+**Pendências humanas:** [repositório público, VirusTotal, texto da página…]
+
+### Defeitos conhecidos
+
+> Tudo que o jogador vai encontrar: pendência da memória, bloqueador de code-review, item de backlog parcial.
+> Cada um sai daqui **corrigido antes** ou **declarado na página**. Sem decisão = 🔴.
+
+| Defeito | Origem | Decisão | Onde fica registrado |
+| --- | --- | --- | --- |
+| | | ⬜ corrigir antes / ⬜ publicar declarando | |
+
+**Roteiro de teste de terceiro:** [instalação limpa · sem Fika · junto de mods populares]
+
+## Fase 5 — Interface web
+
+[Achados das 4 lentes do `trl-ds-validation`, ou "não se aplica — mod sem interface web".]
+
+---
+
+## Pontos
+
+### PUB-{{AUDIT_NN}}-01 · Fase N — Frente · Impacto
+
+**[Título resumido]**
+
+**Local:** [`caminho:linha`](link) — ou `—` quando é ação externa
+
+**Problema:** [O que está errado, com evidência: trecho de código, arquivo de config, ou a regra do Forge.]
+
+**Por que importa:** [Consequência concreta para quem baixar o mod, ou qual regra é violada.]
+
+**Sugestão:** [Ação específica o suficiente para o usuário aceitar com um "ok" ou contrapor.]
+
+**Decisão:**
+- `[ ]` Pendente
+- `[ ]` Aceitar sugestão
+- `[ ]` Aceitar com modificação: _________________
+- `[ ]` Rejeitar (deferir / aceitar como dívida): _________________
+
+<!-- Ao resolver: marcar a opção, trocar o título para ✅ Aplicado em YYYY-MM-DD e adicionar **Resolução:** + paths -->
+
+---
+
+## Pós-publicação
+
+Preencher **depois** que o mod for ao ar — sem isto o repo não registra que a publicação aconteceu:
+
+- `[ ]` `mod.json`: `forge_url` = ___ · `license` = ___ · `spt_version` = ___
+- `[ ]` `CHANGELOG.md`: versão publicada marcada
+- `[ ]` `/update-memory` rodado (licença acordada + limitações declaradas na página)
+
+## Histórico
+
+| Data | Evento |
+| --- | --- |
+| {{CREATED_AT}} | Auditoria {{AUDIT_NN}} criada via `/prepare-mod-for-publish` |
