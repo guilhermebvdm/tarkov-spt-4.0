@@ -1,7 +1,9 @@
 using System;
 using System.Reflection;
+using Comfort.Common;
 using EFT;
 using EFT.Communications;
+using EFT.UI;
 using HarmonyLib;
 using SPT.Reflection.Patching;
 using UnityEngine;
@@ -53,7 +55,10 @@ namespace TarkovRedLine.PvpMode.Patches
                     return;
                 }
 
-                var holding = Input.GetKey(Settings.RESPAWN_KEY.Value);
+                // Sem as guardas de contexto, digitar no chat ou no console com a tecla rebindada
+                // para uma letra gastaria uma vida. O próprio Fika guarda os mesmos três estados
+                // antes de ler teclado (ClientPacketSender.cs:44-47) — code review 002, D-07.
+                var holding = !IsTypingSomewhere(__instance) && Input.GetKey(Settings.RESPAWN_KEY.Value);
 
                 if (!holding)
                 {
@@ -81,6 +86,29 @@ namespace TarkovRedLine.PvpMode.Patches
             {
                 Plugin.Log.LogError($"[TRL-PvpMode] RespawnInputPatch: {ex}");
                 Reset();
+            }
+        }
+
+        /// <summary>
+        /// O jogador está escrevendo em algum lugar? Mesmos três estados que o Fika consulta antes
+        /// de ler teclado. O chat é resolvido por reflexão porque o tipo é interno do Fika.
+        /// </summary>
+        private static bool IsTypingSomewhere(Player player)
+        {
+            try
+            {
+                if (player.IsInventoryOpened) return true;
+
+                var preloader = MonoBehaviourSingleton<PreloaderUI>.Instance;
+                if (preloader != null && preloader.Console != null && preloader.Console.IsConsoleVisible)
+                    return true;
+
+                return FikaBridge.IsChatActive();
+            }
+            catch
+            {
+                // Em dúvida, deixa passar: bloquear o renascimento é pior que o risco de digitar.
+                return false;
             }
         }
 

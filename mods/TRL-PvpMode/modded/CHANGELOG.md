@@ -2,6 +2,28 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/); versionamento [SemVer](https://semver.org/).
 
+## [0.6.0] — não lançado
+
+Correções do review adversarial do item 002 (13 achados, todos aplicados).
+
+### Corrigido
+
+- **O ponto de renascimento agora é sorteado de verdade.** A versão anterior chamava a busca de spawn
+  do jogo acreditando que ela variava o resultado — não varia: devolve sempre o ponto mais distante de
+  todos, então o jogador renascia no mesmo canto do mapa morte após morte, e o laço de cinco tentativas
+  era custo puro. Agora montamos a lista de candidatos, filtramos por lado e distância de quem está
+  vivo, e escolhemos ao acaso. Nova opção `Min Spawn Distance (m)`.
+- **O teto de revives do Fika não corta mais as vidas em silêncio.** Cada renascimento incrementa um
+  contador do Fika que, com `maxRevives` definido no servidor, encerrava a partida com vidas ainda no
+  indicador. O teto passa a ser liberado no início da raid.
+- **Não é mais possível renascer em cima do próprio cadáver.** O Fika não limpa o estado de caído
+  quando o prazo acaba; por 1–2 quadros dava para completar a tecla já morto.
+- **O jogador levanta de pé.** A pose deitada aplicada ao cair não era desfeita ao renascer.
+- **Fratura, dor e intoxicação não sobrevivem mais ao renascimento** — só o sangramento era removido.
+- **A vida só é debitada depois do ponto de não-retorno.** Antes, uma falha no meio da sequência
+  deixava "vida gasta, teleportado e ainda caído".
+- **Digitar no chat não gasta mais uma vida** com a tecla rebindada para uma letra.
+
 ## [0.5.0] — não lançado
 
 Item de backlog **004 — Contador de vidas na tela**.

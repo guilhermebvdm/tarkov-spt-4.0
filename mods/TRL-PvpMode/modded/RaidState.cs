@@ -108,6 +108,15 @@ namespace TarkovRedLine.PvpMode
             if (mainPlayer.ActiveHealthController is not Fika.Core.Main.ClientClasses.ClientHealthController chc)
                 return;
 
+            // O teto de revives do Fika é o segundo termo de CanBeDowned, que não patchamos.
+            // Zerá-lo (0 = ilimitado para o Fika) deixa a contagem inteiramente com o nosso
+            // contador de vidas — senão ele corta o modo pela metade em silêncio (D-02).
+            if (!FikaBridge.TryUncapRevives(chc))
+            {
+                Notify("TRL-PvpMode: nao foi possivel liberar o limite de revives do Fika. " +
+                       "Se \"maxRevives\" estiver definido no servidor, ele vai limitar suas vidas.", Color.yellow);
+            }
+
             var seconds = Mathf.Max(0f, Settings.DOWNED_TIMEOUT.Value);
             if (FikaBridge.TrySetBleedoutTime(chc, seconds)) return;
 

@@ -19,6 +19,7 @@ namespace TarkovRedLine.PvpMode
         public static ConfigEntry<float> RESPAWN_HOLD_TIME;
         public static ConfigEntry<float> SPAWN_PROTECTION;
         public static ConfigEntry<bool> SHOW_LIVES_HUD;
+        public static ConfigEntry<float> MIN_SPAWN_DISTANCE;
 
         public static void Init(ConfigFile config)
         {
@@ -70,6 +71,15 @@ namespace TarkovRedLine.PvpMode
                 new ConfigDescription(
                     "Tempo sem receber dano depois de renascer. 0 = sem protecao.",
                     new AcceptableValueRange<float>(0f, 30f)));
+
+            MIN_SPAWN_DISTANCE = config.Bind(
+                SECTION_LIVES,
+                "Min Spawn Distance (m)",
+                80f,
+                new ConfigDescription(
+                    "Distancia minima de qualquer jogador ou bot vivo ao sortear onde renascer. " +
+                    "Se nenhum ponto atender, o filtro e relaxado em vez de impedir o renascimento.",
+                    new AcceptableValueRange<float>(0f, 500f)));
 
             SHOW_LIVES_HUD = config.Bind(
                 SECTION_LIVES,

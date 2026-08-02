@@ -7,9 +7,9 @@
     <LangVersion>latest</LangVersion>
     <!-- Manter em sincronia com a versão do [BepInPlugin] em Plugin.cs e com o CHANGELOG.
          Sem isto a DLL sai como 1.0.0.0 — e o Forge exige que todas as declarações de versão batam. -->
-    <Version>0.5.0</Version>
-    <AssemblyVersion>0.5.0.0</AssemblyVersion>
-    <FileVersion>0.5.0.0</FileVersion>
+    <Version>0.6.0</Version>
+    <AssemblyVersion>0.6.0.0</AssemblyVersion>
+    <FileVersion>0.6.0.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -22,6 +22,8 @@
     <Reference Include="UnityEngine.InputLegacyModule"><HintPath>References\UnityEngine.InputLegacyModule.dll</HintPath></Reference>
     <Reference Include="UnityEngine.IMGUIModule"><HintPath>References\UnityEngine.IMGUIModule.dll</HintPath></Reference>
     <Reference Include="UnityEngine.TextRenderingModule"><HintPath>References\UnityEngine.TextRenderingModule.dll</HintPath></Reference>
+    <!-- Necessário só porque PreloaderUI herda de SerializedMonoBehaviour (Odin). -->
+    <Reference Include="Sirenix.Serialization"><HintPath>References\Sirenix.Serialization.dll</HintPath></Reference>
     <Reference Include="Comfort"><HintPath>References\Comfort.dll</HintPath></Reference>
     <Reference Include="Comfort.Unity"><HintPath>References\Comfort.Unity.dll</HintPath></Reference>
     <Reference Include="SPT.Reflection"><HintPath>References\SPT.Reflection.dll</HintPath></Reference>

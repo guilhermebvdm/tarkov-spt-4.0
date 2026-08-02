@@ -17,16 +17,28 @@ namespace TarkovRedLine.PvpMode
     /// </summary>
     internal static class RespawnService
     {
-        private const int SPAWN_PICK_ATTEMPTS = 5;
         private const float SAME_SPOT_TOLERANCE_SQR = 25f;  // 5 m
+
+        private static readonly System.Collections.Generic.List<Vector3> _candidateBuffer = new();
 
         private static float _protectionLeft;
         private static bool _protectionActive;
+        private static Player _protectedPlayer;
 
         public static void Reset()
         {
+            // Devolver o coeficiente antes de largar o estado: senão um fim de raid no meio da
+            // proteção deixaria o jogador invulnerável se o objeto sobrevivesse (D-09).
+            if (_protectionActive && _protectedPlayer?.ActiveHealthController != null)
+            {
+                try { _protectedPlayer.ActiveHealthController.SetDamageCoeff(1f); }
+                catch (Exception ex) { Plugin.Log.LogError($"[TRL-PvpMode] Reset protection: {ex.Message}"); }
+            }
+
             _protectionLeft = 0f;
             _protectionActive = false;
+            _protectedPlayer = null;
+            _candidateBuffer.Clear();
         }
 
         /// <summary>
@@ -40,32 +52,47 @@ namespace TarkovRedLine.PvpMode
                 if (player is not FikaPlayer fikaPlayer) return false;
                 if (!RaidState.IsActive) return false;
 
-                // Guarda contra disparo duplo e contra a corrida com o tempo esgotando: se o
-                // jogador já não está caído, não há o que renascer.
+                // O Fika NÃO limpa Downed quando o prazo acaba: BleedOut() marca _bledOut, revive
+                // o suficiente para chamar Kill() e pronto. Por 1-2 quadros o jogador continua na
+                // lista de vivos com Downed == true, já com cadáver criado e morte anunciada ao
+                // servidor. Sem o teste de IsAlive, completar a tecla nessa janela renasceria em
+                // cima do próprio cadáver (code review 002, D-03).
+                if (!player.ActiveHealthController.IsAlive) return false;
+
                 if (player.ActiveHealthController is not Fika.Core.Main.ClientClasses.ClientHealthController { Downed: true })
                     return false;
 
                 if (!TryGetSpawnPosition(player, out var position))
                 {
-                    Notify("TRL-PvpMode: nao foi possivel achar um ponto de renascimento.", Color.red);
+                    NotifyThrottled("TRL-PvpMode: nao foi possivel achar um ponto de renascimento.", Color.red);
                     return false;
                 }
 
-                if (!RaidState.TryConsumeLife())
-                {
-                    Notify("Sem vidas restantes.", Color.red);
-                    return false;
-                }
-
-                // 1. Teleportar ANTES de religar: durante o caído o boneco está desligado nos
-                //    outros clientes, e religar primeiro o faria reaparecer na posição antiga.
+                // 1. Teleportar. Ainda não gastamos vida: se algo estourar daqui para trás, o
+                //    jogador perde nada.
                 player.Teleport(position);
 
                 // 2. Religar. Envia o DownedSyncPacket avisando todo mundo que levantamos.
+                //    Este é o ponto de não-retorno.
                 fikaPlayer.ToggleDowned(false);
 
-                // 3. Curar. Só agora, porque ToggleDowned(false) é quem devolve IsAlive = true.
+                // 3. Debitar a vida SÓ depois do passo que não tem volta. Cobrar antes deixaria o
+                //    jogador sem vida e ainda caído se qualquer passo acima estourasse (D-06).
+                RaidState.TryConsumeLife();
+
+                // 4. Levantar de fato: ToggleDowned(false) restaura dano, arma, eixos e metabolismo,
+                //    mas NÃO desfaz a pose deitada que ele mesmo aplicou ao cair (D-04).
+                if (player.MovementContext != null)
+                {
+                    player.MovementContext.IsInPronePose = false;
+                    player.MovementContext.SetPoseLevel(1f);
+                }
+
+                // 5. Curar. Só agora, porque ToggleDowned(false) é quem devolve IsAlive = true.
+                //    RestoreFullHealth restaura membros e vida, mas remove apenas sangramento —
+                //    fratura, dor e intoxicação sobreviveriam ao renascimento (D-05).
                 player.ActiveHealthController.RestoreFullHealth();
+                player.ActiveHealthController.RemoveNegativeEffects(EBodyPart.Common);
 
                 // 4. Proteger. Por último: ToggleDowned(false) restaura o coeficiente de dano
                 //    para 1 e sobrescreveria uma proteção aplicada antes.
@@ -88,41 +115,88 @@ namespace TarkovRedLine.PvpMode
         }
 
         /// <summary>
-        /// Sorteia um ponto de nascimento de jogador. Passar um identificador aleatório a cada
-        /// tentativa faz o sistema de spawn tratar o pedido como de outro personagem e aplicar
-        /// sozinho o afastamento de quem já está no mapa.
+        /// Sorteia de verdade um ponto de nascimento de jogador.
+        ///
+        /// ⚠️ NÃO usamos <c>ISpawnSystem.SelectSpawnPoint</c>: com os argumentos disponíveis aqui
+        /// (sem grupo, sem time) ele cai em "o mais distante de todos os jogadores", que é
+        /// **determinístico** — chamá-lo cinco vezes devolve cinco vezes o mesmo ponto, e o jogador
+        /// renasceria sempre no mesmo canto do mapa a cada morte. O identificador aleatório que a
+        /// versão anterior passava só influencia o desvio de transição, nada de afastamento
+        /// (code review 002, D-01).
+        ///
+        /// Aqui montamos a lista de candidatos, filtramos por categoria, lado e distância de quem
+        /// está vivo, e sorteamos.
         /// </summary>
         private static bool TryGetSpawnPosition(Player player, out Vector3 position)
         {
             position = Vector3.zero;
 
-            var game = Singleton<IFikaGame>.Instance;
-            var spawnSystem = game?.GameController?.SpawnSystem;
-            if (spawnSystem == null)
+            var points = FikaBridge.GetSpawnPoints();
+            if (points == null)
             {
-                Plugin.Log.LogWarning("[TRL-PvpMode] SpawnSystem indisponivel — respawn abortado.");
+                Plugin.Log.LogWarning("[TRL-PvpMode] Lista de pontos de nascimento indisponivel — respawn abortado.");
                 return false;
             }
 
+            var sideMask = ToSideMask(player.Side);
             var deathPosition = player.Position;
+            var minDistanceSqr = Settings.MIN_SPAWN_DISTANCE.Value * Settings.MIN_SPAWN_DISTANCE.Value;
 
-            for (var attempt = 0; attempt < SPAWN_PICK_ATTEMPTS; attempt++)
+            var candidates = _candidateBuffer;
+            candidates.Clear();
+
+            // Duas passadas: primeiro exigindo distância dos vivos; se ninguém sobrar, relaxa o
+            // filtro (mapa pequeno ou lotado não pode impedir o renascimento).
+            for (var strict = 1; strict >= 0; strict--)
             {
-                var point = spawnSystem.SelectSpawnPoint(
-                    ESpawnCategory.Player, player.Side, null, null, null, null, Guid.NewGuid().ToString());
+                foreach (var point in points)
+                {
+                    if (point == null) continue;
+                    if ((point.Categories & ESpawnCategoryMask.Player) == 0) continue;
+                    if ((point.Sides & sideMask) == 0) continue;
 
-                if (point == null) continue;
+                    var candidate = point.Position;
+                    if (candidate == Vector3.zero) continue;   // sentinela de ponto inválido
 
-                position = point.Position;
+                    if ((candidate - deathPosition).sqrMagnitude <= SAME_SPOT_TOLERANCE_SQR) continue;
 
-                // Mapa pequeno pode não ter alternativa; aceitamos o repetido na última tentativa.
-                if ((position - deathPosition).sqrMagnitude > SAME_SPOT_TOLERANCE_SQR)
-                    return true;
+                    if (strict == 1 && !IsFarFromLivingPlayers(candidate, player, minDistanceSqr)) continue;
+
+                    candidates.Add(candidate);
+                }
+
+                if (candidates.Count > 0) break;
             }
 
-            // Se chegou aqui com um ponto qualquer, ele serve — melhor renascer perto do que não renascer.
-            return position != Vector3.zero;
+            if (candidates.Count == 0) return false;
+
+            position = candidates[UnityEngine.Random.Range(0, candidates.Count)];
+            return true;
         }
+
+        private static bool IsFarFromLivingPlayers(Vector3 candidate, Player self, float minDistanceSqr)
+        {
+            var gameWorld = Singleton<GameWorld>.Instance;
+            var players = gameWorld?.AllAlivePlayersList;
+            if (players == null) return true;
+
+            for (var i = 0; i < players.Count; i++)
+            {
+                var other = players[i];
+                if (other == null || other == self) continue;
+                if ((other.Position - candidate).sqrMagnitude < minDistanceSqr) return false;
+            }
+
+            return true;
+        }
+
+        private static EPlayerSideMask ToSideMask(EPlayerSide side) => side switch
+        {
+            EPlayerSide.Usec => EPlayerSideMask.Usec,
+            EPlayerSide.Bear => EPlayerSideMask.Bear,
+            EPlayerSide.Savage => EPlayerSideMask.Savage,
+            _ => EPlayerSideMask.All,
+        };
 
         private static void StartProtection(Player player)
         {
@@ -132,6 +206,7 @@ namespace TarkovRedLine.PvpMode
             player.ActiveHealthController.SetDamageCoeff(0f);
             _protectionLeft = seconds;
             _protectionActive = true;
+            _protectedPlayer = player;
         }
 
         /// <summary>Chamado a cada quadro pelo patch de input, já filtrado para o jogador local.</summary>
@@ -143,8 +218,22 @@ namespace TarkovRedLine.PvpMode
             if (_protectionLeft > 0f) return;
 
             _protectionActive = false;
+            _protectedPlayer = null;
             player.ActiveHealthController.SetDamageCoeff(1f);
             Notify("Protecao de renascimento encerrada.", Color.yellow);
+        }
+
+        private static float _nextFailureNotice;
+
+        /// <summary>
+        /// Falha de sorteio com a tecla segurada se repetiria a cada ciclo; o antirrepique evita
+        /// entupir a tela (D-11).
+        /// </summary>
+        private static void NotifyThrottled(string message, Color color)
+        {
+            if (Time.time < _nextFailureNotice) return;
+            _nextFailureNotice = Time.time + 3f;
+            Notify(message, color);
         }
 
         private static void Notify(string message, Color color)

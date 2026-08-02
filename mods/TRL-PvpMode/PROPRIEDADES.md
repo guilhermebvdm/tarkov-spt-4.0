@@ -1,7 +1,7 @@
 # Propriedades F12 — TRL-PvpMode
 
-> Todas as opções do menu **F12** (BepInEx ConfigurationManager). **1 seção · 8 opções.**
-> Gerado de [modded/Settings.cs](modded/Settings.cs) em **2026-08-01**, para a **v0.5.0**.
+> Todas as opções do menu **F12** (BepInEx ConfigurationManager). **1 seção · 9 opções.**
+> Gerado de [modded/Settings.cs](modded/Settings.cs) em **2026-08-01**, para a **v0.6.0**.
 >
 > **Plugin:** `com.trl.pvpmode` — "TRL-PvpMode" · arquivo de config: `BepInEx/config/com.trl.pvpmode.cfg`
 
@@ -15,6 +15,7 @@
 | Lives Per Raid | Vidas por partida | int | `1` | -1 a 10 | Quantas vezes você pode renascer por partida. `-1` = ilimitado. `0` = nenhuma (morre de primeira). |
 | Downed Timeout (s) | Tempo para decidir (s) | float | `60` | 0 a 600 | Tempo para decidir renascer, em segundos. Ao zerar, a morte é definitiva. `0` = sem limite: você fica caído até decidir. |
 | Headshot Kills Instantly | Tiro na cabeça mata direto | bool | `false` | — | Tiro na cabeça encerra a partida na hora, ignorando as vidas restantes. |
+| Min Spawn Distance (m) | Distância mínima ao renascer (m) | float | `80` | 0 a 500 | Distância mínima de qualquer jogador ou bot vivo ao sortear onde renascer. Se nenhum ponto atender, o filtro é relaxado em vez de impedir o renascimento. |
 | Show Lives Counter | Mostrar contador de vidas | bool | `true` | — | Mostra as vidas restantes na tela. Fica destacado enquanto você estiver caído. |
 | Respawn Key | Tecla de renascer | KeyCode | `F5` | — | Tecla para renascer. Segure-a enquanto estiver caído. |
 | Respawn Hold Time (s) | Tempo segurando (s) | float | `2` | 0.1 a 10 | Por quanto tempo a tecla precisa ficar pressionada. Soltar antes cancela sem gastar vida. |

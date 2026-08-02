@@ -21,6 +21,8 @@ namespace TarkovRedLine.PvpMode
         public static Type BleedoutType { get; private set; }
 
         private static FieldInfo _bleedoutTimeBackingField;
+        private static FieldInfo _maxRevivesField;
+        private static FieldInfo _spawnPointsField;
 
         private static bool _resolved;
 
@@ -46,7 +48,19 @@ namespace TarkovRedLine.PvpMode
             // compilador, e o patch ficaria inerte sem ninguém perceber (review 01, R-04).
             _bleedoutTimeBackingField = AccessTools.Field(typeof(ClientHealthController), "<BleedoutTime>k__BackingField");
 
+            // ref: ClientHealthController.cs:29 — readonly int alimentado por ReviveConfig.MaxRevives.
+            // É o SEGUNDO termo de CanBeDowned (:22), que não patchamos: com maxRevives=2 no
+            // servidor e 5 vidas no F12, o jogador pararia de cair na 3ª morte com 3 vidas ainda
+            // no contador e no indicador de tela (code review 002, D-02).
+            _maxRevivesField = AccessTools.Field(typeof(ClientHealthController), "_maxRevives");
+
+            // ref: fika-plugin/Fika.Core/Main/GameMode/BaseGameController.cs:130 (protected)
+            _spawnPointsField = AccessTools.Field(
+                AccessTools.TypeByName("Fika.Core.Main.GameMode.BaseGameController"), "_spawnPoints");
+
             LogMissing(ReviveInteractableType == null, "tipo ReviveInteractable");
+            LogMissing(_maxRevivesField == null, "campo ClientHealthController._maxRevives");
+            LogMissing(_spawnPointsField == null, "campo BaseGameController._spawnPoints");
             LogMissing(BleedoutType == null, "tipo Bleedout");
             LogMissing(_bleedoutTimeBackingField == null, "campo de apoio de ClientHealthController.BleedoutTime");
 
@@ -55,7 +69,9 @@ namespace TarkovRedLine.PvpMode
             // mentira silenciosa (code review 01, C-06).
             IsUsable = ReviveInteractableType != null
                     && BleedoutType != null
-                    && _bleedoutTimeBackingField != null;
+                    && _bleedoutTimeBackingField != null
+                    && _maxRevivesField != null
+                    && _spawnPointsField != null;
 
             if (!IsUsable)
             {
@@ -68,6 +84,71 @@ namespace TarkovRedLine.PvpMode
         private static void LogMissing(bool missing, string what)
         {
             if (missing) Plugin.Log.LogWarning($"[TRL-PvpMode] Nao resolvido: {what}");
+        }
+
+        private static PropertyInfo _chatActiveProperty;
+
+        /// <summary>
+        /// O chat do Fika está aberto? Tipo interno, resolvido por nome. Em caso de dúvida devolve
+        /// falso — bloquear o renascimento é pior que o risco de digitar.
+        /// </summary>
+        public static bool IsChatActive()
+        {
+            _chatActiveProperty ??= AccessTools.Property(
+                AccessTools.TypeByName("Fika.Core.UI.Custom.FikaChatUIScript"), "IsActive");
+
+            if (_chatActiveProperty == null) return false;
+
+            try { return _chatActiveProperty.GetValue(null) is true; }
+            catch { return false; }
+        }
+
+        /// <summary>
+        /// Zera o teto de revives do Fika (0 = ilimitado para ele), passando o controle da contagem
+        /// inteiramente para o nosso contador de vidas — coerente com o resto do mod, que já assume
+        /// por inteiro as decisões que divide com o Fika.
+        ///
+        /// Sem isto, `maxRevives` no `fika.jsonc` corta o modo pela metade **em silêncio**: o
+        /// jogador para de cair mas o indicador continua mostrando vidas (code review 002, D-02).
+        /// </summary>
+        public static bool TryUncapRevives(ClientHealthController controller)
+        {
+            if (controller == null || _maxRevivesField == null) return false;
+
+            try
+            {
+                _maxRevivesField.SetValue(controller, 0);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Plugin.Log.LogError($"[TRL-PvpMode] TryUncapRevives: {ex.Message}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Lista de pontos de nascimento da partida, para sortearmos um de verdade.
+        /// `SpawnPointManagerClass` implementa `IEnumerable&lt;ISpawnPoint&gt;`.
+        /// </summary>
+        public static System.Collections.Generic.IEnumerable<EFT.Game.Spawning.ISpawnPoint> GetSpawnPoints()
+        {
+            if (_spawnPointsField == null) return null;
+
+            try
+            {
+                var game = Comfort.Common.Singleton<Fika.Core.Main.GameMode.IFikaGame>.Instance;
+                var controller = game?.GameController;
+                if (controller == null) return null;
+
+                return _spawnPointsField.GetValue(controller)
+                    as System.Collections.Generic.IEnumerable<EFT.Game.Spawning.ISpawnPoint>;
+            }
+            catch (Exception ex)
+            {
+                Plugin.Log.LogError($"[TRL-PvpMode] GetSpawnPoints: {ex.Message}");
+                return null;
+            }
         }
 
         /// <summary>
