@@ -328,14 +328,12 @@ namespace SPT.Launcher.ViewModels
         /// fonte de verdade, D-17 — não repete se o plugins esvaziar depois) E o cliente está sem plugins
         /// (pasta inexistente ou sem nenhum .dll em qualquer profundidade). Dev Mode não dispara (CC-14).
         /// </summary>
-        private static bool ShouldTriggerOnboarding(string gamePath)
+        // Item 033: onboarding UNIVERSAL — dispara para todos na 1ª vez (novo jogador E quem atualiza,
+        // qualquer versão, inclusive em Dev Mode), uma vez só. A fonte de verdade é o flag persistente;
+        // o estado do disco (plugins) e o Dev Mode não decidem mais (CA-033.6/CA-033.7).
+        private static bool ShouldTriggerOnboarding()
         {
-            if (LauncherSettingsProvider.Instance.ModsConfigsOnboardingDone) return false;
-            if (LauncherSettingsProvider.Instance.IsDevMode) return false;
-
-            string pluginsDir = Path.Combine(gamePath, "BepInEx", "plugins");
-            if (!Directory.Exists(pluginsDir)) return true;
-            return !Directory.EnumerateFiles(pluginsDir, "*.dll", SearchOption.AllDirectories).Any();
+            return !LauncherSettingsProvider.Instance.ModsConfigsOnboardingDone;
         }
 
         public bool CanStartGame => LauncherSettingsProvider.Instance.CanStartGame;
@@ -448,16 +446,9 @@ namespace SPT.Launcher.ViewModels
 
             try
             {
-                if (devMode && !manual)
-                {
-                    // Auto-check do login continua pulando em Dev Mode (login rápido, server
-                    // pode nem estar de pé). A verificação manual roda o motor com R5.
-                    LogManager.Instance.Info("[Profile] DevMode ativo. Pulando varredura automática (verificação manual disponível)...");
-                    LauncherSettingsProvider.Instance.IsUpdating = false;
-                    IsUpdateVisible = false;
-                    return;
-                }
-
+                // Item 033: NÃO faz early-return de Dev Mode aqui — o manifesto precisa ser buscado para
+                // popular o catálogo + semear (Mec.1) + disparar o onboarding universal (Mec.2). O skip do
+                // Dev Mode (não mover/aplicar arquivos) foi movido para depois disso, antes do planner.
                 LauncherSettingsProvider.Instance.IsUpdating = true;
                 IsUpdateVisible = true;
                 UpdateStatusText = LocalizationProvider.Instance.update_checking;
@@ -519,6 +510,17 @@ namespace SPT.Launcher.ViewModels
 
                 if (string.IsNullOrEmpty(response))
                 {
+                    // Item 033: em Dev Mode auto-check, se o servidor não respondeu, desiste sem o countdown
+                    // de 30s (preserva o "login rápido" que motivava o skip do Dev Mode). O onboarding/seed
+                    // rodam no próximo login/verificação com o servidor de pé.
+                    if (devMode && !manual)
+                    {
+                        LogManager.Instance.Info("[Profile] DevMode: manifesto indisponível — pulando este ciclo (sem retry longo).");
+                        LauncherSettingsProvider.Instance.IsUpdating = false;
+                        IsUpdateVisible = false;
+                        return;
+                    }
+
                     LogManager.Instance.Warning("[Profile] Manifesto não disponível após 5 tentativas. Reagendando em 30s...");
                     manifestFailed = true;
 
@@ -635,11 +637,21 @@ namespace SPT.Launcher.ViewModels
                 // onboarding não concluído vai direto pra tela "Mods e Configs" ANTES de aplicar — o
                 // catálogo já foi populado acima. Ao sair da tela, a primeira ingestão roda com as
                 // escolhas dele (a tela dispara via PendingApply). Só em full scan (não no skipFileScan).
-                if (ShouldTriggerOnboarding(gamePath))
+                if (ShouldTriggerOnboarding())
                 {
-                    LogManager.Instance.Info("[Profile] Onboarding: cliente sem plugins — abrindo tela Mods e Configs antes do primeiro sync");
+                    LogManager.Instance.Info("[Profile] Onboarding (item 033): 1º acesso — abrindo tela Mods e Configs antes do primeiro sync");
                     Dispatcher.UIThread.Post(() => NavigateTo(new ModsConfigsViewModel(HostScreen, onboarding: true)));
                     return; // não aplica agora; o apply vem quando o player sair da tela (CA-030.19)
+                }
+
+                // Item 033: skip do Dev Mode MOVIDO para cá — catálogo + seed + gatilho de onboarding já
+                // rodaram; o Dev Mode continua NÃO movendo/aplicando arquivos (preserva builds locais do dev).
+                if (devMode && !manual)
+                {
+                    LogManager.Instance.Info("[Profile] DevMode ativo — catálogo/seed/onboarding OK; pulando a aplicação do sync.");
+                    LauncherSettingsProvider.Instance.IsUpdating = false;
+                    IsUpdateVisible = false;
+                    return;
                 }
 
                 var planner = new SyncPlanner(resolver, baseline, plannerOptions);
