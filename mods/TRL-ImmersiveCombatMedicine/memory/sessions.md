@@ -1,4 +1,4 @@
-﻿# Memória de Sessões — TRL-ImmersiveCombatMedicine
+# Memória de Sessões — TRL-ImmersiveCombatMedicine
 
 ## Estado atual
 
@@ -299,3 +299,20 @@
 4. Identificação de bug crítico na mira do scanner (ScanForPatient não detectava).
 5. Code review levantando bloqueador sobre Layers e Fallback do collider.
 6. Refactor do scanner para contornar nulos no Camera.main e no GetPlayerByCollider.
+
+---
+
+## 2026-07-29 02:40 (GMT-3) — Sessão 6: Arquitetura do Canal 3 Compartilhado TRL & Validação da Autoridade de Inventário
+
+**Tema central:** Definição da diretriz de isolamento de rede do mod no `ROADMAP.md` e análise da coexistência entre a autoridade de inventário do Tarkov/FIKA e as mensagens customizadas do mod.
+
+**Decisões-chave:**
+- **Diretriz de Rede (ROADMAP.md):** Especificada no [ROADMAP.md](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-ImmersiveCombatMedicine/ROADMAP.md) a migração dos pacotes de dados médicos (sinais de socorro, desmaio, cura remota e animação do socorrista) para o **Channel 3 Compartilhado TRL** com a assinatura binária `TRLM` (`0x54 0x52 0x4C 0x4D`).
+- **Isolamento e Autoridade do Inventário:** Validado que mover as mensagens médicas para o Canal 3 **não afeta nem desincroniza o inventário do FIKA**. As mensagens do mod trafegam no Canal 3 notificando as intenções entre médicos e pacientes, enquanto o desconto real da durabilidade dos itens do inventário (`ApplyTreatment` / `ExecuteOperation`) permanece 100% sob a gestão autoritativa do FIKA no `Channel 0`.
+
+**Lições / hipóteses descartadas:**
+- A dúvida sobre a necessidade de manter as mensagens do mod no `Channel 0` do FIKA para garantir a baixa de durabilidade dos itens foi descartada: a baixa de durabilidade é nativa do Tarkov via `Channel 0`, dispensando o mod de usar o leitor do FIKA para tráfego secundário.
+
+**Atividade cronológica:**
+1. Análise técnica da interação entre a baixa de itens e as mensagens de cura em rede coop.
+2. Criação do `ROADMAP.md` formalizando o Canal 3 Compartilhado TRL com Magic Header `TRLM`.

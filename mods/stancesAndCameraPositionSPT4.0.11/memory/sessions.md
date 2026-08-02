@@ -876,3 +876,20 @@ mod no SPT Forge** — o que exigiu criar o command e a skill que faltavam no ha
 - Fecha a F2 mencionada como pendência nas Sessões 11 (cont. 4) e (cont. 5).
 - [P-11.5] (F1+F3, calibração in-game) e [P-11.1] (velocidade presa) seguem abertas — não tocadas nesta sessão.
 - Trabalho paralelo no mesmo dia (fora deste mod): decompile completo do EFT cercado no harness (`.agents/tools/decompile-eft/`, skill `graph-code-navigation`) — não é um mod, sem `sessions.md` próprio (ver `.handoffs/handoff-2026-07-25-eft-decompile-completo-e-stances-2.10.0.md`).
+
+---
+
+## 2026-07-29 02:40 (GMT-3) — Sessão 12: Diretriz de Isolamento de Rede para Sincronização 3ª Pessoa (Canal 3 / TRLS)
+
+**Tema central:** Especificação de diretriz de rede no `ROADMAP.md` para a sincronização visual da postura das mãos/arma para a 3ª pessoa (`ObservedPlayer`) entre parceiros de equipe coop.
+
+**Decisões-chave:**
+- **Diretriz de Rede (ROADMAP.md):** Especificada no [ROADMAP.md](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/stancesAndCameraPositionSPT4.0.11/ROADMAP.md) a transmissão dos eventos de mudança de postura e movimentação de mãos para outros jogadores no **Channel 3 Compartilhado TRL** (`Unreliable`) com a assinatura binária `TRLS` (`0x54 0x52 0x4C 0x53`).
+- **Isolamento de Erros:** Garantido que qualquer variação de rede ou perda de pacote na troca de postura ocorra de forma isolada no Canal 3, mantendo o `Channel 0` do FIKA 100% livre de engasgos e livre de erros do tipo `ParseException: Undefined packet`.
+
+**Lições / hipóteses descartadas:**
+- A ideia inicial de criar um canal de rede exclusivo para este mod foi descartada em favor do **Channel 3 Compartilhado TRL**, onde múltiplos mods TRL de dados e postura compartilham o mesmo canal de rede utilizando assinaturas binárias (Magic Headers) de 4 bytes sem interferência mútua.
+
+**Atividade cronológica:**
+1. Análise do envio de postura de braços na visão em 3ª pessoa (`ObservedPlayer`).
+2. Criação do `ROADMAP.md` formalizando a arquitetura do Canal 3 Compartilhado TRL com Magic Header `TRLS`.
