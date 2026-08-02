@@ -3,6 +3,11 @@
     <TargetFramework>net472</TargetFramework>
     <AssemblyName>TRL-Fixes</AssemblyName>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <!-- Manter em sincronia com a versão do [BepInPlugin] em Plugin.cs. Sem isto a DLL sai como 1.0.0.0 —
+         e o Forge exige que todas as declarações de versão do mod batam exatamente. -->
+    <Version>1.1.0</Version>
+    <AssemblyVersion>1.1.0.0</AssemblyVersion>
+    <FileVersion>1.1.0.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

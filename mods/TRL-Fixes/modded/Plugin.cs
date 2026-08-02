@@ -3,7 +3,14 @@ using System;
 
 namespace TRLFixes
 {
-    [BepInPlugin("com.trl.fixes", "TRL Fixes", "1.0.0")]
+    // SoftDependency do FIKA: o FixFikaReviveRagdollPatch resolve o tipo do FIKA por NOME
+    // (AccessTools.TypeByName). Sem declarar a dependência, a ordem de carga do BepInEx é
+    // indeterminada — se este plugin subir antes do FIKA o tipo não resolve, o patch é dispensado
+    // e o log diz "FIKA nao detectado". Falha SILENCIOSA disfarçada de "FIKA não instalado", que
+    // custaria uma sessão de teste inteira. Soft = ordena a carga se presente, não exige.
+    // GUID confirmado: fika-plugin/Fika.Core/FikaPlugin.cs:40. Mesmo padrão de DiscordRaidMap e MOAR-Client.
+    [BepInPlugin("com.trl.fixes", "TRL Fixes", "1.1.0")]
+    [BepInDependency("com.fika.core", BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin
     {
         private void Awake()
@@ -38,6 +45,16 @@ namespace TRLFixes
             catch (Exception ex)
             {
                 Logger.LogError($"TRL-Fixes: Falha ao carregar FixFikaReviveRagdollPatch: {ex.Message}");
+            }
+
+            try
+            {
+                new Patches.PickupAimingSafetyPatch().Enable();
+                Logger.LogInfo("TRL-Fixes: PickupAimingSafetyPatch ativado com sucesso.");
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"TRL-Fixes: Falha ao carregar PickupAimingSafetyPatch: {ex.Message}");
             }
         }
     }

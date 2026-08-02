@@ -1,8 +1,29 @@
 # 📋 Handoff Técnico — Correção de Trava de Entrada (Pickup/Equip NRE Guard)
 
 **Data:** 25 de Julho de 2026  
-**Módulo Alvo:** `TRL-ImmersiveCombatMedicine`  
+**Módulo Alvo:** `TRL-Fixes` (ver histórico abaixo)  
 **Autor:** Antigravity AI Pair Programmer  
+
+---
+
+## 📌 Histórico de dono (2026-08-01)
+
+Este documento foi escrito endereçado ao `TRL-ImmersiveCombatMedicine`, **que nunca recebeu o patch**. O código
+foi implementado no `TRL-Fixes`, movido para `stancesAndCameraPositionSPT4.0.11` no commit `19aa6499` sem
+registro em changelog ou memória de nenhum dos três mods, e **devolvido ao `TRL-Fixes` em 2026-08-01**.
+
+Motivo da devolução: é um remendo sobre bug do **jogo base**, sem relação com posturas/mobilidade. Verificado
+que o mod de stances não participa do caminho do erro — nenhum mod TRL escreve `FirearmController.IsAiming`, e
+os enxertos de stances no fluxo de mira ficam no pipeline de animação (`ProceduralWeaponAnimation`), que roda
+depois e em outro objeto. Como o mod de stances está sendo preparado para publicação pública, um patch que
+engole exceções alheias ao seu tema não pode viajar junto.
+
+## 🔍 Estado da causa raiz
+
+O mecanismo descrito abaixo é **coerente com o decompilado** — `method_63`/`method_64` (`Player.cs:14569-14588`)
+acessam `FirearmsAnimator` sem checagem de nulo, e o campo é preenchido só no equip da arma — mas **nunca foi
+confirmado com uma captura real em raid**. Por isso a implementação atual registra a **primeira ocorrência com
+a pilha de chamadas completa**. Se essa pilha apontar origem diferente, o remendo está mascarando outra coisa.
 
 ---
 
