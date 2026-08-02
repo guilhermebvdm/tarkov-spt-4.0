@@ -1,16 +1,16 @@
 # Graph Report - mods\CustomClasses\modded  (2026-08-01)
 
 ## Corpus Check
-- 118 files · ~116,519 words
+- 118 files · ~116,639 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1805 nodes · 2351 edges · 118 communities (108 shown, 10 thin omitted)
+- 1806 nodes · 2352 edges · 118 communities (108 shown, 10 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 2 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `3e2bd46a`
+- Built from commit: `fcc73010`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -431,8 +431,8 @@ Cohesion: 0.09
 Nodes (17): AISoundType, Func, int, MethodBase, PatchPostfix, PatchPrefix, Player, EAudioMovementState (+9 more)
 
 ### Community 83 - "Community 83"
-Cohesion: 0.25
-Nodes (5): AbstractSkillClass, MethodBase, PatchPrefix, ModulePatch, OnTriggerPatch
+Cohesion: 0.17
+Nodes (7): AbstractSkillClass, MethodBase, PatchPrefix, ForceEffector, ModulePatch, AimPunchPatch, OnTriggerPatch
 
 ### Community 84 - "Community 84"
 Cohesion: 0.17
@@ -527,8 +527,8 @@ Cohesion: 0.11
 Nodes (14): bool, float, MethodBase, PatchPostfix, Player, EDamageType, GClass3008, GClass898 (+6 more)
 
 ### Community 111 - "Community 111"
-Cohesion: 0.12
-Nodes (10): float, MethodBase, ProceduralWeaponAnimation, ForceEffector, AdsSpeedPatch, AimPunchPatch, HolsterDrawResetPatch, HolsterPutAwaySpeedPatch (+2 more)
+Cohesion: 0.15
+Nodes (9): bool, MethodBase, ProceduralWeaponAnimation, AdsSpeedPatch, HeavyWeaponErgoPatch, HolsterDrawResetPatch, HolsterDrawSpeedPatch, HolsterPutAwaySpeedPatch (+1 more)
 
 ### Community 112 - "Community 112"
 Cohesion: 0.29
@@ -539,8 +539,8 @@ Cohesion: 0.18
 Nodes (7): CombatMedicSurgery, ActiveHealthController, bool, MethodBase, PatchPrefix, Player, SurgeryPenaltyPatch
 
 ### Community 114 - "Community 114"
-Cohesion: 0.16
-Nodes (8): bool, FirearmController, Item, PatchPostfix, PatchPrefix, HolsterDrawSpeedPatch, ReloadSpeedPatch, ShotgunReloadPatch
+Cohesion: 0.19
+Nodes (6): FirearmController, Item, PatchPostfix, PatchPrefix, ReloadSpeedPatch, ShotgunReloadPatch
 
 ### Community 115 - "Community 115"
 Cohesion: 0.22
@@ -548,7 +548,7 @@ Nodes (6): BaseSoundPlayer, FieldInfo, MethodBase, PatchPrefix, PropertyInfo, Si
 
 ### Community 117 - "Community 117"
 Cohesion: 0.25
-Nodes (4): Player, Weapon, HeavyWeapon, HeavyWeaponErgoPatch
+Nodes (5): float, Player, Weapon, HeavyWeapon, LocalHitTypePatch
 
 ## Knowledge Gaps
 - **966 isolated node(s):** `float`, `Coroutine`, `IEnumerator`, `string`, `bool` (+961 more)

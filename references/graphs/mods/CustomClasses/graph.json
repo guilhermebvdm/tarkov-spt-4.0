@@ -2520,7 +2520,7 @@
       "source_location": "L202",
       "_origin": "ast",
       "id": "patches_classweaponpatches_heavyweaponergopatch",
-      "community": 117,
+      "community": 111,
       "norm_label": "heavyweaponergopatch"
     },
     {
@@ -2530,7 +2530,7 @@
       "source_location": "L204",
       "_origin": "ast",
       "id": "patches_classweaponpatches_heavyweaponergopatch_gettargetmethod",
-      "community": 117,
+      "community": 111,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -2540,7 +2540,7 @@
       "source_location": "L209",
       "_origin": "ast",
       "id": "patches_classweaponpatches_heavyweaponergopatch_postfix",
-      "community": 117,
+      "community": 114,
       "norm_label": ".postfix()"
     },
     {
@@ -2600,7 +2600,7 @@
       "source_location": "L266",
       "_origin": "ast",
       "id": "patches_classweaponpatches_aimpunchpatch",
-      "community": 111,
+      "community": 83,
       "norm_label": "aimpunchpatch"
     },
     {
@@ -2610,7 +2610,7 @@
       "source_location": "L268",
       "_origin": "ast",
       "id": "patches_classweaponpatches_aimpunchpatch_gettargetmethod",
-      "community": 111,
+      "community": 83,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -2620,7 +2620,7 @@
       "source_location": "L275",
       "_origin": "ast",
       "id": "patches_classweaponpatches_aimpunchpatch_prefix",
-      "community": 111,
+      "community": 83,
       "norm_label": ".prefix()"
     },
     {
@@ -2630,7 +2630,7 @@
       "source_location": "L275",
       "_origin": "ast",
       "id": "forceeffector",
-      "community": 111,
+      "community": 83,
       "norm_label": "forceeffector"
     },
     {
@@ -2640,7 +2640,7 @@
       "source_location": "L344",
       "_origin": "ast",
       "id": "patches_classweaponpatches_holsterdrawspeedpatch",
-      "community": 114,
+      "community": 111,
       "norm_label": "holsterdrawspeedpatch"
     },
     {
@@ -2650,7 +2650,7 @@
       "source_location": "L348",
       "_origin": "ast",
       "id": "client_patches_classweaponpatches_cs_bool",
-      "community": 114,
+      "community": 111,
       "norm_label": "bool"
     },
     {
@@ -2660,7 +2660,7 @@
       "source_location": "L350",
       "_origin": "ast",
       "id": "patches_classweaponpatches_holsterdrawspeedpatch_gettargetmethod",
-      "community": 114,
+      "community": 111,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -2700,7 +2700,7 @@
       "source_location": "L416",
       "_origin": "ast",
       "id": "patches_classweaponpatches_holsterdrawresetpatch_postfix",
-      "community": 111,
+      "community": 114,
       "norm_label": ".postfix()"
     },
     {
@@ -2750,7 +2750,7 @@
       "source_location": "L518",
       "_origin": "ast",
       "id": "patches_classweaponpatches_localhittypepatch",
-      "community": 111,
+      "community": 117,
       "norm_label": "localhittypepatch"
     },
     {
@@ -2760,7 +2760,7 @@
       "source_location": "L523",
       "_origin": "ast",
       "id": "client_patches_classweaponpatches_cs_float",
-      "community": 111,
+      "community": 117,
       "norm_label": "float"
     },
     {
@@ -2770,7 +2770,7 @@
       "source_location": "L525",
       "_origin": "ast",
       "id": "patches_classweaponpatches_localhittypepatch_gettargetmethod",
-      "community": 111,
+      "community": 117,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -4504,10 +4504,20 @@
       "norm_label": "gameobject"
     },
     {
+      "label": ".OnColorsChanged()",
+      "file_type": "code",
+      "source_file": "Client/Patches/SkillsClassTabPatch.cs",
+      "source_location": "L33",
+      "_origin": "ast",
+      "id": "patches_skillsclasstabpatch_classtabcontroller_oncolorschanged",
+      "community": 49,
+      "norm_label": ".oncolorschanged()"
+    },
+    {
       "label": ".Show()",
       "file_type": "code",
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
-      "source_location": "L28",
+      "source_location": "L47",
       "_origin": "ast",
       "id": "patches_skillsclasstabpatch_classtabcontroller_show",
       "community": 49,
@@ -4517,7 +4527,7 @@
       "label": ".TryHide()",
       "file_type": "code",
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
-      "source_location": "L34",
+      "source_location": "L53",
       "_origin": "ast",
       "id": "patches_skillsclasstabpatch_classtabcontroller_tryhide",
       "community": 49,
@@ -4527,7 +4537,7 @@
       "label": "Task",
       "file_type": "code",
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
-      "source_location": "L34",
+      "source_location": "L53",
       "_origin": "ast",
       "id": "client_patches_skillsclasstabpatch_cs_task",
       "community": 49,
@@ -4537,7 +4547,7 @@
       "label": "SkillsClassTabPatch",
       "file_type": "code",
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
-      "source_location": "L60",
+      "source_location": "L79",
       "_origin": "ast",
       "id": "patches_skillsclasstabpatch_skillsclasstabpatch",
       "community": 49,
@@ -4547,7 +4557,7 @@
       "label": "string",
       "file_type": "code",
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
-      "source_location": "L62",
+      "source_location": "L81",
       "_origin": "ast",
       "id": "client_patches_skillsclasstabpatch_cs_string",
       "community": 49,
@@ -4557,7 +4567,7 @@
       "label": "bool",
       "file_type": "code",
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
-      "source_location": "L64",
+      "source_location": "L83",
       "_origin": "ast",
       "id": "client_patches_skillsclasstabpatch_cs_bool",
       "community": 49,
@@ -4567,7 +4577,7 @@
       "label": "SkillsAndMasteringScreen",
       "file_type": "code",
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
-      "source_location": "L68",
+      "source_location": "L87",
       "_origin": "ast",
       "id": "client_patches_skillsclasstabpatch_cs_skillsandmasteringscreen",
       "community": 49,
@@ -4577,7 +4587,7 @@
       "label": "Tab",
       "file_type": "code",
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
-      "source_location": "L69",
+      "source_location": "L88",
       "_origin": "ast",
       "id": "tab",
       "community": 49,
@@ -4587,7 +4597,7 @@
       "label": "object",
       "file_type": "code",
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
-      "source_location": "L74",
+      "source_location": "L93",
       "_origin": "ast",
       "id": "client_patches_skillsclasstabpatch_cs_object",
       "community": 49,
@@ -4597,7 +4607,7 @@
       "label": "float",
       "file_type": "code",
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
-      "source_location": "L75",
+      "source_location": "L94",
       "_origin": "ast",
       "id": "client_patches_skillsclasstabpatch_cs_float",
       "community": 49,
@@ -4607,7 +4617,7 @@
       "label": ".GetTargetMethod()",
       "file_type": "code",
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
-      "source_location": "L78",
+      "source_location": "L97",
       "_origin": "ast",
       "id": "patches_skillsclasstabpatch_skillsclasstabpatch_gettargetmethod",
       "community": 49,
@@ -4617,7 +4627,7 @@
       "label": "MethodBase",
       "file_type": "code",
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
-      "source_location": "L78",
+      "source_location": "L97",
       "_origin": "ast",
       "id": "client_patches_skillsclasstabpatch_cs_methodbase",
       "community": 49,
@@ -4627,7 +4637,7 @@
       "label": ".Postfix()",
       "file_type": "code",
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
-      "source_location": "L84",
+      "source_location": "L103",
       "_origin": "ast",
       "id": "patches_skillsclasstabpatch_skillsclasstabpatch_postfix",
       "community": 49,
@@ -4637,7 +4647,7 @@
       "label": "PatchPostfix",
       "file_type": "code",
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
-      "source_location": "L84",
+      "source_location": "L103",
       "_origin": "ast",
       "id": "client_patches_skillsclasstabpatch_cs_patchpostfix",
       "community": 49,
@@ -4647,7 +4657,7 @@
       "label": ".RepositionClassTab()",
       "file_type": "code",
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
-      "source_location": "L228",
+      "source_location": "L247",
       "_origin": "ast",
       "id": "patches_skillsclasstabpatch_skillsclasstabpatch_repositionclasstab",
       "community": 49,
@@ -4657,7 +4667,7 @@
       "label": ".AlignPanelToTab()",
       "file_type": "code",
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
-      "source_location": "L297",
+      "source_location": "L316",
       "_origin": "ast",
       "id": "patches_skillsclasstabpatch_skillsclasstabpatch_alignpaneltotab",
       "community": 49,
@@ -4667,7 +4677,7 @@
       "label": "UIElement",
       "file_type": "code",
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
-      "source_location": "L297",
+      "source_location": "L316",
       "_origin": "ast",
       "id": "uielement",
       "community": 49,
@@ -4677,7 +4687,7 @@
       "label": "RectTransform",
       "file_type": "code",
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
-      "source_location": "L297",
+      "source_location": "L316",
       "_origin": "ast",
       "id": "recttransform",
       "community": 49,
@@ -4687,7 +4697,7 @@
       "label": ".EnsureSettingHook()",
       "file_type": "code",
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
-      "source_location": "L319",
+      "source_location": "L338",
       "_origin": "ast",
       "id": "patches_skillsclasstabpatch_skillsclasstabpatch_ensuresettinghook",
       "community": 49,
@@ -4697,7 +4707,7 @@
       "label": ".StyleClassTab()",
       "file_type": "code",
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
-      "source_location": "L344",
+      "source_location": "L363",
       "_origin": "ast",
       "id": "patches_skillsclasstabpatch_skillsclasstabpatch_styleclasstab",
       "community": 49,
@@ -4707,7 +4717,7 @@
       "label": ".DumpNativeTexts()",
       "file_type": "code",
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
-      "source_location": "L444",
+      "source_location": "L463",
       "_origin": "ast",
       "id": "patches_skillsclasstabpatch_skillsclasstabpatch_dumpnativetexts",
       "community": 49,
@@ -4717,7 +4727,7 @@
       "label": ".TabPath()",
       "file_type": "code",
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
-      "source_location": "L475",
+      "source_location": "L494",
       "_origin": "ast",
       "id": "patches_skillsclasstabpatch_skillsclasstabpatch_tabpath",
       "community": 49,
@@ -4727,7 +4737,7 @@
       "label": "Transform",
       "file_type": "code",
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
-      "source_location": "L475",
+      "source_location": "L494",
       "_origin": "ast",
       "id": "client_patches_skillsclasstabpatch_cs_transform",
       "community": 49,
@@ -24521,6 +24531,16 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
+      "source_location": "L33",
+      "weight": 1.0,
+      "source": "patches_skillsclasstabpatch_classtabcontroller",
+      "target": "patches_skillsclasstabpatch_classtabcontroller_oncolorschanged",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/SkillsClassTabPatch.cs",
       "source_location": "L28",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -26389,9 +26409,9 @@
       "source_file": "Client/PerksConfig.cs",
       "source_location": "L63",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "client_perksconfig",
-      "target": "client_perksconfig_configurationmanagerattributes",
-      "confidence_score": 1.0
+      "target": "client_perksconfig_configurationmanagerattributes"
     },
     {
       "relation": "contains",
@@ -26432,9 +26452,9 @@
       "source_location": "L69",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "client_perksconfig_perksconfig",
-      "target": "client_perksconfig_cs_int",
-      "confidence_score": 1.0
+      "target": "client_perksconfig_cs_int"
     },
     {
       "relation": "references",
@@ -26473,9 +26493,9 @@
       "source_file": "Client/PerksConfig.cs",
       "source_location": "L79",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "client_perksconfig_perksconfig",
-      "target": "client_perksconfig_perksconfig_bindordered",
-      "confidence_score": 1.0
+      "target": "client_perksconfig_perksconfig_bindordered"
     },
     {
       "relation": "method",
@@ -26515,9 +26535,9 @@
       "source_location": "L79",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "client_perksconfig_perksconfig_bindordered",
-      "target": "client_perksconfig_cs_configentry",
-      "confidence_score": 1.0
+      "target": "client_perksconfig_cs_configentry"
     },
     {
       "relation": "references",
@@ -26526,9 +26546,9 @@
       "source_location": "L66",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "client_perksconfig_configurationmanagerattributes",
-      "target": "client_perksconfig_cs_bool",
-      "confidence_score": 1.0
+      "target": "client_perksconfig_cs_bool"
     },
     {
       "relation": "references",
@@ -26537,9 +26557,9 @@
       "source_location": "L65",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "client_perksconfig_configurationmanagerattributes",
-      "target": "client_perksconfig_cs_int",
-      "confidence_score": 1.0
+      "target": "client_perksconfig_cs_int"
     },
     {
       "relation": "calls",
@@ -26548,9 +26568,9 @@
       "source_file": "Client/PerksConfig.cs",
       "source_location": "L213",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "client_perksconfig_perksconfig_bind",
-      "target": "client_perksconfig_perksconfig_bindordered",
-      "confidence_score": 1.0
+      "target": "client_perksconfig_perksconfig_bindordered"
     },
     {
       "relation": "calls",
@@ -26559,9 +26579,9 @@
       "source_file": "Client/PerksConfig.cs",
       "source_location": "L665",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "client_perksconfig_perksconfig_bindclasscolor",
-      "target": "client_perksconfig_perksconfig_bindordered",
-      "confidence_score": 1.0
+      "target": "client_perksconfig_perksconfig_bindordered"
     },
     {
       "relation": "references",
@@ -26570,9 +26590,9 @@
       "source_location": "L79",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "client_perksconfig_perksconfig_bindordered",
-      "target": "configdescription",
-      "confidence_score": 1.0
+      "target": "configdescription"
     },
     {
       "relation": "references",
@@ -26581,9 +26601,9 @@
       "source_location": "L79",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "client_perksconfig_perksconfig_bindordered",
-      "target": "configfile",
-      "confidence_score": 1.0
+      "target": "configfile"
     },
     {
       "relation": "references",
@@ -26592,9 +26612,9 @@
       "source_location": "L79",
       "weight": 1.0,
       "context": "generic_arg",
+      "confidence_score": 1.0,
       "source": "client_perksconfig_perksconfig_bindordered",
-      "target": "t",
-      "confidence_score": 1.0
+      "target": "t"
     },
     {
       "relation": "references",
@@ -42398,5 +42418,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "3e2bd46a66f80963b90ca2781c2f9b064b5b8255"
+  "built_at_commit": "fcc730104c59580c75d3c1296f97ee1833bc05e1"
 }
