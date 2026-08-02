@@ -54,7 +54,16 @@ namespace SPT.Launcher.Sync
         /// <summary>Item 030: config-optional → config aplicadas (item ligado).</summary>
         public int OptionalConfigCount => Actions.Count(a => a.Kind == SyncActionKind.OptionalConfigCopy);
 
+        /// <summary>Item 034: mods movidos p/ quarentena como PASTA inteira (Directory.Move).</summary>
+        public int MoveDirCount => Actions.Count(a => a.Kind == SyncActionKind.MoveDirToDisabled);
+
+        /// <summary>
+        /// Item 034: roots de espelho-com-quarentena a varrer para remover pastas vazias no fim do
+        /// sync (rede de segurança da faxina). Vazio em Dev Mode (a faxina não roda). Populado pelo planner.
+        /// </summary>
+        public List<string> EmptyDirCleanupRoots { get; } = new List<string>();
+
         /// <summary>Actions that actually touch the disk (downloads, deletes, moves, seeds, forces, performance).</summary>
-        public int IoActionCount => DownloadCount + DeleteCount + MoveCount + SeedCount + ForceCount + OptionalConfigCount;
+        public int IoActionCount => DownloadCount + DeleteCount + MoveCount + MoveDirCount + SeedCount + ForceCount + OptionalConfigCount;
     }
 }

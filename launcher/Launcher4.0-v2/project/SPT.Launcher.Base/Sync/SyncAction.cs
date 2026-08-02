@@ -35,6 +35,14 @@ namespace SPT.Launcher.Sync
         /// (sem baseline, o sync seguinte trataria como customizado para sempre).
         /// </summary>
         OptionalConfigCopy,
+
+        /// <summary>
+        /// Item 034: move a PASTA inteira de um mod para a quarentena de uma vez (Directory.Move),
+        /// em vez de arquivo a arquivo — <see cref="SyncAction.RelativePath"/> = pasta de origem,
+        /// <see cref="SyncAction.MoveTargetRelative"/> = pasta destino. Evita deixar a pasta-pai
+        /// vazia na origem (a consolidação do planner troca N MoveToDisabled por 1 destas).
+        /// </summary>
+        MoveDirToDisabled,
     }
 
     /// <summary>One planned action produced by <see cref="SyncPlanner"/> and executed by <see cref="SyncEngine"/>.</summary>

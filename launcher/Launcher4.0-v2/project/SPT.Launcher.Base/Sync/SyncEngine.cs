@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -175,6 +176,39 @@ namespace SPT.Launcher.Sync
 
                             break;
 
+                        case SyncActionKind.MoveDirToDisabled:
+                            try
+                            {
+                                // Item 034: move a pasta INTEIRA do mod para a quarentena — origem sem casca.
+                                string srcAbs = ResolveUnderRoot(action.RelativePath);   // ref: CR-01-05
+                                string dstAbs = ResolveUnderRoot(action.MoveTargetRelative);
+
+                                // Baseline: o caminho de cada arquivo muda — remove ANTES de mover.
+                                if (Directory.Exists(srcAbs))
+                                {
+                                    foreach (var f in Directory.EnumerateFiles(srcAbs, "*", SearchOption.AllDirectories))
+                                    {
+                                        string rel = Path.GetRelativePath(_gameRoot, f).Replace('\\', '/');
+                                        _baseline.Remove(rel);
+                                    }
+                                }
+
+                                MoveDirectoryMerge(srcAbs, dstAbs);
+                                result.MovedToDisabled++;
+                                ioDone++;
+                                // CA-034.7: UMA entrada agregada pela pasta (não uma por arquivo).
+                                AddEntry(result, action.RelativePath, "moved-to-disabled", action.MoveTargetRelative);
+                            }
+                            catch (Exception ex)
+                            {
+                                result.Errors++;
+                                ioDone++;
+                                AddEntry(result, action.RelativePath, "error", ex.Message);
+                                _log($"[Sync] Falha ao mover a pasta {action.RelativePath}: {ex.Message}");
+                            }
+
+                            break;
+
                         case SyncActionKind.SeedCopy:
                             try
                             {
@@ -344,6 +378,9 @@ namespace SPT.Launcher.Sync
                             break;
                     }
                 }
+
+                // Item 034: faxina de pastas vazias (dentro do try → pulada no cancelamento). Silenciosa.
+                CleanupEmptyDirectories(plan.EmptyDirCleanupRoots);
             }
             catch (OperationCanceledException)
             {
@@ -432,6 +469,77 @@ namespace SPT.Launcher.Sync
             }
 
             File.Move(sourcePath, destinationPath, overwrite: true);
+        }
+
+        /// <summary>
+        /// Item 034: move a pasta inteira para a quarentena. Se o destino já existe (CC-4: quarentena
+        /// anterior), mescla arquivo a arquivo sobrescrevendo homônimos e remove a origem esvaziada.
+        /// Directory.Move preserva o nome exato da origem (CC-7).
+        /// </summary>
+        private static void MoveDirectoryMerge(string source, string destination)
+        {
+            if (!Directory.Exists(source)) return;
+
+            if (!Directory.Exists(destination))
+            {
+                string parent = Path.GetDirectoryName(destination);
+                if (!string.IsNullOrEmpty(parent)) Directory.CreateDirectory(parent);
+                Directory.Move(source, destination);
+                return;
+            }
+
+            // Materializa a lista ANTES de mover — mutar a árvore durante enumeração lazy poderia PULAR
+            // arquivos, e o delete recursivo os apagaria (perda de dados silenciosa).
+            var files = Directory.EnumerateFiles(source, "*", SearchOption.AllDirectories).ToList();
+            foreach (var file in files)
+            {
+                string rel = Path.GetRelativePath(source, file);
+                string target = Path.Combine(destination, rel);
+                string dir = Path.GetDirectoryName(target);
+                if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir);
+                File.Move(file, target, overwrite: true);
+            }
+
+            // Só remove a origem se ela ficou REALMENTE sem arquivos (nunca apaga conteúdo não movido).
+            if (!Directory.EnumerateFiles(source, "*", SearchOption.AllDirectories).Any())
+            {
+                Directory.Delete(source, recursive: true); // só restam pastas vazias
+            }
+        }
+
+        /// <summary>
+        /// Item 034: remove pastas vazias sob os roots de espelho-com-quarentena (bottom-up). Silenciosa
+        /// (não entra no relatório — CA-034.7). Nunca remove o próprio root; nunca desce em -disabled (CC-6).
+        /// Lista vazia em Dev Mode (o planner não a popula — CC-3). Falha isolada, nunca derruba o sync.
+        /// </summary>
+        private void CleanupEmptyDirectories(IReadOnlyList<string> roots)
+        {
+            if (roots == null) return;
+            foreach (var root in roots)
+            {
+                string rootAbs = SyncPathUtil.ToLocalPath(_gameRoot, root);
+                if (!Directory.Exists(rootAbs)) continue;
+                try { RemoveEmptyDirsBottomUp(rootAbs, isRoot: true); }
+                catch (Exception ex) { _log($"[Sync] Faxina de pastas vazias falhou em {root}: {ex.Message}"); }
+            }
+        }
+
+        private static void RemoveEmptyDirsBottomUp(string dir, bool isRoot)
+        {
+            string name = Path.GetFileName(dir.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
+            if (name.EndsWith("-disabled", StringComparison.Ordinal)) return; // CC-6: nunca a quarentena
+
+            foreach (var sub in Directory.GetDirectories(dir))
+            {
+                RemoveEmptyDirsBottomUp(sub, isRoot: false);
+            }
+
+            if (!isRoot && Directory.GetFileSystemEntries(dir).Length == 0)
+            {
+                // Falha por-diretório (pasta em uso / sem permissão) não aborta a faxina do resto.
+                try { Directory.Delete(dir, recursive: false); }
+                catch { /* deixa a casca; nunca derruba o sync por causa da faxina */ }
+            }
         }
 
         private static void AddEntry(SyncResult result, string path, string action, string detail)

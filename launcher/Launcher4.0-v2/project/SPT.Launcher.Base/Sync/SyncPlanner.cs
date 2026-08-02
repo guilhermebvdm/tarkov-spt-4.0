@@ -465,6 +465,22 @@ namespace SPT.Launcher.Sync
 
             ScanExtras(plan, manifestPaths, cancellationToken);
 
+            // Item 034: consolida N moves por-arquivo numa pasta inteira quando o conteúdo real permite.
+            ConsolidateFolderMoves(plan, manifestFiles, manifestPaths, cancellationToken);
+
+            // Item 034: faxina de pastas vazias — roots MirrorMoveDisabled EXISTENTES, sem duplicata,
+            // fora do Dev Mode (CC-3). MirrorPrefixes traz plugins E bepinex/plugins (2 não existem no real).
+            if (!_options.DevMode)
+            {
+                foreach (var kv in _resolver.MirrorPrefixes.Where(p => p.Value == SyncFolderRule.MirrorMoveDisabled))
+                {
+                    string root = ResolveOnDiskCasing(kv.Key);
+                    string abs = SyncPathUtil.ToLocalPath(_options.GameRoot, root);
+                    if (Directory.Exists(abs) && !plan.EmptyDirCleanupRoots.Contains(root))
+                        plan.EmptyDirCleanupRoots.Add(root);
+                }
+            }
+
             return plan;
         }
 
@@ -638,6 +654,133 @@ namespace SPT.Launcher.Sync
             return segment == null
                 ? prefixOriginalCase + "-disabled/" + remainder
                 : prefixOriginalCase + "-disabled/" + segment + "/" + remainder;
+        }
+
+        /// <summary>
+        /// Item 034: onde a pasta inteira de um mod pode ir para a quarentena, troca as N ações
+        /// MoveToDisabled por-arquivo por UMA MoveDirToDisabled. Só consolida quando (a) todas as ações
+        /// do grupo apontam para o MESMO destino de pasta (origem única — evita namespace misto) e (b) o
+        /// conteúdo REAL da pasta no disco pode ir inteiro (nenhum arquivo precisa ficar — FileMustStay).
+        /// Cobre fallback coop-safe (CA-034.4) e pasta compartilhada (CC-1): um arquivo que fica → per-file.
+        /// </summary>
+        private void ConsolidateFolderMoves(SyncPlan plan, IReadOnlyList<ManifestFile> manifestFiles,
+            HashSet<string> manifestPaths, CancellationToken ct)
+        {
+            var moveActions = plan.Actions.Where(a => a.Kind == SyncActionKind.MoveToDisabled).ToList();
+            if (moveActions.Count == 0) return;
+
+            // Arquivos que ESTÃO indo para a quarentena (por RelativePath normalizado).
+            var moving = new HashSet<string>(
+                moveActions.Select(a => SyncPathUtil.Normalize(a.RelativePath)), StringComparer.Ordinal);
+
+            // CR-01-01 (TOCTOU): pastas de 1º nível que contêm alguma entrada de manifesto que FICA
+            // (mandatória ou optional LIGADO), MESMO ausente no disco agora (será baixada). Consolidar
+            // levaria esse download futuro para a quarentena e apagaria seu baseline (loop infinito).
+            // Bloquear independe da presença no disco (o FileMustStay só enxerga o que já existe).
+            var blockedFolders = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var mf in manifestFiles)
+            {
+                bool stays = !mf.optional || _options.IsOptionalModEnabled(OptionalIdOf(mf));
+                if (!stays) continue;
+                string f = FirstLevelFolder(mf.path);
+                if (f != null) blockedFolders.Add(SyncPathUtil.Normalize(f));
+            }
+
+            // Agrupa pela pasta de 1º nível NORMALIZADA (casing manifesto×disco cai numa chave só);
+            // arquivo solto no root não agrupa (FirstLevelFolder devolve null → segue per-file).
+            var byFolder = moveActions
+                .Select(a => (action: a, folder: FirstLevelFolder(a.RelativePath)))
+                .Where(x => x.folder != null)
+                .ToLookup(x => SyncPathUtil.Normalize(x.folder), x => x.action);
+
+            foreach (var group in byFolder)
+            {
+                ct.ThrowIfCancellationRequested();
+                if (blockedFolders.Contains(group.Key)) continue; // entrada de manifesto que fica → per-file
+
+                string folderRel = ResolveOnDiskCasing(group.Key);   // casing real do disco (CC-7)
+                string folderAbs = SyncPathUtil.ToLocalPath(_options.GameRoot, folderRel);
+                if (!Directory.Exists(folderAbs)) continue;
+
+                var actions = group.ToList();
+
+                // Origens mistas (mod opcional + extra na mesma pasta) apontam p/ destinos-disabled
+                // diferentes → NÃO consolida (cai per-file; a faxina limpa a casca). Só se convergem p/ 1.
+                var targets = actions
+                    .Select(a => DeriveFolderDisabledTarget(folderRel, a.RelativePath, a.MoveTargetRelative))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+                if (targets.Count != 1) continue;
+
+                bool anyStays = Directory
+                    .EnumerateFiles(folderAbs, "*", SearchOption.AllDirectories)
+                    .Any(f => FileMustStay(f, manifestPaths, moving));
+                if (anyStays) continue; // pasta compartilhada ou com protegido → mantém per-file
+
+                foreach (var a in actions) plan.Actions.Remove(a);
+                plan.Actions.Add(new SyncAction
+                {
+                    RelativePath = folderRel,
+                    MoveTargetRelative = targets[0],
+                    Kind = SyncActionKind.MoveDirToDisabled,
+                    Rule = actions[0].Rule,
+                    Reason = actions[0].Reason,
+                });
+            }
+        }
+
+        /// <summary>
+        /// Item 034: pasta de 1º nível sob um root MirrorMoveDisabled; null se o arquivo está solto no
+        /// root (.dll sem pasta própria → segue per-file). Devolve o casing do manifesto.
+        /// </summary>
+        private string FirstLevelFolder(string relative)
+        {
+            string norm = SyncPathUtil.Normalize(relative);
+            if (_resolver.Resolve(norm, out string matched) != SyncFolderRule.MirrorMoveDisabled) return null;
+            if (string.IsNullOrEmpty(matched)) return null;
+
+            string forward = (relative ?? string.Empty).Replace('\\', '/').TrimStart('/');
+            if (forward.Length <= matched.Length) return null;
+            string remainder = forward.Substring(matched.Length).TrimStart('/'); // "PiP-Disabler/x.dll" ou "Foo.dll"
+            int slash = remainder.IndexOf('/');
+            if (slash < 0) return null;                                          // arquivo solto no root
+            string prefixOriginalCase = forward.Substring(0, matched.Length);    // casing do root
+            return prefixOriginalCase + "/" + remainder.Substring(0, slash);     // "plugins/PiP-Disabler"
+        }
+
+        /// <summary>
+        /// Item 034: um arquivo real precisa FICAR (impede o move da pasta inteira) se é protegido
+        /// (coop-safe/ignored/excluído/protegido), está sob -disabled, está sob regra que NÃO é
+        /// quarentena (preserve-divergent/mirror-reference/force/optional-config — espelha o skip do
+        /// ScanExtras), ou é entrada do manifesto que NÃO vai à quarentena (mod ligado/mandatório).
+        /// Arquivo neutro não-catalogado sob a pasta de um mod desligado NÃO impede — vai junto.
+        /// </summary>
+        private bool FileMustStay(string absoluteFile, HashSet<string> manifestPaths, HashSet<string> moving)
+        {
+            string norm = SyncPathUtil.Normalize(
+                Path.GetRelativePath(_options.GameRoot, absoluteFile).Replace('\\', '/'));
+            if (SyncPathUtil.ContainsDisabledSegment(norm)) return true;
+            if (IsIgnored(norm) || IsExcludedFromCleanup(norm) || _protectedNormalized.Contains(norm)) return true;
+            if (SyncCoopSafe.IsCoopEssentialPlugin(norm)) return true;
+            if (_resolver.Resolve(norm, out _) != SyncFolderRule.MirrorMoveDisabled) return true;
+            if (manifestPaths.Contains(norm) && !moving.Contains(norm)) return true; // mod ligado / mandatório
+            return false;
+        }
+
+        /// <summary>
+        /// Item 034: destino da PASTA na quarentena — sobe no MoveTargetRelative do arquivo tantos
+        /// níveis quantos ele está abaixo da pasta de origem. Ex.: pasta "plugins/PiP-Disabler",
+        /// arquivo "plugins/PiP-Disabler/x.dll" → alvo ".../optional/PiP-Disabler/x.dll" (depth 1)
+        /// → sobe 1 → ".../optional/PiP-Disabler".
+        /// </summary>
+        private static string DeriveFolderDisabledTarget(string folderRel, string sampleSource, string sampleTarget)
+        {
+            string folderF = (folderRel ?? string.Empty).Replace('\\', '/').TrimEnd('/');
+            string srcF = (sampleSource ?? string.Empty).Replace('\\', '/');
+            string rem = srcF.Length > folderF.Length ? srcF.Substring(folderF.Length).TrimStart('/') : string.Empty;
+            int depth = rem.Length == 0 ? 0 : rem.Split('/').Length;
+            var segs = (sampleTarget ?? string.Empty).Replace('\\', '/').TrimEnd('/').Split('/');
+            return string.Join("/", segs.Take(Math.Max(1, segs.Length - depth)));
         }
 
         /// <summary>

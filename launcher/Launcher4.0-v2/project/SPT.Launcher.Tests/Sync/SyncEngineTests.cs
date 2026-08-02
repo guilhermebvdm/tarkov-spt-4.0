@@ -53,6 +53,9 @@ namespace SPT.Launcher.Tests.Sync
         [Fact]
         public async Task Move_collision_in_disabled_folder_is_replaced()
         {
+            // Item 034: OldMod é pasta de 1 arquivo → consolida em MoveDirToDisabled e passa pelo merge
+            // (destino existe), que sobrescreve o homônimo stale. A garantia R3.3 no caminho PER-FILE
+            // fica coberta por SyncFolderQuarantineTests.PerFile_move_overwrites_colliding_target_in_disabled.
             using var fx = new SyncTestFixture();
 
             fx.WriteLocal("BepInEx/plugins/OldMod/old.dll", "fresh-quarantine");
@@ -330,8 +333,9 @@ namespace SPT.Launcher.Tests.Sync
         [Fact]
         public async Task Move_failure_on_locked_target_does_not_abort_remaining_actions()
         {
-            // ref: CR-01-06c — destino no -disabled travado (handle exclusivo) → erro por-arquivo,
-            // origem intocada, demais moves seguem.
+            // ref: CR-01-06c — destino no -disabled travado (handle exclusivo) → erro isolado, origem
+            // intocada, demais moves seguem. Item 034: AAA/ZZZ são pastas de 1 arquivo → o erro isola-se
+            // por-PASTA (MoveDirToDisabled/merge) em vez de por-arquivo; o efeito assertado é o mesmo.
             using var fx = new SyncTestFixture();
             fx.WriteLocal("BepInEx/plugins/AAA/locked.dll", "new-quarantine");
             fx.WriteLocal("BepInEx/plugins/ZZZ/free.dll", "movable");

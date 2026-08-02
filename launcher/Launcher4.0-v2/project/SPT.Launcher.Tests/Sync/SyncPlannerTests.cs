@@ -148,8 +148,10 @@ namespace SPT.Launcher.Tests.Sync
             var manifest = new[] { fx.Entry("BepInEx/plugins/Current/cur.dll", "cur") };
             var plan = await PlanAsync(fx, manifest);
 
-            var move = Assert.Single(plan.Actions, a => a.Kind == SyncActionKind.MoveToDisabled);
-            Assert.Equal("BepInEx/plugins-disabled/OldMod/old.dll", move.MoveTargetRelative);
+            // Item 034: a pasta extra inteira consolida numa única ação de move-de-pasta.
+            var move = Assert.Single(plan.Actions, a => a.Kind == SyncActionKind.MoveDirToDisabled);
+            Assert.Equal("BepInEx/plugins/OldMod", move.RelativePath);
+            Assert.Equal("BepInEx/plugins-disabled/OldMod", move.MoveTargetRelative);
         }
 
         [Fact]
@@ -169,9 +171,10 @@ namespace SPT.Launcher.Tests.Sync
             // ScanExtras não toca — manifestPaths protege optional inativo dele).
             var plan = await PlanAsync(fx, manifest);
 
+            // Item 034: a pasta do mod desligado consolida numa única ação de move-de-pasta (origem optional).
             var move = Assert.Single(plan.Actions,
-                a => a.Kind == SyncActionKind.MoveToDisabled && a.RelativePath.Contains("gore.dll"));
-            Assert.Equal("BepInEx/plugins-disabled/optional/Gore/gore.dll", move.MoveTargetRelative);
+                a => a.Kind == SyncActionKind.MoveDirToDisabled && a.RelativePath.Contains("Gore"));
+            Assert.Equal("BepInEx/plugins-disabled/optional/Gore", move.MoveTargetRelative);
             Assert.DoesNotContain(plan.Actions, a => a.Kind == SyncActionKind.DeleteExtra);
         }
 
@@ -192,10 +195,10 @@ namespace SPT.Launcher.Tests.Sync
             // Desligado → TODOS os arquivos da pasta vão pra quarentena (nada da pasta fica no jogo).
             var plan = await PlanAsync(fx, manifest);
 
-            var moves = plan.Actions.Where(a => a.Kind == SyncActionKind.MoveToDisabled).ToList();
-            Assert.Equal(2, moves.Count);
-            Assert.Contains(moves, m => m.MoveTargetRelative == "BepInEx/plugins-disabled/optional/FooMod/main.dll");
-            Assert.Contains(moves, m => m.MoveTargetRelative == "BepInEx/plugins-disabled/optional/FooMod/data.bundle");
+            // Item 034: desligado → a PASTA inteira vai pra quarentena numa ÚNICA ação (não 2 por-arquivo).
+            var move = Assert.Single(plan.Actions, a => a.Kind == SyncActionKind.MoveDirToDisabled);
+            Assert.Equal("BepInEx/plugins/FooMod", move.RelativePath);
+            Assert.Equal("BepInEx/plugins-disabled/optional/FooMod", move.MoveTargetRelative);
         }
 
         [Fact]
@@ -394,8 +397,10 @@ namespace SPT.Launcher.Tests.Sync
             var manifest = new[] { fx.Entry("BepInEx/plugins/Current/cur.dll", "cur") };
             var plan = await PlanAsync(fx, manifest);
 
-            var move = Assert.Single(plan.Actions, a => a.Kind == SyncActionKind.MoveToDisabled);
-            Assert.Equal("BepInEx/plugins-disabled/OldMod/old.dll", move.MoveTargetRelative);
+            // Item 034: a pasta extra inteira consolida numa única ação de move-de-pasta.
+            var move = Assert.Single(plan.Actions, a => a.Kind == SyncActionKind.MoveDirToDisabled);
+            Assert.Equal("BepInEx/plugins/OldMod", move.RelativePath);
+            Assert.Equal("BepInEx/plugins-disabled/OldMod", move.MoveTargetRelative);
         }
 
         [Fact]
