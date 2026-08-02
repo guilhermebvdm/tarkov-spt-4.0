@@ -1,12 +1,19 @@
 # Propriedades F12 — stancesAndCameraPositionSPT4.0.11
 
-> Todas as opções do menu **F12** (BepInEx ConfigurationManager). **19 seções · 111 opções.**
-> Regenerado de `modded/Plugin.cs` em **2026-07-12** (fonte de verdade), para a **v2.5.0**.
+> Todas as opções do menu **F12** (BepInEx ConfigurationManager). **19 seções · 123 opções** (v2.15.0).
 >
-> ⚠️ **A contagem acima é da v2.5.0.** As versões 2.6.0–2.13.0 acrescentaram opções (waypoint de ADS por
-> postura, compressão de ADS-speed, UI de checagem de câmara, `Debug ADS Speed`) e removeram a seção
-> `Action Stances`. O documento recebeu edições pontuais, mas **só volta a bater exatamente com o jogo na
-> próxima regeneração completa** — prevista na faxina de preparação para publicação. Os tooltips do jogo são bilíngues (EN + PT); aqui a coluna **Descrição** traz a versão em português resumida.
+> ⚠️ **As tabelas por seção abaixo ainda são da v2.5.0** e receberam só remendos desde então — faltam nelas as
+> opções acrescentadas entre a 2.6.0 e a 2.15.0 (waypoint de ADS por postura, compressão de velocidade de
+> mira, UI de checagem de câmara, `Debug ADS Speed`, `Debug Speed Limits`). **O cabeçalho, a contagem e a
+> ordem no fim do documento foram apurados direto do código em 2026-08-02** e estão corretos; as tabelas
+> ainda precisam da regeneração linha a linha.
+>
+> **Como a contagem foi apurada** (repetível): extraindo do `modded/Plugin.cs` todas as chamadas de
+> `Config.Bind`, mais as geradas pelos auxiliares `BindStance` (6 opções × 4 posturas, com sentinelas nulas
+> por postura: a Stance 0 recebe 3, as demais 5 cada) e `BindMult` (16 no grupo de stamina). A **ordem das
+> seções** é a de **descoberta** — a posição da primeira `Config.Bind` de cada seção **na execução**, não no
+> texto: por isso `Stance 0 - Vanilla` (criada na linha 652, antes do bloco da Stance 1) e
+> `Stamina Management` (chamada na linha 834, antes de `Hold Breath`) caem onde caem. Os tooltips do jogo são bilíngues (EN + PT); aqui a coluna **Descrição** traz a versão em português resumida.
 >
 > **v2.2.0 corrigiu os eixos Yaw/Roll** (estavam trocados em todas as stances e no ADS — a rotação é aplicada nos eixos LOCAIS da arma, onde Y = cano/roll e Z = vertical/yaw) e **traduziu os nomes para inglês**. Tooltips seguem bilíngues.
 >
@@ -284,10 +291,34 @@ Multiplicador de stamina de braço por cenário. Semântica: **< 1 drena · 1 ma
 
 A ordem real das seções no ConfigurationManager (por ordem de descoberta no `Plugin.cs`):
 
-1. Manual Chambering · 2. Camera Position · 3. Stance Cycle & Hotkeys · 4. Stance Transition & Kick · 5. ADS Default Values (Advanced) · 6. Stance 0 - Vanilla · 7. Stance 1 - High Ready · 8. Stance 2 - Low Ready · 9. Stance 3 - Custom · 10. Weapon Mount (Active) · 11. Weapon Mount (Passive) · 12. Stamina Management · 13. Hold Breath · 14. Oxygen Bar (UI) · 15. Animation Speed · 16. Movement & Inertia · 17. Tac Sprint Settings (Advanced) · 18. Debug (Advanced)
+Apurada do código em 2026-08-02 (v2.15.0), com a contagem de opções por seção:
 
-> A seção `Action Stances` deixou de existir na **v2.13.0** — sua única opção (`Enable Action Stance Swap`)
-> foi absorvida pelo rodapé de `Stance Cycle & Hotkeys`.
+| # | Seção | Opções |
+|---|---|---|
+| 1 | Manual Chambering | 3 |
+| 2 | Weapon Inspection | 1 |
+| 3 | Camera Position | 4 |
+| 4 | Stance Cycle & Hotkeys | 16 |
+| 5 | Stance Transition & Kick | 7 |
+| 6 | ADS Default Values (Advanced) | 7 |
+| 7 | Stance 0 - Vanilla | 3 |
+| 8 | Stance 1 - High Ready | 12 |
+| 9 | Stance 2 - Low Ready | 12 |
+| 10 | Stance 3 - Custom | 12 |
+| 11 | Weapon Mount (Active) | 1 |
+| 12 | Weapon Mount (Passive) | 5 |
+| 13 | Stamina Management | 16 |
+| 14 | Hold Breath | 5 |
+| 15 | Oxygen Bar (UI) | 5 |
+| 16 | Animation Speed | 2 |
+| 17 | Movement & Inertia | 3 |
+| 18 | Tac Sprint Settings (Advanced) | 5 |
+| 19 | Debug (Advanced) | 4 |
+| | **Total** | **123** |
+
+> A `Action Stances` deixou de existir na **v2.13.0** (sua única opção, `Enable Action Stance Swap`, foi
+> absorvida pelo rodapé de `Stance Cycle & Hotkeys`), e a `Weapon Inspection` nasceu na **v2.10.0** — uma
+> saiu, uma entrou, e o total de seções seguiu em 19.
 
 ## Histórico de Alterações
 
