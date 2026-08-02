@@ -37,12 +37,12 @@ namespace CameraRotationMod.Networking
             {
                 // Gatilho secundário: o registro real é dirigido por EnsurePacketsRegistered.
                 FikaEventDispatcher.SubscribeEvent<FikaNetworkManagerCreatedEvent>(OnNetworkManagerCreated);
-                _logger.LogInfo("[CameraRotationMod] Fika integration initialized.");
+                _logger.LogInfo("[TRL-StancesAndMobility] Fika integration initialized.");
                 _initialized = true;
             }
             catch (Exception ex)
             {
-                _logger.LogError($"[CameraRotationMod] Failed to initialize Fika integration: {ex}");
+                _logger.LogError($"[TRL-StancesAndMobility] Failed to initialize Fika integration: {ex}");
             }
         }
 
@@ -82,11 +82,11 @@ namespace CameraRotationMod.Networking
                 currentManager.RegisterPacket<StanceSyncPacket>(OnStanceSyncPacketReceivedLegacy);
 
                 _lastRegisteredNetworkManager = currentManager;
-                _logger?.LogInfo($"[CameraRotationMod] Registered StanceSyncPacketV2 (+legacy) on new IFikaNetworkManager instance ({currentManager.GetType().Name}).");
+                _logger?.LogInfo($"[TRL-StancesAndMobility] Registered StanceSyncPacketV2 (+legacy) on new IFikaNetworkManager instance ({currentManager.GetType().Name}).");
             }
             catch (Exception ex)
             {
-                _logger?.LogError($"[CameraRotationMod] Error registering stance packets: {ex}");
+                _logger?.LogError($"[TRL-StancesAndMobility] Error registering stance packets: {ex}");
             }
         }
 

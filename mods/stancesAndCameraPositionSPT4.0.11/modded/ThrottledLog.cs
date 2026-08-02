@@ -42,7 +42,7 @@ namespace CameraRotationMod
             if (ex != null && _tracedExceptionTypes.Add(ex.GetType()))
             {
                 _lastErrorLogTick = now;
-                log?.LogError($"[CameraRotationMod] {context}: {ex}");
+                log?.LogError($"[TRL-StancesAndMobility] {context}: {ex}");
                 return;
             }
 
@@ -56,7 +56,7 @@ namespace CameraRotationMod
             _lastErrorLogTick = now;
             var suppressed = _suppressedErrors;
             _suppressedErrors = 0;
-            log?.LogError($"[CameraRotationMod] {context}: {ex?.Message}"
+            log?.LogError($"[TRL-StancesAndMobility] {context}: {ex?.Message}"
                 + (suppressed > 0 ? $" (+{suppressed} falhas suprimidas nos últimos {ErrorLogIntervalMs / 1000}s)" : string.Empty));
         }
 

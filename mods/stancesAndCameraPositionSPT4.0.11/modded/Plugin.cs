@@ -20,7 +20,7 @@ public enum ScrollMode
     Linear,
 }
 
-[BepInPlugin("com.shwng.fpscamerastances", "shwngFpsCameraStances4", "2.15.0")]
+[BepInPlugin("com.trl.stancesandmobility", "TRL-StancesAndMobility", "2.16.0")]
 public class Plugin : BaseUnityPlugin
 {
     public static Plugin Instance { get; private set; }
@@ -229,7 +229,7 @@ public class Plugin : BaseUnityPlugin
     {
         Instance = this;
         Logger = base.Logger;
-        Logger.LogInfo("Plugin shwngFpsCameraStances4 is loaded!");
+        Logger.LogInfo("Plugin TRL-StancesAndMobility is loaded!");
         Logger.LogInfo($"Camera Rotation Mod has loaded!");
 
         // backlog 002 F4 (06-fix-01) — resolver Player.FirearmController.SetTriggerPressed por reflection.
@@ -1272,12 +1272,12 @@ public class Plugin : BaseUnityPlugin
             }
             catch (System.Exception ex)
             {
-                Logger.LogError($"[CameraRotationMod] Erro ao tentar inicializar integração com Fika: {ex.Message}");
+                Logger.LogError($"[TRL-StancesAndMobility] Erro ao tentar inicializar integração com Fika: {ex.Message}");
             }
         }
         else
         {
-            Logger.LogInfo("[CameraRotationMod] Fika multiplayer not found. Running in offline/standard mode.");
+            Logger.LogInfo("[TRL-StancesAndMobility] Fika multiplayer not found. Running in offline/standard mode.");
         }
 
         // UI
@@ -1332,7 +1332,9 @@ public class Plugin : BaseUnityPlugin
 
         // Item 019: Chamber Check Ammo UI
         SafeEnable("ChamberCheckAmmoPatch", () => new Patches.ChamberCheckAmmoPatch());
-        SafeEnable("PickupAimingSafetyPatch", () => new Patches.PickupAimingSafetyPatch());
+        // PickupAimingSafetyPatch devolvido ao TRL-Fixes na v2.13.0 — é remendo sobre bug do jogo base
+        // (trava de controles ao pegar item do chão), sem relação com posturas/mobilidade. Ver
+        // mods/TRL-Fixes/docs/handoff-pickup-aiming-safety.md.
 
         // Carrega sprites do ícone de mount (reusados pelo novo item de mount; carregamento mantido).
         LoadedSprites["mounting.png"] = LoadEmbeddedSprite("mounting.png");

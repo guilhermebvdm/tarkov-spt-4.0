@@ -4,14 +4,14 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <LangVersion>latest</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <AssemblyName>shwngFpsCameraStances4</AssemblyName>
+    <AssemblyName>TRL-StancesAndMobility</AssemblyName>
     <RootNamespace>CameraRotationMod</RootNamespace>
 
     <!-- Manter em sincronia com a versão do [BepInPlugin] em Plugin.cs — é ela que o
          BepInEx mostra no F12 e nos logs. -->
-    <Version>2.15.0</Version>
-    <AssemblyVersion>2.15.0.0</AssemblyVersion>
-    <FileVersion>2.15.0.0</FileVersion>
+    <Version>2.16.0</Version>
+    <AssemblyVersion>2.16.0.0</AssemblyVersion>
+    <FileVersion>2.16.0.0</FileVersion>
   </PropertyGroup>
 
   <!--

@@ -7,6 +7,28 @@ Versões mais recentes primeiro.
 
 ---
 
+## v2.16.0 (2026-08-02)
+
+### O mod agora se chama TRL-StancesAndMobility
+
+Identidade renomeada para o padrão dos mods TRL, preparando a publicação: o nome que aparece no F12, o
+identificador interno, o arquivo compilado, o arquivo de configuração e o prefixo das mensagens de log.
+
+⚠️ **Atualizar exige atenção — duas coisas mudam de lugar:**
+
+1. **Seus ajustes do F12 voltam ao padrão.** A configuração é guardada num arquivo derivado do identificador
+   do mod; com identificador novo, o jogo cria um arquivo em branco. O arquivo já calibrado é distribuído
+   junto pelo launcher, então quem atualiza por ele não perde nada.
+2. **A pasta de instalação muda** de `BepInEx/plugins/RealisticMobility/` para
+   `BepInEx/plugins/TRL-StancesAndMobility/`. **Remova a pasta antiga** — copiar só a nova deixa as duas
+   carregadas ao mesmo tempo, com dois conjuntos de alterações concorrendo.
+
+Os seis arquivos de áudio e imagem continuam indo ao lado do arquivo do mod, na pasta nova.
+
+Detalhes e o que ficou pendente: `publish/RENAME.md`.
+
+---
+
 ## v2.15.0 (2026-08-02)
 
 ### Faxina pré-publicação (item 020) — nada muda para o jogador
@@ -90,6 +112,19 @@ in-game responde: é para isso que serve esta tela.
   mas tinham faixa 0–1, e o ConfigurationManager renderiza toda faixa exatamente 0–1 como **porcentagem sem
   caixa de digitação** — apareciam como "15%" e "35%". Faixa alargada para 0–2: volta o valor em segundos, com
   caixa para digitar, e agora aceita atrasos acima de 1 s. Valores salvos continuam válidos.
+
+### Escopo
+
+- **`PickupAimingSafetyPatch` devolvido ao `TRL-Fixes`.** Ele impede uma trava de controles do **jogo base**
+  (ao pegar/equipar item do chão, o corpo congela e só a interface responde) engolindo uma exceção do sistema
+  de mira. Chegou aqui na v2.12.0 vindo do `TRL-Fixes`, sem registro em changelog ou memória. Não tem relação
+  com posturas ou mobilidade, e o mod de stances **não participa do caminho do erro** — verificado que nenhum
+  mod TRL escreve `FirearmController.IsAiming` e que os enxertos deste mod no fluxo de mira ficam no pipeline
+  de animação, que roda depois e em outro objeto. Como este mod está sendo preparado para publicação pública,
+  um remendo que silencia exceções alheias ao seu tema não viaja junto. Diagnóstico completo em
+  `mods/TRL-Fixes/docs/handoff-pickup-aiming-safety.md`.
+  ⚠️ **Quem usa os dois mods não perde nada** — o patch continua ativo, agora no TRL-Fixes v1.1.0. Quem usa só
+  o stances volta a ficar exposto ao travamento do jogo base.
 
 ### Documentação
 
