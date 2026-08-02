@@ -40,17 +40,23 @@ O mod original está sob **CC BY-NC 4.0**, que permite adaptar e redistribuir co
 comercial, mas **não concede ao derivado o direito de mudar a licença**. Uma autorização para "postar como mod
 novo" não é, por si só, uma autorização para relicenciar.
 
-## Pendência antes de publicar
+## Decisão sobre a licença (2026-08-02)
 
-Pedir ao shengzhanzhe uma confirmação curta e explícita **sobre a licença** — algo como *"tudo bem publicar o
-fork sob a licença MIT?"* — e anexar aqui. É uma frase de resposta e fecha o ponto de vez.
+**Manter a CC BY-NC 4.0 do original.** Decisão do mantenedor do fork, tomada com o ponto acima na mesa.
 
-Enquanto isso não existir, as opções são:
+É o caminho **mais conservador do ponto de vista da autorização**: não depende de nenhuma permissão além da
+que já está registrada aqui. Um derivado pode ser distribuído sob a mesma licença do original sem pedir mais
+nada — é exatamente o que a CC BY-NC permite. Nada precisa ser perguntado ao autor.
 
-1. **Aguardar a confirmação** e então publicar sob MIT (caminho limpo, custo: o tempo da resposta).
-2. **Publicar mantendo CC BY-NC 4.0.** A diretriz do Forge aponta Creative Commons como adequada a
-   documentação, arte e mídia — não a código — mas **não a proíbe literalmente** para código. Risco de a
-   moderação questionar.
+**O risco que fica, declarado:** a diretriz do Forge (§6.1) aponta as licenças aprovadas pela OSI (MIT, Apache
+2.0, GPL, BSD…) como as que "provide established legal frameworks for code distribution", e situa Creative
+Commons como apropriada para **conteúdo não-código** — "documentation, artwork, and media files". Ela **não
+proíbe** CC para código de forma literal, mas a moderação pode questionar. Se isso acontecer, a saída é a
+mensagem de uma linha ao shengzhanzhe pedindo aval para uma licença OSI — o aceite dele em junho sugere baixa
+resistência.
+
+**Consequência prática do NonCommercial:** ninguém pode usar este código comercialmente, nem o autor original.
+Para um mod de SPT isso é irrelevante na prática, e é o mesmo regime em que o mod original sempre viveu.
 
 ## Histórico de Alterações
 
