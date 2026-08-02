@@ -49,6 +49,8 @@ internal static class Medroso
     /// <summary>Reseta o cooldown entre raids (estado não vaza p/ a próxima).</summary>
     internal static void ResetRaid() => _cooldownUntil = 0f;
 
+    private static MethodInfo _addTremorMethod;
+
     /// <summary>Aplica o tremor se: perk on + Scav local + fora do cooldown + HC disponível.</summary>
     private static void Trigger()
     {
@@ -71,7 +73,15 @@ internal static class Medroso
             }
 
             var dur = PerksConfig.MedrosoDuration?.Value ?? 6f;
-            hc.AddEffect<ScavengerTremor>(EBodyPart.Head, 0.1f, dur, 1.5f);   // ref: ActiveHealthController.cs:3514
+            if (_addTremorMethod == null)
+            {
+                var nativeTremorType = ActiveHealthController.GClass3008.GClass3019_0.Tremor.GetType();
+                _addTremorMethod = typeof(ActiveHealthController)
+                    .GetMethod(nameof(ActiveHealthController.AddEffect))
+                    ?.MakeGenericMethod(nativeTremorType);
+            }
+
+            _addTremorMethod?.Invoke(hc, new object[] { EBodyPart.Head, 0.1f, dur, 1.5f, null, null });
             // CR#7 (082): o AddEffect NÃO deduplica efeitos que implementam GInterface331 (cria nova instância).
             // O cooldown é a única trava — então nunca pode ser MENOR que a duração, senão o Tremor EMPILHA.
             _cooldownUntil = Time.time + Mathf.Max(PerksConfig.MedrosoCooldown?.Value ?? 8f, dur);

@@ -69,3 +69,14 @@ Memória cronológica de sessões de trabalho (timestamps em GMT-3). Cada entrad
   - Implementada a cascata estrita de seleção de pontos com **Master Fallback em última instância** se a bolha não possuir pontos viáveis.
   - **Trava Inviolável**: Mesmo no Master Fallback, o bot **NUNCA** pode spawnar/teleportar dentro da Zona Segura de 100m ou visível na tela (LoS) do jogador.
 - **Compilação**: Projeto `TRL-DynamicSpawn-Client.csproj` compilado com 0 erros e 0 warnings impeditivos (`TRL-DynamicSpawn.dll`).
+
+### 2026-08-02 — Fix da Injeção Prematura do DynamicSpawnManager no GameWorld.OnGameStarted
+
+- **Diagnóstico do Log `LogOutput.log`**:
+  - Identificado o erro `Cannot inject DynamicSpawnManager: IBotGame is not instantiated yet` no evento `OnGameStarted`. Ocorria em raids onde o `IBotGame` / `BotsController` era criado alguns frames após o disparo de `OnGameStarted`.
+- **Implementação do Aguardo Assíncrono (`DynamicSpawnManagerPatch.cs`)**:
+  - Adicionado helper `TryInjectImmediate(GameWorld)` para tentativa imediata de injeção.
+  - Adicionada a Coroutine `WaitForBotGameAndInjectCoroutine(GameWorld)` anexada ao `GameWorld` que aguarda assincronamente até que `Singleton<IBotGame>.Instantiated` e `BotsController.BotSpawner.BotCreator != null` estejam disponíveis (com timeout de 30s).
+  - Adicionada trava `GetComponent<DynamicSpawnManager>() != null` para evitar dupla injeção.
+- **Validação de Build**:
+  - Compilado `TRL-DynamicSpawn-Client.csproj` com 0 Erros (`TRL-DynamicSpawn.dll`).

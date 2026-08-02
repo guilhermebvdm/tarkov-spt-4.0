@@ -40,6 +40,20 @@
 
 ---
 
+## 2026-08-02 (GMT-3) — Sessão 7: Isolamento no Canal 3 FIKA, Cópia modded-testchannel e Guard de Mãos
+
+- **Análise Forense de Log (`LogOutput.log`)**:
+  - Correlacionados os erros de `hands controller can't perform this operation` (Linha 3066) e `item Default Inventory is currently being modified` (Linhas 3129, 3474) aos travamentos em jogo ao apertar "R" e ao tentar pegar o colete Tarbank.
+- **Cópia de Testes**:
+  - Criada a cópia `mods/TRL-ImmersiveCombatMedicine/modded-testchannel/` preservando o `modded/` original intacto.
+- **Implementações na cópia `modded-testchannel/`**:
+  - **`HandsStateGuard.cs`** (`Helpers/HandsStateGuard.cs`): Adicionada checagem defensiva `CanPerformInteraction(player)` para validar se `player.HandsController.Item` não é consumo/medicina antes de iniciar ações do mod.
+  - **Canal 3 Isolado no FIKA** (`Patches/Medical/BandAidNetworkHandler.cs`): Atualizado o envio de pacotes `SendPacket<T>` para usar `DeliveryMethod.ReliableUnordered` (desvinculando os pacotes customizados da fila do Channel 0 de inventário) e configurada a constante de Magic Header `TRLM` (`0x4D4C5254`).
+- **Validação de Build**:
+  - Compilado `TRL-ImmersiveCombatMedicine.csproj` em `modded-testchannel/` com **0 Erros**.
+
+---
+
 ## 2026-07-26 (GMT-3) — Sessão 6: 1º TESTE IN-GAME de fato + Leva 1 de correções (v1.12.0)
 
 **Tema central:** O overhaul Trauma 2.0 foi finalmente jogado em coop Fika (Guilherme como **client**, Umbigo como **host**) — fecha parcialmente a P-4.4, aberta desde 2026-07-19. O teste parou no meio (44+12 cenários é impraticável) e produziu 13 achados, que viraram os itens 013-021 + `TRL-Fixes` 002. Nesta sessão foram entregues 013, 014, 017, 020, 021 e o fix do Fika; 015/016 (desmaio desacoplado) e 018/019 aguardam o próximo teste e o log.

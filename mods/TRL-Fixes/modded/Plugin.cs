@@ -13,8 +13,11 @@ namespace TRLFixes
     [BepInDependency("com.fika.core", BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin
     {
+        public static BepInEx.Logging.ManualLogSource Log;
+
         private void Awake()
         {
+            Log = Logger;
             Logger.LogInfo("TRL-Fixes: Carregando patches...");
 
             try
@@ -55,6 +58,26 @@ namespace TRLFixes
             catch (Exception ex)
             {
                 Logger.LogError($"TRL-Fixes: Falha ao carregar PickupAimingSafetyPatch: {ex.Message}");
+            }
+
+            try
+            {
+                new Patches.DynamicMapsSafetyPatch().Enable();
+                Logger.LogInfo("TRL-Fixes: DynamicMapsSafetyPatch ativado com sucesso.");
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"TRL-Fixes: Falha ao carregar DynamicMapsSafetyPatch: {ex.Message}");
+            }
+
+            try
+            {
+                new Patches.FikaMainThreadUISafetyPatch().Enable();
+                Logger.LogInfo("TRL-Fixes: FikaMainThreadUISafetyPatch ativado com sucesso.");
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"TRL-Fixes: Falha ao carregar FikaMainThreadUISafetyPatch: {ex.Message}");
             }
         }
     }

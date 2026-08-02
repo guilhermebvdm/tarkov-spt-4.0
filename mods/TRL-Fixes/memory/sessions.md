@@ -28,3 +28,19 @@
 1. Leitura e análise da stacktrace do log do usuário (`LogOutput Cherno.log`).
 2. Confirmação do fluxo de estado `Busy` do `FirearmController` em decorrência de `NullReferenceException` em `OnAddAmmoInChamber`.
 3. Remoção do arquivo `Patch_PoolManagerCreateItem.cs`.
+
+---
+
+## 2026-08-02 — Sessão 3: Inclusão do DynamicMapsSafetyPatch e FikaMainThreadUISafetyPatch
+
+**Tema central:** Adição de novos patches de proteção e resiliência no `TRL-Fixes` para eliminar erros de mods de terceiros (`DynamicMaps`) e chamadas de UI fora da thread principal no `Fika.Core`.
+
+**Alterações Realizadas:**
+1. **`DynamicMapsSafetyPatch.cs`**:
+   - Refatorado para utilizar **`[PatchFinalizer]`** do Harmony em `DynamicMaps.Patches.GameWorldOnDestroyPatch`, garantindo a supressão absoluta de `NullReferenceException` lançada durante o encerramento da raid (`ModdedMapScreen.OnRaidEnd()`).
+2. **`FikaMainThreadUISafetyPatch.cs`**:
+   - Refatorado para utilizar **`[PatchFinalizer]`** do Harmony em `Fika.Core.UI.FikaUIGlobals.ShowFikaMessage`, capturando e absorvendo erros de chamadas de UI originadas fora da Main Thread do Unity.
+3. **Registro no `Plugin.cs` & `TRLFixes.csproj`**:
+   - Ativados os novos patches no `Awake()`, exposto `Plugin.Log` para os patches e adicionada a referência `SPT.Reflection.dll` no `.csproj`.
+4. **Validação de Build**:
+   - Compilado `TRLFixes.csproj` (`TRL-Fixes.dll`) com **0 Erros e 0 Warnings**.

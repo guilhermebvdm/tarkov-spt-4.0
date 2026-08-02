@@ -40,6 +40,19 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados). Ca
 
 ## Sessões
 
+### 2026-08-02 — Correção da Exceção KeyNotFoundException no MedrosoPatch (082 / ScavengerTremor)
+
+- **Diagnóstico de Log**:
+  - O log `LogOutput.log` continha spams frequentes do erro `[Error :CustomClasses] (082) medroso trigger falhou: The given key 'ScavengerTremor' was not present in the dictionary`.
+  - Causa raiz: `hc.AddEffect<ScavengerTremor>` tentava buscar uma classe customizada no dicionário interno de construtores de efeitos do `ActiveHealthController` do EFT, que só registra os tipos nativos de efeito.
+- **Correção em `MedrosoPatch.cs`**:
+  - Atualizado `Medroso.Trigger()` para obter a referência do tipo concreto nativo do Tremor (`ActiveHealthController.GClass3008.GClass3019_0.Tremor.GetType()`) e invocar `ActiveHealthController.AddEffect` via método genérico por Reflection.
+  - **Code Review & Otimização**: Implementado cache estático de `MethodInfo` (`_addTremorMethod`) para evitar chamadas repetidas de Reflection (`GetMethod`) em hot path de tiro/supressão.
+- **Validação de Build**:
+  - Copiadas as DLLs de referência e compilado `CustomClasses.Client.csproj` com **0 Erros**.
+
+---
+
 ### 2026-06-07 — Planejamento + scaffold
 
 - Adicionados ao repo (sessões anteriores deste chat) os mods de referência `SkillDistribution` (+ lib `ZGFueDkxCommonLibrary`) e `Skills-Extended` via `/add-mod-repo-for-modding`.

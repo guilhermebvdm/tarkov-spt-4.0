@@ -18,5 +18,6 @@
     <Reference Include="UnityEngine.CoreModule"><HintPath>References\UnityEngine.CoreModule.dll</HintPath></Reference>
     <Reference Include="UnityEngine.PhysicsModule"><HintPath>References\UnityEngine.PhysicsModule.dll</HintPath></Reference>
     <Reference Include="Comfort"><HintPath>References\Comfort.dll</HintPath></Reference>
+    <Reference Include="SPT.Reflection"><HintPath>References\SPT.Reflection.dll</HintPath></Reference>
   </ItemGroup>
 </Project>
