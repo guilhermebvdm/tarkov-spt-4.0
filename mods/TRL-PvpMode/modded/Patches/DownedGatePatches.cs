@@ -34,7 +34,11 @@ namespace TarkovRedLine.PvpMode.Patches
             {
                 // Kill/CanBeDowned rodam para todo mundo no mapa — só o jogador local nos interessa (AP-02).
                 if (__instance?.Player == null || !__instance.Player.IsYourPlayer) return;
-                if (!Settings.ENABLED.Value) return;
+
+                // Modo inativo (desligado no F12, pré-requisito faltando, fora de raid) ⇒ NÃO tocar
+                // no resultado. Forçar false aqui deixaria o jogador pior do que sem o mod: morte
+                // instantânea e nenhum aliado conseguindo levantar (code review 01, C-02).
+                if (!RaidState.IsActive) return;
 
                 __result = RaidState.HasLifeAvailable;
             }
@@ -46,6 +50,8 @@ namespace TarkovRedLine.PvpMode.Patches
     }
 
     /// <summary>
+    /// Com o modo ativo, esta decisão passa a ser NOSSA por inteiro — não somamos à do Fika.
+    ///
     /// Duas funções:
     ///
     /// (a) Morte por desgaste SEMPRE mata direto. Sem isto, o destravamento acima faz a morte por
@@ -54,7 +60,9 @@ namespace TarkovRedLine.PvpMode.Patches
     ///     sem evento de morte e sem tela de fim de raid. É o defeito que este item existe para
     ///     corrigir (review 01, R-02).
     ///
-    /// (b) A opção "tiro na cabeça mata direto" do nosso F12.
+    /// (b) A opção "tiro na cabeça mata direto" do nosso F12. Assumir a decisão inteira é o que
+    ///     permite DESLIGAR o comportamento num servidor que tenha headshotKills ligado — um
+    ///     postfix aditivo só conseguiria ligar, nunca desligar (code review 01, C-03).
     /// </summary>
     public class InstantKillPatch : ModulePatch
     {
@@ -71,18 +79,18 @@ namespace TarkovRedLine.PvpMode.Patches
             try
             {
                 if (__instance?.Player == null || !__instance.Player.IsYourPlayer) return;
-                if (!Settings.ENABLED.Value) return;
-                if (__result) return;   // o Fika já decidiu matar; não desfazemos
+                if (!RaidState.IsActive) return;
 
-                if ((FikaBridge.GetLastDamageType(__instance.Player) & ATTRITION) != 0)
-                {
-                    __result = true;
-                    return;
-                }
+                // Fome / sede / estimulante são desgaste, não combate: matam direto.
+                // O tipo vem do prefixo de Kill, gravado neste mesmo quadro — Player.LastDamageInfo
+                // NÃO serve, pois só é escrito no caminho de dano de combate (C-01).
+                var attrition = (RaidState.LastKillDamageType & ATTRITION) != 0;
 
                 // ref: Assembly-CSharp/EFT/Player.cs:24329 — campo público
-                if (Settings.HEADSHOT_KILLS.Value && __instance.Player.LastDamagedBodyPart == EBodyPart.Head)
-                    __result = true;
+                var headshot = Settings.HEADSHOT_KILLS.Value
+                            && __instance.Player.LastDamagedBodyPart == EBodyPart.Head;
+
+                __result = attrition || headshot;
             }
             catch (Exception ex)
             {

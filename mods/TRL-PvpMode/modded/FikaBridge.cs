@@ -1,13 +1,13 @@
 using System;
 using System.Reflection;
-using EFT;
+using Fika.Core.Main.ClientClasses;
 using HarmonyLib;
 
 namespace TarkovRedLine.PvpMode
 {
     /// <summary>
-    /// Ponte para os membros do Fika e do EFT que o C# não alcança diretamente:
-    /// tipos <c>internal</c> (Bleedout, ReviveInteractable) e campos <c>protected</c>/privados.
+    /// Ponte para os membros do Fika que o C# não alcança diretamente: tipos <c>internal</c>
+    /// (Bleedout, ReviveInteractable) e o campo de apoio de uma propriedade só-leitura.
     ///
     /// Tudo é resolvido UMA vez em estático (SPT best-practices §3 — nunca reflexão por chamada)
     /// e cada ausência é registrada individualmente, para que uma atualização do Fika que
@@ -20,7 +20,6 @@ namespace TarkovRedLine.PvpMode
         public static Type ReviveInteractableType { get; private set; }
         public static Type BleedoutType { get; private set; }
 
-        private static FieldInfo _lastDamageInfoField;   // EFT Player.LastDamageInfo (protected)
         private static FieldInfo _bleedoutTimeBackingField;
 
         private static bool _resolved;
@@ -41,24 +40,22 @@ namespace TarkovRedLine.PvpMode
             // ref: fika-plugin/Fika.Core/Main/Components/Bleedout.cs:11 (internal sealed)
             BleedoutType = AccessTools.TypeByName(NS_COMPONENTS + "Bleedout");
 
-            // ref: Assembly-CSharp/EFT/Player.cs:24360 — protected DamageInfoStruct LastDamageInfo
-            _lastDamageInfoField = AccessTools.Field(typeof(Player), "LastDamageInfo");
-
             // ref: fika-plugin/Fika.Core/Main/ClientClasses/ClientHealthController.cs:26
-            // Auto-property com inicializador. Escrevemos o campo de apoio em vez de patchar o
-            // getter: um getter de duas instruções é candidato a ser embutido pelo compilador,
-            // e o patch ficaria inerte sem ninguém perceber (review 01, R-04).
-            _bleedoutTimeBackingField = AccessTools.Field(
-                typeof(Fika.Core.Main.ClientClasses.ClientHealthController), "<BleedoutTime>k__BackingField");
+            // Auto-property só-leitura com inicializador. Escrevemos o campo de apoio em vez de
+            // patchar o getter: um getter de duas instruções é candidato a ser embutido pelo
+            // compilador, e o patch ficaria inerte sem ninguém perceber (review 01, R-04).
+            _bleedoutTimeBackingField = AccessTools.Field(typeof(ClientHealthController), "<BleedoutTime>k__BackingField");
 
             LogMissing(ReviveInteractableType == null, "tipo ReviveInteractable");
             LogMissing(BleedoutType == null, "tipo Bleedout");
-            LogMissing(_lastDamageInfoField == null, "campo Player.LastDamageInfo");
             LogMissing(_bleedoutTimeBackingField == null, "campo de apoio de ClientHealthController.BleedoutTime");
 
+            // Os três são exigidos: sem os tipos não há como bloquear o resgate por aliado nem a
+            // morte forçada por companheiros; sem o campo, a opção de tempo do F12 seria uma
+            // mentira silenciosa (code review 01, C-06).
             IsUsable = ReviveInteractableType != null
                     && BleedoutType != null
-                    && _lastDamageInfoField != null;
+                    && _bleedoutTimeBackingField != null;
 
             if (!IsUsable)
             {
@@ -74,31 +71,11 @@ namespace TarkovRedLine.PvpMode
         }
 
         /// <summary>
-        /// Tipo do último dano sofrido pelo jogador. O caminho do Fika (LatestDamageInfo) é
-        /// <c>internal</c> e o campo do EFT é <c>protected</c> — daí a reflexão (review 01, R-07).
-        /// </summary>
-        public static EDamageType GetLastDamageType(Player player)
-        {
-            if (player == null || _lastDamageInfoField == null) return EDamageType.Undefined;
-
-            try
-            {
-                var info = (DamageInfoStruct)_lastDamageInfoField.GetValue(player);
-                return info.DamageType;
-            }
-            catch (Exception ex)
-            {
-                Plugin.Log.LogError($"[TRL-PvpMode] GetLastDamageType: {ex.Message}");
-                return EDamageType.Undefined;
-            }
-        }
-
-        /// <summary>
         /// Sobrescreve o prazo de sangramento que o Fika leu do servidor. Um único ponto governa
         /// a contagem (Bleedout.Init), o desfecho por tempo (ShouldBleedOut) e o número na tela
         /// (Bleedout.ShowUI). Precisa ser aplicado ANTES da queda — é chamado no início da raid.
         /// </summary>
-        public static bool TrySetBleedoutTime(Fika.Core.Main.ClientClasses.ClientHealthController controller, float seconds)
+        public static bool TrySetBleedoutTime(ClientHealthController controller, float seconds)
         {
             if (controller == null || _bleedoutTimeBackingField == null) return false;
 

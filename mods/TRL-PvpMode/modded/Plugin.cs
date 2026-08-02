@@ -41,16 +41,24 @@ namespace TarkovRedLine.PvpMode
         /// <summary>Patches que só dependem de tipos públicos — sempre seguros de habilitar.</summary>
         private void EnableCorePatches()
         {
+            // Um try POR patch: uma falha isolada não pode derrubar os seguintes em silêncio
+            // (code review 01, C-09).
+            TryEnable(new GameWorldOnGameStartedPatch(), nameof(GameWorldOnGameStartedPatch));
+            TryEnable(new GameWorldOnDestroyPatch(), nameof(GameWorldOnDestroyPatch));
+            TryEnable(new KillGatePatch(), nameof(KillGatePatch));
+            TryEnable(new CanBeRevivedByOtherPlayerPatch(), nameof(CanBeRevivedByOtherPlayerPatch));
+            TryEnable(new InstantKillPatch(), nameof(InstantKillPatch));
+        }
+
+        private void TryEnable(SPT.Reflection.Patching.ModulePatch patch, string name)
+        {
             try
             {
-                new GameWorldOnGameStartedPatch().Enable();
-                new GameWorldOnDestroyPatch().Enable();
-                new CanBeRevivedByOtherPlayerPatch().Enable();
-                new InstantKillPatch().Enable();
+                patch.Enable();
             }
             catch (Exception ex)
             {
-                Log.LogError($"[{PluginName}] Falha ao habilitar os patches principais: {ex}");
+                Log.LogError($"[{PluginName}] Falha ao habilitar {name}: {ex}");
             }
         }
 
@@ -66,15 +74,8 @@ namespace TarkovRedLine.PvpMode
                 return;
             }
 
-            try
-            {
-                new NoAllyRevivePatch().Enable();
-                new BleedoutOnPlayerDeathPatch().Enable();
-            }
-            catch (Exception ex)
-            {
-                Log.LogError($"[{PluginName}] Falha ao habilitar os patches do Fika: {ex}");
-            }
+            TryEnable(new NoAllyRevivePatch(), nameof(NoAllyRevivePatch));
+            TryEnable(new BleedoutOnPlayerDeathPatch(), nameof(BleedoutOnPlayerDeathPatch));
         }
     }
 }

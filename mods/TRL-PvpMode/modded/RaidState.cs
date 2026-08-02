@@ -7,8 +7,9 @@ using UnityEngine;
 namespace TarkovRedLine.PvpMode
 {
     /// <summary>
-    /// Estado do modo de vidas durante UMA raid. Tudo que vive aqui é zerado em <see cref="Begin"/>,
-    /// então nada atravessa de uma partida para a seguinte (AP-01 / critério "estado entre raids").
+    /// Estado do modo de vidas durante UMA raid. Tudo que vive aqui é zerado na primeira linha de
+    /// <see cref="Begin"/>, então nada atravessa de uma partida para a seguinte (AP-01 / critério
+    /// "estado entre raids").
     /// </summary>
     internal static class RaidState
     {
@@ -17,15 +18,28 @@ namespace TarkovRedLine.PvpMode
         private static bool _active;
         private static int _livesLeft;
 
-        /// <summary>Vidas restantes. Negativo = ilimitado.</summary>
+        /// <summary>
+        /// O modo está de fato governando esta raid. Falso quando desligado no F12, quando um
+        /// pré-requisito falta, ou fora de partida.
+        ///
+        /// Todo patch que altera comportamento do Fika PRECISA consultar isto antes de tocar em
+        /// qualquer resultado — senão o "modo desativado" não desativa, piora (code review 01, C-02).
+        /// </summary>
+        public static bool IsActive => _active;
+
+        /// <summary>Vidas restantes. Ilimitado quando <see cref="IsUnlimited"/>.</summary>
         public static int LivesLeft => _livesLeft;
 
-        public static bool IsUnlimited => Settings.ENABLED != null && Settings.LIVES_PER_RAID.Value < 0;
+        public static bool IsUnlimited => Settings.LIVES_PER_RAID != null && Settings.LIVES_PER_RAID.Value < 0;
 
         /// <summary>
-        /// Há vida para gastar? Consultado no portão de morte, então precisa ser barato e
-        /// nunca lançar.
+        /// Tipo do dano que está matando o jogador neste quadro. Gravado pelo prefixo de
+        /// <c>Kill</c> e lido no mesmo quadro pelos portões — é a única fonte confiável para dano
+        /// de desgaste (code review 01, C-01).
         /// </summary>
+        public static EDamageType LastKillDamageType { get; set; } = EDamageType.Undefined;
+
+        /// <summary>Há vida para gastar? Consultado no portão de morte: barato e nunca lança.</summary>
         public static bool HasLifeAvailable => _active && (IsUnlimited || _livesLeft > 0);
 
         /// <summary>Debita uma vida. Chamado quando o jogador escolhe renascer (item 002).</summary>
@@ -38,12 +52,15 @@ namespace TarkovRedLine.PvpMode
 
         public static void Begin(GameWorld gameWorld)
         {
-            // Guarda de contexto: menu e esconderijo não têm modo de vidas (review 01, R-08).
-            if (gameWorld == null || gameWorld.MainPlayer == null) return;
-            if (gameWorld.MainPlayer is HideoutPlayer) return;
-
+            // Reset INCONDICIONAL, antes de qualquer guarda: se um caminho de saída deixar de
+            // chamar End(), o estado não pode atravessar para a raid seguinte (C-05).
             _active = false;
             _livesLeft = 0;
+            LastKillDamageType = EDamageType.Undefined;
+
+            // Menu e esconderijo não têm modo de vidas (R-08).
+            if (gameWorld == null || gameWorld.MainPlayer == null) return;
+            if (gameWorld.MainPlayer is HideoutPlayer) return;
 
             if (!Settings.ENABLED.Value)
             {
@@ -74,6 +91,7 @@ namespace TarkovRedLine.PvpMode
 
             _active = false;
             _livesLeft = 0;
+            LastKillDamageType = EDamageType.Undefined;
             Plugin.Log.LogInfo("[TRL-PvpMode] Raid encerrada — estado do modo de vidas limpo.");
         }
 
@@ -87,12 +105,14 @@ namespace TarkovRedLine.PvpMode
                 return;
 
             var seconds = Mathf.Max(0f, Settings.DOWNED_TIMEOUT.Value);
-            if (!FikaBridge.TrySetBleedoutTime(chc, seconds))
-            {
-                Plugin.Log.LogWarning(
-                    "[TRL-PvpMode] Nao foi possivel sobrescrever o tempo de decisao — " +
-                    $"o valor do servidor ({chc.BleedoutTime}s) continua valendo.");
-            }
+            if (FikaBridge.TrySetBleedoutTime(chc, seconds)) return;
+
+            // Falha silenciosa aqui significaria jogar a raid inteira com o tempo do servidor
+            // achando que o do F12 está valendo — precisa aparecer na tela (C-06).
+            Notify($"TRL-PvpMode: nao foi possivel aplicar o tempo de decisao do F12. " +
+                   $"Valendo o valor do servidor ({chc.BleedoutTime}s).", Color.yellow);
+            Plugin.Log.LogWarning(
+                $"[TRL-PvpMode] Tempo de decisao nao aplicado — servidor: {chc.BleedoutTime}s.");
         }
 
         /// <summary>

@@ -40,6 +40,8 @@ opção e consegue levantar o caído, furando a contagem de vidas.
 | **Tempo `0` desliga a tecla nativa de desistir** | Com tempo zero, o componente de contagem do Fika sai antes de ler o teclado. Até o item 002 existir (tecla própria de renascer), configurar `0` deixa o jogador caído **sem saída**. |
 | **A plaquinha de vida vista pelos companheiros usa o tempo do servidor** | O medidor do Fika lê o `bleedoutTime` do `fika.jsonc` direto, fora do alcance do mod. O número que os outros veem pode divergir do seu; o desfecho real segue o valor do F12. |
 | **Reconexão estando caído** | Comportamento indefinido — restaurar o estado no rejoin depende de rede e está previsto para o item 003. |
+| **Cair durante transição, extração ou dentro do veículo blindado** | Não tratado. O estado de caído trava o personagem, e nesses contextos não há como escapar até o item 002 existir (tecla de renascer). Combinado com tempo `0`, é um travamento sem saída. |
+| **Vasculhar o corpo caído também some** | O bloqueio da opção "levantar companheiro" remove **todas** as ações sobre o caído, inclusive "Search" quando `allowLooting` está ligado no servidor. Coerente com cadáver saqueável estar fora de escopo. |
 
 ## Histórico de Alterações
 

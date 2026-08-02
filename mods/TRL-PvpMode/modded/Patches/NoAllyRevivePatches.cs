@@ -30,10 +30,15 @@ namespace TarkovRedLine.PvpMode.Patches
         {
             try
             {
-                if (!Settings.ENABLED.Value) return true;
+                // Mesmo portão dos demais patches: modo inativo ⇒ comportamento nativo do Fika
+                // intacto (code review 01, C-04).
+                if (!RaidState.IsActive) return true;
 
                 // null já é retorno previsto pelo próprio método (:157) e o consumidor trata
                 // com `?.` — ref: Assembly-CSharp/EFT/GamePlayerOwner.cs:883
+                // Nota: isto remove TODAS as ações sobre o caído, inclusive "Search" quando
+                // allowLooting está ligado no servidor (ReviveInteractable.cs:171-178). Coerente
+                // com "cadáver saqueável" estar fora de escopo; documentado no PROPRIEDADES.md.
                 __result = null;
                 return false;
             }
@@ -59,13 +64,16 @@ namespace TarkovRedLine.PvpMode.Patches
             => AccessTools.Method(FikaBridge.BleedoutType, "OnPlayerDeath");
 
         [PatchPrefix]
-        private static bool Prefix()
+        private static bool Prefix(Fika.Core.Main.ClientClasses.ClientHealthController ____healthController)
         {
             try
             {
-                // Só bloqueia enquanto o modo estiver de fato governando a raid; fora disso o
-                // comportamento nativo do Fika continua valendo.
-                return !(Settings.ENABLED.Value && RaidState.HasLifeAvailable);
+                // Gateado em "modo ativo + estou caído", NÃO em vidas restantes. A vida é debitada
+                // no instante de escolher renascer (item 002): gatear em HasLifeAvailable faria o
+                // bloqueio cair no meio do respawn, e a morte de um companheiro voltaria a forçar
+                // BleedOut() com o jogador ainda caído (code review 01, C-10).
+                if (!RaidState.IsActive) return true;
+                return ____healthController is not { Downed: true };
             }
             catch (Exception ex)
             {
