@@ -427,12 +427,23 @@ public class ModUpdaterController : ControllerBase
         }
     }
 
-    private static async Task GenerateManifestAsync()
+    // Item 001: wrapper com o gate. O corpo vive em GenerateManifestCore (sem gate), reusado pelo
+    // EnsureManifestReady do boot. Não-async (corpo síncrono/CPU-bound) → sem CS1998; o
+    // `_ = GenerateManifestAsync()` dos endpoints segue funcionando.
+    private static Task GenerateManifestAsync()
     {
         // CR-02-02: gate ATÔMICO — dois requests concorrentes (ou request + /refresh) não entram ambos
         // na geração completa (scan + hash + swap). O test-and-set em bool não era atômico.
-        if (Interlocked.CompareExchange(ref _manifestGenerating, 1, 0) != 0) return;
+        if (Interlocked.CompareExchange(ref _manifestGenerating, 1, 0) != 0) return Task.CompletedTask;
+        try { GenerateManifestCore(); }
+        finally { Interlocked.Exchange(ref _manifestGenerating, 0); }
+        return Task.CompletedTask;
+    }
 
+    // Item 001: geração propriamente dita (scan + hash + swap + persistência), SEM o gate. Mantém o
+    // try/catch interno (log "Critical error") — nunca propaga para o caller (PA-01-04).
+    private static void GenerateManifestCore()
+    {
         try
         {
             var files = new List<object>();
@@ -440,6 +451,11 @@ public class ModUpdaterController : ControllerBase
             // /refresh concorrente com Clear()+repopular derrube o TryGetValue do /download (404 nos -ref,
             // que só existem via cache).
             var fileMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+            // Item 001: acúmulo da impressão leve do mods_repo (cobre TODOS os arquivos, inclusive os
+            // 2 JSON de metadados que o loop pula só para o manifesto).
+            int fpCount = 0; long fpSizeSum = 0; long fpMaxTicks = 0;
+            var fpPaths = new List<string>();
 
             var modsPath = GetModsRepoPath();
             if (!Directory.Exists(modsPath))
@@ -473,6 +489,15 @@ public class ModUpdaterController : ControllerBase
                 var relPath = Path.GetRelativePath(modsPath, file).Replace("\\", "/");
                 var relNorm = relPath.ToLowerInvariant();
 
+                // Item 001: impressão ANTES do continue — cobre TODO o mods_repo (editar as definições
+                // também tem que invalidar). FileInfo é só stat (não abre o arquivo).
+                var fi = new FileInfo(file);
+                fpCount++;
+                fpSizeSum += fi.Length;
+                long fpTicks = fi.LastWriteTimeUtc.Ticks;
+                if (fpTicks > fpMaxTicks) fpMaxTicks = fpTicks;
+                fpPaths.Add(relPath);
+
                 // S-2: os JSON de definição são METADADOS — nunca sincronizados no jogo do player.
                 if (relNorm == "bepinex/plugins-optional.json"
                     || relNorm == "bepinex/config-optional/configs-optional.json")
@@ -481,7 +506,7 @@ public class ModUpdaterController : ControllerBase
                 }
 
                 var hash = GetFileHash(file);
-                var size = new FileInfo(file).Length;
+                var size = fi.Length;
 
                 if (relNorm.StartsWith(PerfPrefix, StringComparison.Ordinal))
                 {
@@ -637,15 +662,169 @@ public class ModUpdaterController : ControllerBase
             _fileMapCache = fileMap; // troca atômica de referência
             _manifestCache = manifestObj;
             _manifestHash = BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
+
+            // Item 001: monta a impressão (paths ordenados → digest barato pega rename/add/remove — CC-8)
+            // e persiste em disco (best-effort — CC-7). A impressão é dos MESMOS arquivos hasheados (CC-2).
+            fpPaths.Sort(StringComparer.Ordinal);
+            var fingerprint = new Fingerprint
+            {
+                count = fpCount,
+                sizeSum = fpSizeSum,
+                maxMtimeUtcTicks = fpMaxTicks,
+                pathsDigest = Md5Hex(string.Join("\n", fpPaths)),
+            };
+            PersistManifest(manifestObj, _manifestHash, fingerprint, fileMap, modsPath);
         }
         catch (Exception ex)
         {
             Console.WriteLine($"[ModUpdater] Critical error generating manifest: {ex.Message}");
             Console.WriteLine(ex.StackTrace);
         }
-        finally
+    }
+
+    // ===================== Item 001: cache persistente do manifesto =====================
+
+    private const int PersistedFormatVersion = 1;
+
+    private static string GetManifestCachePath() =>
+        Path.Combine(GetUpdaterBasePath(), $"manifest-cache{ModRouting.StateSuffix}.json");
+
+    private static string Md5Hex(string s)
+    {
+        using var md5 = MD5.Create();
+        return BitConverter.ToString(md5.ComputeHash(System.Text.Encoding.UTF8.GetBytes(s)))
+            .Replace("-", "").ToLowerInvariant();
+    }
+
+    private sealed class Fingerprint
+    {
+        public int count { get; set; }
+        public long sizeSum { get; set; }
+        public long maxMtimeUtcTicks { get; set; }
+        public string pathsDigest { get; set; } = "";
+    }
+
+    private sealed class PersistedManifest
+    {
+        public int formatVersion { get; set; }
+        public string hash { get; set; } = "";
+        public Fingerprint fingerprint { get; set; } = new();
+        public JsonElement manifest { get; set; }                       // o manifestObj serializado
+        public Dictionary<string, string> fileMap { get; set; } = new(); // chaveLógica -> relativo ao mods_repo
+    }
+
+    /// <summary>
+    /// Item 001: chamado proativamente no boot (Plugin static ctor). Carrega do disco se a impressão
+    /// bate; senão regera. Gate próprio — não roda concorrente com uma geração em voo. GenerateManifestCore
+    /// e TryLoadPersisted têm try/catch internos; o CALLER (Plugin) ainda envolve por robustez (PA-01-04).
+    /// </summary>
+    public static void EnsureManifestReady()
+    {
+        if (_manifestCache != null) return;
+        if (Interlocked.CompareExchange(ref _manifestGenerating, 1, 0) != 0) return; // já cuidando
+        try
         {
-            Interlocked.Exchange(ref _manifestGenerating, 0);
+            if (TryLoadPersisted()) return; // carregou do disco (log dentro)
+            GenerateManifestCore();          // regera + persiste
+        }
+        finally { Interlocked.Exchange(ref _manifestGenerating, 0); }
+    }
+
+    private static bool TryLoadPersisted()
+    {
+        try
+        {
+            string path = GetManifestCachePath();
+            if (!System.IO.File.Exists(path)) return false;
+
+            var p = JsonSerializer.Deserialize<PersistedManifest>(System.IO.File.ReadAllText(path));
+            if (p == null || p.formatVersion != PersistedFormatVersion) return false; // CC-5
+            // Guard (CR-01-01): manifest ausente/corrompido (adulteração externa do arquivo) — regera
+            // em vez de servir um JsonElement Undefined que só estouraria na serialização do /manifest.
+            if (p.manifest.ValueKind != JsonValueKind.Object) return false;
+
+            var modsPath = GetModsRepoPath();
+            var current = ComputeFingerprint(modsPath);
+            if (!FingerprintEquals(current, p.fingerprint))
+            {
+                Console.WriteLine("[ModUpdater] impressão do mods_repo mudou — regerando manifesto.");
+                return false;
+            }
+
+            // Reconstrói o fileMap absoluto a partir dos relativos ao mods_repo (R-3: cobre os -ref D-18).
+            var map = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var kv in p.fileMap)
+                map[kv.Key] = Path.GetFullPath(Path.Combine(modsPath,
+                    kv.Value.Replace("/", Path.DirectorySeparatorChar.ToString())));
+
+            // Ordem de publicação map → manifesto → hash (CR-02-06). CC-9: serve o hash ORIGINAL.
+            _fileMapCache = map;
+            _manifestCache = p.manifest;
+            _manifestHash = p.hash;
+            Console.WriteLine("[ModUpdater] manifesto carregado do disco (sem regerar).");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[ModUpdater] cache persistido ilegível ({ex.Message}) — regerando.");
+            return false;
+        }
+    }
+
+    private static Fingerprint ComputeFingerprint(string modsPath)
+    {
+        if (!Directory.Exists(modsPath)) return new Fingerprint { pathsDigest = "" }; // CC-10
+        int count = 0; long sizeSum = 0; long maxTicks = 0; var paths = new List<string>();
+        foreach (var file in Directory.GetFiles(modsPath, "*.*", SearchOption.AllDirectories))
+        {
+            var fi = new FileInfo(file);
+            count++; sizeSum += fi.Length;
+            long t = fi.LastWriteTimeUtc.Ticks; if (t > maxTicks) maxTicks = t;
+            paths.Add(Path.GetRelativePath(modsPath, file).Replace("\\", "/"));
+        }
+        paths.Sort(StringComparer.Ordinal);
+        return new Fingerprint
+        {
+            count = count,
+            sizeSum = sizeSum,
+            maxMtimeUtcTicks = maxTicks,
+            pathsDigest = Md5Hex(string.Join("\n", paths)),
+        };
+    }
+
+    private static bool FingerprintEquals(Fingerprint a, Fingerprint b) =>
+        a.count == b.count && a.sizeSum == b.sizeSum && a.maxMtimeUtcTicks == b.maxMtimeUtcTicks
+        && string.Equals(a.pathsDigest, b.pathsDigest, StringComparison.Ordinal);
+
+    private static void PersistManifest(object manifestObj, string hash, Fingerprint fp,
+        Dictionary<string, string> fileMap, string modsPath)
+    {
+        try
+        {
+            // fileMap guardado RELATIVO ao mods_repo (robusto a mudança de pasta — R-3).
+            var relMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var kv in fileMap)
+                relMap[kv.Key] = Path.GetRelativePath(modsPath, kv.Value).Replace("\\", "/");
+
+            var payload = new PersistedManifest
+            {
+                formatVersion = PersistedFormatVersion,
+                hash = hash,
+                fingerprint = fp,
+                manifest = JsonSerializer.SerializeToElement(manifestObj),
+                fileMap = relMap,
+            };
+
+            string path = GetManifestCachePath();
+            string tmp = path + ".tmp";
+            string dir = Path.GetDirectoryName(path);
+            if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir);
+            System.IO.File.WriteAllText(tmp, JsonSerializer.Serialize(payload));
+            System.IO.File.Move(tmp, path, overwrite: true); // troca atômica (CC-4)
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[ModUpdater] persist manifest falhou (best-effort): {ex.Message}");
         }
     }
 }

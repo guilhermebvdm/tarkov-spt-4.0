@@ -95,15 +95,25 @@ namespace TarkovRedLine.PvpMode.Patches
 
                 if (_holdElapsed < required) return;
 
-                Reset();
-
                 if (!RaidState.HasLifeAvailable)
                 {
+                    Reset();
                     ShowNoLivesLeft();
                     return;
                 }
 
-                RespawnService.TryRespawn(__instance);
+                // So zera a barra quando o renascimento REALMENTE aconteceu. Zerar antes fazia a
+                // falha parecer "a barra travou e voltou ao zero" (segundo teste in-game).
+                if (RespawnService.TryRespawn(__instance))
+                {
+                    Reset();
+                    return;
+                }
+
+                // Falhou: segura a barra cheia e espera o jogador soltar a tecla, para nao entrar
+                // em laco de tentativa a cada quadro.
+                HoldProgress = 1f;
+                _holdElapsed = float.MaxValue;
             }
             catch (Exception ex)
             {

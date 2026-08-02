@@ -24,5 +24,14 @@ public record TarkovRedLineModMetadata : AbstractModMetadata, IModWebMetadata
     {
         // Register Harmony Patches
         Patches.FikaProfilePatch.Enable();
+
+        // Item 001: prepara o manifesto em background no boot (carrega do disco se a impressão do
+        // mods_repo bate; senão gera). Fire-and-forget — não bloqueia o startup. O try/catch garante
+        // que qualquer falha seja LOGADA, nunca uma unobserved task exception (PA-01-04).
+        System.Threading.Tasks.Task.Run(() =>
+        {
+            try { Controllers.ModUpdaterController.EnsureManifestReady(); }
+            catch (Exception ex) { Console.WriteLine($"[ModUpdater] boot warmup falhou: {ex.Message}"); }
+        });
     }
 }

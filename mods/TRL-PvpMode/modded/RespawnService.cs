@@ -48,11 +48,11 @@ namespace TarkovRedLine.PvpMode
         {
             try
             {
-                if (player is not FikaPlayer fikaPlayer) return false;
-                if (!RaidState.IsActive) return false;
+                if (player is not FikaPlayer fikaPlayer) return Fail("jogador nao e do tipo esperado");
+                if (!RaidState.IsActive) return Fail("modo de vidas inativo nesta raid");
 
                 if (player.ActiveHealthController is not Fika.Core.Main.ClientClasses.ClientHealthController { Downed: true } chc)
-                    return false;
+                    return Fail("voce nao esta mais no estado caido");
 
                 // O Fika NAO limpa Downed quando o prazo acaba: BleedOut() marca _bledOut, revive
                 // o suficiente para chamar Kill() e pronto. Por 1-2 quadros o jogador segue com
@@ -63,13 +63,10 @@ namespace TarkovRedLine.PvpMode
                 // (o prefixo de Kill do Fika o zera ao entrar), entao testa-lo bloquearia todo
                 // renascimento legitimo e deixaria passar so a janela proibida - polaridade
                 // exatamente invertida (review completo, F-01).
-                if (FikaBridge.HasBledOut(chc)) return false;
+                if (FikaBridge.HasBledOut(chc)) return Fail("o tempo ja acabou");
 
                 if (!TryGetSpawnPosition(player, out var position))
-                {
-                    NotifyThrottled("TRL-PvpMode: nao foi possivel achar um ponto de renascimento.", Color.red);
-                    return false;
-                }
+                    return Fail("nenhum ponto de renascimento disponivel neste mapa");
 
                 // 1. Avisar os outros clientes ANTES de teleportar. O estado de posição do FIKA
                 //    trafega em canal não-confiável e o aviso em canal confiável — não há ordem
@@ -115,6 +112,7 @@ namespace TarkovRedLine.PvpMode
             }
             catch (Exception ex)
             {
+                Fail($"erro interno: {ex.Message}");
                 Plugin.Log.LogError($"[TRL-PvpMode] TryRespawn: {ex}");
 
                 // O anuncio ja saiu (e o passo 1). Sem cancelar, os outros clientes ficariam com o
@@ -124,6 +122,18 @@ namespace TarkovRedLine.PvpMode
 
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Toda saida sem renascimento passa por aqui. Falhar em silencio e indistinguivel, para
+        /// quem esta jogando, de "a barra travou e voltou ao zero" - foi exatamente essa a leitura
+        /// no segundo teste in-game.
+        /// </summary>
+        private static bool Fail(string reason)
+        {
+            NotifyThrottled($"Nao deu para renascer: {reason}.", Color.red);
+            Plugin.Log.LogWarning($"[TRL-PvpMode] Respawn recusado — {reason}.");
+            return false;
         }
 
         /// <summary>
@@ -146,7 +156,7 @@ namespace TarkovRedLine.PvpMode
             var points = FikaBridge.GetSpawnPoints();
             if (points == null)
             {
-                Plugin.Log.LogWarning("[TRL-PvpMode] Lista de pontos de nascimento indisponivel — respawn abortado.");
+                Plugin.Log.LogWarning("[TRL-PvpMode] Lista de pontos de nascimento indisponivel.");
                 return false;
             }
 
@@ -180,9 +190,16 @@ namespace TarkovRedLine.PvpMode
                 if (candidates.Count > 0) break;
             }
 
-            if (candidates.Count == 0) return false;
+            if (candidates.Count == 0)
+            {
+                Plugin.Log.LogWarning(
+                    $"[TRL-PvpMode] Nenhum candidato de spawn (lado {player.Side}, distancia minima " +
+                    $"{Settings.MIN_SPAWN_DISTANCE.Value}m) — o mapa pode nao expor pontos do lado certo.");
+                return false;
+            }
 
             position = candidates[UnityEngine.Random.Range(0, candidates.Count)];
+            Plugin.Log.LogInfo($"[TRL-PvpMode] {candidates.Count} pontos candidatos; escolhido {position}.");
             return true;
         }
 

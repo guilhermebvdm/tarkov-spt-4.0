@@ -12,7 +12,7 @@
 
 | # | Título | Resumo | Pasta | Status |
 |---|---|---|---|---|
-| 001 | Cache persistente do manifesto (fim da espera "preparing the list") | O manifesto/hash é cacheado só **em memória** e gerado **sob demanda** ([ModUpdater.cs](../TarkovRedLine.Server/Controllers/ModUpdater.cs)) → some a cada restart do servidor (e o AutoSync roda em watcher com auto-restart), e o 1º player pós-boot paga o 503 "Manifesto ainda sendo gerado" → countdown de 30s no launcher. Fix: **persistir manifesto+hash em disco** com uma impressão leve do `mods_repo`; no boot, se a impressão bate, **carrega do disco** (zero espera); se mudou, regera e regrava. Elimina a espera em todo boot sem mudança de conteúdo. | [001-cache-persistente-do-manifesto/](./001-cache-persistente-do-manifesto/) | ⚪ |
+| 001 | Cache persistente do manifesto (fim da espera "preparing the list") | O manifesto/hash é cacheado só **em memória** e gerado **sob demanda** ([ModUpdater.cs](../TarkovRedLine.Server/Controllers/ModUpdater.cs)) → some a cada restart do servidor (e o AutoSync roda em watcher com auto-restart), e o 1º player pós-boot paga o 503 "Manifesto ainda sendo gerado" → countdown de 30s no launcher. Fix: **persistir manifesto+hash em disco** com uma impressão leve do `mods_repo`; no boot, se a impressão bate, **carrega do disco** (zero espera); se mudou, regera e regrava. Elimina a espera em todo boot sem mudança de conteúdo. | [001-cache-persistente-do-manifesto/](./001-cache-persistente-do-manifesto/) | 🟢 (código; gate in-game pendente) |
 
 ## Legenda
 
