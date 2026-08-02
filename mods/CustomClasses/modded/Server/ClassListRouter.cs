@@ -25,6 +25,20 @@ namespace CustomClasses;
 [Injectable]
 public class ClassListRouter : StaticRouter
 {
+    /// <summary>
+    ///     Ordem de exibição CURADA das classes no launcher (Peladão/Naked por último). Chave = DisplayName.En.
+    ///     Ordena SÓ a resposta desta rota — não toca boot, editor, arquivos de classe nem perfis. Uma classe
+    ///     nova fora desta lista vai pro fim mantendo a ordem alfabética de origem (OrderBy é estável).
+    /// </summary>
+    private static readonly string[] DisplayOrder =
+        new[] { "Rifleman", "Combat Medic", "Hunter", "Tank", "Stealth", "Scavenger", "Naked" };
+
+    private static int DisplayIndex(ClassListItem item)
+    {
+        int idx = Array.FindIndex(DisplayOrder, n => string.Equals(n, item.DisplayName?.En, StringComparison.OrdinalIgnoreCase));
+        return idx >= 0 ? idx : int.MaxValue;
+    }
+
     public ClassListRouter(
         JsonUtil jsonUtil,
         ClassEditorService editorService,
@@ -112,7 +126,8 @@ public class ClassListRouter : StaticRouter
                         });
                     }
 
-                    var json = jsonUtil.Serialize(items) ?? "[]";
+                    // Ordem de exibição curada (Peladão por último) — ordena só a lista servida ao launcher.
+                    var json = jsonUtil.Serialize(items.OrderBy(DisplayIndex).ToList()) ?? "[]";
                     return new ValueTask<string>(json);
                 }),
         ];
