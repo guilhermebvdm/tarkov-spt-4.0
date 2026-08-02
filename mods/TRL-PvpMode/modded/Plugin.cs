@@ -16,7 +16,7 @@ namespace TarkovRedLine.PvpMode
     {
         public const string PluginGuid = "com.trl.pvpmode";
         public const string PluginName = "TRL-PvpMode";
-        public const string PluginVersion = "0.3.0";
+        public const string PluginVersion = "0.4.0";
 
         public static Plugin Instance { get; private set; }
         public static ManualLogSource Log { get; private set; }
@@ -36,6 +36,16 @@ namespace TarkovRedLine.PvpMode
             EnableFikaInternalPatches();
 
             Log.LogInfo($"[{PluginName}] {PluginVersion} carregado.");
+        }
+
+        /// <summary>
+        /// O FIKA destrói e recria o gerenciador de rede a cada troca de sessão, e o novo nasce sem
+        /// os registros do mod. Reconferir por quadro é o padrão do repo (AP-11) — a checagem é uma
+        /// comparação de referência, não custa nada.
+        /// </summary>
+        private void Update()
+        {
+            Networking.RespawnNetwork.EnsurePacketsRegistered();
         }
 
         /// <summary>Patches que só dependem de tipos públicos — sempre seguros de habilitar.</summary>

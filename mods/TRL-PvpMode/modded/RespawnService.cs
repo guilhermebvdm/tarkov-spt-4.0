@@ -71,6 +71,10 @@ namespace TarkovRedLine.PvpMode
                 //    para 1 e sobrescreveria uma proteção aplicada antes.
                 StartProtection(player);
 
+                // 5. Avisar os outros clientes para cravarem a posição nova em vez de interpolar
+                //    o trajeto inteiro (item 003).
+                Networking.RespawnNetwork.BroadcastRespawn(fikaPlayer, position);
+
                 var left = RaidState.IsUnlimited ? "ilimitadas" : RaidState.LivesLeft.ToString();
                 Notify($"Voce renasceu. Vidas restantes: {left}", Color.green);
                 Plugin.Log.LogInfo($"[TRL-PvpMode] Respawn em {position} — vidas restantes: {left}");

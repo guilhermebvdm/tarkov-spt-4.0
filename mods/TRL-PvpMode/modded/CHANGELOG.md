@@ -2,6 +2,31 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/); versionamento [SemVer](https://semver.org/).
 
+## [0.4.0] — não lançado
+
+Item de backlog **003 — Sincronização do respawn em coop**.
+
+### Adicionado
+
+- **Corte seco na posição ao renascer.** Um aviso de rede próprio faz os outros clientes limparem o
+  histórico de posições e cravarem a posição nova. Sem ele, o corpo alheio percorre o trajeto entre o
+  ponto da morte e o do renascimento em linha reta, porque o Fika interpola entre estados sem nenhuma
+  detecção de teleporte.
+
+### Notas de rede (AP-11)
+
+O pacote segue o padrão canônico do repo: envelope de comprimento, leitura só com `TryGet*`, marca de
+validade antes de processar, todos os campos zerados na entrada do `Deserialize` (a instância é
+reutilizada entre recepções), envio só da linha principal e registro rastreado por **instância** do
+gerenciador de rede — o Fika o recria a cada troca de sessão e o novo nasce vazio. Nenhum
+`UnregisterPacket`: fora de raid o callback sai pela guarda.
+
+Isso não é zelo excessivo: no Fika, uma exceção que escape do caminho do pacote **descarta a fila de
+eventos daquele quadro para todos os pares e todos os mods** — o sintoma clássico é jogador "patinando".
+
+- `TargetFramework` passou de `net472` para `netstandard2.1`, necessário para usar os tipos de rede do
+  Fika. Mesmo alvo que os outros mods do repo que tocam a rede.
+
 ## [0.3.0] — não lançado
 
 Item de backlog **002 — Renascer em spawn aleatório**.
