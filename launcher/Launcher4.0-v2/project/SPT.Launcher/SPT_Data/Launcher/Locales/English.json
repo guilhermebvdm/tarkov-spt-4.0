@@ -118,7 +118,7 @@
   "onboarding_body": "We turned on the optional mods you already use — adjust freely: turn any on or off. On a weaker PC, enabling the performance configs helps. Your choices apply when you save.",
   "onboarding_ok": "Got it",
   "confirm_unsaved_title": "Unsaved changes",
-  "confirm_unsaved_body": "You changed some options but haven't applied them yet. What do you want to do?",
+  "confirm_unsaved_body": "You have mod/config choices that haven't been applied yet. What would you like to do?",
   "confirm_unsaved_save": "SAVE AND LEAVE",
   "confirm_unsaved_discard": "DISCARD",
   "confirm_unsaved_cancel": "CANCEL",

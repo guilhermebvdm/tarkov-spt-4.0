@@ -13,17 +13,21 @@
     <StackPanel Spacing="18">
       <TextBlock Text="{Binding Body}" TextWrapping="Wrap" FontSize="{DynamicResource TrlTextMd}"/>
 
-      <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
-        <Button Content="{Binding CancelText}" Classes="ghost" Cursor="Hand"
+      <!-- Cancel isolado à esquerda; Discard/Save (ações de sair) agrupados à direita — a separação
+           evita clicar "Descartar" no lugar de "Cancelar" (CR 🟠). Save (primary) é a ação enfatizada. -->
+      <Grid ColumnDefinitions="Auto, *, Auto">
+        <Button Grid.Column="0" Content="{Binding CancelText}" Classes="ghost" Cursor="Hand"
                 CommandParameter="{x:Static vm:ConfirmUnsavedDialogViewModel.CancelResult}"
                 Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=dialogHost:DialogHost}, Path=CloseDialogCommand}"/>
-        <Button Content="{Binding DiscardText}" Classes="ghost" Cursor="Hand"
-                CommandParameter="{x:Static vm:ConfirmUnsavedDialogViewModel.DiscardResult}"
-                Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=dialogHost:DialogHost}, Path=CloseDialogCommand}"/>
-        <Button Content="{Binding SaveText}" Classes="primary" Cursor="Hand"
-                CommandParameter="{x:Static vm:ConfirmUnsavedDialogViewModel.SaveResult}"
-                Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=dialogHost:DialogHost}, Path=CloseDialogCommand}"/>
-      </StackPanel>
+        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10">
+          <Button Content="{Binding DiscardText}" Classes="ghost" Cursor="Hand"
+                  CommandParameter="{x:Static vm:ConfirmUnsavedDialogViewModel.DiscardResult}"
+                  Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=dialogHost:DialogHost}, Path=CloseDialogCommand}"/>
+          <Button Content="{Binding SaveText}" Classes="primary" Cursor="Hand"
+                  CommandParameter="{x:Static vm:ConfirmUnsavedDialogViewModel.SaveResult}"
+                  Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=dialogHost:DialogHost}, Path=CloseDialogCommand}"/>
+        </StackPanel>
+      </Grid>
     </StackPanel>
   </cc:TrlDialogChrome>
 </UserControl>

@@ -118,7 +118,7 @@
   "onboarding_body": "Já deixamos ligados os mods opcionais que você usa — ajuste à vontade: ligue ou desligue o que quiser. Em PC mais fraco, ativar as configs de performance ajuda. Suas escolhas são aplicadas ao salvar.",
   "onboarding_ok": "Entendi",
   "confirm_unsaved_title": "Alterações não salvas",
-  "confirm_unsaved_body": "Você mudou algumas opções mas ainda não aplicou. O que deseja fazer?",
+  "confirm_unsaved_body": "Você tem escolhas de mods/configs ainda não aplicadas. O que deseja fazer?",
   "confirm_unsaved_save": "SALVAR E SAIR",
   "confirm_unsaved_discard": "DESCARTAR",
   "confirm_unsaved_cancel": "CANCELAR",

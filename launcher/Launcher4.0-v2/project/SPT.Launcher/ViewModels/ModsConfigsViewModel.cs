@@ -173,13 +173,44 @@ namespace SPT.Launcher.ViewModels
             if (_onboarding || HasUnsavedChanges())
             {
                 var choice = await ShowConfirmDialog();
-                if (choice == ConfirmUnsavedChoice.Cancel) return;   // fica na tela; toggles intactos
-                if (choice == ConfirmUnsavedChoice.Save) SaveChanges();
-                // Discard: não persiste — as escolhas em memória somem ao trocar de tela (CA-033.8/CC-14);
-                // ao voltar, o novo VM relê do settings (inalterado), então o descarte é efetivo.
+                switch (choice)
+                {
+                    case ConfirmUnsavedChoice.Cancel:
+                        return;   // fica na tela; toggles intactos
+
+                    case ConfirmUnsavedChoice.Discard:
+                        // Reverte a UI ao salvo (CR): ir a Settings faz PUSH — o VM sobrevive na stack e é
+                        // reusado ao voltar; sem reverter, a alteração "descartada" reapareceria marcada.
+                        RevertTogglesFromSaved();
+                        // Onboarding: descartar = aceitar o SEED. Ainda CONCLUI (persiste o seed já revertido
+                        // + marca ModsConfigsOnboardingDone + dispara o 1º sync), senão o onboarding re-loopa
+                        // e o sync fica bloqueado pelo gate ShouldTriggerOnboarding (CR 🔴 / CA-030.19).
+                        if (_onboarding) SaveChanges();
+                        break;
+
+                    case ConfirmUnsavedChoice.Save:
+                        SaveChanges();
+                        break;
+                }
             }
 
             navigate();
+        }
+
+        /// <summary>
+        /// Item 033 (CR): reverte os toggles em memória ao estado salvo (no onboarding, isso é o seed do
+        /// Mec.1). Necessário porque a navegação por Settings faz PUSH — o VM permanece vivo e é reusado ao
+        /// voltar; sem reverter, a alteração "descartada" reapareceria marcada (e um "Salvar e voltar"
+        /// seguinte a persistiria). O botão Launcher (pop) destruiria o VM, mas a reversão explícita cobre
+        /// os dois caminhos.
+        /// </summary>
+        private void RevertTogglesFromSaved()
+        {
+            var settings = LauncherSettingsProvider.Instance;
+            foreach (var item in OptionalMods)
+                item.IsEnabled = settings.IsOptionalEnabled(item.Id);
+            foreach (var item in OptionalConfigs)
+                item.IsEnabled = settings.IsOptionalConfigEnabled(item.Id);
         }
 
         /// <summary>
