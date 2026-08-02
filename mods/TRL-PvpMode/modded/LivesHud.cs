@@ -19,6 +19,16 @@ namespace TarkovRedLine.PvpMode
 
         private static bool _broken;
 
+        /// <summary>Chamado no inicio de cada raid: um erro isolado nao pode apagar o indicador
+        /// pelo resto da SESSAO, e os estilos vem de uma cena que ja nao existe (F-06).</summary>
+        public static void Reset()
+        {
+            _broken = false;
+            _style = null;
+            _styleDowned = null;
+        }
+
+
         private static GUIStyle _style;
         private static GUIStyle _styleDowned;
 
@@ -41,14 +51,15 @@ namespace TarkovRedLine.PvpMode
                 var player = gameWorld?.MainPlayer;
                 if (player == null) return;
 
-                // O fim de raid começa bem antes de GameWorld.OnDestroy: sem esta guarda o
-                // contador fica por cima da tela de morte, contrariando a spec (E-06).
-                if (!player.HealthController.IsAlive) return;
-
-                EnsureStyles();
-
                 var downed = player.ActiveHealthController is
                     Fika.Core.Main.ClientClasses.ClientHealthController { Downed: true };
+
+                // Esconder na tela de fim de raid (E-06) SEM esconder no estado caido - que e o
+                // unico momento para o qual este indicador existe. IsAlive e false durante todo o
+                // caido, entao testa-lo sozinho tornaria o ramo destacado inalcancavel (F-02).
+                if (!player.HealthController.IsAlive && !downed) return;
+
+                EnsureStyles();
 
                 var value = RaidState.IsUnlimited ? INFINITY : RaidState.LivesLeft.ToString();
                 var text = downed ? $"VIDAS: {value}" : $"Vidas: {value}";

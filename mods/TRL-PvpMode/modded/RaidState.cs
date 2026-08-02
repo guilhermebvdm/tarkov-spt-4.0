@@ -17,6 +17,7 @@ namespace TarkovRedLine.PvpMode
 
         private static bool _active;
         private static int _livesLeft;
+        private static bool _isUnlimited;
 
         /// <summary>
         /// O modo está de fato governando esta raid. Falso quando desligado no F12, quando um
@@ -30,7 +31,12 @@ namespace TarkovRedLine.PvpMode
         /// <summary>Vidas restantes. Ilimitado quando <see cref="IsUnlimited"/>.</summary>
         public static int LivesLeft => _livesLeft;
 
-        public static bool IsUnlimited => Settings.LIVES_PER_RAID != null && Settings.LIVES_PER_RAID.Value < 0;
+        /// <summary>
+        /// Fotografado no inicio da raid, junto com o total de vidas. Ler o F12 ao vivo faria
+        /// metade da mesma opcao mudar no meio da partida - trocar para ilimitado concederia vidas
+        /// na hora, e o caminho inverso zeraria o contador (F-03).
+        /// </summary>
+        public static bool IsUnlimited => _isUnlimited;
 
         /// <summary>
         /// Tipo do dano que está matando o jogador neste quadro. Gravado pelo prefixo de
@@ -56,13 +62,22 @@ namespace TarkovRedLine.PvpMode
             // chamar End(), o estado não pode atravessar para a raid seguinte (C-05).
             _active = false;
             _livesLeft = 0;
+            _isUnlimited = false;
             LastKillDamageType = EDamageType.Undefined;
             RespawnService.Reset();
             Patches.RespawnInputPatch.Reset();
             Networking.RespawnNetwork.Reset();
+            LivesHud.Reset();
 
             // Menu e esconderijo não têm modo de vidas (R-08).
-            if (gameWorld == null || gameWorld.MainPlayer == null) return;
+            if (gameWorld == null || gameWorld.MainPlayer == null)
+            {
+                // O anfitriao sem tela nao tem jogador local, entao o modo fica inerte nele - o
+                // que esta certo. Registrar para o operador distinguir "carregado e inerte de
+                // proposito" de "mod ausente", que e a causa do problema de rede acima (G-09).
+                Plugin.Log.LogInfo("[TRL-PvpMode] Sem jogador local nesta instancia — modo de vidas inerte.");
+                return;
+            }
             if (gameWorld.MainPlayer is HideoutPlayer) return;
 
             if (!Settings.ENABLED.Value)
@@ -71,13 +86,15 @@ namespace TarkovRedLine.PvpMode
                 return;
             }
 
-            FikaBridge.Resolve();
             if (!FikaBridge.IsUsable) return;
+
+            WarnIfHitboxFixMissing();
 
             if (WarnIfConflictingModLoaded()) return;
             if (!WarnIfServerReviveDisabled(gameWorld.MainPlayer)) return;
 
-            _livesLeft = Mathf.Max(0, Settings.LIVES_PER_RAID.Value);
+            _isUnlimited = Settings.LIVES_PER_RAID.Value < 0;
+            _livesLeft = _isUnlimited ? 0 : Settings.LIVES_PER_RAID.Value;
             _active = true;
 
             ApplyDownedTimeout(gameWorld.MainPlayer);
@@ -90,14 +107,17 @@ namespace TarkovRedLine.PvpMode
         /// <summary>Idempotente — pode ser chamado mais de uma vez por fim de raid.</summary>
         public static void End()
         {
-            if (!_active && _livesLeft == 0) return;
-
+            // Sem atalho de saida: o estado de rede e populado mesmo com o modo inativo (o
+            // callback do pacote so checa se ha partida), entao um return antecipado deixaria os
+            // guards de posicao sujos entre raids (F-05). As limpezas sao idempotentes.
             _active = false;
             _livesLeft = 0;
+            _isUnlimited = false;
             LastKillDamageType = EDamageType.Undefined;
             RespawnService.Reset();
             Patches.RespawnInputPatch.Reset();
             Networking.RespawnNetwork.Reset();
+            LivesHud.Reset();
             Plugin.Log.LogInfo("[TRL-PvpMode] Raid encerrada — estado do modo de vidas limpo.");
         }
 
@@ -128,6 +148,21 @@ namespace TarkovRedLine.PvpMode
                    $"Valendo o valor do servidor ({chc.BleedoutTime}s).", Color.yellow);
             Plugin.Log.LogWarning(
                 $"[TRL-PvpMode] Tempo de decisao nao aplicado — servidor: {chc.BleedoutTime}s.");
+        }
+
+        /// <summary>
+        /// Sem o TRL-Fixes, o caminho de saida do estado caido devolve os colisores do corpo na
+        /// camada errada e o jogador que renasceu fica impossivel de acertar para os outros pelo
+        /// resto da partida. O mod converte um bug ocasional do Fika no caminho unico e garantido,
+        /// entao a ausencia precisa gritar (G-05).
+        /// </summary>
+        private static void WarnIfHitboxFixMissing()
+        {
+            if (Chainloader.PluginInfos.ContainsKey(Plugin.TrlFixesGuid)) return;
+
+            Notify("TRL-PvpMode: instale o TRL-Fixes. Sem ele, quem renascer fica impossivel de " +
+                   "acertar para os outros jogadores.", Color.yellow);
+            Plugin.Log.LogWarning("[TRL-PvpMode] com.trl.fixes ausente — hitbox pos-respawn ficara quebrada.");
         }
 
         /// <summary>

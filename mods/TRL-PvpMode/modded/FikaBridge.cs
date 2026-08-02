@@ -23,6 +23,7 @@ namespace TarkovRedLine.PvpMode
         private static FieldInfo _bleedoutTimeBackingField;
         private static FieldInfo _maxRevivesField;
         private static FieldInfo _spawnPointsField;
+        private static FieldInfo _bledOutField;
 
         private static bool _resolved;
 
@@ -58,20 +59,27 @@ namespace TarkovRedLine.PvpMode
             _spawnPointsField = AccessTools.Field(
                 AccessTools.TypeByName("Fika.Core.Main.GameMode.BaseGameController"), "_spawnPoints");
 
+            // ref: ClientHealthController.cs:33 - a UNICA marca confiavel de "acabou de vez".
+            // IsAlive NAO serve: o prefixo de Kill do Fika o zera ao entrar no caido
+            // (ClientHealthController_Kill_Patch.cs:22) e so ToggleDowned(false) o devolve.
+            _bledOutField = AccessTools.Field(typeof(ClientHealthController), "_bledOut");
+
             LogMissing(ReviveInteractableType == null, "tipo ReviveInteractable");
+            LogMissing(_bledOutField == null, "campo ClientHealthController._bledOut");
             LogMissing(_maxRevivesField == null, "campo ClientHealthController._maxRevives");
             LogMissing(_spawnPointsField == null, "campo BaseGameController._spawnPoints");
             LogMissing(BleedoutType == null, "tipo Bleedout");
             LogMissing(_bleedoutTimeBackingField == null, "campo de apoio de ClientHealthController.BleedoutTime");
 
-            // Os três são exigidos: sem os tipos não há como bloquear o resgate por aliado nem a
+            // Todos sao exigidos: sem os tipos não há como bloquear o resgate por aliado nem a
             // morte forçada por companheiros; sem o campo, a opção de tempo do F12 seria uma
             // mentira silenciosa (code review 01, C-06).
             IsUsable = ReviveInteractableType != null
                     && BleedoutType != null
                     && _bleedoutTimeBackingField != null
                     && _maxRevivesField != null
-                    && _spawnPointsField != null;
+                    && _spawnPointsField != null
+                    && _bledOutField != null;
 
             if (!IsUsable)
             {
@@ -84,6 +92,23 @@ namespace TarkovRedLine.PvpMode
         private static void LogMissing(bool missing, string what)
         {
             if (missing) Plugin.Log.LogWarning($"[TRL-PvpMode] Nao resolvido: {what}");
+        }
+
+        /// <summary>
+        /// O jogador acabou de vez (o prazo estourou)? Discriminante real do estado terminal.
+        /// </summary>
+        public static bool HasBledOut(ClientHealthController controller)
+        {
+            if (controller == null || _bledOutField == null) return false;
+            try { return _bledOutField.GetValue(controller) is true; }
+            catch { return false; }
+        }
+
+        /// <summary>O chat do Fika esta aberto? Tipo e propriedade sao publicos - sem reflexao.</summary>
+        public static bool IsChatActive()
+        {
+            try { return Fika.Core.UI.Custom.FikaChatUIScript.IsActive; }
+            catch { return false; }
         }
 
         private static MethodInfo _removeAllActiveEffectsMethod;
@@ -104,23 +129,6 @@ namespace TarkovRedLine.PvpMode
 
             try { _removeAllActiveEffectsMethod.Invoke(healthBar, null); }
             catch (Exception ex) { Plugin.Log.LogError($"[TRL-PvpMode] TryClearHealthBarEffects: {ex.Message}"); }
-        }
-
-        private static PropertyInfo _chatActiveProperty;
-
-        /// <summary>
-        /// O chat do Fika está aberto? Tipo interno, resolvido por nome. Em caso de dúvida devolve
-        /// falso — bloquear o renascimento é pior que o risco de digitar.
-        /// </summary>
-        public static bool IsChatActive()
-        {
-            _chatActiveProperty ??= AccessTools.Property(
-                AccessTools.TypeByName("Fika.Core.UI.Custom.FikaChatUIScript"), "IsActive");
-
-            if (_chatActiveProperty == null) return false;
-
-            try { return _chatActiveProperty.GetValue(null) is true; }
-            catch { return false; }
         }
 
         /// <summary>

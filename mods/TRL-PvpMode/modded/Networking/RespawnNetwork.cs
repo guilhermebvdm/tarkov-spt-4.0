@@ -26,7 +26,9 @@ namespace TarkovRedLine.PvpMode.Networking
         private const float SNAP_GUARD_SECONDS = 1.5f;
 
         /// <summary>Distância a partir da qual um estado é considerado "pré-teleporte" e rejeitado.</summary>
-        private const float SNAP_GUARD_TOLERANCE_SQR = 400f;   // 20 m
+        private const float SNAP_GUARD_TOLERANCE_SQR = 16f;   // 4 m - abaixo da tolerancia
+                                                              // de "mesmo lugar" do sorteio (5 m), senao
+                                                              // um respawn curto fica sem defesa (F-11)
 
         /// <summary>Além disto não é mapa nenhum — payload lixo (2 km da origem).</summary>
         private const float SANITY_MAX_SQR = 4_000_000f;
@@ -51,6 +53,12 @@ namespace TarkovRedLine.PvpMode.Networking
             _expiredBuffer.Clear();
             _failCount = 0;
             _lastFailedManager = null;
+
+            // Soltar a referencia do gerenciador destruido: Destroy() derruba so o lado nativo, e
+            // a referencia estatica manteria vivo o wrapper e TUDO que ele referencia - inclusive
+            // a lista de peers - ate a raid seguinte registrar outro (F-04). So quando nao ha
+            // gerenciador: em transito entre mapas ele sobrevive, e limpar duplicaria o registro.
+            if (!Singleton<IFikaNetworkManager>.Instantiated) _lastRegisteredManager = null;
         }
 
         public static void EnsurePacketsRegistered()
@@ -92,7 +100,7 @@ namespace TarkovRedLine.PvpMode.Networking
         /// diferentes. Avisando primeiro, o receptor já está defendendo a posição nova quando os
         /// primeiros estados pós-teleporte chegarem (code review 003, E-01).
         /// </summary>
-        public static void BroadcastRespawn(FikaPlayer player, Vector3 position)
+        public static void BroadcastRespawn(FikaPlayer player, Vector3 position, bool isCorrection = false)
         {
             EnsurePacketsRegistered();
             if (!Singleton<IFikaNetworkManager>.Instantiated) return;
@@ -103,6 +111,7 @@ namespace TarkovRedLine.PvpMode.Networking
                 {
                     NetId = player.NetId,
                     Position = position,
+                    IsCorrection = isCorrection,
                 };
 
                 // Envio só a partir da main thread: o FIKA compartilha um único NetDataWriter sem
@@ -117,6 +126,18 @@ namespace TarkovRedLine.PvpMode.Networking
             {
                 Plugin.Log.LogWarning($"[TRL-PvpMode] Erro ao anunciar respawn: {ex.Message}");
             }
+        }
+
+        /// <summary>
+        /// Desfaz um anuncio que nao se concretizou. O aviso e o PRIMEIRO passo do renascimento
+        /// (para nao chegar depois do estado de posicao), entao uma falha nos passos seguintes
+        /// deixaria os outros clientes com o corpo cravado num ponto onde o jogador nunca chegou,
+        /// defendido por 1,5s (G-06). Reemitir com a posicao real cancela isso.
+        /// </summary>
+        public static void BroadcastCorrection(FikaPlayer player)
+        {
+            if (player == null) return;
+            BroadcastRespawn(player, player.Position, isCorrection: true);
         }
 
         private static void OnRespawnSyncReceived(TrlRespawnSyncPacket packet)
@@ -217,6 +238,9 @@ namespace TarkovRedLine.PvpMode.Networking
 
         private static ObservedPlayer FindObserved(int netId)
         {
+            // TickGuards chama fora do callback, onde o gerenciador pode ja ter sumido (F-10).
+            if (!Singleton<IFikaNetworkManager>.Instantiated) return null;
+
             var players = Singleton<IFikaNetworkManager>.Instance.ObservedPlayers;
             if (players == null) return null;
 

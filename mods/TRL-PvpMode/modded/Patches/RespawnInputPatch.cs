@@ -58,7 +58,8 @@ namespace TarkovRedLine.PvpMode.Patches
                 // Sem as guardas de contexto, digitar no chat ou no console com a tecla rebindada
                 // para uma letra gastaria uma vida. O próprio Fika guarda os mesmos três estados
                 // antes de ler teclado (ClientPacketSender.cs:44-47) — code review 002, D-07.
-                var holding = !IsTypingSomewhere(__instance) && Input.GetKey(Settings.RESPAWN_KEY.Value);
+                // Input.GetKey primeiro: e a checagem mais barata e falha na maioria dos quadros.
+                var holding = Input.GetKey(Settings.RESPAWN_KEY.Value) && !IsTypingSomewhere(__instance);
 
                 if (!holding)
                 {

@@ -27,6 +27,9 @@ namespace TarkovRedLine.PvpMode.Networking
         public int NetId;
         public Vector3 Position;
 
+        /// <summary>Anuncio de cancelamento: o renascimento falhou depois de anunciado.</summary>
+        public bool IsCorrection;
+
         /// <summary>
         /// NÃO serializado. Falso quando o corpo veio truncado — não aplicar.
         /// (O relay do host acontece em bytes crus ANTES do Deserialize, em FikaServer.cs:932-936,
@@ -45,6 +48,7 @@ namespace TarkovRedLine.PvpMode.Networking
             inner.Put(Position.x);
             inner.Put(Position.y);
             inner.Put(Position.z);
+            inner.Put(IsCorrection);
 
             // Sempre o overload de 3 argumentos: o de 1 argumento escreve o buffer inteiro,
             // incluindo o padding além de Length (NetDataWriter.cs:381).
@@ -56,6 +60,7 @@ namespace TarkovRedLine.PvpMode.Networking
         {
             NetId = 0;
             Position = Vector3.zero;
+            IsCorrection = false;
             Valid = false;
 
             if (!reader.TryGetBytesWithLength(out var payload) || payload == null) return;
@@ -66,6 +71,7 @@ namespace TarkovRedLine.PvpMode.Networking
             if (!inner.TryGetFloat(out var x)) return;
             if (!inner.TryGetFloat(out var y)) return;
             if (!inner.TryGetFloat(out var z)) return;
+            if (!inner.TryGetBool(out IsCorrection)) return;
 
             Position = new Vector3(x, y, z);
             Valid = true;

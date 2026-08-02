@@ -2,6 +2,69 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/); versionamento [SemVer](https://semver.org/).
 
+## [0.8.0] — não lançado
+
+Review completo do mod inteiro, com três lentes independentes (integração/estado · coop/Fika ·
+padrões do repo). **33 achados, todos aplicados.** Duas lentes chegaram ao mesmo bloqueador por
+caminhos diferentes.
+
+### Corrigido — bloqueadores
+
+- **O renascimento nunca teria funcionado.** A guarda que impede renascer em cima do próprio cadáver
+  testava se o jogador estava vivo, partindo da premissa de que quem está caído está "vivo". Não
+  está: o Fika marca o jogador como morto ao entrar no estado de caído e só reverte ao sair. A guarda
+  ficou com a polaridade invertida — bloqueava todo renascimento legítimo e deixava passar
+  exatamente a janela que deveria barrar. O discriminante agora é o estado terminal real.
+- **O contador sumia justo quando importa.** Pela mesma premissa, o indicador destacado no estado
+  caído era código inalcançável — e é o único momento para o qual ele existe.
+- **O pacote de build levava 22 MB de bibliotecas da BSG e do Fika.** Faltava marcar as referências
+  como não-copiáveis. Redistribuí-las reprovaria na publicação e causaria conflito de identidade de
+  tipo. A saída caiu para 68 KB.
+
+### Corrigido — graves
+
+- **Um par sem o mod não é só uma brecha de jogabilidade, é falha de rede.** O anfitrião retransmite
+  o aviso de renascimento em bytes crus **antes** de decodificá-lo; a máquina sem o mod não sabe o
+  que é aquilo e derruba a fila de eventos de rede daquele quadro — para todos os pares e todos os
+  mods. Elevado a requisito duro na documentação, com a razão explicada.
+- **Dependência do TRL-Fixes declarada**, com aviso na tela quando ausente. Sem ele, todo jogador que
+  renasce fica impossível de acertar para os outros: o mod transforma um bug ocasional do Fika no
+  caminho único e garantido.
+- **Renascimento que falha no meio agora se cancela.** O aviso de rede é o primeiro passo; sem
+  cancelamento, uma falha nos passos seguintes deixaria o corpo cravado, para os outros, num ponto
+  onde o jogador nunca chegou.
+- Vidas ilimitadas passam a ser fotografadas no início da raid, como o total — antes metade da mesma
+  opção reagia ao vivo, e mudá-la no meio da partida zerava o contador.
+- A referência ao gerenciador de rede é solta no fim da raid; antes retinha o objeto e todo o grafo
+  de participantes até a raid seguinte.
+- O indicador não fica mais desligado pelo resto da **sessão** após um erro isolado.
+- A proteção ao renascer não remove mais a invulnerabilidade de quem caiu de novo dentro da janela.
+- Falha de carregamento agora desativa o mod por inteiro, em vez de deixá-lo meio-carregado mexendo
+  em participantes sem nenhum patch instalado.
+- Só o alvo caído aceita o corte seco de posição, e a leitura do teclado ficou mais barata.
+
+### Limitações declaradas nesta rodada
+
+Configuração diferente entre jogadores não é suportada (a assimetria pode deixar o caído sem saída);
+`grenadesKills` do servidor deixa de valer; e as opções passam a ser explicitamente por partida.
+
+## [0.7.0] — não lançado
+
+Correções do review adversarial dos itens 003 e 004 (12 achados, todos aplicados).
+
+### Corrigido
+
+- **O conserto do deslize reintroduzia o próprio defeito.** Limpar o histórico de posições também
+  apaga a única informação que o Fika usa para rejeitar um estado atrasado, e os dois fluxos correm
+  em canais sem ordem garantida entre si. Agora o aviso é o primeiro passo do renascimento e o
+  receptor defende a posição por 1,5s.
+- Posições implausíveis (`NaN`, infinito, fora do mapa) são rejeitadas — uma delas deixaria o corpo
+  daquele participante permanentemente inválido.
+- Os ícones de efeito da plaquinha de vida também são limpos, como o próprio Fika faz na reconexão.
+- Falha de registro do pacote desiste após 5 tentativas, em vez de registrar erro a cada quadro.
+- O indicador de vidas só roda no evento de pintura, e some na tela de fim de raid.
+- Campo de rotação removido do pacote: era carga morta, revertida no quadro seguinte.
+
 ## [0.6.0] — não lançado
 
 Correções do review adversarial do item 002 (13 achados, todos aplicados).

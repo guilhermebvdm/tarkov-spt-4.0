@@ -1,6 +1,6 @@
 # TRL-PvpMode
 
-**Versão:** 0.1.0 · **Licença:** MIT · **SPT:** 4.0.x · **EFT:** 0.16.9
+**Versão:** 0.8.0 · **Licença:** MIT · **SPT:** 4.0.x · **EFT:** 0.16.9
 **Dependência:** Fika (`com.fika.core`) — dependência dura
 **Forge:** _(não publicado)_
 

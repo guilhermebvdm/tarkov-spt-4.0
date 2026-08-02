@@ -1,7 +1,7 @@
 # Propriedades F12 — TRL-PvpMode
 
 > Todas as opções do menu **F12** (BepInEx ConfigurationManager). **1 seção · 9 opções.**
-> Gerado de [modded/Settings.cs](modded/Settings.cs) em **2026-08-01**, para a **v0.7.0**.
+> Gerado de [modded/Settings.cs](modded/Settings.cs) em **2026-08-01**, para a **v0.8.0**.
 >
 > **Plugin:** `com.trl.pvpmode` — "TRL-PvpMode" · arquivo de config: `BepInEx/config/com.trl.pvpmode.cfg`
 
@@ -33,20 +33,25 @@ O modo **não funciona** sem estes dois. Ambos são avisados na tela no início 
 2. **O mod PlayerLives não pode estar instalado.** Ele intercepta o mesmo instante da morte e impede
    todo o resto de funcionar.
 
-E um terceiro que o jogo não tem como avisar: **o mod precisa estar instalado em todos os clientes.**
-O bloqueio de "levantar companheiro" roda na máquina de quem olha — um par sem o mod continua vendo a
-opção e consegue levantar o caído, furando a contagem de vidas.
+3. **O mod precisa estar instalado em TODOS os participantes — inclusive no anfitrião sem tela.**
+   Isto não é preferência: é requisito de funcionamento. O anfitrião retransmite o aviso de
+   renascimento em bytes crus, **antes** de decodificá-lo. Numa máquina sem o mod, o Fika não sabe o
+   que é aquele pacote e lança erro no meio do processamento de rede — e como ele não protege esse
+   ponto, **todos os eventos de rede enfileirados naquele quadro são descartados**, para todos os
+   pares e todos os mods. O sintoma é o clássico "jogador patinando". Além disso, um par sem o mod
+   continua enxergando a opção de levantar o caído e consegue usá-la, furando a contagem de vidas.
 
 ## Limitações conhecidas
 
 | Limitação | Detalhe |
 |---|---|
-| **Mudar o tempo durante a raid** | O prazo é fotografado no instante da queda. Alterar `Downed Timeout` estando caído não muda a contagem em curso — vale a partir da próxima queda. |
-| **Tempo `0` desliga a tecla nativa de desistir** | Com tempo zero, o componente de contagem do Fika sai antes de ler o teclado. Até o item 002 existir (tecla própria de renascer), configurar `0` deixa o jogador caído **sem saída**. |
+| **Opções valem por partida** | `Lives Per Raid`, `Downed Timeout` e `Enable Lives Mode` são lidos **no início da raid**. Mudá-los durante a partida não tem efeito nenhum até a partida seguinte. |
 | **A plaquinha de vida vista pelos companheiros usa o tempo do servidor** | O medidor do Fika lê o `bleedoutTime` do `fika.jsonc` direto, fora do alcance do mod. O número que os outros veem pode divergir do seu; o desfecho real segue o valor do F12. |
+| **Configuração diferente entre jogadores não é suportada** | Todos precisam da **mesma** configuração. Se quem cai está com o modo desligado e quem observa está com ele ligado, o observador não vê a opção de levantar e o caído não tem tecla de renascer — situação sem saída que não existe sem o mod. |
+| **`grenadesKills` do servidor é ignorado** | O mod assume por inteiro a decisão de "o que mata na hora", então a opção de granada do `fika.jsonc` deixa de valer. Só a de cabeça tem equivalente no F12. |
 | **Bots ainda procuram no lugar da morte** | Ao renascer, o corpo aparece no ponto novo para todos, mas a memória de inimigo dos bots guarda a última posição conhecida num cache próprio que o teleporte não invalida. Eles vasculham o ponto antigo por um tempo antes de desistir. |
-| **Reconexão estando caído** | Comportamento indefinido — restaurar o estado no rejoin depende de rede e está previsto para o item 003. |
-| **Cair durante transição, extração ou dentro do veículo blindado** | Não tratado. O estado de caído trava o personagem, e nesses contextos não há como escapar até o item 002 existir (tecla de renascer). Combinado com tempo `0`, é um travamento sem saída. |
+| **Reconexão estando caído** | Comportamento indefinido — restaurar o estado ao reentrar na partida não foi implementado. |
+| **Cair durante transição, extração ou dentro do veículo blindado** | Não tratado. O estado de caído trava o personagem; renascer nesses contextos não foi testado. |
 | **Vasculhar o corpo caído também some** | O bloqueio da opção "levantar companheiro" remove **todas** as ações sobre o caído, inclusive "Search" quando `allowLooting` está ligado no servidor. Coerente com cadáver saqueável estar fora de escopo. |
 
 ## Histórico de Alterações
@@ -54,3 +59,6 @@ opção e consegue levantar o caído, furando a contagem de vidas.
 | Data | Autor | Alteração |
 |---|---|---|
 | 2026-08-01 | Guilherme | Criação — 4 opções da seção `Lives` (item 001 do backlog). |
+| 2026-08-01 | Guilherme | +3 opções do item 002 (tecla, tempo segurando, proteção ao renascer). |
+| 2026-08-01 | Guilherme | +1 opção do item 004 (contador na tela). |
+| 2026-08-02 | Guilherme | +1 opção do review do 002 (distância mínima ao renascer); limitações reescritas contra o comportamento real; pré-requisito de rede elevado a requisito duro após o review de coop. |

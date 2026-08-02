@@ -3,7 +3,6 @@ using Comfort.Common;
 using EFT;
 using EFT.Communications;
 using EFT.Game.Spawning;
-using Fika.Core.Main.GameMode;
 using Fika.Core.Main.Players;
 using UnityEngine;
 
@@ -52,15 +51,19 @@ namespace TarkovRedLine.PvpMode
                 if (player is not FikaPlayer fikaPlayer) return false;
                 if (!RaidState.IsActive) return false;
 
-                // O Fika NÃO limpa Downed quando o prazo acaba: BleedOut() marca _bledOut, revive
-                // o suficiente para chamar Kill() e pronto. Por 1-2 quadros o jogador continua na
-                // lista de vivos com Downed == true, já com cadáver criado e morte anunciada ao
-                // servidor. Sem o teste de IsAlive, completar a tecla nessa janela renasceria em
-                // cima do próprio cadáver (code review 002, D-03).
-                if (!player.ActiveHealthController.IsAlive) return false;
-
-                if (player.ActiveHealthController is not Fika.Core.Main.ClientClasses.ClientHealthController { Downed: true })
+                if (player.ActiveHealthController is not Fika.Core.Main.ClientClasses.ClientHealthController { Downed: true } chc)
                     return false;
+
+                // O Fika NAO limpa Downed quando o prazo acaba: BleedOut() marca _bledOut, revive
+                // o suficiente para chamar Kill() e pronto. Por 1-2 quadros o jogador segue com
+                // Downed == true, ja com cadaver criado - completar a tecla nessa janela renasceria
+                // em cima do proprio cadaver (code review 002, D-03).
+                //
+                // NAO usar IsAlive como discriminante: ele e FALSE durante todo o estado de caido
+                // (o prefixo de Kill do Fika o zera ao entrar), entao testa-lo bloquearia todo
+                // renascimento legitimo e deixaria passar so a janela proibida - polaridade
+                // exatamente invertida (review completo, F-01).
+                if (FikaBridge.HasBledOut(chc)) return false;
 
                 if (!TryGetSpawnPosition(player, out var position))
                 {
@@ -101,7 +104,7 @@ namespace TarkovRedLine.PvpMode
                 player.ActiveHealthController.RestoreFullHealth();
                 player.ActiveHealthController.RemoveNegativeEffects(EBodyPart.Common);
 
-                // 4. Proteger. Por último: ToggleDowned(false) restaura o coeficiente de dano
+                // 7. Proteger. Por ultimo: ToggleDowned(false) restaura o coeficiente de dano
                 //    para 1 e sobrescreveria uma proteção aplicada antes.
                 StartProtection(player);
 
@@ -113,6 +116,12 @@ namespace TarkovRedLine.PvpMode
             catch (Exception ex)
             {
                 Plugin.Log.LogError($"[TRL-PvpMode] TryRespawn: {ex}");
+
+                // O anuncio ja saiu (e o passo 1). Sem cancelar, os outros clientes ficariam com o
+                // corpo cravado num ponto onde o jogador nunca chegou (G-06).
+                try { Networking.RespawnNetwork.BroadcastCorrection(player as FikaPlayer); }
+                catch { /* melhor esforco */ }
+
                 return false;
             }
         }
@@ -222,6 +231,11 @@ namespace TarkovRedLine.PvpMode
 
             _protectionActive = false;
             _protectedPlayer = null;
+
+            // Nao devolver o coeficiente se o jogador caiu de novo no meio da protecao: ali quem
+            // manda e a invulnerabilidade do estado de caido, aplicada pelo Fika (F-09).
+            if (player.ActiveHealthController is Fika.Core.Main.ClientClasses.ClientHealthController { Downed: true }) return;
+
             player.ActiveHealthController.SetDamageCoeff(1f);
             Notify("Protecao de renascimento encerrada.", Color.yellow);
         }

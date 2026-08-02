@@ -12,20 +12,46 @@ namespace TarkovRedLine.PvpMode
     /// </summary>
     [BepInPlugin(PluginGuid, PluginName, PluginVersion)]
     [BepInDependency("com.fika.core", BepInDependency.DependencyFlags.HardDependency)]
+    // Suave de proposito: sem o TRL-Fixes o mod carrega, mas todo jogador que renascer fica
+    // impossivel de acertar para os outros - o RemoveRagdoll do Fika devolve os colisores na
+    // camada errada e quem conserta e o postfix do com.trl.fixes. Avisamos na tela em vez de
+    // recusar a carga (review coop, G-05).
+    [BepInDependency(TrlFixesGuid, BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin
     {
         public const string PluginGuid = "com.trl.pvpmode";
         public const string PluginName = "TRL-PvpMode";
-        public const string PluginVersion = "0.7.0";
+        public const string PluginVersion = "0.8.0";
+        public const string TrlFixesGuid = "com.trl.fixes";
 
         public static Plugin Instance { get; private set; }
         public static ManualLogSource Log { get; private set; }
+
+        /// <summary>
+        /// Carregamento falhou no meio. O Unity aborta o Awake mas SEGUE chamando Update/OnGUI,
+        /// entao sem esta marca o mod ficaria meio-carregado: sem patches, mas ainda registrando
+        /// pacote e mexendo em peers observados, e sem nada no log (H-04).
+        /// </summary>
+        private static bool _bootFailed;
 
         private void Awake()
         {
             Instance = this;
             Log = Logger;
 
+            try
+            {
+                Boot();
+            }
+            catch (Exception ex)
+            {
+                _bootFailed = true;
+                Log.LogError($"[{PluginName}] Falha no carregamento — mod DESATIVADO nesta sessao: {ex}");
+            }
+        }
+
+        private void Boot()
+        {
             Settings.Init(Config);
 
             // O Fika é dependência dura, então já está carregado aqui — os tipos internal
@@ -45,12 +71,14 @@ namespace TarkovRedLine.PvpMode
         /// </summary>
         private void Update()
         {
+            if (_bootFailed) return;
             Networking.RespawnNetwork.EnsurePacketsRegistered();
             Networking.RespawnNetwork.TickGuards();
         }
 
         private void OnGUI()
         {
+            if (_bootFailed) return;
             LivesHud.Draw();
         }
 
