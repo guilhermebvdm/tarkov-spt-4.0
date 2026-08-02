@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,7 +16,7 @@ public class ModUpdaterController : ControllerBase
 {
     private static string _manifestHash = string.Empty;
     private static object _manifestCache = null;
-    private static bool _manifestGenerating = false;
+    private static int _manifestGenerating; // 0 = idle, 1 = gerando (gate atômico via Interlocked, CR-02-02)
     // ref: CR-01-06 — case-insensitive lookups: manifest-path casing may differ from the
     // client's request casing (merge preserves base casing); on a case-sensitive host the
     // miss would 404 instead of falling back.
@@ -135,7 +136,7 @@ public class ModUpdaterController : ControllerBase
     {
         if (string.IsNullOrEmpty(_manifestHash))
         {
-            if (!_manifestGenerating) { _ = GenerateManifestAsync(); }
+            if (Volatile.Read(ref _manifestGenerating) == 0) { _ = GenerateManifestAsync(); }
             return StatusCode(503, new { error = "Manifesto ainda sendo gerado" });
         }
         return Ok(new { hash = _manifestHash });
@@ -146,7 +147,7 @@ public class ModUpdaterController : ControllerBase
     {
         if (_manifestCache == null)
         {
-            if (!_manifestGenerating) { _ = GenerateManifestAsync(); }
+            if (Volatile.Read(ref _manifestGenerating) == 0) { _ = GenerateManifestAsync(); }
             return StatusCode(503, new { error = "Manifesto ainda sendo gerado" });
         }
         return Ok(_manifestCache);
@@ -221,9 +222,10 @@ public class ModUpdaterController : ControllerBase
     /// Validações S-5: recusa o mod inteiro se algum path está sob user/mods (client-only, D-15) ou se
     /// sobrepõe outro mod (D-19); o motivo vai pro log.
     /// </summary>
-    private static object[] LoadOptionalDefs(string modsPath, out List<(string prefix, string id)> optionalPrefixes, out object[] categories, List<string> warnings)
+    private static object[] LoadOptionalDefs(string modsPath, out List<(string prefix, string id)> optionalPrefixes, out object[] categories, out List<string> rejectedPrefixes, List<string> warnings)
     {
         optionalPrefixes = new List<(string prefix, string id)>();
+        rejectedPrefixes = new List<string>();
         categories = Array.Empty<object>();
         var mods = new List<object>();
 
@@ -246,15 +248,20 @@ public class ModUpdaterController : ControllerBase
                 if (string.IsNullOrWhiteSpace(id)) continue;
                 if (!mod.TryGetProperty("paths", out var pathsP) || pathsP.ValueKind != JsonValueKind.Array) continue;
 
-                var validPrefixes = new List<string>();
-                bool rejected = false;
+                // Coleta TODOS os prefixos do mod antes de validar — se recusado, todos são rastreados em
+                // rejectedPrefixes p/ o scan pular (CR-02-03), inclusive os que vêm depois do que falhou.
+                var modPrefixes = new List<string>();
                 foreach (var p in pathsP.EnumerateArray())
                 {
                     if (p.ValueKind != JsonValueKind.String) continue;
                     // Trim('/') (não TrimStart): aceita "FooMod/" (pasta com barra) e "Foo.dll" igual.
                     string prefixNorm = (p.GetString() ?? "").Replace("\\", "/").Trim('/').ToLowerInvariant();
-                    if (prefixNorm.Length == 0) continue;
+                    if (prefixNorm.Length > 0) modPrefixes.Add(prefixNorm);
+                }
 
+                bool rejected = false;
+                foreach (var prefixNorm in modPrefixes)
+                {
                     if (prefixNorm == "user/mods" || prefixNorm.StartsWith("user/mods/", StringComparison.Ordinal))
                     {
                         warnings.Add($"mod opcional '{id}' referencia '{prefixNorm}' sob user/mods — RECUSADO (mod opcional é client-only, D-15)");
@@ -267,11 +274,18 @@ public class ModUpdaterController : ControllerBase
                         warnings.Add($"'{prefixNorm}' se sobrepõe a '{clash.prefix}' (mod '{clash.id}') — mod '{id}' RECUSADO (D-19)");
                         rejected = true; break;
                     }
-                    validPrefixes.Add(prefixNorm);
                 }
-                if (rejected) continue;
 
-                foreach (var pn in validPrefixes) optionalPrefixes.Add((pn, id));
+                if (rejected)
+                {
+                    // CR-02-03: um mod recusado NÃO pode ter os arquivos emitidos como obrigatórios pra todos
+                    // (seria o oposto de "opcional" — num coop empurra gameplay pra todo mundo). O scan pula
+                    // qualquer arquivo sob esses prefixos.
+                    rejectedPrefixes.AddRange(modPrefixes);
+                    continue;
+                }
+
+                foreach (var pn in modPrefixes) optionalPrefixes.Add((pn, id));
 
                 object name = mod.TryGetProperty("name", out var nP) ? nP.Clone() : (object)id;
                 object description = mod.TryGetProperty("description", out var dP) ? dP.Clone() : null;
@@ -350,6 +364,11 @@ public class ModUpdaterController : ControllerBase
                 if (string.IsNullOrWhiteSpace(id)) continue;
                 if (!item.TryGetProperty("files", out var filesP) || filesP.ValueKind != JsonValueKind.Array) continue;
 
+                // CR-02-04: coleta e valida os arquivos ANTES de registrar. Um arquivo já pertencente a
+                // outro item recusa o ITEM INTEIRO (paridade com o D-19 dos mods), em vez de deixar um item
+                // parcialmente possuído na UI (o player ligava e parte do efeito não acontecia).
+                var itemFiles = new List<string>();
+                bool itemRejected = false;
                 foreach (var f in filesP.EnumerateArray())
                 {
                     if (f.ValueKind != JsonValueKind.String) continue;
@@ -357,13 +376,16 @@ public class ModUpdaterController : ControllerBase
                     if (inner.Length == 0) continue;
                     string relNorm = ("bepinex/config-optional/" + inner).ToLowerInvariant();
 
-                    if (pathToOptionalConfigId.TryGetValue(relNorm, out var owner))
+                    if (pathToOptionalConfigId.TryGetValue(relNorm, out var owner) || itemFiles.Contains(relNorm))
                     {
-                        warnings.Add($"arquivo '{relNorm}' está em dois itens de performance ('{owner}' e '{id}') — ignorado (D-19)");
-                        continue;
+                        warnings.Add($"arquivo '{relNorm}' já pertence ao item '{owner ?? id}' — item de config '{id}' RECUSADO inteiro (D-19)");
+                        itemRejected = true; break;
                     }
-                    pathToOptionalConfigId[relNorm] = id;
+                    itemFiles.Add(relNorm);
                 }
+
+                if (itemRejected) continue;
+                foreach (var rel in itemFiles) pathToOptionalConfigId[rel] = id;
 
                 object name = item.TryGetProperty("name", out var nP) ? nP.Clone() : (object)id;
                 object description = item.TryGetProperty("description", out var dP) ? dP.Clone() : null;
@@ -407,8 +429,9 @@ public class ModUpdaterController : ControllerBase
 
     private static async Task GenerateManifestAsync()
     {
-        if (_manifestGenerating) return;
-        _manifestGenerating = true;
+        // CR-02-02: gate ATÔMICO — dois requests concorrentes (ou request + /refresh) não entram ambos
+        // na geração completa (scan + hash + swap). O test-and-set em bool não era atômico.
+        if (Interlocked.CompareExchange(ref _manifestGenerating, 1, 0) != 0) return;
 
         try
         {
@@ -428,8 +451,17 @@ public class ModUpdaterController : ControllerBase
             // optionalConfigId. Validações de conteúdo (S-5): recusa path sob user/mods (mod opcional é
             // client-only, D-15) e arquivo repetido em dois itens (D-19). As mensagens vão pro log.
             var contentWarnings = new List<string>();
-            var optionalMods = LoadOptionalDefs(modsPath, out var optionalPrefixes, out var optionalModCategories, contentWarnings);
+            var optionalMods = LoadOptionalDefs(modsPath, out var optionalPrefixes, out var optionalModCategories, out var rejectedModPrefixes, contentWarnings);
             var optionalConfigs = LoadOptionalConfigDefs(out var pathToOptionalConfigId, out var optionalConfigCategories, contentWarnings);
+
+            // CR-01-03: id deve ser único ENTRE os dois eixos — o motor do launcher compara JustToggledIds
+            // contra optionalId E optionalConfigId, então um id repetido cross-eixo faz alternar um mod
+            // marcar o config homônimo como "recém-tocado" (aplicando-o sobre a customização do player).
+            var modIdSet = new HashSet<string>(optionalPrefixes.Select(e => e.id), StringComparer.OrdinalIgnoreCase);
+            foreach (var dupId in pathToOptionalConfigId.Values.Distinct().Where(cid => modIdSet.Contains(cid)))
+            {
+                contentWarnings.Add($"id '{dupId}' em mod opcional E config opcional — ids devem ser únicos entre os dois eixos (o toggle de um pode aplicar o outro)");
+            }
 
             const string PerfPrefix = "bepinex/config-optional/";
             const string PerfPrefixCased = "BepInEx/config-optional/";
@@ -484,6 +516,13 @@ public class ModUpdaterController : ControllerBase
                 if (optId != null)
                 {
                     files.Add(new { path = relPath, hash, size, optional = true, optionalId = optId });
+                }
+                else if (rejectedModPrefixes.Any(rp => IsUnderOrEqual(relNorm, rp)))
+                {
+                    // CR-02-03: arquivo de um mod opcional RECUSADO (config inválida) — não emite, senão
+                    // viraria obrigatório pra todos os players. A recusa em si já está em contentWarnings.
+                    contentWarnings.Add($"'{relPath}' pertence a um mod opcional recusado — não emitido no manifesto");
+                    continue;
                 }
                 else
                 {
@@ -581,6 +620,9 @@ public class ModUpdaterController : ControllerBase
                 optionalModCategories = optionalModCategories,
                 optionalConfigCategories = optionalConfigCategories,
                 folderRules = folderRules,
+                // CR-02-05: expõe as recusas/colisões S-5 ao operador (antes só iam pro Console, invisível
+                // em produção — "meu mod opcional não apareceu" exigia ler o log do servidor).
+                contentWarnings = contentWarnings,
                 files = files
             };
 
@@ -589,9 +631,12 @@ public class ModUpdaterController : ControllerBase
             using var md5 = MD5.Create();
             var hashBytes = md5.ComputeHash(System.Text.Encoding.UTF8.GetBytes(json));
             
-            _manifestHash = BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
-            _fileMapCache = fileMap; // troca atômica de referência (fim da geração)
+            // CR-02-06: publica na ordem mapa → manifesto → hash. Assim um cliente que veja o hash novo
+            // (via /manifest-hash) sempre encontra o manifesto correspondente já buscável (sem janela 503),
+            // e qualquer path do manifesto novo já é resolvível no /download (fileMap primeiro).
+            _fileMapCache = fileMap; // troca atômica de referência
             _manifestCache = manifestObj;
+            _manifestHash = BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
         }
         catch (Exception ex)
         {
@@ -600,7 +645,7 @@ public class ModUpdaterController : ControllerBase
         }
         finally
         {
-            _manifestGenerating = false;
+            Interlocked.Exchange(ref _manifestGenerating, 0);
         }
     }
 }
