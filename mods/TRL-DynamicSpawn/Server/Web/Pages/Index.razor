@@ -318,6 +318,18 @@ html, body {
 .trl-boss-card { background: var(--trl-surface-1); border: 1px solid var(--trl-edge); padding: var(--trl-space-3); margin-bottom: var(--trl-space-3); border-left: 2px solid var(--trl-accent); }
 .trl-boss-card__title { font-family: var(--trl-font-display); font-size: var(--trl-text-sm); text-transform: uppercase; color: var(--trl-fg); margin-bottom: var(--trl-space-2); }
 
+.is-disabled {
+  opacity: 0.35 !important;
+  pointer-events: none !important;
+  user-select: none !important;
+  transition: opacity var(--trl-dur-2) var(--trl-ease);
+}
+.is-disabled input,
+.is-disabled select,
+.is-disabled button {
+  cursor: not-allowed !important;
+}
+
 .trl-zone-matrix { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; margin-top: 8px; }
 .trl-zone-chip {
   display: flex; align-items: center; gap: 6px; padding: 4px 8px; background: var(--trl-surface-2); border: 1px solid var(--trl-edge);
@@ -1162,6 +1174,27 @@ html, body {
         }
     }
 
+    function setDependentState(ids, isEnabled) {
+        const idArray = Array.isArray(ids) ? ids : [ids];
+        idArray.forEach(id => {
+            const el = typeof id === 'string' ? document.getElementById(id) : id;
+            if (!el) return;
+            if (isEnabled) {
+                el.classList.remove("is-disabled");
+                el.style.opacity = "1";
+                el.style.pointerEvents = "auto";
+                el.querySelectorAll("input, select, button").forEach(i => { i.disabled = false; });
+                if (["INPUT", "SELECT", "BUTTON"].includes(el.tagName)) el.disabled = false;
+            } else {
+                el.classList.add("is-disabled");
+                el.style.opacity = "0.35";
+                el.style.pointerEvents = "none";
+                el.querySelectorAll("input, select, button").forEach(i => { i.disabled = true; });
+                if (["INPUT", "SELECT", "BUTTON"].includes(el.tagName)) el.disabled = true;
+            }
+        });
+    }
+
     // --- MAPAS ---
 
     function renderMapSubtabs() {
@@ -1222,7 +1255,7 @@ html, body {
                         <input type="checkbox" id="mc_bubble_enable" ${cfg.enableSpawnBubble ? 'checked' : ''}>
                         <span>${t('enable_bubble')}</span>
                     </label>
-                    <div class="trl-field">
+                    <div id="mc_bubble_dist_wrap" class="trl-field">
                         <label class="trl-field__label">
                             <span>${t('max_bubble_dist')}</span>
                             <span id="val_mc_despawn_dist" class="trl-slider-val">${cfg.despawnDistance ?? 300}</span>
@@ -1242,13 +1275,13 @@ html, body {
                         <span>${t('enable_teleport')}</span>
                     </label>
                     <br>
-                    <label class="trl-switch" style="margin-top:8px;">
+                    <label id="mc_despawn_pmcs_wrap" class="trl-switch" style="margin-top:8px;">
                         <input type="checkbox" id="mc_despawn_pmcs" ${cfg.despawnPMCs ? 'checked' : ''}>
                         <span>${t('include_pmcs')}</span>
                     </label>
                 </div>
 
-                <div>
+                <div id="mc_teleport_fields_wrap">
                     <div class="trl-field">
                         <label class="trl-field__label">
                             <span>${t('teleport_min_dist')}</span>
@@ -1275,12 +1308,26 @@ html, body {
         bindSlider("mc_teleport_dist", val => { ensureMapConfig(mapInfo.id).teleportMinDistance = parseFloat(val); });
         bindSlider("mc_despawn_interval", val => { ensureMapConfig(mapInfo.id).despawnInterval = parseFloat(val); });
 
+        const updateBubbleDependents = () => {
+            const isBubbleActive = document.getElementById("mc_bubble_enable")?.checked ?? false;
+            setDependentState(["mc_bubble_dist_wrap"], isBubbleActive);
+        };
+        const updateTeleportDependents = () => {
+            const isTeleportActive = document.getElementById("mc_teleport_enable")?.checked ?? false;
+            setDependentState(["mc_despawn_pmcs_wrap", "mc_teleport_fields_wrap"], isTeleportActive);
+        };
+
+        updateBubbleDependents();
+        updateTeleportDependents();
+
         document.getElementById("mc_bubble_enable").onchange = (e) => {
             ensureMapConfig(mapInfo.id).enableSpawnBubble = e.target.checked;
+            updateBubbleDependents();
             markDirty(true);
         };
         document.getElementById("mc_teleport_enable").onchange = (e) => {
             ensureMapConfig(mapInfo.id).enableDespawn = e.target.checked;
+            updateTeleportDependents();
             markDirty(true);
         };
         document.getElementById("mc_despawn_pmcs").onchange = (e) => {
@@ -1362,7 +1409,7 @@ html, body {
                 </label>
 
                 ${!isRegularBot && botCat.prop !== "pmcBot" ? `
-                <label class="trl-switch">
+                <label id="bc_followers_wrap" class="trl-switch">
                     <input type="checkbox" id="bc_disable_followers" ${bossInfo.disableFollowers ? 'checked' : ''}>
                     <span>${t('disable_followers')}</span>
                 </label>
@@ -1370,30 +1417,34 @@ html, body {
             </div>
 
             ${isRegularBot ? `
-            <div class="trl-h3">${t('group_spawn_sub')}</div>
-            <div class="trl-form-grid">
-                <div class="trl-field">
-                    <label class="trl-field__label">
-                        <span>${t('bot_group_chance')}</span>
-                        <span id="val_bc_group_chance" class="trl-slider-val">${bossInfo.groupChance ?? 30}</span>
-                    </label>
-                    <input type="range" id="bc_group_chance" class="trl-slider" min="0" max="100" value="${bossInfo.groupChance ?? 30}">
-                </div>
+            <div id="bc_group_section_wrap">
+                <div class="trl-h3">${t('group_spawn_sub')}</div>
+                <div class="trl-form-grid">
+                    <div class="trl-field">
+                        <label class="trl-field__label">
+                            <span>${t('bot_group_chance')}</span>
+                            <span id="val_bc_group_chance" class="trl-slider-val">${bossInfo.groupChance ?? 30}</span>
+                        </label>
+                        <input type="range" id="bc_group_chance" class="trl-slider" min="0" max="100" value="${bossInfo.groupChance ?? 30}">
+                    </div>
 
-                <div class="trl-field">
-                    <label class="trl-field__label">
-                        <span>${t('max_group_size')}</span>
-                        <span id="val_bc_max_group" class="trl-slider-val">${bossInfo.maxGroupSize ?? 3}</span>
-                    </label>
-                    <input type="range" id="bc_max_group" class="trl-slider" min="1" max="5" value="${bossInfo.maxGroupSize ?? 3}">
+                    <div class="trl-field">
+                        <label class="trl-field__label">
+                            <span>${t('max_group_size')}</span>
+                            <span id="val_bc_max_group" class="trl-slider-val">${bossInfo.maxGroupSize ?? 3}</span>
+                        </label>
+                        <input type="range" id="bc_max_group" class="trl-slider" min="1" max="5" value="${bossInfo.maxGroupSize ?? 3}">
+                    </div>
                 </div>
+                <div class="trl-divider"></div>
             </div>
-            <div class="trl-divider"></div>
             ` : ''}
 
-            <div class="trl-h3">${t('boss_matrix_sub')}</div>
+            <div id="bc_matrix_section_wrap">
+                <div class="trl-h3">${t('boss_matrix_sub')}</div>
 
-            <div id="bossMapMatrixContainer"></div>
+                <div id="bossMapMatrixContainer"></div>
+            </div>
         `;
 
         if (isRegularBot) {
@@ -1401,8 +1452,16 @@ html, body {
             bindSlider("bc_max_group", val => { ensureBossInfo(botCat.prop).maxGroupSize = parseInt(val); });
         }
 
+        const updateBossDependents = () => {
+            const isBossActive = document.getElementById("bc_enable")?.checked ?? false;
+            setDependentState(["bc_followers_wrap", "bc_group_section_wrap", "bc_matrix_section_wrap"], isBossActive);
+        };
+
+        updateBossDependents();
+
         document.getElementById("bc_enable").onchange = (e) => {
             ensureBossInfo(botCat.prop).enable = e.target.checked;
+            updateBossDependents();
             markDirty(true);
         };
 
