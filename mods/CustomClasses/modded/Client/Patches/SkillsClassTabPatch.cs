@@ -23,6 +23,25 @@ internal class ClassTabController : GInterface486
     internal ClassTabController(GameObject panel)
     {
         _panel = panel;
+        // 067b: live-update da aba CLASS. Antes só o MENU (nome do jogador) escutava ClassColorsChanged — a aba CLASS
+        // só re-renderizava ao ser (re)aberta, então mudar a cor no F12 com a aba já aberta não refletia até trocar
+        // de aba e voltar. Agora a aba re-renderiza na hora que o override/cor muda. O handler se auto-desinscreve
+        // quando o painel é destruído (tela de Skills fechada) → sem acúmulo/leak entre aberturas.
+        PerksConfig.ClassColorsChanged += OnColorsChanged;
+    }
+
+    private void OnColorsChanged()
+    {
+        if (_panel == null)   // Unity: GameObject destruído == null → limpa o listener órfão
+        {
+            PerksConfig.ClassColorsChanged -= OnColorsChanged;
+            return;
+        }
+
+        if (_panel.activeInHierarchy)
+        {
+            PerksPanelView.Refresh(_panel);   // re-aplica a cor override na hora (título + ícone da classe)
+        }
     }
 
     public void Show()
