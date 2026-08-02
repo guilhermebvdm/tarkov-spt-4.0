@@ -58,6 +58,10 @@ namespace TarkovRedLine.PvpMode
                 var downed = player.ActiveHealthController is
                     Fika.Core.Main.ClientClasses.ClientHealthController { Downed: true };
 
+                // Desmaio do TRL-ImmersiveCombatMedicine nao e morte: o jogador acorda sozinho e
+                // nao gasta vida. Mostrar "segure para renascer" ali promete o que nao se aplica.
+                if (FikaBridge.IsFaintedByCombatMedicine(player.ProfileId)) return;
+
                 // Esconder na tela de fim de raid (E-06) SEM esconder no estado caido - que e o
                 // unico momento para o qual este indicador existe. IsAlive e false durante todo o
                 // caido, entao testa-lo sozinho tornaria o ramo destacado inalcancavel (F-02).

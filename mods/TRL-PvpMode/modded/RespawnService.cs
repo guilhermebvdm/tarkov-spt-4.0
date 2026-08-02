@@ -99,7 +99,7 @@ namespace TarkovRedLine.PvpMode
                 //    RestoreFullHealth restaura membros e vida, mas remove apenas sangramento —
                 //    fratura, dor e intoxicação sobreviveriam ao renascimento (D-05).
                 player.ActiveHealthController.RestoreFullHealth();
-                player.ActiveHealthController.RemoveNegativeEffects(EBodyPart.Common);
+                ClearAllNegativeEffects(player);
 
                 // 7. Proteger. Por ultimo: ToggleDowned(false) restaura o coeficiente de dano
                 //    para 1 e sobrescreveria uma proteção aplicada antes.
@@ -122,6 +122,30 @@ namespace TarkovRedLine.PvpMode
 
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Limpa efeito negativo de TODOS os membros, nao so do generico.
+        ///
+        /// RemoveNegativeEffects age POR MEMBRO (ActiveHealthController.cs:3637): chamar apenas
+        /// com EBodyPart.Common deixava fratura de perna, dor e tremor intactos, e o jogador
+        /// renascia mancando - resquicio reportado no terceiro teste in-game.
+        /// </summary>
+        private static void ClearAllNegativeEffects(Player player)
+        {
+            var hc = player.ActiveHealthController;
+            if (hc == null) return;
+
+            foreach (EBodyPart part in Enum.GetValues(typeof(EBodyPart)))
+            {
+                try { hc.RemoveNegativeEffects(part); }
+                catch (Exception ex) { Plugin.Log.LogWarning($"[TRL-PvpMode] Limpar efeitos de {part}: {ex.Message}"); }
+            }
+
+            // Intoxicação (comum e letal) tem remoção própria, fora da varredura por membro.
+            // ref: Assembly-CSharp/EFT.HealthSystem/ActiveHealthController.cs:3655
+            try { hc.method_18(); }
+            catch (Exception ex) { Plugin.Log.LogWarning($"[TRL-PvpMode] Limpar intoxicacao: {ex.Message}"); }
         }
 
         /// <summary>

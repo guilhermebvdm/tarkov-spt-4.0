@@ -111,6 +111,51 @@ namespace TarkovRedLine.PvpMode
             catch { return false; }
         }
 
+        private static FieldInfo _blackoutTimersField;
+        private static bool _blackoutResolved;
+
+        /// <summary>
+        /// O jogador esta desmaiado pelo TRL-ImmersiveCombatMedicine?
+        ///
+        /// Desmaio NAO e morte: o jogador acorda sozinho e nao gasta vida. Sem esta checagem, a
+        /// interface de renascer aparece durante o desmaio e promete algo que nao se aplica -
+        /// reportado no terceiro teste in-game.
+        ///
+        /// Resolvido por nome porque o ICM e um mod separado e opcional: sem ele, isto sempre
+        /// devolve falso e nada muda.
+        /// ref: mods/TRL-ImmersiveCombatMedicine/modded/Patches/Trauma/TraumaState.cs:21
+        /// </summary>
+        public static bool IsFaintedByCombatMedicine(string profileId)
+        {
+            if (string.IsNullOrEmpty(profileId)) return false;
+
+            if (!_blackoutResolved)
+            {
+                _blackoutResolved = true;
+                var type = AccessTools.TypeByName("TrueTrauma.TraumaState");
+                _blackoutTimersField = type == null ? null : AccessTools.Field(type, "BlackoutTimers");
+
+                Plugin.Log.LogInfo(_blackoutTimersField != null
+                    ? "[TRL-PvpMode] TRL-ImmersiveCombatMedicine detectado — desmaio nao vai acionar o modo de vidas."
+                    : "[TRL-PvpMode] TRL-ImmersiveCombatMedicine ausente — sem tratamento de desmaio.");
+            }
+
+            if (_blackoutTimersField == null) return false;
+
+            try
+            {
+                if (_blackoutTimersField.GetValue(null) is not System.Collections.Generic.Dictionary<string, float> timers)
+                    return false;
+
+                // O dicionario guarda o instante em que o desmaio termina.
+                return timers.TryGetValue(profileId, out var deadline) && UnityEngine.Time.time < deadline;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         private static MethodInfo _removeAllActiveEffectsMethod;
 
         /// <summary>

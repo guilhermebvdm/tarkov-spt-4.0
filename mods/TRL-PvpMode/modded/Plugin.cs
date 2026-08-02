@@ -21,7 +21,7 @@ namespace TarkovRedLine.PvpMode
     {
         public const string PluginGuid = "com.trl.pvpmode";
         public const string PluginName = "TRL-PvpMode";
-        public const string PluginVersion = "0.11.0";
+        public const string PluginVersion = "0.12.0";
         public const string TrlFixesGuid = "com.trl.fixes";
 
         public static Plugin Instance { get; private set; }

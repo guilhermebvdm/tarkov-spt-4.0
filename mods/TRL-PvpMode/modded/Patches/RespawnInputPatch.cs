@@ -64,6 +64,13 @@ namespace TarkovRedLine.PvpMode.Patches
                     return;
                 }
 
+                // Desmaio do ICM nao e morte - nao ha o que renascer, e a vida nao pode ser gasta.
+                if (FikaBridge.IsFaintedByCombatMedicine(__instance.ProfileId))
+                {
+                    if (_wasHolding) Reset();
+                    return;
+                }
+
                 // Uma linha por queda: dá para conferir no log qual tecla o mod está esperando,
                 // sem depender da memória do jogador nem de adivinhação no meio da raid.
                 if (!_announcedDowned)
