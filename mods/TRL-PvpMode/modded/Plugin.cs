@@ -1,5 +1,7 @@
+using System;
 using BepInEx;
 using BepInEx.Logging;
+using TarkovRedLine.PvpMode.Patches;
 
 namespace TarkovRedLine.PvpMode
 {
@@ -14,7 +16,7 @@ namespace TarkovRedLine.PvpMode
     {
         public const string PluginGuid = "com.trl.pvpmode";
         public const string PluginName = "TRL-PvpMode";
-        public const string PluginVersion = "0.1.0";
+        public const string PluginVersion = "0.2.0";
 
         public static Plugin Instance { get; private set; }
         public static ManualLogSource Log { get; private set; }
@@ -24,7 +26,55 @@ namespace TarkovRedLine.PvpMode
             Instance = this;
             Log = Logger;
 
+            Settings.Init(Config);
+
+            // O Fika é dependência dura, então já está carregado aqui — os tipos internal
+            // resolvem antes de qualquer GetTargetMethod precisar deles.
+            FikaBridge.Resolve();
+
+            EnableCorePatches();
+            EnableFikaInternalPatches();
+
             Log.LogInfo($"[{PluginName}] {PluginVersion} carregado.");
+        }
+
+        /// <summary>Patches que só dependem de tipos públicos — sempre seguros de habilitar.</summary>
+        private void EnableCorePatches()
+        {
+            try
+            {
+                new GameWorldOnGameStartedPatch().Enable();
+                new GameWorldOnDestroyPatch().Enable();
+                new CanBeRevivedByOtherPlayerPatch().Enable();
+                new InstantKillPatch().Enable();
+            }
+            catch (Exception ex)
+            {
+                Log.LogError($"[{PluginName}] Falha ao habilitar os patches principais: {ex}");
+            }
+        }
+
+        /// <summary>
+        /// Patches que miram tipos <c>internal</c> do Fika. Se a ponte não resolveu, ficam de fora
+        /// em vez de estourar na inicialização — o modo se autodesativa e o motivo já foi logado.
+        /// </summary>
+        private void EnableFikaInternalPatches()
+        {
+            if (!FikaBridge.IsUsable)
+            {
+                Log.LogWarning($"[{PluginName}] Patches dependentes do Fika nao habilitados — ver avisos acima.");
+                return;
+            }
+
+            try
+            {
+                new NoAllyRevivePatch().Enable();
+                new BleedoutOnPlayerDeathPatch().Enable();
+            }
+            catch (Exception ex)
+            {
+                Log.LogError($"[{PluginName}] Falha ao habilitar os patches do Fika: {ex}");
+            }
         }
     }
 }
