@@ -53,13 +53,16 @@ namespace TarkovRedLine.PvpMode
             // captura teclas fantasma (F13) em teclado de notebook. O de KeyboardShortcut usa o
             // caminho de captura do proprio BepInEx e aceita combinacao.
             //
-            // Default Home, nao F5: F5 ja tem funcao no jogo (o teste in-game caiu na tela de sair
-            // da raid). Home fica livre no EFT e existe como tecla fisica direta na maioria dos
-            // teclados - Pause costuma exigir Fn e nem sempre chega ao Unity.
+            // Default Espaco: e a tecla mais obvia e existe em qualquer teclado, sem Fn. Nao
+            // conflita com pular porque BlockJumpWhileDownedPatch ignora o pulo enquanto o jogador
+            // esta caido - o unico momento em que esta tecla e lida.
+            //
+            // Nao F5 (abre a saida da raid, descoberto no teste in-game) nem Pause (costuma exigir
+            // Fn e pode nem chegar ao Unity).
             RESPAWN_KEY = config.Bind(
                 SECTION_LIVES,
                 "Respawn Key",
-                new KeyboardShortcut(KeyCode.Home),
+                new KeyboardShortcut(KeyCode.Space),
                 new ConfigDescription(
                     "Tecla para renascer. Segure-a enquanto estiver caido."));
 
