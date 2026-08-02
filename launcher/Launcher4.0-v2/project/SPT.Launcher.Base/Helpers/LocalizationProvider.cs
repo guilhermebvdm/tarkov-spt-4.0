@@ -224,6 +224,22 @@ namespace SPT.Launcher.Helpers
             locale.update_error = "Falha ao atualizar: {0}";
             locale.update_files_to_delete = "{0} arquivo(s) para remover";
             locale.update_deleting = "Removendo: {0} ({1}/{2})";
+            // Item 031: progresso por ação
+            locale.update_archiving = "Arquivando (saiu do servidor): {0} ({1}/{2})";
+            locale.update_seeding = "Instalando padrão: {0} ({1}/{2})";
+            locale.update_forcing_config = "Aplicando config obrigatória: {0} ({1}/{2})";
+            locale.update_applying_optional_config = "Aplicando config opcional: {0} ({1}/{2})";
+            // Item 031: segmentos do resumo final
+            locale.sync_completed_prefix = "Concluído: {0}";
+            locale.sync_seg_downloaded = "{0} baixados";
+            locale.sync_seg_archived = "{0} arquivados";
+            locale.sync_seg_removed = "{0} removidos";
+            locale.sync_seg_seeded = "{0} padrões instalados";
+            locale.sync_seg_forced = "{0} configs obrigatórias";
+            locale.sync_seg_optional_config = "{0} configs opcionais";
+            locale.sync_seg_backed_up = "{0} config(s) sua(s) preservada(s)";
+            locale.sync_seg_kept = "{0} mantidos";
+            locale.sync_seg_errors = "{0} erros";
             #endregion
 
             Directory.CreateDirectory(LocalizationProvider.DefaultLocaleFolderPath);
@@ -1398,6 +1414,38 @@ namespace SPT.Launcher.Helpers
 
         private string _update_deleting;
         public string update_deleting { get => _update_deleting; set => SetProperty(ref _update_deleting, value); }
+
+        // Item 031: progresso por ação
+        private string _update_archiving;
+        public string update_archiving { get => _update_archiving; set => SetProperty(ref _update_archiving, value); }
+        private string _update_seeding;
+        public string update_seeding { get => _update_seeding; set => SetProperty(ref _update_seeding, value); }
+        private string _update_forcing_config;
+        public string update_forcing_config { get => _update_forcing_config; set => SetProperty(ref _update_forcing_config, value); }
+        private string _update_applying_optional_config;
+        public string update_applying_optional_config { get => _update_applying_optional_config; set => SetProperty(ref _update_applying_optional_config, value); }
+
+        // Item 031: segmentos do resumo final
+        private string _sync_completed_prefix;
+        public string sync_completed_prefix { get => _sync_completed_prefix; set => SetProperty(ref _sync_completed_prefix, value); }
+        private string _sync_seg_downloaded;
+        public string sync_seg_downloaded { get => _sync_seg_downloaded; set => SetProperty(ref _sync_seg_downloaded, value); }
+        private string _sync_seg_archived;
+        public string sync_seg_archived { get => _sync_seg_archived; set => SetProperty(ref _sync_seg_archived, value); }
+        private string _sync_seg_removed;
+        public string sync_seg_removed { get => _sync_seg_removed; set => SetProperty(ref _sync_seg_removed, value); }
+        private string _sync_seg_seeded;
+        public string sync_seg_seeded { get => _sync_seg_seeded; set => SetProperty(ref _sync_seg_seeded, value); }
+        private string _sync_seg_forced;
+        public string sync_seg_forced { get => _sync_seg_forced; set => SetProperty(ref _sync_seg_forced, value); }
+        private string _sync_seg_optional_config;
+        public string sync_seg_optional_config { get => _sync_seg_optional_config; set => SetProperty(ref _sync_seg_optional_config, value); }
+        private string _sync_seg_backed_up;
+        public string sync_seg_backed_up { get => _sync_seg_backed_up; set => SetProperty(ref _sync_seg_backed_up, value); }
+        private string _sync_seg_kept;
+        public string sync_seg_kept { get => _sync_seg_kept; set => SetProperty(ref _sync_seg_kept, value); }
+        private string _sync_seg_errors;
+        public string sync_seg_errors { get => _sync_seg_errors; set => SetProperty(ref _sync_seg_errors, value); }
         #endregion
 
         #region trl_i18n_batch

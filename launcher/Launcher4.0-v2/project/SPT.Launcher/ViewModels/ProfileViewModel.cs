@@ -152,6 +152,10 @@ namespace SPT.Launcher.ViewModels
         // === Item 016 — taxa de download na barra de update (média móvel, MB/s decimal, PT-BR) ===
 
         private readonly DownloadRateMeter _rateMeter = new DownloadRateMeter();
+        // Item 031: run atual — guard contra um Progress<T> de um run anterior sobrescrever a msg final.
+        private int _syncRunId;
+        // Item 032: ticker que atualiza a taxa na UI em cadência fixa (~500ms), desacoplado dos chunks.
+        private DispatcherTimer _speedTicker;
 
         private string _downloadSpeedText = "";
         public string DownloadSpeedText
@@ -455,6 +459,10 @@ namespace SPT.Launcher.ViewModels
                 UpdateProgress = 0;
                 _rateMeter.Reset();      // item 016 — taxa limpa a cada verificação
                 DownloadSpeedText = "";
+                // Item 031: reset ÚNICO — o placar/link do run ANTERIOR não pode sobrar na tela (D-031.3).
+                LastUpdateText = "";
+                HasLastUpdate = false;
+                int myRun = ++_syncRunId;   // Item 031: run atual; reports de runs anteriores são ignorados.
                 LogManager.Instance.Info("[Profile] Verificando atualizações de mods...");
 
                 // 1. Buscar hash do manifesto do servidor (endpoint leve)
@@ -678,10 +686,12 @@ namespace SPT.Launcher.ViewModels
 
                     var applyProgress = new Progress<SyncProgress>(p =>
                     {
+                        if (myRun != _syncRunId) return;   // Item 031: report de run já encerrado → ignora (defensivo)
                         UpdateProgress = p.Current;
-                        UpdateStatusText = string.Format(LocalizationProvider.Instance.update_downloading, p.CurrentPath, p.Current, p.Total);
+                        UpdateStatusText = SyncMessages.ProgressText(p.Kind, p.CurrentPath, p.Current, p.Total);
                     });
 
+                    StartSpeedTicker();  // Item 032: taxa atualiza em cadência fixa durante o apply
                     result = await engine.ExecuteAsync(plan, ReportFilePath, applyProgress, _syncCts.Token);
                 }
                 else
@@ -695,7 +705,8 @@ namespace SPT.Launcher.ViewModels
                     LogManager.Instance.Warning($"[Profile] {warning}");
                 }
 
-                SetLastUpdate(result.Updated);
+                _syncRunId++;               // Item 031: invalida qualquer report de progresso ainda em voo
+                SetLastUpdate(result);      // Item 031: link por TOTAL de ações, não só Updated
                 OutdatedFiles = 0;
 
                 if (result.Cancelled)
@@ -710,8 +721,8 @@ namespace SPT.Launcher.ViewModels
                 }
                 else if (plan.IoActionCount > 0)
                 {
-                    UpdateStatusText = string.Format(LocalizationProvider.Instance.update_completed_success, result.Summary);
-                    LogManager.Instance.Info($"[Profile] Atualização concluída: {result.Summary}");
+                    UpdateStatusText = SyncMessages.BuildSummary(result);   // Item 031: i18n, não result.Summary (PT)
+                    LogManager.Instance.Info($"[Profile] Atualização concluída: {result.Summary}");  // log interno (PT ok)
                 }
                 else
                 {
@@ -766,6 +777,7 @@ namespace SPT.Launcher.ViewModels
             finally
             {
                 CanCancelUpdate = false;
+                StopSpeedTicker();      // item 032 — para o ticker da taxa (sucesso/erro/cancelamento)
                 DownloadSpeedText = ""; // item 016 — some com a taxa ao terminar a verificação
                 _syncCts?.Dispose();
                 _syncCts = null;
@@ -787,10 +799,20 @@ namespace SPT.Launcher.ViewModels
             // Item 030: um downloader só — o canal config-optional virou regra de pasta (as duas
             // entradas lógicas config-optional/ e config-optional-ref/ baixam do /download comum,
             // servidas pelo _fileMapCache do servidor). O overlay/performance-download foi aposentado.
-            SyncDownloader downloader = (path, ct) => Task.Run(() => RequestHandler.DownloadModFile(path), ct);
-
-            // Item 016 — camada MAIS EXTERNA: mede a taxa de todos os downloads.
-            downloader = WithSpeedMeter(downloader);
+            // Item 032: o downloader alimenta o meter POR CHUNK (medição intra-arquivo). O ticker
+            // (StartSpeedTicker) lê o meter em cadência fixa e atualiza a UI — não medimos mais por arquivo.
+            SyncDownloader downloader = (path, ct) => Task.Run(() =>
+            {
+                var sw = Stopwatch.StartNew();
+                long last = 0;
+                return RequestHandler.DownloadModFile(path, 30000, onProgress: total =>
+                {
+                    long delta = total - last;
+                    last = total;
+                    _rateMeter.AddSample(delta, sw.Elapsed); // (bytes do chunk, tempo do chunk)
+                    sw.Restart();
+                });
+            }, ct);
 
             return new SyncEngine(
                 gamePath,
@@ -800,31 +822,23 @@ namespace SPT.Launcher.ViewModels
                 log: msg => LogManager.Instance.Info(msg));
         }
 
-        /// <summary>
-        /// Item 016: envolve o downloader para medir bytes/tempo por arquivo e empurrar a taxa
-        /// suavizada pra barra de update via UI thread (o delegate roda em thread de Task).
-        /// </summary>
-        private SyncDownloader WithSpeedMeter(SyncDownloader inner)
+        // === Item 032: ticker da taxa — lê o meter em cadência fixa (~500ms), desacoplado dos chunks ===
+
+        private void StartSpeedTicker()
         {
-            return async (path, ct) =>
-            {
-                var stopwatch = Stopwatch.StartNew();
-                byte[] data = await inner(path, ct);
-                stopwatch.Stop();
-
-                _rateMeter.AddSample(data?.LongLength ?? 0, stopwatch.Elapsed);
-                double bytesPerSec = _rateMeter.BytesPerSecond;
-                string text = DownloadRateMeter.Format(bytesPerSec);
-
-                Dispatcher.UIThread.Post(() =>
-                {
-                    DownloadBytesPerSec = bytesPerSec;
-                    DownloadSpeedText = text;
-                });
-
-                return data;
-            };
+            _speedTicker ??= new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
+            _speedTicker.Tick -= OnSpeedTick;   // evita handler duplicado em runs repetidos
+            _speedTicker.Tick += OnSpeedTick;
+            _speedTicker.Start();
         }
+
+        private void OnSpeedTick(object sender, EventArgs e)
+        {
+            var (has, text) = _rateMeter.Snapshot(); // leitura ATÔMICA (CR-01-01)
+            DownloadSpeedText = has ? text : "";
+        }
+
+        private void StopSpeedTicker() => _speedTicker?.Stop();
 
         /// <summary>
         /// Requisito 4.1.2: cancelar com confirmação + alerta de consequência.
@@ -871,8 +885,11 @@ namespace SPT.Launcher.ViewModels
                 if (!File.Exists(ReportFilePath)) return;
 
                 var report = JObject.Parse(File.ReadAllText(ReportFilePath));
-                int updated = report["counts"]?["updated"]?.Value<int>() ?? 0;
-                SetLastUpdate(updated);
+                var c = report["counts"];
+                int Count(string key) => c?[key]?.Value<int>() ?? 0;
+                // Item 031: total de ações relevantes (mesmo critério do run atual, com os counts do JSON).
+                SetLastUpdateTotal(Count("updated") + Count("movedToDisabled") + Count("deleted")
+                                   + Count("forced") + Count("seeded"));
             }
             catch
             {
@@ -880,10 +897,16 @@ namespace SPT.Launcher.ViewModels
             }
         }
 
-        private void SetLastUpdate(int updatedCount)
+        // Item 031: o link "ver detalhes" liga por TOTAL de ações relevantes (não só downloads),
+        // senão some justamente num run que só moveu/removeu arquivos (Updated=0 — CA-031.6).
+        private void SetLastUpdate(SyncResult r)
+            => SetLastUpdateTotal(r.Updated + r.MovedToDisabled + r.Deleted + r.Forced + r.Seeded + r.OptionalConfigApplied);
+
+        private void SetLastUpdateTotal(int total)
         {
-            LastUpdateText = string.Format(LocalizationProvider.Instance.last_update_files_updated, updatedCount);
-            HasLastUpdate = updatedCount > 0;
+            LastUpdateText = string.Format(LocalizationProvider.Instance.last_update_files_updated, total);
+            HasLastUpdate = total > 0;
+            if (total > 0) IsUpdateVisible = true;   // Item 031: a área com o resumo+link fica visível (incl. no load)
         }
 
         public void LogoutCommand()

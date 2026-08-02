@@ -204,9 +204,9 @@ namespace SPT.Launcher
         /// Item 021: <paramref name="timeoutMs"/> parametrizado — o download de grupos opcionais
         /// (arquivos grandes) passa um limite maior que os 30 s default do sync (R-1).
         /// </summary>
-        public static byte[] DownloadModFile(string filePath, int timeoutMs = 30000)
+        public static byte[] DownloadModFile(string filePath, int timeoutMs = 30000, Action<long> onProgress = null)
         {
-            return DownloadBinary($"{request.RemoteEndPoint}{M("/launcher/mods/download")}?file={Uri.EscapeDataString(filePath)}", timeoutMs);
+            return DownloadBinary($"{request.RemoteEndPoint}{M("/launcher/mods/download")}?file={Uri.EscapeDataString(filePath)}", timeoutMs, onProgress);
         }
 
         // Item 030 (S-7): DownloadOptionalFile / RequestOptionalsManifest / DownloadPerformanceFile /
@@ -214,7 +214,9 @@ namespace SPT.Launcher
         // opcionais + overlay de performance aposentados, D-13). O canal config-performance baixa do
         // /download comum, como o resto do manifesto.
 
-        private static byte[] DownloadBinary(string url, int timeoutMs = 30000)
+        // Item 032: onProgress != null → lê em blocos e reporta os bytes ACUMULADOS durante a
+        // transferência (medição intra-arquivo). null = caminho antigo (CopyTo), byte[] idêntico (CC-4).
+        private static byte[] DownloadBinary(string url, int timeoutMs = 30000, Action<long> onProgress = null)
         {
             try
             {
@@ -226,7 +228,22 @@ namespace SPT.Launcher
                 using (var responseStream = response.GetResponseStream())
                 using (var memStream = new MemoryStream())
                 {
-                    responseStream.CopyTo(memStream);
+                    if (onProgress == null)
+                    {
+                        responseStream.CopyTo(memStream);
+                    }
+                    else
+                    {
+                        var buffer = new byte[81920];
+                        long total = 0;
+                        int read;
+                        while ((read = responseStream.Read(buffer, 0, buffer.Length)) > 0)
+                        {
+                            memStream.Write(buffer, 0, read);
+                            total += read;
+                            onProgress(total);
+                        }
+                    }
                     return memStream.ToArray();
                 }
             }

@@ -307,10 +307,11 @@ namespace SPT.Launcher.ViewModels
                 var progress = new Progress<SyncProgress>(p =>
                 {
                     Progress = p.Current;
-                    StatusText = string.Format(LocalizationProvider.Instance.update_downloading, p.CurrentPath, p.Current, p.Total);
+                    StatusText = SyncMessages.ProgressText(p.Kind, p.CurrentPath, p.Current, p.Total);  // Item 031
                     UpdateFileStatus(p.CurrentPath, "updating");
                 });
 
+                StartSpeedTicker();  // Item 032: taxa em cadência fixa durante o apply
                 var result = await engine.ExecuteAsync(plan, ReportFilePath, progress, _cts.Token);
 
                 foreach (var entry in result.Entries)
@@ -318,7 +319,7 @@ namespace SPT.Launcher.ViewModels
                     UpdateFileStatus(entry.path, MapEntryStatus(entry.action));
                 }
 
-                SummaryText = result.Summary;
+                SummaryText = SyncMessages.BuildSummary(result);  // Item 031: i18n
                 OutdatedFiles = 0;
                 _plan = null; // always re-check before another apply
 
@@ -336,7 +337,7 @@ namespace SPT.Launcher.ViewModels
                 else
                 {
                     UpdateComplete = true;
-                    StatusText = string.Format(LocalizationProvider.Instance.update_completed, result.Updated);
+                    StatusText = SyncMessages.BuildSummary(result);  // Item 031: mesma frase i18n do Profile
                     Controllers.LogManager.Instance.Info($"[ModUpdateView] Atualização concluída: {result.Summary}");
                 }
             }
@@ -349,6 +350,7 @@ namespace SPT.Launcher.ViewModels
             {
                 IsUpdating = false;
                 CanCancel = false;
+                StopSpeedTicker();      // item 032
                 DownloadSpeedText = ""; // item 016 — some com a taxa ao terminar o apply
                 _cts?.Dispose();
                 _cts = null;
@@ -398,11 +400,19 @@ namespace SPT.Launcher.ViewModels
         private SyncEngine CreateEngine()
         {
             // Item 030: um downloader só (overlay/performance-download aposentado — D-13).
-            SyncDownloader downloader = (path, ct) => Task.Run(() => RequestHandler.DownloadModFile(path), ct);
-
-            // Item 016 — mede a taxa como camada MAIS EXTERNA: captura todos os downloads
-            // (base, overlay do 008 e seeds do 017), independente da origem.
-            downloader = WithSpeedMeter(downloader);
+            // Item 032: o downloader alimenta o meter POR CHUNK (intra-arquivo); o ticker lê o meter.
+            SyncDownloader downloader = (path, ct) => Task.Run(() =>
+            {
+                var sw = System.Diagnostics.Stopwatch.StartNew();
+                long last = 0;
+                return RequestHandler.DownloadModFile(path, 30000, onProgress: total =>
+                {
+                    long delta = total - last;
+                    last = total;
+                    _rateMeter.AddSample(delta, sw.Elapsed);
+                    sw.Restart();
+                });
+            }, ct);
 
             return new SyncEngine(
                 _gamePath,
@@ -412,31 +422,25 @@ namespace SPT.Launcher.ViewModels
                 log: msg => Controllers.LogManager.Instance.Info(msg));
         }
 
-        /// <summary>
-        /// Item 016: wraps a downloader to measure bytes/time per file and push the smoothed rate to
-        /// the VM via the UI thread (the delegate runs on a Task thread). No coupling to the engine.
-        /// </summary>
-        private SyncDownloader WithSpeedMeter(SyncDownloader inner)
+        // === Item 032: ticker da taxa — lê o meter em cadência fixa (~500ms), desacoplado dos chunks ===
+
+        private Avalonia.Threading.DispatcherTimer _speedTicker;
+
+        private void StartSpeedTicker()
         {
-            return async (path, ct) =>
-            {
-                var stopwatch = System.Diagnostics.Stopwatch.StartNew();
-                byte[] data = await inner(path, ct);
-                stopwatch.Stop();
-
-                _rateMeter.AddSample(data?.LongLength ?? 0, stopwatch.Elapsed);
-                double bytesPerSec = _rateMeter.BytesPerSecond;
-                string text = DownloadRateMeter.Format(bytesPerSec);
-
-                Avalonia.Threading.Dispatcher.UIThread.Post(() =>
-                {
-                    DownloadBytesPerSec = bytesPerSec;
-                    DownloadSpeedText = text;
-                });
-
-                return data;
-            };
+            _speedTicker ??= new Avalonia.Threading.DispatcherTimer { Interval = System.TimeSpan.FromMilliseconds(500) };
+            _speedTicker.Tick -= OnSpeedTick;   // evita handler duplicado em runs repetidos
+            _speedTicker.Tick += OnSpeedTick;
+            _speedTicker.Start();
         }
+
+        private void OnSpeedTick(object sender, System.EventArgs e)
+        {
+            var (has, text) = _rateMeter.Snapshot(); // leitura ATÔMICA (CR-01-01)
+            DownloadSpeedText = has ? text : "";
+        }
+
+        private void StopSpeedTicker() => _speedTicker?.Stop();
 
         private static string BuildPlanSummary(SyncPlan plan)
         {

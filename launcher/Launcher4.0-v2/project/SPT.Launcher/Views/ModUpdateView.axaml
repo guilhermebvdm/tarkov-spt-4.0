@@ -23,10 +23,14 @@
 
         <!-- Progresso + cancelar + resumo -->
         <StackPanel Grid.Row="1" Spacing="6" Margin="0,14,0,14">
-            <Grid ColumnDefinitions="*,Auto,Auto">
+            <!-- Item 031: a BARRA some quando não há sync em curso (IsBusy); o resumo abaixo permanece -->
+            <Grid ColumnDefinitions="*,Auto,Auto" IsVisible="{Binding IsBusy}">
                 <ProgressBar Minimum="0" Maximum="{Binding MaxProgress}" Value="{Binding Progress}"
                              VerticalAlignment="Center"/>
-                <!-- velocidade de download removida a pedido -->
+                <!-- Item 032: velocidade de download (rebind) -->
+                <TextBlock Grid.Column="1" Text="{Binding DownloadSpeedText}" IsVisible="{Binding HasDownloadSpeed}"
+                           Classes="trl-mono trl-muted" VerticalAlignment="Center" Margin="8,0,0,0"
+                           FontSize="{DynamicResource TrlTextXs}"/>
                 <!-- 4.1.2: cancelar com confirmação (dialog na VM) -->
                 <Button Grid.Column="2" Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=cancel_button}" Classes="ghost sm" Cursor="Hand" Margin="8,0,0,0"
                         Command="{Binding CancelCommand}" IsVisible="{Binding CanCancel}"

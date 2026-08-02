@@ -6,18 +6,21 @@ namespace SPT.Launcher.Sync
     /// <summary>Progress callback payload for both planning ("checking") and execution ("applying") phases.</summary>
     public sealed class SyncProgress
     {
-        public SyncProgress(string phase, string currentPath, int current, int total)
+        public SyncProgress(string phase, string currentPath, int current, int total, SyncActionKind? kind = null)
         {
             Phase = phase;
             CurrentPath = currentPath;
             Current = current;
             Total = total;
+            Kind = kind;
         }
 
         public string Phase { get; }
         public string CurrentPath { get; }
         public int Current { get; }
         public int Total { get; }
+        /// <summary>Item 031: tipo da ação em curso (null na fase "checking") — a UI escolhe a frase.</summary>
+        public SyncActionKind? Kind { get; }
     }
 
     /// <summary>Output of <see cref="SyncPlanner"/> — pure data, nothing has been written to disk yet.</summary>

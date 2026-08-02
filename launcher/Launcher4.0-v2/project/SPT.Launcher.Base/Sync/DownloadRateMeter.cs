@@ -23,6 +23,8 @@ namespace SPT.Launcher.Sync
         private readonly Queue<(long bytes, double seconds)> _samples = new Queue<(long, double)>();
         private long _sumBytes;
         private double _sumSeconds;
+        // Item 032 (CR-01-01): AddSample roda na thread do download; Snapshot no ticker da UI → lock.
+        private readonly object _gate = new object();
 
         /// <param name="windowSize">How many recent samples are averaged together (clamped to >= 1).</param>
         public DownloadRateMeter(int windowSize = 5)
@@ -43,15 +45,18 @@ namespace SPT.Launcher.Sync
                 return;
             }
 
-            _samples.Enqueue((bytes, seconds));
-            _sumBytes += bytes;
-            _sumSeconds += seconds;
-
-            while (_samples.Count > _windowSize)
+            lock (_gate)
             {
-                var evicted = _samples.Dequeue();
-                _sumBytes -= evicted.bytes;
-                _sumSeconds -= evicted.seconds;
+                _samples.Enqueue((bytes, seconds));
+                _sumBytes += bytes;
+                _sumSeconds += seconds;
+
+                while (_samples.Count > _windowSize)
+                {
+                    var evicted = _samples.Dequeue();
+                    _sumBytes -= evicted.bytes;
+                    _sumSeconds -= evicted.seconds;
+                }
             }
         }
 
@@ -67,9 +72,25 @@ namespace SPT.Launcher.Sync
         /// <summary>Clears every sample — call at the start of a new sync/verification run.</summary>
         public void Reset()
         {
-            _samples.Clear();
-            _sumBytes = 0;
-            _sumSeconds = 0;
+            lock (_gate)
+            {
+                _samples.Clear();
+                _sumBytes = 0;
+                _sumSeconds = 0;
+            }
+        }
+
+        /// <summary>
+        /// Item 032 (CR-01-01): leitura ATÔMICA para o ticker da UI (thread diferente do AddSample) —
+        /// o par (tem-taxa, texto formatado) sob um único lock, evitando torn read / somas incoerentes.
+        /// </summary>
+        public (bool has, string formatted) Snapshot()
+        {
+            lock (_gate)
+            {
+                bool has = _sumSeconds > 0 && _sumBytes > 0;
+                return (has, has ? Format(_sumBytes / _sumSeconds) : string.Empty);
+            }
         }
 
         /// <summary>

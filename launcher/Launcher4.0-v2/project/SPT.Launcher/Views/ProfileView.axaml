@@ -214,9 +214,13 @@
                 <!-- BARRA DE PROGRESSO / UPDATE (item 007: cancelar + link do relatório) -->
                 <StackPanel Grid.Row="1" Margin="20,0,20,5" IsVisible="{Binding IsUpdateVisible}" Spacing="5" VerticalAlignment="Bottom">
                     <TextBlock Text="{Binding UpdateStatusText}" Classes="trl-muted" FontSize="{DynamicResource TrlTextXs}"/>
-                    <Grid ColumnDefinitions="*,Auto,Auto">
+                    <!-- Item 031: a BARRA some ao concluir (IsSyncRunning); o texto final + link ficam no StackPanel -->
+                    <Grid ColumnDefinitions="*,Auto,Auto" IsVisible="{Binding IsSyncRunning}">
                         <ProgressBar Minimum="0" Maximum="{Binding UpdateMaxProgress}" Value="{Binding UpdateProgress}" VerticalAlignment="Center"/>
-                        <!-- velocidade de download removida a pedido -->
+                        <!-- Item 032: velocidade de download (rebind) -->
+                        <TextBlock Grid.Column="1" Text="{Binding DownloadSpeedText}" IsVisible="{Binding HasDownloadSpeed}"
+                                   Classes="trl-mono trl-muted" VerticalAlignment="Center" Margin="8,0,0,0"
+                                   FontSize="{DynamicResource TrlTextXs}"/>
                         <Button Grid.Column="2" Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=update_cancel_button}" Classes="ghost sm" Cursor="Hand" Margin="8,0,0,0"
                                 Command="{Binding CancelUpdateCommand}" IsVisible="{Binding CanCancelUpdate}"
                                 ToolTip.Tip="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=update_cancel_tooltip}"/>

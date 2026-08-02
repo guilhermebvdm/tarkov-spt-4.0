@@ -83,7 +83,7 @@ namespace SPT.Launcher.Sync
                     }
 
                     cancellationToken.ThrowIfCancellationRequested();
-                    progress?.Report(new SyncProgress("applying", action.RelativePath, ioDone + 1, ioTotal));
+                    progress?.Report(new SyncProgress("applying", action.RelativePath, ioDone + 1, ioTotal, action.Kind));
 
                     switch (action.Kind)
                     {
