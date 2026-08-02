@@ -41,7 +41,7 @@ Propriedades expostas no menu de configuração (F12 / ConfigurationManager). Um
 | `Class seal — Y offset` | float | `-20` | −1000..1000 | Selo da classe (tela de Skills) — offset vertical do topo (negativo = para baixo). |
 | `Class icon size ratio` | float | `1.35` | 0.8..2.5 | Tamanho do ícone = fonte do nome × ratio (mantém a proporção ícone:fonte em todas as telas). |
 | `Deploy name scale` | float | `1.2` | 1.0..4.0 | Escala do ícone+nome do jogador na tela de deploy/loading (ícone e nome crescem juntos). |
-| `Class Tab — X offset` | float | `0` | −400..400 | Ajuste fino da posição horizontal do botão da aba CLASS. |
+| `Class Tab — X offset` | float | `185` | −400..400 | Ajuste fino da posição horizontal do botão da aba CLASS. |
 | `Class Detail on Loading Screen` | bool | `true` | — | Detalhe da classe (perks/drawbacks) no seu nome na tela de loading da raid (FIKA). (item 055) |
 | `Class Detail — Loading panel scale` | float | `0.75` | 0.5..1.0 | Escala (zoom-out) do popover de classe no loading (mesma área, conteúdo menor). |
 | `Weight Marker — X offset` | float | `-107.0423` | −600..600 | Posição horizontal do marcador `▲ +X%` no peso (aba Health). Default calibrado in-game. (item 056) |

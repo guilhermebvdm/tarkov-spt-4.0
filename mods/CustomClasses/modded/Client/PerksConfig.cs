@@ -234,7 +234,7 @@ internal static class PerksConfig
 
         // ─────────────────── 1 · Interface & Position ───────────────────
         ClassTabOffsetX = BindOrdered(config, 
-            SecInterface, "Class Tab — X offset", 0f,
+            SecInterface, "Class Tab — X offset", 185f,
             new ConfigDescription(
                 "Ajuste fino da posição horizontal do botão da aba CLASS (px). Só use se a aba não alinhar. / Fine-tune the CLASS tab button horizontal position (px).",
                 new AcceptableValueRange<float>(-400f, 400f)));

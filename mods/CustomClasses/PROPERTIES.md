@@ -41,7 +41,7 @@ Properties exposed in the configuration menu (F12 / ConfigurationManager). One i
 | `Class seal — Y offset` | float | `-20` | −1000..1000 | Class seal (Skills screen) — vertical offset from top (negative = down). |
 | `Class icon size ratio` | float | `1.35` | 0.8..2.5 | Icon size = name font × ratio (keeps the icon:font proportion across screens). |
 | `Deploy name scale` | float | `1.2` | 1.0..4.0 | Scale of the player icon+name on the deploy/loading screen (icon and name grow together). |
-| `Class Tab — X offset` | float | `0` | −400..400 | Fine-tune the CLASS tab button horizontal position. |
+| `Class Tab — X offset` | float | `185` | −400..400 | Fine-tune the CLASS tab button horizontal position. |
 | `Class Detail on Loading Screen` | bool | `true` | — | Class detail (perks/drawbacks) on your name in the raid loading screen (FIKA). (item 055) |
 | `Class Detail — Loading panel scale` | float | `0.75` | 0.5..1.0 | Scale (zoom-out) of the loading-screen class popover (same footprint, smaller content). |
 | `Weight Marker — X offset` | float | `-107.0423` | −600..600 | Horizontal position of the `▲ +X%` weight marker (Health tab). Default calibrated in-game. (item 056) |
