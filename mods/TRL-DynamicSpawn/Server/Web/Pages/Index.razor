@@ -1490,31 +1490,34 @@ html, body {
         });
     }
 
-    // Scroll container to top and flash the anchor alert element
+    // Scroll to page top and flash the anchor alert element
     window.scrollToTopAlert = function(event, containerId, alertId) {
         event.preventDefault();
-        const container = document.getElementById(containerId);
         const alert = document.getElementById(alertId);
+
+        // Scroll the main scrollable area to the very top
+        const main = document.querySelector('.trl-main') || document.querySelector('main') || document.documentElement;
+        main.scrollTo({ top: 0, behavior: 'smooth' });
+        // Also reset inner containers just in case
+        const container = document.getElementById(containerId);
         if (container) container.scrollTop = 0;
-        if (container) container.parentElement?.scrollTo({ top: 0, behavior: 'smooth' });
-        // Scroll the panel body to top
-        const panel = document.querySelector('#sec-boss-config .trl-panel__body, #sec-boss-config .trl-panel');
-        if (panel) panel.scrollTo({ top: 0, behavior: 'smooth' });
+
+        // Flash the note box after scroll settles
         if (alert) {
-            alert.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            // Flash animation
-            alert.style.transition = 'box-shadow 0.15s ease';
-            let flashes = 0;
-            const interval = setInterval(() => {
-                alert.style.boxShadow = flashes % 2 === 0
-                    ? '0 0 0 2px var(--trl-accent), 0 0 12px rgba(200,170,80,0.45)'
-                    : 'none';
-                flashes++;
-                if (flashes >= 6) {
-                    clearInterval(interval);
-                    alert.style.boxShadow = 'none';
-                }
-            }, 180);
+            setTimeout(() => {
+                alert.style.transition = 'box-shadow 0.15s ease';
+                let flashes = 0;
+                const interval = setInterval(() => {
+                    alert.style.boxShadow = flashes % 2 === 0
+                        ? '0 0 0 2px var(--trl-accent), 0 0 12px rgba(200,170,80,0.45)'
+                        : 'none';
+                    flashes++;
+                    if (flashes >= 6) {
+                        clearInterval(interval);
+                        alert.style.boxShadow = 'none';
+                    }
+                }, 180);
+            }, 400); // pequeno delay para o scroll terminar antes do flash
         }
     };
 
