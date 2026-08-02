@@ -5,7 +5,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <OutputType>Library</OutputType>
-    <Version>1.0.0</Version>
+    <!-- Manter em sincronia com Plugin.cs (SemanticVersioning.Version). Define AssemblyVersion/
+         FileVersion/InformationalVersion → é a "Versão do arquivo" que o Windows mostra. -->
+    <Version>4.1.0</Version>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <EnableDefaultContentItems>false</EnableDefaultContentItems>
     <NoDefaultLaunchSettingsFile>true</NoDefaultLaunchSettingsFile>
