@@ -44,6 +44,23 @@ Versões mais recentes primeiro.
 
 ---
 
+## v2.12.1 (2026-07-27)
+
+### Correção — o painel de munição da câmara não aparecia
+
+A entrega da v2.10.0 pedia o painel ao jogo por um caminho indireto (assinar o evento `Player.OnShowAmmoDetails`
+por reflexão): o assinante era encontrado, nenhum erro acontecia, **e o painel simplesmente não desenhava** no
+teste real (estande de tiro do esconderijo). Agora a chamada é direta na tela de combate
+(`EftBattleUIScreen.ShowAmmoDetails` via `Singleton<CommonUI>`), abordagem que o RealismMod já usava — some a
+dependência de **qual instância de jogador** o evento estava ligado. Corrigido junto o limite de contagem de
+munição, para bater com a fórmula do painel nativo. Ref: code-review 02/03 do item 019.
+
+> **Nota de histórico:** o `PickupAimingSafetyPatch` chegou a este mod em 2026-07-25 (vindo do `TRL-Fixes`,
+> commit `19aa6499`) **sem release próprio** — não existiu uma v2.12.0; o número saltou de 2.11.0 para 2.12.1.
+> O patch foi devolvido ao `TRL-Fixes` na v2.13.0, ver a seção "Escopo" daquela versão.
+
+---
+
 ## v2.11.0 (2026-07-26)
 
 ### Endurecimento da sincronização de rede FIKA
