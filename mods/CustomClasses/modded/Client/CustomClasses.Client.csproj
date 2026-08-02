@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <RootNamespace>CustomClasses.Client</RootNamespace>
     <AssemblyName>CustomClasses-Client</AssemblyName>
-    <Version>0.16.4</Version>
+    <Version>0.16.5</Version>
     <!-- Refs resolvidas pelo .agents/scripts/compile-mod.sh em ./References/ (copiadas do SPT install). -->
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>

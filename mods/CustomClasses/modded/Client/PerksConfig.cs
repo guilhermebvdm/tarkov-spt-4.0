@@ -67,11 +67,15 @@ internal static class PerksConfig
     }
 
     private static int _order = short.MaxValue;   // 1º bind = topo; decrementa a cada BindOrdered (contador compartilhado Plugin+PerksConfig)
+    // Pool SEPARADO e bem abaixo para o par de cor: garante que a cor fique no FUNDO da seção mesmo quando um perk
+    // COMPARTILHADO (Light Frame/Quick Draw em Hunter, Loud Looter em Rifleman) é bindado no bloco de OUTRA classe e
+    // recebe Order menor que a cor. Como todo perk tem Order > 0 (perto de short.MaxValue), a cor sempre afunda. (MP-01-02)
+    private static int _colorOrder = short.MinValue + 100;
 
-    /// <summary>Bind com Order automático — tooltip simples (sem range).</summary>
-    internal static ConfigEntry<T> BindOrdered<T>(ConfigFile cfg, string section, string key, T def, string tooltip, bool advanced = false)
+    /// <summary>Bind com Order automático — tooltip simples (sem range). <paramref name="order"/> força um Order fixo (ex.: par de cor no fundo).</summary>
+    internal static ConfigEntry<T> BindOrdered<T>(ConfigFile cfg, string section, string key, T def, string tooltip, bool advanced = false, int? order = null)
     {
-        var attr = new ConfigurationManagerAttributes { Order = _order--, IsAdvanced = advanced ? true : (bool?)null };
+        var attr = new ConfigurationManagerAttributes { Order = order ?? _order--, IsAdvanced = advanced ? true : (bool?)null };
         return cfg.Bind(section, key, def, new ConfigDescription(tooltip, null, attr));
     }
 
@@ -662,12 +666,16 @@ internal static class PerksConfig
     /// </summary>
     private static void BindClassColor(ConfigFile config, string section, string classNameEn, string serverHex)
     {
-        var ovr = BindOrdered(config, 
+        // order: pool _colorOrder (bem abaixo dos perks) → o par de cor SEMPRE no fundo da seção, mesmo com perks
+        // compartilhados bindados no bloco de outra classe (Override acima de Class color: 1º bind = Order maior).
+        var ovr = BindOrdered(config,
             section, "Override color", false,
-            "Sobrescreve a cor do nome/ícone desta classe pela 'Class color' abaixo. Desligado (default) = usa a cor do server. / Override this class's name/icon color with 'Class color' below. Off (default) = use the server color.");
-        var col = BindOrdered(config, 
+            "Sobrescreve a cor do nome/ícone desta classe pela 'Class color' abaixo. Desligado (default) = usa a cor do server. / Override this class's name/icon color with 'Class color' below. Off (default) = use the server color.",
+            order: _colorOrder--);
+        var col = BindOrdered(config,
             section, "Class color", Hex(serverHex),
-            "Cor do nome/ícone da classe — só vale com 'Override color' ligado. O alpha é ignorado (a cor do nome é sempre opaca). / Class name/icon color — only applies when 'Override color' is on. Alpha is ignored (name color is always opaque).");
+            "Cor do nome/ícone da classe — só vale com 'Override color' ligado. O alpha é ignorado (a cor do nome é sempre opaca). / Class name/icon color — only applies when 'Override color' is on. Alpha is ignored (name color is always opaque).",
+            order: _colorOrder--);
 
         ClassColors[classNameEn] = new ClassColorEntry(ovr, col);
         ovr.SettingChanged += (_, _) => ClassColorsChanged?.Invoke();
