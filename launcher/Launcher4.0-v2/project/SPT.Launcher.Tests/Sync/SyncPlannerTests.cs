@@ -218,6 +218,28 @@ namespace SPT.Launcher.Tests.Sync
         }
 
         [Fact]
+        public async Task Disabled_optional_mod_that_is_coop_essential_is_never_quarantined()
+        {
+            using var fx = new SyncTestFixture();
+            fx.WriteLocal("BepInEx/plugins/Fika.Core.dll", "fika-bytes");
+
+            var manifest = new[]
+            {
+                // Um plugin da família Fika oferecido como opcional e DESLIGADO (default).
+                fx.Entry("BepInEx/plugins/Fika.Core.dll", "fika-bytes", optional: true, optionalId: "fika"),
+            };
+
+            // 🟡 CR-01-01: o guard coop-safe de QuarantineDisabledOptionalMods NUNCA move um plugin Fika,
+            // mesmo taggeado opcional e desligado — mover quebraria o join de todo cliente não-host, e
+            // solo=host mascara 100%. Espelha o guard do ScanExtras pelo eixo de opcionais.
+            var plan = await PlanAsync(fx, manifest);
+
+            Assert.DoesNotContain(plan.Actions,
+                a => a.Kind == SyncActionKind.MoveToDisabled && a.RelativePath.Contains("Fika.Core.dll"));
+            Assert.Contains(plan.Warnings, w => w.Contains("coop-safe"));
+        }
+
+        [Fact]
         public async Task Enabled_optional_mod_files_are_not_quarantined()
         {
             using var fx = new SyncTestFixture();

@@ -312,7 +312,11 @@ namespace SPT.Launcher.Sync
                             {
                                 RelativePath = file.path,            // fonte: config-optional/<rel>
                                 SeedTargetRelative = perfTargetRel,  // destino: config/<rel>
-                                MoveTargetRelative = exists
+                                // CR-01-04: só faz backup quando há algo DO PLAYER a preservar (toggle recente OU
+                                // divergência do baseline). Num update de rotina intocado (perfMatchesBaseline, sem
+                                // toggle) o que está em config/ é a versão ANTERIOR DO SERVIDOR — guardá-la em
+                                // optional-config/replaced/ (rótulo "sua config", D-20) é ruído e incha a quarentena.
+                                MoveTargetRelative = (exists && (justToggled || !perfMatchesBaseline))
                                     ? SyncPathUtil.DeriveDisabledBackup(perfTargetRel, matchedPrefix, SyncPathUtil.DisabledOrigin.OptionalConfigReplaced)
                                     : null,
                                 Kind = SyncActionKind.OptionalConfigCopy,

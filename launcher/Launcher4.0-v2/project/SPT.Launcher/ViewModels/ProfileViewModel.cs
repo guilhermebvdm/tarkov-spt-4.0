@@ -250,6 +250,14 @@ namespace SPT.Launcher.ViewModels
                 Carousel.Start();
                 Disposable.Create(() => Carousel.Stop()).DisposeWith(disposables);
 
+                // CR-03-04: o resumo "Mods e Configs" é materializado por string.Format (não é binding
+                // reativo), então não reage sozinho à troca de idioma. Re-renderiza quando o locale muda
+                // com o Profile ativo; o handler estático é removido ao desativar (evita leak).
+                EventHandler onLocaleChanged = (_, _) =>
+                    Dispatcher.UIThread.Post(RefreshModsConfigsSummary);
+                LocalizationProvider.LocaleChanged += onLocaleChanged;
+                Disposable.Create(() => LocalizationProvider.LocaleChanged -= onLocaleChanged).DisposeWith(disposables);
+
                 // Item 030 (PA-01-03/§5.6): ao voltar da tela "Mods e Configs", se há intenção pendente
                 // e o jogo está fechado (CA-030.23), dispara o sync — a tela NÃO sincroniza, quem aplica
                 // é aqui, com o guard de concorrência existente. Se um sync já roda, a pendência persiste.

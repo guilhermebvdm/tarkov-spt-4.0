@@ -143,6 +143,33 @@ namespace SPT.Launcher.Tests.Sync
                 a => a.Rule == SyncFolderRule.OptionalConfigToConfig && a.Kind == SyncActionKind.PreserveCustomized);
         }
 
+        // 🟡 CR-01-02 — desligar performance quando a base é config-FORCE e o alvo foi customizado: o
+        // canal force RECLAMA o alvo (ForceCopy, com backup em config-disabled/), comportamento
+        // INTENCIONAL (não-destrutivo + coop-correto: a config forçada volta a valer). O canal de
+        // performance NÃO emite PreserveCustomized — a base decide o alvo nesta passada.
+        [Fact]
+        public async Task Disabling_with_customized_force_base_lets_force_reclaim_the_target()
+        {
+            using var fx = new SyncTestFixture();
+            var manifest = new[]
+            {
+                fx.Entry(ForceSource, "forcada"),
+                fx.Entry(PerfSource, "perf-config", optionalConfigId: "perf1"),
+            };
+
+            // liga a performance e aplica (o force fica suprimido nesta fase)…
+            await fx.PlanAndRunAsync(manifest,
+                fx.Options(performanceEnabled: id => id == "perf1", justToggled: new[] { "perf1" }));
+            fx.WriteLocal(Target, "eu-mexi-depois"); // customiza o alvo à mão
+
+            // …depois desliga a performance.
+            var plan = await PlanAsync(fx, manifest, fx.Options(performanceEnabled: _ => false));
+
+            Assert.DoesNotContain(plan.Actions,
+                a => a.Rule == SyncFolderRule.OptionalConfigToConfig && a.Kind == SyncActionKind.PreserveCustomized);
+            Assert.Contains(plan.Actions, a => a.Kind == SyncActionKind.ForceCopy);
+        }
+
         // CA-030.1 / RN-2 — performance LIGADA vence config-force do mesmo alvo; o force é suprimido e o
         // relatório registra optional-config-suppressed-force.
         [Fact]

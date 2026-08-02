@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reactive;
 using ReactiveUI;
 using SPT.Launcher.Attributes;
+using SPT.Launcher.Controllers;
 using SPT.Launcher.Helpers;
 using SPT.Launcher.ViewModels.Dialogs;
 
@@ -48,7 +49,10 @@ namespace SPT.Launcher.ViewModels
             if (_onboarding)
             {
                 // CA-030.18: modal one-shot explicando a escolha (não bloqueia; roda após a tela montar).
-                var _ = ShowDialog(new OnboardingDialogViewModel());
+                // CR-03-05: observa a Task descartada — se o DialogHost lançar, a falha é logada em vez de sumir.
+                _ = ShowDialog(new OnboardingDialogViewModel())
+                    .ContinueWith(t => LogManager.Instance.Exception(t.Exception!),
+                        System.Threading.Tasks.TaskContinuationOptions.OnlyOnFaulted);
             }
         }
 
@@ -186,7 +190,14 @@ namespace SPT.Launcher.ViewModels
                 settings.PendingApply.Add(SyncTriggers.PendingApplyMarker);
             }
 
-            settings.SaveSettings();
+            // CR-03-01: OpenModsConfigsCommand desliga AllowSettings ao abrir; restaura ao sair (espelha
+            // SettingsViewModel.GoBackCommand) — senão a engrenagem de Configurações some pela sessão.
+            settings.AllowSettings = true;
+            // CR-03-02: falha de gravação não pode passar silenciosa — as prefs/onboarding não persistiriam
+            // e o sync rodaria só com o PendingApply em memória (toggles somem no próximo login).
+            if (!settings.SaveSettings())
+                SendNotification("", LocalizationProvider.Instance.failed_to_save_settings,
+                    Avalonia.Controls.Notifications.NotificationType.Error);
             NavigateBack();
         }
     }

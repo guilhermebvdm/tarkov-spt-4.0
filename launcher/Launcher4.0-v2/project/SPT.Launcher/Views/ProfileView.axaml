@@ -78,8 +78,10 @@
                     <!-- Item 030: acesso à tela "Mods e Configs" (substitui o placeholder em construção).
                          Desabilitado durante o sync (CanVerifyFiles = jogo fechado & sem sync) — evita
                          registrar toggles enquanto um sync em voo os descartaria (🟡 CR). -->
+                    <!-- CR-03-03: tooltip do gate CA-030.23 — Avalonia mostra tooltip mesmo com o botão apagado. -->
                     <Button Classes="nav" Cursor="Hand" Command="{Binding OpenModsConfigsCommand}"
-                            IsEnabled="{Binding CanVerifyFiles}">
+                            IsEnabled="{Binding CanVerifyFiles}"
+                            ToolTip.Tip="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=mods_configs_game_running}">
                         <StackPanel Orientation="Horizontal" Spacing="10">
                             <Path Data="{StaticResource TrlIconMenu2}" VerticalAlignment="Center"/>
                             <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=nav_mods_configs}" VerticalAlignment="Center"/>
@@ -146,7 +148,8 @@
                                  Background="{DynamicResource TrlPanelOverPhotoBrush}"
                                  IsVisible="{Binding HasModsConfigsSummary}">
                         <Button Classes="ghost" Cursor="Hand" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
-                                Command="{Binding OpenModsConfigsCommand}" IsEnabled="{Binding CanVerifyFiles}">
+                                Command="{Binding OpenModsConfigsCommand}" IsEnabled="{Binding CanVerifyFiles}"
+                                ToolTip.Tip="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=mods_configs_game_running}">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <TextBlock Text="{Binding ModsConfigsSummary}" VerticalAlignment="Center"
                                            FontSize="{DynamicResource TrlTextXs}" TextWrapping="Wrap"/>
