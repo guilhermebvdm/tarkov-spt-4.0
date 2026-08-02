@@ -6,13 +6,14 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados quan
 
 ## Estado atual (snapshot ao fim da última sessão)
 
-- **Fork ativo = `modded` (CANÔNICO desde 2026-07-09).** Reorg: `git mv modded-beta → modded` e antigo `modded → modded-bak` (backup, não editar). Build **self-contained** (`/compile-mod` OU `dotnet build`; csproj puxa `Fika.Core` da raiz `references/`, sem `mods/references/` temp). **Deploy manual** do DLL em `D:/SPT/BepInEx/plugins/RealisticMobility/` (assets `.ogg`/`.png` ao lado; `/compile-mod` instala em `plugins/<AssemblyName>/`, então copiar à mão). **DLL atual: v2.10.0 (`ed9cf500`)** — deployada localmente em `D:/SPT` (EFT fechado durante deploy); **servidor NÃO recebeu ainda** ([P-11.7]). Trilha desde a 2.5.0: 2.8.1 (`47d30935`, fix de colisão de `Order`) → 2.8.2 (`316b6581`, ADS Waypoint no rodapé) → 2.9.0 (`8c9ae609`, 30 configs promovidas a default + item 018 backlog) → 2.10.0 (`ed9cf500`, item 019 chamber-check ammo UI). Ver Sessão 11 (cont. 6) e memória global `reference_stances_canonical_build`.
+- **Fork ativo = `modded` (CANÔNICO desde 2026-07-09).** Reorg: `git mv modded-beta → modded` e antigo `modded → modded-bak` (backup, não editar). Build **self-contained** (`/compile-mod` OU `dotnet build`; csproj puxa `Fika.Core` da raiz `references/`, sem `mods/references/` temp). **Deploy manual** do DLL em `D:/SPT/BepInEx/plugins/RealisticMobility/` (assets `.ogg`/`.png` ao lado; `/compile-mod` instala em `plugins/<AssemblyName>/`, então copiar à mão). **DLL atual: v2.13.0** (build local; **não deployada** — o `modded/` mudou depois da última build, rebuildar antes de copiar). **Nem `D:/SPT` nem o servidor têm a 2.13.0** ([P-11.7]). Trilha desde a 2.5.0: 2.8.1 (`47d30935`, fix de colisão de `Order`) → 2.8.2 (`316b6581`, ADS Waypoint no rodapé) → 2.9.0 (`8c9ae609`, 30 configs promovidas a default + item 018 backlog) → 2.10.0 (`ed9cf500`, item 019 chamber-check ammo UI) → **2.11.0** (`22ae6176`, 26/07, envelope de comprimento no pacote de stance do FIKA — release lockstep) → **2.12.1** (`bada9d2a`, 27/07, chamber-check UI refeita via `EftBattleUIScreen` — a v1 resolvia o assinante sem erro e o painel nunca desenhava) → **2.13.0** (Sessão 12). ⚠️ **Não existiu v2.12.0**: o `PickupAimingSafetyPatch` entrou em 25/07 (`19aa6499`) sem release próprio e foi devolvido ao TRL-Fixes na 2.13.0. ⚠️ **As versões 2.11.0–2.12.1 não passaram por `/update-memory`** — o que se sabe delas vem do `git log` e do `modded/CHANGELOG.md`, não desta memória. Ver Sessão 12 e memória global `reference_stances_canonical_build`.
 - ⚠️⚠️ **EIXOS DA ARMA SÃO LOCAIS, NÃO OS DO UNITY** (fix v2.2.0, commit `d9069fb`). A rotação é aplicada como `weapRotation * Quaternion.Euler(euler)` (`ApplyComplexRotationPatch:280`) → **espaço local da arma**: `X = lateral · Y = LONGITUDINAL (o cano) · Z = vertical`. Portanto **girar em torno de Y = TOMBAR (roll)** e **em torno de Z = APONTAR (yaw)** — o **contrário** da ordem canônica do Unity `(pitch, yaw, roll)`. A montagem correta é `new Vector3(pitch, roll, yaw)`. **Nunca presumir a convenção do Unity aqui.**
 - **VERSÃO 2.5.0 (2026-07-14, commit `17f9d02`) — DLL `397b3c3`.** Trilha da sessão: 2.0.0 (`39e7a56`) → 2.1.0 (`ca9f868`) → 2.2.0 (`d9069fb`) → **2.2.1 hotfix** (`4936e8f`) → 2.3.0 (`b477c21`) → 2.4.0 (`8fc8f8e`) → 2.5.0 (`17f9d02`).
 - ⚠️⚠️ **O BepInEx PROÍBE `=` no nome de uma key** (é o separador do `.cfg`) — `Config.Bind` **lança** e **aborta o `Awake`**. Também proibidos: `[ ] " ' \ tab`. Isto derrubou a v2.2.0 (ver Sessão 10).
 - ⚠️ **ORDEM DO `Awake` (v2.3.0):** `BindAllConfig()` **ANTES** de `EnableEverything()`. Antes era o contrário e um bind que lançasse deixava os ~35 patches VIVOS com `ConfigEntry` null → NRE por frame na raid. Hoje um bind ruim → 1 log `[BOOT]`, `ConfigReady=false`, **nenhum** patch aplicado (jogo roda vanilla). `Plugin.Update` e `PassiveMountUI.Update` checam `ConfigReady` (o Unity chama MonoBehaviour mesmo com Awake abortado).
 - **A ORDEM dos `Config.Bind` entre si é a ordem das SEÇÕES no F12** (o ConfigurationManager usa ordem de descoberta). Não reordenar sem querer. A Stance 0 é bindada cedo de propósito (`Plugin.cs:616`, antes da Stance 1).
-- **F12 hoje: 19 seções · 111 opções.**
+- **F12 hoje: 18 seções** (a `Action Stances` foi absorvida pelo rodapé de `Stance Cycle & Hotkeys` na 2.13.0). **A contagem de opções está defasada desde a v2.5.0** — o `PROPRIEDADES.md` também, e só volta a bater na regeneração completa prevista na preparação para publicação ([P-12.3]).
+- ⚠️ **Todo `float` com faixa exatamente `0–1` é renderizado como PORCENTAGEM** pelo ConfigurationManager, sem caixa de digitação — um tempo de `0.15 s` aparece como "15%". Alargar a faixa (ex.: `0–2`) devolve o valor real e a caixa. Corrigido em 2 props na 2.13.0 (`MP-02-06`).
 - **`assets/config/com.shwng.fpscamerastances.cfg`** = a config CALIBRADA do servidor, versionada. **DLL e `.cfg` são um PAR** — desde a 2.0.0 as keys foram renomeadas, então DLL nova + cfg velho = o BepInEx não casa nada e reseta tudo. Distribuir via **`config-server`** do launcher (espelho, sobrescreve), **nunca** `config` (seed-if-missing: quem já tem o cfg antigo não receberia nada). Antes: 2.0.0 (commit `39e7a56`, bump `1.3.1 → 2.0.0`). A versão vive em **dois** lugares que precisam bater: `Plugin.cs` (`BepInPlugin` — é o que o F12 mostra) e `.csproj` (`Version`/`AssemblyVersion`/`FileVersion` — antes ausente, a DLL saía como `1.0.0.0`). Changelog do fork em **`modded/CHANGELOG.md`** (o `CHANGELOG_SIMPLIFIED.md` é do upstream e para na 1.1.4).
 - **F12 hoje: 20 seções · 113 opções** (2.1.0). Era 21 · 120 na 2.0.0 — a review 02 achou e removeu **7 props fantasmas**.
 - ⚠️ **A 2.0.0 reseta a config salva do usuário** (renome de seção/key na reorg do F12 — o BepInEx casa por `(seção, chave)` literal). A 2.1.0 **não** renomeia nada; só remove props (as entries removidas ficam órfãs no `.cfg` e são ignoradas).
@@ -25,16 +26,18 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados quan
 
 ## Pendências / próximos passos conhecidos
 
-- **[P-11.6] (aberta 2026-07-25) 🔴 Validar item 019 (chamber-check ammo UI, v2.10.0) in-game.** Prioridade: caso "Empty" com câmara vazia via Manual Chambering (item 010) — única suposição load-bearing não verificada (`CheckChamber()` retorna `true` com câmara vazia). Requer bindar "Check Chamber" nos controles do EFT (não vem por default). Depois: câmara carregada, toggle F12, Fika. Ver Sessão 11 (cont. 6).
-- **[P-11.7] (aberta 2026-07-25) 🟡 Subir 2.8.0→2.10.0 ao servidor** via `config-server` do launcher (DLL + `.cfg`) — só deployado localmente em `D:/SPT`. Ver Sessão 11 (cont. 6).
+- **[P-12.1] (aberta 2026-08-01) 🟡 Calibrar a compressão de ADS-speed (item 017 F3) com o overlay novo.** A compressão **aplica** (mecanismo confirmado no decompilado), mas o **pivô default 1.5 está acima da faixa real das armas** — derivando de `globals.Aiming` (peso 0,6–9 kg; tempos 0,35–2,4 s), a velocidade interna vai de ~0,57 (LMG) a ~1,9 (pistola), fuzis em ~1,0. Com pivô 1,5 a compressão **acelera as pesadas** em vez de segurar as leves, e o usuário não sentia diferença. Centro real ≈ **1,0–1,1**. Ligar `Debug ADS Speed` (F12 → `Debug (Advanced)`), anotar os valores das armas usadas, escolher o pivô e **promover a default** (como foi feito na 2.9.0). Ver Sessão 12.
+- **[P-12.2] (aberta 2026-08-01) 🔴 Preparação para publicação no SPT Forge — portão de elegibilidade.** (a) **Relicenciamento**: o upstream é CC BY-NC do `shengzhanzhe`; o usuário **tem a autorização do autor** para o fork, mas falta permissão para relicenciar sob licença OSI (o Forge aponta CC como adequada a doc/arte, não a código). (b) **Política de IA**: declarar (o Forge recusa mod "substantially or entirely written by AI coding agents" e exige o flag "Contains AI Content" com qualquer uso de LLM). (c) **Origem dos assets** (5 `.png` + o `.ogg` do hold-breath). Rodar `/prepare-mod-for-publish` para a auditoria formal. Ver Sessão 12 e skill `trl-mod-publishing`.
+- **[P-12.3] (aberta 2026-08-01) 🟡 Regenerar o `PROPRIEDADES.md` inteiro.** O documento se declara como da v2.5.0 e recebeu só remendos desde então; a contagem de seções/opções não bate com o jogo. Fazer junto do `/review-mod-properties` da preparação para publicação.
+- **[P-11.7] (aberta 2026-07-25, atualizada 2026-08-01) 🟡 Subir a versão corrente ao servidor** via `config-server` do launcher (DLL + `.cfg`). O gap cresceu: servidor está na 2.8.0, o código na **2.13.0**. O `.cfg` versionado já tem o `Enable Action Stance Swap` na seção nova — distribuí-lo junto é o que impede o reset dessa opção para quem atualizar.
 - **[P-11.1] (aberta 2026-07-15) 🟡 BUG DE GAMEPLAY reportado pelo usuário — a velocidade fica presa devagar.** Sintoma: às vezes, andando normal (fora de postura), a velocidade **não volta ao máximo** e o personagem anda devagar sem motivo. **Workaround do usuário:** uma ação que força o recálculo destrava — **mirar (ADS)**, trocar para **Pronto Alto/Baixo** (Stance 1/2) e voltar, etc. **Hipótese:** é o teto de velocidade (`mc.AddStateSpeedLimit(target, StanceSpeedLimitCause)`) ficando **preso (stale)**. O `target = fraction * mc.MaxSpeed` é calculado num instante; se `MaxSpeed` sobe depois (skill Strength, mudança de peso/estado) o cap **não é re-aplicado** e prende a velocidade num valor baixo. Ações como mirar/trocar stance disparam `ApplyStaminaStance`/`EvaluateProneSuspensionTick` (`StanceManager.cs` ~1240 e ~1336) → `Remove` + `Add` com o valor novo → destrava. **Este é o "bug real" que o P-7.2 esperava** ("risco > valor até surgir bug real") — a área é o reset/re-aplicação do speed limit. **Ainda NÃO investigado a fundo nem corrigido** — só registrado. Ver `feedback_spt_validation` (validar in-game o fix). Relacionado: P-8.3 (o cap de 90% da Stance 0 é intencional, então o alvo é o *staleness*, não o cap em si). **Refinamento (2026-07-17) — gatilho identificado pelo usuário: voltar do agachado para em pé.** Ao levantar, a velocidade **não retorna ao máximo da stance atual**. Coerente com a hipótese do cap stale: agachado, `mc.MaxSpeed` é menor → `target = fraction * MaxSpeed` sai baixo; ao levantar, `MaxSpeed` sobe mas o cap **não é recalculado** e prende a velocidade no teto do agachado. **Requisito do fix: cercar os dois regimes de caminhada — andar lento E andar normal** (ambos devem re-derivar o teto na mudança de pose, cada um voltando ao máximo da stance vigente).
-- **[P-7.1] (aberta 2026-07-11, PARCIAL em 2026-07-12) 🟡 Validar in-game — agora a build 2.1.0 (`0e622ba`).** ✅ Feito: release 2.0.0/2.1.0 (versão + changelog + rebuild + deploy) e **conferência do F12 na 2.0.0** (usuário confirmou seções, ordem e tooltips corretos, com prints). **Falta:** rodar em **raid** e reconfirmar os itens da Sessão 7 (008 recarga, 010 chambering, 011 mount passivo, 015 bloqueio de mount, 002 snap ao atirar) — **nunca rodaram** com a reorg do F12 nem com a limpeza da 2.1.0. Ver `feedback_spt_validation`.
-- **[P-8.1] (aberta 2026-07-12) 🟡 Validar os 4 fixes da 2.1.0 in-game:** (a) FOV expandido volta a funcionar (ligar `Enable Expanded FOV Range` e passar de 75 — se `GClass1085.Class1841.method_0` não existir mais na 0.16.x, o `SafeEnable` loga a falha e a decisão vira *remover* as 3 props); (b) as 4 props de ciclo aparecem no F12 mesmo em modo `Linear`; (c) prone e teto de velocidade seguem corretos após o sentinel null em `ApplyWhenProne`; (d) nada regrediu com a remoção da seção `Default Hands/Arms`.
-- **[P-8.2] (aberta 2026-07-12) 🟠 Achados da review 02 NÃO aplicados** (`PROPRIEDADES-review-02.md`): **MP-02-05** (`Camera Position` — `_cameraOffsetDirty` nunca volta a `true` no raid start; suspeita de o offset parar de valer da 2ª raid em diante — o fix é 1 linha, mas depende de saber se o `PlayerSpringPatch` já cobre); **MP-02-06** (2 props em **segundos** com range 0–1 são exibidas como **%** pelo ConfigurationManager — alargar para 0–2); **MP-02-07** (29 keys misturam EN+PT no nome — decisão: manter, é didático); **MP-02-08** (7 headers do `PROPRIEDADES.md` com sufixo `— Item NNN` inexistente no F12); **MP-02-09** (código morto: `CameraBobbingScript` nunca instanciado, `PlayerSpringPatch._cameraOffsetField`, `FixedUpdate` vazio, `ApplySimpleRotationPatch` hardcoda `damping=12f` ignorando a prop); **MP-02-10** (comentário `// Stance 0: irrelevante` é FALSO — ver abaixo).
+- ✅ **[P-7.1] e [P-8.1] RESOLVIDAS (2026-08-01)** — o usuário confirmou que a revalidação em raid pós-reorg do F12 e os 4 fixes da 2.1.0 estão OK. Eram dívida de **registro**, não de teste: 8 versões se passaram desde então e o mod rodou em raid o tempo todo.
+- ✅ **[P-8.2] parcialmente resolvida (2026-08-01)** — **MP-02-05 era FALSO POSITIVO** (prova abaixo), **MP-02-06 e MP-02-08 aplicados na 2.13.0**, MP-02-07 já era "manter". Sobra só o que está em [P-10.2]. Ver Sessão 12.
+- ⚠️ **`HandsContainer` É um `PlayerSpring`** (`ProceduralWeaponAnimation.cs:211` do decompilado) — os dois caminhos que o mod usa para o offset de câmera escrevem **o mesmo campo do mesmo objeto**, e **nada no EFT reescreve `CameraOffset`** (grep de escrita volta vazio no decompilado inteiro). Por isso o `PlayerSpringPatch` (Postfix de `PlayerSpring.Start`) cobre toda raid e o cache `_cameraOffsetDirty` serve só para refletir mudanças do F12 ao vivo. **Não "consertar" isso** — foi a dúvida do `MP-02-05`, resolvida com o decompile completo que a review 02 não tinha.
 - **[P-8.3] ✅ RESOLVIDA (2026-07-12) — o cap de velocidade da Stance 0 é INTENCIONAL.** O usuário confirmou: *"tudo bem para a multiplicação de tudo do walk e das stances speed"*. A Stance 0 aplica cap de 90% fora de postura e **compõe** com o `Walk Speed Multiplier` (0.85) — é o comportamento desejado, não um bug. ⚠️ **Não "otimizar" isso.** (O comentário `// Stance 0: irrelevante` em `Plugin.cs:47` continua **falso** e ainda deve ser corrigido — parte do `MP-02-10`.)
 - **[P-8.4] ✅ RESOLVIDA (2026-07-14) — eixos validados in-game.** `Yaw` aponta, `Roll` tomba, poses preservadas pela migração do `.cfg`. (Texto original abaixo.)
 - **[P-10.1] (aberta 2026-07-14) 🟢 Achados do code-review NÃO aplicados** (`CODE-REVIEW-v2.2.1.md`): **CR-05** (o aparato de `Browsable`/ConfigurationManager virou no-op mas ainda força rebuild do F12 a cada mudança do scroll mode) e **CR-07** (`Plugin.Update` sem try/catch — uma exceção derruba o resto do tick, todo frame; se aplicar, com log **rate-limited**).
-- **[P-10.2] (aberta 2026-07-14) 🟡 Achados da review 02 que sobraram:** **MP-02-05** (`Camera Position` — `_cameraOffsetDirty` nunca volta a `true` no raid start; suspeita de o offset parar de valer da 2ª raid em diante), **MP-02-06** (2 props em segundos com range 0–1 são exibidas como % pelo ConfigurationManager), **MP-02-08**, **MP-02-09**, **MP-02-10** (o comentário `// Stance 0: irrelevante` ainda é falso).
+- **[P-10.2] (aberta 2026-07-14, reduzida 2026-08-01) 🟡 O que sobrou da review 02:** **MP-02-09** (código morto: `CameraBobbingScript` nunca instanciado, `PlayerSpringPatch._cameraOffsetField` resolvido e nunca usado, `FixedUpdate` vazio, `ApplySimpleRotationPatch` com `damping=12f` fixo ignorando a prop) e **MP-02-10** (o comentário `// Stance 0: irrelevante` em `Plugin.cs:47` é falso). Ambos entram na faxina de código da preparação para publicação — ver [P-12.2].
 - ~~**[P-8.4]** (aberta 2026-07-12) Validar in-game a v2.2.0 (`a22d368`) — fix dos eixos:~~ `Yaw` deve **APONTAR** esq/dir e `Roll` deve **TOMBAR** a arma, nas 3 stances **e no ADS** (antes faziam o contrário). Conferir também que **as poses ficaram iguais às de antes** — o `.cfg` foi migrado (valores `Yaw`↔`Roll` trocados) justamente para preservar o visual; se alguma stance parecer diferente, a migração errou. Backup: `cfg.bak-pre-v220`.
 - **[P-7.2] (aberta 2026-07-11) 🟢 Dívida técnica** (herda a antiga P-5.3): unificar a interpolação em `SpringMath.SpringDamp`, eliminar a reflection que roda a cada frame, `try/catch` nos ~19 patches restantes (só os 6 do Manual Chambering têm), auditar o reset de estado estático entre raids. Adiada porque mexe em código de câmera **já validado** — risco > valor até surgir bug real.
 - **[P-7.3] (aberta 2026-07-11) 🟢 Dívida da revisão do F12** (achados adiados do `PROPRIEDADES-review-01.md`): reordenar as seções (**MP-01-03** — os binds de uma mesma seção estão espalhados pelo `Awake`, ex.: Stance 2 em L766 **e** L1184; reordenar arriscaria quebrar um arquivo de 1700 linhas já validado), rever onde ficam as opções de velocidade (**MP-01-08**) e se a seção da Stance 0 se justifica (**MP-01-10**).
@@ -763,6 +766,82 @@ dupla-compressão de campo dormente; sem sintoma, mas corrigido replicando o gua
 **Pendências:** **[P-11.5] 🟡 GATE F1+F3:** calibrar in-game o `ADS Waypoint Time` por stance + o
 `Compression`/`Pivot`; testar troca de arma no ADS-in, scope, Fika. · P-11.4 (baseline/diagnóstico F2). · **F2**
 (braço G36 — atenuar o eixo, após o diagnóstico). · P-11.1, P-11.2, P-10.x, subir 2.8.0 ao servidor.
+
+## 2026-08-01 22:43 (GMT-3) — Sessão 12: v2.13.0 (debug de ADS-speed, F12 saneado) + harness de publicação
+
+**Tema central:** fechar as dúvidas abertas do relatório de status do mod e montar o processo para **publicar o
+mod no SPT Forge** — o que exigiu criar o command e a skill que faltavam no harness.
+
+**Decisões-chave:**
+
+- **A compressão de ADS-speed aplica; o pivô é que está errado.** O usuário relatou "mexi e não senti
+  diferença". Cadeia verificada no decompilado: o EFT escreve `_aimingSpeed` em
+  `ProceduralWeaponAnimation.UpdateWeaponVariables:1209`, nosso Postfix reescreve logo depois, e **nada mais no
+  jogo toca esse campo** (só `ManualSetVariables`, usada por binóculo/telêmetro com valor fixo `2f`). O
+  problema é de calibração: com `globals.Aiming` (`LightWeight=0.6`, `HeavyWeight=9`, `MinTimeLight=0.35`,
+  `MaxTimeHeavy=2.4`) a velocidade real vai de ~0,57 (LMG) a ~1,9 (pistola) — o pivô default **1.5** está no
+  topo dessa faixa, então comprimir **acelera as pesadas** em vez de segurar as leves. Entregue o overlay
+  `Debug ADS Speed` para calibrar por número; **default não alterado** (mexeria na calibração de quem já
+  ajustou). Ref: [P-12.1], `Patches/AdsSpeedCompressionPatch.cs`.
+- **Guard da compressão estava no campo errado** — checava `_firearmController`, mas o EFT decide se recalcula
+  o valor nativo por `_firearmAnimationData.Weapon` (`UpdateWeaponVariables:1196`). Na janela em que existe
+  controller sem dados de arma, comprimíamos por cima do já comprimido e o efeito acumulava. Guard agora é
+  idêntico ao nativo.
+- **`MP-02-05` era falso positivo** — ver o bullet do `HandsContainer`/`PlayerSpring` no topo. O que faltava à
+  review 02 era o decompile completo, que hoje existe.
+- **`Enable Action Stance Swap` saiu da seção própria** para o rodapé de `Stance Cycle & Hotkeys` (pedido do
+  usuário, com print). A seção `Action Stances` deixou de existir. Reset da opção aceito conscientemente — o
+  `.cfg` versionado já saiu atualizado para o launcher distribuir.
+- **Publicação no Forge tem dois portões que não são de engenharia** (regras conferidas na redação literal em
+  <https://forge.sp-tarkov.com/content-guidelines>): licença (§6.1 — CC é apontada para conteúdo não-código;
+  o upstream é CC BY-NC) e política de IA (§4.2 — *"does not accept mods that have been substantially or
+  entirely written by AI coding agents"* + flag "Contains AI Content" obrigatório com qualquer uso de LLM).
+  O usuário **já tem a autorização do autor original**; falta o relicenciamento. Ref: [P-12.2].
+
+**Lições / hipóteses descartadas:**
+
+- **"O mod tem uma opção que não faz nada" nem sempre é código morto — pode ser default mal posicionado.** A
+  compressão de ADS estava perfeita e inerte na prática. A lição é de método: antes de caçar bug num efeito
+  imperceptível, **derivar a faixa real dos valores** que o efeito manipula (aqui, a partir do `globals.json`
+  do servidor) e conferir se o parâmetro de referência cai dentro dela.
+- **Postfix que reescreve campo do EFT tem que replicar o guard nativo — o campo certo, não um parecido.** A
+  2.8.0 já tinha aprendido "replicar o guard"; errou **qual** guard. Verificar sempre no corpo do método alvo
+  qual condição o jogo usa para decidir se recalcula.
+- **Afirmar regra de plataforma externa por resumo é o mesmo erro que afirmar API por memória.** Na primeira
+  versão da skill escrevi "o Forge exige licença OSI; CC BY-NC reprova" — a redação real é mais branda. Só
+  depois de pedir a **citação literal** o texto ficou correto. A skill passou a marcar cada regra como
+  📌 citação verificada ou 📄 leitura resumida, e regra 📄 não sustenta bloqueio sozinha.
+- **Working tree compartilhado engole trabalho não commitado.** Todo o trabalho deste mod (arquivo novo do
+  overlay, `PROPRIEDADES.md`, `.cfg`, versão no `.csproj`) foi arrastado para o commit `8bf2aa17`, cuja
+  mensagem fala de **CustomClasses** — uma sessão paralela rodou `git add` amplo. Nada se perdeu, mas o
+  histórico ficou enganoso. Reforça a regra do `CLAUDE.md` §4: commitar cedo e cirurgicamente.
+
+**Atividade cronológica:**
+
+1. `/update-me-about-this-mod` — relatório de status; o usuário respondeu item a item, fechando P-7.1, P-8.1 e
+   a validação do item 019.
+2. Investigação da compressão de ADS e do `MP-02-05` no decompilado → diagnóstico acima.
+3. **v2.13.0**: overlay `Debug ADS Speed` (`AdsSpeedDebugUI.cs`), guard corrigido, `Action Stance Swap`
+   movido, faixas `0–1`→`0–2` em `ADS Kick Delay (In)` e `Tac Sprint Reset Delay` (`MP-02-06`), 7 títulos do
+   `PROPRIEDADES.md` sem o sufixo fantasma (`MP-02-08`), `.cfg` do servidor migrado, changelog. Build limpa.
+4. **Harness de publicação** (commit `dbe99c46`): command `/prepare-mod-for-publish` (5 fases, portão de
+   elegibilidade primeiro), skill `trl-mod-publishing` (regras do Forge + padrão de identidade TRL) e template
+   `publish-audit.md.tmpl`. Revisados por `/g-write-a-skill` e `/g-review-content`: 12 achados, todos
+   aplicados — o mais grave era prometer que `/apply-code-review` consumiria a auditoria, o que é impossível
+   (ele resolve `<ref>` para pasta de item de backlog e exige `05-asbuild.md`).
+5. Plano de publicação em 8 ondas acordado com o usuário; onda 1 (higiene de registro) executada aqui.
+
+**Pendências abertas nesta sessão:** [P-12.1] 🟡 calibrar o pivô · [P-12.2] 🔴 portão de publicação
+(relicenciamento + política de IA + assets) · [P-12.3] 🟡 regenerar `PROPRIEDADES.md`.
+
+**Cross-refs:**
+
+- Resolve [P-7.1], [P-8.1] e [P-11.6] (validações confirmadas pelo usuário); reduz [P-8.2] e [P-10.2].
+- [P-11.1] (velocidade presa ao levantar do agachado) **segue aberta** — é o único defeito de gameplay
+  conhecido e precisa de decisão de produto antes de publicar: corrigir ou declarar na página do mod.
+- Trabalho paralelo no mesmo mod, por outra sessão: `PickupAimingSafetyPatch` devolvido ao `TRL-Fixes`
+  (ver `mods/TRL-Fixes/docs/handoff-pickup-aiming-safety.md` e a seção "Escopo" da 2.13.0 no changelog).
+- Harness criado nesta sessão não tem memória dedicada — ver `git log` do commit `dbe99c46`.
 
 ## 2026-07-25 01:49 (GMT-3) — Sessão 11 (cont. 6): v2.8.1→v2.10.0 (code-review 01, ADS waypoint no rodapé, defaults promovidos, chamber-check UI) — F2 encerrada
 
