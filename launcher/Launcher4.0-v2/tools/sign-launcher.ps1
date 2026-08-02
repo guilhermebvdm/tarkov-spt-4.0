@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Item 018 (auto-update-security) — signs the released launcher exe, producing the detached
     "<exe>.sig" that the server serves and the client verifies against the embedded PUBLIC key.
