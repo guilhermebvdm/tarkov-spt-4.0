@@ -24,11 +24,20 @@ namespace TarkovRedLine.PvpMode.Patches
     {
         private static float _holdElapsed;
         private static bool _wasHolding;
+        private static bool _announcedDowned;
+
+        /// <summary>
+        /// Progresso do segurar, de 0 a 1. Lido pelo indicador de tela para desenhar a barra —
+        /// sem realimentacao visual o jogador nao tem como saber se a tecla esta chegando.
+        /// </summary>
+        public static float HoldProgress { get; private set; }
 
         public static void Reset()
         {
             _holdElapsed = 0f;
             _wasHolding = false;
+            HoldProgress = 0f;
+            _announcedDowned = false;
         }
 
         protected override MethodBase GetTargetMethod()
@@ -51,15 +60,25 @@ namespace TarkovRedLine.PvpMode.Patches
                 if (__instance.ActiveHealthController is not Fika.Core.Main.ClientClasses.ClientHealthController { Downed: true })
                 {
                     // De pé: qualquer pressão acumulada perde a validade.
-                    if (_wasHolding) Reset();
+                    if (_wasHolding || _announcedDowned) Reset();
                     return;
+                }
+
+                // Uma linha por queda: dá para conferir no log qual tecla o mod está esperando,
+                // sem depender da memória do jogador nem de adivinhação no meio da raid.
+                if (!_announcedDowned)
+                {
+                    _announcedDowned = true;
+                    Plugin.Log.LogInfo(
+                        $"[TRL-PvpMode] Caido. Segure [{Settings.RESPAWN_KEY.Value}] por " +
+                        $"{Settings.RESPAWN_HOLD_TIME.Value}s para renascer.");
                 }
 
                 // Sem as guardas de contexto, digitar no chat ou no console com a tecla rebindada
                 // para uma letra gastaria uma vida. O próprio Fika guarda os mesmos três estados
                 // antes de ler teclado (ClientPacketSender.cs:44-47) — code review 002, D-07.
                 // Input.GetKey primeiro: e a checagem mais barata e falha na maioria dos quadros.
-                var holding = Input.GetKey(Settings.RESPAWN_KEY.Value) && !IsTypingSomewhere(__instance);
+                var holding = Settings.RESPAWN_KEY.Value.IsPressed() && !IsTypingSomewhere(__instance);
 
                 if (!holding)
                 {
@@ -71,7 +90,10 @@ namespace TarkovRedLine.PvpMode.Patches
                 _wasHolding = true;
                 _holdElapsed += deltaTime;
 
-                if (_holdElapsed < Mathf.Max(0.1f, Settings.RESPAWN_HOLD_TIME.Value)) return;
+                var required = Mathf.Max(0.1f, Settings.RESPAWN_HOLD_TIME.Value);
+                HoldProgress = Mathf.Clamp01(_holdElapsed / required);
+
+                if (_holdElapsed < required) return;
 
                 Reset();
 

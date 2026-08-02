@@ -15,7 +15,7 @@ namespace TarkovRedLine.PvpMode
         public static ConfigEntry<int> LIVES_PER_RAID;
         public static ConfigEntry<float> DOWNED_TIMEOUT;
         public static ConfigEntry<bool> HEADSHOT_KILLS;
-        public static ConfigEntry<KeyCode> RESPAWN_KEY;
+        public static ConfigEntry<KeyboardShortcut> RESPAWN_KEY;
         public static ConfigEntry<float> RESPAWN_HOLD_TIME;
         public static ConfigEntry<float> SPAWN_PROTECTION;
         public static ConfigEntry<bool> SHOW_LIVES_HUD;
@@ -49,10 +49,17 @@ namespace TarkovRedLine.PvpMode
                     "mudar durante a partida so vale na proxima.",
                     new AcceptableValueRange<float>(0f, 600f)));
 
+            // KeyboardShortcut e nao KeyCode: o seletor do ConfigurationManager para KeyCode
+            // captura teclas fantasma (F13) em teclado de notebook. O de KeyboardShortcut usa o
+            // caminho de captura do proprio BepInEx e aceita combinacao.
+            //
+            // Default Home, nao F5: F5 ja tem funcao no jogo (o teste in-game caiu na tela de sair
+            // da raid). Home fica livre no EFT e existe como tecla fisica direta na maioria dos
+            // teclados - Pause costuma exigir Fn e nem sempre chega ao Unity.
             RESPAWN_KEY = config.Bind(
                 SECTION_LIVES,
                 "Respawn Key",
-                KeyCode.F5,
+                new KeyboardShortcut(KeyCode.Home),
                 new ConfigDescription(
                     "Tecla para renascer. Segure-a enquanto estiver caido."));
 

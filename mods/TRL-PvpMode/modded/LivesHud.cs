@@ -26,11 +26,15 @@ namespace TarkovRedLine.PvpMode
             _broken = false;
             _style = null;
             _styleDowned = null;
+            _stylePrompt = null;
+            _styleNoLives = null;
         }
 
 
         private static GUIStyle _style;
         private static GUIStyle _styleDowned;
+        private static GUIStyle _stylePrompt;
+        private static GUIStyle _styleNoLives;
 
         public static void Draw()
         {
@@ -64,6 +68,10 @@ namespace TarkovRedLine.PvpMode
                 var value = RaidState.IsUnlimited ? INFINITY : RaidState.LivesLeft.ToString();
                 var text = downed ? $"VIDAS: {value}" : $"Vidas: {value}";
 
+                // A instrução da tecla é o que faltava: sem ela o jogador cai, vê o contador e não
+                // tem como saber o que fazer com ele. Descoberto no primeiro teste in-game.
+                if (downed) DrawRespawnPrompt();
+
                 // Caído: destacado e centralizado — é a informação que decide a próxima ação.
                 // De pé: discreto, no canto.
                 var rect = downed
@@ -78,6 +86,46 @@ namespace TarkovRedLine.PvpMode
                 _broken = true;
                 Plugin.Log.LogError($"[TRL-PvpMode] LivesHud desativado apos erro: {ex.Message}");
             }
+        }
+
+        /// <summary>
+        /// Diz qual tecla segurar e mostra o quanto já foi segurado.
+        ///
+        /// A barra não é enfeite: ela é a única forma de o jogador distinguir "estou segurando a
+        /// tecla certa e falta tempo" de "esta tecla não está chegando ao jogo" — distinção que
+        /// custou uma raid inteira de tentativa e erro no primeiro teste.
+        /// </summary>
+        private static void DrawRespawnPrompt()
+        {
+            var hasLife = RaidState.HasLifeAvailable;
+            var key = Settings.RESPAWN_KEY.Value.ToString();
+
+            var message = hasLife
+                ? $"Segure  [{key}]  para renascer"
+                : "Sem vidas restantes — esta morte e definitiva";
+
+            var promptRect = new Rect(0f, Screen.height * 0.70f, Screen.width, 30f);
+            GUI.Label(promptRect, message, hasLife ? _stylePrompt : _styleNoLives);
+
+            if (!hasLife) return;
+
+            // Barra de progresso do segurar.
+            var progress = Patches.RespawnInputPatch.HoldProgress;
+            const float barWidth = 320f;
+            const float barHeight = 10f;
+            var barX = (Screen.width - barWidth) * 0.5f;
+            var barY = Screen.height * 0.70f + 34f;
+
+            GUI.color = new Color(1f, 1f, 1f, 0.25f);
+            GUI.DrawTexture(new Rect(barX, barY, barWidth, barHeight), Texture2D.whiteTexture);
+
+            if (progress > 0f)
+            {
+                GUI.color = new Color(0.45f, 0.95f, 0.45f, 0.9f);
+                GUI.DrawTexture(new Rect(barX, barY, barWidth * progress, barHeight), Texture2D.whiteTexture);
+            }
+
+            GUI.color = Color.white;
         }
 
         private static void EnsureStyles()
@@ -98,6 +146,16 @@ namespace TarkovRedLine.PvpMode
                 alignment = TextAnchor.MiddleCenter,
             };
             _styleDowned.normal.textColor = new Color(1f, 0.35f, 0.35f, 0.95f);
+
+            _stylePrompt = new GUIStyle(_style)
+            {
+                fontSize = 18,
+                alignment = TextAnchor.MiddleCenter,
+            };
+            _stylePrompt.normal.textColor = new Color(1f, 0.95f, 0.75f, 0.95f);
+
+            _styleNoLives = new GUIStyle(_stylePrompt);
+            _styleNoLives.normal.textColor = new Color(1f, 0.45f, 0.45f, 0.9f);
         }
     }
 }
