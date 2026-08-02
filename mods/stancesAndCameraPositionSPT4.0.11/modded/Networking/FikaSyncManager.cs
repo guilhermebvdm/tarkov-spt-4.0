@@ -22,49 +22,11 @@ namespace CameraRotationMod.Networking
         /// </summary>
         private static IFikaNetworkManager _lastRegisteredNetworkManager;
 
-        // Throttle de log: com peer de versão divergente a falha vira por-pacote. Sem limite, o
-        // console do BepInEx receberia um stack trace por pacote, causando hitching e escondendo
-        // o erro real.
-        private const int ErrorLogIntervalMs = 5000;
-        private static int _lastErrorLogTick;
-        private static int _suppressedErrors;
-
         /// <summary>
-        /// Tipos de exceção que já renderam stack trace completo. A chave é o TIPO (e não um
-        /// booleano global): uma falha diferente que apareça raids depois ainda precisa do trace,
-        /// caso contrário o throttle esconderia justamente o problema novo.
+        /// Item 020 (F4): o mecanismo foi extraído para `ThrottledLog` (agora também serve o laço
+        /// principal). Assinatura mantida pelos call-sites de rede; comportamento idêntico.
         /// </summary>
-        private static readonly System.Collections.Generic.HashSet<Type> _tracedExceptionTypes
-            = new System.Collections.Generic.HashSet<Type>();
-
-        /// <summary>
-        /// Loga a exceção completa na primeira ocorrência de cada TIPO e, depois, no máximo uma vez
-        /// a cada 5 s com a contagem do que foi suprimido.
-        /// </summary>
-        internal static void LogErrorThrottled(string context, Exception ex)
-        {
-            var now = Environment.TickCount;
-
-            if (ex != null && _tracedExceptionTypes.Add(ex.GetType()))
-            {
-                _lastErrorLogTick = now;
-                _logger?.LogError($"[CameraRotationMod] {context}: {ex}");
-                return;
-            }
-
-            // Subtração de ints trata o wrap-around de TickCount corretamente.
-            if (now - _lastErrorLogTick < ErrorLogIntervalMs)
-            {
-                _suppressedErrors++;
-                return;
-            }
-
-            _lastErrorLogTick = now;
-            var suppressed = _suppressedErrors;
-            _suppressedErrors = 0;
-            _logger?.LogError($"[CameraRotationMod] {context}: {ex?.Message}"
-                + (suppressed > 0 ? $" (+{suppressed} falhas suprimidas nos últimos {ErrorLogIntervalMs / 1000}s)" : string.Empty));
-        }
+        internal static void LogErrorThrottled(string context, Exception ex) => ThrottledLog.Error(context, ex);
 
         public static void Initialize(ManualLogSource logger)
         {

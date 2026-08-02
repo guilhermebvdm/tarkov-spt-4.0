@@ -7,6 +7,35 @@ Versões mais recentes primeiro.
 
 ---
 
+## v2.15.0 (2026-08-02)
+
+### Faxina pré-publicação (item 020) — nada muda para o jogador
+
+Higiene de código para o mod ir a público. O critério de aceite foi **"o jogo se comporta exatamente como
+antes"**: mesmas posturas, mesmo F12, mesmos valores salvos.
+
+- **Uma falha num subsistema não derruba mais os outros.** O laço principal chamava sete subsistemas em
+  sequência sem proteção: uma exceção no primeiro cancelava os seis seguintes — **a cada quadro, para
+  sempre**. É o formato de falha que produz "o mod parou de funcionar no meio da raid" (as posturas travam,
+  a stamina congela, a câmera não responde) sem nada além de um erro repetido no console. Agora cada
+  subsistema é isolado, e o erro vai para o log com **limite de repetição**: a primeira ocorrência de cada
+  tipo sai completa, as seguintes no máximo uma a cada 5 s com a contagem do que foi suprimido.
+- **Removida a classe de balanço de câmera que nunca era instanciada** (`CameraBobbingScript`) — código do
+  fork que nunca chegou a ser ligado.
+- **Removido um campo resolvido por reflexão e nunca lido** no patch de posição de câmera.
+- **Removido um `FixedUpdate` vazio** — o Unity o chamava a cada passo de física (~50×/s) para não fazer nada.
+- **Removido o mecanismo inerte de visibilidade do F12.** Ele mostrava/escondia os quatro interruptores de
+  ciclo conforme o modo de scroll; desde que se decidiu deixá-los sempre visíveis, só restava o efeito de
+  mandar o menu inteiro ser reconstruído a cada mudança do modo. As opções continuam nas mesmas seções, na
+  mesma ordem.
+
+**Fora de escopo, por verificação:** três alvos que estavam na lista não existiam mais — o amortecimento fixo
+já tinha sido corrigido, o comentário "incorreto" já estava certo, e a "reflexão por quadro" na verdade é
+resolvida uma única vez. A separação do `Plugin.cs` (1720 linhas) ficou para item próprio, por decisão de
+escopo: não misturar refatoração grande com correções na mesma validação in-game.
+
+---
+
 ## v2.14.0 (2026-08-01)
 
 ### Diagnóstico do "andar que trava devagar"

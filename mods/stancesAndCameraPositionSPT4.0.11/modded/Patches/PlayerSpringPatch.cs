@@ -10,14 +10,14 @@ namespace CameraRotationMod.Patches
 {
     public class PlayerSpringPatch : ModulePatch
     {
-        private static FieldInfo _cameraOffsetField;
-        
         protected override MethodBase GetTargetMethod()
         {
-            // Get the field reference for CameraOffset
-            _cameraOffsetField = AccessTools.Field(typeof(PlayerSpring), nameof(PlayerSpring.CameraOffset));
-            
-            // Patch PlayerSpring.Start - simple and works
+            // Item 020 (F2): aqui se resolvia `_cameraOffsetField` por reflection e o campo NUNCA era lido —
+            // o Postfix escreve `__instance.CameraOffset` direto, que é público. Removido.
+            //
+            // `PlayerSpring.Start` roda uma vez por instância do rig de mãos, ou seja, uma vez por raid — é o
+            // que garante que o offset valha em TODA raid. (O cache `Plugin._cameraOffsetDirty` serve só para
+            // refletir mudanças do F12 ao vivo; nada no EFT reescreve `CameraOffset`.)
             return AccessTools.Method(typeof(PlayerSpring), nameof(PlayerSpring.Start));
         }
 

@@ -1214,6 +1214,10 @@ namespace CameraRotationMod
                 _staminaConfigDirty = true;
                 _lastAppliedSpeedLimit = -1f;
 
+                // Item 020 (F4): o balde de tipos de exceção já registrados não atravessa raids — senão um
+                // erro que apareceu na raid anterior nunca mais renderia rastreamento completo.
+                ThrottledLog.Reset();
+
                 // Cachear AimDrainRate (constante imutável em runtime) — evita Singleton lookup todo frame
                 var backend = Singleton<BackendConfigSettingsClass>.Instance;
                 if (backend?.Stamina != null)

@@ -24,6 +24,8 @@
 | 018 | Rastejar rápido (crawl + run / high-crawl) | Enquanto prone, permitir um rastejar acelerado ("high-crawl") acionado por **andar-para-frente + agachado + correr** — mobilidade tática sem levantar. Ideia bruta; pendente investigação (o EFT tem high-crawl nativo? só velocidade ou animação?) e spec. | [018-rastejar-rapido/](./018-rastejar-rapido/) | ⚪ |
 | 019 | UI ao checar a câmara (bala + tipo) | Ao checar a câmara, mostra se há bala e qual é, na **mesma UI do check de carregador**. Gate GO validado antes de implementar (nada vanilla nem de outro mod cobria). Entregue na v2.10.0, refeito via `EftBattleUIScreen` na v2.12.1, **validado in-game em 2026-08-01**. | [019-checar-camara-ui/](./019-checar-camara-ui/) | 🟢 |
 
+| 020 | Faxina pré-publicação | Higiene de código para o mod ir a público: remove a classe de balanço de câmera nunca instanciada, o campo de reflexão nunca lido e o `FixedUpdate` vazio; protege o laço principal contra exceção (uma falha hoje cancela os outros 6 subsistemas, todo quadro); remove o aparato inerte que reconstrói o menu F12 à toa. **Nada muda para o jogador** — o critério de aceite é "o jogo se comporta exatamente como antes". | [020-faxina-pre-publicacao/](./020-faxina-pre-publicacao/) | 🟡 |
+
 ## Legenda
 
 - ⚪ Backlog · 🟡 Em progresso · 🟢 Entregue · 🔴 Cancelado

@@ -20,7 +20,7 @@ public enum ScrollMode
     Linear,
 }
 
-[BepInPlugin("com.shwng.fpscamerastances", "shwngFpsCameraStances4", "2.14.0")]
+[BepInPlugin("com.shwng.fpscamerastances", "shwngFpsCameraStances4", "2.15.0")]
 public class Plugin : BaseUnityPlugin
 {
     public static Plugin Instance { get; private set; }
@@ -128,18 +128,12 @@ public class Plugin : BaseUnityPlugin
     // backlog 002 F5 — iniciar raid em Stance 2 - Low Ready (set imediato sem animação).
     public static ConfigEntry<bool> _StartInLowReadyOnRaidBegin;
 
-    // backlog 002 F2 — refs aos `ConfigurationManagerAttributes` para mutar `Browsable` em runtime
-    // (visibilidade dependente do Mouse Wheel Scroll Mode). Capturadas no Awake durante Config.Bind.
-    private static ConfigurationManagerAttributes _attrIncludeStance0;
-    private static ConfigurationManagerAttributes _attrEnableStance1Cycle;
-    private static ConfigurationManagerAttributes _attrEnableStance2Cycle;
-    private static ConfigurationManagerAttributes _attrEnableStance3Cycle;
-
-    // backlog 002 F2 — cache da reflexão do ConfigurationManager (PA-01-03) para forçar
-    // refresh do F12 em runtime. Resolvidos em TryResolveConfigurationManager (Awake).
-    private static MethodInfo _cmBuildSettingListMethod;
-    private static UnityEngine.Object _cmInstance;
-    private static bool _cmRefreshAvailable;
+    // Item 020 (F5) / CR-05 — aqui viviam 4 refs a `ConfigurationManagerAttributes` e o cache de reflexão
+    // do ConfigurationManager, usados para esconder/mostrar os toggles de ciclo conforme o modo de scroll.
+    // O MP-02-04 já tinha decidido que os 4 ficam SEMPRE visíveis (governam também o ciclo da tecla V), o
+    // que deixou o mecanismo inerte: `Browsable` era fixado em `true` e o único efeito restante era mandar
+    // o ConfigurationManager reconstruir a lista inteira de opções a cada mudança do modo de scroll.
+    // Removido — os `Order` agora vão inline no `Config.Bind`.
 
     // backlog 002 F4 (06-fix-01) — patch target: Player.FirearmController.SetTriggerPressed
     // (NÃO nested operation). Resolvido por reflection no Awake.
@@ -237,9 +231,6 @@ public class Plugin : BaseUnityPlugin
         Logger = base.Logger;
         Logger.LogInfo("Plugin shwngFpsCameraStances4 is loaded!");
         Logger.LogInfo($"Camera Rotation Mod has loaded!");
-
-        // backlog 002 F2 — cachear API do ConfigurationManager para refresh de visibilidade em runtime.
-        TryResolveConfigurationManager();
 
         // backlog 002 F4 (06-fix-01) — resolver Player.FirearmController.SetTriggerPressed por reflection.
         // Patch target trocado de operation-base para o método de roteamento da FC (virtual dispatch
@@ -358,7 +349,6 @@ public class Plugin : BaseUnityPlugin
         const string GeneralSection = "Stance Transition & Kick";
 
         // backlog 002 F1 — substitui `Use Only Stances` (lógica invertida).
-        _attrIncludeStance0 = new ConfigurationManagerAttributes { Order = 65 };
         _IncludeStance0InCycle = Config.Bind(
             Settings,
             "Include Stance 0 - Vanilla in Cycle",
@@ -368,35 +358,31 @@ public class Plugin : BaseUnityPlugin
                 "Replaces the old `Use Only Stances` toggle (inverted logic, clearer naming). " +
                 "Always affects the V key cycle; affects mouse scroll only when Mouse Wheel Scroll Mode = Cycle.\n\nQuando ativado, a Stance 0 (Vanilla) entra no ciclo de posturas. Substitui o antigo `Use Only Stances` (lógica invertida, nome mais claro). Sempre afeta o ciclo da tecla V; afeta o scroll do mouse apenas quando Mouse Wheel Scroll Mode = Cycle.",
                 null,
-                _attrIncludeStance0));
+                new ConfigurationManagerAttributes { Order = 65 }));
 
-        // backlog 002 F2 — capturar atributos para mutar Browsable em runtime
-        _attrEnableStance1Cycle = new ConfigurationManagerAttributes { Order = 64 };
         _EnableStance1 = Config.Bind(
             Settings,
             "Enable Stance 1 - High Ready in Cycle",
             true,
             new ConfigDescription("When enabled, Stance 1 is included in the stance cycle. When disabled, Stance 1 is skipped.\n\nQuando ativado, a Stance 1 entra no ciclo de posturas. Quando desativado, a Stance 1 é pulada.",
             null,
-            _attrEnableStance1Cycle));
+            new ConfigurationManagerAttributes { Order = 64 }));
 
-        _attrEnableStance2Cycle = new ConfigurationManagerAttributes { Order = 63 };
         _EnableStance2 = Config.Bind(
             Settings,
             "Enable Stance 2 - Low Ready in Cycle",
             true,
             new ConfigDescription("When enabled, Stance 2 is included in the stance cycle. When disabled, Stance 2 is skipped.\n\nQuando ativado, a Stance 2 entra no ciclo de posturas. Quando desativado, a Stance 2 é pulada.",
             null,
-            _attrEnableStance2Cycle));
+            new ConfigurationManagerAttributes { Order = 63 }));
 
-        _attrEnableStance3Cycle = new ConfigurationManagerAttributes { Order = 62 };
         _EnableStance3 = Config.Bind(
             Settings,
             "Enable Stance 3 - Custom in Cycle",
             true,
             new ConfigDescription("When enabled, Stance 3 is included in the stance cycle. When disabled, Stance 3 is skipped.\n\nQuando ativado, a Stance 3 entra no ciclo de posturas. Quando desativado, a Stance 3 é pulada.",
             null,
-            _attrEnableStance3Cycle));
+            new ConfigurationManagerAttributes { Order = 62 }));
 
         _StanceToggleKey = Config.Bind(
             Settings,
@@ -435,8 +421,6 @@ public class Plugin : BaseUnityPlugin
                 new ConfigurationManagerAttributes { Order = 58 }));
 
         // PA-03-04: SettingChanged via método nomeado (não lambda) — permite unsubscribe no OnDestroy.
-        _MouseWheelScrollMode.SettingChanged  += OnScrollModeSettingChanged;
-        _EnableMouseWheelCycle.SettingChanged += OnScrollModeSettingChanged;
 
         _StanceTransitionSpeed = Config.Bind(
             GeneralSection,
@@ -1258,9 +1242,6 @@ public class Plugin : BaseUnityPlugin
 
         // Note: RotationEvents and SetItemInHandsPatch are deprecated now
         // All logic is handled by StanceManager + SpringGetPatch
-
-        // backlog 002 F2 — visibilidade inicial dos toggles de ciclo conforme ScrollMode atual.
-        RefreshScrollModeVisibility();
     }
 
     /// <summary>
@@ -1382,56 +1363,6 @@ public class Plugin : BaseUnityPlugin
     // ==========================================================================
 
     /// <summary>
-    /// PA-03-04: handler nomeado (não lambda) para subscribe/unsubscribe explícito.
-    /// </summary>
-    private static void OnScrollModeSettingChanged(object sender, EventArgs args)
-        => RefreshScrollModeVisibility();
-
-    /// <summary>
-    /// F2 — atualiza Browsable das ConfigEntries dependentes do modo de scroll
-    /// e força repaint do ConfigurationManager (se disponível). PA-01-03 + PA-03-04.
-    /// </summary>
-    private static void RefreshScrollModeVisibility()
-    {
-        // MP-02-04 — os 4 toggles de ciclo agora ficam SEMPRE visíveis.
-        // Antes: `Browsable = wheelEnabled && mode == Cycle`, o que os escondia na config padrão
-        // (wheel off / modo Linear). Mas eles governam também o ciclo da tecla V (IsStanceEnabled →
-        // GetNextStance) em QUALQUER modo — como o próprio tooltip diz. Escondê-los deixava o
-        // usuário sem como editar, pela UI, quais posturas o V percorre.
-        if (_attrIncludeStance0 != null)     _attrIncludeStance0.Browsable = true;
-        if (_attrEnableStance1Cycle != null) _attrEnableStance1Cycle.Browsable = true;
-        if (_attrEnableStance2Cycle != null) _attrEnableStance2Cycle.Browsable = true;
-        if (_attrEnableStance3Cycle != null) _attrEnableStance3Cycle.Browsable = true;
-
-        // Forçar redesenho do CM em tempo real — só se cache disponível (degradação graciosa).
-        if (!_cmRefreshAvailable) return;
-        try { _cmBuildSettingListMethod.Invoke(_cmInstance, null); }
-        catch (Exception ex) { Logger.LogError($"[F2] BuildSettingList falhou: {ex}"); }
-    }
-
-    /// <summary>
-    /// PA-01-03: cachear MethodInfo + instância do ConfigurationManager para forçar repaint
-    /// do F12 quando Browsable muda. Soft dependency — se ausente, log info e segue.
-    /// </summary>
-    private static void TryResolveConfigurationManager()
-    {
-        var tCM = AccessTools.TypeByName("ConfigurationManager.ConfigurationManager");
-        if (tCM == null)
-        {
-            Logger.LogInfo("[F2] ConfigurationManager não detectado — visibilidade dinâmica desabilitada (atualiza ao reabrir F12).");
-            return;
-        }
-        _cmBuildSettingListMethod = AccessTools.Method(tCM, "BuildSettingList");
-        _cmInstance = UnityEngine.Object.FindObjectOfType(tCM);
-        if (_cmBuildSettingListMethod == null || _cmInstance == null)
-        {
-            Logger.LogWarning("[F2] ConfigurationManager presente mas BuildSettingList não resolvido — visibilidade só atualiza ao reabrir F12.");
-            return;
-        }
-        _cmRefreshAvailable = true;
-    }
-
-    /// <summary>
     /// 06-fix-01: resolver Player.FirearmController.SetTriggerPressed (NÃO operation-base).
     /// ref: Player.cs:13668 — virtual público em Player.FirearmController que roteia para
     /// CurrentOperation.SetTriggerPressed.
@@ -1492,16 +1423,12 @@ public class Plugin : BaseUnityPlugin
         }
     }
 
-    private void OnDestroy()
-    {
-        if (_MouseWheelScrollMode != null)  _MouseWheelScrollMode.SettingChanged  -= OnScrollModeSettingChanged;
-        if (_EnableMouseWheelCycle != null) _EnableMouseWheelCycle.SettingChanged -= OnScrollModeSettingChanged;
-    }
+    // Item 020 (F5): o `OnDestroy` existia só para desinscrever os handlers de visibilidade do F12
+    // (removidos com o aparato). Sem assinatura para desfazer, o método deixou de ter função.
 
-    private void FixedUpdate()
-    {
-
-    }
+    // Item 020 (F3): havia aqui um `FixedUpdate` VAZIO. O Unity o chamava a cada passo de física
+    // (~50×/s) para não executar nada — MonoBehaviour com o método declarado entra na lista de
+    // callbacks mesmo com corpo vazio. Removido; nada no mod usa o passo de física.
 
     // Cached camera offset state to avoid setting every frame
     private static Vector3 _lastCameraOffset = new Vector3(0.04f, 0.04f, 0.04f);
@@ -1528,13 +1455,28 @@ public class Plugin : BaseUnityPlugin
         // lê _stanceToggleKeyConfig.Value (null) e cospe NullReferenceException a cada frame, para sempre.
         if (!ConfigReady) return;
 
-        StanceManager.Update();
-        StanceManager.UpdateTacSprint();
-        StanceManager.TickAdsNetworkSync();             // CR-02-02: reenvia stance ao mirar/desmirar (Fika)
-        StaminaController.Tick();                       // item 012: stamina de braço (autoridade única)
-        StanceManager.TickStanceStamina();              // item 012: agora só re-aplica o speed-limit quando a config muda
-        StanceManager.EvaluateProneSuspensionTick();    // backlog 001: prone toggle + refresh defensivo de speed limit
-        UpdateCameraOffset();
+        // Item 020 (F4) / CR-07 — cada subsistema é isolado. Antes, os sete rodavam sem proteção numa
+        // sequência: uma exceção no primeiro cancelava os SEIS seguintes, a cada frame, para sempre —
+        // o modo de falha que produz "o mod parou de funcionar no meio da raid" (posturas travam, stamina
+        // congela, câmera não responde) sem nada além de um erro repetido no console.
+        //
+        // Isolado significa isolado de verdade: um try por subsistema, não um try envolvendo os sete.
+        // Um bloco único deixaria o mesmo efeito dominó dentro do try.
+        //
+        // O custo de um try/catch sem exceção é zero em runtime (só metadados de tabela de exceção), então
+        // isto não pesa no frame. O log é limitado por ThrottledLog — sem isso, uma falha por frame afogaria
+        // o console e esconderia o erro real.
+        //
+        // ⚠️ Escrito na mão, sem um helper `Tick(Action, string)`: passar method group vira alocação de
+        // delegate POR FRAME (7 por frame, um deles capturando `this`) — trocaria um bug por lixo de GC no
+        // caminho mais quente do mod. Verbosidade aqui é o preço de zero alocação.
+        try { StanceManager.Update(); }                    catch (Exception ex) { ThrottledLog.Error("Update/Stance", ex); }
+        try { StanceManager.UpdateTacSprint(); }           catch (Exception ex) { ThrottledLog.Error("Update/TacSprint", ex); }
+        try { StanceManager.TickAdsNetworkSync(); }        catch (Exception ex) { ThrottledLog.Error("Update/AdsNetworkSync", ex); }   // CR-02-02 (Fika)
+        try { StaminaController.Tick(); }                  catch (Exception ex) { ThrottledLog.Error("Update/Stamina", ex); }          // item 012
+        try { StanceManager.TickStanceStamina(); }         catch (Exception ex) { ThrottledLog.Error("Update/StanceStamina", ex); }    // item 012
+        try { StanceManager.EvaluateProneSuspensionTick(); } catch (Exception ex) { ThrottledLog.Error("Update/ProneSuspension", ex); } // backlog 001
+        try { UpdateCameraOffset(); }                      catch (Exception ex) { ThrottledLog.Error("Update/CameraOffset", ex); }
     }
     
     private StanceConfig BindStance(
