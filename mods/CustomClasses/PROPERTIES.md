@@ -58,7 +58,7 @@ Properties exposed in the configuration menu (F12 / ConfigurationManager). One i
 | `Swift Surgeon — Enabled` | bool | `true` | — | Perk (**072**): much faster surgery (CMS/Surv12). |
 | `Swift Surgeon — Surgery time mult` | float | `0.75` | 0.3..1 | Surgery time (0.75 = 25% faster). The player's Surgery skill **still** stacks on top. |
 | `Restorative Surgery — Enabled` | bool | `true` | — | Perk (**076**): surgery restores the limb to ~80% of max HP (vanilla: CMS 25–45%, Surv12 60–72%). Applies to own surgery + ally via ICM. |
-| `Restorative Surgery — Restored max HP` | float | `0.80` | 0..1 | **Floor** of the retained max-HP fraction (0.80 = 80%). Never worse than vanilla; the Surgery skill pushes **beyond** this floor. |
+| `Restorative Surgery — Restored max HP` | float | `0.90` | 0..1 | **Floor** of the retained max-HP fraction (0.80 = 80%). Never worse than vanilla; the Surgery skill pushes **beyond** this floor. |
 | `Unskilled — Enabled` | bool | `true` | — | Drawback (**079**, formerly `Shaky Hands`): more recoil from lack of firearm skill. Now Combat Medic **and** Scavenger, and **ON** by default (was off). |
 | `Unskilled — Recoil mult` | float | `1.25` | 1..2 | Recoil (1.25 = +25%). |
 | `Override color` | bool | `false` | — | Override this class's name/icon color with 'Class color' (off = server color). (item 067) |
@@ -95,7 +95,7 @@ Properties exposed in the configuration menu (F12 / ConfigurationManager). One i
 | `Stalker — Enabled` | bool | `true` | — | Perk: reduces the audibility radius of your movement sounds (stalking). Weaker sibling of the Stealth's Ghost Step. |
 | `Stalker — Sound radius mult` | float | `0.8` | 0.1..1 | Movement-sound radius (0.80 = **−20%**; the Stealth gets −30%). |
 | `Sharpshooter — Enabled` | bool | `true` | — | Perk: faster ADS. |
-| `Sharpshooter — ADS time mult` | float | `0.85` | 0.5..1 | ADS time (0.85 = 15% faster). |
+| `Sharpshooter — ADS time mult` | float | `0.90` | 0.5..1 | ADS time (0.85 = 15% faster). |
 | `Iron Lungs — Enabled` | bool | `true` | — | Perk: holds breath longer. |
 | `Iron Lungs — Breath drain mult` | float | `0.7` | 0.2..1 | Hold-breath O2 drain (0.7 → +43% duration). |
 | `Steady Arms — Enabled` | bool | `true` | — | Perk: slower arm fatigue while aiming (**requires the stances mod**). |
@@ -107,10 +107,10 @@ Properties exposed in the configuration menu (F12 / ConfigurationManager). One i
 | `Override color` | bool | `false` | — | Override this class's name/icon color with 'Class color' (off = server color). (item 067) |
 | `Class color` | Color | `#c2973f` | — | Class name/icon color — only when 'Override color' is on; alpha ignored (always opaque). (item 067) |
 | `Light Frame — Enabled` | bool | `true` | — | Drawback (**079**, Hunter + Stealth): reduced carry limit (light frame — carries less loot). |
-| `Light Frame — Carry limit penalty` | float | `-0.20` | −0.5..0 | Carry-limit reduction (−0.20 = −20%). **Negative** value (cap, not floor). |
+| `Light Frame — Carry limit penalty` | float | `-0.10` | −0.5..0 | Carry-limit reduction (−0.20 = −20%). **Negative** value (cap, not floor). |
 | `Quick Draw — Enabled` | bool | `true` | — | Perk (**080/087/088**, Hunter + Rifleman + Stealth): faster SWAP to the Holster weapon (put away the previous + draw the holster one). |
-| `Quick Draw — Draw-in time mult (phase 3)` | float | `0.65` | 0.3..1 | Phase 3 — time to **DRAW** the holster weapon (0.65 = 35% faster; 1.0 = off). |
-| `Quick Draw — Put-away time mult (phase 1)` | float | `0.75` | 0.3..1 | Phase 1 — time to **PUT AWAY** the previous weapon (0.75 = 25% faster; 1.0 = off). |
+| `Quick Draw — Draw-in time mult (phase 3)` | float | `0.90` | 0.3..1 | Phase 3 — time to **DRAW** the holster weapon (0.65 = 35% faster; 1.0 = off). |
+| `Quick Draw — Put-away time mult (phase 1)` | float | `0.90` | 0.3..1 | Phase 1 — time to **PUT AWAY** the previous weapon (0.75 = 25% faster; 1.0 = off). |
 
 ## Section `5 · Stealth`
 
@@ -119,7 +119,7 @@ Properties exposed in the configuration menu (F12 / ConfigurationManager). One i
 | `Execution Speed — Enabled` | bool | `true` | — | Perk: +move speed with the melee in hand. |
 | `Execution Speed — Move speed mult` | float | `1.1` | 1..1.5 | Move speed with melee in hand (1.1 = +10%). |
 | `Execution Melee — Enabled` | bool | `true` | — | Perk: multiplies knife melee damage. |
-| `Execution Melee — Damage mult` | float | `3.5` | 1..10 | Melee damage (3.5x, execution). Was `5` (trivial one-shot). (balance B7) |
+| `Execution Melee — Damage mult` | float | `5` | 1..10 | Melee damage (3.5x, execution). Was `5` (trivial one-shot). (balance B7) |
 | `Ghost Step — Enabled` | bool | `true` | — | Perk: reduces the audibility radius of your movement sounds. |
 | `Ghost Step — Sound radius mult` | float | `0.7` | 0.1..1 | Movement-sound radius (0.7 = −30%). |
 | `Rattled — Enabled` | bool | `true` | — | Drawback: stronger aim-punch when hit. |

@@ -275,7 +275,7 @@ internal static class PerksConfig
         RapidCareUseTime = BindOrdered(config, 
             SecMedic, "Rapid Care — Use time mult", 0.75f,
             new ConfigDescription(
-                "Multiplicador do tempo de uso de itens médicos (0.75 = 25% mais rápido). Não vale para o kit de cirurgia (veja Swift Surgeon). / Medical item use-time multiplier (0.75 = 25% faster). Does not apply to the surgery kit (see Swift Surgeon).",
+                "Multiplicador do tempo de uso de itens médicos (0.9 = 10% mais rápido). Não vale para o kit de cirurgia (veja Swift Surgeon). / Medical item use-time multiplier (0.9 = 10% faster). Does not apply to the surgery kit (see Swift Surgeon).",
                 new AcceptableValueRange<float>(0.3f, 1f)));
         SwiftSurgeonEnabled = BindOrdered(config, 
             SecMedic, "Swift Surgeon — Enabled", true,
@@ -283,7 +283,7 @@ internal static class PerksConfig
         SwiftSurgeonTime = BindOrdered(config, 
             SecMedic, "Swift Surgeon — Surgery time mult", 0.75f,
             new ConfigDescription(
-                "Multiplicador do tempo de cirurgia (0.75 = 25% mais rápido). A skill Surgery do jogador segue valendo por cima. / Surgery time multiplier (0.75 = 25% faster). The player's Surgery skill still stacks on top.",
+                "Multiplicador do tempo de cirurgia (0.9 = 10% mais rápido). A skill Surgery do jogador segue valendo por cima. / Surgery time multiplier (0.9 = 10% faster). The player's Surgery skill still stacks on top.",
                 new AcceptableValueRange<float>(0.3f, 1f)));
         // 079: Mobile Surgery REMOVIDO (o Médico não anda mais em cirurgia — nem própria nem de aliado).
         // 076 — a cirurgia do Médico não deixa a "cicatriz" permanente de HP máximo. Vale p/ a própria cirurgia
@@ -292,9 +292,9 @@ internal static class PerksConfig
             SecMedic, "Restorative Surgery — Enabled", true,
             "Médico: a cirurgia restaura o membro a ~80% do HP MÁXIMO (configurável abaixo), em vez da cicatriz grande do vanilla (CMS mantém só 25–45%, Surv12 60–72%). Vale para a cirurgia no próprio Médico e nos aliados que ele opera (via ICM). / Combat Medic: surgery restores the limb to ~80% of MAX HP (configurable below) instead of vanilla's big scar (CMS keeps only 25–45%, Surv12 60–72%). Applies to the medic's own surgery and to allies they operate on (via ICM).");
         RestorativeSurgeryRetention = BindOrdered(config, 
-            SecMedic, "Restorative Surgery — Restored max HP", 0.80f,
+            SecMedic, "Restorative Surgery — Restored max HP", 0.9f,
             new ConfigDescription(
-                "Fração MÍNIMA do HP máximo que o membro operado retém (0.80 = volta com 80%). É um PISO: nunca pior que o vanilla, e a skill Surgery do jogador pode melhorar ALÉM disto. / Minimum fraction of the limb's max HP retained after surgery (0.80 = comes back at 80%). It's a FLOOR: never worse than vanilla, and the player's Surgery skill can push beyond it.",
+                "Fração MÍNIMA do HP máximo que o membro operado retém (0.90 = volta com 90%). É um PISO: nunca pior que o vanilla, e a skill Surgery do jogador pode melhorar ALÉM disto. / Minimum fraction of the limb's max HP retained after surgery (0.90 = comes back at 90%). It's a FLOOR: never worse than vanilla, and the player's Surgery skill can push beyond it.",
                 new AcceptableValueRange<float>(0f, 1f)));
         // 079: "Shaky Hands" renomeado p/ "Unskilled" / "Falta de habilidade" + LIGADO (era OFF) + agora
         // Médico E Saqueador (gate no ShootRecoilPatch). Key F12 renomeada → reseta o valor salvo (changelog).
@@ -376,9 +376,9 @@ internal static class PerksConfig
             SecHunter, "Sharpshooter — Enabled", true,
             "Caçador: mira (ADS) mais rápido. / Hunter: faster ADS.");
         SharpshooterAdsTime = BindOrdered(config, 
-            SecHunter, "Sharpshooter — ADS time mult", 0.85f,
+            SecHunter, "Sharpshooter — ADS time mult", 0.9f,
             new ConfigDescription(
-                "Multiplicador do TEMPO de ADS do Caçador (0.85 = 15% mais rápido). / Hunter ADS time multiplier (0.85 = 15% faster).",
+                "Multiplicador do TEMPO de ADS do Caçador (0.9 = 10% mais rápido). / Hunter ADS time multiplier (0.9 = 10% faster).",
                 new AcceptableValueRange<float>(0.5f, 1f)));
         IronLungsEnabled = BindOrdered(config, 
             SecHunter, "Iron Lungs — Enabled", true,
@@ -431,9 +431,9 @@ internal static class PerksConfig
         // B7 (balance 2026-07-11): ×5 → ×3.5. O ×5 era one-shot trivial (kill garantido); ×3.5 mantém a
         // faca como arma real de execução, mas exige posicionamento — sem o kill automático.
         ExecutionMeleeDamage = BindOrdered(config, 
-            SecStealth, "Execution Melee — Damage mult", 3.5f,
+            SecStealth, "Execution Melee — Damage mult", 5f,
             new ConfigDescription(
-                "Multiplicador do dano de melee do Furtivo (3.5 = 3.5×, execução). / Stealth melee damage multiplier (3.5 = 3.5×, execution).",
+                "Multiplicador do dano de melee do Furtivo (5 = 5×, execução). / Stealth melee damage multiplier (5 = 5×, execution).",
                 new AcceptableValueRange<float>(1f, 10f)));
         GhostStepEnabled = BindOrdered(config, 
             SecStealth, "Ghost Step — Enabled", true,
@@ -489,9 +489,9 @@ internal static class PerksConfig
             SecHunter, "Light Frame — Enabled", true,
             "Caçador/Furtivo: limite de carga reduzido (estrutura leve — leva menos loot). / Hunter/Stealth: reduced carry limit (light frame).");
         LightFrameCarryPenalty = BindOrdered(config, 
-            SecHunter, "Light Frame — Carry limit penalty", -0.20f,
+            SecHunter, "Light Frame — Carry limit penalty", -0.1f,
             new ConfigDescription(
-                "Redução do limite de carga (−0.20 = −20%). Valor NEGATIVO. / Carry-limit reduction (−0.20 = −20%). Negative.",
+                "Redução do limite de carga (−0.1 = −10%). Valor NEGATIVO. / Carry-limit reduction (−0.1 = −10%). Negative.",
                 new AcceptableValueRange<float>(-0.5f, 0f)));
         // Loud Looter / Saque Barulhento (Fuzileiro): som de interação/loot mais ALTO (a IA ouve mais — requer SAIN).
         LoudLooterEnabled = BindOrdered(config, 
@@ -509,14 +509,14 @@ internal static class PerksConfig
             SecHunter, "Quick Draw — Enabled", true,
             "Caçador/Fuzileiro/Furtivo: acelera a TROCA para a arma do coldre (guardar a anterior + sacar a do coldre). / Hunter/Rifleman/Stealth: faster SWAP to the Holster weapon (put-away + draw-in).");
         QuickDrawDrawInTime = BindOrdered(config, 
-            SecHunter, "Quick Draw — Draw-in time mult (phase 3)", 0.65f,
+            SecHunter, "Quick Draw — Draw-in time mult (phase 3)", 0.9f,
             new ConfigDescription(
-                "Fase 3 — TEMPO de SACAR a arma do coldre (trazê-la à mão). 0.65 = 35% mais rápido; 1.0 = desliga. / Phase 3 — time to DRAW the holster weapon (bring to hand). 0.65 = 35% faster; 1.0 = off.",
+                "Fase 3 — TEMPO de SACAR a arma do coldre (trazê-la à mão). 0.9 = 10% mais rápido; 1.0 = desliga. / Phase 3 — time to DRAW the holster weapon (bring to hand). 0.9 = 10% faster; 1.0 = off.",
                 new AcceptableValueRange<float>(0.3f, 1f)));
         QuickDrawPutAwayTime = BindOrdered(config, 
-            SecHunter, "Quick Draw — Put-away time mult (phase 1)", 0.75f,
+            SecHunter, "Quick Draw — Put-away time mult (phase 1)", 0.9f,
             new ConfigDescription(
-                "Fase 1 — TEMPO de GUARDAR a arma anterior ao trocar para o coldre (a transição encurta junto). 0.75 = 25% mais rápido; 1.0 = desliga. / Phase 1 — time to PUT AWAY the previous weapon. 0.75 = 25% faster; 1.0 = off.",
+                "Fase 1 — TEMPO de GUARDAR a arma anterior ao trocar para o coldre (a transição encurta junto). 0.9 = 10% mais rápido; 1.0 = desliga. / Phase 1 — time to PUT AWAY the previous weapon. 0.9 = 10% faster; 1.0 = off.",
                 new AcceptableValueRange<float>(0.3f, 1f)));
         // 081 — Lebre (Saqueador): +velocidade de movimento enquanto NÃO estiver pesado (Overweight nativo == 0).
         LebreEnabled = BindOrdered(config, 

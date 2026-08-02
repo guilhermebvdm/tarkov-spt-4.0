@@ -58,7 +58,7 @@ Propriedades expostas no menu de configuração (F12 / ConfigurationManager). Um
 | `Swift Surgeon — Enabled` | bool | `true` | — | Perk (**072**): cirurgia (CMS/Surv12) muito mais rápida. |
 | `Swift Surgeon — Surgery time mult` | float | `0.75` | 0.3..1 | Tempo de cirurgia (0.75 = 25% mais rápido). A skill Surgery do jogador **continua** valendo por cima. |
 | `Restorative Surgery — Enabled` | bool | `true` | — | Perk (**076**): a cirurgia restaura o membro a ~80% do HP máx (vanilla: CMS 25–45%, Surv12 60–72%). Vale na auto-cirurgia + aliado via ICM. |
-| `Restorative Surgery — Restored max HP` | float | `0.80` | 0..1 | **Piso** da fração de HP máx retida (0.80 = 80%). Nunca pior que o vanilla; a skill Surgery empurra **além** deste piso. |
+| `Restorative Surgery — Restored max HP` | float | `0.90` | 0..1 | **Piso** da fração de HP máx retida (0.80 = 80%). Nunca pior que o vanilla; a skill Surgery empurra **além** deste piso. |
 | `Unskilled — Enabled` | bool | `true` | — | Drawback (**079**, ex-`Shaky Hands`): +recuo por falta de habilidade. Agora Médico **E** Saqueador, e **LIGADO** por padrão (antes off). |
 | `Unskilled — Recoil mult` | float | `1.25` | 1..2 | Recuo (1.25 = +25%). |
 | `Override color` | bool | `false` | — | Sobrescreve a cor do nome/ícone desta classe pela 'Class color' (desligado = cor do server). (item 067) |
@@ -95,7 +95,7 @@ Propriedades expostas no menu de configuração (F12 / ConfigurationManager). Um
 | `Stalker — Enabled` | bool | `true` | — | Perk: −raio de audibilidade dos sons de movimento (espreita). Irmão mais fraco do Ghost Step do Furtivo. |
 | `Stalker — Sound radius mult` | float | `0.8` | 0.1..1 | Raio de som de movimento (0.80 = **−20%**; o Furtivo tem −30%). |
 | `Sharpshooter — Enabled` | bool | `true` | — | Perk: mira (ADS) mais rápido. |
-| `Sharpshooter — ADS time mult` | float | `0.85` | 0.5..1 | Tempo de ADS (0.85 = 15% mais rápido). |
+| `Sharpshooter — ADS time mult` | float | `0.90` | 0.5..1 | Tempo de ADS (0.85 = 15% mais rápido). |
 | `Iron Lungs — Enabled` | bool | `true` | — | Perk: segura a respiração por mais tempo. |
 | `Iron Lungs — Breath drain mult` | float | `0.7` | 0.2..1 | Dreno de O₂ ao prender a respiração (0.7 → +43% de duração). |
 | `Steady Arms — Enabled` | bool | `true` | — | Perk: braço cansa mais devagar ao mirar (**requer o stances mod**). |
@@ -107,10 +107,10 @@ Propriedades expostas no menu de configuração (F12 / ConfigurationManager). Um
 | `Override color` | bool | `false` | — | Sobrescreve a cor do nome/ícone desta classe pela 'Class color' (desligado = cor do server). (item 067) |
 | `Class color` | Color | `#c2973f` | — | Cor do nome/ícone da classe — só vale com 'Override color' ligado; alpha ignorado (sempre opaca). (item 067) |
 | `Light Frame — Enabled` | bool | `true` | — | Drawback (**079**, Caçador + Furtivo): limite de carga reduzido (estrutura leve — leva menos loot). |
-| `Light Frame — Carry limit penalty` | float | `-0.20` | −0.5..0 | Redução do limite de carga (−0.20 = −20%). Valor **negativo** (teto, não piso). |
+| `Light Frame — Carry limit penalty` | float | `-0.10` | −0.5..0 | Redução do limite de carga (−0.20 = −20%). Valor **negativo** (teto, não piso). |
 | `Quick Draw — Enabled` | bool | `true` | — | Perk (**080/087/088**, Caçador + Fuzileiro + Furtivo): acelera a TROCA para a arma do coldre (guardar a anterior + sacar a do coldre). |
-| `Quick Draw — Draw-in time mult (phase 3)` | float | `0.65` | 0.3..1 | Fase 3 — tempo de **SACAR** a arma do coldre (0.65 = 35% mais rápido; 1.0 = desliga). |
-| `Quick Draw — Put-away time mult (phase 1)` | float | `0.75` | 0.3..1 | Fase 1 — tempo de **GUARDAR** a arma anterior (0.75 = 25% mais rápido; 1.0 = desliga). |
+| `Quick Draw — Draw-in time mult (phase 3)` | float | `0.90` | 0.3..1 | Fase 3 — tempo de **SACAR** a arma do coldre (0.65 = 35% mais rápido; 1.0 = desliga). |
+| `Quick Draw — Put-away time mult (phase 1)` | float | `0.90` | 0.3..1 | Fase 1 — tempo de **GUARDAR** a arma anterior (0.75 = 25% mais rápido; 1.0 = desliga). |
 
 ## Seção `5 · Stealth`
 
@@ -119,7 +119,7 @@ Propriedades expostas no menu de configuração (F12 / ConfigurationManager). Um
 | `Execution Speed — Enabled` | bool | `true` | — | Perk: +velocidade com a melee na mão. |
 | `Execution Speed — Move speed mult` | float | `1.1` | 1..1.5 | Velocidade com melee na mão (1.1 = +10%). |
 | `Execution Melee — Enabled` | bool | `true` | — | Perk: multiplica o dano de golpe de faca. |
-| `Execution Melee — Damage mult` | float | `3.5` | 1..10 | Dano de melee (3.5×, execução). Era `5` (one-shot trivial). (balance B7) |
+| `Execution Melee — Damage mult` | float | `5` | 1..10 | Dano de melee (5×, execução — default calibrado pelo usuário 2026-08-01; era 3.5). (balance B7) |
 | `Ghost Step — Enabled` | bool | `true` | — | Perk: −raio de audibilidade dos sons de movimento. |
 | `Ghost Step — Sound radius mult` | float | `0.7` | 0.1..1 | Raio de som de movimento (0.7 = −30%). |
 | `Rattled — Enabled` | bool | `true` | — | Drawback: +tranco de câmera ao levar dano. |
