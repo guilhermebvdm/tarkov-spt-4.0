@@ -7,6 +7,32 @@ Versões mais recentes primeiro.
 
 ---
 
+## v2.14.0 (2026-08-01)
+
+### Diagnóstico do "andar que trava devagar"
+
+Nova opção `Debug Speed Limits` (seção `Debug (Advanced)`): mostra na tela **todas as causas de limite de
+velocidade ativas**, qual delas está vencendo, e o limite resultante — mais uma linha no log **sempre que a
+causa vencedora muda**, para o problema poder ser diagnosticado depois, sem depender de estar olhando a tela
+na hora. Os valores são fatores normalizados (1 = sem limite), não m/s.
+
+**Por que só um instrumento e não a correção:** a hipótese que estava registrada há semanas — "o teto é
+calculado uma vez e não é recalculado quando a velocidade máxima muda, então agachar e levantar prende a
+velocidade no valor do agachado" — **não se sustenta na leitura do jogo**:
+
+- `MovementContext.MaxSpeed` **não depende da pose**. É função do backend e da skill Strength
+  (`MovementContext.cs:910`), então agachar ou levantar não muda o valor de que o mod deriva o teto.
+- O recálculo **não é preguiçoso**: `ProcessSpeedLimits` roda **todo frame** dentro de `ManualUpdate`
+  (`MovementContext.cs:2499`), e o mod ainda re-aplica defensivamente por conta própria a cada tick.
+
+O jogo escolhe o teto pegando o **menor** valor de um dicionário de causas (`BarbedWire`, `HealthCondition`,
+`Aiming`, `Weight`, `SurfaceNormal`, `Swamp`, `Shot`, `Armor`, `Fall`, mais a do mod). O sintoma relatado —
+anda devagar sem motivo, e mirar ou trocar de postura destrava — é compatível com **uma causa que fica
+registrada quando deveria ter sido removida**, e mirar/desmirar força a remoção. Qual delas, só a captura
+in-game responde: é para isso que serve esta tela.
+
+---
+
 ## v2.13.0 (2026-08-01)
 
 ### A compressão de ADS-speed ficou visível e confiável

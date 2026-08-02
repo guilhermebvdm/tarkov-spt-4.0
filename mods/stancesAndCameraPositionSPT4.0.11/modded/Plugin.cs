@@ -20,7 +20,7 @@ public enum ScrollMode
     Linear,
 }
 
-[BepInPlugin("com.shwng.fpscamerastances", "shwngFpsCameraStances4", "2.13.0")]
+[BepInPlugin("com.shwng.fpscamerastances", "shwngFpsCameraStances4", "2.14.0")]
 public class Plugin : BaseUnityPlugin
 {
     public static Plugin Instance { get; private set; }
@@ -208,6 +208,7 @@ public class Plugin : BaseUnityPlugin
     public static ConfigEntry<bool> _PassiveStaminaSave;
     public static ConfigEntry<bool> _DebugStaminaState;   // item 012 — toggle do overlay/log de estado de stamina
     public static ConfigEntry<bool> _DebugAdsSpeed;       // item 017 F3 — overlay nativo→comprimido do ADS speed
+    public static ConfigEntry<bool> _DebugSpeedLimits;    // P-11.1 — overlay das causas de teto de velocidade
     public static ConfigEntry<bool> _ShowMountIcon;
 
     // Animation Settings (Item 005)
@@ -1159,6 +1160,24 @@ public class Plugin : BaseUnityPlugin
                 null,
                 new ConfigurationManagerAttributes { IsAdvanced = true, Order = -3 }));
 
+        // [P-11.1] — instrumento para o bug "a velocidade fica presa devagar". O EFT decide o teto pelo MENOR
+        // valor do dicionário MovementContext.SpeedLimits (causa → fator); o sintoma não diz qual causa está
+        // segurando. Ver SpeedLimitDebugUI.
+        _DebugSpeedLimits = Config.Bind(
+            DebugSettings,
+            "Debug Speed Limits",
+            false,
+            new ConfigDescription(
+                "Shows on screen every active speed-limit cause and which one is winning (the lowest wins), " +
+                "plus the resulting limit. Also logs one line whenever the winning cause changes, so a stuck " +
+                "walk speed can be diagnosed after the fact. Values are normalized factors (1 = no limit), " +
+                "not m/s.\n\nMostra na tela todas as causas de limite de velocidade ativas e qual está " +
+                "vencendo (vence a menor), mais o limite resultante. Também registra uma linha no log sempre " +
+                "que a causa vencedora muda, para diagnosticar depois um andar que travou devagar. Os valores " +
+                "são fatores normalizados (1 = sem limite), não m/s.",
+                null,
+                new ConfigurationManagerAttributes { IsAdvanced = true, Order = -4 }));
+
         // ========================================
         // STANCE STAMINA + VELOCIDADE (backlog 001) — 5 props × 4 stances
         // ========================================
@@ -1347,6 +1366,9 @@ public class Plugin : BaseUnityPlugin
 
         // Item 017 (F3): overlay de debug do ADS speed nativo→comprimido (toggle no F12).
         gameObject.AddComponent<AdsSpeedDebugUI>();
+
+        // [P-11.1]: overlay de debug das causas de teto de velocidade (toggle no F12).
+        gameObject.AddComponent<SpeedLimitDebugUI>();
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
