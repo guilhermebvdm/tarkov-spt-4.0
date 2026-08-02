@@ -745,6 +745,7 @@ html, body {
             rogues_map_scroll_hint: "Os sliders abaixo adicionam Rogues em OUTROS mapas além da Lighthouse. Clique para ler a nota acima. ↑",
             raiders_map_scroll_hint: "Os sliders abaixo adicionam Raiders em todos os mapas (ADICIONAIS). Atenção: Labs e Reserve possuem Raiders nativos vanilla. ↑ Clique para ler a nota.",
             scroll_hint_tooltip: "Clique para ver a nota no topo",
+            nota_inline: "NOTA: Leia a descrição no topo das configurações para entender como as alterações funcionam",
             alert_rogues_vanilla: "Nota: Por padrão, Rogues nativos da Lighthouse nascem na Unidade de Tratamento de Água. As configurações de chance de spawn abaixo são para grupos ADICIONAIS além do vanilla. Desative a opção abaixo se quiser liberar vagas de bots no limite de mapa (MaxBotCap).",
             alert_raiders_vanilla: "Nota: Por padrão, Raiders nativos nascem em eventos (Reserve/Labs). As configurações de chance de spawn abaixo são para grupos ADICIONAIS além do vanilla. Desative a opção abaixo se quiser bloquear o spawn nativo.",
             custom_pmc: "Ativar Spawns Customizados de PMCs", custom_scav: "Ativar Spawns Customizados de Scavs", custom_sniper: "Ativar Spawns Customizados de Snipers", custom_player: "Ativar Spawns Customizados de Jogadores",
@@ -787,6 +788,7 @@ html, body {
             rogues_map_scroll_hint: "The sliders below add Rogues to OTHER maps beyond Lighthouse. Click to read the note above. ↑",
             raiders_map_scroll_hint: "The sliders below add Raiders to all maps (ADDITIONAL). Note: Labs and Reserve have native vanilla Raiders. ↑ Click to read the note.",
             scroll_hint_tooltip: "Click to see the note at the top",
+            nota_inline: "NOTE: Read the description at the top of the settings to understand how changes work",
             alert_rogues_vanilla: "Note: By default, native Lighthouse Rogues spawn at the Water Treatment Plant. The spawn chance settings below are for EXTRA groups in addition to vanilla. Disable the option below to free up bot slots on the map (MaxBotCap).",
             alert_raiders_vanilla: "Note: By default, native Raiders spawn during map events (Reserve/Labs). The spawn chance settings below are for EXTRA groups in addition to vanilla. Disable the option below to block native spawns.",
             custom_pmc: "Enable Custom PMC Spawns", custom_scav: "Enable Custom Scav Spawns", custom_sniper: "Enable Custom Sniper Spawns", custom_player: "Enable Custom Player Spawns",
@@ -1458,16 +1460,16 @@ html, body {
                 </div>`;
             }).join("");
 
-            // Small inline clickable hint before map title for vanilla maps
+            // Inline amber box hint after map title for vanilla maps
             const scrollHint = isVanillaMap && alertTargetId
-                ? `<a href="#" onclick="scrollToTopAlert(event,'bossConfigContainer','${alertTargetId}')" title="${t('scroll_hint_tooltip')}" style="display:inline-flex;align-items:center;gap:3px;color:var(--trl-accent);font-size:10px;text-decoration:none;margin-right:6px;vertical-align:middle;opacity:0.85;">
-                       <svg style="width:11px;height:11px;" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="8" r="6.5"/><line x1="8" y1="5" x2="8" y2="8.5"/><line x1="8" y1="10.5" x2="8" y2="11"/></svg>
-                       <span>NOTA</span>
+                ? `<a href="#" onclick="scrollToTopAlert(event,'bossConfigContainer','${alertTargetId}')" title="${t('scroll_hint_tooltip')}" style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.3);padding:2px 7px 2px 5px;color:var(--trl-accent);font-size:11px;font-weight:600;text-decoration:none;margin-left:8px;vertical-align:middle;cursor:pointer;">
+                    <svg style="width:11px;height:11px;flex-shrink:0;" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="8" r="6.5"/><line x1="8" y1="5" x2="8" y2="8.5"/><line x1="8" y1="10.5" x2="8" y2="11"/></svg>
+                    <span>${t('nota_inline')}</span>
                    </a>`
                 : '';
 
             card.innerHTML = `
-                <div class="trl-boss-card__title">${scrollHint}${m.name}</div>
+                <div class="trl-boss-card__title" style="display:flex;align-items:center;">${m.name}${scrollHint}</div>
                 <div class="trl-field">
                     <label class="trl-field__label">
                         <span>${chanceLabel} (${m.name.toUpperCase()})</span>
