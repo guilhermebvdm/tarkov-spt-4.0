@@ -27,6 +27,21 @@
                             <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=nav_mods_configs}" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
+                    <!-- Menu completo (mesma ordem da ProfileView): entrar aqui não perde as outras opções.
+                         Settings salva as escolhas antes de navegar (OpenSettings → SaveChanges). -->
+                    <Button Classes="nav" Cursor="Hand" Command="{Binding OpenSettingsCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <Path Data="{StaticResource TrlIconSettings}" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=nav_settings}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Classes="nav" Cursor="Hand" Command="{Binding OpenKofiCommand}">
+                        <DockPanel LastChildFill="True">
+                            <Path DockPanel.Dock="Left" Data="{StaticResource TrlIconCoffee}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                            <Path DockPanel.Dock="Right" Data="{StaticResource TrlIconExternalLink}" Width="12" Height="12" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                            <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=nav_support_coffee}" VerticalAlignment="Center"/>
+                        </DockPanel>
+                    </Button>
                 </StackPanel>
             </Grid>
         </cc:TrlSidebarNav>

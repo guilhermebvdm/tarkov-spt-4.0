@@ -35,6 +35,8 @@ namespace SPT.Launcher.ViewModels
         public ReactiveCommand<Unit, Unit> ToggleAllOptionalCommand { get; }
         public ReactiveCommand<Unit, Unit> ToggleAllOptionalConfigCommand { get; }
         public ReactiveCommand<Unit, Unit> SaveAndReturnCommand { get; }
+        public ReactiveCommand<Unit, Unit> OpenSettingsCommand { get; }
+        public ReactiveCommand<Unit, Unit> OpenKofiCommand { get; }
 
         public ModsConfigsViewModel(IScreen Host, bool onboarding = false) : base(Host)
         {
@@ -43,6 +45,8 @@ namespace SPT.Launcher.ViewModels
             ToggleAllOptionalCommand = ReactiveCommand.Create(() => ToggleAll(OptionalMods));
             ToggleAllOptionalConfigCommand = ReactiveCommand.Create(() => ToggleAll(OptionalConfigs));
             SaveAndReturnCommand = ReactiveCommand.Create(SaveAndReturn);
+            OpenSettingsCommand = ReactiveCommand.Create(OpenSettings);
+            OpenKofiCommand = ReactiveCommand.Create(OpenKofi);
 
             LoadItems();
 
@@ -142,12 +146,33 @@ namespace SPT.Launcher.ViewModels
             foreach (var i in items) i.IsEnabled = anyOff;
         }
 
-        /// <summary>
-        /// Sair da tela (§5.6). NÃO sincroniza: grava as escolhas + a intenção pendente, marca os itens
-        /// como vistos e o onboarding como concluído, e volta pra aba Launcher — que detecta PendingApply
-        /// e aplica. No onboarding, sempre dispara a ingestão inicial (CA-030.19), mesmo sem alteração.
-        /// </summary>
         private void SaveAndReturn()
+        {
+            SaveChanges();
+            NavigateBack();
+        }
+
+        /// <summary>Sai pela SETTINGS: salva as escolhas (mesma persistência do LAUNCHER) e navega.</summary>
+        private void OpenSettings()
+        {
+            SaveChanges();
+            NavigateTo(new SettingsViewModel(HostScreen));
+        }
+
+        /// <summary>Abre a página de apoio (Ko-fi) no navegador — não sai da tela.</summary>
+        private void OpenKofi() => System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+        {
+            FileName = "https://ko-fi.com/umbigopreto",
+            UseShellExecute = true
+        });
+
+        /// <summary>
+        /// Persiste as escolhas + a intenção pendente, marca itens vistos e o onboarding concluído. NÃO
+        /// sincroniza (§5.6) — quem aplica é o ProfileViewModel ao detectar PendingApply. Compartilhado por
+        /// SaveAndReturn (→ Launcher) e OpenSettings (→ Configurações): sair por qualquer item do menu
+        /// preserva as escolhas. No onboarding, dispara a ingestão inicial (CA-030.19) mesmo sem alteração.
+        /// </summary>
+        private void SaveChanges()
         {
             var settings = LauncherSettingsProvider.Instance;
             var all = OptionalMods.Concat(OptionalConfigs).ToList();
@@ -198,7 +223,6 @@ namespace SPT.Launcher.ViewModels
             if (!settings.SaveSettings())
                 SendNotification("", LocalizationProvider.Instance.failed_to_save_settings,
                     Avalonia.Controls.Notifications.NotificationType.Error);
-            NavigateBack();
         }
     }
 
