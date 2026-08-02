@@ -15,7 +15,7 @@
                 <Image Grid.Row="0" Source="/Assets/logo-redline.png" Stretch="Uniform" MaxHeight="52" HorizontalAlignment="Center" Margin="24,56,24,16"/>
 
                 <StackPanel Grid.Row="1" Spacing="2" Margin="0,28,0,0">
-                    <Button Classes="nav" Cursor="Hand" Command="{Binding SaveAndReturnCommand}">
+                    <Button Classes="nav" Cursor="Hand" Command="{Binding GoLauncherCommand}">
                         <StackPanel Orientation="Horizontal" Spacing="10">
                             <Path Data="{StaticResource TrlIconHome}" VerticalAlignment="Center"/>
                             <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=nav_launcher}" VerticalAlignment="Center"/>
@@ -28,7 +28,7 @@
                         </StackPanel>
                     </Button>
                     <!-- Menu completo (mesma ordem da ProfileView): entrar aqui não perde as outras opções.
-                         Settings salva as escolhas antes de navegar (OpenSettings → SaveChanges). -->
+                         Launcher/Settings passam pelo guard de alterações não salvas (Item 033, Mecanismo 3). -->
                     <Button Classes="nav" Cursor="Hand" Command="{Binding OpenSettingsCommand}">
                         <StackPanel Orientation="Horizontal" Spacing="10">
                             <Path Data="{StaticResource TrlIconSettings}" VerticalAlignment="Center"/>
@@ -46,8 +46,9 @@
             </Grid>
         </cc:TrlSidebarNav>
 
-        <!-- ÁREA CENTRAL -->
-        <ScrollViewer Grid.Column="1" Margin="30,64,30,30" VerticalScrollBarVisibility="Auto">
+        <!-- ÁREA CENTRAL: conteúdo rolável (Row 0) + rodapé fixo "Salvar e voltar" (Row 1, CA-033.11) -->
+        <Grid Grid.Column="1" RowDefinitions="*, Auto">
+        <ScrollViewer Grid.Row="0" Margin="30,64,30,12" VerticalScrollBarVisibility="Auto">
             <StackPanel Spacing="18" MaxWidth="1000">
 
                 <TextBlock Classes="trl-h1" Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=mods_configs_title}"/>
@@ -146,12 +147,18 @@
                     </cc:TrlPanel>
                 </Grid>
 
-                <!-- SALVAR E VOLTAR -->
-                <Button Classes="primary" Cursor="Hand" HorizontalAlignment="Right" Padding="18,10"
-                        Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=save_and_go_back}"
-                        Command="{Binding SaveAndReturnCommand}"/>
-
             </StackPanel>
         </ScrollViewer>
+
+        <!-- RODAPÉ FIXO (CA-033.11): "Salvar e voltar" sempre à vista, fora do scroll. Fluxo explícito
+             (SaveAndReturnCommand) — sempre salva, sem passar pelo guard. -->
+        <Border Grid.Row="1" Background="{DynamicResource TrlBgAppBrush}"
+                BorderBrush="{DynamicResource TrlEdgeBrush}" BorderThickness="0,1,0,0"
+                Padding="30,12,30,16">
+            <Button Classes="primary" Cursor="Hand" HorizontalAlignment="Right" Padding="18,10"
+                    Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=save_and_go_back}"
+                    Command="{Binding SaveAndReturnCommand}"/>
+        </Border>
+        </Grid>
     </Grid>
 </UserControl>

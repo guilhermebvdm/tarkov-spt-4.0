@@ -365,6 +365,16 @@ namespace SPT.Launcher.Helpers
         public string onboarding_body { get => _onboarding_body; set => SetProperty(ref _onboarding_body, value); }
         private string _onboarding_ok;
         public string onboarding_ok { get => _onboarding_ok; set => SetProperty(ref _onboarding_ok, value); }
+        private string _confirm_unsaved_title;
+        public string confirm_unsaved_title { get => _confirm_unsaved_title; set => SetProperty(ref _confirm_unsaved_title, value); }
+        private string _confirm_unsaved_body;
+        public string confirm_unsaved_body { get => _confirm_unsaved_body; set => SetProperty(ref _confirm_unsaved_body, value); }
+        private string _confirm_unsaved_save;
+        public string confirm_unsaved_save { get => _confirm_unsaved_save; set => SetProperty(ref _confirm_unsaved_save, value); }
+        private string _confirm_unsaved_discard;
+        public string confirm_unsaved_discard { get => _confirm_unsaved_discard; set => SetProperty(ref _confirm_unsaved_discard, value); }
+        private string _confirm_unsaved_cancel;
+        public string confirm_unsaved_cancel { get => _confirm_unsaved_cancel; set => SetProperty(ref _confirm_unsaved_cancel, value); }
         #endregion
         
         #region dev_mode

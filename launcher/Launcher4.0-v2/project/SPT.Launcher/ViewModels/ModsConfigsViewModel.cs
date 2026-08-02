@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
+using System.Threading.Tasks;
 using ReactiveUI;
 using SPT.Launcher.Attributes;
 using SPT.Launcher.Controllers;
@@ -32,6 +33,7 @@ namespace SPT.Launcher.ViewModels
         public bool HasOptionalMods => OptionalMods.Count > 0;
         public bool HasOptionalConfigs => OptionalConfigs.Count > 0;
 
+        public ReactiveCommand<Unit, Unit> GoLauncherCommand { get; }
         public ReactiveCommand<Unit, Unit> ToggleAllOptionalCommand { get; }
         public ReactiveCommand<Unit, Unit> ToggleAllOptionalConfigCommand { get; }
         public ReactiveCommand<Unit, Unit> SaveAndReturnCommand { get; }
@@ -42,10 +44,14 @@ namespace SPT.Launcher.ViewModels
         {
             _onboarding = onboarding;
 
+            // Menu lateral: Launcher/Settings passam pelo guard de alterações não salvas (Mecanismo 3);
+            // "Salvar e voltar" (footer) e Ko-fi (link externo, não navega) ficam fora do guard.
+            GoLauncherCommand = ReactiveCommand.CreateFromTask(() => GuardedNavigate(NavigateBack));
             ToggleAllOptionalCommand = ReactiveCommand.Create(() => ToggleAll(OptionalMods));
             ToggleAllOptionalConfigCommand = ReactiveCommand.Create(() => ToggleAll(OptionalConfigs));
             SaveAndReturnCommand = ReactiveCommand.Create(SaveAndReturn);
-            OpenSettingsCommand = ReactiveCommand.Create(OpenSettings);
+            OpenSettingsCommand = ReactiveCommand.CreateFromTask(
+                () => GuardedNavigate(() => NavigateTo(new SettingsViewModel(HostScreen))));
             OpenKofiCommand = ReactiveCommand.Create(OpenKofi);
 
             LoadItems();
@@ -70,8 +76,11 @@ namespace SPT.Launcher.ViewModels
 
             foreach (var def in ModsConfigCatalog.OptionalMods)
             {
-                // Onboarding (D-5): tudo LIGADO. Fora dele: o estado salvo. Item novo (não visto): desligado (D-6).
-                bool enabled = _onboarding || settings.IsOptionalEnabled(def.Id);
+                // Item 033 (revisa D-5): no onboarding os toggles refletem o SEED (Mec.1, já gravado antes
+                // de abrir esta tela) — mod instalado vem ligado, ausente desligado; sem plugin nenhum, o
+                // seed ligou Optional/Heavy/Performance (dev NÃO). Fora do onboarding, idem: o estado salvo.
+                // Item novo (não visto): desligado (D-6).
+                bool enabled = settings.IsOptionalEnabled(def.Id);
                 bool isNew = !_onboarding && !settings.SeenItemIds.Contains(def.Id);
                 OptionalMods.Add(BuildToggle(def, enabled, isNew, preferPt));
             }
@@ -146,17 +155,54 @@ namespace SPT.Launcher.ViewModels
             foreach (var i in items) i.IsEnabled = anyOff;
         }
 
+        /// <summary>Botão "Salvar e voltar" (footer): fluxo explícito — sempre salva e volta, sem guard.</summary>
         private void SaveAndReturn()
         {
             SaveChanges();
             NavigateBack();
         }
 
-        /// <summary>Sai pela SETTINGS: salva as escolhas (mesma persistência do LAUNCHER) e navega.</summary>
-        private void OpenSettings()
+        /// <summary>
+        /// Item 033 (Mecanismo 3): navega para fora da tela por um item do menu protegendo alterações não
+        /// salvas. Dispara o diálogo se há alteração pendente OU no onboarding (CA-033.10 — garante que o
+        /// jogador viu/decidiu na 1ª vez). Sem alteração e fora do onboarding: navega direto (CA-033.9,
+        /// caso "entrei do Launcher, não mexi, clico Launcher de novo"). Cancelar aborta a navegação.
+        /// </summary>
+        private async Task GuardedNavigate(Action navigate)
         {
-            SaveChanges();
-            NavigateTo(new SettingsViewModel(HostScreen));
+            if (_onboarding || HasUnsavedChanges())
+            {
+                var choice = await ShowConfirmDialog();
+                if (choice == ConfirmUnsavedChoice.Cancel) return;   // fica na tela; toggles intactos
+                if (choice == ConfirmUnsavedChoice.Save) SaveChanges();
+                // Discard: não persiste — as escolhas em memória somem ao trocar de tela (CA-033.8/CC-14);
+                // ao voltar, o novo VM relê do settings (inalterado), então o descarte é efetivo.
+            }
+
+            navigate();
+        }
+
+        /// <summary>
+        /// Item 033 (CC-8): algum toggle diverge do salvo? Delega à lógica pura de <c>OptionalToggleState</c>
+        /// (via Settings), então é o mesmo critério testado sem UI.
+        /// </summary>
+        public bool HasUnsavedChanges()
+        {
+            var current = OptionalMods.Concat(OptionalConfigs)
+                .Select(t => (t.Id, t.IsOptionalConfig, t.IsEnabled));
+            return LauncherSettingsProvider.Instance.HasUnsavedOptionalChanges(current);
+        }
+
+        /// <summary>Exibe o modal de 3 botões e mapeia o token do DialogHost ao enum (null/fechar → Cancel).</summary>
+        private async Task<ConfirmUnsavedChoice> ShowConfirmDialog()
+        {
+            var result = await ShowDialog(new ConfirmUnsavedDialogViewModel()) as string;
+            return result switch
+            {
+                ConfirmUnsavedDialogViewModel.SaveResult => ConfirmUnsavedChoice.Save,
+                ConfirmUnsavedDialogViewModel.DiscardResult => ConfirmUnsavedChoice.Discard,
+                _ => ConfirmUnsavedChoice.Cancel,   // clicou fora/ESC/Cancelar → não navega
+            };
         }
 
         /// <summary>Abre a página de apoio (Ko-fi) no navegador — não sai da tela.</summary>

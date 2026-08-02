@@ -349,6 +349,13 @@ namespace SPT.Launcher.Helpers
             SaveSettings();
         }
 
+        /// <summary>
+        /// Item 033 (Mecanismo 3): há toggle da tela "Mods e Configs" divergindo do salvo? Delega à lógica
+        /// pura de <see cref="OptionalToggleState"/> (testável sem IO). Cada tupla é (id, é-config, ligado?).
+        /// </summary>
+        public bool HasUnsavedOptionalChanges(IEnumerable<(string Id, bool IsConfig, bool Enabled)> current)
+            => OptionalToggleState.HasUnsavedChanges(current, _enabledOptionals, _enabledOptionalConfigs);
+
         private LauncherAction _launcherStartGameAction;
         public LauncherAction LauncherStartGameAction
         {
