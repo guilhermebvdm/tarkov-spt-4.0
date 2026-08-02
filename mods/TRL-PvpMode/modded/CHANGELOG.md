@@ -2,6 +2,22 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/); versionamento [SemVer](https://semver.org/).
 
+## [0.5.0] — não lançado
+
+Item de backlog **004 — Contador de vidas na tela**.
+
+### Adicionado
+
+- **Indicador de vidas restantes.** Discreto no canto durante a partida; **destacado no centro** quando
+  o jogador está caído — que é o momento em que a informação decide a próxima ação. Vidas ilimitadas
+  aparecem como `∞`. Opção `Show Lives Counter` no F12 para esconder.
+
+### Notas
+
+- Desenhado via `OnGUI` em vez de um elemento da interface do jogo: é um texto só, não depende de tipos
+  internos do Fika ou do EFT (que mudam entre versões) e some sozinho quando a guarda de contexto
+  reprova. O corpo do método sai na primeira linha fora de partida.
+
 ## [0.4.0] — não lançado
 
 Item de backlog **003 — Sincronização do respawn em coop**.

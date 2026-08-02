@@ -18,6 +18,7 @@ namespace TarkovRedLine.PvpMode
         public static ConfigEntry<KeyCode> RESPAWN_KEY;
         public static ConfigEntry<float> RESPAWN_HOLD_TIME;
         public static ConfigEntry<float> SPAWN_PROTECTION;
+        public static ConfigEntry<bool> SHOW_LIVES_HUD;
 
         public static void Init(ConfigFile config)
         {
@@ -69,6 +70,13 @@ namespace TarkovRedLine.PvpMode
                 new ConfigDescription(
                     "Tempo sem receber dano depois de renascer. 0 = sem protecao.",
                     new AcceptableValueRange<float>(0f, 30f)));
+
+            SHOW_LIVES_HUD = config.Bind(
+                SECTION_LIVES,
+                "Show Lives Counter",
+                true,
+                new ConfigDescription(
+                    "Mostra as vidas restantes na tela. Fica destacado enquanto voce estiver caido."));
 
             HEADSHOT_KILLS = config.Bind(
                 SECTION_LIVES,

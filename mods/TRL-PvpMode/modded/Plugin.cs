@@ -16,7 +16,7 @@ namespace TarkovRedLine.PvpMode
     {
         public const string PluginGuid = "com.trl.pvpmode";
         public const string PluginName = "TRL-PvpMode";
-        public const string PluginVersion = "0.4.0";
+        public const string PluginVersion = "0.5.0";
 
         public static Plugin Instance { get; private set; }
         public static ManualLogSource Log { get; private set; }
@@ -46,6 +46,11 @@ namespace TarkovRedLine.PvpMode
         private void Update()
         {
             Networking.RespawnNetwork.EnsurePacketsRegistered();
+        }
+
+        private void OnGUI()
+        {
+            LivesHud.Draw();
         }
 
         /// <summary>Patches que só dependem de tipos públicos — sempre seguros de habilitar.</summary>
