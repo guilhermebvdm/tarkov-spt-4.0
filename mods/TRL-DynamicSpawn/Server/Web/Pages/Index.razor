@@ -742,6 +742,8 @@ html, body {
             evt_raiders: "Raiders Aleatórios em Qualquer Mapa", evt_rogues: "Rogues Aleatórios em Qualquer Mapa",
             disable_vanilla_rogues: "Desativar Rogues Nativos da Lighthouse (Vanilla)", disable_vanilla_raiders: "Desativar Raiders Nativos (Vanilla)",
             alert_extra_groups: "Nota: As opções abaixo ativam invasões e grupos de reforço EXTRAS pelo mapa.",
+            rogues_map_scroll_hint: "Os sliders abaixo adicionam Rogues em OUTROS mapas além da Lighthouse. Clique para ler a nota acima. ↑",
+            raiders_map_scroll_hint: "Os sliders abaixo adicionam Raiders em todos os mapas (ADICIONAIS). Atenção: Labs e Reserve possuem Raiders nativos vanilla. ↑ Clique para ler a nota.",
             alert_rogues_vanilla: "Nota: Por padrão, Rogues nativos da Lighthouse nascem na Unidade de Tratamento de Água. As configurações de chance de spawn abaixo são para grupos ADICIONAIS além do vanilla. Desative a opção abaixo se quiser liberar vagas de bots no limite de mapa (MaxBotCap).",
             alert_raiders_vanilla: "Nota: Por padrão, Raiders nativos nascem em eventos (Reserve/Labs). As configurações de chance de spawn abaixo são para grupos ADICIONAIS além do vanilla. Desative a opção abaixo se quiser bloquear o spawn nativo.",
             custom_pmc: "Ativar Spawns Customizados de PMCs", custom_scav: "Ativar Spawns Customizados de Scavs", custom_sniper: "Ativar Spawns Customizados de Snipers", custom_player: "Ativar Spawns Customizados de Jogadores",
@@ -781,6 +783,8 @@ html, body {
             evt_raiders: "Random Raiders on Any Map", evt_rogues: "Random Rogues on Any Map",
             disable_vanilla_rogues: "Disable Native Lighthouse Rogues (Vanilla)", disable_vanilla_raiders: "Disable Native Raiders (Vanilla)",
             alert_extra_groups: "Note: The options below enable invasions and EXTRA reinforcement groups across the map.",
+            rogues_map_scroll_hint: "The sliders below add Rogues to OTHER maps beyond Lighthouse. Click to read the note above. ↑",
+            raiders_map_scroll_hint: "The sliders below add Raiders to all maps (ADDITIONAL). Note: Labs and Reserve have native vanilla Raiders. ↑ Click to read the note.",
             alert_rogues_vanilla: "Note: By default, native Lighthouse Rogues spawn at the Water Treatment Plant. The spawn chance settings below are for EXTRA groups in addition to vanilla. Disable the option below to free up bot slots on the map (MaxBotCap).",
             alert_raiders_vanilla: "Note: By default, native Raiders spawn during map events (Reserve/Labs). The spawn chance settings below are for EXTRA groups in addition to vanilla. Disable the option below to block native spawns.",
             custom_pmc: "Enable Custom PMC Spawns", custom_scav: "Enable Custom Scav Spawns", custom_sniper: "Enable Custom Sniper Spawns", custom_player: "Enable Custom Player Spawns",
@@ -1314,8 +1318,8 @@ html, body {
             <div class="trl-h3" style="color:var(--trl-accent);">${botTitle.toUpperCase()}</div>
             
             ${botCat.prop === "exUsec" ? `
-            <div style="background:rgba(255, 215, 0, 0.08); border:1px solid rgba(255, 215, 0, 0.25); border-radius:4px; padding:12px; margin-bottom:16px; color:#e0e0e0; font-size:13px; display:flex; align-items:center; gap:10px;">
-                <span style="color:#ffd700; font-size:16px; font-weight:bold;">ℹ️</span>
+            <div id="bc_rogues_alert_top" style="background:rgba(255, 215, 0, 0.08); border:1px solid rgba(255, 215, 0, 0.25); border-radius:4px; padding:12px; margin-bottom:16px; color:#e0e0e0; font-size:13px; display:flex; align-items:center; gap:10px;">
+                <svg class="trl-icon trl-icon--lg" viewBox="0 0 16 16" fill="none" stroke="var(--trl-accent)" stroke-width="1.5" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><line x1="8" y1="5" x2="8" y2="8.5"/><line x1="8" y1="10.5" x2="8" y2="11"/></svg>
                 <span data-i18n="alert_rogues_vanilla">Nota: Por padrão, Rogues nativos da Lighthouse nascem na Unidade de Tratamento de Água. As configurações de chance de spawn abaixo são para grupos ADICIONAIS além do vanilla. Desative a opção abaixo se quiser liberar vagas de bots no limite de mapa (MaxBotCap).</span>
             </div>
             <div class="trl-form-grid" style="margin-bottom:16px;">
@@ -1327,8 +1331,8 @@ html, body {
             ` : ''}
 
             ${botCat.prop === "pmcBot" ? `
-            <div style="background:rgba(255, 215, 0, 0.08); border:1px solid rgba(255, 215, 0, 0.25); border-radius:4px; padding:12px; margin-bottom:16px; color:#e0e0e0; font-size:13px; display:flex; align-items:center; gap:10px;">
-                <span style="color:#ffd700; font-size:16px; font-weight:bold;">ℹ️</span>
+            <div id="bc_raiders_alert_top" style="background:rgba(255, 215, 0, 0.08); border:1px solid rgba(255, 215, 0, 0.25); border-radius:4px; padding:12px; margin-bottom:16px; color:#e0e0e0; font-size:13px; display:flex; align-items:center; gap:10px;">
+                <svg class="trl-icon trl-icon--lg" viewBox="0 0 16 16" fill="none" stroke="var(--trl-accent)" stroke-width="1.5" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><line x1="8" y1="5" x2="8" y2="8.5"/><line x1="8" y1="10.5" x2="8" y2="11"/></svg>
                 <span data-i18n="alert_raiders_vanilla">Nota: Por padrão, Raiders nativos nascem em eventos (Reserve/Labs). As configurações de chance de spawn abaixo são para grupos ADICIONAIS além do vanilla. Desative a opção abaixo se quiser bloquear o spawn nativo.</span>
             </div>
             <div class="trl-form-grid" style="margin-bottom:16px;">
@@ -1376,6 +1380,21 @@ html, body {
             ` : ''}
 
             <div class="trl-h3">${t('boss_matrix_sub')}</div>
+
+            ${botCat.prop === "exUsec" ? `
+            <a href="#" id="bc_rogues_scroll_hint" class="trl-alert trl-alert--info" style="cursor:pointer; text-decoration:none; margin-bottom:12px; display:flex;" onclick="scrollToTopAlert(event, 'bossConfigContainer', 'bc_rogues_alert_top')">
+                <svg class="trl-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><line x1="8" y1="5" x2="8" y2="8.5"/><line x1="8" y1="10.5" x2="8" y2="11"/></svg>
+                <span>${t('rogues_map_scroll_hint')}</span>
+            </a>
+            ` : ''}
+
+            ${botCat.prop === "pmcBot" ? `
+            <a href="#" id="bc_raiders_scroll_hint" class="trl-alert trl-alert--info" style="cursor:pointer; text-decoration:none; margin-bottom:12px; display:flex;" onclick="scrollToTopAlert(event, 'bossConfigContainer', 'bc_raiders_alert_top')">
+                <svg class="trl-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><line x1="8" y1="5" x2="8" y2="8.5"/><line x1="8" y1="10.5" x2="8" y2="11"/></svg>
+                <span>${t('raiders_map_scroll_hint')}</span>
+            </a>
+            ` : ''}
+
             <div id="bossMapMatrixContainer"></div>
         `;
 
@@ -1423,6 +1442,8 @@ html, body {
         const bossInfo = ensureBossInfo(bossProp);
         const isRegularBot = (bossProp === "sptBear" || bossProp === "sptUsec" || bossProp === "assault");
         const chanceLabel = isRegularBot ? t('hotzone_chance') : t('spawn_chance');
+        const isRaider = bossProp === "pmcBot";
+        const VANILLA_MAPS = { laboratory: true, rezervbase: true };
         container.innerHTML = "";
 
         MAP_LIST.forEach(m => {
@@ -1430,9 +1451,14 @@ html, body {
             const currentZoneStr = bossInfo.bossZone?.[m.key] || "";
             const activeZones = currentZoneStr ? currentZoneStr.split(",").map(z => z.trim()) : [];
             const availableZones = BOT_ZONES_MAP[m.key] || ["BotZone"];
+            const isVanillaMap = isRaider && VANILLA_MAPS[m.key];
 
             const card = document.createElement("div");
             card.className = "trl-boss-card";
+            if (isVanillaMap) {
+                card.style.borderLeft = "3px solid var(--trl-accent)";
+                card.style.paddingLeft = "8px";
+            }
 
             let zonesHtml = availableZones.map(z => {
                 const isSelected = activeZones.includes(z);
@@ -1441,8 +1467,12 @@ html, body {
                 </div>`;
             }).join("");
 
+            const vanillaBadge = isVanillaMap
+                ? `<span class="trl-badge trl-badge--amber" style="margin-left:8px; font-size:10px; vertical-align:middle;">VANILLA</span>`
+                : '';
+
             card.innerHTML = `
-                <div class="trl-boss-card__title">${m.name}</div>
+                <div class="trl-boss-card__title">${m.name}${vanillaBadge}</div>
                 <div class="trl-field">
                     <label class="trl-field__label">
                         <span>${chanceLabel} (${m.name.toUpperCase()})</span>
@@ -1462,6 +1492,34 @@ html, body {
             });
         });
     }
+
+    // Scroll container to top and flash the anchor alert element
+    window.scrollToTopAlert = function(event, containerId, alertId) {
+        event.preventDefault();
+        const container = document.getElementById(containerId);
+        const alert = document.getElementById(alertId);
+        if (container) container.scrollTop = 0;
+        if (container) container.parentElement?.scrollTo({ top: 0, behavior: 'smooth' });
+        // Scroll the panel body to top
+        const panel = document.querySelector('#sec-boss-config .trl-panel__body, #sec-boss-config .trl-panel');
+        if (panel) panel.scrollTo({ top: 0, behavior: 'smooth' });
+        if (alert) {
+            alert.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // Flash animation
+            alert.style.transition = 'box-shadow 0.15s ease';
+            let flashes = 0;
+            const interval = setInterval(() => {
+                alert.style.boxShadow = flashes % 2 === 0
+                    ? '0 0 0 2px var(--trl-accent), 0 0 12px rgba(200,170,80,0.45)'
+                    : 'none';
+                flashes++;
+                if (flashes >= 6) {
+                    clearInterval(interval);
+                    alert.style.boxShadow = 'none';
+                }
+            }, 180);
+        }
+    };
 
     window.toggleBossZone = function(bossProp, mapKey, zoneName, chipEl) {
         const bossInfo = ensureBossInfo(bossProp);
