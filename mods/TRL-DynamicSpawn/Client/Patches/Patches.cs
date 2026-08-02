@@ -426,6 +426,28 @@ namespace TRLDynamicSpawn.Patches
                 return false;
             }
 
+            var elite = TRLDynamicSpawn.Components.DynamicSpawnManager.Instance?.ServerConfig?.EliteConfig;
+            if (elite != null)
+            {
+                if (elite.DisableVanillaRogues && name == "exusec")
+                {
+                    if (TRLDynamicSpawn.Helpers.Settings.enableDebugLogs.Value)
+                    {
+                        Plugin.LogSource.LogInfo($"[TRLDynamicSpawn] Blocked Native Vanilla Rogue Wave ({wave.BossName}) per user config.");
+                    }
+                    return false;
+                }
+
+                if (elite.DisableVanillaRaiders && name == "pmcbot")
+                {
+                    if (TRLDynamicSpawn.Helpers.Settings.enableDebugLogs.Value)
+                    {
+                        Plugin.LogSource.LogInfo($"[TRLDynamicSpawn] Blocked Native Vanilla Raider Wave ({wave.BossName}) per user config.");
+                    }
+                    return false;
+                }
+            }
+
             // Permite todos os outros bosses reais, elites, snipers, raiders (pmcbot), rogues (exusec) e cultistas nativos
             return true;
         }

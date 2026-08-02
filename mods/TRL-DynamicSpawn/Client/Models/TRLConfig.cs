@@ -71,6 +71,8 @@ public record EliteConfig
     [JsonProperty("randomRaiderGroupChance")] public int RandomRaiderGroupChance { get; set; } = 10;
     [JsonProperty("randomRogueGroup")] public bool RandomRogueGroup { get; set; } = false;
     [JsonProperty("randomRogueGroupChance")] public int RandomRogueGroupChance { get; set; } = 10;
+    [JsonProperty("disableVanillaRogues")] public bool DisableVanillaRogues { get; set; } = false;
+    [JsonProperty("disableVanillaRaiders")] public bool DisableVanillaRaiders { get; set; } = false;
 
     [JsonProperty("bossKnight")] public EliteLocationInfo BossKnight { get; set; } = new()
     {

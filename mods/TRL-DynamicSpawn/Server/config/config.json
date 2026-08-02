@@ -38,6 +38,8 @@
 
   "randomRogueGroup": false,
   "randomRogueGroupChance": 10,
+  "disableVanillaRogues": false,
+  "disableVanillaRaiders": false,
 
   "disableBosses": false,
   "mainBossChanceBuff": 0,
