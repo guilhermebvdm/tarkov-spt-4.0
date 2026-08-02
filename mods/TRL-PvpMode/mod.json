@@ -1,0 +1,11 @@
+{
+  "name": "TRL-PvpMode",
+  "upstream_url": "",
+  "upstream_sha": "",
+  "upstream_branch": "",
+  "forge_url": "",
+  "license": "MIT",
+  "version_base": "0.1.0",
+  "spt_version": "4.0.0",
+  "created_at": "2026-08-01T00:00:00Z"
+}
