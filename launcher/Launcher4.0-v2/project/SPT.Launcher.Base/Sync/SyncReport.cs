@@ -105,6 +105,7 @@ namespace SPT.Launcher.Sync
                     preserved = result.Preserved,
                     preservedDevMode = result.PreservedDevMode,
                     seeded = result.Seeded,
+                    optionalConfigApplied = result.OptionalConfigApplied,  // Item 031/CR: link "ver detalhes" conta isto
                     configsBackedUp = result.ConfigsBackedUp,
                     movedToDisabled = result.MovedToDisabled,
                     deleted = result.Deleted,

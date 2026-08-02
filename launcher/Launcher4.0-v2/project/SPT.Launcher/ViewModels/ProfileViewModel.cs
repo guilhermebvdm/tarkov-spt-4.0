@@ -887,9 +887,11 @@ namespace SPT.Launcher.ViewModels
                 var report = JObject.Parse(File.ReadAllText(ReportFilePath));
                 var c = report["counts"];
                 int Count(string key) => c?[key]?.Value<int>() ?? 0;
-                // Item 031: total de ações relevantes (mesmo critério do run atual, com os counts do JSON).
-                SetLastUpdateTotal(Count("updated") + Count("movedToDisabled") + Count("deleted")
-                                   + Count("forced") + Count("seeded"));
+                // Item 031/CR: total alinhado com o SetLastUpdate ao vivo. O JSON separa updated (config do
+                // usuário) e referenceUpdated (biblioteca); o r.Updated ao vivo inclui os dois, então somamos ambos.
+                SetLastUpdateTotal(Count("updated") + Count("referenceUpdated") + Count("movedToDisabled")
+                                   + Count("deleted") + Count("forced") + Count("seeded")
+                                   + Count("optionalConfigApplied"));
             }
             catch
             {

@@ -257,7 +257,7 @@ namespace SPT.Launcher.ViewModels
                     // Nothing to apply, but persist the converged baseline seed + report of preserved files
                     var engine = CreateEngine();
                     var result = await engine.ExecuteAsync(plan, ReportFilePath, null, CancellationToken.None);
-                    SummaryText = result.Summary;
+                    SummaryText = SyncMessages.BuildSummary(result);  // Item 031/CR: i18n (não result.Summary PT)
                 }
             }
             catch (OperationCanceledException)
