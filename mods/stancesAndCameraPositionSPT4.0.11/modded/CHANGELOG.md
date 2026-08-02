@@ -7,6 +7,25 @@ Versões mais recentes primeiro.
 
 ---
 
+## v2.17.0 (2026-08-02)
+
+### Os valores de fábrica agora são os calibrados
+
+Quem instala do zero — sem receber o arquivo de configuração pelo launcher — passa a começar já com o tuning
+bom, em vez dos valores antigos. É o que vale para quem baixar o mod publicado: o BepInEx gera a configuração
+na primeira execução a partir dos padrões escritos no código, e esses estavam defasados.
+
+| Opção | Antes | Agora |
+|---|---|---|
+| Velocidade de transição entre posturas | 0.8 | **0.6** |
+| Velocidade de transição da mira | 1.0 | **0.9** |
+| Volume de inspirar / expirar / batimento | 0.01 | **0.05** |
+
+⚠️ **Não muda nada para quem já tem o arquivo de configuração.** Padrão só vale para chave ausente ou
+instalação limpa — igual à v2.9.0, que fez o mesmo com 30 opções.
+
+---
+
 ## v2.16.0 (2026-08-02)
 
 ### O mod agora se chama TRL-StancesAndMobility

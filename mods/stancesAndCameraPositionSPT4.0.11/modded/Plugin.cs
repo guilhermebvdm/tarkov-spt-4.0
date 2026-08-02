@@ -20,7 +20,7 @@ public enum ScrollMode
     Linear,
 }
 
-[BepInPlugin("com.trl.stancesandmobility", "TRL-StancesAndMobility", "2.16.0")]
+[BepInPlugin("com.trl.stancesandmobility", "TRL-StancesAndMobility", "2.17.0")]
 public class Plugin : BaseUnityPlugin
 {
     public static Plugin Instance { get; private set; }
@@ -425,7 +425,7 @@ public class Plugin : BaseUnityPlugin
         _StanceTransitionSpeed = Config.Bind(
             GeneralSection,
             "Stance Transition Speed",
-            0.8f,
+            0.6f,
             new ConfigDescription("Speed multiplier for switching BETWEEN STANCES (including back to the default view). Does not affect aiming — see ADS Transition Speed.\n\nMultiplicador de velocidade da troca ENTRE POSTURAS (incluindo a volta para a visão padrão). Não afeta a mira — veja ADS Transition Speed.",
             new AcceptableValueRange<float>(0.1f, 5.0f),
             new ConfigurationManagerAttributes { Order = 98 }));
@@ -433,7 +433,7 @@ public class Plugin : BaseUnityPlugin
         _ADSTransitionSpeed = Config.Bind(
             GeneralSection,
             "ADS Transition Speed",
-            1.0f,
+            0.9f,
             new ConfigDescription("Speed multiplier for RAISING AND LOWERING THE SIGHTS (aiming in and out). Split from Stance Transition Speed, which used to drive both.\n\nMultiplicador de velocidade de LEVANTAR E BAIXAR A MIRA (entrar e sair do ADS). Separado do Stance Transition Speed, que antes controlava os dois.",
             new AcceptableValueRange<float>(0.1f, 5.0f),
             new ConfigurationManagerAttributes { Order = 97 }));
@@ -859,7 +859,7 @@ public class Plugin : BaseUnityPlugin
         _BreathInVolume = Config.Bind(
             HoldBreathSection,
             "Breath In Volume",
-            0.01f,
+            0.05f,
             new ConfigDescription("Volume of the breath_in audio.\n\nVolume do áudio de inspiração (breath_in).",
             new AcceptableValueRange<float>(0f, 2f),
             new ConfigurationManagerAttributes { Order = -12 }));
@@ -867,7 +867,7 @@ public class Plugin : BaseUnityPlugin
         _BreathOutVolume = Config.Bind(
             HoldBreathSection,
             "Breath Out Volume",
-            0.01f,
+            0.05f,
             new ConfigDescription("Volume of the breath_out audio.\n\nVolume do áudio de expiração (breath_out).",
             new AcceptableValueRange<float>(0f, 2f),
             new ConfigurationManagerAttributes { Order = -13 }));
@@ -875,7 +875,7 @@ public class Plugin : BaseUnityPlugin
         _HeartbeatVolume = Config.Bind(
             HoldBreathSection,
             "Heartbeat Volume",
-            0.01f,
+            0.05f,
             new ConfigDescription("Volume of the heartbeat loop audio.\n\nVolume do áudio em loop dos batimentos cardíacos.",
             new AcceptableValueRange<float>(0f, 2f),
             new ConfigurationManagerAttributes { Order = -14 }));
