@@ -199,7 +199,7 @@ namespace SPT.Launcher.ViewModels
             }
 
             LauncherSettingsProvider.Instance.AllowSettings = false;
-            NavigateTo(new ModsConfigsViewModel(HostScreen));
+            NavigateMenu(new ModsConfigsViewModel(HostScreen));
         }
 
         public async Task CopyLogsToClipboard()
@@ -341,11 +341,20 @@ namespace SPT.Launcher.ViewModels
             bool hasPending = LauncherSettingsProvider.Instance.PendingOptionalChanges.Count > 0;
             if (hasPending)
             {
-                NavigateTo(new ProfileViewModel(HostScreen));
+                // NavigateAndReset (não NavigateTo): substitui a pilha por um único Profile fresco que roda
+                // o apply. Evita empilhar um 2º ProfileViewModel (dois ILauncherHome), que o NavigateMenu
+                // depois descartaria — junto de um apply em curso, com risco de sync concorrente.
+                HostScreen.Router.NavigateAndReset.Execute(new ProfileViewModel(HostScreen));
+            }
+            else if (SlimMode)
+            {
+                // Modo enxuto (aberto de um erro de conexão, sem Launcher na pilha): volta à tela que abriu.
+                NavigateBack();
             }
             else
             {
-                NavigateBack();
+                // Menu normal: vai DIRETO ao Launcher (pilha rasa e determinística) — é item de menu, não "voltar".
+                NavigateMenu(null);
             }
         }
 

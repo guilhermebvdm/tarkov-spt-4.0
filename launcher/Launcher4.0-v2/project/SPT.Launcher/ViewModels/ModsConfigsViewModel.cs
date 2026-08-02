@@ -46,12 +46,12 @@ namespace SPT.Launcher.ViewModels
 
             // Menu lateral: Launcher/Settings passam pelo guard de alterações não salvas (Mecanismo 3);
             // "Salvar e voltar" (footer) e Ko-fi (link externo, não navega) ficam fora do guard.
-            GoLauncherCommand = ReactiveCommand.CreateFromTask(() => GuardedNavigate(NavigateBack));
+            GoLauncherCommand = ReactiveCommand.CreateFromTask(() => GuardedNavigate(() => NavigateMenu(null)));
             ToggleAllOptionalCommand = ReactiveCommand.Create(() => ToggleAll(OptionalMods));
             ToggleAllOptionalConfigCommand = ReactiveCommand.Create(() => ToggleAll(OptionalConfigs));
             SaveAndReturnCommand = ReactiveCommand.Create(SaveAndReturn);
             OpenSettingsCommand = ReactiveCommand.CreateFromTask(
-                () => GuardedNavigate(() => NavigateTo(new SettingsViewModel(HostScreen))));
+                () => GuardedNavigate(() => NavigateMenu(new SettingsViewModel(HostScreen))));
             OpenKofiCommand = ReactiveCommand.Create(OpenKofi);
 
             LoadItems();

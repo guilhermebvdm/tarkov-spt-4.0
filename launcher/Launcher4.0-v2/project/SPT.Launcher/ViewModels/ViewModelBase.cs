@@ -127,6 +127,57 @@ namespace SPT.Launcher.ViewModels
         }
 
         /// <summary>
+        /// Navegação por item de MENU (comportamento "abas", não "voltar"): leva SEMPRE à tela do item
+        /// clicado, venha o usuário de onde vier, mantendo a pilha rasa. Volta até a home (<see
+        /// cref="ILauncherHome"/> — o Launcher/Profile) descartando o que estiver acima, e então empilha o
+        /// alvo. <paramref name="target"/> = null significa "ir à própria home" (fica só no Launcher).
+        /// Implementa a mesma regra de <see cref="Helpers.MenuNavigationPlan"/> (que a testa exaustivamente),
+        /// usando só os commands oficiais do Router. Home ausente (modo enxuto/pré-login) → degrada: navega
+        /// direto ao alvo, sem tocar na pilha.
+        /// </summary>
+        public void NavigateMenu(ViewModelBase target)
+        {
+            // Roteia o alvo pelas MESMAS pré-condições do NavigateTo (ex.: [RequireLoggedIn]) — senão um
+            // item de menu empilharia uma tela logada-only sem sessão. Se a pré-condição anular o alvo, sai.
+            ViewModelBase resolved = target != null ? ProcessViewModelResults(target) : null;
+            if (target != null && resolved == null) return;
+
+            Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                var stack = HostScreen.Router.NavigationStack;
+
+                int homeIdx = -1;
+                for (int i = 0; i < stack.Count; i++)
+                {
+                    if (stack[i] is ILauncherHome) { homeIdx = i; break; }
+                }
+
+                if (homeIdx < 0)
+                {
+                    // Sem Launcher na pilha (ex.: Settings aberto pela engrenagem ANTES do login): não há
+                    // "home". Abre o alvo (já validado por pré-condição); "ir ao Launcher" (target null)
+                    // degrada para voltar UMA tela — nunca no-op, senão o item LAUNCHER travaria o usuário.
+                    if (resolved != null) HostScreen.Router.Navigate.Execute(resolved);
+                    else if (stack.Count > 1) HostScreen.Router.NavigateBack.Execute();
+                    return;
+                }
+
+                // Volta até a home (nº fixo de pops — sem loop dependente de estado) descartando o que
+                // estiver acima dela; depois empilha o alvo. Se target == null, para na própria home.
+                int popCount = stack.Count - (homeIdx + 1);
+                for (int i = 0; i < popCount; i++)
+                {
+                    HostScreen.Router.NavigateBack.Execute();
+                }
+
+                if (resolved != null)
+                {
+                    HostScreen.Router.Navigate.Execute(resolved);
+                }
+            });
+        }
+
+        /// <summary>
         /// Navigate to the previous viewmodel
         /// </summary>
         public void NavigateBack()

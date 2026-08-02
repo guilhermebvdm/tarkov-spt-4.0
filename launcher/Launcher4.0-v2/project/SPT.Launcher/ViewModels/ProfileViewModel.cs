@@ -28,7 +28,7 @@ using Splat;
 namespace SPT.Launcher.ViewModels
 {
     [RequireLoggedIn]
-    public class ProfileViewModel : ViewModelBase
+    public class ProfileViewModel : ViewModelBase, ILauncherHome
     {
         private string _CurrentEdition;
         public string CurrentEdition
@@ -320,7 +320,7 @@ namespace SPT.Launcher.ViewModels
         public void OpenModsConfigsCommand()
         {
             LauncherSettingsProvider.Instance.AllowSettings = false;
-            NavigateTo(new ModsConfigsViewModel(HostScreen));
+            NavigateMenu(new ModsConfigsViewModel(HostScreen));
         }
 
         /// <summary>
@@ -353,7 +353,7 @@ namespace SPT.Launcher.ViewModels
         {
             // Esconde o gear da topbar enquanto está em Configurações (senão abriria outra por cima).
             LauncherSettingsProvider.Instance.AllowSettings = false;
-            NavigateTo(new SettingsViewModel(HostScreen));
+            NavigateMenu(new SettingsViewModel(HostScreen));
         }
 
         public void OpenLinkCommand(string url)
