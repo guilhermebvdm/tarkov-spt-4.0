@@ -1,4 +1,5 @@
 using BepInEx.Configuration;
+using UnityEngine;
 
 namespace TarkovRedLine.PvpMode
 {
@@ -14,6 +15,9 @@ namespace TarkovRedLine.PvpMode
         public static ConfigEntry<int> LIVES_PER_RAID;
         public static ConfigEntry<float> DOWNED_TIMEOUT;
         public static ConfigEntry<bool> HEADSHOT_KILLS;
+        public static ConfigEntry<KeyCode> RESPAWN_KEY;
+        public static ConfigEntry<float> RESPAWN_HOLD_TIME;
+        public static ConfigEntry<float> SPAWN_PROTECTION;
 
         public static void Init(ConfigFile config)
         {
@@ -42,6 +46,29 @@ namespace TarkovRedLine.PvpMode
                     "0 = sem limite: voce fica caido ate decidir. O valor e lido no instante da queda — " +
                     "mudar durante a partida so vale na proxima.",
                     new AcceptableValueRange<float>(0f, 600f)));
+
+            RESPAWN_KEY = config.Bind(
+                SECTION_LIVES,
+                "Respawn Key",
+                KeyCode.F5,
+                new ConfigDescription(
+                    "Tecla para renascer. Segure-a enquanto estiver caido."));
+
+            RESPAWN_HOLD_TIME = config.Bind(
+                SECTION_LIVES,
+                "Respawn Hold Time (s)",
+                2f,
+                new ConfigDescription(
+                    "Por quanto tempo a tecla precisa ficar pressionada. Soltar antes cancela sem gastar vida.",
+                    new AcceptableValueRange<float>(0.1f, 10f)));
+
+            SPAWN_PROTECTION = config.Bind(
+                SECTION_LIVES,
+                "Spawn Protection (s)",
+                5f,
+                new ConfigDescription(
+                    "Tempo sem receber dano depois de renascer. 0 = sem protecao.",
+                    new AcceptableValueRange<float>(0f, 30f)));
 
             HEADSHOT_KILLS = config.Bind(
                 SECTION_LIVES,

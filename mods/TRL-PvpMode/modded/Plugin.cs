@@ -16,7 +16,7 @@ namespace TarkovRedLine.PvpMode
     {
         public const string PluginGuid = "com.trl.pvpmode";
         public const string PluginName = "TRL-PvpMode";
-        public const string PluginVersion = "0.2.0";
+        public const string PluginVersion = "0.3.0";
 
         public static Plugin Instance { get; private set; }
         public static ManualLogSource Log { get; private set; }
@@ -48,6 +48,7 @@ namespace TarkovRedLine.PvpMode
             TryEnable(new KillGatePatch(), nameof(KillGatePatch));
             TryEnable(new CanBeRevivedByOtherPlayerPatch(), nameof(CanBeRevivedByOtherPlayerPatch));
             TryEnable(new InstantKillPatch(), nameof(InstantKillPatch));
+            TryEnable(new RespawnInputPatch(), nameof(RespawnInputPatch));
         }
 
         private void TryEnable(SPT.Reflection.Patching.ModulePatch patch, string name)

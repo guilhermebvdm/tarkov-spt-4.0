@@ -2,6 +2,29 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/); versionamento [SemVer](https://semver.org/).
 
+## [0.3.0] — não lançado
+
+Item de backlog **002 — Renascer em spawn aleatório**.
+
+### Adicionado
+
+- **Renascer segurando uma tecla** (padrão `F5`, tempo configurável). Soltar antes cancela sem gastar
+  vida. A leitura do teclado é própria do mod — não pode depender do componente de contagem do Fika,
+  que com tempo `0` sai antes de ler o teclado.
+- **Sorteio do ponto de nascimento** entre os mesmos que a partida usa no início, respeitando o lado
+  (PMC/Scav). O pedido usa um identificador aleatório a cada tentativa, o que faz o sistema de spawn
+  aplicar sozinho o afastamento de quem já está no mapa.
+- **Invulnerabilidade após renascer**, configurável (padrão 5s, `0` desliga).
+- Vida restaurada e equipamento intacto; sem cadáver no local da morte.
+
+### Notas
+
+- A ordem dos passos é obrigatória: teleportar → religar → curar → proteger. Religar antes de teleportar
+  faz o corpo reaparecer na posição antiga; curar antes de religar opera sobre um controlador que se
+  considera morto; proteger antes de religar é sobrescrito pela restauração do dano.
+- A posição nova ainda chega aos outros clientes pelo fluxo normal de estado, com interpolação — pode
+  aparecer um deslize. É o que o item 003 resolve.
+
 ## [0.2.0] — não lançado
 
 Item de backlog **001 — Morte desligada com timer**.
