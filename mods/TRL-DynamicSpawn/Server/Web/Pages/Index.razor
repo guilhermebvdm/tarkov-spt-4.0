@@ -291,8 +291,16 @@ html, body {
 .trl-slider-val { font-family: var(--trl-font-mono); font-weight: bold; color: var(--trl-accent); margin-left: var(--trl-space-2); }
 
 .trl-select {
-  appearance: none; width: 100%; height: 30px; padding: 0 var(--trl-space-2);
-  background: var(--trl-bg-input); border: 1px solid var(--trl-edge); color: var(--trl-fg); font-size: var(--trl-text-md);
+  appearance: none; -webkit-appearance: none; width: 100%; height: 30px;
+  padding: 0 var(--trl-space-6) 0 var(--trl-space-2);
+  background-color: var(--trl-bg-input); border: 1px solid var(--trl-edge); color: var(--trl-fg); font-size: var(--trl-text-md);
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--trl-accent-dim) 50%),
+    linear-gradient(135deg, var(--trl-accent-dim) 50%, transparent 50%);
+  background-position: calc(100% - 14px) 13px, calc(100% - 9px) 13px;
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
+  cursor: pointer;
 }
 
 .trl-switch { display: inline-flex; align-items: center; gap: var(--trl-space-2); font-size: var(--trl-text-md); color: var(--trl-fg-muted); cursor: pointer; margin-bottom: var(--trl-space-2); }
