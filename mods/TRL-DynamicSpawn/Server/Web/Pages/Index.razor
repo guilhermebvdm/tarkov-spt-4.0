@@ -686,7 +686,7 @@ html, body {
                                 <input type="checkbox" id="evt_raiders_enable">
                                 <span data-i18n="evt_raiders">Raiders Aleatórios em Qualquer Mapa</span>
                             </label>
-                            <div class="trl-field">
+                            <div id="evt_raiders_chance_wrap" class="trl-field">
                                 <label class="trl-field__label">
                                     <span data-i18n="raider_chance">CHANCE DE RAIDERS (%)</span>
                                     <span id="val_evt_raiders_chance" class="trl-slider-val">10</span>
@@ -700,7 +700,7 @@ html, body {
                                 <input type="checkbox" id="evt_rogues_enable">
                                 <span data-i18n="evt_rogues">Rogues Aleatórios em Qualquer Mapa</span>
                             </label>
-                            <div class="trl-field">
+                            <div id="evt_rogues_chance_wrap" class="trl-field">
                                 <label class="trl-field__label">
                                     <span data-i18n="rogue_chance">CHANCE DE ROGUES (%)</span>
                                     <span id="val_evt_rogues_chance" class="trl-slider-val">10</span>
@@ -1146,6 +1146,8 @@ html, body {
 
         document.getElementById("evt_rogues_enable").checked = !!elite.randomRogueGroup;
         setSliderVal("evt_rogues_chance", elite.randomRogueGroupChance ?? 10);
+
+        updateEventDependents();
 
         // 5. CUSTOM SPAWNS
         const cs = stateCurrent.customSpawnsConfig || {};
@@ -1741,6 +1743,17 @@ html, body {
         });
     }
 
+    function updateEventDependents() {
+        const isBossInvasionActive = document.getElementById("evt_boss_invasion_enable")?.checked ?? false;
+        setDependentState(["bossInvasionPanel"], isBossInvasionActive);
+
+        const isRaiderActive = document.getElementById("evt_raiders_enable")?.checked ?? false;
+        setDependentState(["evt_raiders_chance_wrap"], isRaiderActive);
+
+        const isRogueActive = document.getElementById("evt_rogues_enable")?.checked ?? false;
+        setDependentState(["evt_rogues_chance_wrap"], isRogueActive);
+    }
+
     // --- COLETOR DE UI DE VOLTA AO OBJETO STATE ---
 
     function collectUI() {
@@ -1807,9 +1820,9 @@ html, body {
 
         document.getElementById("disableBosses").onchange = () => markDirty(true);
         document.getElementById("bossOpenZones").onchange = () => markDirty(true);
-        document.getElementById("evt_boss_invasion_enable").onchange = () => markDirty(true);
-        document.getElementById("evt_raiders_enable").onchange = () => markDirty(true);
-        document.getElementById("evt_rogues_enable").onchange = () => markDirty(true);
+        document.getElementById("evt_boss_invasion_enable").onchange = () => { updateEventDependents(); markDirty(true); };
+        document.getElementById("evt_raiders_enable").onchange = () => { updateEventDependents(); markDirty(true); };
+        document.getElementById("evt_rogues_enable").onchange = () => { updateEventDependents(); markDirty(true); };
         document.getElementById("enableCustomPmcSpawns").onchange = () => markDirty(true);
         document.getElementById("enableCustomScavSpawns").onchange = () => markDirty(true);
         document.getElementById("enableCustomSniperSpawns").onchange = () => markDirty(true);
