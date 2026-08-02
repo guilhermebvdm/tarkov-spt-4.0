@@ -6,7 +6,10 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados quan
 
 ## Estado atual (snapshot ao fim da última sessão)
 
-- **Fork ativo = `modded` (CANÔNICO desde 2026-07-09).** Reorg: `git mv modded-beta → modded` e antigo `modded → modded-bak` (backup, não editar). Build **self-contained** (`/compile-mod` OU `dotnet build`; csproj puxa `Fika.Core` da raiz `references/`, sem `mods/references/` temp). **Deploy manual** do DLL em `D:/SPT/BepInEx/plugins/RealisticMobility/` (assets `.ogg`/`.png` ao lado; `/compile-mod` instala em `plugins/<AssemblyName>/`, então copiar à mão). **DLL atual: v2.17.0** — instalada em `D:/SPT` (pasta `TRL-StancesAndMobility/`; a antiga `RealisticMobility/` foi movida para `D:/SPT/_backup-RealisticMobility-2026-08-02/`) (build local; **não deployada** — o `modded/` mudou depois da última build, rebuildar antes de copiar). **Nem `D:/SPT` nem o servidor têm a 2.13.0/2.14.0** ([P-11.7]). Trilha desde a 2.5.0: 2.8.1 (`47d30935`, fix de colisão de `Order`) → 2.8.2 (`316b6581`, ADS Waypoint no rodapé) → 2.9.0 (`8c9ae609`, 30 configs promovidas a default + item 018 backlog) → 2.10.0 (`ed9cf500`, item 019 chamber-check ammo UI) → **2.11.0** (`22ae6176`, 26/07, envelope de comprimento no pacote de stance do FIKA — release lockstep) → **2.12.1** (`bada9d2a`, 27/07, chamber-check UI refeita via `EftBattleUIScreen` — a v1 resolvia o assinante sem erro e o painel nunca desenhava) → **2.13.0** e **2.14.0** (Sessão 12). ⚠️ **Não existiu v2.12.0**: o `PickupAimingSafetyPatch` entrou em 25/07 (`19aa6499`) sem release próprio e foi devolvido ao TRL-Fixes na 2.13.0. ⚠️ **As versões 2.11.0–2.12.1 não passaram por `/update-memory`** — o que se sabe delas vem do `git log` e do `modded/CHANGELOG.md`, não desta memória. Ver Sessão 12 e memória global `reference_stances_canonical_build`.
+- **Fork ativo = `modded` (CANÔNICO desde 2026-07-09).** Reorg: `git mv modded-beta → modded` e antigo `modded → modded-bak` (backup, não editar). Build **self-contained** (`/compile-mod` OU `dotnet build`; csproj puxa `Fika.Core` da raiz `references/`, sem `mods/references/` temp). **Deploy manual** do DLL em `D:/SPT/BepInEx/plugins/RealisticMobility/` (assets `.ogg`/`.png` ao lado; `/compile-mod` instala em `plugins/<AssemblyName>/`, então copiar à mão). **DLL atual: v2.17.0** — instalada em `D:/SPT` (pasta `TRL-StancesAndMobility/`; a antiga `RealisticMobility/` foi movida para `D:/SPT/_backup-RealisticMobility-2026-08-02/`) (build local; **não deployada** — o `modded/` mudou depois da última build, rebuildar antes de copiar). **Nem `D:/SPT` nem o servidor têm a 2.13.0/2.14.0** ([P-11.7]). Trilha desde a 2.5.0: 2.8.1 (`47d30935`, fix de colisão de `Order`) → 2.8.2 (`316b6581`, ADS Waypoint no rodapé) → 2.9.0 (`8c9ae609`, 30 configs promovidas a default + item 018 backlog) → 2.10.0 (`ed9cf500`, item 019 chamber-check ammo UI) → **2.11.0** (`22ae6176`, 26/07, envelope de comprimento no pacote de stance do FIKA — release lockstep) → **2.12.1** (`bada9d2a`, 27/07, chamber-check UI refeita via `EftBattleUIScreen` — a v1 resolvia o assinante sem erro e o painel nunca desenhava) → **2.13.0** e **2.14.0** (Sessão 12). ⚠️ **Não existiu v2.12.0**: o `PickupAimingSafetyPatch` entrou em 25/07 (`19aa6499`) sem release próprio e foi devolvido ao TRL-Fixes na 2.13.0. ⚠️ **As versões 2.11.0–2.12.1 não passaram por `/update-memory` em tempo real** — a Sessão 14 preencheu o vazio
+retroativamente (gravada em 02/08, trabalho de 26-27/07): a narrativa completa da depuração do item 019
+(por que a v1 do chamber-check-UI não desenhava, e o fix via `EftBattleUIScreen`) está lá. Ver Sessão 12, Sessão
+14 e memória global `reference_stances_canonical_build`.
 - ⚠️⚠️ **EIXOS DA ARMA SÃO LOCAIS, NÃO OS DO UNITY** (fix v2.2.0, commit `d9069fb`). A rotação é aplicada como `weapRotation * Quaternion.Euler(euler)` (`ApplyComplexRotationPatch:280`) → **espaço local da arma**: `X = lateral · Y = LONGITUDINAL (o cano) · Z = vertical`. Portanto **girar em torno de Y = TOMBAR (roll)** e **em torno de Z = APONTAR (yaw)** — o **contrário** da ordem canônica do Unity `(pitch, yaw, roll)`. A montagem correta é `new Vector3(pitch, roll, yaw)`. **Nunca presumir a convenção do Unity aqui.**
 - **VERSÃO 2.5.0 (2026-07-14, commit `17f9d02`) — DLL `397b3c3`.** Trilha da sessão: 2.0.0 (`39e7a56`) → 2.1.0 (`ca9f868`) → 2.2.0 (`d9069fb`) → **2.2.1 hotfix** (`4936e8f`) → 2.3.0 (`b477c21`) → 2.4.0 (`8fc8f8e`) → 2.5.0 (`17f9d02`).
 - ⚠️⚠️ **O BepInEx PROÍBE `=` no nome de uma key** (é o separador do `.cfg`) — `Config.Bind` **lança** e **aborta o `Awake`**. Também proibidos: `[ ] " ' \ tab`. Isto derrubou a v2.2.0 (ver Sessão 10).
@@ -779,6 +782,88 @@ dupla-compressão de campo dormente; sem sintoma, mas corrigido replicando o gua
 **Pendências:** **[P-11.5] 🟡 GATE F1+F3:** calibrar in-game o `ADS Waypoint Time` por stance + o
 `Compression`/`Pivot`; testar troca de arma no ADS-in, scope, Fika. · P-11.4 (baseline/diagnóstico F2). · **F2**
 (braço G36 — atenuar o eixo, após o diagnóstico). · P-11.1, P-11.2, P-10.x, subir 2.8.0 ao servidor.
+
+## 2026-08-02 03:29 (GMT-3) — Sessão 14: depuração do item 019 (chamber-check UI não desenhava) — v2.11.0→v2.13.0
+
+> **Nota de posicionamento:** o trabalho abaixo aconteceu cronologicamente em **2026-07-26/27** (antes das Sessões
+> 12 e 13), numa conversa que ficou pausada e só voltou hoje para o `/update-memory`. Por regra da skill
+> `memory-curation` §10, a entrada é gravada com o horário da GRAVAÇÃO (agora), não do trabalho original —
+> preenche o vazio que a Sessão 12 já tinha sinalizado ("as versões 2.11.0–2.12.1 não passaram por
+> `/update-memory`"). ⚠️ **Os caminhos de deploy citados abaixo (`D:/SPT/BepInEx/plugins/RealisticMobility/`) já
+> não existem** — a Sessão 13 moveu essa pasta para `_backup-RealisticMobility-2026-08-02/` e o destino atual é
+> `TRL-StancesAndMobility/`. Histórico preservado como aconteceu; não é mais o caminho a seguir.
+
+**Tema central:** o usuário reportou que a UI do item 019 (chamber-check ammo, entregue na v2.10.0) não mostrava
+nada na tela ao checar a câmara — investigar a causa raiz e corrigir.
+
+**Decisões-chave:**
+- **Mecanismo de exibição trocado:** de disparar o evento `Player.OnShowAmmoDetails` por reflexão (v1, v2.10.0)
+  para chamar `Singleton<CommonUI>.Instance.EftBattleUIScreen.ShowAmmoDetails(...)` **diretamente** (v2, v2.12.0,
+  commit `bada9d2a`) — padrão copiado do `RealismMod` 0.14.8/SPT 3.11 decompilado
+  (`mods/RealismMod/Client/DLL descompilada/RealismMod/RealismMod/ChamberCheckUIPatch.cs:33-44`), que nunca usou o
+  evento por-player. Ref: `Patches/ChamberCheckAmmoPatch.cs`.
+- **`maxAmmoCount` diferenciado por tipo de arma (v2.12.1, CR-03-01):** `AmmoCountPanel` do EFT usa DUAS fórmulas
+  de threshold diferentes (`GetAmmoCountByLevel` para câmara única: `ammoCount >= maxAmmoCount-1`;
+  `GetAmmoCountByLevelForFoldingMechanismWeapon` para múltipla: `ammoCount >= maxAmmoCount`, sem o "-1"). O código
+  agora usa `maxAmmoCount = folding ? 1 : 2` — sem isso, ou "Empty" caía sempre em "Full" (com max=1), ou arma de
+  câmara múltipla mostrava o texto cru "1" em vez de "Full" (com max=2 fixo pros dois casos).
+
+**Lições / hipóteses descartadas:**
+- **Hipótese "ordem de chamada" (CR-02-01) — REFUTADA.** Suspeita inicial: o Postfix roda depois que
+  `CurrentOperation.CheckChamber()` já chamou `SetAiming(false)`/`RunUtilityOperation` internamente (ao contrário
+  do nativo `CheckAmmo()`, que mostra o painel ANTES dessas chamadas — `Player.cs:5770` vs `:5773`/`:5781`), e uma
+  transição de UI (`BattleUIScreen.UpdatePanelsVisibility(false)`) escondia o painel logo em seguida. **Testada**
+  com uma sonda que reinvocava `show()` 20 frames depois (~0,33s, tempo de sobra pra qualquer transição
+  assentar) — **mesmo resultado, nada aparecia**. Descartada.
+- **Reflexão pegando o delegate errado — não confirmado, mas irrelevante no fim.** Dump da invocation list do
+  evento (`show.GetInvocationList()`) mostrou exatamente 1 subscriber correto (`GamePlayerOwner.method_8` via
+  `HideoutPlayerOwner`), invocado sem exceção. O delegate certo disparava a cadeia certa
+  (`BattleUIScreenController.ShowAmmoDetails` → `_ammoCountPanel.Show`) e mesmo assim nada desenhava — a causa
+  raiz exata dentro dessa cadeia nunca foi isolada; só ficou provado que o caminho **por-evento** não é confiável
+  nesse cenário (estande de tiro, `HideoutPlayerOwner`), e que ir direto ao `Singleton<CommonUI>` resolve.
+- **Teste de controle decisivo:** checar o CARREGADOR nativo (sem nenhum mod, mesma arma, mesmo lugar) funcionava
+  normalmente — descartou de vez a hipótese de que o ambiente (estande de tiro) não suportasse esse painel.
+- **NRE de `FikaPlayer.MouseLook` reportado durante o teste NÃO é do stances**, apesar de **duas sessões
+  paralelas terem apontado o contrário com alta confiança**. Correlação de log: existe **uma única** linha
+  `[TRLDynamicSpawn] DIRECT SPAWN SUCCESS` no log inteiro, e a tempestade de `NullReferenceException` (recorrente
+  todo frame, sem parar) começa **2 linhas depois** — sem nenhuma atividade do stances entre os dois eventos.
+  Precedida por múltiplos `[TRLDynamicSpawn] Bot generation timed out!`. O usuário confirmou ter desabilitado
+  spawn nas configs da raid testada, o que explica os timeouts levando ao fallback "DIRECT SPAWN" (que
+  provavelmente pula parte da inicialização normal do bot — `PlayerBones`/`HandsController` incompletos). **Lição
+  de processo:** duas sessões concordando não é prova — a correlação de log com timestamp preciso venceu o
+  consenso.
+
+**Atividade cronológica:**
+1. Diagnóstico incremental (v2.11.1→v2.11.4): logs em cada guard do patch, sonda de reinvocação atrasada,
+   Postfix profundo em `EFT.UI.AmmoCountPanel.Show`, dump da invocation list — cada rodada eliminou uma hipótese.
+2. Teste de controle (check de carregador nativo) isolou que o problema era específico do caminho do patch, não
+   do ambiente.
+3. Pesquisa dirigida no `RealismMod` decompilado achou `ChamberCheckUIPatch.cs` — padrão de referência.
+4. `ChamberCheckAmmoPatch.cs` reescrito (v2.12.0) sem a reflexão do evento; toda instrumentação de diagnóstico
+   removida do arquivo final.
+5. Usuário confirmou visualmente: painel aparece — item 019 desbloqueado.
+6. `/code-review` rodadas 02 (documentou a investigação, achado de ordering depois refutado) e 03 (revisou a
+   reescrita, achou CR-03-01). Ver `backlog/019-checar-camara-ui/019-checar-camara-ui-04-code-review-0{2,3}.md`.
+7. CR-03-01 corrigido → v2.12.1.
+8. Investigação do NRE (`FikaPlayer.MouseLook`) — descartada como não relacionada (ver lições).
+9. **3 incidentes de "launcher reverteu a DLL"** durante a sessão — o launcher (Dev Mod off) sobrescreveu o
+   `.dll` em `RealisticMobility/` com uma build antiga pelo menos 2 vezes; corrigido redeployando manualmente a
+   cada vez. Também descoberto: `/compile-mod --flat` escreve na RAIZ de `BepInEx/plugins/`, não em
+   `RealisticMobility/` — **toda compilação exigiu mover o arquivo manualmente**, e uma vez isso deixou **duas
+   DLLs do mesmo GUID** instaladas simultaneamente por alguns minutos (risco real, mesma classe do
+   [P-13.3] registrado depois pela Sessão 13 para a pasta `TRL-StancesAndMobility/`).
+10. Versão avançou 2.10.0 → v2.13.0 (a v2.13.0 incorporou, de sessão paralela, a remoção do
+    `PickupAimingSafetyPatch`, devolvido ao `TRL-Fixes`).
+
+**Pendências abertas nesta sessão:** nenhuma nova — as relevantes (validar toda a pilha em raid, subir ao
+servidor) já foram registradas pela Sessão 13 ([P-13.1], [P-11.7]).
+
+**Cross-refs:**
+- Fecha o item **019** do backlog (chamber-check ammo UI) — de "código pronto, teste pendente" para "validado
+  visualmente pelo usuário". Continua fora do `mod-backlog.md` como ⚪ por desatualização do próprio arquivo
+  (não corrigido nesta sessão).
+- [P-13.1]/[P-13.3] (Sessão 13) herdam risco confirmado aqui: DLL duplicada por sync/deploy incompleto é um
+  padrão recorrente neste mod, não um caso isolado.
 
 ## 2026-08-02 02:35 (GMT-3) — Sessão 13: faxina do item 020, licença decidida e identidade TRL (v2.15.0 → v2.17.0)
 
