@@ -13,7 +13,7 @@ namespace TarkovRedLine.PvpMode
     /// Traz o jogador caído de volta ao jogo em outro ponto do mapa.
     ///
     /// A ordem dos passos importa e está justificada na spec técnica do item 002 §1:
-    ///   consumir vida → teleportar → religar o boneco → curar → proteger
+    ///   avisar a rede → teleportar → religar → debitar vida → levantar → curar → proteger
     /// </summary>
     internal static class RespawnService
     {
@@ -68,19 +68,26 @@ namespace TarkovRedLine.PvpMode
                     return false;
                 }
 
-                // 1. Teleportar. Ainda não gastamos vida: se algo estourar daqui para trás, o
-                //    jogador perde nada.
+                // 1. Avisar os outros clientes ANTES de teleportar. O estado de posição do FIKA
+                //    trafega em canal não-confiável e o aviso em canal confiável — não há ordem
+                //    garantida entre canais diferentes. Avisando primeiro, o receptor já está
+                //    defendendo a posição nova quando o primeiro estado pós-teleporte chegar
+                //    (code review 003, E-01).
+                Networking.RespawnNetwork.BroadcastRespawn(fikaPlayer, position);
+
+                // 2. Teleportar. Ainda não gastamos vida: se algo estourar daqui para trás, o
+                //    jogador não perde nada.
                 player.Teleport(position);
 
-                // 2. Religar. Envia o DownedSyncPacket avisando todo mundo que levantamos.
+                // 3. Religar. Envia o DownedSyncPacket avisando todo mundo que levantamos.
                 //    Este é o ponto de não-retorno.
                 fikaPlayer.ToggleDowned(false);
 
-                // 3. Debitar a vida SÓ depois do passo que não tem volta. Cobrar antes deixaria o
+                // 4. Debitar a vida SÓ depois do passo que não tem volta. Cobrar antes deixaria o
                 //    jogador sem vida e ainda caído se qualquer passo acima estourasse (D-06).
                 RaidState.TryConsumeLife();
 
-                // 4. Levantar de fato: ToggleDowned(false) restaura dano, arma, eixos e metabolismo,
+                // 5. Levantar de fato: ToggleDowned(false) restaura dano, arma, eixos e metabolismo,
                 //    mas NÃO desfaz a pose deitada que ele mesmo aplicou ao cair (D-04).
                 if (player.MovementContext != null)
                 {
@@ -88,7 +95,7 @@ namespace TarkovRedLine.PvpMode
                     player.MovementContext.SetPoseLevel(1f);
                 }
 
-                // 5. Curar. Só agora, porque ToggleDowned(false) é quem devolve IsAlive = true.
+                // 6. Curar. Só agora, porque ToggleDowned(false) é quem devolve IsAlive = true.
                 //    RestoreFullHealth restaura membros e vida, mas remove apenas sangramento —
                 //    fratura, dor e intoxicação sobreviveriam ao renascimento (D-05).
                 player.ActiveHealthController.RestoreFullHealth();
@@ -97,10 +104,6 @@ namespace TarkovRedLine.PvpMode
                 // 4. Proteger. Por último: ToggleDowned(false) restaura o coeficiente de dano
                 //    para 1 e sobrescreveria uma proteção aplicada antes.
                 StartProtection(player);
-
-                // 5. Avisar os outros clientes para cravarem a posição nova em vez de interpolar
-                //    o trajeto inteiro (item 003).
-                Networking.RespawnNetwork.BroadcastRespawn(fikaPlayer, position);
 
                 var left = RaidState.IsUnlimited ? "ilimitadas" : RaidState.LivesLeft.ToString();
                 Notify($"Voce renasceu. Vidas restantes: {left}", Color.green);

@@ -86,6 +86,26 @@ namespace TarkovRedLine.PvpMode
             if (missing) Plugin.Log.LogWarning($"[TRL-PvpMode] Nao resolvido: {what}");
         }
 
+        private static MethodInfo _removeAllActiveEffectsMethod;
+
+        /// <summary>
+        /// Limpa os ícones de efeito da plaquinha de vida de um peer. Método <c>internal</c> do
+        /// Fika — é o que o próprio handler de reconexão dele faz junto com a limpeza do histórico
+        /// de posições (FikaClient.Callbacks.cs:43). Sem isto, sangramento e fratura de ANTES da
+        /// queda ficam pendurados na plaquinha mesmo depois de a cura tê-los removido de verdade
+        /// (code review 003, E-03).
+        /// </summary>
+        public static void TryClearHealthBarEffects(object healthBar)
+        {
+            if (healthBar == null) return;
+
+            _removeAllActiveEffectsMethod ??= AccessTools.Method(healthBar.GetType(), "RemoveAllActiveEffects");
+            if (_removeAllActiveEffectsMethod == null) return;
+
+            try { _removeAllActiveEffectsMethod.Invoke(healthBar, null); }
+            catch (Exception ex) { Plugin.Log.LogError($"[TRL-PvpMode] TryClearHealthBarEffects: {ex.Message}"); }
+        }
+
         private static PropertyInfo _chatActiveProperty;
 
         /// <summary>

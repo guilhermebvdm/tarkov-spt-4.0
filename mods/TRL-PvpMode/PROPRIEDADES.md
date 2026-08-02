@@ -1,7 +1,7 @@
 # Propriedades F12 — TRL-PvpMode
 
 > Todas as opções do menu **F12** (BepInEx ConfigurationManager). **1 seção · 9 opções.**
-> Gerado de [modded/Settings.cs](modded/Settings.cs) em **2026-08-01**, para a **v0.6.0**.
+> Gerado de [modded/Settings.cs](modded/Settings.cs) em **2026-08-01**, para a **v0.7.0**.
 >
 > **Plugin:** `com.trl.pvpmode` — "TRL-PvpMode" · arquivo de config: `BepInEx/config/com.trl.pvpmode.cfg`
 
@@ -44,6 +44,7 @@ opção e consegue levantar o caído, furando a contagem de vidas.
 | **Mudar o tempo durante a raid** | O prazo é fotografado no instante da queda. Alterar `Downed Timeout` estando caído não muda a contagem em curso — vale a partir da próxima queda. |
 | **Tempo `0` desliga a tecla nativa de desistir** | Com tempo zero, o componente de contagem do Fika sai antes de ler o teclado. Até o item 002 existir (tecla própria de renascer), configurar `0` deixa o jogador caído **sem saída**. |
 | **A plaquinha de vida vista pelos companheiros usa o tempo do servidor** | O medidor do Fika lê o `bleedoutTime` do `fika.jsonc` direto, fora do alcance do mod. O número que os outros veem pode divergir do seu; o desfecho real segue o valor do F12. |
+| **Bots ainda procuram no lugar da morte** | Ao renascer, o corpo aparece no ponto novo para todos, mas a memória de inimigo dos bots guarda a última posição conhecida num cache próprio que o teleporte não invalida. Eles vasculham o ponto antigo por um tempo antes de desistir. |
 | **Reconexão estando caído** | Comportamento indefinido — restaurar o estado no rejoin depende de rede e está previsto para o item 003. |
 | **Cair durante transição, extração ou dentro do veículo blindado** | Não tratado. O estado de caído trava o personagem, e nesses contextos não há como escapar até o item 002 existir (tecla de renascer). Combinado com tempo `0`, é um travamento sem saída. |
 | **Vasculhar o corpo caído também some** | O bloqueio da opção "levantar companheiro" remove **todas** as ações sobre o caído, inclusive "Search" quando `allowLooting` está ligado no servidor. Coerente com cadáver saqueável estar fora de escopo. |

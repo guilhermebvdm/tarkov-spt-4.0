@@ -1,4 +1,4 @@
-using System;
+using System;   // ThreadStatic
 using Fika.Core.Networking.LiteNetLib.Utils;
 using UnityEngine;
 
@@ -26,9 +26,12 @@ namespace TarkovRedLine.PvpMode.Networking
     {
         public int NetId;
         public Vector3 Position;
-        public float Yaw;
 
-        /// <summary>NÃO serializado. Falso quando o corpo veio truncado — não processar nem retransmitir.</summary>
+        /// <summary>
+        /// NÃO serializado. Falso quando o corpo veio truncado — não aplicar.
+        /// (O relay do host acontece em bytes crus ANTES do Deserialize, em FikaServer.cs:932-936,
+        /// e não pode ser impedido daqui — a flag protege o USO do valor, não a retransmissão.)
+        /// </summary>
         internal bool Valid;
 
         [ThreadStatic] private static NetDataWriter _inner;
@@ -42,7 +45,6 @@ namespace TarkovRedLine.PvpMode.Networking
             inner.Put(Position.x);
             inner.Put(Position.y);
             inner.Put(Position.z);
-            inner.Put(Yaw);
 
             // Sempre o overload de 3 argumentos: o de 1 argumento escreve o buffer inteiro,
             // incluindo o padding além de Length (NetDataWriter.cs:381).
@@ -54,7 +56,6 @@ namespace TarkovRedLine.PvpMode.Networking
         {
             NetId = 0;
             Position = Vector3.zero;
-            Yaw = 0f;
             Valid = false;
 
             if (!reader.TryGetBytesWithLength(out var payload) || payload == null) return;
@@ -65,7 +66,6 @@ namespace TarkovRedLine.PvpMode.Networking
             if (!inner.TryGetFloat(out var x)) return;
             if (!inner.TryGetFloat(out var y)) return;
             if (!inner.TryGetFloat(out var z)) return;
-            if (!inner.TryGetFloat(out Yaw)) return;
 
             Position = new Vector3(x, y, z);
             Valid = true;

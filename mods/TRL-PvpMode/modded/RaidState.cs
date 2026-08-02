@@ -59,6 +59,7 @@ namespace TarkovRedLine.PvpMode
             LastKillDamageType = EDamageType.Undefined;
             RespawnService.Reset();
             Patches.RespawnInputPatch.Reset();
+            Networking.RespawnNetwork.Reset();
 
             // Menu e esconderijo não têm modo de vidas (R-08).
             if (gameWorld == null || gameWorld.MainPlayer == null) return;
@@ -96,6 +97,7 @@ namespace TarkovRedLine.PvpMode
             LastKillDamageType = EDamageType.Undefined;
             RespawnService.Reset();
             Patches.RespawnInputPatch.Reset();
+            Networking.RespawnNetwork.Reset();
             Plugin.Log.LogInfo("[TRL-PvpMode] Raid encerrada — estado do modo de vidas limpo.");
         }
 
