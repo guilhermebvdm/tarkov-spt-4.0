@@ -6,7 +6,7 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados quan
 
 ## Estado atual (snapshot ao fim da última sessão)
 
-- **Fork ativo = `modded` (CANÔNICO desde 2026-07-09).** Reorg: `git mv modded-beta → modded` e antigo `modded → modded-bak` (backup, não editar). Build **self-contained** (`/compile-mod` OU `dotnet build`; csproj puxa `Fika.Core` da raiz `references/`, sem `mods/references/` temp). **Deploy manual** do DLL em `D:/SPT/BepInEx/plugins/RealisticMobility/` (assets `.ogg`/`.png` ao lado; `/compile-mod` instala em `plugins/<AssemblyName>/`, então copiar à mão). **DLL atual: v2.14.0** (build local; **não deployada** — o `modded/` mudou depois da última build, rebuildar antes de copiar). **Nem `D:/SPT` nem o servidor têm a 2.13.0/2.14.0** ([P-11.7]). Trilha desde a 2.5.0: 2.8.1 (`47d30935`, fix de colisão de `Order`) → 2.8.2 (`316b6581`, ADS Waypoint no rodapé) → 2.9.0 (`8c9ae609`, 30 configs promovidas a default + item 018 backlog) → 2.10.0 (`ed9cf500`, item 019 chamber-check ammo UI) → **2.11.0** (`22ae6176`, 26/07, envelope de comprimento no pacote de stance do FIKA — release lockstep) → **2.12.1** (`bada9d2a`, 27/07, chamber-check UI refeita via `EftBattleUIScreen` — a v1 resolvia o assinante sem erro e o painel nunca desenhava) → **2.13.0** e **2.14.0** (Sessão 12). ⚠️ **Não existiu v2.12.0**: o `PickupAimingSafetyPatch` entrou em 25/07 (`19aa6499`) sem release próprio e foi devolvido ao TRL-Fixes na 2.13.0. ⚠️ **As versões 2.11.0–2.12.1 não passaram por `/update-memory`** — o que se sabe delas vem do `git log` e do `modded/CHANGELOG.md`, não desta memória. Ver Sessão 12 e memória global `reference_stances_canonical_build`.
+- **Fork ativo = `modded` (CANÔNICO desde 2026-07-09).** Reorg: `git mv modded-beta → modded` e antigo `modded → modded-bak` (backup, não editar). Build **self-contained** (`/compile-mod` OU `dotnet build`; csproj puxa `Fika.Core` da raiz `references/`, sem `mods/references/` temp). **Deploy manual** do DLL em `D:/SPT/BepInEx/plugins/RealisticMobility/` (assets `.ogg`/`.png` ao lado; `/compile-mod` instala em `plugins/<AssemblyName>/`, então copiar à mão). **DLL atual: v2.17.0** — instalada em `D:/SPT` (pasta `TRL-StancesAndMobility/`; a antiga `RealisticMobility/` foi movida para `D:/SPT/_backup-RealisticMobility-2026-08-02/`) (build local; **não deployada** — o `modded/` mudou depois da última build, rebuildar antes de copiar). **Nem `D:/SPT` nem o servidor têm a 2.13.0/2.14.0** ([P-11.7]). Trilha desde a 2.5.0: 2.8.1 (`47d30935`, fix de colisão de `Order`) → 2.8.2 (`316b6581`, ADS Waypoint no rodapé) → 2.9.0 (`8c9ae609`, 30 configs promovidas a default + item 018 backlog) → 2.10.0 (`ed9cf500`, item 019 chamber-check ammo UI) → **2.11.0** (`22ae6176`, 26/07, envelope de comprimento no pacote de stance do FIKA — release lockstep) → **2.12.1** (`bada9d2a`, 27/07, chamber-check UI refeita via `EftBattleUIScreen` — a v1 resolvia o assinante sem erro e o painel nunca desenhava) → **2.13.0** e **2.14.0** (Sessão 12). ⚠️ **Não existiu v2.12.0**: o `PickupAimingSafetyPatch` entrou em 25/07 (`19aa6499`) sem release próprio e foi devolvido ao TRL-Fixes na 2.13.0. ⚠️ **As versões 2.11.0–2.12.1 não passaram por `/update-memory`** — o que se sabe delas vem do `git log` e do `modded/CHANGELOG.md`, não desta memória. Ver Sessão 12 e memória global `reference_stances_canonical_build`.
 - ⚠️⚠️ **EIXOS DA ARMA SÃO LOCAIS, NÃO OS DO UNITY** (fix v2.2.0, commit `d9069fb`). A rotação é aplicada como `weapRotation * Quaternion.Euler(euler)` (`ApplyComplexRotationPatch:280`) → **espaço local da arma**: `X = lateral · Y = LONGITUDINAL (o cano) · Z = vertical`. Portanto **girar em torno de Y = TOMBAR (roll)** e **em torno de Z = APONTAR (yaw)** — o **contrário** da ordem canônica do Unity `(pitch, yaw, roll)`. A montagem correta é `new Vector3(pitch, roll, yaw)`. **Nunca presumir a convenção do Unity aqui.**
 - **VERSÃO 2.5.0 (2026-07-14, commit `17f9d02`) — DLL `397b3c3`.** Trilha da sessão: 2.0.0 (`39e7a56`) → 2.1.0 (`ca9f868`) → 2.2.0 (`d9069fb`) → **2.2.1 hotfix** (`4936e8f`) → 2.3.0 (`b477c21`) → 2.4.0 (`8fc8f8e`) → 2.5.0 (`17f9d02`).
 - ⚠️⚠️ **O BepInEx PROÍBE `=` no nome de uma key** (é o separador do `.cfg`) — `Config.Bind` **lança** e **aborta o `Awake`**. Também proibidos: `[ ] " ' \ tab`. Isto derrubou a v2.2.0 (ver Sessão 10).
@@ -27,10 +27,13 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados quan
 
 ## Pendências / próximos passos conhecidos
 
+- **[P-13.1] (aberta 2026-08-02) 🔴 Validar in-game a pilha 2.13.0→2.17.0** — cinco versões sem nenhuma raid, incluindo a troca de identidade. No F12: nome `TRL-StancesAndMobility` e **os valores calibrados do usuário**, não os defaults. Em raid: posturas, mira, mount, recarga, checagem de câmara, seção `Camera Position`. ⚠️ Erro novo no console provavelmente é **antigo** — o laço protegido (2.15.0) revela exceção que antes cancelava os subsistemas em silêncio.
+- **[P-13.3] (aberta 2026-08-02) 🔴 O launcher precisa REMOVER `plugins/RealisticMobility/` ao atualizar**, não só criar `plugins/TRL-StancesAndMobility/`. Sem isso o jogador carrega **dois plugins de postura ao mesmo tempo** — é o único risco de dano real da renomeação. Vale para os beta testers e para o servidor. O `.cfg` novo tem que sair pelo canal `config-server` (sobrescreve), nunca pelo `config` (só cria quando falta).
+- **[P-13.2] (aberta 2026-08-02) 🟡 Renomeação estrutural pendente:** namespace `CameraRotationMod` → `TarkovRedLine.StancesAndMobility` (39 arquivos) e pasta do repo `mods/stancesAndCameraPositionSPT4.0.11/` → `mods/TRL-StancesAndMobility/`. Invisível ao jogador; a pasta quebra caminhos de memória/backlog/grafos/harness e exige checkout sem sessão paralela. Ver `publish/RENAME.md`.
 - **[P-12.1] (aberta 2026-08-01) 🟡 Calibrar a compressão de ADS-speed (item 017 F3) com o overlay novo.** A compressão **aplica** (mecanismo confirmado no decompilado), mas o **pivô default 1.5 está acima da faixa real das armas** — derivando de `globals.Aiming` (peso 0,6–9 kg; tempos 0,35–2,4 s), a velocidade interna vai de ~0,57 (LMG) a ~1,9 (pistola), fuzis em ~1,0. Com pivô 1,5 a compressão **acelera as pesadas** em vez de segurar as leves, e o usuário não sentia diferença. Centro real ≈ **1,0–1,1**. Ligar `Debug ADS Speed` (F12 → `Debug (Advanced)`), anotar os valores das armas usadas, escolher o pivô e **promover a default** (como foi feito na 2.9.0). Ver Sessão 12.
 - **[P-12.2] (aberta 2026-08-01) 🔴 Preparação para publicação no SPT Forge — portão de elegibilidade.** (a) ✅ **Licença RESOLVIDA (2026-08-02): fica a CC BY-NC 4.0 do original** — decisão do usuário. A autorização do `shengzhanzhe` para publicar o fork está **registrada** (print de 2026-06-13 transcrito em `publish/PERMISSION.md`; PNG a anexar ao lado). Manter a mesma licença dispensa qualquer permissão adicional. ⚠️ Risco declarado: o Forge §6.1 situa CC como apropriada a doc/arte, não a código — não proíbe, mas a moderação pode questionar; a saída seria uma mensagem curta pedindo aval para licença OSI. **Não reabrir esta decisão sem motivo novo.** (b) **Política de IA**: declarar (o Forge recusa mod "substantially or entirely written by AI coding agents" e exige o flag "Contains AI Content" com qualquer uso de LLM). (c) **Origem dos assets** (5 `.png` + o `.ogg` do hold-breath). Rodar `/prepare-mod-for-publish` para a auditoria formal. Ver Sessão 12 e skill `trl-mod-publishing`.
 - **[P-12.3] (aberta 2026-08-01) 🟡 Regenerar o `PROPRIEDADES.md` inteiro.** O documento se declara como da v2.5.0 e recebeu só remendos desde então; a contagem de seções/opções não bate com o jogo. Fazer junto do `/review-mod-properties` da preparação para publicação.
-- **[P-11.7] (aberta 2026-07-25, atualizada 2026-08-01) 🟡 Subir a versão corrente ao servidor** via `config-server` do launcher (DLL + `.cfg`). O gap cresceu: servidor está na 2.8.0, o código na **2.14.0**. O `.cfg` versionado já tem o `Enable Action Stance Swap` na seção nova — distribuí-lo junto é o que impede o reset dessa opção para quem atualizar.
+- **[P-11.7] (aberta 2026-07-25, atualizada 2026-08-01) 🟡 Subir a versão corrente ao servidor** via `config-server` do launcher (DLL + `.cfg`). O gap cresceu: servidor está na 2.8.0, o código na **2.17.0**. O `.cfg` versionado já tem o `Enable Action Stance Swap` na seção nova — distribuí-lo junto é o que impede o reset dessa opção para quem atualizar.
 - **[P-11.1] (aberta 2026-07-15) 🟡 PARCIALMENTE RESOLVIDA (2026-08-01) — a velocidade fica presa devagar.** Sintoma: às vezes, andando normal (fora de postura), a velocidade **não volta ao máximo** e o personagem anda devagar sem motivo; **mirar (ADS)** ou trocar de postura e voltar destrava. ⚠️ **RELATO DE TERCEIRO — o dono do servidor NUNCA sofreu o sintoma** (esclarecido em 2026-08-01). As entradas anteriores desta memória atribuíam o relato, o workaround e o gatilho "voltar do agachado para em pé" ao usuário; **é repasse de outro jogador**, não observação direta. O requisito "cercar os dois regimes de caminhada (andar lento E andar normal)" veio da hipótese hoje refutada — tratar como pista, não como especificação.
   ⏸️ **Estado: aguardando reprodução.** O instrumento existe (v2.14.0, ver abaixo); **não investigar mais sem dado novo**. Quem reproduzir traz a leitura da tela/log e a pendência volta a andar. Para a publicação: **não é bloqueio** — é relato não confirmado, sem reprodução conhecida, com contorno trivial (mirar). Se for declarar na página do mod, declarar como possível limitação, não como bug confirmado.
 
@@ -776,6 +779,77 @@ dupla-compressão de campo dormente; sem sintoma, mas corrigido replicando o gua
 **Pendências:** **[P-11.5] 🟡 GATE F1+F3:** calibrar in-game o `ADS Waypoint Time` por stance + o
 `Compression`/`Pivot`; testar troca de arma no ADS-in, scope, Fika. · P-11.4 (baseline/diagnóstico F2). · **F2**
 (braço G36 — atenuar o eixo, após o diagnóstico). · P-11.1, P-11.2, P-10.x, subir 2.8.0 ao servidor.
+
+## 2026-08-02 02:35 (GMT-3) — Sessão 13: faxina do item 020, licença decidida e identidade TRL (v2.15.0 → v2.17.0)
+
+**Tema central:** executar as ondas 2 a 5 do plano de publicação — faxina de código, portão de licença e a
+renomeação para `TRL-StancesAndMobility` — e deployar para o dono do servidor validar em raid.
+
+**Decisões-chave:**
+
+- **Licença: FICA a CC BY-NC 4.0 do original** (decisão do usuário, com o trade-off na mesa). O print do
+  aceite do `shengzhanzhe` (2026-06-13) está transcrito em `publish/PERMISSION.md`. ⚠️ **O aceite cobre
+  publicar o fork com créditos — não menciona licença.** Manter a mesma licença **dispensa** qualquer
+  permissão adicional, e é por isso que a decisão é a mais conservadora do ponto de vista da autorização.
+  Risco declarado: o Forge §6.1 situa CC como apropriada a doc/arte, não a código.
+- **Item 020 (faxina) entregue na v2.15.0** — o achado com consequência real era o laço principal: sete
+  subsistemas em sequência sem proteção, então uma exceção no primeiro cancelava os seis seguintes **todo
+  frame** (o formato de falha "o mod parou no meio da raid"). Isolados um a um, com log limitado
+  (`ThrottledLog`, extraído do `FikaSyncManager` em vez de duplicado). Ver `backlog/020-.../05-asbuild.md`.
+- **v2.16.0: identidade renomeada** — GUID `com.trl.stancesandmobility`, plugin/assembly
+  `TRL-StancesAndMobility`, `.cfg` e prefixo de log. **Namespace (39 arquivos) e pasta do repo ficaram de
+  fora** — invisíveis ao jogador, e a pasta quebra caminhos de memória/backlog/grafos com sessão paralela
+  aberta. Ver `publish/RENAME.md`.
+- **v2.17.0: 5 valores calibrados promovidos a default de código** (transição de stance 0.8→0.6, ADS 1.0→0.9,
+  3 volumes 0.01→0.05). **Pergunta do usuário que gerou isto:** sincronizar o `.cfg` distribuído não basta —
+  quem baixa do Forge não recebe `.cfg` nenhum e cai nos defaults compilados. Mesmo movimento da v2.9.0.
+
+**Lições / hipóteses descartadas:**
+
+- **`try/catch` por subsistema quase virou alocação por frame.** A primeira versão usava um helper
+  `Tick(Action, string)`: 7 delegates por frame, um capturando `this`, no caminho mais quente do mod.
+  Reescrito na mão. **Regra:** method group em laço de frame é alocação, não açúcar sintático.
+- **A faxina de código morto criou código morto.** O `ThrottledLog` nasceu com `Initialize`/`Reset` que
+  ninguém chamava. Revisar o próprio diff com o mesmo critério do item pegou.
+- **Diferença de tamanho de `.cfg` não é entrada órfã.** Afirmei que o `.cfg` do repo era menor por ter menos
+  entradas órfãs — **falso**: os dois tinham 123 chaves, a diferença era comentário, e **7 valores** do
+  usuário estavam sendo sobrescritos por versões antigas (incluindo transição de stance 0.6→0.8, que se sente
+  na hora). **Comparar chave a chave antes de copiar `.cfg` por cima. Nunca inferir conteúdo pelo tamanho.**
+- **"18 seções" era erro meu**, repetido em 3 lugares. A `Action Stances` saiu na 2.13.0, mas a
+  `Weapon Inspection` entrou na 2.10.0 — **19 seções · 123 opções**, apurado do código. A ordem no F12 segue
+  a **execução**, não a posição no arquivo (Stance 0 na linha 652, Stamina Management na 834).
+- **Verificar string em DLL por `Select-String` dá falso negativo** — literais UTF-16 em offset ímpar somem.
+  Conferir os dois alinhamentos antes de concluir que algo não foi compilado.
+
+**Atividade cronológica:**
+
+1. Item 020 criado e executado via `/g-autodev` (5 frentes; 3 alvos da lista caíram por verificação: damping
+   já corrigido, comentário já correto, "reflexão por frame" resolve uma vez só) → **v2.15.0** (`b1172322`).
+2. `PROPRIEDADES.md`: cabeçalho, contagem e ordem apurados do código (`df339c9a`). Tabelas por seção seguem
+   da v2.5.0 — [P-12.3].
+3. Licença decidida + `publish/PERMISSION.md` e `publish/ASSETS.md` (`c6cdddd7`, `a7934d91`, `1c6f866e`).
+4. **v2.16.0** renomeação (`6e3ebce1`) → `.cfg` sincronizado com a calibração real (`90ca0aef`) →
+   **v2.17.0** defaults promovidos (`1fd6e91c`).
+5. **Deploy em `D:/SPT`:** pasta `TRL-StancesAndMobility/` criada com DLL + 6 assets, `.cfg` no
+   `BepInEx/config/`, e a pasta antiga `RealisticMobility/` **movida** para
+   `D:/SPT/_backup-RealisticMobility-2026-08-02/`. Confirmado: nenhuma DLL com o GUID antigo sobrou.
+
+**Pendências abertas nesta sessão:**
+
+- [P-13.1] 🔴 **Validar in-game a pilha 2.13.0→2.17.0** — 5 versões sem nenhuma raid, incluindo troca de
+  identidade. Conferir no F12: nome `TRL-StancesAndMobility` e **os valores do usuário** (não os defaults).
+- [P-13.2] 🟡 **Namespace `CameraRotationMod` → `TarkovRedLine.StancesAndMobility` (39 arquivos) e pasta do
+  repo `mods/stancesAndCameraPositionSPT4.0.11/` → `mods/TRL-StancesAndMobility/`.** Interno, invisível ao
+  jogador; a pasta exige checkout sem sessão paralela.
+- [P-13.3] 🔴 **O launcher precisa REMOVER `plugins/RealisticMobility/` ao atualizar, não só somar a pasta
+  nova** — senão o jogador roda dois plugins de postura juntos. É o único risco de dano real da 2.16.0.
+
+**Cross-refs:**
+
+- Fecha o item (a) de [P-12.2] (licença). Restam os assets — `publish/ASSETS.md` tem a tabela: **6 arquivos
+  usados pelo código**; os outros ~36 MB (5 capturas + 1 vídeo) não são carregados e não vão no pacote.
+- [P-11.1] segue congelada (relato de terceiro, instrumento entregue na 2.14.0).
+- Trabalho paralelo no mesmo checkout: `TRL-PvpMode` e `launcher` (ver `git log`).
 
 ## 2026-08-01 22:43 (GMT-3) — Sessão 12: v2.13.0 (debug de ADS-speed, F12 saneado) + harness de publicação
 
