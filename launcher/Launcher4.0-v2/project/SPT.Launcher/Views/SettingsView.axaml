@@ -45,6 +45,13 @@
                             <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=nav_launcher}" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
+                    <!-- Item 033: MODS & CONFIGS no menu (2º item) — padrão canônico da ProfileView/ModsConfigsView. -->
+                    <Button Classes="nav" Cursor="Hand" Command="{Binding OpenModsConfigsCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <Path Data="{StaticResource TrlIconMenu2}" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=nav_mods_configs}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
                     <Button Classes="nav active" Cursor="Hand">
                         <StackPanel Orientation="Horizontal" Spacing="10">
                             <Path Data="{StaticResource TrlIconSettings}" VerticalAlignment="Center"/>
@@ -58,12 +65,6 @@
                             <Path DockPanel.Dock="Right" Data="{StaticResource TrlIconExternalLink}" Width="12" Height="12" VerticalAlignment="Center" Margin="10,0,0,0"/>
                             <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=nav_support_kofi}" VerticalAlignment="Center"/>
                         </DockPanel>
-                    </Button>
-                    <Button Classes="nav" Cursor="Hand" ToolTip.Tip="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=under_construction}" IsEnabled="False" Opacity="0.5">
-                        <StackPanel Orientation="Horizontal" Spacing="10">
-                            <Path Data="{StaticResource TrlIconMenu2}" VerticalAlignment="Center"/>
-                            <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=nav_mod_list}" VerticalAlignment="Center"/>
-                        </StackPanel>
                     </Button>
                 </StackPanel>
 

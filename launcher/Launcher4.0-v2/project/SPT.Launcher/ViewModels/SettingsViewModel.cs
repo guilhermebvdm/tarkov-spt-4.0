@@ -180,6 +180,28 @@ namespace SPT.Launcher.ViewModels
             });
         }
 
+        /// <summary>
+        /// Item 033: abre a tela "Mods e Configs" pelo menu lateral (item canônico do SettingsView, que
+        /// antes tinha só um "Mod List" em construção). Espelha ProfileViewModel.OpenModsConfigsCommand —
+        /// desliga AllowSettings (a ModsConfigsView restaura ao sair). Desregistra o handler de fechamento
+        /// e persiste as configs antes de navegar (o cleanup que o GoBack faz, sem a lógica de reconexão).
+        /// </summary>
+        public void OpenModsConfigsCommand()
+        {
+            if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+            {
+                desktop.MainWindow.Closing -= MainWindow_Closing;
+            }
+
+            if (!LauncherSettingsProvider.Instance.SaveSettings())
+            {
+                SendNotification("", LocalizationProvider.Instance.failed_to_save_settings, NotificationType.Error);
+            }
+
+            LauncherSettingsProvider.Instance.AllowSettings = false;
+            NavigateTo(new ModsConfigsViewModel(HostScreen));
+        }
+
         public async Task CopyLogsToClipboard()
         {
             LogManager.Instance.Info("[Settings] Copying logs to clipboard ...");
