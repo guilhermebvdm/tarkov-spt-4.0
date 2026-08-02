@@ -128,12 +128,14 @@ namespace SPT.Launcher.ViewModels
 
         /// <summary>
         /// Navegação por item de MENU (comportamento "abas", não "voltar"): leva SEMPRE à tela do item
-        /// clicado, venha o usuário de onde vier, mantendo a pilha rasa. Volta até a home (<see
-        /// cref="ILauncherHome"/> — o Launcher/Profile) descartando o que estiver acima, e então empilha o
-        /// alvo. <paramref name="target"/> = null significa "ir à própria home" (fica só no Launcher).
-        /// Implementa a mesma regra de <see cref="Helpers.MenuNavigationPlan"/> (que a testa exaustivamente),
-        /// usando só os commands oficiais do Router. Home ausente (modo enxuto/pré-login) → degrada: navega
-        /// direto ao alvo, sem tocar na pilha.
+        /// clicado, venha o usuário de onde vier, mantendo a pilha rasa ([Launcher, Tela]). Resultado igual
+        /// ao <see cref="Helpers.MenuNavigationPlan"/> (que a testa exaustivamente). <paramref name="target"/>
+        /// = null significa "ir à própria home" (o Launcher/<see cref="ILauncherHome"/>).
+        ///
+        /// Para NÃO piscar o Launcher no meio da troca, a ordem importa: empilha o alvo PRIMEIRO (o topo vai
+        /// direto da tela atual para a clicada) e só então remove as telas intermediárias do MEIO da pilha —
+        /// remoção no meio não altera o topo visível, logo sem render intermediário. "Ir ao Launcher" (alvo
+        /// null) faz pop, pois aí a home É o destino. Home ausente (modo enxuto/pré-login) → degrada.
         /// </summary>
         public void NavigateMenu(ViewModelBase target)
         {
@@ -162,17 +164,26 @@ namespace SPT.Launcher.ViewModels
                     return;
                 }
 
-                // Volta até a home (nº fixo de pops — sem loop dependente de estado) descartando o que
-                // estiver acima dela; depois empilha o alvo. Se target == null, para na própria home.
-                int popCount = stack.Count - (homeIdx + 1);
-                for (int i = 0; i < popCount; i++)
-                {
-                    HostScreen.Router.NavigateBack.Execute();
-                }
-
                 if (resolved != null)
                 {
+                    // Empilha o alvo PRIMEIRO: o topo vai direto da tela atual para a clicada (transição
+                    // única, sem piscar o Launcher). Depois remove os intermediários entre a home e o alvo
+                    // — remoção no MEIO não mexe no topo (o alvo continua visível), então nada re-renderiza.
                     HostScreen.Router.Navigate.Execute(resolved);
+                    for (int i = stack.Count - 2; i > homeIdx; i--)
+                    {
+                        stack.RemoveAt(i);
+                    }
+                }
+                else
+                {
+                    // "Ir ao Launcher": a home É o destino, então exibi-la não é flash. Com a pilha já rasa
+                    // ([Launcher, Tela]) é um único pop direto ao destino.
+                    int popCount = stack.Count - (homeIdx + 1);
+                    for (int i = 0; i < popCount; i++)
+                    {
+                        HostScreen.Router.NavigateBack.Execute();
+                    }
                 }
             });
         }
