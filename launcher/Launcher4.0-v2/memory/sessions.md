@@ -35,3 +35,24 @@
 - **Diagnóstico do ".NET Desktop Runtime" (amigo do usuário):** o exe dele era framework-dependent (pequeno, pede runtime); o `9.0.14` da mensagem bate com o `runtimeconfig` do build. O single-file self-contained (145 MB) que o usuário publicou **não** tem esse problema. Resolvido passando o single-file. Causa raiz: o csproj não força `SelfContained` (ver P-1.6).
 - **Pendências de validação fechadas por uso:** a pedido do usuário, os gates de teste in-game dos itens entregues (001-025, 028) foram considerados **fechados por uso real** — launcher em produção há dias sem reports. Não houve pente-fino formal; qualquer bug futuro reabre o item pontual.
 - **Criada esta `memory/` do launcher** — antes o launcher não tinha memória de sessão como os mods; agora tem, no mesmo formato.
+
+## 2026-08-02 02:43 (GMT-3) — Sessão 2: doc de fluxo (AutoSync + "Verificar arquivos") e mapa do motor de sync
+
+**Tema central:** documentar em visão de produto como o cache 3D chega aos jogadores — o fluxo do AutoSync no servidor e o "Verificar arquivos" do launcher — como parte do rework do AutoSync (trabalho principal em `mods/TarkovRedLine4.0`).
+
+**Decisões-chave:**
+- **Criada a pasta `docs/` do launcher** com o primeiro doc: [docs/01-fluxo-autosync-e-verificar-arquivos.md](../docs/01-fluxo-autosync-e-verificar-arquivos.md) (commit `b73faa33`) — visão de produto (sem refs a código), 3 diagramas mermaid, tabela de arquivos gerados e critérios de aceite CA-A1..A7 (AutoSync) + CA-L1..L6 (launcher). Publicado também como artifact privado para visualização imediata.
+- Nenhum código do launcher foi tocado nesta sessão.
+
+**Lições / hipóteses descartadas:**
+- **Hipótese refutada:** "o hash do AutoSync (`ultimo_mod_hash.txt`) tem algum papel no launcher 2.0.0". Não tem — nenhum `.cs` do launcher o referencia; o launcher só consome o manifesto MD5 por arquivo gerado por `ModUpdater.cs:437` (`GenerateManifestAsync`), que **não é arquivo em disco**: vive em memória (`_manifestCache`) e regenera via `GET /launcher/mods/refresh` ou restart do servidor.
+- Não confundir os hashes homônimos: `manifest_hash.txt` (cliente, MD5 do manifesto inteiro — o skip de scan que ele habilitaria está **desativado por decisão**, `ProfileViewModel.cs:608`) ≠ o extinto `ultimo_mod_hash.txt` do AutoSync.
+- O cache 3D (`SPT/user/cache`) entra no manifesto pela varredura **genérica** do `mods_repo` — não há lógica dedicada de cache no launcher; e como `SPT/user/cache` não é `managedPath`, extras locais do jogador nunca são deletados pelo sync.
+
+**Atividade cronológica:**
+1. Agente Explore mapeou o motor de sync (`SyncPlanner`/`SyncEngine`/`SyncBaseline`/`SyncRuleResolver` + `ModUpdater` no server mod) — base factual do doc.
+2. Doc 01 escrito no padrão `NN-` com cabeçalho/histórico, commitado (`b73faa33`).
+3. Mermaid não renderizava no preview do editor (Antigravity) — resolvido com artifact + extensão `bierner.markdown-mermaid` instalada com aprovação do usuário.
+
+**Cross-refs:**
+- Trabalho principal desta sessão (rework do AutoSync-Cache v2): ver `mods/TarkovRedLine4.0/memory/sessions.md` 2026-08-02 (Sessão 1).
