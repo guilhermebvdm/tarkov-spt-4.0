@@ -55,11 +55,12 @@ namespace TRLDynamicSpawn.Components
         
         private IEnumerator FetchServerConfigAndStart()
         {
-            if (IsFikaClient())
+            if (FikaHelper.IsClient())
             {
                 Plugin.LogSource.LogInfo("[TRL-DynamicSpawn] Client peer detected. Spawning is managed by the host. Disabling manager loop.");
                 yield break;
             }
+
 
             try 
             {

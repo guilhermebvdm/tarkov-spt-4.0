@@ -347,8 +347,11 @@ namespace TRLDynamicSpawn.Patches
         [PatchPostfix]
         private static void PatchPostfix(BotsController __instance, int maxCount)
         {
+            if (FikaHelper.IsClient()) return;
+
             var gameWorld = Singleton<GameWorld>.Instance;
             if (gameWorld == null) return;
+
 
             var location = gameWorld.LocationId;
             if (string.IsNullOrEmpty(location)) return;
@@ -378,7 +381,9 @@ namespace TRLDynamicSpawn.Patches
         [PatchPrefix]
         private static bool PatchPrefix(BotWaveDataClass wave, ref System.Threading.Tasks.Task __result)
         {
+            if (FikaHelper.IsClient()) return true;
             if (TRLDynamicSpawn.Components.DynamicSpawnManager.IsGeneratingDynamicWave) return true; // Let our wave run!
+
             
             // Se for Scav comum ou PMC do vanilla, bloqueia 100% (inclusive no 1º minuto) para o DynamicSpawn controlar
             if (wave != null && (wave.WildSpawnType == WildSpawnType.assault || 
@@ -409,7 +414,9 @@ namespace TRLDynamicSpawn.Patches
         [PatchPrefix]
         private static bool PatchPrefix(BossLocationSpawn wave)
         {
+            if (FikaHelper.IsClient()) return true;
             if (wave == null || wave.BossName == null) return true;
+
 
             string name = wave.BossName.ToLower();
 
@@ -437,6 +444,52 @@ namespace TRLDynamicSpawn.Patches
                     }
                     return false;
                 }
+
+                // Lighthouse Rogue Zone Filter + Count Limiter
+                if (name == "exusec")
+                {
+                    var gameWorld = Comfort.Common.Singleton<GameWorld>.Instance;
+                    if (gameWorld != null && string.Equals(gameWorld.MainPlayer?.Location, "lighthouse", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // Zone filter: discard rogues not in the Treatment area
+                        if (elite.LighthouseRogueZoneFilter)
+                        {
+                            string bossZone = wave.BossZone ?? "";
+                            bool inAllowedZone = bossZone.Contains("Zone_TreatmentContainers")
+                                             || bossZone.Contains("Zone_TreatmentRocks")
+                                             || bossZone.Contains("Zone_TreatmentBeach");
+
+                            if (!inAllowedZone)
+                            {
+                                Plugin.LogSource.LogInfo($"[TRLDynamicSpawn] Rogue wave DISCARDED — zone '{bossZone}' not in Treatment area. Bot slot freed.");
+                                return false;
+                            }
+                        }
+
+                        // Count limiter: discard if alive rogues already hit the cap
+                        int maxRogues = elite.LighthouseRogueMaxCount;
+                        if (maxRogues > 0)
+                        {
+                            int aliveRogues = 0;
+                            var allPlayers = gameWorld.AllAlivePlayersList;
+                            if (allPlayers != null)
+                            {
+                                foreach (var p in allPlayers)
+                                {
+                                    if (p != null && p.IsAI && p.Profile?.Info?.Settings?.Role == WildSpawnType.exUsec)
+                                        aliveRogues++;
+                                }
+                            }
+
+                            if (aliveRogues >= maxRogues)
+                            {
+                                Plugin.LogSource.LogInfo($"[TRLDynamicSpawn] Rogue wave DISCARDED — cap reached ({aliveRogues}/{maxRogues}). Bot slot freed.");
+                                return false;
+                            }
+                        }
+                    }
+                }
+
 
                 if (elite.DisableVanillaRaiders && name == "pmcbot")
                 {
@@ -466,7 +519,10 @@ namespace TRLDynamicSpawn.Patches
         [PatchPrefix]
         private static bool PatchPrefix(BotSpawner __instance, BotZone botZone, BotCreationDataClass data, bool withCheckMinMax, bool newWave, ref List<ISpawnPoint> pointsToSpawn, bool forcedSpawn = false)
         {
+            if (FikaHelper.IsClient()) return true;
+
             // Bloqueio cirúrgico de Scavs comuns (assault / cursedAssault) vindos do motor nativo do jogo (vanilla/SPT)
+
             if (!TRLDynamicSpawn.Components.DynamicSpawnManager.IsGeneratingDynamicWave)
             {
                 WildSpawnType role = WildSpawnType.assault;

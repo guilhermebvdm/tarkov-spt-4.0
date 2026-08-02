@@ -116,8 +116,9 @@ namespace TRLDynamicSpawn.Components
                     }
 
                     // For Fika compatibility, we only run this on the Host or Solo
-                    if (!IsHostOrSolo())
+                    if (!FikaHelper.IsHostOrSolo())
                         continue;
+
 
                     // Se a otimização de bolha de spawn estiver desativada no cliente (F12), não fazemos o teletransporte/despawn
                     if (!TRLDynamicSpawn.Helpers.Settings.enableSpawnBubble.Value)

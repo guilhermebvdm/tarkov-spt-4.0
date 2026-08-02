@@ -18,7 +18,14 @@ namespace TRLDynamicSpawn.Patches
         private static void PatchPostfix(GameWorld __instance)
         {
             // Resolve real singletons for bot spawning
+            if (TRLDynamicSpawn.Helpers.FikaHelper.IsClient())
+            {
+                Plugin.LogSource.LogInfo("[TRL-DynamicSpawn] Guest client detected in FIKA coop. Skipping DynamicSpawnManager injection.");
+                return;
+            }
+
             if (!Singleton<IBotGame>.Instantiated)
+
             {
                 Plugin.LogSource.LogError("[TRL-DynamicSpawn] Cannot inject DynamicSpawnManager: IBotGame is not instantiated yet.");
                 return;

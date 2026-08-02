@@ -74,6 +74,8 @@ public record EliteConfig
     [JsonPropertyName("randomRogueGroupChance")] public int RandomRogueGroupChance { get; set; } = 10;
     [JsonPropertyName("disableVanillaRogues")] public bool DisableVanillaRogues { get; set; } = false;
     [JsonPropertyName("disableVanillaRaiders")] public bool DisableVanillaRaiders { get; set; } = false;
+    [JsonPropertyName("lighthouseRogueZoneFilter")] public bool LighthouseRogueZoneFilter { get; set; } = true;
+    [JsonPropertyName("lighthouseRogueMaxCount")] public int LighthouseRogueMaxCount { get; set; } = -1;
 
     [JsonPropertyName("bossKnight")] public EliteLocationInfo BossKnight { get; set; } = new()
     {
