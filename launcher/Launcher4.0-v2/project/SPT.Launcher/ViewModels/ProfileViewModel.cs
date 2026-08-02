@@ -549,6 +549,15 @@ namespace SPT.Launcher.ViewModels
                 ModsConfigCatalog.UpdateFromManifest(manifest["optionalMods"], manifest["optionalConfigs"], manifest["optionalModCategories"], manifest["optionalConfigCategories"]);
                 Dispatcher.UIThread.Post(RefreshModsConfigsSummary);
 
+                // Item 033: seed do disco — define o estado inicial dos mods opcionais NÃO-decididos ANTES do
+                // planner (CC-7), para que um mod que o jogador já usa não seja quarentenado por nascer
+                // desligado (D-6). Jogador com plugins → liga o instalado; sem plugins → liga as categorias.
+                var seededDefaults = OptionalModSeeder.ComputeSeed(
+                    allFiles, gamePath,
+                    new HashSet<string>(LauncherSettingsProvider.Instance.EnabledOptionals.Keys),
+                    ModsConfigCatalog.OptionalMods.ToDictionary(m => m.Id, m => m.Category));
+                LauncherSettingsProvider.Instance.SeedOptionalDefaults(seededDefaults);
+
                 // Se as hashes são iguais, já terminamos o trabalho inicial (que era só montar a UI)
                 if (skipFileScan)
                 {

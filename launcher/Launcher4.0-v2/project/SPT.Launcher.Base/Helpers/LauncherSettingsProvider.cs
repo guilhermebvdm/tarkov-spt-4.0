@@ -274,6 +274,25 @@ namespace SPT.Launcher.Helpers
             SaveSettings();
         }
 
+        /// <summary>
+        /// Item 033: semeia defaults dos mods opcionais no login — grava só ids AUSENTES de EnabledOptionals
+        /// (respeita decisões anteriores, CA-033.3) e salva UMA vez. Chamado pelo seed antes do sync.
+        /// </summary>
+        public void SeedOptionalDefaults(IReadOnlyDictionary<string, bool> seeded)
+        {
+            if (seeded == null) return;
+            bool changed = false;
+            foreach (var kvp in seeded)
+            {
+                if (!_enabledOptionals.ContainsKey(kvp.Key))
+                {
+                    _enabledOptionals[kvp.Key] = kvp.Value;
+                    changed = true;
+                }
+            }
+            if (changed) SaveSettings();
+        }
+
         // === Item 030: tela "Mods e Configs" — eixo de configs de performance + onboarding ===
 
         /// <summary>Item 030: itemId → enabled do eixo de configs de PERFORMANCE (espelha EnabledOptionals).</summary>
