@@ -6,7 +6,7 @@
     </PropertyGroup>
 
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-        <Exec Command="dotnet publish ../SPT.Launcher/SPT.Launcher.csproj -c Release -f net9.0 -r win-x64 /p:IncludeNativeLibrariesForSelfExtract=true -p:PublishSingleFile=true --self-contained false"/>
+        <Exec Command="dotnet publish ../SPT.Launcher/SPT.Launcher.csproj -c Release -f net9.0 -r win-x64 /p:IncludeNativeLibrariesForSelfExtract=true -p:PublishSingleFile=true --self-contained true"/>
         <Exec Command="pwsh -NoProfile -ExecutionPolicy Bypass ../build.ps1" WorkingDirectory="$(ProjectDir)" />
     </Target>
 
