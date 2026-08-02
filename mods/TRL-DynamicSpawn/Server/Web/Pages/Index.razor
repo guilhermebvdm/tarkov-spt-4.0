@@ -657,18 +657,7 @@ html, body {
                     
                     <div style="background:rgba(255, 215, 0, 0.08); border:1px solid rgba(255, 215, 0, 0.25); border-radius:4px; padding:12px; margin-bottom:16px; color:#e0e0e0; font-size:13px; display:flex; align-items:center; gap:10px;">
                         <span style="color:#ffd700; font-size:16px; font-weight:bold;">ℹ️</span>
-                        <span data-i18n="alert_extra_groups">Nota: Por padrão, Rogues e Raiders nativos do jogo (ex: Lighthouse) nascem normalmente. As opções abaixo ativam grupos EXTRAS pelo mapa.</span>
-                    </div>
-
-                    <div class="trl-form-grid" style="margin-bottom:16px;">
-                        <label class="trl-switch">
-                            <input type="checkbox" id="evt_disable_vanilla_rogues">
-                            <span data-i18n="disable_vanilla_rogues">Desativar Rogues Nativos da Lighthouse (Vanilla)</span>
-                        </label>
-                        <label class="trl-switch">
-                            <input type="checkbox" id="evt_disable_vanilla_raiders">
-                            <span data-i18n="disable_vanilla_raiders">Desativar Raiders Nativos (Vanilla)</span>
-                        </label>
+                        <span data-i18n="alert_extra_groups">Nota: As opções abaixo ativam invasões e grupos de reforço EXTRAS pelo mapa.</span>
                     </div>
 
                     <div class="trl-form-grid">
@@ -752,7 +741,9 @@ html, body {
             disable_bosses: "Desativar Todos os Bosses em Todos os Mapas", boss_open_zones: "Permitir Bosses em Qualquer Zona do Mapa",
             evt_raiders: "Raiders Aleatórios em Qualquer Mapa", evt_rogues: "Rogues Aleatórios em Qualquer Mapa",
             disable_vanilla_rogues: "Desativar Rogues Nativos da Lighthouse (Vanilla)", disable_vanilla_raiders: "Desativar Raiders Nativos (Vanilla)",
-            alert_extra_groups: "Nota: Por padrão, Rogues e Raiders nativos do jogo (ex: Lighthouse) nascem normalmente. As opções abaixo ativam grupos EXTRAS pelo mapa.",
+            alert_extra_groups: "Nota: As opções abaixo ativam invasões e grupos de reforço EXTRAS pelo mapa.",
+            alert_rogues_vanilla: "Nota: Por padrão, Rogues nativos da Lighthouse nascem na Unidade de Tratamento de Água. As configurações de chance de spawn abaixo são para grupos ADICIONAIS além do vanilla. Desative a opção abaixo se quiser liberar vagas de bots no limite de mapa (MaxBotCap).",
+            alert_raiders_vanilla: "Nota: Por padrão, Raiders nativos nascem em eventos (Reserve/Labs). As configurações de chance de spawn abaixo são para grupos ADICIONAIS além do vanilla. Desative a opção abaixo se quiser bloquear o spawn nativo.",
             custom_pmc: "Ativar Spawns Customizados de PMCs", custom_scav: "Ativar Spawns Customizados de Scavs", custom_sniper: "Ativar Spawns Customizados de Snipers", custom_player: "Ativar Spawns Customizados de Jogadores",
             opt_balanced: "Equilibrado (50% PMC / 50% Scav)", opt_pmc_war: "Guerra de PMCs (70% PMC / 30% Scav)", opt_scav_infestation: "Infestação de Scavs (20% PMC / 80% Scav)", opt_quiet_raid: "Raid Tranquilo (Baixa Densidade)", opt_warzone: "Zona de Guerra (Alta Densidade)", opt_random: "Aleatório por Match",
             sub_global_bosses: "CONTROLES GLOBAIS DE BOSSES", sub_boss_invasion: "SISTEMA DE INVASÃO DE BOSSES (BOSS INVASION)", enable_boss_invasion: "Ativar Sistema de Invasão de Bosses", invasion_map_chance: "CHANCE DE INVASÃO NO MAPA (%)", invasion_boss_chance: "CHANCE DE SPAWN DE CADA BOSS (%)", allowed_invasion_bosses: "BOSSES PERMITIDOS NA INVASÃO", allowed_invasion_maps: "MAPAS PERMITIDOS NA INVASÃO", sub_raiders_rogues: "GRUPOS DE RAIDERS E ROGUES ALEATÓRIOS", raider_chance: "CHANCE DE RAIDERS (%)", rogue_chance: "CHANCE DE ROGUES (%)",
@@ -789,7 +780,9 @@ html, body {
             disable_bosses: "Disable All Bosses on All Maps", boss_open_zones: "Allow Bosses in Any Map Zone",
             evt_raiders: "Random Raiders on Any Map", evt_rogues: "Random Rogues on Any Map",
             disable_vanilla_rogues: "Disable Native Lighthouse Rogues (Vanilla)", disable_vanilla_raiders: "Disable Native Raiders (Vanilla)",
-            alert_extra_groups: "Note: By default, native game Rogues and Raiders (e.g. Lighthouse) spawn normally. The options below enable EXTRA groups across the map.",
+            alert_extra_groups: "Note: The options below enable invasions and EXTRA reinforcement groups across the map.",
+            alert_rogues_vanilla: "Note: By default, native Lighthouse Rogues spawn at the Water Treatment Plant. The spawn chance settings below are for EXTRA groups in addition to vanilla. Disable the option below to free up bot slots on the map (MaxBotCap).",
+            alert_raiders_vanilla: "Note: By default, native Raiders spawn during map events (Reserve/Labs). The spawn chance settings below are for EXTRA groups in addition to vanilla. Disable the option below to block native spawns.",
             custom_pmc: "Enable Custom PMC Spawns", custom_scav: "Enable Custom Scav Spawns", custom_sniper: "Enable Custom Sniper Spawns", custom_player: "Enable Custom Player Spawns",
             opt_balanced: "Balanced (50% PMC / 50% Scav)", opt_pmc_war: "PMC War (70% PMC / 30% Scav)", opt_scav_infestation: "Scav Infestation (20% PMC / 80% Scav)", opt_quiet_raid: "Quiet Raid (Low Density)", opt_warzone: "Warzone (High Density)", opt_random: "Random per Match",
             sub_global_bosses: "GLOBAL BOSS CONTROLS", sub_boss_invasion: "BOSS INVASION SYSTEM", enable_boss_invasion: "Enable Boss Invasion System", invasion_map_chance: "MAP INVASION CHANCE (%)", invasion_boss_chance: "EACH BOSS SPAWN CHANCE (%)", allowed_invasion_bosses: "ALLOWED INVASION BOSSES", allowed_invasion_maps: "ALLOWED INVASION MAPS", sub_raiders_rogues: "RANDOM RAIDER & ROGUE GROUPS", raider_chance: "RAIDER SPAWN CHANCE (%)", rogue_chance: "ROGUE SPAWN CHANCE (%)",
@@ -1126,9 +1119,6 @@ html, body {
         document.getElementById("evt_rogues_enable").checked = !!elite.randomRogueGroup;
         setSliderVal("evt_rogues_chance", elite.randomRogueGroupChance ?? 10);
 
-        document.getElementById("evt_disable_vanilla_rogues").checked = !!elite.disableVanillaRogues;
-        document.getElementById("evt_disable_vanilla_raiders").checked = !!elite.disableVanillaRaiders;
-
         // 5. CUSTOM SPAWNS
         const cs = stateCurrent.customSpawnsConfig || {};
         document.getElementById("enableCustomPmcSpawns").checked = !!cs.enableCustomPmcSpawns;
@@ -1322,6 +1312,33 @@ html, body {
 
         container.innerHTML = `
             <div class="trl-h3" style="color:var(--trl-accent);">${botTitle.toUpperCase()}</div>
+            
+            ${botCat.prop === "exUsec" ? `
+            <div style="background:rgba(255, 215, 0, 0.08); border:1px solid rgba(255, 215, 0, 0.25); border-radius:4px; padding:12px; margin-bottom:16px; color:#e0e0e0; font-size:13px; display:flex; align-items:center; gap:10px;">
+                <span style="color:#ffd700; font-size:16px; font-weight:bold;">ℹ️</span>
+                <span data-i18n="alert_rogues_vanilla">Nota: Por padrão, Rogues nativos da Lighthouse nascem na fábrica de água. Desative a opção abaixo se quiser liberar vagas de bots no limite de mapa (MaxBotCap).</span>
+            </div>
+            <div class="trl-form-grid" style="margin-bottom:16px;">
+                <label class="trl-switch">
+                    <input type="checkbox" id="bc_disable_vanilla_rogues" ${stateCurrent.eliteConfig?.disableVanillaRogues ? 'checked' : ''}>
+                    <span data-i18n="disable_vanilla_rogues">Desativar Rogues Nativos da Lighthouse (Vanilla)</span>
+                </label>
+            </div>
+            ` : ''}
+
+            ${botCat.prop === "pmcBot" ? `
+            <div style="background:rgba(255, 215, 0, 0.08); border:1px solid rgba(255, 215, 0, 0.25); border-radius:4px; padding:12px; margin-bottom:16px; color:#e0e0e0; font-size:13px; display:flex; align-items:center; gap:10px;">
+                <span style="color:#ffd700; font-size:16px; font-weight:bold;">ℹ️</span>
+                <span data-i18n="alert_raiders_vanilla">Nota: Por padrão, Raiders nativos nascem em eventos (Reserve/Labs). Desative a opção abaixo se quiser bloquear o spawn nativo.</span>
+            </div>
+            <div class="trl-form-grid" style="margin-bottom:16px;">
+                <label class="trl-switch">
+                    <input type="checkbox" id="bc_disable_vanilla_raiders" ${stateCurrent.eliteConfig?.disableVanillaRaiders ? 'checked' : ''}>
+                    <span data-i18n="disable_vanilla_raiders">Desativar Raiders Nativos (Vanilla)</span>
+                </label>
+            </div>
+            ` : ''}
+
             <div class="trl-form-grid" style="margin-bottom:16px;">
                 <label class="trl-switch">
                     <input type="checkbox" id="bc_enable" ${bossInfo.enable !== false ? 'checked' : ''}>
@@ -1371,6 +1388,24 @@ html, body {
             ensureBossInfo(botCat.prop).enable = e.target.checked;
             markDirty(true);
         };
+
+        const disableVanillaRoguesEl = document.getElementById("bc_disable_vanilla_rogues");
+        if (disableVanillaRoguesEl) {
+            disableVanillaRoguesEl.onchange = (e) => {
+                if (!stateCurrent.eliteConfig) stateCurrent.eliteConfig = {};
+                stateCurrent.eliteConfig.disableVanillaRogues = e.target.checked;
+                markDirty(true);
+            };
+        }
+
+        const disableVanillaRaidersEl = document.getElementById("bc_disable_vanilla_raiders");
+        if (disableVanillaRaidersEl) {
+            disableVanillaRaidersEl.onchange = (e) => {
+                if (!stateCurrent.eliteConfig) stateCurrent.eliteConfig = {};
+                stateCurrent.eliteConfig.disableVanillaRaiders = e.target.checked;
+                markDirty(true);
+            };
+        }
 
         const followersEl = document.getElementById("bc_disable_followers");
         if (followersEl) {
@@ -1597,8 +1632,6 @@ html, body {
 
         stateCurrent.eliteConfig.randomRaiderGroup = document.getElementById("evt_raiders_enable").checked;
         stateCurrent.eliteConfig.randomRogueGroup = document.getElementById("evt_rogues_enable").checked;
-        stateCurrent.eliteConfig.disableVanillaRogues = document.getElementById("evt_disable_vanilla_rogues").checked;
-        stateCurrent.eliteConfig.disableVanillaRaiders = document.getElementById("evt_disable_vanilla_raiders").checked;
 
         if (!stateCurrent.customSpawnsConfig) stateCurrent.customSpawnsConfig = {};
         stateCurrent.customSpawnsConfig.enableCustomPmcSpawns = document.getElementById("enableCustomPmcSpawns").checked;
@@ -1652,8 +1685,6 @@ html, body {
         document.getElementById("evt_boss_invasion_enable").onchange = () => markDirty(true);
         document.getElementById("evt_raiders_enable").onchange = () => markDirty(true);
         document.getElementById("evt_rogues_enable").onchange = () => markDirty(true);
-        document.getElementById("evt_disable_vanilla_rogues").onchange = () => markDirty(true);
-        document.getElementById("evt_disable_vanilla_raiders").onchange = () => markDirty(true);
         document.getElementById("enableCustomPmcSpawns").onchange = () => markDirty(true);
         document.getElementById("enableCustomScavSpawns").onchange = () => markDirty(true);
         document.getElementById("enableCustomSniperSpawns").onchange = () => markDirty(true);
