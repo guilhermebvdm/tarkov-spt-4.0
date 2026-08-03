@@ -311,8 +311,13 @@ namespace TRL_SpeakFromTarkov.Network
                 remoteSpeakers[profileId] = speaker;
             }
 
-            // Ancoragem do alto-falante 3D na cabeça/corpo do jogador
-            var player = gameWorld.AllAlivePlayersList?.FirstOrDefault(p => p != null && p.ProfileId == profileId);
+            // Ancoragem do alto-falante 3D na cabeça/corpo do jogador (Nativo Tarkov + Fallback)
+            Player player = gameWorld.GetAlivePlayerByProfileID(profileId);
+            if (player == null && gameWorld.AllAlivePlayersList != null)
+            {
+                player = gameWorld.AllAlivePlayersList.FirstOrDefault(p => p != null && (p.ProfileId == profileId || (p.Profile != null && p.Profile.Id == profileId)));
+            }
+
             if (player != null)
             {
                 Transform targetBone = player.PlayerBones != null && player.PlayerBones.Head != null
@@ -332,6 +337,7 @@ namespace TRL_SpeakFromTarkov.Network
         {
             var go = new GameObject($"SftRemoteSpeaker_{profileId}");
             var speaker = go.AddComponent<RemoteSpeaker>();
+            speaker.TargetProfileId = profileId;
             speaker.Initialize(sampleRate, frameSize);
             return speaker;
         }

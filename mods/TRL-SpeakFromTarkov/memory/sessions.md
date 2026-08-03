@@ -1,8 +1,8 @@
 # TRL-SpeakFromTarkov — Memória de Sessões
 
 ## Snapshot Delta
-- **Versão:** 1.5.0 (SPT 4.0 / FIKA)
-- **Estado:** v1.5.0 compilada e commitada com 0 erros (`32533fd1`). Transmissão VOIP isolada no `Channel 1` com Magic Header `SFTV`, enquadramento DSP de 40ms (1.920 amostras @ 48kHz), Zero-Allocation Opus `ArrayPool` e higienização FMOD/NaN.
+- **Versão:** 1.5.1 (SPT 4.0 / FIKA)
+- **Estado:** v1.5.1 compilada e commitada com 0 erros. Correção de desync da ancoragem 3D de áudio em raids multiplayer (busca nativa via `GetAlivePlayerByProfileID` + re-ancoragem dinâmica em `Update` no `RemoteSpeaker`).
 - **Pendências:** 🟢 Nenhuma pendência blocker registrada.
 
 ---
@@ -33,6 +33,17 @@
 4. Refatoração v1.5.0: Magic Header `SFTV` no `SftAudioPacket.cs` e filtro de validação no `SftNetwork.cs`.
 5. Compilação via `dotnet build -c Release` concluída com **0 erros**.
 6. Git add, commit `32533fd1` e `git push origin main` executados com sucesso.
+
+---
+
+## 2026-08-02 — Sessão 3: v1.5.1 (Correção de Ancoragem 3D Posicional e Re-ancoragem Dinâmica)
+
+**Tema central:** Correção da anomalia de áudio posicional 3D em que vozes de todos os jogadores remotos eram emitidas a partir do mesmo ponto `(0, 0, 0)` no espaço 3D (saída concentrada no mesmo ponto/jogador).
+
+**Decisões-chave:**
+- **Busca Nativa por Perfil Tarkov:** Substituição de filtro manual `FirstOrDefault` em `AllAlivePlayersList` pelo método nativo do motor do Tarkov `Singleton<GameWorld>.Instance.GetAlivePlayerByProfileID(profileId)` no [SftNetwork.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded/Network/SftNetwork.cs).
+- **Re-ancoragem Dinâmica no RemoteSpeaker:** Implementado mecanismo de auto-recuperação em `RemoteSpeaker.Update` no [RemoteSpeaker.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded/Audio/RemoteSpeaker.cs) quando `transform.parent == null`. Caso o pacote de VOIP chegue antes do avatar do jogador remoto spawnar completamente na cena, o `RemoteSpeaker` tenta re-ancorar a cada frame e se prende à cabeça (`Head.Original`) assim que o boneco é instanciado, eliminando o acúmulo de vozes na origem `(0, 0, 0)`.
+- **Conformidade de Rede FIKA:** Validação e alinhamento do mod com o guia canônico `docs/technical/fika-packet-desync-prevention-plan.md` (`EnsurePacketsRegistered` pré-envio, ausência de `UnregisterPacket`, airbag `try-catch` em callbacks).
 
 **Pendências abertas nesta sessão:**
 - Nenhuma pendência blocker.
