@@ -44,3 +44,27 @@
    - Ativados os novos patches no `Awake()`, exposto `Plugin.Log` para os patches e adicionada a referência `SPT.Reflection.dll` no `.csproj`.
 4. **Validação de Build**:
    - Compilado `TRLFixes.csproj` (`TRL-Fixes.dll`) com **0 Erros e 0 Warnings**.
+
+---
+
+## 2026-08-03 — Sessão 4: Correção de AmbiguousMatchException nos Patches de Segurança
+
+**Tema central:** Raid de teste revelou que ambos os patches da Sessão 3 não carregavam (`Ambiguous match in Harmony patch`), pois os alvos tinham múltiplos overloads com o mesmo nome.
+
+**Diagnóstico (Log da Raid):**
+- `[Error : TRL Fixes] TRL-Fixes: Falha ao carregar FikaMainThreadUISafetyPatch: Ambiguous match in Harmony patch for Fika.Core.UI.FikaUIGlobals:ShowFikaMessage` — dois overloads: `ShowFikaMessage(this PreloaderUI, ...)` e `ShowFikaMessage(this ErrorScreen, ...)`.
+- `DynamicMaps.UI.ModdedMapScreen.OnRaidEnd` ainda gerava `NullReferenceException` pois o `PatchFinalizer` em `GameWorldOnDestroyPatch.PatchPrefix` não captura exceções internas de chamadas feitas dentro do método patchado.
+
+**Alterações Realizadas:**
+1. **`FikaMainThreadUISafetyPatch.cs`**:
+   - Substituído `AccessTools.Method(targetType, "ShowFikaMessage")` por `GetMethods().FirstOrDefault(m => m.GetParameters()[0].ParameterType == preloaderUIType)` para selecionar explicitamente o overload com `PreloaderUI` como primeiro parâmetro.
+   - Adicionado `using System.Linq` e logs de diagnóstico para falha de resolução.
+2. **`DynamicMapsSafetyPatch.cs`**:
+   - Redirecionado alvo primário para `DynamicMaps.UI.ModdedMapScreen.OnRaidEnd` diretamente via `AccessTools.TypeByName`.
+   - Mantido fallback para `GameWorldOnDestroyPatch.PatchPrefix` com warning explícito de que o fallback é ineficaz para suprimir `OnRaidEnd`.
+3. **Validação de Build**:
+   - Compilado `TRLFixes.csproj` com **0 Erros e 0 Warnings**.
+
+**Code Review (CR-01) — Achados em TRL-Fixes:**
+- 🟡 CR-01-04: Fallback do `DynamicMapsSafetyPatch` retorna comportamento ineficaz se `ModdedMapScreen` não existir — considerar retornar `null` em vez de fallback enganoso.
+- 🟢 CR-01-05: `AccessTools.TypeByName("EFT.UI.PreloaderUI")` pode ser substituído por `typeof(PreloaderUI)` para segurança de compilação.

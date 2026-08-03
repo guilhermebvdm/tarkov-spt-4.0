@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Reflection;
 using Comfort.Common;
 using EFT;
@@ -49,7 +50,7 @@ internal static class Medroso
     /// <summary>Reseta o cooldown entre raids (estado não vaza p/ a próxima).</summary>
     internal static void ResetRaid() => _cooldownUntil = 0f;
 
-    private static MethodInfo _addTremorMethod;
+    private static MethodInfo? _addTremorMethod;
 
     /// <summary>Aplica o tremor se: perk on + Scav local + fora do cooldown + HC disponível.</summary>
     private static void Trigger()
@@ -76,12 +77,17 @@ internal static class Medroso
             if (_addTremorMethod == null)
             {
                 var nativeTremorType = ActiveHealthController.GClass3008.GClass3019_0.Tremor.GetType();
+                // GetMethod("AddEffect") lança AmbiguousMatchException porque GClass3009 (classe pai) também
+                // tem um AddEffect(T effect) não-genérico. GetMethods() filtra pelo método genérico com 6 params.
                 _addTremorMethod = typeof(ActiveHealthController)
-                    .GetMethod(nameof(ActiveHealthController.AddEffect))
+                    .GetMethods(BindingFlags.Public | BindingFlags.Instance)
+                    .FirstOrDefault(m => m.Name == nameof(ActiveHealthController.AddEffect)
+                                        && m.IsGenericMethodDefinition
+                                        && m.GetParameters().Length == 6)
                     ?.MakeGenericMethod(nativeTremorType);
             }
 
-            _addTremorMethod?.Invoke(hc, new object[] { EBodyPart.Head, 0.1f, dur, 1.5f, null, null });
+            _addTremorMethod?.Invoke(hc, new object?[] { EBodyPart.Head, (float?)0.1f, (float?)dur, (float?)1.5f, null, null });
             // CR#7 (082): o AddEffect NÃO deduplica efeitos que implementam GInterface331 (cria nova instância).
             // O cooldown é a única trava — então nunca pode ser MENOR que a duração, senão o Tremor EMPILHA.
             _cooldownUntil = Time.time + Mathf.Max(PerksConfig.MedrosoCooldown?.Value ?? 8f, dur);
