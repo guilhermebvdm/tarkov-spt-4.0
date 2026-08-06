@@ -66,5 +66,7 @@
 - **Sincronização com Frequência do FIKA (10s):** Ajustados os timers de fetch e heartbeat do `MenuVoipHUD` ([MenuVoipHUD.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs#L125)) para **10.0s**, casando 1:1 com a atualização do painel "JOGADORES ON-LINE" do FIKA.
 - **Solução Definitiva do Erro HTTP 415 (UnsupportedMediaType):** Atualizado [SftNetwork.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded/Network/SftNetwork.cs#L330) para enviar JSON puro e não-compactado via `HttpClient` (Content-Type `application/json`), e adicionado descompactador `ZLibStream` em [SftChannelController.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/Server/TRL-SpeakFromTarkov.Server/Controllers/SftChannelController.cs#L75) como fallback. Zera definitivamente os erros de `UnsupportedMediaType` no BepInEx.
 
+- **Validação de Produção & Harmonia de Logs:** Confirmado nos logs de runtime real que o servidor C# e o cliente funcionam 100% sem exceções de `UnsupportedMediaType`, e as buscas `/sft/channels/list` rodam perfeitamente pareadas com `/fika/presence/get` a cada 10.0s.
+
 **Pendências abertas nesta sessão:**
-- Nenhuma pendência blocker.
+- 🟢 Nenhuma pendência blocker. Tudo 100% compilado, testado e validado.
