@@ -40,6 +40,7 @@ namespace TRL_SpeakFromTarkov.Server.Controllers
 
     [ApiController]
     [Route("sft/channels")]
+    [Consumes("application/json", "text/plain", "application/octet-stream")]
     public class SftChannelController(SptWebSocketConnectionHandler webSocketHandler) : ControllerBase
     {
         private static readonly ConcurrentDictionary<int, SftMenuChannelDto> _channels = new ConcurrentDictionary<int, SftMenuChannelDto>();

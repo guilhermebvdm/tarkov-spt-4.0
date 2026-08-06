@@ -64,7 +64,7 @@
 - **Code Review:** Executada revisão em 6 categorias × 4 impactos com aprovação 100% (0 bloqueadores).
 - **Debounce Anti-Spam Global (0.8s):** Aplicada trava de 0.8s no `BroadcastChannelAnnouncement` ([SftNetwork.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded/Network/SftNetwork.cs#L290)) para todas as ações, zerando requisições multiplicadas no mesmo milissegundo.
 - **Sincronização com Frequência do FIKA (10s):** Ajustados os timers de fetch e heartbeat do `MenuVoipHUD` ([MenuVoipHUD.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs#L125)) para **10.0s**, casando 1:1 com a atualização do painel "JOGADORES ON-LINE" do FIKA.
-- **Correção de Erro HTTP 415 (UnsupportedMediaType) & Crash de Startup:** Removido o coringa corrompido `*/*` do atributo `Consumes` em [SftChannelController.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/Server/TRL-SpeakFromTarkov.Server/Controllers/SftChannelController.cs#L40) (que não é suportado pelo motor do ASP.NET Core), mantendo o leitor de fallback de `Request.Body` bruto. O servidor SPT iniciou 100% limpo sem exceções.
+- **Correção de Erro HTTP 415 (UnsupportedMediaType):** Adicionados os tipos de mídia concretos `[Consumes("application/json", "text/plain", "application/octet-stream")]` em [SftChannelController.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/Server/TRL-SpeakFromTarkov.Server/Controllers/SftChannelController.cs#L40). Isso força o ASP.NET Core a aceitar requisições do `RequestHandler.PostJson` enviadas como `text/plain` ou `application/octet-stream` sem rejeição de mídia.
 
 **Pendências abertas nesta sessão:**
 - Nenhuma pendência blocker.
