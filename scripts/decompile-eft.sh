@@ -69,7 +69,7 @@ echo "  sha256=${DLL_SHA:0:16}… buildGuid=${BUILD_GUID:-?} eft=$EFT_VERSION sp
 # ── build do harness ──────────────────────────────────────────────────────────
 echo "▶ compilando o harness…"
 dotnet build "$HARNESS/DecompileEft.csproj" -c Release -v quiet --nologo >/dev/null
-HARNESS_DLL="$HARNESS/bin/Release/net10.0/DecompileEft.dll"
+HARNESS_DLL="$HARNESS/bin/Release/net9.0/DecompileEft.dll"
 [ -f "$HARNESS_DLL" ] || { echo "❌ harness não compilou: $HARNESS_DLL"; exit 1; }
 
 # ── geração em TEMP (rede de segurança) ───────────────────────────────────────

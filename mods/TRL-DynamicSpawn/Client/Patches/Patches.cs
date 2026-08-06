@@ -671,9 +671,19 @@ namespace TRLDynamicSpawn.Patches
                     maxDist = mapSettings.SpawnBubbleDistance;
                 }
 
+                bool isSniperBot = SpawnPointHelper.IsSniperRole(botRole);
+
                 foreach (var checkPoint in allPoints)
                 {
                     if (checkPoint == null) continue;
+
+                    bool isSniperPoint = SpawnPointHelper.IsSniperSpawnPoint(checkPoint, botZone);
+
+                    // Regra Estrita Bilateral de Sniper:
+                    // 1. Bots não-sniper NUNCA usam pontos de sniper.
+                    // 2. Bots sniper NUNCA usam pontos normais.
+                    if (!isSniperBot && isSniperPoint) continue;
+                    if (isSniperBot && !isSniperPoint) continue;
 
                     bool insideBubble = true;
                     bool outsideSafe = true;

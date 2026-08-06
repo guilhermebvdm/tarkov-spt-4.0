@@ -671,8 +671,8 @@ html, body {
                     <span class="trl-screen-bar__title" data-i18n="title_difficulty">DISTRIBUIÇÃO DE DIFICULDADE DA IA</span>
                 </div>
                 <div class="trl-panel__body">
-                    <div style="background:rgba(255, 215, 0, 0.08); border:1px solid rgba(255, 215, 0, 0.25); border-radius:4px; padding:12px; margin-bottom:20px; color:#e0e0e0; font-size:13px; display:flex; align-items:center; gap:10px;">
-                        <span style="color:#ffd700; font-size:16px; font-weight:bold;">ℹ️</span>
+                    <div style="background:rgba(255, 215, 0, 0.08); border:1px solid rgba(255, 215, 0, 0.25); border-radius:4px; padding:12px; margin-bottom:20px; color:#e0e0e0; font-size:13px; display:flex; align-items:flex-start; gap:8px;">
+                        <svg style="width:14px;height:14px;flex-shrink:0;margin-top:1px;" viewBox="0 0 16 16" fill="none" stroke="var(--trl-accent)" stroke-width="1.5" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><line x1="8" y1="5" x2="8" y2="8.5"/><line x1="8" y1="10.5" x2="8" y2="11"/></svg>
                         <span data-i18n="alert_sain_diff_note">Nota: Se o mod SAIN estiver instalado, as configurações de dificuldade abaixo serão totalmente ignoradas (o SAIN prevalecerá no controle da IA).</span>
                     </div>
                     <div id="diffConfigContainer"></div>
@@ -739,8 +739,8 @@ html, body {
 
                     <div class="trl-h3" data-i18n="sub_raiders_rogues">GRUPOS DE RAIDERS E ROGUES ALEATÓRIOS</div>
                     
-                    <div style="background:rgba(255, 215, 0, 0.08); border:1px solid rgba(255, 215, 0, 0.25); border-radius:4px; padding:12px; margin-bottom:16px; color:#e0e0e0; font-size:13px; display:flex; align-items:center; gap:10px;">
-                        <span style="color:#ffd700; font-size:16px; font-weight:bold;">ℹ️</span>
+                    <div style="background:rgba(255, 215, 0, 0.08); border:1px solid rgba(255, 215, 0, 0.25); border-radius:4px; padding:12px; margin-bottom:16px; color:#e0e0e0; font-size:13px; display:flex; align-items:flex-start; gap:8px;">
+                        <svg style="width:14px;height:14px;flex-shrink:0;margin-top:1px;" viewBox="0 0 16 16" fill="none" stroke="var(--trl-accent)" stroke-width="1.5" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><line x1="8" y1="5" x2="8" y2="8.5"/><line x1="8" y1="10.5" x2="8" y2="11"/></svg>
                         <span data-i18n="alert_extra_groups">Nota: As opções abaixo ativam invasões e grupos de reforço EXTRAS pelo mapa.</span>
                     </div>
 
@@ -784,9 +784,9 @@ html, body {
                     <span class="trl-screen-bar__title" data-i18n="title_custom">SPAWNPOINTS ADICIONAIS E COORDENADAS DO MOAR</span>
                 </div>
                 <div class="trl-panel__body">
-                    <div style="background:rgba(255, 215, 0, 0.08); border:1px solid rgba(255, 215, 0, 0.25); border-radius:4px; padding:12px; margin-bottom:20px; color:#e0e0e0; font-size:13px; display:flex; align-items:center; gap:10px;">
-                        <span style="color:#ffd700; font-size:16px; font-weight:bold;">ℹ️</span>
-                        <span data-i18n="alert_custom_spawns_note">Nota: Ao ativar as opções abaixo, o mod injetará centenas de pontos de spawn adicionais (herdados do sistema MOAR) espalhados por todos os mapas. Isso expande as localizaciones onde bots, PMCs e Snipers podem nascer.</span>
+                    <div style="background:rgba(255, 215, 0, 0.08); border:1px solid rgba(255, 215, 0, 0.25); border-radius:4px; padding:12px; margin-bottom:20px; color:#e0e0e0; font-size:13px; display:flex; align-items:flex-start; gap:8px;">
+                        <svg style="width:14px;height:14px;flex-shrink:0;margin-top:1px;" viewBox="0 0 16 16" fill="none" stroke="var(--trl-accent)" stroke-width="1.5" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><line x1="8" y1="5" x2="8" y2="8.5"/><line x1="8" y1="10.5" x2="8" y2="11"/></svg>
+                        <span data-i18n="alert_custom_spawns_note">Nota: Ao ativar as opções abaixo, o mod injetará centenas de pontos de spawn adicionais (herdados do sistema MOAR) espalhados por todos os mapas. Isso expande as localizações onde bots, PMCs e Snipers podem nascer.</span>
                     </div>
 
                     <div class="trl-form-grid" style="margin-bottom:16px;">
@@ -1589,34 +1589,34 @@ html, body {
             ${botCat.prop === "exUsec" ? `
             <div id="bc_rogues_alert_top" style="background:rgba(255, 215, 0, 0.08); border:1px solid rgba(255, 215, 0, 0.25); border-radius:4px; padding:12px; margin-bottom:16px; color:#e0e0e0; font-size:13px; display:flex; align-items:flex-start; gap:8px;">
                 <svg style="width:14px;height:14px;flex-shrink:0;margin-top:1px;" viewBox="0 0 16 16" fill="none" stroke="var(--trl-accent)" stroke-width="1.5" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><line x1="8" y1="5" x2="8" y2="8.5"/><line x1="8" y1="10.5" x2="8" y2="11"/></svg>
-                <span data-i18n="alert_rogues_vanilla">Nota: Por padrão, Rogues nativos da Lighthouse nascem na Unidade de Tratamento de Água. As configurações de chance de spawn abaixo são para grupos ADICIONAIS além do vanilla. Desative a opção abaixo se quiser liberar vagas de bots no limite de mapa (MaxBotCap).</span>
+                <span data-i18n="alert_rogues_vanilla">${t('alert_rogues_vanilla')}</span>
             </div>
             <div class="trl-form-grid" style="margin-bottom:16px;">
                 <label class="trl-switch">
                     <input type="checkbox" id="bc_disable_vanilla_rogues" ${stateCurrent.eliteConfig?.disableVanillaRogues ? 'checked' : ''}>
-                    <span data-i18n="disable_vanilla_rogues">Desativar Rogues Nativos da Lighthouse (Vanilla)</span>
+                    <span data-i18n="disable_vanilla_rogues">${t('disable_vanilla_rogues')}</span>
                 </label>
             </div>
 
             <div class="trl-divider"></div>
             <div class="trl-h3" style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
                 <svg style="width:13px;height:13px;flex-shrink:0;" viewBox="0 0 16 16" fill="none" stroke="var(--trl-accent)" stroke-width="1.5"><path d="M8 2L2 6v8h4v-4h4v4h4V6L8 2z"/></svg>
-                <span data-i18n="lh_rogue_section_title" style="color:var(--trl-accent);font-size:11px;">CONFIGURAÇÕES ESPECIAIS DE ROGUES — LIGHTHOUSE</span>
+                <span data-i18n="lh_rogue_section_title" style="color:var(--trl-accent);font-size:11px;">${t('lh_rogue_section_title')}</span>
             </div>
             <div class="trl-card" style="background:rgba(255,215,0,0.04);border:1px solid rgba(255,215,0,0.15);border-radius:6px;padding:14px 16px;margin-bottom:14px;">
                 <div class="trl-form-grid" style="margin-bottom:10px;">
                     <label class="trl-switch">
                         <input type="checkbox" id="bc_lh_rogue_zone_filter" ${stateCurrent.eliteConfig?.lighthouseRogueZoneFilter !== false ? 'checked' : ''}>
-                        <span data-i18n="lh_rogue_zone_filter">Filtrar Rogues fora da Área de Tratamento</span>
+                        <span data-i18n="lh_rogue_zone_filter">${t('lh_rogue_zone_filter')}</span>
                     </label>
                 </div>
                 <div style="font-size:11px;color:var(--trl-muted);line-height:1.5;margin-bottom:12px;" data-i18n="lh_rogue_zone_filter_hint">
-                    Rogues vanilla que tentem spawnar em Zone_Blockpost, Zone_RoofRocks, Zone_RoofContainers, Zone_RoofBeach ou Zone_Hellicopter serão descartados (não realocados), liberando slots para PMC e Scav.
+                    ${t('lh_rogue_zone_filter_hint')}
                 </div>
                 <div class="trl-divider" style="margin:10px 0;"></div>
                 <div class="trl-field">
                     <label class="trl-field__label">
-                        <span data-i18n="lh_rogue_max_count">MÁXIMO DE ROGUES SIMULTÂNEOS (-1 = sem limite)</span>
+                        <span data-i18n="lh_rogue_max_count">${t('lh_rogue_max_count')}</span>
                         <span id="val_bc_lh_rogue_max" class="trl-slider-val">${(stateCurrent.eliteConfig?.lighthouseRogueMaxCount ?? -1) === -1 ? t('no_limit') : stateCurrent.eliteConfig?.lighthouseRogueMaxCount}</span>
                     </label>
                     <input type="range" id="bc_lh_rogue_max" class="trl-slider" min="-1" max="15" value="${stateCurrent.eliteConfig?.lighthouseRogueMaxCount ?? -1}">
@@ -1629,12 +1629,12 @@ html, body {
             ${botCat.prop === "pmcBot" ? `
             <div id="bc_raiders_alert_top" style="background:rgba(255, 215, 0, 0.08); border:1px solid rgba(255, 215, 0, 0.25); border-radius:4px; padding:12px; margin-bottom:16px; color:#e0e0e0; font-size:13px; display:flex; align-items:flex-start; gap:8px;">
                 <svg style="width:14px;height:14px;flex-shrink:0;margin-top:1px;" viewBox="0 0 16 16" fill="none" stroke="var(--trl-accent)" stroke-width="1.5" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><line x1="8" y1="5" x2="8" y2="8.5"/><line x1="8" y1="10.5" x2="8" y2="11"/></svg>
-                <span data-i18n="alert_raiders_vanilla">Nota: Por padrão, Raiders nativos nascem em eventos (Reserve/Labs). As configurações de chance de spawn abaixo são para grupos ADICIONAIS além do vanilla. Desative a opção abaixo se quiser bloquear o spawn nativo.</span>
+                <span data-i18n="alert_raiders_vanilla">${t('alert_raiders_vanilla')}</span>
             </div>
             <div class="trl-form-grid" style="margin-bottom:16px;">
                 <label class="trl-switch">
                     <input type="checkbox" id="bc_disable_vanilla_raiders" ${stateCurrent.eliteConfig?.disableVanillaRaiders ? 'checked' : ''}>
-                    <span data-i18n="disable_vanilla_raiders">Desativar Raiders Nativos (Vanilla)</span>
+                    <span data-i18n="disable_vanilla_raiders">${t('disable_vanilla_raiders')}</span>
                 </label>
             </div>
             ` : ''}

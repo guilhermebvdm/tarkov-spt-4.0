@@ -41,14 +41,17 @@ namespace TRLDynamicSpawn.Helpers
             };
         }
 
-        public static BotZone GetRandomZone(BotSpawner botSpawner)
+        public static BotZone GetRandomZone(BotSpawner botSpawner, bool allowSnipeZone = false)
         {
             if (botSpawner == null) return null;
             var zones = LocationScene.GetAllObjects<BotZone>();
-            if (zones != null && zones.ToArray().Length > 0)
+            if (zones != null)
             {
-                var zonesArray = zones.ToArray();
-                return zonesArray[UnityEngine.Random.Range(0, zonesArray.Length)];
+                var filtered = zones.Where(z => z != null && (allowSnipeZone || !SpawnPointHelper.IsSniperZone(z))).ToArray();
+                if (filtered.Length > 0)
+                {
+                    return filtered[UnityEngine.Random.Range(0, filtered.Length)];
+                }
             }
             return null;
         }

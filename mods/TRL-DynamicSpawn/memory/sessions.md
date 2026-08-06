@@ -52,6 +52,19 @@ Memória cronológica de sessões de trabalho (timestamps em GMT-3). Cada entrad
 
 ## Histórico de Sessões
 
+### 2026-08-06 — Restrição Estrita de ISpawnPoints para Sniper Scavs e Melhorias Visuais/I18N na Web UI
+
+- **Restrição Estrita Bilateral de `ISpawnPoint`s para Sniper Scavs**:
+  - Criado `SpawnPointHelper.cs` com métodos `IsSniperRole`, `IsSniperZone` e `IsSniperSpawnPoint`.
+  - Atualizado `Methods.GetRandomZone(botSpawner, allowSnipeZone)` para evitar o sorteio de `Zone_SniperPeak` em fallbacks de Scavs/PMCs comuns.
+  - Atualizado `Patches.cs` (`TryToSpawnInZoneAndDelayPatch`) e `BotDespawnManager.cs` (`GetValidTeleportPoint`) para filtrar bidirecionalmente bots terrestres em pontos de sniper e sniper bots em pontos terrestres.
+  - Resolvido o erro `Bot creation failed even after fallback for assault in zone Zone_SniperPeak`.
+- **Melhorias Visuais e I18N na Web UI (`Index.razor`)**:
+  - Substituído o emoji `ℹ️` pelo ícone circular SVG `ⓘ` (TRL Design System) nas notas de alerta das seções `AI DIFFICULTY`, `EVENTS & INVASIONS` e `ADDITIONAL SPAWNPOINTS`.
+  - Corrigidas as strings estáticas em português nos templates de `BOTS/RAIDERS` e `BOTS/ROGUES` em `Index.razor` (`renderActiveBossConfig`), viabilizando a tradução dinâmica ao alternar para `EN-US`.
+- **Validação de Build**:
+  - `TRL-DynamicSpawn-Client.csproj` e `TRL-DynamicSpawn-Server.csproj` compilados com **0 Erros**. Binários atualizados nos diretórios de plugins/mods do SPT.
+
 ### 2026-08-05 — Suporte a Copiar Mapa, Referência Imutável config.default.json, Modal do Default e Remoção do BotMountPatch
 
 - **Remoção do `BotMountWeaponFixPatch` de TRL-DynamicSpawn**:

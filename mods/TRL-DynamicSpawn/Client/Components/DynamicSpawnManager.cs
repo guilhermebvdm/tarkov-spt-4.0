@@ -726,13 +726,13 @@ namespace TRLDynamicSpawn.Components
 
                 if (selectedZone == null)
                 {
-                    if (gData.Role == WildSpawnType.marksman)
+                    if (SpawnPointHelper.IsSniperRole(gData.Role))
                     {
-                        var snipeZones = LocationScene.GetAllObjects<BotZone>().Where(z => z.SnipeZone).ToList();
+                        var snipeZones = LocationScene.GetAllObjects<BotZone>().Where(z => z != null && SpawnPointHelper.IsSniperZone(z)).ToList();
                         var validSnipeZones = snipeZones.Where(z => 
                         {
                             var botsInZone = _botsController.Bots.GetListByZone(z);
-                            return botsInZone == null || !botsInZone.Any(b => b.Profile.Info.Settings.Role == WildSpawnType.marksman && b.HealthController.IsAlive);
+                            return botsInZone == null || !botsInZone.Any(b => SpawnPointHelper.IsSniperRole(b.Profile.Info.Settings.Role) && b.HealthController.IsAlive);
                         }).ToList();
 
                         if (validSnipeZones.Count > 0)
@@ -742,7 +742,7 @@ namespace TRLDynamicSpawn.Components
                     }
                     else
                     {
-                        var nonSnipeZones = LocationScene.GetAllObjects<BotZone>().Where(z => !z.SnipeZone).ToList();
+                        var nonSnipeZones = LocationScene.GetAllObjects<BotZone>().Where(z => z != null && !SpawnPointHelper.IsSniperZone(z)).ToList();
                         float maxDistBuffer = 300f + 50f; // Bubble default + margem (REDUZIDO de 250 para 50 para evitar zonas fora da bolha)
                         var mapSettings = MapNameHelper.GetMapSettings(_serverConfig, mapName);
                         if (mapSettings != null)
@@ -812,7 +812,7 @@ namespace TRLDynamicSpawn.Components
                         }
                         else
                         {
-                            selectedZone = TRLDynamicSpawn.Helpers.Methods.GetRandomZone(_botsController.BotSpawner);
+                            selectedZone = TRLDynamicSpawn.Helpers.Methods.GetRandomZone(_botsController.BotSpawner, SpawnPointHelper.IsSniperRole(gData.Role));
                             _lastSelectedZone = selectedZone;
                         }
                     }
