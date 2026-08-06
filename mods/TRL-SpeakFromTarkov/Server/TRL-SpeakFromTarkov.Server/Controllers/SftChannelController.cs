@@ -3,9 +3,19 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
+using SPTarkov.Server.Core.Servers.Ws;
+using SPTarkov.Server.Core.Models.Eft.Ws;
 
 namespace TRL_SpeakFromTarkov.Server.Controllers
 {
+    public record SftWsChannelEvent : WsNotificationEvent
+    {
+        public SftWsChannelEvent()
+        {
+            EventType = (NotificationEventType)999;
+        }
+    }
+
     public class SftMenuChannelDto
     {
         public int channelId { get; set; }
@@ -29,7 +39,7 @@ namespace TRL_SpeakFromTarkov.Server.Controllers
 
     [ApiController]
     [Route("sft/channels")]
-    public class SftChannelController : ControllerBase
+    public class SftChannelController(SptWebSocketConnectionHandler webSocketHandler) : ControllerBase
     {
         private static readonly ConcurrentDictionary<int, SftMenuChannelDto> _channels = new ConcurrentDictionary<int, SftMenuChannelDto>();
 
@@ -38,11 +48,20 @@ namespace TRL_SpeakFromTarkov.Server.Controllers
             long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             foreach (var kvp in _channels.ToArray())
             {
-                if (now - kvp.Value.lastSeen > 20000) // Expirar salas sem heartbeat > 20s
+                if (now - kvp.Value.lastSeen > 30000) // Expirar salas sem heartbeat > 30s
                 {
                     _channels.TryRemove(kvp.Key, out _);
                 }
             }
+        }
+
+        private void NotifyClientsWebSocket()
+        {
+            try
+            {
+                webSocketHandler?.SendMessageToAll(new SftWsChannelEvent());
+            }
+            catch { }
         }
 
         [HttpGet("list")]
@@ -99,6 +118,7 @@ namespace TRL_SpeakFromTarkov.Server.Controllers
             }
 
             CleanupStaleChannels();
+            NotifyClientsWebSocket();
             return Ok(new { status = "OK" });
         }
     }

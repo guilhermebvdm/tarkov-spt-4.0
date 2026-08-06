@@ -284,10 +284,19 @@ namespace TRL_SpeakFromTarkov.Network
             }
         }
 
+        private static float _lastAnnounceTime = 0f;
+
         public static void BroadcastChannelAnnouncement(byte channelId, string channelName, string hostProfileId, string hostNickname, byte action, string targetProfileId = "")
         {
             try
             {
+                // Debounce Anti-Spam: ignora chamadas repetidas em curto intervalo (< 0.8s) para qualquer ação
+                if (Time.time - _lastAnnounceTime < 0.8f)
+                {
+                    return;
+                }
+                _lastAnnounceTime = Time.time;
+
                 var packet = new SftChannelAnnouncementPacket
                 {
                     ChannelId = channelId,

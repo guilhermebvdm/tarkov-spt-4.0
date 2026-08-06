@@ -62,6 +62,7 @@
 - **Migração do Mod de Servidor para C# (SPT 4.0):** Implementado o Mod de Servidor C# em [SftChannelController.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/Server/TRL-SpeakFromTarkov.Server/Controllers/SftChannelController.cs) herda de `ControllerBase` (`[ApiController]`), disponibilizando endpoints HTTP (`/sft/channels/list` e `/sft/channels/announce`) para listagem instantânea de salas entre todos os jogadores no menu.
 - **Failover de Liderança P2P & Reconexão Pós-Raid:** Se o Host original do canal continuar na raid, os convidados que retornam ao menu assumem automaticamente a transmissão de heartbeats sem deixar o canal cair. Ao sair de uma partida, os jogadores são reconectados automaticamente ao canal de menu em que estavam antes da raid.
 - **Code Review:** Executada revisão em 6 categorias × 4 impactos com aprovação 100% (0 bloqueadores).
+- **Debounce Anti-Spam Global (0.8s):** Aplicada trava de 0.8s no `BroadcastChannelAnnouncement` ([SftNetwork.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded/Network/SftNetwork.cs#L290)) para todas as ações, zerando requisições multiplicadas no mesmo milissegundo.
 
 **Pendências abertas nesta sessão:**
 - Nenhuma pendência blocker.
