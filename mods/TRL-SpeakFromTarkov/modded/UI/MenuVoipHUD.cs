@@ -126,16 +126,16 @@ namespace TRL_SpeakFromTarkov.UI
                 wasInRaid = true;
             }
 
-            // Executa limpezas, heartbeats e busca no servidor SPT a cada 6s-8s (somente fora de raid)
+            // Executa limpezas, heartbeats e busca no servidor SPT a cada 10s (sincronizado com a presenca do FIKA)
             if (!inRaid)
             {
-                if (Time.time - lastServerFetchTime > 6.0f)
+                if (Time.time - lastServerFetchTime > 10.0f)
                 {
                     lastServerFetchTime = Time.time;
                     FetchServerChannels();
                 }
 
-                if (Time.time - lastHeartbeatTime > 8.0f)
+                if (Time.time - lastHeartbeatTime > 10.0f)
                 {
                     lastHeartbeatTime = Time.time;
                     CleanupStaleChannels();
