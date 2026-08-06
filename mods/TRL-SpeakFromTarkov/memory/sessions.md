@@ -1,8 +1,8 @@
 # TRL-SpeakFromTarkov — Memória de Sessões
 
 ## Snapshot Delta
-- **Versão:** 1.5.1 (SPT 4.0 / FIKA)
-- **Estado:** v1.5.1 compilada e commitada com 0 erros. Correção de desync da ancoragem 3D de áudio em raids multiplayer (busca nativa via `GetAlivePlayerByProfileID` + re-ancoragem dinâmica em `Update` no `RemoteSpeaker`).
+- **Versão:** 1.6.0 (SPT 4.0 / FIKA)
+- **Estado:** v1.6.0 compilada e testada com 0 erros. Implementação completa de Canais de VOIP no Menu Principal com P2P 2D estéreo, HUD alinhado ao FIKA, moderação de jogadores (Remover/Banir), confirmação anti-missclick, rolagem automática (ScrollView) e reconexão automática contínua pós-raid.
 - **Pendências:** 🟢 Nenhuma pendência blocker registrada.
 
 ---
@@ -44,6 +44,22 @@
 - **Busca Nativa por Perfil Tarkov:** Substituição de filtro manual `FirstOrDefault` em `AllAlivePlayersList` pelo método nativo do motor do Tarkov `Singleton<GameWorld>.Instance.GetAlivePlayerByProfileID(profileId)` no [SftNetwork.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded/Network/SftNetwork.cs).
 - **Re-ancoragem Dinâmica no RemoteSpeaker:** Implementado mecanismo de auto-recuperação em `RemoteSpeaker.Update` no [RemoteSpeaker.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded/Audio/RemoteSpeaker.cs) quando `transform.parent == null`. Caso o pacote de VOIP chegue antes do avatar do jogador remoto spawnar completamente na cena, o `RemoteSpeaker` tenta re-ancorar a cada frame e se prende à cabeça (`Head.Original`) assim que o boneco é instanciado, eliminando o acúmulo de vozes na origem `(0, 0, 0)`.
 - **Conformidade de Rede FIKA:** Validação e alinhamento do mod com o guia canônico `docs/technical/fika-packet-desync-prevention-plan.md` (`EnsurePacketsRegistered` pré-envio, ausência de `UnregisterPacket`, airbag `try-catch` em callbacks).
+
+**Pendências abertas nesta sessão:**
+- Nenhuma pendência blocker.
+
+---
+
+## 2026-08-05 — Sessão 4: v1.6.0 (Sistema de Canais de VOIP no Menu Principal & HUD de Moderação)
+
+**Tema central:** Implementação do sistema de comunicação por voz no Menu Principal (fora de raid), com criação/gestão de canais 2D P2P, HUD integrado no padrão do FIKA, moderação por dono do canal e reconexão fluida pós-raid.
+
+**Decisões-chave:**
+- **Menu VOIP HUD:** Criada a interface [MenuVoipHUD.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs) posicionada no topo direito (`width = 400px`, `marginRight = 55px`), perfeitamente alinhada com o painel de `JOGADORES ON-LINE` do FIKA.
+- **Visibilidade Sincronizada com o FIKA:** Visibilidade do HUD vinculada ao objeto visual interno do FIKA (`_userInterface.activeInHierarchy`), garantindo que o painel fique oculto nas abas de Inventário/Personagem, Comerciantes, Mercado, Esconderijo e na Raid.
+- **Microfone Desligado por Padrão no Menu:** No menu principal, o microfone permanece 100% desligado (`capturer.StopCapture()`) e só é ativado quando o jogador cria ou entra em um canal de voz.
+- **Protocolo de Canais de Menu & Moderação:** Criado o [SftChannelAnnouncementPacket.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded/Network/SftChannelAnnouncementPacket.cs) com suporte a anúncios de sala, heartbeats, entrada, saída, `Kick` e `Ban`. Ações de moderação protegidas por modal de confirmação anti-missclick.
+- **Failover de Liderança P2P & Reconexão Pós-Raid:** Se o Host original do canal continuar na raid, os convidados que retornam ao menu assumem automaticamente a transmissão de heartbeats sem deixar o canal cair. Ao sair de uma partida, os jogadores são reconectados automaticamente ao canal de menu em que estavam antes da raid.
 
 **Pendências abertas nesta sessão:**
 - Nenhuma pendência blocker.

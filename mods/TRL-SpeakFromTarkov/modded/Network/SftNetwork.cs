@@ -28,6 +28,7 @@ namespace TRL_SpeakFromTarkov.Network
         /// então capturar `this` deixaria um callback apontando para um objeto Unity destruído.
         /// </summary>
         private static SftNetwork _instance;
+        public static SftNetwork Instance => _instance;
 
         /// <summary>
         /// Rastreamento por REFERÊNCIA de instância (não por flag bool): o FIKA destrói e recria o
@@ -147,12 +148,11 @@ namespace TRL_SpeakFromTarkov.Network
             try
             {
                 currentManager.RegisterPacket<SftAudioPacketV2>(OnReceiveVoipDataV2);
-                // Formato legado (≤1.3.0): registrado só para RECEPÇÃO, para continuar ouvindo
-                // peers ainda não atualizados. Nunca é enviado.
                 currentManager.RegisterPacket<SftAudioPacket>(OnReceiveVoipDataLegacy);
+                currentManager.RegisterPacket<SftChannelAnnouncementPacket>(OnReceiveChannelAnnouncement);
 
                 _lastRegisteredManager = currentManager;
-                Log?.LogInfo($"[SFT] SftAudioPacketV2 (+legado) registrado no NetPacketProcessor do FIKA ({currentManager.GetType().Name}).");
+                Log?.LogInfo($"[SFT] Pacotes VOIP (+Canais de Menu) registrados no NetPacketProcessor do FIKA ({currentManager.GetType().Name}).");
             }
             catch (Exception ex)
             {
@@ -251,25 +251,62 @@ namespace TRL_SpeakFromTarkov.Network
                 nameof(OnReceiveVoipDataV2));
         }
 
-        /// <summary>Recepção do formato legado (peer ≤ 1.3.0). Mesmo processamento do V2.</summary>
         private static void OnReceiveVoipDataLegacy(SftAudioPacket packet)
         {
             DispatchVoipPacket(packet.ProfileId, packet.Channel, packet.AudioData, packet.VoiceLevel,
                 nameof(OnReceiveVoipDataLegacy));
         }
 
+        private static void OnReceiveChannelAnnouncement(SftChannelAnnouncementPacket packet)
+        {
+            try
+            {
+                if (UI.MenuVoipHUD.Instance != null)
+                {
+                    UI.MenuVoipHUD.Instance.HandleChannelAnnouncement(packet);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogErrorThrottled("Erro no callback OnReceiveChannelAnnouncement", ex);
+            }
+        }
+
+        public static void BroadcastChannelAnnouncement(byte channelId, string channelName, string hostProfileId, string hostNickname, byte action, string targetProfileId = "")
+        {
+            try
+            {
+                EnsurePacketsRegistered();
+                if (!Singleton<IFikaNetworkManager>.Instantiated) return;
+
+                var packet = new SftChannelAnnouncementPacket
+                {
+                    ChannelId = channelId,
+                    ChannelName = channelName,
+                    HostProfileId = hostProfileId,
+                    HostNickname = hostNickname,
+                    TargetProfileId = targetProfileId ?? string.Empty,
+                    Action = action
+                };
+                Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, Fika.Core.Networking.LiteNetLib.DeliveryMethod.ReliableOrdered, broadcast: true);
+            }
+            catch (Exception ex)
+            {
+                LogErrorThrottled("Erro ao transmitir anúncio de canal de menu", ex);
+            }
+        }
+
         private static void DispatchVoipPacket(string profileId, byte channel, byte[] audioData, float voiceLevel, string context)
         {
             try
             {
-                if (!Singleton<GameWorld>.Instantiated) return;
                 if (VoIPPlugin.EnableMod != null && !VoIPPlugin.EnableMod.Value) return;
 
-                // Headless não reproduz áudio: desserializar já manteve o stream alinhado e o relay
-                // para os demais peers é feito pelo próprio FIKA (FikaServer.OnNetworkReceive
-                // reencaminha os bytes crus antes de parsear). Criar RemoteSpeaker aqui seria
-                // GameObject + AudioSource + decoder Opus puro desperdício no processo que já tem
-                // histórico de OOM neste repo.
+                bool inRaid = Singleton<GameWorld>.Instantiated;
+                bool inMenuChannel = (UI.MenuVoipHUD.Instance != null && UI.MenuVoipHUD.Instance.ConnectedChannelId.HasValue);
+
+                if (!inRaid && !inMenuChannel) return;
+
                 if (Fika.Core.Main.Utils.FikaBackendUtils.IsHeadless) return;
 
                 var self = _instance;
@@ -288,17 +325,14 @@ namespace TRL_SpeakFromTarkov.Network
             if (audioData == null || audioData.Length == 0) return;
             if (string.IsNullOrEmpty(profileId)) return;
 
-            // Teto defensivo: o encoder local nunca passa de 1275 bytes. Payload maior veio de peer
-            // bugado ou hostil — não entregar ao decoder Opus.
             if (audioData.Length > SftAudioPacketV2.MaxAudioBytes) return;
 
-            // Rejeita pacotes próprios (eco loopback local)
             if (profileId == LocalSessionId) return;
 
-            var gameWorld = Singleton<GameWorld>.Instance;
-            if (gameWorld == null) return;
+            bool inRaid = Singleton<GameWorld>.Instantiated;
+            var gameWorld = inRaid ? Singleton<GameWorld>.Instance : null;
 
-            if (gameWorld.MainPlayer != null && profileId == gameWorld.MainPlayer.ProfileId) return;
+            if (inRaid && gameWorld != null && gameWorld.MainPlayer != null && profileId == gameWorld.MainPlayer.ProfileId) return;
 
             if (Core.VoipController.Instance != null && channel != Core.VoipController.Instance.CurrentChannel)
                 return;
@@ -311,23 +345,31 @@ namespace TRL_SpeakFromTarkov.Network
                 remoteSpeakers[profileId] = speaker;
             }
 
-            // Ancoragem do alto-falante 3D na cabeça/corpo do jogador (Nativo Tarkov + Fallback)
-            Player player = gameWorld.GetAlivePlayerByProfileID(profileId);
-            if (player == null && gameWorld.AllAlivePlayersList != null)
+            if (inRaid && gameWorld != null)
             {
-                player = gameWorld.AllAlivePlayersList.FirstOrDefault(p => p != null && (p.ProfileId == profileId || (p.Profile != null && p.Profile.Id == profileId)));
-            }
-
-            if (player != null)
-            {
-                Transform targetBone = player.PlayerBones != null && player.PlayerBones.Head != null
-                    ? player.PlayerBones.Head.Original
-                    : player.Transform.Original;
-                if (speaker.transform.parent != targetBone)
+                speaker.SetEmergency2DMode(false);
+                Player player = gameWorld.GetAlivePlayerByProfileID(profileId);
+                if (player == null && gameWorld.AllAlivePlayersList != null)
                 {
-                    speaker.transform.SetParent(targetBone, false);
-                    speaker.transform.localPosition = targetBone == player.Transform.Original ? Vector3.up * 1.6f : Vector3.zero;
+                    player = gameWorld.AllAlivePlayersList.FirstOrDefault(p => p != null && (p.ProfileId == profileId || (p.Profile != null && p.Profile.Id == profileId)));
                 }
+
+                if (player != null)
+                {
+                    Transform targetBone = player.PlayerBones != null && player.PlayerBones.Head != null
+                        ? player.PlayerBones.Head.Original
+                        : player.Transform.Original;
+                    if (speaker.transform.parent != targetBone)
+                    {
+                        speaker.transform.SetParent(targetBone, false);
+                        speaker.transform.localPosition = targetBone == player.Transform.Original ? Vector3.up * 1.6f : Vector3.zero;
+                    }
+                }
+            }
+            else
+            {
+                // Modo 2D Estéreo para o Menu Principal
+                speaker.SetEmergency2DMode(true);
             }
 
             speaker.EnqueuePacket(audioData, voiceLevel);

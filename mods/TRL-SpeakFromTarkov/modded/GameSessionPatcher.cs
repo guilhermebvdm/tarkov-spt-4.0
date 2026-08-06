@@ -32,6 +32,7 @@ namespace TRL_SpeakFromTarkov
                 if (__instance.IsYourPlayer && Core.VoipController.Instance != null)
                 {
                     Core.VoipController.Instance.SetGameStateChannel(true);
+                    Core.VoipController.Instance.StartVoipCapture();
                 }
             }
         }

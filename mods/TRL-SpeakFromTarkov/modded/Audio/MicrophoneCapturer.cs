@@ -68,6 +68,15 @@ namespace TRL_SpeakFromTarkov.Audio
                 StopCapture();
             }
 
+            // Flush de segurança: Encerra qualquer captura pendente ou travada pelo Vivox/Unity no boot
+            try
+            {
+                if (!string.IsNullOrEmpty(device) && Microphone.IsRecording(device))
+                    Microphone.End(device);
+                Microphone.End(null);
+            }
+            catch { }
+
             deviceName = device;
             actualSampleRate = AudioSettings.outputSampleRate;
             
@@ -111,7 +120,9 @@ namespace TRL_SpeakFromTarkov.Audio
             availableSamples = 0;
             hasPlayed = false;
             dspConfirmed = 0;
-            lastMicPosition = 0;
+            
+            int initialPos = Microphone.GetPosition(deviceName);
+            lastMicPosition = initialPos >= 0 ? initialPos : 0;
             
             audioFilter = new AudioFilter(targetSampleRate, targetFrameSize, VoIPPlugin.HPFCutoff.Value);
             audioFilter.OpenThreshold  = VoIPPlugin.NoiseGateThreshold.Value;

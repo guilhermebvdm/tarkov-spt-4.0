@@ -23,6 +23,13 @@ namespace TRL_SpeakFromTarkov.Core
         private ConcurrentQueue<Action> mainThreadActions = new ConcurrentQueue<Action>();
         
         public byte CurrentChannel { get; private set; } = 1;
+        public MenuVoipHUD menuHud { get; private set; }
+
+        public void SetCurrentChannel(byte channelId)
+        {
+            CurrentChannel = channelId;
+            VoIPPlugin.Log.LogInfo($"[SFT] Canal de áudio alterado para: {channelId}");
+        }
         
         void Awake()
         {
@@ -62,6 +69,8 @@ namespace TRL_SpeakFromTarkov.Core
             hud = gameObject.AddComponent<VoipHUD>();
             hud.Initialize();
             hud.Processor = processor;
+            
+            menuHud = gameObject.AddComponent<MenuVoipHUD>();
             
             // Wiring Events
             capturer.OnAudioDataCaptured += processor.ProcessAudio;
@@ -130,30 +139,38 @@ namespace TRL_SpeakFromTarkov.Core
 
         private System.Collections.IEnumerator DelayedStartVoipCaptureCo()
         {
-            // Aguarda o PreloaderUI estar 100% ativo e montado na hierarquia do jogo
-            float timeout = 25.0f;
-            float elapsed = 0f;
-
-            while (elapsed < timeout)
-            {
-                if (MonoBehaviourSingleton<PreloaderUI>.Instantiated &&
-                    MonoBehaviourSingleton<PreloaderUI>.Instance != null &&
-                    MonoBehaviourSingleton<PreloaderUI>.Instance.gameObject.activeInHierarchy)
-                {
-                    break;
-                }
-                elapsed += 0.5f;
-                yield return new WaitForSecondsRealtime(0.5f);
-            }
-
-            // Margem de segurança de 3.0s após a UI do menu carregar completamente (pós-Vivox)
+            // Margem de segurança de 3.0s após a UI do menu carregar completamente
             yield return new WaitForSecondsRealtime(3.0f);
 
-            VoIPPlugin.Log.LogInfo("[SFT] Menu principal do Tarkov 100% carregado e pronto. Inicializando microfone...");
-            StartVoipCapture();
+            // No Menu Principal, NÃO ativamos o microfone automaticamente!
+            // O microfone permanece DESLIGADO até o jogador Criar ou Entrar em um Canal no MenuVoipHUD.
+            VoIPPlugin.Log.LogInfo("[SFT] Menu principal do Tarkov 100% carregado. Microfone mantido DESLIGADO no menu até entrar em um canal.");
         }
 
-        private void StartVoipCapture()
+        public void EnableMenuCapture(bool enable)
+        {
+            if (Singleton<EFT.GameWorld>.Instantiated) return;
+
+            if (enable)
+            {
+                if (capturer != null)
+                {
+                    string device = GetEftMicrophone();
+                    capturer.StartCapture(device);
+                    VoIPPlugin.Log.LogInfo("[SFT-MENU] Microfone ATIVADO para o canal do menu.");
+                }
+            }
+            else
+            {
+                if (capturer != null && capturer.IsRecording)
+                {
+                    capturer.StopCapture();
+                    VoIPPlugin.Log.LogInfo("[SFT-MENU] Microfone DESLIGADO ao sair do canal do menu.");
+                }
+            }
+        }
+
+        public void StartVoipCapture()
         {
             if (capturer == null || capturer.IsRecording) return;
             string device = GetEftMicrophone();
