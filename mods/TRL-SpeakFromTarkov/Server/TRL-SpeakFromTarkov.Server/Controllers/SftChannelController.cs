@@ -2,7 +2,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using SPTarkov.Server.Core.Servers.Ws;
 using SPTarkov.Server.Core.Models.Eft.Ws;
@@ -40,7 +39,6 @@ namespace TRL_SpeakFromTarkov.Server.Controllers
 
     [ApiController]
     [Route("sft/channels")]
-    [Consumes("application/json", "text/plain", "application/octet-stream")]
     public class SftChannelController(SptWebSocketConnectionHandler webSocketHandler) : ControllerBase
     {
         private static readonly ConcurrentDictionary<int, SftMenuChannelDto> _channels = new ConcurrentDictionary<int, SftMenuChannelDto>();
@@ -74,62 +72,48 @@ namespace TRL_SpeakFromTarkov.Server.Controllers
         }
 
         [HttpPost("announce")]
-        public async Task<IActionResult> AnnounceChannel([FromBody] SftChannelActionDto? data)
+        public IActionResult AnnounceChannel([FromBody] SftChannelActionDto request)
         {
-            if (data == null)
-            {
-                try
-                {
-                    using var reader = new System.IO.StreamReader(Request.Body);
-                    string rawJson = await reader.ReadToEndAsync();
-                    if (!string.IsNullOrEmpty(rawJson))
-                    {
-                        data = System.Text.Json.JsonSerializer.Deserialize<SftChannelActionDto>(rawJson);
-                    }
-                }
-                catch { }
-            }
+            if (request == null || request.channelId <= 0) return BadRequest();
 
-            if (data == null || data.channelId <= 0) return BadRequest();
-
-            if (data.action == 1) // Close
+            if (request.action == 1) // Close
             {
-                _channels.TryRemove(data.channelId, out _);
+                _channels.TryRemove(request.channelId, out _);
             }
             else
             {
-                var ch = _channels.GetOrAdd(data.channelId, id => new SftMenuChannelDto
+                var ch = _channels.GetOrAdd(request.channelId, id => new SftMenuChannelDto
                 {
                     channelId = id,
-                    channelName = data.channelName,
-                    hostProfileId = data.hostProfileId,
-                    hostNickname = data.hostNickname,
+                    channelName = request.channelName,
+                    hostProfileId = request.hostProfileId,
+                    hostNickname = request.hostNickname,
                     lastSeen = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
                     members = new List<string>(),
                     bannedProfileIds = new List<string>()
                 });
 
-                ch.channelName = !string.IsNullOrEmpty(data.channelName) ? data.channelName : ch.channelName;
-                ch.hostProfileId = !string.IsNullOrEmpty(data.hostProfileId) ? data.hostProfileId : ch.hostProfileId;
-                ch.hostNickname = !string.IsNullOrEmpty(data.hostNickname) ? data.hostNickname : ch.hostNickname;
+                ch.channelName = !string.IsNullOrEmpty(request.channelName) ? request.channelName : ch.channelName;
+                ch.hostProfileId = !string.IsNullOrEmpty(request.hostProfileId) ? request.hostProfileId : ch.hostProfileId;
+                ch.hostNickname = !string.IsNullOrEmpty(request.hostNickname) ? request.hostNickname : ch.hostNickname;
                 ch.lastSeen = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
-                if (data.action == 2 && !string.IsNullOrEmpty(data.hostProfileId)) // Join
+                if (request.action == 2 && !string.IsNullOrEmpty(request.hostProfileId)) // Join
                 {
-                    if (!ch.members.Contains(data.hostProfileId)) ch.members.Add(data.hostProfileId);
+                    if (!ch.members.Contains(request.hostProfileId)) ch.members.Add(request.hostProfileId);
                 }
-                else if (data.action == 3 && !string.IsNullOrEmpty(data.hostProfileId)) // Leave
+                else if (request.action == 3 && !string.IsNullOrEmpty(request.hostProfileId)) // Leave
                 {
-                    ch.members.Remove(data.hostProfileId);
+                    ch.members.Remove(request.hostProfileId);
                 }
-                else if (data.action == 4 && !string.IsNullOrEmpty(data.targetProfileId)) // Kick
+                else if (request.action == 4 && !string.IsNullOrEmpty(request.targetProfileId)) // Kick
                 {
-                    ch.members.Remove(data.targetProfileId);
+                    ch.members.Remove(request.targetProfileId);
                 }
-                else if (data.action == 5 && !string.IsNullOrEmpty(data.targetProfileId)) // Ban
+                else if (request.action == 5 && !string.IsNullOrEmpty(request.targetProfileId)) // Ban
                 {
-                    ch.members.Remove(data.targetProfileId);
-                    if (!ch.bannedProfileIds.Contains(data.targetProfileId)) ch.bannedProfileIds.Add(data.targetProfileId);
+                    ch.members.Remove(request.targetProfileId);
+                    if (!ch.bannedProfileIds.Contains(request.targetProfileId)) ch.bannedProfileIds.Add(request.targetProfileId);
                 }
             }
 
