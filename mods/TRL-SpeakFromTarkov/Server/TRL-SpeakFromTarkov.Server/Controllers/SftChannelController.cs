@@ -1,7 +1,12 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
 using System.Linq;
+using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using SPTarkov.Server.Core.Servers.Ws;
 using SPTarkov.Server.Core.Models.Eft.Ws;
@@ -72,8 +77,34 @@ namespace TRL_SpeakFromTarkov.Server.Controllers
         }
 
         [HttpPost("announce")]
-        public IActionResult AnnounceChannel([FromBody] SftChannelActionDto request)
+        public async Task<IActionResult> AnnounceChannel([FromBody] SftChannelActionDto? request)
         {
+            if (request == null || request.channelId <= 0)
+            {
+                try
+                {
+                    string rawJson;
+                    var requestIsCompressed = !Request.Headers.TryGetValue("requestcompressed", out var compressHeader) || compressHeader != "0";
+                    if (requestIsCompressed)
+                    {
+                        using var deflateStream = new ZLibStream(Request.Body, CompressionMode.Decompress);
+                        using var reader = new StreamReader(deflateStream, Encoding.UTF8);
+                        rawJson = await reader.ReadToEndAsync();
+                    }
+                    else
+                    {
+                        using var reader = new StreamReader(Request.Body, Encoding.UTF8);
+                        rawJson = await reader.ReadToEndAsync();
+                    }
+
+                    if (!string.IsNullOrEmpty(rawJson))
+                    {
+                        request = JsonSerializer.Deserialize<SftChannelActionDto>(rawJson);
+                    }
+                }
+                catch { }
+            }
+
             if (request == null || request.channelId <= 0) return BadRequest();
 
             if (request.action == 1) // Close

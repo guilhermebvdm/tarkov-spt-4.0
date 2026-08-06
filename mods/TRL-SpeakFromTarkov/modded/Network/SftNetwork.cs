@@ -329,7 +329,13 @@ namespace TRL_SpeakFromTarkov.Network
                             action = (int)action
                         };
                         string json = UnityEngine.JsonUtility.ToJson(dto);
-                        SPT.Common.Http.RequestHandler.PostJson("/sft/channels/announce", json);
+                        string serverUrl = SPT.Common.Http.RequestHandler.Host;
+                        if (!serverUrl.EndsWith("/")) serverUrl += "/";
+                        
+                        using var client = new System.Net.Http.HttpClient();
+                        client.Timeout = TimeSpan.FromSeconds(3);
+                        var content = new System.Net.Http.StringContent(json, System.Text.Encoding.UTF8, "application/json");
+                        var response = client.PostAsync(serverUrl + "sft/channels/announce", content).Result;
                     }
                     catch { }
                 });
