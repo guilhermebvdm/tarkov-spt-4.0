@@ -6,11 +6,17 @@ Memória cronológica de sessões de trabalho (timestamps em GMT-3). Cada entrad
 
 ---
 
-## Estado Atual (Snapshot ao Fim da Sessão — 2026-08-04)
+## Estado Atual (Snapshot ao Fim da Sessão — 2026-08-06)
 
-**Mod C# Client (v3.2.5) + C# Server compilados com sucesso (0 erros).**
+**Mod C# Client (v3.2.3) + C# Server (v3.2.3) compilados com sucesso (0 erros).**
 
 - **Identity**: `TRL-DynamicSpawn` (Client BepInEx DLL: `TRL-DynamicSpawn.dll`, Server C# DLL: `TRL-DynamicSpawn-Server.dll` com Web UI). Compatível com SPT 4.0.13 e EFT 0.16.9.
+- **MaxBot Dinâmico (`GetDynamicCap` / `ApplyDynamicMaxBot`)**:
+  - `MaxBot` dinâmico (`dynamicCap = playerCap + specialBots`). A cota de `playerCap` é preservada exclusivamente para PMCs/Scavs, enquanto bots especiais (Bosses, Guardas, Rogues, Raiders, Cultistas, Bloodhounds, Snipers) expandem o limite do motor do jogo em tempo real sem drenar vagas de PMC/Scav.
+- **Invasão Dinâmica de Elites & Rogues Não-Nativos (v3.2.3)**:
+  - **Fix do `isFirstWave`**: Resolvido bug em `SpawnHordeLoop` onde `ProcessWave(false)` era chamado com `false` hardcoded, impedindo o spawn de Rogues e Elites não-nativos em mapas sem ondas vanilla nativas (Customs `bigmap`, Ground Zero `sandbox`).
+  - **Integridade do Esquadrão de Rogues**: Elites enfileirados como um único grupo de esquadrão (`GroupSize = MaxGroupSize`) e posicionados na sub-lista `elites` no topo do `spawnList`, garantindo nascimento conjunto e imediato na mesma zona no segundo 0 da onda.
+  - **Isenção de Bolha para Bots Especiais**: Validado que Rogues (`exUsec`) e Elites já possuem isenção total da bolha de distância (`enableSpawnBubble`) em `IsValidSpawnZone`.
 - **Sincronização do Raio da Bolha & DynamicMaps Overlay (`TRLMapBubbleOverlay.cs` / `MapNameHelper.cs` / `Index.razor`)**:
   - Slider do painel web (`#mc_despawn_dist`) atualiza em sincronia tanto `spawnBubbleDistance` quanto `despawnDistance`.
   - `MapNameHelper.Normalize("bigmap")` normalizado para `"bigmap"`, garantindo correspondência com a chave de `mapConfigs` do `config.json` e Web UI.
@@ -21,30 +27,15 @@ Memória cronológica de sessões de trabalho (timestamps em GMT-3). Cada entrad
 - **Labs Exclusivo para PMCs (Backlog 003 — 🟢 Entregue)**:
   - Quando a partida for no mapa Labs (`laboratory`), `idealScavs` e `scavSlots` no `DynamicSpawnManager` são forçados para `0`.
   - 100% da cota do `MaxBot` em Labs é alocada para PMCs (`sptBear` e `sptUsec`).
-  - Raiders nativos do jogo/alarmes permanecem intactos sob gerência da engine Vanilla.
 - **Dificuldade de Bots & Integração com SAIN (Backlog 004 — 🟢 Entregue)**:
   - Detecção automática do mod SAIN (`IsSainInstalled`). Se ativo, ignora a sobreposição e repassa `BotDifficulty.normal` para ceder 100% do controle da IA ao SAIN.
-  - Amostragem ponderada (`GetRandomDifficulty`) respeitando as porcentagens do painel Web para PMCs, Scavs e Bosses quando o SAIN não está presente.
-  - Sincronização prévia com `AddToTargetBackup` e fallback automático transparente para `BotDifficulty.normal` se o SPT retornar `null` ao criar o perfil.
-  - Logs de inspeção `[SPY]` e `[SPY-FALLBACK]` no console BepInEx para depuração ativa.
 - **Revisão de Bloqueadores de Spawn (Backlog 005 — 🟢 Entregue)**:
-  - **Isenção de Bosses Nativos**: Bots com `WildSpawnType` iniciando com `boss` ou `follower` são isentados das restrições de SafeZone e LoS do mod no `TryToSpawnInZoneAndDelayPatch`.
-  - **Remoção do Duplo Filtro de LoS**: `IsValidSpawnZone` não testa mais a visibilidade do pivot da `BotZone` inteira.
-  - **Inclusão de Colisores de Portas e Objetos**: `Physics.Linecast` expandido com `LayerMaskClass.PlayerStaticCollisionsMask`.
-  - **Altura Vertical Ajustada para 4.0m**: Parâmetro `heightLimit` ajustado para 4.0m em mapas verticais multiares.
-- **Otimização da Fila de Warmup (Backlog 006 — 🟢 Entregue)**:
-  - Implementado o pré-carregamento em lote de perfis (`AddToTargetBackup`) no início de cada `ProcessWave`.
-  - Toda a cota da onda (`usecSlots`, `bearSlots`, `normalScavSlots`, `pScavSlots`) é solicitada em uma única requisição HTTP síncrona/lote para o servidor SPT.
-  - A Coroutine de injeção suave no Unity consome os perfis direto da RAM com 0ms de latência, mantendo a injeção bot a bot no mapa sem stutters e atingindo o `MaxBot` em 1 a 2 ciclos de Warmup.
-  - Mantida a limpeza de requisições antigas (`ClearSptQueue()`) e o controle estrito de bots vivos no mapa (`GetRealAliveBotsCount()`).
+  - Isenção de Bosses Nativos de SafeZone e LoS no `TryToSpawnInZoneAndDelayPatch`.
 
 ---
 
 ## Pendências / Próximos Passos Conhecidos (Roadmap)
 
-- ⚪ [004-dificuldade-bots-sain-integration] **Dificuldade de Bots & Compatibilidade SAIN**: Validar aplicação de dificuldade do mod e ignorar alteração caso o SAIN esteja instalado.
-- ⚪ [006-otimizacao-fila-spawn-warmup] **Otimização da Fila de Spawn no Warmup**: Investigar atrito no atingimento da cota MaxBot e garantir limpeza completa da fila de criação de bots.
-- ⚪ [007-rogues-armas-montadas] **Rogues em Armas Montadas**: Investigar por que os Rogues em Lighthouse vão para metralhadoras/AGS estacionárias mas não as operam.
 - 🟡 [P-ROADMAP-01] **Retorno do Viés Direcional (Pós-Debug)**: Retornar a proporção do viés direcional de spawn/teleport para 70% frontal / 30% traseiro pós-testes.
 - 🟡 [P-ROADMAP-04] **Standalone Mod — Limpador de Corpos Inteligente (Corpse Cleaner)**: Novo mod separado focado em performance (timer individual por corpo).
 
@@ -52,18 +43,21 @@ Memória cronológica de sessões de trabalho (timestamps em GMT-3). Cada entrad
 
 ## Histórico de Sessões
 
-### 2026-08-06 — Restrição Estrita de ISpawnPoints para Sniper Scavs e Melhorias Visuais/I18N na Web UI
+### 2026-08-06 — Invasão Dinâmica de Elites/Rogues (v3.2.3), MaxBot Dinâmico (v3.2.0) e Code Review 008
 
-- **Restrição Estrita Bilateral de `ISpawnPoint`s para Sniper Scavs**:
-  - Criado `SpawnPointHelper.cs` com métodos `IsSniperRole`, `IsSniperZone` e `IsSniperSpawnPoint`.
-  - Atualizado `Methods.GetRandomZone(botSpawner, allowSnipeZone)` para evitar o sorteio de `Zone_SniperPeak` em fallbacks de Scavs/PMCs comuns.
-  - Atualizado `Patches.cs` (`TryToSpawnInZoneAndDelayPatch`) e `BotDespawnManager.cs` (`GetValidTeleportPoint`) para filtrar bidirecionalmente bots terrestres em pontos de sniper e sniper bots em pontos terrestres.
-  - Resolvido o erro `Bot creation failed even after fallback for assault in zone Zone_SniperPeak`.
-- **Melhorias Visuais e I18N na Web UI (`Index.razor`)**:
-  - Substituído o emoji `ℹ️` pelo ícone circular SVG `ⓘ` (TRL Design System) nas notas de alerta das seções `AI DIFFICULTY`, `EVENTS & INVASIONS` e `ADDITIONAL SPAWNPOINTS`.
-  - Corrigidas as strings estáticas em português nos templates de `BOTS/RAIDERS` e `BOTS/ROGUES` em `Index.razor` (`renderActiveBossConfig`), viabilizando a tradução dinâmica ao alternar para `EN-US`.
-- **Validação de Build**:
-  - `TRL-DynamicSpawn-Client.csproj` e `TRL-DynamicSpawn-Server.csproj` compilados com **0 Erros**. Binários atualizados nos diretórios de plugins/mods do SPT.
+- **Correção da Causa Raiz do Spawning de Rogues/Elites Não-Nativos (`DynamicSpawnManager.cs`)**:
+  - `SpawnHordeLoop` invocava `ProcessWave(false)` de forma hardcoded. Ajustado para `ProcessWave(warmupAttempt == 1)`, ativando `isFirstWave = true` no 1º ciclo de Warmup da raid.
+  - Rogues configurados no painel Web para mapas sem ondas nativas (ex: Customs/Ground Zero) agora sorteiam e enfileiram normalmente.
+- **Integridade e Spawn Conjunto de Esquadrões de Rogues**:
+  - Eliminado o fracionamento de grupos em instâncias de 1 bot. O grupo é enfileirado como uma única unidade (`GroupSize = MaxGroupSize`).
+  - Removido `exUsec` da sub-lista de PMCs comuns no algoritmo de interleaving, alocando Rogues no topo da lista (`elites`) para nascerem juntos no segundo 0 da onda na mesma zona.
+- **Validações e QA (Code Review 008)**:
+  - Confirmado que a bolha de distância (`enableSpawnBubble`) **não afeta Rogues/Elites** (já isentos em `IsValidSpawnZone`).
+  - Aplicada comparação insensível a caixa (`StringComparison.OrdinalIgnoreCase`) em `GetZoneFromConfig`.
+  - Adicionado pré-carregamento síncrono de Rogues (`exUsec`) no `AddToTargetBackup` do SPT.
+- **Validação de Build & SemVer (`v3.2.3`)**:
+  - BepInPlugin e Server csproj atualizados para `3.2.3`. Compilados com **0 Erros**.
+
 
 ### 2026-08-05 — Suporte a Copiar Mapa, Referência Imutável config.default.json, Modal do Default e Remoção do BotMountPatch
 

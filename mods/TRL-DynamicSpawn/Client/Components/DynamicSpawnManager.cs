@@ -137,10 +137,14 @@ namespace TRLDynamicSpawn.Components
                 // Pre-populate SPT Bot Creator Backup target for PMCs to resolve profile generation empty queues
                 if (_botCreator != null)
                 {
-                    Plugin.LogSource.LogInfo("[TRL-DynamicSpawn] Pre-populating SPT Bot Creator Backup target for PMCs and Scavs...");
+                    Plugin.LogSource.LogInfo("[TRL-DynamicSpawn] Pre-populating SPT Bot Creator Backup target for PMCs, Scavs and Rogues...");
                     _botCreator.AddToTargetBackup(BotDifficulty.normal, WildSpawnType.pmcUSEC, 30);
                     _botCreator.AddToTargetBackup(BotDifficulty.normal, WildSpawnType.pmcBEAR, 30);
                     _botCreator.AddToTargetBackup(BotDifficulty.normal, WildSpawnType.assault, 20);
+                    if (_serverConfig?.EliteConfig?.Rogues != null && _serverConfig.EliteConfig.Rogues.Enable)
+                    {
+                        _botCreator.AddToTargetBackup(BotDifficulty.normal, WildSpawnType.exUsec, 10);
+                    }
                 }
 
                 // Ajusta as waves de boss originais do vanilla baseado nas configurações recebidas do servidor
@@ -393,7 +397,8 @@ namespace TRLDynamicSpawn.Components
                         Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Map needs bots (REAL Alive: {aliveRealBots}/{dynamicCap} | playerCap={playerCap}). Triggering {warmupInterval}s Warmup Wave (Attempt {warmupAttempt})...");
 
                         if (_activeWaveCoroutine != null) StopCoroutine(_activeWaveCoroutine);
-                        _activeWaveCoroutine = StartCoroutine(ProcessWave(false));
+                        bool isFirstWave = (warmupAttempt == 1);
+                        _activeWaveCoroutine = StartCoroutine(ProcessWave(isFirstWave));
                         _nextWaveTime = Time.time + warmupInterval;
 
                         bool capReachedEarly = false;
@@ -497,7 +502,7 @@ namespace TRLDynamicSpawn.Components
             var eliteConfig = _serverConfig?.EliteConfig;
 
             // Group Splitting Local Function
-            void GenerateAndEnqueueGroups(WildSpawnType role, BotDifficulty diff, int totalSlots, EliteLocationInfo info)
+            void GenerateAndEnqueueGroups(WildSpawnType role, BotDifficulty diff, int totalSlots, EliteLocationInfo info, BotZone overrideZone = null)
             {
                 int slotsRemaining = totalSlots;
                 while (slotsRemaining > 0)
@@ -518,8 +523,76 @@ namespace TRLDynamicSpawn.Components
                         Info = info
                     };
 
-                    spawnList.Add(new Tuple<SpawnGroupData, BotZone>(gData, GetHotzone(info, mapName)));
+                    BotZone zoneToUse = overrideZone ?? GetHotzone(info, mapName);
+                    spawnList.Add(new Tuple<SpawnGroupData, BotZone>(gData, zoneToUse));
                     slotsRemaining -= groupSize;
+                }
+            }
+
+            // ======================================
+            // PROCESS NON-NATIVE ELITES / ROGUES / BOSSES
+            // ======================================
+            if (isFirstWave && eliteConfig != null && !eliteConfig.DisableBosses)
+            {
+                var eliteEntries = new (EliteLocationInfo info, WildSpawnType role, string bossName)[]
+                {
+                    (eliteConfig.Rogues, WildSpawnType.exUsec, "exusec"),
+                    (eliteConfig.Raiders, WildSpawnType.pmcBot, "pmcbot"),
+                    (eliteConfig.Bloodhounds, WildSpawnType.arenaFighterEvent, "arenafighterevent"),
+                    (eliteConfig.Cultists, WildSpawnType.sectantPriest, "sectantpriest"),
+                    (eliteConfig.BossKnight, WildSpawnType.bossKnight, "bossknight"),
+                    (eliteConfig.BossTagilla, WildSpawnType.bossTagilla, "bosstagilla"),
+                    (eliteConfig.BossKilla, WildSpawnType.bossKilla, "bosskilla"),
+                    (eliteConfig.BossZryachiy, WildSpawnType.bossZryachiy, "bosszryachiy"),
+                    (eliteConfig.BossGluhar, WildSpawnType.bossGluhar, "bossgluhar"),
+                    (eliteConfig.BossSanitar, WildSpawnType.bossSanitar, "bosssanitar"),
+                    (eliteConfig.BossKolontay, WildSpawnType.bossKolontay, "bosskolontay"),
+                    (eliteConfig.BossReshala, WildSpawnType.bossBully, "bossreshala"),
+                    (eliteConfig.BossKaban, WildSpawnType.bossBoar, "bosskaban"),
+                    (eliteConfig.BossShturman, WildSpawnType.bossKojaniy, "bossshturman"),
+                    (eliteConfig.BossPartisan, WildSpawnType.bossPartisan, "bosspartisan"),
+                    (eliteConfig.BossGifter, WildSpawnType.gifter, "gifter")
+                };
+
+                foreach (var entry in eliteEntries)
+                {
+                    if (entry.info == null || !entry.info.Enable) continue;
+
+                    int spawnChance = GetBossChanceForMap(entry.info.SpawnChance, mapName);
+                    if (spawnChance <= 0) continue;
+
+                    // Se o mapa JÁ possui uma wave vanilla nativa para este chefe/elite (ex: Rogues no Lighthouse ou Reshala no Customs),
+                    // a wave vanilla é ajustada no AdjustVanillaBossWaves() e controlada nativamente.
+                    if (HasNativeVanillaWave(entry.bossName)) continue;
+
+                    // Se NÃO possui wave nativa no mapa (ex: Rogues no Customs ou Ground Zero), geramos o spawn dinamicamente!
+                    if (UnityEngine.Random.Range(1, 101) <= spawnChance)
+                    {
+                        int targetGroupSize = entry.info.MaxGroupSize > 0 ? entry.info.MaxGroupSize : 1;
+                        if (entry.info.GroupChance > 0 && entry.info.GroupChance < 100)
+                        {
+                            if (UnityEngine.Random.Range(1, 101) > entry.info.GroupChance)
+                            {
+                                targetGroupSize = 1;
+                            }
+                            else
+                            {
+                                targetGroupSize = UnityEngine.Random.Range(2, Mathf.Max(2, entry.info.MaxGroupSize) + 1);
+                            }
+                        }
+
+                        BotZone selectedZone = GetZoneFromConfig(entry.info, mapName);
+                        Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Non-Native Elite Invasion: Queueing squad of {targetGroupSize}x {entry.role} ({entry.bossName}) on {mapName} in zone '{selectedZone?.NameZone ?? "Random"}' (Chance: {spawnChance}%)...");
+                        
+                        var gData = new SpawnGroupData
+                        {
+                            Role = entry.role,
+                            Difficulty = BotDifficulty.normal,
+                            GroupSize = targetGroupSize,
+                            Info = entry.info
+                        };
+                        spawnList.Add(new Tuple<SpawnGroupData, BotZone>(gData, selectedZone));
+                    }
                 }
             }
 
@@ -671,7 +744,7 @@ namespace TRLDynamicSpawn.Components
 
             // Embaralha as sublistas, mas intercala de forma balanceada PMCs e Scavs
             var rng = new System.Random();
-            var pmcs = spawnList.Where(t => t.Item1.Role == WildSpawnType.pmcUSEC || t.Item1.Role == WildSpawnType.pmcBEAR || t.Item1.Role == WildSpawnType.exUsec).OrderBy(x => rng.Next()).ToList();
+            var pmcs = spawnList.Where(t => t.Item1.Role == WildSpawnType.pmcUSEC || t.Item1.Role == WildSpawnType.pmcBEAR).OrderBy(x => rng.Next()).ToList();
             var scavs = spawnList.Where(t => t.Item1.Role == WildSpawnType.assault || t.Item1.Role == WildSpawnType.marksman).OrderBy(x => rng.Next()).ToList();
             var elites = spawnList.Except(pmcs).Except(scavs).OrderBy(x => rng.Next()).ToList();
 
@@ -850,7 +923,12 @@ namespace TRLDynamicSpawn.Components
 
         private IEnumerator SpawnGroupBotsCoroutine(WildSpawnType role, BotDifficulty diff, int groupSize, BotZone zone)
         {
-            if (zone == null || groupSize <= 0) yield break;
+            if (groupSize <= 0) yield break;
+            if (zone == null)
+            {
+                zone = TRLDynamicSpawn.Helpers.Methods.GetRandomZone(_botsController?.BotSpawner);
+                if (zone == null) yield break;
+            }
 
             bool isSain = IsSainInstalled();
             Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn][SPY] SQUAD SPAWN INITIATED: Role={role}, Difficulty={diff}, GroupSize={groupSize}, Zone={zone.NameZone}, SAIN Active={isSain}");
@@ -1164,6 +1242,7 @@ namespace TRLDynamicSpawn.Components
                     else if (bossNameLower == "arenafighterevent") bossInfo = _serverConfig?.EliteConfig?.Bloodhounds;
                     else if (bossNameLower == "sectantpriest") bossInfo = _serverConfig?.EliteConfig?.Cultists;
                     else if (bossNameLower == "gifter") bossInfo = _serverConfig?.EliteConfig?.BossGifter;
+                    else if (bossNameLower == "exusec") bossInfo = _serverConfig?.EliteConfig?.Rogues;
 
                     if (bossInfo != null)
                     {
@@ -1184,6 +1263,33 @@ namespace TRLDynamicSpawn.Components
             {
                 Plugin.LogSource.LogError($"[TRL-DynamicSpawn] Error adjusting vanilla boss waves: {ex.Message}\n{ex.StackTrace}");
             }
+        }
+
+        private bool HasNativeVanillaWave(string bossNameLower)
+        {
+            var game = Singleton<IBotGame>.Instance;
+            if (game == null || game.BossSpawnScenario == null || game.BossSpawnScenario.BossSpawnWaves == null)
+                return false;
+
+            return game.BossSpawnScenario.BossSpawnWaves.Any(w => w != null && w.BossName != null && w.BossName.ToLower() == bossNameLower);
+        }
+
+        private BotZone GetZoneFromConfig(EliteLocationInfo info, string mapName)
+        {
+            if (info == null) return null;
+            string zonesString = GetBossZoneForMap(info.BossZone, mapName);
+            if (!string.IsNullOrEmpty(zonesString))
+            {
+                string[] possibleZones = zonesString.Split(',').Select(z => z.Trim()).Where(z => !string.IsNullOrEmpty(z)).ToArray();
+                if (possibleZones.Length > 0)
+                {
+                    string selectedZoneName = possibleZones[UnityEngine.Random.Range(0, possibleZones.Length)];
+                    var allZones = LocationScene.GetAllObjects<BotZone>();
+                    var zone = allZones != null ? allZones.FirstOrDefault(z => z != null && string.Equals(z.NameZone, selectedZoneName, StringComparison.OrdinalIgnoreCase)) : null;
+                    if (zone != null) return zone;
+                }
+            }
+            return TRLDynamicSpawn.Helpers.Methods.GetRandomZone(_botsController?.BotSpawner);
         }
 
         private int GetBossChanceForMap(ValidLocationInt chance, string mapName)
