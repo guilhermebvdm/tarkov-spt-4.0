@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using SPTarkov.Server.Core.Servers.Ws;
 using SPTarkov.Server.Core.Models.Eft.Ws;
@@ -39,6 +40,7 @@ namespace TRL_SpeakFromTarkov.Server.Controllers
 
     [ApiController]
     [Route("sft/channels")]
+    [Consumes("application/json", "text/plain", "application/octet-stream", "*/*")]
     public class SftChannelController(SptWebSocketConnectionHandler webSocketHandler) : ControllerBase
     {
         private static readonly ConcurrentDictionary<int, SftMenuChannelDto> _channels = new ConcurrentDictionary<int, SftMenuChannelDto>();
@@ -72,8 +74,23 @@ namespace TRL_SpeakFromTarkov.Server.Controllers
         }
 
         [HttpPost("announce")]
-        public IActionResult AnnounceChannel([FromBody] SftChannelActionDto data)
+        [Consumes("application/json", "text/plain", "application/octet-stream", "*/*")]
+        public async Task<IActionResult> AnnounceChannel([FromBody] SftChannelActionDto? data)
         {
+            if (data == null)
+            {
+                try
+                {
+                    using var reader = new System.IO.StreamReader(Request.Body);
+                    string rawJson = await reader.ReadToEndAsync();
+                    if (!string.IsNullOrEmpty(rawJson))
+                    {
+                        data = System.Text.Json.JsonSerializer.Deserialize<SftChannelActionDto>(rawJson);
+                    }
+                }
+                catch { }
+            }
+
             if (data == null || data.channelId <= 0) return BadRequest();
 
             if (data.action == 1) // Close
