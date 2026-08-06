@@ -49,15 +49,10 @@ namespace TRLDynamicSpawn.Components
 
         private IEnumerator DespawnLoop()
         {
-            // Fetch Config
-            string json = RequestHandler.GetJson("/trldynamicspawn/getConfig");
-            if (!string.IsNullOrEmpty(json))
-            {
-                _serverConfig = JsonConvert.DeserializeObject<TRLConfig>(json);
-            }
-
             while (true)
             {
+                _serverConfig = ServerConfigProvider.Config;
+
                 // Config can be null if not loaded yet
                 if (_serverConfig == null || !TRLDynamicSpawn.Helpers.Settings.masterDespawnToggle.Value)
                 {

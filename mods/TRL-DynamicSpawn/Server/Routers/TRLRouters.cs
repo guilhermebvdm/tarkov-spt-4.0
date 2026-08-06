@@ -91,9 +91,12 @@ public class TRLRouters : StaticRouter
                 {
                     try
                     {
-                        CurrentConfig = new TRLConfig();
-                        await TRLDynamicSpawnServer.Globals.TRLConfigManager.SaveConfig();
-                        return await new ValueTask<string>("{\"status\":\"success\",\"message\":\"Config reset to defaults\"}");
+                        var result = await TRLDynamicSpawnServer.Globals.TRLConfigManager.ResetConfig();
+                        if (result == TRLDynamicSpawnServer.Globals.ConfigOperationResult.Success)
+                        {
+                            return await new ValueTask<string>("{\"status\":\"success\",\"message\":\"Config reset to defaults\"}");
+                        }
+                        return await new ValueTask<string>("{\"status\":\"error\",\"message\":\"Failed to reset config\"}");
                     }
                     catch (System.Exception ex)
                     {

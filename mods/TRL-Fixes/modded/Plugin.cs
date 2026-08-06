@@ -9,7 +9,7 @@ namespace TRLFixes
     // e o log diz "FIKA nao detectado". Falha SILENCIOSA disfarçada de "FIKA não instalado", que
     // custaria uma sessão de teste inteira. Soft = ordena a carga se presente, não exige.
     // GUID confirmado: fika-plugin/Fika.Core/FikaPlugin.cs:40. Mesmo padrão de DiscordRaidMap e MOAR-Client.
-    [BepInPlugin("com.trl.fixes", "TRL Fixes", "1.1.0")]
+    [BepInPlugin("com.trl.fixes", "TRL Fixes", "1.2.0")]
     [BepInDependency("com.fika.core", BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin
     {
@@ -78,6 +78,20 @@ namespace TRLFixes
             catch (Exception ex)
             {
                 Logger.LogError($"TRL-Fixes: Falha ao carregar FikaMainThreadUISafetyPatch: {ex.Message}");
+            }
+
+            try
+            {
+                new Patches.BotMountWeaponFixPatch().Enable();
+                new Patches.GClass81ShallUseNowPatch().Enable();
+                new Patches.BotStationaryWeaponDataMethod4Patch().Enable();
+                new Patches.FikaPlayerOperateStationaryWeaponPatch().Enable();
+                new Patches.PlayerOperateStationaryWeaponPatch().Enable();
+                Logger.LogInfo("TRL-Fixes: BotMountWeaponFixPatch ativado com sucesso.");
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"TRL-Fixes: Falha ao carregar BotMountWeaponFixPatch: {ex.Message}");
             }
         }
     }

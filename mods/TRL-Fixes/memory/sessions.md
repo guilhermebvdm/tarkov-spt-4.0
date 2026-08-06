@@ -68,3 +68,19 @@
 **Code Review (CR-01) — Achados em TRL-Fixes:**
 - 🟡 CR-01-04: Fallback do `DynamicMapsSafetyPatch` retorna comportamento ineficaz se `ModdedMapScreen` não existir — considerar retornar `null` em vez de fallback enganoso.
 - 🟢 CR-01-05: `AccessTools.TypeByName("EFT.UI.PreloaderUI")` pode ser substituído por `typeof(PreloaderUI)` para segurança de compilação.
+
+---
+
+## 2026-08-05 — Sessão 5: Migração do Bot Mount Fix Patch de DynamicSpawn para TRL-Fixes
+
+**Tema central:** Migração e centralização do patch de armas estacionárias (`BotMountWeaponFixPatch`) de `TRL-DynamicSpawn` para `TRL-Fixes`.
+
+**Alterações Realizadas:**
+1. **`BotMountWeaponFixPatch.cs`**:
+   - Replicada a lógica do patch `StationaryWeaponPatch` de `TRL-DynamicSpawn` para `TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs`.
+   - Intercepta `BotStationaryWeaponData.TakeStationaryWeapon()` prevenindo o travamento da IA de Rogues/Bots ao montar em metralhadoras e metralhadoras pesadas/AGS.
+2. **Ativação no `Plugin.cs`**:
+   - Ativado `BotMountWeaponFixPatch` no `Awake()` do `TRL-Fixes`.
+3. **Validação de Build**:
+   - `TRLFixes.csproj` compilado com **0 Erros e 0 Warnings**.
+

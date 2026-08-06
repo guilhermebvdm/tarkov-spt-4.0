@@ -206,7 +206,7 @@ namespace TRLDynamicSpawn.Components
                 double minSafeDist = 100.0;
                 double maxBubbleDist = 300.0;
 
-                var mapSettings = MapNameHelper.GetMapSettings(DynamicSpawnManager.Instance?.ServerConfig, mapName);
+                var mapSettings = MapNameHelper.GetMapSettings(ServerConfigProvider.Config, mapName);
                 if (mapSettings != null)
                 {
                     minSafeDist = mapSettings.SafeZoneDistance;
