@@ -5,6 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 using EFT;
 using System.Linq;
@@ -12,6 +13,17 @@ using TRL_SpeakFromTarkov.Audio;
 
 namespace TRL_SpeakFromTarkov.Network
 {
+    [Serializable]
+    public class SftChannelPostDto
+    {
+        public int channelId;
+        public string channelName = string.Empty;
+        public string hostProfileId = string.Empty;
+        public string hostNickname = string.Empty;
+        public string targetProfileId = string.Empty;
+        public int action;
+    }
+
     public class SftNetwork : MonoBehaviour
     {
         private static ManualLogSource Log => VoIPPlugin.Log;
@@ -276,9 +288,6 @@ namespace TRL_SpeakFromTarkov.Network
         {
             try
             {
-                EnsurePacketsRegistered();
-                if (!Singleton<IFikaNetworkManager>.Instantiated) return;
-
                 var packet = new SftChannelAnnouncementPacket
                 {
                     ChannelId = channelId,
@@ -288,7 +297,33 @@ namespace TRL_SpeakFromTarkov.Network
                     TargetProfileId = targetProfileId ?? string.Empty,
                     Action = action
                 };
-                Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, Fika.Core.Networking.LiteNetLib.DeliveryMethod.ReliableOrdered, broadcast: true);
+
+                // 1. Envia via LiteNetLib se a sessão do FIKA estiver ativa
+                if (Singleton<IFikaNetworkManager>.Instantiated)
+                {
+                    EnsurePacketsRegistered();
+                    Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, Fika.Core.Networking.LiteNetLib.DeliveryMethod.ReliableOrdered, broadcast: true);
+                }
+
+                // 2. Transmite via HTTP para o Servidor SPT (Visível para TODOS no Menu Principal)
+                Task.Run(() =>
+                {
+                    try
+                    {
+                        var dto = new SftChannelPostDto
+                        {
+                            channelId = (int)channelId,
+                            channelName = channelName ?? "",
+                            hostProfileId = hostProfileId ?? "",
+                            hostNickname = hostNickname ?? "",
+                            targetProfileId = targetProfileId ?? "",
+                            action = (int)action
+                        };
+                        string json = UnityEngine.JsonUtility.ToJson(dto);
+                        SPT.Common.Http.RequestHandler.PostJson("/sft/channels/announce", json);
+                    }
+                    catch { }
+                });
             }
             catch (Exception ex)
             {

@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <RootNamespace>TRL_SpeakFromTarkov.Server</RootNamespace>
+    <AssemblyName>TRL-SpeakFromTarkov.Server</AssemblyName>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <OutputType>Library</OutputType>
+    <Version>1.6.0</Version>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <EnableDefaultContentItems>false</EnableDefaultContentItems>
+    <NoDefaultLaunchSettingsFile>true</NoDefaultLaunchSettingsFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SPTarkov.Server.Core" Version="4.0.2" />
+    <PackageReference Include="SPTarkov.Server.Web" Version="4.0.2" />
+    <PackageReference Include="SPTarkov.DI" Version="4.0.2" />
+    <PackageReference Include="SPTarkov.Common" Version="4.0.2" />
+    <PackageReference Include="SemanticVersioning" Version="3.0.0" />
+  </ItemGroup>
+</Project>

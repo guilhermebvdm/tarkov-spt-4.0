@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 using EFT;
 using EFT.UI;
@@ -11,12 +12,30 @@ using TRL_SpeakFromTarkov.Network;
 
 namespace TRL_SpeakFromTarkov.UI
 {
+    [Serializable]
+    public class SftMenuChannelDto
+    {
+        public int channelId;
+        public string channelName = string.Empty;
+        public string hostProfileId = string.Empty;
+        public string hostNickname = string.Empty;
+        public long lastSeen;
+        public string[] members = new string[0];
+        public string[] bannedProfileIds = new string[0];
+    }
+
+    [Serializable]
+    public class SftMenuChannelDtoListWrapper
+    {
+        public SftMenuChannelDto[] channels = new SftMenuChannelDto[0];
+    }
+
     public class SftMenuChannel
     {
         public byte ChannelId { get; set; }
-        public string ChannelName { get; set; }
-        public string HostProfileId { get; set; }
-        public string HostNickname { get; set; }
+        public string ChannelName { get; set; } = string.Empty;
+        public string HostProfileId { get; set; } = string.Empty;
+        public string HostNickname { get; set; } = string.Empty;
         public DateTime LastSeen { get; set; }
         public HashSet<string> Members { get; set; } = new HashSet<string>();
         public HashSet<string> BannedProfileIds { get; set; } = new HashSet<string>();
@@ -24,7 +43,7 @@ namespace TRL_SpeakFromTarkov.UI
 
     public class MenuVoipHUD : MonoBehaviour
     {
-        public static MenuVoipHUD Instance { get; private set; }
+        public static MenuVoipHUD Instance { get; private set; } = null!;
 
         private ConcurrentDictionary<byte, SftMenuChannel> activeChannels = new ConcurrentDictionary<byte, SftMenuChannel>();
         public byte? ConnectedChannelId { get; private set; } = null;
@@ -42,24 +61,25 @@ namespace TRL_SpeakFromTarkov.UI
         private string pendingTargetNickname = string.Empty;
         private byte pendingChannelId = 0;
 
-        private Texture2D bgTex;
-        private Texture2D headerTex;
-        private Texture2D btnGreenTex;
-        private Texture2D btnRedTex;
-        private Texture2D btnNormalTex;
-        private Texture2D borderTex;
-        private Texture2D modalBgTex;
+        private Texture2D bgTex = null!;
+        private Texture2D headerTex = null!;
+        private Texture2D btnGreenTex = null!;
+        private Texture2D btnRedTex = null!;
+        private Texture2D btnNormalTex = null!;
+        private Texture2D borderTex = null!;
+        private Texture2D modalBgTex = null!;
 
         private float lastHeartbeatTime = 0f;
+        private float lastServerFetchTime = 0f;
         private Vector2 scrollPosition = Vector2.zero;
 
-        private GUIStyle headerStyle;
-        private GUIStyle itemStyle;
-        private GUIStyle subStyle;
-        private GUIStyle btnGreenStyle;
-        private GUIStyle btnRedStyle;
-        private GUIStyle btnNormalStyle;
-        private GUIStyle modalStyle;
+        private GUIStyle headerStyle = null!;
+        private GUIStyle itemStyle = null!;
+        private GUIStyle subStyle = null!;
+        private GUIStyle btnGreenStyle = null!;
+        private GUIStyle btnRedStyle = null!;
+        private GUIStyle btnNormalStyle = null!;
+        private GUIStyle modalStyle = null!;
         private bool stylesInitialized = false;
 
         private string GetLocalSessionId()
@@ -106,13 +126,69 @@ namespace TRL_SpeakFromTarkov.UI
                 wasInRaid = true;
             }
 
-            // Executa limpezas e heartbeats periódicos a cada 3s (somente fora de raid)
-            if (!inRaid && Time.time - lastHeartbeatTime > 3.0f)
+            // Executa limpezas, heartbeats e busca no servidor SPT a cada 2s-3s (somente fora de raid)
+            if (!inRaid)
             {
-                lastHeartbeatTime = Time.time;
-                CleanupStaleChannels();
-                SendChannelHeartbeats();
+                if (Time.time - lastServerFetchTime > 2.0f)
+                {
+                    lastServerFetchTime = Time.time;
+                    FetchServerChannels();
+                }
+
+                if (Time.time - lastHeartbeatTime > 3.0f)
+                {
+                    lastHeartbeatTime = Time.time;
+                    CleanupStaleChannels();
+                    SendChannelHeartbeats();
+                }
             }
+        }
+
+        private void FetchServerChannels()
+        {
+            Task.Run(() =>
+            {
+                try
+                {
+                    string json = SPT.Common.Http.RequestHandler.GetJson("/sft/channels/list");
+                    if (!string.IsNullOrEmpty(json) && json != "[]")
+                    {
+                        string wrappedJson = "{\"channels\":" + json + "}";
+                        var wrapper = UnityEngine.JsonUtility.FromJson<SftMenuChannelDtoListWrapper>(wrappedJson);
+                        if (wrapper != null && wrapper.channels != null)
+                        {
+                            var now = DateTime.Now;
+                            foreach (var dto in wrapper.channels)
+                            {
+                                byte cId = (byte)dto.channelId;
+                                var ch = activeChannels.GetOrAdd(cId, id => new SftMenuChannel
+                                {
+                                    ChannelId = id,
+                                    ChannelName = dto.channelName,
+                                    HostProfileId = dto.hostProfileId,
+                                    HostNickname = dto.hostNickname,
+                                    LastSeen = now
+                                });
+
+                                ch.ChannelName = dto.channelName;
+                                ch.HostProfileId = dto.hostProfileId;
+                                ch.HostNickname = dto.hostNickname;
+                                ch.LastSeen = now;
+
+                                if (dto.members != null)
+                                {
+                                    ch.Members = new HashSet<string>(dto.members);
+                                }
+                                if (dto.bannedProfileIds != null)
+                                {
+                                    ch.BannedProfileIds = new HashSet<string>(dto.bannedProfileIds);
+                                }
+                            }
+                        }
+                    }
+                }
+                catch { }
+            });
         }
 
         private void AutoRestoreMenuChannel()
@@ -136,14 +212,12 @@ namespace TRL_SpeakFromTarkov.UI
             {
                 var ch = kvp.Value;
 
-                // Se o jogador local é participante ou dono do canal, renova o LastSeen para nunca expirar sozinho!
                 if (ch.Members.Contains(myId) || ch.HostProfileId == myId || ConnectedChannelId == ch.ChannelId)
                 {
                     ch.LastSeen = now;
                     continue;
                 }
 
-                // Canais de outros jogadores expiram após 15s sem heartbeat
                 if ((now - ch.LastSeen).TotalSeconds > 15)
                 {
                     activeChannels.TryRemove(kvp.Key, out _);
@@ -163,13 +237,11 @@ namespace TRL_SpeakFromTarkov.UI
             string myId = GetLocalSessionId();
             if (activeChannels.TryGetValue(cId, out var channel))
             {
-                // Se eu sou o Host OU se o Host original não está no menu e eu sou o primeiro membro ativo no menu:
                 bool isHost = (channel.HostProfileId == myId);
                 bool shouldBroadcast = isHost;
 
                 if (!isHost && channel.Members.Contains(myId))
                 {
-                    // Failover de Liderança no Menu: se o Host original estiver na raid, o membro no menu assume a manutenção do canal!
                     string firstActiveMember = channel.Members.OrderBy(m => m).FirstOrDefault();
                     if (firstActiveMember == myId)
                     {
@@ -249,7 +321,7 @@ namespace TRL_SpeakFromTarkov.UI
 
         public void CreateNewChannel()
         {
-            if (ConnectedChannelId.HasValue) return; // Não permite criar se já estiver em um canal
+            if (ConnectedChannelId.HasValue) return;
 
             string myNick = GetMyNickname();
             string myProfileId = GetLocalSessionId();
@@ -289,7 +361,6 @@ namespace TRL_SpeakFromTarkov.UI
             ConnectedChannelId = channelId;
             ConnectedChannelName = channelName;
 
-            // Salva o canal em memória para reconexão automática ao sair da raid!
             SavedMenuChannelId = channelId;
             SavedMenuChannelName = channelName;
 
@@ -301,7 +372,7 @@ namespace TRL_SpeakFromTarkov.UI
             if (VoipController.Instance != null)
             {
                 VoipController.Instance.SetCurrentChannel(channelId);
-                VoipController.Instance.EnableMenuCapture(true); // LIGA O MICROFONE AO ENTRAR
+                VoipController.Instance.EnableMenuCapture(true);
             }
 
             SftNetwork.BroadcastChannelAnnouncement(channelId, channelName, myId, GetMyNickname(), 2);
@@ -314,7 +385,6 @@ namespace TRL_SpeakFromTarkov.UI
 
             if (userInitiated)
             {
-                // Se o usuário clicou manualmente em SAIR ou foi Kicked/Banned, limpa a memória
                 SavedMenuChannelId = null;
                 SavedMenuChannelName = string.Empty;
             }
@@ -328,7 +398,6 @@ namespace TRL_SpeakFromTarkov.UI
 
                     if (channel.Members.Count > 0)
                     {
-                        // Transfere a liderança para o próximo membro remanescente no canal
                         string nextHost = channel.Members.First();
                         channel.HostProfileId = nextHost;
                         SftNetwork.BroadcastChannelAnnouncement(oldId, channel.ChannelName, nextHost, channel.HostNickname, 0);
@@ -336,7 +405,6 @@ namespace TRL_SpeakFromTarkov.UI
                     }
                     else
                     {
-                        // Se era o último membro, desfaz o canal
                         activeChannels.TryRemove(oldId, out _);
                         SftNetwork.BroadcastChannelAnnouncement(oldId, channel.ChannelName, myId, GetMyNickname(), 1); // Close
                     }
@@ -349,7 +417,7 @@ namespace TRL_SpeakFromTarkov.UI
             if (VoipController.Instance != null)
             {
                 VoipController.Instance.SetCurrentChannel(1);
-                VoipController.Instance.EnableMenuCapture(false); // DESLIGA O MICROFONE AO SAIR
+                VoipController.Instance.EnableMenuCapture(false);
             }
             VoIPPlugin.Log.LogInfo("[SFT-MENU] Desconectado do canal de voz do menu. Microfone desligado.");
         }
@@ -411,7 +479,7 @@ namespace TRL_SpeakFromTarkov.UI
             {
                 fontSize = 14
             };
-            headerStyle.normal.textColor = new Color(0.9f, 0.77f, 0.51f); // Amarelo Khaki Tarkov
+            headerStyle.normal.textColor = new Color(0.9f, 0.77f, 0.51f);
 
             itemStyle = new GUIStyle(GUI.skin.label)
             {
@@ -444,10 +512,6 @@ namespace TRL_SpeakFromTarkov.UI
             modalStyle.normal.textColor = Color.white;
         }
 
-        /// <summary>
-        /// VERIFICAÇÃO ESTRITA DE VISIBILIDADE DO FIKA:
-        /// Inspeciona a visibilidade ativa em hierarquia do GameObject interno do FIKA (`_userInterface`).
-        /// </summary>
         private bool IsFikaHUDVisible()
         {
             if (!Fika.Core.UI.Custom.MainMenuUIScript.Exist) return false;
@@ -477,17 +541,14 @@ namespace TRL_SpeakFromTarkov.UI
 
         private void OnGUI()
         {
-            // Exibe a interface APENAS no Menu Principal (fora de raid)
             if (Singleton<GameWorld>.Instantiated) return;
             if (VoIPPlugin.EnableMod != null && !VoIPPlugin.EnableMod.Value) return;
 
-            // SERVICE DE GENTE GRANDE: Verifica se o painel do FIKA está VISÍVEL na tela
             if (!IsFikaHUDVisible()) return;
 
             InitStyles();
             GUI.depth = -900;
 
-            // ALINHAMENTO EXATO COM A JANELA DO FIKA
             float width = 400f;
             float marginRight = 55f;
             float marginTop = 35f;
@@ -497,21 +558,18 @@ namespace TRL_SpeakFromTarkov.UI
             float height = ConnectedChannelId.HasValue ? 260f : 210f;
             Rect containerRect = new Rect(posX, posY, width, height);
 
-            // Fundo e Moldura
             GUI.DrawTexture(containerRect, bgTex);
             GUI.DrawTexture(new Rect(posX, posY, width, 1), borderTex);
             GUI.DrawTexture(new Rect(posX, posY + height - 1, width, 1), borderTex);
             GUI.DrawTexture(new Rect(posX, posY, 1, height), borderTex);
             GUI.DrawTexture(new Rect(posX + width - 1, posY, 1, height), borderTex);
 
-            // Barra de Cabeçalho
             Rect headerRect = new Rect(posX + 1, posY + 1, width - 2, 30);
             GUI.DrawTexture(headerRect, headerTex);
 
             int channelCount = activeChannels.Count;
             GUI.Label(new Rect(posX + 10, posY + 5, 220, 22), $"CANAIS DE VOIP: {channelCount}", headerStyle);
 
-            // BOTÃO DINÂMICO NO CABEÇALHO: "+ CRIAR CANAL" vs "SAIR DO CANAL"
             if (ConnectedChannelId.HasValue)
             {
                 if (GUI.Button(new Rect(posX + width - 135, posY + 4, 125, 22), "SAIR DO CANAL", btnRedStyle))
@@ -529,12 +587,10 @@ namespace TRL_SpeakFromTarkov.UI
 
             float currentY = posY + 36;
 
-            // Status do Canal Conectado & Controles do Dono
             if (ConnectedChannelId.HasValue)
             {
                 GUI.Label(new Rect(posX + 10, currentY, width - 150, 20), $"🔊 {ConnectedChannelName} (Conectado)", itemStyle);
 
-                // Mute Mic Toggle
                 var proc = VoipController.Instance?.processor;
                 if (proc != null)
                 {
@@ -546,7 +602,6 @@ namespace TRL_SpeakFromTarkov.UI
                 }
                 currentY += 24;
 
-                // LISTA DE MEMBROS E BOTÕES DE REMOVER/BANIR (Exclusivos do Dono do Canal)
                 string myId = GetLocalSessionId();
                 if (activeChannels.TryGetValue(ConnectedChannelId.Value, out var curChannel))
                 {
@@ -563,7 +618,6 @@ namespace TRL_SpeakFromTarkov.UI
 
                         GUI.Label(new Rect(posX + 15, currentY, 200, 20), $"🟢 {nick}", itemStyle);
 
-                        // Apenas o DONO vê os botões de REMOVER e BANIR em outros jogadores
                         if (isHost && memberId != myId)
                         {
                             if (GUI.Button(new Rect(posX + width - 145, currentY, 65, 18), "REMOVER", btnNormalStyle))
@@ -588,7 +642,6 @@ namespace TRL_SpeakFromTarkov.UI
             GUI.DrawTexture(new Rect(posX + 10, currentY, width - 20, 1), borderTex);
             currentY += 6;
 
-            // Título da Lista
             GUI.Label(new Rect(posX + 10, currentY, width - 20, 18), "CANAIS DISPONÍVEIS NO MENU:", subStyle);
             currentY += 20;
 
@@ -599,7 +652,6 @@ namespace TRL_SpeakFromTarkov.UI
             }
             else
             {
-                // SCROLLVIEW AUTOMÁTICO PARA A LISTA DE CANAIS
                 float visibleScrollHeight = (posY + height) - currentY - 6f;
                 float contentHeight = channelsList.Count * 26f;
 
@@ -631,7 +683,6 @@ namespace TRL_SpeakFromTarkov.UI
                 GUI.EndScrollView();
             }
 
-            // MODAL DE CONFIRMAÇÃO DE KICK / BAN
             DrawConfirmationModal();
         }
 
@@ -639,7 +690,7 @@ namespace TRL_SpeakFromTarkov.UI
         {
             if (pendingAction == PendingActionType.None) return;
 
-            GUI.depth = -1000; // Desenha sobre tudo
+            GUI.depth = -1000;
 
             float modalWidth = 420f;
             float modalHeight = 150f;
@@ -647,7 +698,6 @@ namespace TRL_SpeakFromTarkov.UI
             float mY = (Screen.height - modalHeight) / 2f;
             Rect modalRect = new Rect(mX, mY, modalWidth, modalHeight);
 
-            // Fundo escuro com borda vermelha/amarela
             GUI.DrawTexture(modalRect, modalBgTex);
             GUI.DrawTexture(new Rect(mX, mY, modalWidth, 2), borderTex);
             GUI.DrawTexture(new Rect(mX, mY + modalHeight - 2, modalWidth, 2), borderTex);
@@ -663,7 +713,6 @@ namespace TRL_SpeakFromTarkov.UI
 
             GUI.Label(new Rect(mX + 15, mY + 42, modalWidth - 30, 45), msg, modalStyle);
 
-            // Botões de Confirmação e Cancelamento
             string confirmBtnText = pendingAction == PendingActionType.Kick ? "SIM, REMOVER" : "SIM, BANIR";
             if (GUI.Button(new Rect(mX + 30, mY + 100, 160, 30), confirmBtnText, btnRedStyle))
             {

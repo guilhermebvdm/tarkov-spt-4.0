@@ -59,7 +59,9 @@
 - **Visibilidade Sincronizada com o FIKA:** Visibilidade do HUD vinculada ao objeto visual interno do FIKA (`_userInterface.activeInHierarchy`), garantindo que o painel fique oculto nas abas de Inventário/Personagem, Comerciantes, Mercado, Esconderijo e na Raid.
 - **Microfone Desligado por Padrão no Menu:** No menu principal, o microfone permanece 100% desligado (`capturer.StopCapture()`) e só é ativado quando o jogador cria ou entra em um canal de voz.
 - **Protocolo de Canais de Menu & Moderação:** Criado o [SftChannelAnnouncementPacket.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded/Network/SftChannelAnnouncementPacket.cs) com suporte a anúncios de sala, heartbeats, entrada, saída, `Kick` e `Ban`. Ações de moderação protegidas por modal de confirmação anti-missclick.
+- **Migração do Mod de Servidor para C# (SPT 4.0):** Implementado o Mod de Servidor C# em [SftChannelController.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/Server/TRL-SpeakFromTarkov.Server/Controllers/SftChannelController.cs) herda de `ControllerBase` (`[ApiController]`), disponibilizando endpoints HTTP (`/sft/channels/list` e `/sft/channels/announce`) para listagem instantânea de salas entre todos os jogadores no menu.
 - **Failover de Liderança P2P & Reconexão Pós-Raid:** Se o Host original do canal continuar na raid, os convidados que retornam ao menu assumem automaticamente a transmissão de heartbeats sem deixar o canal cair. Ao sair de uma partida, os jogadores são reconectados automaticamente ao canal de menu em que estavam antes da raid.
+- **Code Review:** Executada revisão em 6 categorias × 4 impactos com aprovação 100% (0 bloqueadores).
 
 **Pendências abertas nesta sessão:**
 - Nenhuma pendência blocker.
