@@ -40,7 +40,6 @@ namespace TRL_SpeakFromTarkov.Server.Controllers
 
     [ApiController]
     [Route("sft/channels")]
-    [Consumes("application/json", "text/plain", "application/octet-stream", "*/*")]
     public class SftChannelController(SptWebSocketConnectionHandler webSocketHandler) : ControllerBase
     {
         private static readonly ConcurrentDictionary<int, SftMenuChannelDto> _channels = new ConcurrentDictionary<int, SftMenuChannelDto>();
@@ -74,7 +73,6 @@ namespace TRL_SpeakFromTarkov.Server.Controllers
         }
 
         [HttpPost("announce")]
-        [Consumes("application/json", "text/plain", "application/octet-stream", "*/*")]
         public async Task<IActionResult> AnnounceChannel([FromBody] SftChannelActionDto? data)
         {
             if (data == null)
