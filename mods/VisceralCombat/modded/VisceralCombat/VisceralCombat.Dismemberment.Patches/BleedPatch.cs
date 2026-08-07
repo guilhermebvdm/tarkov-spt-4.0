@@ -100,13 +100,6 @@ public class BleedPatch : ModulePatch
 
 		private bool MoveNext()
 		{
-			//IL_00fe: Unknown result type (might be due to invalid IL or missing references)
-			//IL_0102: Unknown result type (might be due to invalid IL or missing references)
-			//IL_0107: Unknown result type (might be due to invalid IL or missing references)
-			//IL_00e6: Unknown result type (might be due to invalid IL or missing references)
-			//IL_0283: Unknown result type (might be due to invalid IL or missing references)
-			//IL_028e: Unknown result type (might be due to invalid IL or missing references)
-			//IL_0293: Unknown result type (might be due to invalid IL or missing references)
 			switch (_003C_003E1__state)
 			{
 			default:
@@ -220,7 +213,6 @@ public class BleedPatch : ModulePatch
 
 		bool IEnumerator.MoveNext()
 		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
 			return this.MoveNext();
 		}
 
@@ -285,7 +277,6 @@ public class BleedPatch : ModulePatch
 	[IteratorStateMachine(typeof(_003CWatchShot_003Ed__5))]
 	private static IEnumerator WatchShot(EftBulletClass shot)
 	{
-		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
 		return new _003CWatchShot_003Ed__5(0)
 		{
 			shot = shot
@@ -294,14 +285,6 @@ public class BleedPatch : ModulePatch
 
 	public static void HitEffect(Player player, Collider col, EftBulletClass shot, bool isAlive, float time, int bundleIndex)
 	{
-		//IL_00fe: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0115: Unknown result type (might be due to invalid IL or missing references)
-		//IL_011a: Unknown result type (might be due to invalid IL or missing references)
-		//IL_011f: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0152: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0157: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0165: Unknown result type (might be due to invalid IL or missing references)
-		//IL_016a: Unknown result type (might be due to invalid IL or missing references)
 		GameObject val = null;
 		switch (bundleIndex)
 		{
@@ -328,8 +311,14 @@ public class BleedPatch : ModulePatch
 			QuickLogger.Log(ELogType.Error, "HitEffect: bloodParticlesPrefab is null, aborting.");
 			return;
 		}
-		GameObject bloodParticleObject = Object.Instantiate<GameObject>(val);
-		bloodParticleObject.AddComponent<ParticleFloorPainter>();
+		GameObject bloodParticleObject = (GoreObjectPool.Instance != null) 
+			? GoreObjectPool.Instance.Spawn(val, shot.HitPoint, Quaternion.LookRotation(-shot.HitNormal), ((Component)col).transform)
+			: Object.Instantiate<GameObject>(val);
+
+		if (bloodParticleObject.GetComponent<ParticleFloorPainter>() == null)
+		{
+			bloodParticleObject.AddComponent<ParticleFloorPainter>();
+		}
 		bloodParticleObject.transform.SetParent(((Component)col).transform, false);
 		bloodParticleObject.transform.position = shot.HitPoint;
 		bloodParticleObject.transform.localRotation = Quaternion.LookRotation(-shot.HitNormal);
@@ -337,8 +326,8 @@ public class BleedPatch : ModulePatch
 		ParticleSystem[] array = componentsInChildren;
 		foreach (ParticleSystem val2 in array)
 		{
-			val2.loop = false;
 			ParticleSystem.MainModule main = val2.main;
+			main.loop = false;
 			main.duration = time;
 			ParticleSystem.CollisionModule collision = val2.collision;
 			collision.sendCollisionMessages = true;
@@ -350,20 +339,22 @@ public class BleedPatch : ModulePatch
 		}
 		GClass855.WaitSeconds((MonoBehaviour)(object)StaticManager.Instance, time + 1f, (Action)delegate
 		{
-			Object.Destroy((Object)(object)bloodParticleObject);
+			if (bloodParticleObject != null && Singleton<GameWorld>.Instantiated)
+			{
+				if (GoreObjectPool.Instance != null)
+				{
+					GoreObjectPool.Instance.Recycle(bloodParticleObject);
+				}
+				else
+				{
+					Object.Destroy((Object)(object)bloodParticleObject);
+				}
+			}
 		});
 	}
 
 	public static void BleedEffect(Collider col, EftBulletClass shot, bool isAlive, float chance, float time, int bundleIndex)
 	{
-		//IL_0105: Unknown result type (might be due to invalid IL or missing references)
-		//IL_011c: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0121: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0126: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0159: Unknown result type (might be due to invalid IL or missing references)
-		//IL_015e: Unknown result type (might be due to invalid IL or missing references)
-		//IL_016c: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0171: Unknown result type (might be due to invalid IL or missing references)
 		if (chance < 8f)
 		{
 			return;
@@ -394,7 +385,10 @@ public class BleedPatch : ModulePatch
 			QuickLogger.Log(ELogType.Error, "BleedEffect: bloodSquirtPrefab is null, aborting.");
 			return;
 		}
-		GameObject bloodSquirtObject = Object.Instantiate<GameObject>(val);
+		GameObject bloodSquirtObject = (GoreObjectPool.Instance != null)
+			? GoreObjectPool.Instance.Spawn(val, shot.HitPoint, Quaternion.LookRotation(-shot.Direction), ((Component)col).transform)
+			: Object.Instantiate<GameObject>(val);
+
 		bloodSquirtObject.transform.SetParent(((Component)col).transform, false);
 		bloodSquirtObject.transform.position = shot.HitPoint;
 		bloodSquirtObject.transform.rotation = Quaternion.LookRotation(-shot.Direction);
@@ -402,8 +396,8 @@ public class BleedPatch : ModulePatch
 		ParticleSystem[] array = componentsInChildren;
 		foreach (ParticleSystem val2 in array)
 		{
-			val2.loop = false;
 			ParticleSystem.MainModule main = val2.main;
+			main.loop = false;
 			main.duration = time;
 			ParticleSystem.CollisionModule collision = val2.collision;
 			collision.sendCollisionMessages = true;
@@ -415,7 +409,17 @@ public class BleedPatch : ModulePatch
 		}
 		GClass855.WaitSeconds((MonoBehaviour)(object)StaticManager.Instance, time + 1f, (Action)delegate
 		{
-			Object.Destroy((Object)(object)bloodSquirtObject);
+			if (bloodSquirtObject != null && Singleton<GameWorld>.Instantiated)
+			{
+				if (GoreObjectPool.Instance != null)
+				{
+					GoreObjectPool.Instance.Recycle(bloodSquirtObject);
+				}
+				else
+				{
+					Object.Destroy((Object)(object)bloodSquirtObject);
+				}
+			}
 		});
 	}
 }

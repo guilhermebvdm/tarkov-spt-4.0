@@ -8,17 +8,17 @@
 
 ## Resumo
 
-> 🔴 Bloqueadores: 1 · 🟠 Fortes: 2 · 🟡 Médios: 1 · 🟢 Menores: 1 · ✅ Resolvidos: 0 · Total: 5
+> 🔴 Bloqueadores: 0 · 🟠 Fortes: 0 · 🟡 Médios: 0 · 🟢 Menores: 0 · ✅ Resolvidos: 5 · Total: 5
 
 ## Índice
 
 | ID | Categoria | Impacto | Título | Status |
 | --- | --- | --- | --- | --- |
-| CR-01-01 | D — Arquitetura | 🔴 Bloqueador | Callback assíncrono em `WaitSeconds` pode causar `NullReferenceException` pós-raid | `[ ]` Pendente |
-| CR-01-02 | E — Desempenho/Manutenção | 🟠 Forte | Invocação de `SupportRigidbody` via Reflection a cada collider de ragdoll sem cache | `[ ]` Pendente |
-| CR-01-03 | B — Bug Latente | 🟠 Forte | Vazamento de memória nativa por falta de `Destroy` em `AnimatorOverrideController` | `[ ]` Pendente |
-| CR-01-04 | C — Gap vs. Spec | 🟡 Médio | `GoreObjectPool` criado mas não integrado ao `KillPatch` / `BleedPatch` | `[ ]` Pendente |
-| CR-01-05 | F — Melhoria Opcional | 🟢 Menor | Uso da propriedade obsoleta `ParticleSystem.loop` | `[ ]` Pendente |
+| CR-01-01 | D — Arquitetura | 🔴 Bloqueador | Callback assíncrono em `WaitSeconds` pode causar `NullReferenceException` pós-raid | ✅ Aplicado em 2026-08-07 |
+| CR-01-02 | E — Desempenho/Manutenção | 🟠 Forte | Invocação de `SupportRigidbody` via Reflection a cada collider de ragdoll sem cache | ✅ Aplicado em 2026-08-07 |
+| CR-01-03 | B — Bug Latente | 🟠 Forte | Vazamento de memória nativa por falta de `Destroy` em `AnimatorOverrideController` | ✅ Aplicado em 2026-08-07 |
+| CR-01-04 | C — Gap vs. Spec | 🟡 Médio | `GoreObjectPool` criado mas não integrado ao `KillPatch` / `BleedPatch` | ✅ Aplicado em 2026-08-07 |
+| CR-01-05 | F — Melhoria Opcional | 🟢 Menor | Uso da propriedade obsoleta `ParticleSystem.loop` | ✅ Aplicado em 2026-08-07 |
 
 ## Categorias
 
@@ -76,10 +76,11 @@ GClass855.WaitSeconds((MonoBehaviour)(object)StaticManager.Instance, sleepDelay,
 ```
 
 **Decisão:**
-- `[ ]` Pendente
-- `[ ]` Aceitar sugestão
-- `[ ]` Aceitar com modificação: _________________
-- `[ ]` Rejeitar (deferir / aceitar como dívida): _________________
+- `[x]` Aceitar sugestão
+
+**Resolução:**
+- **Status:** ✅ Aplicado em 2026-08-07
+- **Aplicação:** Adicionadas checagens de `Singleton<GameWorld>.Instantiated` e validações de não-nulo em todos os callbacks diferidos de `KillPatch.cs` e `BleedPatch.cs`.
 
 ---
 
@@ -108,10 +109,11 @@ private static readonly MethodInfo _supportRigidbodyMethod = typeof(Player).Asse
 E no loop utilizar apenas: `_supportRigidbodyMethod?.Invoke(null, new object[] { val4, 0f, null });`.
 
 **Decisão:**
-- `[ ]` Pendente
-- `[ ]` Aceitar sugestão
-- `[ ]` Aceitar com modificação: _________________
-- `[ ]` Rejeitar (deferir / aceitar como dívida): _________________
+- `[x]` Aceitar sugestão
+
+**Resolução:**
+- **Status:** ✅ Aplicado em 2026-08-07
+- **Aplicação:** Criado o campo estático `_supportRigidbodyMethod` em `RagdollClassPatch.cs` e reutilizado no loop de corpos rígidos do ragdoll.
 
 ---
 
@@ -141,10 +143,11 @@ if (p.BodyAnimatorCommon.runtimeAnimatorController is AnimatorOverrideController
 ```
 
 **Decisão:**
-- `[ ]` Pendente
-- `[ ]` Aceitar sugestão
-- `[ ]` Aceitar com modificação: _________________
-- `[ ]` Rejeitar (deferir / aceitar como dívida): _________________
+- `[x]` Aceitar sugestão
+
+**Resolução:**
+- **Status:** ✅ Aplicado em 2026-08-07
+- **Aplicação:** Adicionada a destruição com `UnityEngine.Object.Destroy(oldOverride)` antes de atribuir o novo `AnimatorOverrideController` no `KillPatch.cs`.
 
 ---
 
@@ -164,10 +167,11 @@ Instanciações frequentes durante tiroteios intensos geram picos de Garbage Col
 Conectar as chamadas de `GoreObjectPool.Rent` e `GoreObjectPool.Return` dentro dos métodos `SpawnArterialSprays` e `HitEffect`.
 
 **Decisão:**
-- `[ ]` Pendente
-- `[ ]` Aceitar sugestão
-- `[ ]` Aceitar com modificação: _________________
-- `[ ]` Rejeitar (deferir / aceitar como dívida): _________________
+- `[x]` Aceitar sugestão
+
+**Resolução:**
+- **Status:** ✅ Aplicado em 2026-08-07
+- **Aplicação:** Integrado `GoreObjectPool.Instance.Spawn` e `GoreObjectPool.Instance.Recycle` nos métodos `SpawnArterialSprays` de `KillPatch.cs` e `HitEffect` / `BleedEffect` de `BleedPatch.cs`.
 
 ---
 
@@ -187,10 +191,11 @@ Mantém o código livre de avisos de depreciação nas versões mais recentes da
 Usar `main.loop = false;` aproveitando a variável `main` obtida em `val.main`.
 
 **Decisão:**
-- `[ ]` Pendente
-- `[ ]` Aceitar sugestão
-- `[ ]` Aceitar com modificação: _________________
-- `[ ]` Rejeitar (deferir / aceitar como dívida): _________________
+- `[x]` Aceitar sugestão
+
+**Resolução:**
+- **Status:** ✅ Aplicado em 2026-08-07
+- **Aplicação:** Substituído `val.loop = false` por `main.loop = false` em `KillPatch.cs` e `BleedPatch.cs`.
 
 ---
 
@@ -199,3 +204,4 @@ Usar `main.loop = false;` aproveitando a variável `main` obtida em `val.main`.
 | Data | Evento |
 | --- | --- |
 | 2026-08-07 | Code review 01 criada via `/code-review` |
+| 2026-08-07 | Todos os 5 achados resolvidos e aplicados via plano de implementação aprovado |

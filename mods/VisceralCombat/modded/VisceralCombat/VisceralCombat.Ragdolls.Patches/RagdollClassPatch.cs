@@ -13,8 +13,12 @@ using Random = UnityEngine.Random;
 using Object = UnityEngine.Object;
 
 namespace VisceralCombat.Ragdolls.Patches;
+
 public class RagdollClassPatch : ModulePatch
 {
+	private static readonly MethodInfo _supportRigidbodyMethod = typeof(Player).Assembly.GetTypes()
+		.FirstOrDefault(t => t.GetMethod("SupportRigidbody") != null)?.GetMethod("SupportRigidbody");
+
 	[CompilerGenerated]
 	private sealed class _003CRagdollSleepHandler_003Ed__2 : IEnumerator<object>, IEnumerator, IDisposable
 	{
@@ -203,8 +207,7 @@ public class RagdollClassPatch : ModulePatch
 			val4.maxDepenetrationVelocity = __instance.Float_0;
 			val4.velocity = __instance.Vector3_0;
 			val4.collisionDetectionMode = __instance.CollisionDetectionMode_0;
-			MethodInfo supportMethod = typeof(Player).Assembly.GetTypes().FirstOrDefault(t => t.GetMethod("SupportRigidbody") != null)?.GetMethod("SupportRigidbody");
-			supportMethod?.Invoke(null, new object[] { val4, 0f, null });
+			_supportRigidbodyMethod?.Invoke(null, new object[] { val4, 0f, null });
 		}
 		__instance.Bool_2 = false;
 		if (__instance.Bool_1)

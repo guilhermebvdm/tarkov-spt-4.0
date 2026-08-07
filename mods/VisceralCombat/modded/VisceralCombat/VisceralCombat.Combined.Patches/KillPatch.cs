@@ -442,16 +442,21 @@ public class KillPatch : ModulePatch
 
 	internal static void SpawnArterialSprays(Transform target, Vector3 direction)
 	{
-		//IL_0033: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0038: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0099: Unknown result type (might be due to invalid IL or missing references)
-		//IL_00c3: Unknown result type (might be due to invalid IL or missing references)
-		//IL_011a: Unknown result type (might be due to invalid IL or missing references)
-		//IL_011f: Unknown result type (might be due to invalid IL or missing references)
-		//IL_012c: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0131: Unknown result type (might be due to invalid IL or missing references)
-		GameObject bloodParticleObject = Object.Instantiate<GameObject>(VisceralEntry.Instance.effectContainer.limbSquirter);
-		bloodParticleObject.AddComponent<ParticleFloorPainter>();
+		GameObject bloodParticleObject = null;
+		if (GoreObjectPool.Instance != null)
+		{
+			bloodParticleObject = GoreObjectPool.Instance.Spawn(VisceralEntry.Instance.effectContainer.limbSquirter, Vector3.zero, Quaternion.identity);
+		}
+		else
+		{
+			bloodParticleObject = Object.Instantiate<GameObject>(VisceralEntry.Instance.effectContainer.limbSquirter);
+		}
+
+		if (bloodParticleObject.GetComponent<ParticleFloorPainter>() == null)
+		{
+			bloodParticleObject.AddComponent<ParticleFloorPainter>();
+		}
+
 		if (((Component)target).transform.localScale == Vector3.zero)
 		{
 			bloodParticleObject.transform.parent = ((Component)target).transform.parent;
@@ -460,24 +465,37 @@ public class KillPatch : ModulePatch
 		{
 			bloodParticleObject.transform.parent = ((Component)target).transform;
 		}
-		bloodParticleObject.transform.localPosition = new Vector3(0f, 0f, 0f);
+		bloodParticleObject.transform.localPosition = Vector3.zero;
 		bloodParticleObject.transform.localRotation = new Quaternion(-0.0923f, 0.7011f, -0.0923f, -0.7011f);
 		ParticleSystem[] componentsInChildren = bloodParticleObject.GetComponentsInChildren<ParticleSystem>();
 		float num = UnityEngine.Random.Range(VisceralEntry.Instance.ArterySprayMin.Value, VisceralEntry.Instance.ArterySprayMax.Value);
 		ParticleSystem[] array = componentsInChildren;
 		foreach (ParticleSystem val in array)
 		{
-			val.loop = false;
 			ParticleSystem.MainModule main = val.main;
+			main.loop = false;
 			main.duration = num;
 			ParticleSystem.CollisionModule collision = val.collision;
 			collision.sendCollisionMessages = true;
-			((Component)val).gameObject.AddComponent<ParticleFloorPainter>();
+			if (((Component)val).gameObject.GetComponent<ParticleFloorPainter>() == null)
+			{
+				((Component)val).gameObject.AddComponent<ParticleFloorPainter>();
+			}
 			val.Play();
 		}
 		GClass855.WaitSeconds((MonoBehaviour)(object)StaticManager.Instance, num + 1f, (Action)delegate
 		{
-			Object.Destroy((Object)(object)bloodParticleObject);
+			if (bloodParticleObject != null && Singleton<GameWorld>.Instantiated)
+			{
+				if (GoreObjectPool.Instance != null)
+				{
+					GoreObjectPool.Instance.Recycle(bloodParticleObject);
+				}
+				else
+				{
+					Object.Destroy((Object)(object)bloodParticleObject);
+				}
+			}
 		});
 	}
 
@@ -522,6 +540,13 @@ public class KillPatch : ModulePatch
 		}
 
 		p.BodyAnimatorCommon.enabled = true;
+
+		// CR-01-03: Destruição do AnimatorOverrideController anterior para evitar vazamento de memória nativa
+		if (p.BodyAnimatorCommon.runtimeAnimatorController is AnimatorOverrideController oldOverride)
+		{
+			UnityEngine.Object.Destroy(oldOverride);
+		}
+
 		AnimatorOverrideController runtimeAnimatorController = new AnimatorOverrideController(p.BodyAnimatorCommon.runtimeAnimatorController);
 		p.BodyAnimatorCommon.runtimeAnimatorController = (RuntimeAnimatorController)(object)runtimeAnimatorController;
 		RagdollHelperClass.PlayDeathAnimation(p, componentInChildren, eBodyPart);
@@ -551,7 +576,7 @@ public class KillPatch : ModulePatch
 		componentInChildren.state = PuppetMaster.State.Dead;
 		GClass855.WaitSeconds((MonoBehaviour)(object)StaticManager.Instance, 0.1f, (Action)delegate
 		{
-			if (p.BodyAnimatorCommon != null)
+			if (p != null && p.BodyAnimatorCommon != null && Singleton<GameWorld>.Instantiated)
 			{
 				p.BodyAnimatorCommon.enabled = true;
 			}
@@ -563,7 +588,7 @@ public class KillPatch : ModulePatch
 			float sleepDelay = (VisceralEntry.Instance.RagdollDisableTime != null) ? VisceralEntry.Instance.RagdollDisableTime.Value : 3.5f;
 			GClass855.WaitSeconds((MonoBehaviour)(object)StaticManager.Instance, sleepDelay, (Action)delegate
 			{
-				if (componentInChildren != null)
+				if (componentInChildren != null && ((Component)componentInChildren).gameObject != null && Singleton<GameWorld>.Instantiated)
 				{
 					componentInChildren.mode = PuppetMaster.Mode.Kinematic;
 					((Behaviour)componentInChildren).enabled = false;
