@@ -152,7 +152,7 @@ public class KillPatch : ModulePatch
 		}
 		if ((int)damageInfo.DamageType != 2048 && (int)damageInfo.DamageType != 4 && (int)damageInfo.DamageType != 32 && (int)damageInfo.DamageType != 8 && (int)damageInfo.DamageType != 16 && (int)damageInfo.DamageType != 8192)
 		{
-			if (!Singleton<ItemFactoryClass>.Instance.ItemTemplates.TryGetValue((MongoID)damageInfo.SourceId, out ItemTemplate value))
+			if (!((Dictionary<MongoID, ItemTemplate>)(object)Singleton<ItemFactoryClass>.Instance.ItemTemplates).TryGetValue((MongoID)damageInfo.SourceId, out ItemTemplate value))
 			{
 				return;
 			}
