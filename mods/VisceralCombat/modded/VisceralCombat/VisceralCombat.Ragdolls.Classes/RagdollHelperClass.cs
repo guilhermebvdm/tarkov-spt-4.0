@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using Comfort.Common;
 using EFT;
 using Nexus.BundleLoader;
 using UnityEngine;
@@ -255,7 +256,7 @@ public static class RagdollHelperClass
 			Utils.SetAnimation(overrideController, "cultist_pray", (AnimationClip)(object)((obj2 is AnimationClip) ? obj2 : null));
 			p.BodyAnimatorCommon.Play("cultist_pray", 18, 0f);
 			p.BodyAnimatorCommon.speed = Random.Range(0.2f, 1f);
-			pm.stateSettings.killDuration = Random.Range(4f, Anim_Stomach2_Length - 17f);
+			pm.stateSettings.killDuration = Random.Range(2.5f, 5f);
 			break;
 		}
 		case 4:
@@ -264,7 +265,7 @@ public static class RagdollHelperClass
 			Utils.SetAnimation(overrideController, "cultist_pray", (AnimationClip)(object)((obj is AnimationClip) ? obj : null));
 			p.BodyAnimatorCommon.Play("cultist_pray", 18, 0f);
 			p.BodyAnimatorCommon.speed = Random.Range(0.2f, 1f);
-			pm.stateSettings.killDuration = Random.Range(4f, Anim_Stomach2_Length - 17f);
+			pm.stateSettings.killDuration = Random.Range(2.5f, 5f);
 			break;
 		}
 		default:
@@ -272,16 +273,20 @@ public static class RagdollHelperClass
 			p.BodyAnimatorCommon.enabled = false;
 			break;
 		}
-		GClass855.WaitSeconds((MonoBehaviour)(object)StaticManager.Instance, 17f, (Action)delegate
+
+		float totalDuration = Mathf.Max(3f, pm.stateSettings.killDuration + 1f);
+		GClass855.WaitSeconds((MonoBehaviour)(object)StaticManager.Instance, totalDuration, (Action)delegate
 		{
-			DisableLiveActiveRagdoll(p, pm);
+			if (Singleton<GameWorld>.Instantiated)
+			{
+				DisableLiveActiveRagdoll(p, pm);
+			}
 		});
 	}
 
 	[IteratorStateMachine(typeof(_003CLerpMappingWeight_003Ed__9))]
 	internal static IEnumerator LerpMappingWeight(PuppetMaster pm, float startValue, float endValue, float duration)
 	{
-		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
 		return new _003CLerpMappingWeight_003Ed__9(0)
 		{
 			pm = pm,
@@ -293,12 +298,6 @@ public static class RagdollHelperClass
 
 	internal static bool ShouldRagdoll(EBodyPart bodyPartType)
 	{
-		//IL_0017: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0018: Unknown result type (might be due to invalid IL or missing references)
-		//IL_001a: Unknown result type (might be due to invalid IL or missing references)
-		//IL_001c: Unknown result type (might be due to invalid IL or missing references)
-		//IL_001e: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0041: Expected I4, but got Unknown
 		float num = Random.Range(0f, 1f);
 		float num2 = 0f;
 		if ((int)bodyPartType switch
@@ -320,16 +319,32 @@ public static class RagdollHelperClass
 
 	internal static void DisableLiveActiveRagdoll(Player p, PuppetMaster pm)
 	{
-		Rigidbody[] componentsInChildren = ((Component)p.PlayerBody).gameObject.GetComponentsInChildren<Rigidbody>();
-		Rigidbody[] array = componentsInChildren;
-		foreach (Rigidbody rb in array)
+		if (p != null && p.BodyAnimatorCommon != null)
 		{
-			rb.isKinematic = true;
-			GClass855.WaitSeconds((MonoBehaviour)(object)StaticManager.Instance, 0.06f, (Action)delegate
-			{
-				rb.isKinematic = false;
-			});
+			p.BodyAnimatorCommon.SetLayerWeight(18, 0f);
+			p.BodyAnimatorCommon.enabled = false;
 		}
-		((Component)pm).gameObject.SetActive(false);
+
+		if (pm != null && ((Component)pm).gameObject != null)
+		{
+			if (p?.PlayerBody != null && ((Component)p.PlayerBody).gameObject != null)
+			{
+				Rigidbody[] componentsInChildren = ((Component)p.PlayerBody).gameObject.GetComponentsInChildren<Rigidbody>();
+				Rigidbody[] array = componentsInChildren;
+				foreach (Rigidbody rb in array)
+				{
+					if (rb == null) continue;
+					rb.isKinematic = true;
+					GClass855.WaitSeconds((MonoBehaviour)(object)StaticManager.Instance, 0.06f, (Action)delegate
+					{
+						if (rb != null && Singleton<GameWorld>.Instantiated)
+						{
+							rb.isKinematic = false;
+						}
+					});
+				}
+			}
+			((Component)pm).gameObject.SetActive(false);
+		}
 	}
 }

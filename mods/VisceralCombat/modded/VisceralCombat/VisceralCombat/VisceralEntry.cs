@@ -256,6 +256,7 @@ public class VisceralEntry : BaseUnityPlugin
 		((ModulePatch)new LimbKillPatch()).Enable();
 		((ModulePatch)new CreateBSGRagdollPatch()).Enable();
 		((ModulePatch)new RagdollClassPatch()).Enable();
+		((ModulePatch)new VisceralCombat.Ragdolls.Patches.MovementContextPatch()).Enable();
 		NeverDeleteShells = ((BaseUnityPlugin)this).Config.Bind<bool>("Combat | Visuals", "Infinite Shell Casing Lifetime", false, "Turns off Used Shell Casing Deletion");
 		((ModulePatch)new ShellCasingPatch()).Enable();
 		ItemForce = ((BaseUnityPlugin)this).Config.Bind<bool>("Physics | Item Physical Properties", "Item Physics", false, "If you are getting too much lag turn this off. But most capable PC's should run this fine. (Besides on SoT)");
