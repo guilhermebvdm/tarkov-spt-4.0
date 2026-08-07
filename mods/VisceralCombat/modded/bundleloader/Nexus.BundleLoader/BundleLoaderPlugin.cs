@@ -20,11 +20,16 @@ public class BundleLoaderPlugin : BaseUnityPlugin
 	private void Awake()
 	{
 		Instance = this;
-		string moddedPath1 = Path.Combine(Environment.CurrentDirectory, "BepInEx", "plugins", "VisceralCombat", "ssh", "Bundles");
-		string moddedPath2 = Path.Combine(Environment.CurrentDirectory, "BepInEx", "plugins", "VisceralCombat", "Bundles");
-		string legacyPath = Path.Combine(Environment.CurrentDirectory, "BepInEx", "plugins", "ssh", "Bundles");
+		string pluginRoot = BepInEx.Paths.PluginPath;
+		string moddedPath1 = Path.Combine(pluginRoot, "VisceralCombat", "ssh", "bundles");
+		string moddedPath2 = Path.Combine(pluginRoot, "VisceralCombat", "bundles");
+		string moddedPath3 = Path.Combine(pluginRoot, "VisceralCombat", "Bundles");
+		string legacyPath  = Path.Combine(pluginRoot, "ssh", "bundles");
 
-		string path = Directory.Exists(moddedPath1) ? moddedPath1 : (Directory.Exists(moddedPath2) ? moddedPath2 : legacyPath);
+		string path = Directory.Exists(moddedPath1) ? moddedPath1 : 
+		             (Directory.Exists(moddedPath2) ? moddedPath2 : 
+		             (Directory.Exists(moddedPath3) ? moddedPath3 : legacyPath));
+
 		if (Directory.Exists(path))
 		{
 			_loadedBundles = (from f in Directory.GetFiles(path)
@@ -36,7 +41,7 @@ public class BundleLoaderPlugin : BaseUnityPlugin
 			Directory.CreateDirectory(path);
 			_loadedBundles = new Dictionary<string, AssetBundleCreateRequest>();
 		}
-		Logger.LogInfo((object)$"Loaded {_loadedBundles.Count} bundles from {path}...");
+		Logger.LogInfo((object)$"[BundleLoader] Loaded {_loadedBundles.Count} bundles from path: {path}");
 	}
 
 	public bool IsLoading(string bundleName, out bool isFinished)

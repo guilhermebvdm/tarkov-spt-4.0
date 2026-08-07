@@ -40,7 +40,7 @@ public class VisceralEntry : BaseUnityPlugin
 
 	public EffectContainer effectContainer = null;
 
-	private string filePath = "./BepInEx/plugins/ssh/VD_Calibers.json";
+	private string filePath = "";
 
 	public float lerpTest = 1f;
 
@@ -293,21 +293,27 @@ public class VisceralEntry : BaseUnityPlugin
 
 	private void Start()
 	{
-		string moddedPath1 = Path.Combine(Environment.CurrentDirectory, "BepInEx", "plugins", "VisceralCombat", "ssh", "VD_Calibers.json");
-		string moddedPath2 = Path.Combine(Environment.CurrentDirectory, "BepInEx", "plugins", "VisceralCombat", "VD_Calibers.json");
-		string legacyPath = Path.Combine(Environment.CurrentDirectory, "BepInEx", "plugins", "ssh", "VD_Calibers.json");
+		// BepInEx.Paths.PluginPath is the definitive path to BepInEx/plugins — never relative, never wrong
+		string pluginRoot = BepInEx.Paths.PluginPath;
+		string moddedPath1 = Path.Combine(pluginRoot, "VisceralCombat", "ssh", "VD_Calibers.json");
+		string moddedPath2 = Path.Combine(pluginRoot, "VisceralCombat", "VD_Calibers.json");
+		string legacyPath  = Path.Combine(pluginRoot, "ssh", "VD_Calibers.json");
 
-		if (File.Exists(moddedPath1)) filePath = moddedPath1;
+		QuickLogger.Log(ELogType.Log, $"[VisceralCombat] PluginPath = {pluginRoot}");
+		QuickLogger.Log(ELogType.Log, $"[VisceralCombat] Checking moddedPath2: {moddedPath2} → exists={File.Exists(moddedPath2)}");
+
+		if (File.Exists(moddedPath1))      filePath = moddedPath1;
 		else if (File.Exists(moddedPath2)) filePath = moddedPath2;
-		else if (File.Exists(legacyPath)) filePath = legacyPath;
+		else if (File.Exists(legacyPath))  filePath = legacyPath;
 
-		if (File.Exists(filePath))
+		if (!string.IsNullOrEmpty(filePath) && File.Exists(filePath))
 		{
 			ParseDismembermentJson();
+			QuickLogger.Log(ELogType.Log, $"[VisceralCombat] Loaded {KillPatch.calibers.Count} dismember calibers from: {filePath}");
 		}
 		else
 		{
-			QuickLogger.Log(ELogType.Warn, $"Config file '{filePath}' not found. Dismemberment/bleed calibers will use defaults.");
+			QuickLogger.Log(ELogType.Error, $"[VisceralCombat] VD_Calibers.json NOT FOUND! Checked:\n  {moddedPath1}\n  {moddedPath2}\n  {legacyPath}");
 		}
 	}
 
