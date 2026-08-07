@@ -170,25 +170,30 @@ public class KillPatch : ModulePatch
 			{
 				continue;
 			}
-			if (FikaBackendUtils.IsServer || FikaBackendUtils.IsHeadless)
+
+			// Only send Fika network packets if player is a FikaPlayer (Coop)
+			if ((FikaBackendUtils.IsServer || FikaBackendUtils.IsHeadless) && FikaBackendUtils.IsClient)
 			{
 				Transform[] array2 = affectedLimbs;
 				foreach (Transform val2 in array2)
 				{
 					limbNames = HarmonyLib.CollectionExtensions.AddItem<string>(limbNames, val2.name).ToArray();
 				}
-				FikaPlayer val3 = (FikaPlayer)(object)((player is FikaPlayer) ? player : null);
-				DismembermentPacket dismembermentPacket = default(DismembermentPacket);
-				dismembermentPacket.playerID = val3.NetId;
-				dismembermentPacket.Direction = Direction;
-				dismembermentPacket.bodyPartType = bodyPartType;
-				dismembermentPacket.bone = bone;
-				dismembermentPacket.capAssetName = capAssetName;
-				dismembermentPacket.assetNames = assetNames;
-				DismembermentPacket dismembermentPacket2 = dismembermentPacket;
-				QuickLogger.Log(ELogType.Log, string.Format("Dismemberment Packet Sent: {0}, {1}, {2}, {3}, {4}, {5}", dismembermentPacket2.playerID, dismembermentPacket2.Direction, dismembermentPacket2.bodyPartType, dismembermentPacket2.bone, dismembermentPacket2.capAssetName, string.Join(",", dismembermentPacket2.assetNames)));
-				Singleton<FikaServer>.Instance.SendData<DismembermentPacket>(ref dismembermentPacket2, (DeliveryMethod)0, false);
+				if (player is FikaPlayer fikaPlayer && fikaPlayer != null && Singleton<FikaServer>.Instantiated && Singleton<FikaServer>.Instance != null)
+				{
+					DismembermentPacket dismembermentPacket = default(DismembermentPacket);
+					dismembermentPacket.playerID = fikaPlayer.NetId;
+					dismembermentPacket.Direction = Direction;
+					dismembermentPacket.bodyPartType = bodyPartType;
+					dismembermentPacket.bone = bone;
+					dismembermentPacket.capAssetName = capAssetName;
+					dismembermentPacket.assetNames = assetNames;
+					DismembermentPacket dismembermentPacket2 = dismembermentPacket;
+					QuickLogger.Log(ELogType.Log, string.Format("Dismemberment Packet Sent: {0}, {1}, {2}, {3}, {4}, {5}", dismembermentPacket2.playerID, dismembermentPacket2.Direction, dismembermentPacket2.bodyPartType, dismembermentPacket2.bone, dismembermentPacket2.capAssetName, string.Join(",", dismembermentPacket2.assetNames)));
+					Singleton<FikaServer>.Instance.SendData<DismembermentPacket>(ref dismembermentPacket2, (DeliveryMethod)0, false);
+				}
 			}
+
 			if (!VisceralEntry.Instance.dismemberedPlayers.Contains(player))
 			{
 				VisceralEntry.Instance.dismemberedPlayers.Add(player);
@@ -241,74 +246,91 @@ public class KillPatch : ModulePatch
 
 	public static void DeathSetup(Player p, EBodyPart eBodyPart, int Chance)
 	{
-		int num = 0;
-		if (FikaBackendUtils.IsServer)
+		try
 		{
-			Player obj = p;
-			FikaPlayer val = (FikaPlayer)(object)((obj is FikaPlayer) ? obj : null);
-			RagdollSyncPacket ragdollSyncPacket = default(RagdollSyncPacket);
-			ragdollSyncPacket.PlayerID = val.NetId;
-			ragdollSyncPacket.BodyPart = eBodyPart;
-			RagdollSyncPacket ragdollSyncPacket2 = ragdollSyncPacket;
-			QuickLogger.Log(ELogType.Log, $"Ragdoll Packet Sent: {ragdollSyncPacket2.PlayerID}, {ragdollSyncPacket2.BodyPart}, {ragdollSyncPacket2.RandomChance}");
-			Singleton<FikaServer>.Instance.SendData<RagdollSyncPacket>(ref ragdollSyncPacket2, (DeliveryMethod)0, false);
-		}
-		RagdollHelperClass.limbsToCheck.Clear();
-		if ((Object)(object)p == (Object)null)
-		{
-			QuickLogger.Log(ELogType.Error, "Player is Null!!!!");
-			return;
-		}
-		if ((Object)(object)((Component)p).gameObject == (Object)null)
-		{
-			QuickLogger.Log(ELogType.Error, $"Player Gameobject Null!!!! {p.Id}");
-			return;
-		}
-		if ((Object)(object)((Component)p).gameObject.transform == (Object)null)
-		{
-			QuickLogger.Log(ELogType.Error, $"Player Gameobject's Transform is Null!!!! {p.Id}");
-			return;
-		}
-		PuppetMaster componentInChildren = ((Component)((Component)p).gameObject.transform.parent).GetComponentInChildren<PuppetMaster>();
-		if ((Object)(object)componentInChildren == (Object)null)
-		{
-			QuickLogger.Log(ELogType.Error, "No PuppetMaster found in player's hierarchy!");
-			return;
-		}
-		componentInChildren.pinWeight = 0.25f;
-		componentInChildren.stateSettings.enableAngularLimitsOnKill = true;
-		componentInChildren.stateSettings.deadMuscleWeight = 0.01f;
-		componentInChildren.muscleSpring = 175f;
-		componentInChildren.muscleDamper = 1.5f;
-		((Behaviour)componentInChildren).enabled = true;
-		if (p.BodyAnimatorCommon == null)
-		{
-			QuickLogger.Log(ELogType.Error, "Player's BodyAnimatorCommon is null!");
-			return;
-		}
-		p.BodyAnimatorCommon.enabled = true;
-		AnimatorOverrideController runtimeAnimatorController = new AnimatorOverrideController(p.BodyAnimatorCommon.runtimeAnimatorController);
-		p.BodyAnimatorCommon.runtimeAnimatorController = (RuntimeAnimatorController)(object)runtimeAnimatorController;
-		RagdollHelperClass.PlayDeathAnimation(p, componentInChildren, eBodyPart);
-		if ((Object)(object)p.PlayerBones?.Pelvis?.Original == (Object)null)
-		{
-			QuickLogger.Log(ELogType.Error, "PlayerBones or Pelvis is null!");
-			return;
-		}
-		TransformHelperClass.SetLayersRecursively(((Component)((Component)p.PlayerBones.Pelvis.Original).transform).gameObject, LayerMask.NameToLayer("Deadbody"));
-		((Component)p.PlayerBones.HolsterPrimary).gameObject.SetActive(false);
-		((Component)p.PlayerBones.HolsterSecondary).gameObject.SetActive(false);
-		((Component)p.PlayerBones.HolsterPrimaryAlternative).gameObject.SetActive(false);
-		((Component)p.PlayerBones.HolsterSecondaryAlternative).gameObject.SetActive(false);
-		((Component)p.PlayerBones.HolsterPistol).gameObject.SetActive(false);
-		((Component)p.PlayerBones.LeftLegHolsterPistol).gameObject.SetActive(false);
-		componentInChildren.Teleport(((Component)p).gameObject.transform.position, Quaternion.LookRotation(p.LookDirection), moveToTarget: true);
-		((MonoBehaviour)p).StartCoroutine(RagdollHelperClass.LerpMappingWeight(componentInChildren, 0f, 1f, 0.8f));
-		componentInChildren.state = PuppetMaster.State.Dead;
-		GClass855.WaitSeconds((MonoBehaviour)(object)StaticManager.Instance, 0.1f, (Action)delegate
-		{
+			if ((Object)(object)p == (Object)null || (Object)(object)((Component)p).gameObject == (Object)null)
+			{
+				QuickLogger.Log(ELogType.Error, "DeathSetup: Player or GameObject is Null!");
+				return;
+			}
+
+			if (FikaBackendUtils.IsServer && FikaBackendUtils.IsClient)
+			{
+				if (p is FikaPlayer fikaPlayer && fikaPlayer != null && Singleton<FikaServer>.Instantiated && Singleton<FikaServer>.Instance != null)
+				{
+					RagdollSyncPacket ragdollSyncPacket = default(RagdollSyncPacket);
+					ragdollSyncPacket.PlayerID = fikaPlayer.NetId;
+					ragdollSyncPacket.BodyPart = eBodyPart;
+					RagdollSyncPacket ragdollSyncPacket2 = ragdollSyncPacket;
+					QuickLogger.Log(ELogType.Log, $"Ragdoll Packet Sent: {ragdollSyncPacket2.PlayerID}, {ragdollSyncPacket2.BodyPart}, {ragdollSyncPacket2.RandomChance}");
+					Singleton<FikaServer>.Instance.SendData<RagdollSyncPacket>(ref ragdollSyncPacket2, (DeliveryMethod)0, false);
+				}
+			}
+
+			RagdollHelperClass.limbsToCheck.Clear();
+
+			PuppetMaster componentInChildren = null;
+			if (((Component)p).gameObject.transform.parent != null)
+			{
+				componentInChildren = ((Component)((Component)p).gameObject.transform.parent).GetComponentInChildren<PuppetMaster>();
+			}
+			if ((Object)(object)componentInChildren == (Object)null)
+			{
+				componentInChildren = ((Component)p).GetComponentInChildren<PuppetMaster>();
+			}
+			if ((Object)(object)componentInChildren == (Object)null)
+			{
+				componentInChildren = ((Component)p).GetComponentInParent<PuppetMaster>();
+			}
+
+			if ((Object)(object)componentInChildren == (Object)null)
+			{
+				QuickLogger.Log(ELogType.Warn, "DeathSetup: No PuppetMaster found in player's hierarchy!");
+				return;
+			}
+
+			componentInChildren.pinWeight = 0.25f;
+			componentInChildren.stateSettings.enableAngularLimitsOnKill = true;
+			componentInChildren.stateSettings.deadMuscleWeight = 0.01f;
+			componentInChildren.muscleSpring = 175f;
+			componentInChildren.muscleDamper = 1.5f;
+			((Behaviour)componentInChildren).enabled = true;
+			if (p.BodyAnimatorCommon == null)
+			{
+				QuickLogger.Log(ELogType.Error, "Player's BodyAnimatorCommon is null!");
+				return;
+			}
 			p.BodyAnimatorCommon.enabled = true;
-		});
+			AnimatorOverrideController runtimeAnimatorController = new AnimatorOverrideController(p.BodyAnimatorCommon.runtimeAnimatorController);
+			p.BodyAnimatorCommon.runtimeAnimatorController = (RuntimeAnimatorController)(object)runtimeAnimatorController;
+			RagdollHelperClass.PlayDeathAnimation(p, componentInChildren, eBodyPart);
+			if ((Object)(object)p.PlayerBones?.Pelvis?.Original == (Object)null)
+			{
+				QuickLogger.Log(ELogType.Error, "PlayerBones or Pelvis is null!");
+				return;
+			}
+			TransformHelperClass.SetLayersRecursively(((Component)((Component)p.PlayerBones.Pelvis.Original).transform).gameObject, LayerMask.NameToLayer("Deadbody"));
+			if ((Object)(object)p.PlayerBones.HolsterPrimary != (Object)null) ((Component)p.PlayerBones.HolsterPrimary).gameObject.SetActive(false);
+			if ((Object)(object)p.PlayerBones.HolsterSecondary != (Object)null) ((Component)p.PlayerBones.HolsterSecondary).gameObject.SetActive(false);
+			if ((Object)(object)p.PlayerBones.HolsterPrimaryAlternative != (Object)null) ((Component)p.PlayerBones.HolsterPrimaryAlternative).gameObject.SetActive(false);
+			if ((Object)(object)p.PlayerBones.HolsterSecondaryAlternative != (Object)null) ((Component)p.PlayerBones.HolsterSecondaryAlternative).gameObject.SetActive(false);
+			if ((Object)(object)p.PlayerBones.HolsterPistol != (Object)null) ((Component)p.PlayerBones.HolsterPistol).gameObject.SetActive(false);
+			if ((Object)(object)p.PlayerBones.LeftLegHolsterPistol != (Object)null) ((Component)p.PlayerBones.LeftLegHolsterPistol).gameObject.SetActive(false);
+			componentInChildren.Teleport(((Component)p).gameObject.transform.position, Quaternion.LookRotation(p.LookDirection), moveToTarget: true);
+			((MonoBehaviour)p).StartCoroutine(RagdollHelperClass.LerpMappingWeight(componentInChildren, 0f, 1f, 0.8f));
+			componentInChildren.state = PuppetMaster.State.Dead;
+			GClass855.WaitSeconds((MonoBehaviour)(object)StaticManager.Instance, 0.1f, (Action)delegate
+			{
+				if ((Object)(object)p != (Object)null && p.BodyAnimatorCommon != null)
+				{
+					p.BodyAnimatorCommon.enabled = true;
+				}
+			});
+		}
+		catch (Exception ex)
+		{
+			QuickLogger.Log(ELogType.Error, $"Error in DeathSetup: {ex.Message}");
+		}
 	}
 
 	internal static void SpawnOldVolumetricBlood(Transform val, Vector3 Direction, float mul)
