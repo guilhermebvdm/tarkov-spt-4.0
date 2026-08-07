@@ -1,6 +1,8 @@
 using System;
 using System.Reflection;
 using UnityEngine;
+using Random = UnityEngine.Random;
+using Object = UnityEngine.Object;
 
 namespace VisceralCombat.Ragdolls.Classes.RootMotion;
 
@@ -91,8 +93,7 @@ public class AvatarUtility
 		if ((int)avatarIKGoal == 0 || (int)avatarIKGoal == 1)
 		{
 			float num2 = (float)method.Invoke(avatar, new object[1] { num });
-			Vector3 val2 = default(Vector3);
-			((Vector3)(ref val2))._002Ector(num2, 0f, 0f);
+			Vector3 val2 = new Vector3(num2, 0f, 0f);
 			tQ.t += tQ.q * val2;
 		}
 		Quaternion val3 = Quaternion.Inverse(bodyPositionRotation.q);
@@ -143,8 +144,7 @@ public class AvatarUtility
 		if ((int)avatarIKGoal == 0 || (int)avatarIKGoal == 1)
 		{
 			float num2 = (float)method.Invoke(avatar, new object[1] { num });
-			Vector3 val2 = default(Vector3);
-			((Vector3)(ref val2))._002Ector(num2, 0f, 0f);
+			Vector3 val2 = new Vector3(num2, 0f, 0f);
 			goalTQ.t -= goalTQ.q * val2;
 		}
 		return new TQ(goalTQ.t, goalTQ.q * Quaternion.Inverse(val));

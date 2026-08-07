@@ -1,4 +1,5 @@
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 public class BFX_DecalSettings : MonoBehaviour
 {
@@ -145,8 +146,7 @@ public class BFX_DecalSettings : MonoBehaviour
 			averageRay = GetAverageRay(tParent.position + tParent.right * 0.05f, tParent.right);
 			float num4 = Vector3.Angle(Vector3.up, averageRay);
 			float num5 = Mathf.Clamp(num4, -90f, 90f);
-			Quaternion localRotation = t.localRotation;
-			Vector3 eulerAngles = ((Quaternion)(ref localRotation)).eulerAngles;
+			Vector3 eulerAngles = t.localRotation.eulerAngles;
 			t.localRotation = Quaternion.Euler(eulerAngles.x, eulerAngles.y, (0f - num5) * 0.5f);
 			float num6 = Mathf.Abs(num5) / 90f;
 			Vector3 localScale = t.localScale;
@@ -162,8 +162,6 @@ public class BFX_DecalSettings : MonoBehaviour
 
 	private void OnDisable()
 	{
-		//IL_0023: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0028: Unknown result type (might be due to invalid IL or missing references)
 		if (BloodSettings.ClampDecalSideSurface)
 		{
 			Shader.DisableKeyword("CLAMP_SIDE_SURFACE");
@@ -174,23 +172,10 @@ public class BFX_DecalSettings : MonoBehaviour
 
 	private Vector3 GetAverageRay(Vector3 start, Vector3 forward)
 	{
-		//IL_0001: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0002: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0003: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0030: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0035: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0016: Unknown result type (might be due to invalid IL or missing references)
-		//IL_001b: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0020: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0025: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0028: Unknown result type (might be due to invalid IL or missing references)
-		//IL_002d: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0038: Unknown result type (might be due to invalid IL or missing references)
-		RaycastHit val = default(RaycastHit);
-		if (Physics.Raycast(start, -forward, ref val))
+		if (Physics.Raycast(start, -forward, out RaycastHit val))
 		{
-			Vector3 val2 = ((RaycastHit)(ref val)).normal + Vector3.up;
-			return ((Vector3)(ref val2)).normalized;
+			Vector3 val2 = val.normal + Vector3.up;
+			return val2.normalized;
 		}
 		return Vector3.up;
 	}

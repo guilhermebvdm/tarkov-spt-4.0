@@ -6,6 +6,8 @@ using System.Runtime.CompilerServices;
 using EFT;
 using Nexus.BundleLoader;
 using UnityEngine;
+using Random = UnityEngine.Random;
+using Object = UnityEngine.Object;
 using VisceralCombat.Ragdolls.Classes.RootMotion.Dynamics;
 
 namespace VisceralCombat.Ragdolls.Classes;

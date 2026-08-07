@@ -1,5 +1,7 @@
 using System;
 using UnityEngine;
+using Random = UnityEngine.Random;
+using Object = UnityEngine.Object;
 
 namespace VisceralCombat.Ragdolls.Classes.RootMotion.Dynamics;
 
@@ -171,7 +173,7 @@ public abstract class RagdollCreator : MonoBehaviour
 			rigidbodyT = t;
 		}
 		Vector3 direction = endPoint - startPoint;
-		float num = ((Vector3)(ref direction)).magnitude * (1f + lengthOverlap);
+		float num = direction.magnitude * (1f + lengthOverlap);
 		Vector3 axisVectorToDirection = AxisTools.GetAxisVectorToDirection(t, direction);
 		((Component)rigidbodyT).gameObject.AddComponent<Rigidbody>();
 		float scaleF = GetScaleF(t);
@@ -258,12 +260,12 @@ public abstract class RagdollCreator : MonoBehaviour
 			return;
 		}
 		Vector3 direction = endPoint - startPoint;
-		float num = ((Vector3)(ref direction)).magnitude * (1f + lengthOverlap);
+		float num = direction.magnitude * (1f + lengthOverlap);
 		Vector3 axisVectorToDirection = AxisTools.GetAxisVectorToDirection(t, direction);
 		Vector3 axisVectorToDirection2 = AxisTools.GetAxisVectorToDirection(t, widthDirection);
 		if (axisVectorToDirection2 == axisVectorToDirection)
 		{
-			((Vector3)(ref axisVectorToDirection2))._002Ector(axisVectorToDirection.y, axisVectorToDirection.z, axisVectorToDirection.x);
+			axisVectorToDirection2 = new Vector3(axisVectorToDirection.y, axisVectorToDirection.z, axisVectorToDirection.x);
 		}
 		((Component)t).gameObject.AddComponent<Rigidbody>();
 		Vector3 val = Vector3.Scale(axisVectorToDirection, new Vector3(num, num, num));
@@ -399,7 +401,7 @@ public abstract class RagdollCreator : MonoBehaviour
 		//IL_00a7: Unknown result type (might be due to invalid IL or missing references)
 		//IL_00ac: Unknown result type (might be due to invalid IL or missing references)
 		//IL_00b4: Unknown result type (might be due to invalid IL or missing references)
-		worldDir = ((Vector3)(ref worldDir)).normalized;
+		worldDir = worldDir.normalized;
 		float num = Vector3.Dot(worldDir, transform.right);
 		float num2 = Vector3.Dot(worldDir, transform.up);
 		float num3 = Vector3.Dot(worldDir, transform.forward);
@@ -537,7 +539,7 @@ public abstract class RagdollCreator : MonoBehaviour
 		//IL_0013: Unknown result type (might be due to invalid IL or missing references)
 		//IL_0016: Unknown result type (might be due to invalid IL or missing references)
 		SoftJointLimit result = default(SoftJointLimit);
-		((SoftJointLimit)(ref result)).limit = limit;
+		result.limit = limit;
 		return result;
 	}
 }

@@ -1,5 +1,7 @@
 using System;
 using UnityEngine;
+using Random = UnityEngine.Random;
+using Object = UnityEngine.Object;
 
 namespace VisceralCombat.Ragdolls.Classes.RootMotion;
 
@@ -168,13 +170,13 @@ public class BakerTransform
 	{
 		if (recordPosition && !isRootNode)
 		{
-			posX.AddKey(time, ((Keyframe)(ref posX.keys[0])).value);
-			posY.AddKey(time, ((Keyframe)(ref posY.keys[0])).value);
-			posZ.AddKey(time, ((Keyframe)(ref posZ.keys[0])).value);
+			posX.AddKey(time, posX.keys[0].value);
+			posY.AddKey(time, posY.keys[0].value);
+			posZ.AddKey(time, posZ.keys[0].value);
 		}
-		rotX.AddKey(time, ((Keyframe)(ref rotX.keys[0])).value);
-		rotY.AddKey(time, ((Keyframe)(ref rotY.keys[0])).value);
-		rotZ.AddKey(time, ((Keyframe)(ref rotZ.keys[0])).value);
-		rotW.AddKey(time, ((Keyframe)(ref rotW.keys[0])).value);
+		rotX.AddKey(time, rotX.keys[0].value);
+		rotY.AddKey(time, rotY.keys[0].value);
+		rotZ.AddKey(time, rotZ.keys[0].value);
+		rotW.AddKey(time, rotW.keys[0].value);
 	}
 }

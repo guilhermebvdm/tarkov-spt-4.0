@@ -7,6 +7,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using BepInEx;
 using UnityEngine;
+using Random = UnityEngine.Random;
+using Object = UnityEngine.Object;
 
 namespace Nexus.BundleLoader;
 
@@ -32,7 +34,7 @@ public class BundleLoaderPlugin : BaseUnityPlugin
 			Directory.CreateDirectory(path);
 			_loadedBundles = new Dictionary<string, AssetBundleCreateRequest>();
 		}
-		((BaseUnityPlugin)this).Logger.LogInfo((object)$"Loaded {_loadedBundles.Count} bundles...");
+		Logger.LogInfo((object)$"Loaded {_loadedBundles.Count} bundles...");
 	}
 
 	public bool IsLoading(string bundleName, out bool isFinished)
@@ -55,13 +57,28 @@ public class BundleLoaderPlugin : BaseUnityPlugin
 		return null;
 	}
 
-	public async Task<AssetBundle> GetAssetBundleAsync(string bundleName, CancellationToken cancellationToken = default(CancellationToken))
+	public async Task<AssetBundle> GetAssetBundleAsync(string name, CancellationToken cancellationToken = default(CancellationToken))
 	{
-		if (!_loadedBundles.TryGetValue(bundleName, out var request))
+		name = name.ToLower();
+		bool isFinished;
+		while (!IsLoading(name, out isFinished))
+		{
+			if (cancellationToken.IsCancellationRequested)
+			{
+				return null;
+			}
+			await Task.Yield();
+		}
+		if (isFinished)
+		{
+			return _loadedBundles[name].assetBundle;
+		}
+		AssetBundleCreateRequest request = _loadedBundles[name];
+		if (request == null)
 		{
 			return null;
 		}
-		while (!((AsyncOperation)request).isDone && !cancellationToken.CanBeCanceled)
+		while (!((AsyncOperation)request).isDone && !cancellationToken.IsCancellationRequested)
 		{
 			await Task.Yield();
 		}

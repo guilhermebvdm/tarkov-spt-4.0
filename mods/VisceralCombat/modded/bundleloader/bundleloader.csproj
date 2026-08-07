@@ -11,9 +11,10 @@
   <PropertyGroup />
   <ItemGroup />
   <ItemGroup>
-    <Reference Include="BepInEx" />
-    <Reference Include="UnityEngine.AssetBundleModule" />
+    <Reference Include="BepInEx"><HintPath>References\BepInEx.dll</HintPath></Reference>
+    <Reference Include="UnityEngine"><HintPath>References\UnityEngine.dll</HintPath></Reference>
+    <Reference Include="UnityEngine.AssetBundleModule"><HintPath>References\UnityEngine.AssetBundleModule.dll</HintPath></Reference>
     <Reference Include="System.Core" />
-    <Reference Include="UnityEngine.CoreModule" />
+    <Reference Include="UnityEngine.CoreModule"><HintPath>References\UnityEngine.CoreModule.dll</HintPath></Reference>
   </ItemGroup>
 </Project>

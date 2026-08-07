@@ -1,5 +1,7 @@
 using System;
 using UnityEngine;
+using Random = UnityEngine.Random;
+using Object = UnityEngine.Object;
 
 namespace VisceralCombat.Ragdolls.Classes.RootMotion.Dynamics;
 
@@ -187,9 +189,9 @@ public class MuscleLite
 		targetParent = (((Object)(object)connectedBodyTarget != (Object)null) ? connectedBodyTarget : target.parent);
 		toParentSpace = Quaternion.Inverse(targetParentRotation) * parentRotation;
 		Vector3 val = Vector3.Cross(((Joint)joint).axis, joint.secondaryAxis);
-		Vector3 normalized = ((Vector3)(ref val)).normalized;
+		Vector3 normalized = val.normalized;
 		val = Vector3.Cross(normalized, ((Joint)joint).axis);
-		Vector3 normalized2 = ((Vector3)(ref val)).normalized;
+		Vector3 normalized2 = val.normalized;
 		defaultLocalRotation = localRotation;
 		Quaternion val2 = Quaternion.LookRotation(normalized, normalized2);
 		toJointSpaceInverse = Quaternion.Inverse(val2);
@@ -367,7 +369,7 @@ public class MuscleLite
 			{
 				Vector3 val2 = val;
 				Vector3 val3 = positionOffset;
-				val = val2 / (1f + ((Vector3)(ref val3)).sqrMagnitude * pinDistanceFalloff);
+				val = val2 / (1f + val3.sqrMagnitude * pinDistanceFalloff);
 			}
 			rigidbody.AddForce(val, (ForceMode)2);
 			if (angularPinning)
@@ -399,9 +401,9 @@ public class MuscleLite
 		{
 			lastJointDriveRotationWeight = num;
 			lastRotationDamper = num2;
-			((JointDrive)(ref slerpDrive)).positionSpring = num;
-			((JointDrive)(ref slerpDrive)).maximumForce = Mathf.Max(num, num2);
-			((JointDrive)(ref slerpDrive)).positionDamper = num2;
+			slerpDrive.positionSpring = num;
+			slerpDrive.maximumForce = Mathf.Max(num, num2);
+			slerpDrive.positionDamper = num2;
 			joint.slerpDrive = slerpDrive;
 		}
 	}

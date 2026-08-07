@@ -1,5 +1,7 @@
 using System;
 using UnityEngine;
+using Random = UnityEngine.Random;
+using Object = UnityEngine.Object;
 
 namespace VisceralCombat.Ragdolls.Classes.RootMotion;
 
@@ -710,8 +712,8 @@ public class BipedReferences
 		//IL_005e: Unknown result type (might be due to invalid IL or missing references)
 		Vector3 val = references.rightHand.position - references.leftHand.position;
 		Vector3 val2 = references.rightFoot.position - references.leftFoot.position;
-		float num = Vector3.Dot(((Vector3)(ref val)).normalized, references.root.right);
-		float num2 = Vector3.Dot(((Vector3)(ref val2)).normalized, references.root.right);
+		float num = Vector3.Dot(val.normalized, references.root.right);
+		float num2 = Vector3.Dot(val2.normalized, references.root.right);
 		if (num < 0f || num2 < 0f)
 		{
 			warningMessage = "Biped does not seem to be facing its forward axis. Please make sure that in the initial pose the character is facing towards the positive Z axis of the Biped root gameobject.";

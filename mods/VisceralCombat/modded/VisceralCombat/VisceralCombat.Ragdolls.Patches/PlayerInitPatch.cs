@@ -14,16 +14,18 @@ public class PlayerInitPatch : ModulePatch
 	}
 
 	[PatchPostfix]
-	private static async void Postfix(Player __instance, Task __result)
+	private static void Postfix(Player __instance, Task __result)
 	{
-		if (!__instance.IsYourPlayer)
+		if (!__instance.IsYourPlayer && __result != null)
 		{
-			await __result;
-			if (VisceralEntry.Instance.UseActiveRagdolls.Value)
+			__result.ContinueWith(_ =>
 			{
-				Utils.SetupPuppetMaster(__instance);
-				QuickLogger.Log(ELogType.Log, "Setup Puppet Master for " + __instance.Profile.Nickname);
-			}
+				if (VisceralEntry.Instance != null && VisceralEntry.Instance.UseActiveRagdolls.Value)
+				{
+					Utils.SetupPuppetMaster(__instance);
+					QuickLogger.Log(ELogType.Log, "Setup Puppet Master for " + __instance.Profile.Nickname);
+				}
+			}, TaskScheduler.FromCurrentSynchronizationContext());
 		}
 	}
 }

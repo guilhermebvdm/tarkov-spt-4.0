@@ -1,5 +1,7 @@
 using System;
 using UnityEngine;
+using Random = UnityEngine.Random;
+using Object = UnityEngine.Object;
 
 public class BFX_MouseOrbit : MonoBehaviour
 {
@@ -83,7 +85,7 @@ public class BFX_MouseOrbit : MonoBehaviour
 			distance = 2f;
 		}
 		distance -= Input.GetAxis("Mouse ScrollWheel") * 2f;
-		if (Object.op_Implicit((Object)(object)target) && Input.GetMouseButton(1))
+		if (target != null && Input.GetMouseButton(1))
 		{
 			Vector3 mousePosition = Input.mousePosition;
 			float num = 1f;

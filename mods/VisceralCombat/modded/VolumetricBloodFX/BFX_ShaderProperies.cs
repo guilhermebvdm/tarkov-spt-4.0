@@ -1,5 +1,7 @@
 using System;
 using UnityEngine;
+using Random = UnityEngine.Random;
+using Object = UnityEngine.Object;
 
 public class BFX_ShaderProperies : MonoBehaviour
 {
@@ -52,7 +54,7 @@ public class BFX_ShaderProperies : MonoBehaviour
 		rend.GetPropertyBlock(props);
 		float num = FloatCurve.Evaluate(0f) * GraphIntensityMultiplier;
 		props.SetFloat(cutoutPropertyID, num);
-		props.SetVector(forwardDirPropertyID, Vector4.op_Implicit(((Component)this).transform.up));
+		props.SetVector(forwardDirPropertyID, (Vector4)(((Component)this).transform.up));
 		rend.SetPropertyBlock(props);
 	}
 
@@ -88,7 +90,7 @@ public class BFX_ShaderProperies : MonoBehaviour
 				canUpdate = false;
 				this.OnAnimationFinished?.Invoke();
 			}
-			props.SetVector(forwardDirPropertyID, Vector4.op_Implicit(((Component)this).transform.up));
+			props.SetVector(forwardDirPropertyID, (Vector4)(((Component)this).transform.up));
 			rend.SetPropertyBlock(props);
 		}
 	}

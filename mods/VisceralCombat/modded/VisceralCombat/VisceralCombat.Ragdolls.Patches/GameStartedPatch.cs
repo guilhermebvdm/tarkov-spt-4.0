@@ -6,6 +6,7 @@ using EFT;
 using Nexus.BundleLoader;
 using SPT.Reflection.Patching;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace VisceralCombat.Ragdolls.Patches;
 
@@ -39,7 +40,7 @@ public class GameStartedPatch : ModulePatch
 		Object obj2 = BundleLoaderPlugin.Instance.GetAssetBundle("active_ragdoll_base").LoadAllAssets()[0];
 		GameObject val3 = Object.Instantiate<GameObject>((GameObject)(object)((obj2 is GameObject) ? obj2 : null));
 		Object.Instantiate<GameObject>(val3);
-		SetupNewLayer(LayerMask.op_Implicit(LayerMask.NameToLayer("TransparentFX")));
+		SetupNewLayer(LayerMask.NameToLayer("TransparentFX"));
 		VisceralEntry.Instance.dismemberedPlayers.Clear();
 		if (VisceralEntry.Instance.BodyCollision.Value)
 		{
@@ -76,15 +77,15 @@ public class GameStartedPatch : ModulePatch
 		//IL_0083: Unknown result type (might be due to invalid IL or missing references)
 		//IL_009a: Unknown result type (might be due to invalid IL or missing references)
 		//IL_00b1: Unknown result type (might be due to invalid IL or missing references)
-		Physics.IgnoreLayerCollision(LayerMask.op_Implicit(layer), LayerMask.op_Implicit(layer), false);
-		Physics.IgnoreLayerCollision(LayerMask.op_Implicit(layer), 3, true);
-		Physics.IgnoreLayerCollision(LayerMask.op_Implicit(layer), 6, true);
-		Physics.IgnoreLayerCollision(LayerMask.op_Implicit(layer), 7, true);
-		Physics.IgnoreLayerCollision(LayerMask.op_Implicit(layer), LayerMask.NameToLayer("DoorLowPolyCollider"), true);
-		Physics.IgnoreLayerCollision(LayerMask.op_Implicit(layer), LayerMask.NameToLayer("LowPolyCollider"), true);
-		Physics.IgnoreLayerCollision(LayerMask.op_Implicit(layer), LayerMask.NameToLayer("Terrain"), false);
-		Physics.IgnoreLayerCollision(LayerMask.op_Implicit(layer), LayerMask.NameToLayer("HighPolyCollider"), false);
-		Physics.IgnoreLayerCollision(LayerMask.op_Implicit(layer), LayerMask.NameToLayer("Shells"), false);
-		Physics.IgnoreLayerCollision(LayerMask.op_Implicit(layer), LayerMask.NameToLayer("TransparentCollider"), false);
+		Physics.IgnoreLayerCollision(layer, layer, false);
+		Physics.IgnoreLayerCollision(layer, 3, true);
+		Physics.IgnoreLayerCollision(layer, 6, true);
+		Physics.IgnoreLayerCollision(layer, 7, true);
+		Physics.IgnoreLayerCollision(layer, LayerMask.NameToLayer("DoorLowPolyCollider"), true);
+		Physics.IgnoreLayerCollision(layer, LayerMask.NameToLayer("LowPolyCollider"), true);
+		Physics.IgnoreLayerCollision(layer, LayerMask.NameToLayer("Terrain"), false);
+		Physics.IgnoreLayerCollision(layer, LayerMask.NameToLayer("HighPolyCollider"), false);
+		Physics.IgnoreLayerCollision(layer, LayerMask.NameToLayer("Shells"), false);
+		Physics.IgnoreLayerCollision(layer, LayerMask.NameToLayer("TransparentCollider"), false);
 	}
 }

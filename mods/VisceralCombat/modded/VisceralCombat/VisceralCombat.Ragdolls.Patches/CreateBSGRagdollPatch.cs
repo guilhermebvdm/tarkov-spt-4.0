@@ -7,6 +7,8 @@ using EFT.Interactive;
 using HarmonyLib;
 using SPT.Reflection.Patching;
 using UnityEngine;
+using Random = UnityEngine.Random;
+using Object = UnityEngine.Object;
 
 namespace VisceralCombat.Ragdolls.Patches;
 

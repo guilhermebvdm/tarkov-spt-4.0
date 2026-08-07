@@ -14,6 +14,8 @@ using Fika.Core.Networking;
 using Newtonsoft.Json;
 using SPT.Reflection.Patching;
 using UnityEngine;
+using Random = UnityEngine.Random;
+using Object = UnityEngine.Object;
 using VisceralCombat.Combat.Patches;
 using VisceralCombat.Combined.Patches;
 using VisceralCombat.Dismemberment.Classes;
@@ -25,9 +27,7 @@ using VisceralCombat.Ragdolls.Patches;
 
 namespace VisceralCombat;
 
-[BepInPlugin("com.servph.VisceralCombat", "Visceral Combat", "3.7.0")]
-[BepInDependency(/*Could not decode attribute arguments.*/)]
-[BepInDependency(/*Could not decode attribute arguments.*/)]
+[BepInPlugin("com.servph.VisceralCombat", "Visceral Combat", "3.7.1")]
 public class VisceralEntry : BaseUnityPlugin
 {
 	public List<string> SoundsList = new List<string> { "ThroatGargle1", "ThroatGargle2", "ThroatGargle3", "ThroatGargle4" };
@@ -295,10 +295,11 @@ public class VisceralEntry : BaseUnityPlugin
 		if (File.Exists(filePath))
 		{
 			ParseDismembermentJson();
-			return;
 		}
-		Application.OpenURL("https://www.youtube.com/watch?v=FTv14Bib2z4");
-		Application.Quit();
+		else
+		{
+			QuickLogger.Log(ELogType.Warn, $"Config file '{filePath}' not found. Dismemberment/bleed calibers will use defaults.");
+		}
 	}
 
 	internal LayerMask LayerMaskConstructor(string[] layers)
@@ -311,7 +312,7 @@ public class VisceralEntry : BaseUnityPlugin
 		{
 			num |= 1 << LayerMask.NameToLayer(text);
 		}
-		return LayerMask.op_Implicit(num);
+		return num;
 	}
 
 	internal void LayerMaskRun()
@@ -319,13 +320,15 @@ public class VisceralEntry : BaseUnityPlugin
 		//IL_0021: Unknown result type (might be due to invalid IL or missing references)
 		//IL_0026: Unknown result type (might be due to invalid IL or missing references)
 		LayerMask val = LayerMaskConstructor(WorldLayers.Concat(DeadBodyLayers.Concat(HitColliderLayers)).ToArray());
-		QuickLogger.Log(ELogType.Log, ((object)(LayerMask)(ref val)/*cast due to .constrained prefix*/).ToString());
+		QuickLogger.Log(ELogType.Log, val.ToString());
 	}
 
 	public void ParseDismembermentJson()
 	{
 		string text = File.ReadAllText(filePath);
 		List<Dictionary<string, object>> list = JsonConvert.DeserializeObject<List<Dictionary<string, object>>>(text);
+		BleedPatch.light_calibers.Clear();
+		BleedPatch.heavy_calibers.Clear();
 		foreach (Dictionary<string, object> item in list)
 		{
 			if (item.ContainsKey("dismember_calibers"))

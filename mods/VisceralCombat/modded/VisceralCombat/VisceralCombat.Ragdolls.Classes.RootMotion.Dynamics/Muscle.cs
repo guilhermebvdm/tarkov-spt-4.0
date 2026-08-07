@@ -1,5 +1,7 @@
 using System;
 using UnityEngine;
+using Random = UnityEngine.Random;
+using Object = UnityEngine.Object;
 
 namespace VisceralCombat.Ragdolls.Classes.RootMotion.Dynamics;
 
@@ -609,7 +611,7 @@ public class Muscle
 			if ((Object)(object)component != (Object)null)
 			{
 				Bounds bounds = component.bounds;
-				size = ((Bounds)(ref bounds)).size;
+				size = bounds.size;
 			}
 			rigidbody.inertiaTensor = PhysXTools.CalculateInertiaTensorCuboid(size, rigidbody.mass);
 		}
@@ -626,9 +628,9 @@ public class Muscle
 		rebuildAngularZMotion = joint.angularZMotion;
 		defaultLocalRotation = localRotation;
 		Vector3 val = Vector3.Cross(((Joint)joint).axis, joint.secondaryAxis);
-		Vector3 normalized = ((Vector3)(ref val)).normalized;
+		Vector3 normalized = val.normalized;
 		val = Vector3.Cross(normalized, ((Joint)joint).axis);
-		Vector3 normalized2 = ((Vector3)(ref val)).normalized;
+		Vector3 normalized2 = val.normalized;
 		if (normalized == normalized2)
 		{
 			return;
@@ -1406,7 +1408,7 @@ public class Muscle
 		val2 *= w;
 		if (pinDistanceFalloff > 0f)
 		{
-			val2 /= 1f + ((Vector3)(ref posOffset)).sqrMagnitude * pinDistanceFalloff;
+			val2 /= 1f + posOffset.sqrMagnitude * pinDistanceFalloff;
 		}
 		r.AddForce(val2, (ForceMode)2);
 	}
@@ -1430,9 +1432,9 @@ public class Muscle
 		{
 			lastJointDriveRotationWeight = num;
 			lastRotationDamper = num2;
-			((JointDrive)(ref slerpDrive)).positionSpring = num;
-			((JointDrive)(ref slerpDrive)).maximumForce = Mathf.Max(num, num2) * state.maxForceMlp;
-			((JointDrive)(ref slerpDrive)).positionDamper = num2;
+			slerpDrive.positionSpring = num;
+			slerpDrive.maximumForce = Mathf.Max(num, num2) * state.maxForceMlp;
+			slerpDrive.positionDamper = num2;
 			joint.slerpDrive = slerpDrive;
 		}
 	}
@@ -1452,9 +1454,9 @@ public class Muscle
 			joint.targetRotation = LocalToJointSpace(targetAnimatedRotation);
 		}
 		float num2 = props.muscleDamper * muscleDamper;
-		((JointDrive)(ref slerpDrive)).positionSpring = num;
-		((JointDrive)(ref slerpDrive)).maximumForce = Mathf.Max(num, num2);
-		((JointDrive)(ref slerpDrive)).positionDamper = num2;
+		slerpDrive.positionSpring = num;
+		slerpDrive.maximumForce = Mathf.Max(num, num2);
+		slerpDrive.positionDamper = num2;
 		joint.slerpDrive = slerpDrive;
 	}
 

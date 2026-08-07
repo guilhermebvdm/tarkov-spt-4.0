@@ -200,7 +200,7 @@ print_version_report() {
 
 # ---------- detect mod type ----------
 mapfile -t CSPROJS < <(find "$MODDED" -maxdepth 3 -name '*.csproj' 2>/dev/null \
-  | grep -vE '/(obj|bin)/' | sort)
+  | grep -vE '/(obj|bin)/' | sort -r)
 PACKAGE_JSON="$MODDED/package.json"
 
 MOD_TYPE=""
@@ -300,6 +300,10 @@ resolve_references() {
     "bsg.console.core.dll|$spt/EscapeFromTarkov_Data/Managed/bsg.console.core.dll"
     "DissonanceVoip.dll|$spt/EscapeFromTarkov_Data/Managed/DissonanceVoip.dll"
     "ConfigurationManager.dll|$spt/BepInEx/plugins/spt/ConfigurationManager/ConfigurationManager.dll"
+    "UnityEngine.DirectorModule.dll|$spt/EscapeFromTarkov_Data/Managed/UnityEngine.DirectorModule.dll"
+    "UnityEngine.ParticleSystemModule.dll|$spt/EscapeFromTarkov_Data/Managed/UnityEngine.ParticleSystemModule.dll"
+    "UnityEngine.ClothModule.dll|$spt/EscapeFromTarkov_Data/Managed/UnityEngine.ClothModule.dll"
+    "UnityEngine.AIModule.dll|$spt/EscapeFromTarkov_Data/Managed/UnityEngine.AIModule.dll"
   )
 
   local copied=0
@@ -512,6 +516,11 @@ for CSPROJ in "${CSPROJS[@]}"; do
 
   # Cópia versionada com timestamp (arquivo histórico em builds/)
   cp -f "$MAIN_DLL" "$BUILDS/$ASM-$TS.dll"
+  for OTHER_CSPROJ in "${CSPROJS[@]}"; do
+    ref_dir="$(dirname "$OTHER_CSPROJ")/References"
+    mkdir -p "$ref_dir"
+    cp -f "$MAIN_DLL" "$ref_dir/" 2>/dev/null || true
+  done
   echo "  ✓ Build OK: $MAIN_DLL ($(stat -c%s "$MAIN_DLL" 2>/dev/null || stat -f%z "$MAIN_DLL") bytes); arquivada $ASM-$TS.dll"
 
   [[ -d "$SPT_PATH" ]] || continue

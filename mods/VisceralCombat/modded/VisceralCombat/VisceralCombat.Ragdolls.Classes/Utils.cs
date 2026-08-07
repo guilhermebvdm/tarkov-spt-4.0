@@ -6,6 +6,8 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using EFT;
 using UnityEngine;
+using Random = UnityEngine.Random;
+using Object = UnityEngine.Object;
 using VisceralCombat.Ragdolls.Classes.RootMotion.Dynamics;
 
 namespace VisceralCombat.Ragdolls.Classes;
@@ -83,7 +85,7 @@ public class Utils
 			while (_003CtransformQueue_003E5__1.Count > 0)
 			{
 				_003CparentTransform_003E5__2 = _003CtransformQueue_003E5__1.Dequeue();
-				if (!Object.op_Implicit((Object)(object)_003CparentTransform_003E5__2))
+				if (!_003CparentTransform_003E5__2 != null)
 				{
 					continue;
 				}

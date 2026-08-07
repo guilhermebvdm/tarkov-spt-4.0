@@ -5,6 +5,8 @@ using HarmonyLib;
 using Nexus.BundleLoader;
 using SPT.Reflection.Patching;
 using UnityEngine;
+using Random = UnityEngine.Random;
+using Object = UnityEngine.Object;
 using VisceralCombat.Combined.Patches;
 using VisceralCombat.Dismemberment.Classes;
 
@@ -30,15 +32,15 @@ public class PlayerDetonationPatch : ModulePatch
 		//IL_0076: Unknown result type (might be due to invalid IL or missing references)
 		//IL_00d2: Unknown result type (might be due to invalid IL or missing references)
 		float num = Random.Range(grenadeItem.MinExplosionDistance, grenadeItem.MaxExplosionDistance);
-		RaycastHit[] array = Physics.SphereCastAll(new Ray(grenadePosition, Vector3.up), num, grenadeItem.MaxExplosionDistance, LayerMask.op_Implicit(LayerMasksDataAbstractClass.HitMask));
+		RaycastHit[] array = Physics.SphereCastAll(new Ray(grenadePosition, Vector3.up), num, grenadeItem.MaxExplosionDistance, LayerMasksDataAbstractClass.HitMask);
 		RaycastHit[] array2 = array;
 		for (int i = 0; i < array2.Length; i++)
 		{
 			RaycastHit val = array2[i];
-			Rigidbody component = ((Component)((RaycastHit)(ref val)).collider).GetComponent<Rigidbody>();
+			Rigidbody component = ((Component)val.collider).GetComponent<Rigidbody>();
 			if ((Object)(object)component != (Object)null)
 			{
-				float num2 = Vector3.Distance(grenadePosition, ((Component)((RaycastHit)(ref val)).collider).transform.position);
+				float num2 = Vector3.Distance(grenadePosition, ((Component)val.collider).transform.position);
 				if (num2 < 2f && grenadeItem.GetStrength >= 300f)
 				{
 					Player componentInParentRecursive = Utils.GetComponentInParentRecursive<Player>(((Component)component).gameObject);

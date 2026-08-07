@@ -1,4 +1,5 @@
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace VisceralCombat.Ragdolls.Classes.RootMotion.Dynamics;
 
@@ -59,9 +60,9 @@ public class Actuator : MonoBehaviour
 			return;
 		}
 		Vector3 val = Vector3.Cross(((Joint)joint).axis, joint.secondaryAxis);
-		Vector3 normalized = ((Vector3)(ref val)).normalized;
+		Vector3 normalized = val.normalized;
 		val = Vector3.Cross(normalized, ((Joint)joint).axis);
-		Vector3 normalized2 = ((Vector3)(ref val)).normalized;
+		Vector3 normalized2 = val.normalized;
 		Quaternion localRotation = ((Component)this).transform.localRotation;
 		Quaternion val2 = Quaternion.LookRotation(normalized, normalized2);
 		toJointSpaceInverse = Quaternion.Inverse(val2);
@@ -85,9 +86,9 @@ public class Actuator : MonoBehaviour
 			{
 				lastSpring = spring;
 				lastDamper = damper;
-				((JointDrive)(ref slerpDrive)).positionSpring = spring;
-				((JointDrive)(ref slerpDrive)).positionDamper = damper;
-				((JointDrive)(ref slerpDrive)).maximumForce = Mathf.Max(spring, damper);
+				slerpDrive.positionSpring = spring;
+				slerpDrive.positionDamper = damper;
+				slerpDrive.maximumForce = Mathf.Max(spring, damper);
 				joint.slerpDrive = slerpDrive;
 			}
 		}

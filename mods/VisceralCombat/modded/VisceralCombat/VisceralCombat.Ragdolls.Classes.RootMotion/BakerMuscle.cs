@@ -1,5 +1,7 @@
 using System;
 using UnityEngine;
+using Random = UnityEngine.Random;
+using Object = UnityEngine.Object;
 
 namespace VisceralCombat.Ragdolls.Classes.RootMotion;
 
@@ -73,7 +75,7 @@ public class BakerMuscle
 		for (int i = 0; i < keys.Length; i++)
 		{
 			ref Keyframe reference = ref keys[i];
-			((Keyframe)(ref reference)).time = ((Keyframe)(ref reference)).time * mlp;
+			reference.time = reference.time * mlp;
 		}
 		curve.keys = keys;
 	}

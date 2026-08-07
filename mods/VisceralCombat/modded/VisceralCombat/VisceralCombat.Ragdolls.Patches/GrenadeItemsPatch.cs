@@ -3,6 +3,7 @@ using EFT;
 using EFT.Interactive;
 using SPT.Reflection.Patching;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace VisceralCombat.Ragdolls.Patches;
 
@@ -28,8 +29,8 @@ public class GrenadeItemsPatch : ModulePatch
 		for (int i = 0; i < array2.Length; i++)
 		{
 			RaycastHit val = array2[i];
-			Rigidbody component = ((Component)((RaycastHit)(ref val)).collider).GetComponent<Rigidbody>();
-			if ((Object)(object)component != (Object)null && Object.op_Implicit((Object)(object)((Component)component).gameObject.GetComponent<ObservedLootItem>()))
+			Rigidbody component = ((Component)val.collider).GetComponent<Rigidbody>();
+			if (component != null && component.gameObject.GetComponent<ObservedLootItem>() != null)
 			{
 				component.AddExplosionForce(grenadeItem.GetStrength * 0.5f * VisceralEntry.Instance.GrenadeExplIntensity.Value, grenadePosition, num);
 			}

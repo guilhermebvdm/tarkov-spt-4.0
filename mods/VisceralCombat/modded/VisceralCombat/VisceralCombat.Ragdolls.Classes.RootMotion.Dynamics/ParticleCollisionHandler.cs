@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace VisceralCombat.Ragdolls.Classes.RootMotion.Dynamics;
 
@@ -25,16 +26,16 @@ public class ParticleCollisionHandler : MonoBehaviour
 		//IL_0057: Unknown result type (might be due to invalid IL or missing references)
 		//IL_005a: Unknown result type (might be due to invalid IL or missing references)
 		p = ((Component)this).GetComponent<ParticleSystem>();
-		CollisionModule collision = p.collision;
-		if (!((CollisionModule)(ref collision)).sendCollisionMessages)
+		ParticleSystem.CollisionModule collision = p.collision;
+		if (!collision.sendCollisionMessages)
 		{
 		}
 		collision = p.collision;
-		if (((CollisionModule)(ref collision)).colliderForce <= 0f)
+		if (collision.colliderForce <= 0f)
 		{
 		}
 		collision = p.collision;
-		if (LayerMask.op_Implicit(((CollisionModule)(ref collision)).collidesWith) != 0)
+		if (collision.collidesWith != 0)
 		{
 		}
 	}
@@ -70,12 +71,12 @@ public class ParticleCollisionHandler : MonoBehaviour
 			for (int i = 0; i < collisionEvents; i++)
 			{
 				ParticleCollisionEvent val = particleCollisionEvents[i];
-				Vector3 intersection = ((ParticleCollisionEvent)(ref val)).intersection;
+				Vector3 intersection = val.intersection;
 				val = particleCollisionEvents[i];
-				Vector3 velocity = ((ParticleCollisionEvent)(ref val)).velocity;
-				float magnitude = ((Vector3)(ref velocity)).magnitude;
-				CollisionModule collision = p.collision;
-				float unPin = magnitude * ((CollisionModule)(ref collision)).colliderForce * unpin;
+				Vector3 velocity = val.velocity;
+				float magnitude = velocity.magnitude;
+				ParticleSystem.CollisionModule collision = p.collision;
+				float unPin = magnitude * collision.colliderForce * unpin;
 				component2.Hit(unPin, Vector3.zero, intersection);
 			}
 		}

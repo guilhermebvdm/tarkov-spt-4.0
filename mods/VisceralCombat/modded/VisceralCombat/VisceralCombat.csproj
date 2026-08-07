@@ -1,8 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <AssemblyName>Visceral Combat</AssemblyName>
+    <AssemblyName>VisceralCombat</AssemblyName>
     <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
     <TargetFramework>netstandard2.1</TargetFramework>
+    <Version>3.7.1</Version>
   </PropertyGroup>
   <PropertyGroup>
     <LangVersion>12.0</LangVersion>
@@ -11,26 +12,26 @@
   <PropertyGroup />
   <ItemGroup />
   <ItemGroup>
-    <Reference Include="BepInEx" />
-    <Reference Include="UnityEngine.AssetBundleModule" />
-    <Reference Include="UnityEngine.CoreModule" />
-    <Reference Include="Assembly-CSharp" />
-    <Reference Include="UnityEngine.PhysicsModule" />
-    <Reference Include="Fika.Core" />
-    <Reference Include="spt-reflection" />
-    <Reference Include="UnityEngine.AnimationModule" />
-    <Reference Include="UnityEngine.DirectorModule" />
-    <Reference Include="UnityEngine.ParticleSystemModule" />
-    <Reference Include="UnityEngine.ClothModule" />
-    <Reference Include="UnityEngine.AIModule" />
-    <Reference Include="VolumetricBloodFX">
-      <HintPath>..\..\..\..\..\..\..\Drive\Google Drive\Users\Erick Saraiva\Downloads\Visceral Combat 3.7.0 (SPT 4.0 - Fika 2.2.6) (1)\BepInEx\plugins\VolumetricBloodFX.dll</HintPath>
-    </Reference>
-    <Reference Include="bsg.console.core" />
-    <Reference Include="Comfort" />
-    <Reference Include="Newtonsoft.Json" />
-    <Reference Include="0Harmony" />
-    <Reference Include="nexus-bundleloader" />
-    <Reference Include="AnimationSystem.Types" />
+    <Reference Include="BepInEx"><HintPath>References\BepInEx.dll</HintPath></Reference>
+    <Reference Include="UnityEngine"><HintPath>References\UnityEngine.dll</HintPath></Reference>
+    <Reference Include="UnityEngine.AssetBundleModule"><HintPath>References\UnityEngine.AssetBundleModule.dll</HintPath></Reference>
+    <Reference Include="UnityEngine.CoreModule"><HintPath>References\UnityEngine.CoreModule.dll</HintPath></Reference>
+    <Reference Include="Assembly-CSharp"><HintPath>References\Assembly-CSharp.dll</HintPath></Reference>
+    <Reference Include="UnityEngine.PhysicsModule"><HintPath>References\UnityEngine.PhysicsModule.dll</HintPath></Reference>
+    <Reference Include="Fika.Core"><HintPath>References\Fika.Core.dll</HintPath></Reference>
+    <Reference Include="SPT.Reflection"><HintPath>References\SPT.Reflection.dll</HintPath></Reference>
+    <Reference Include="UnityEngine.AnimationModule"><HintPath>References\UnityEngine.AnimationModule.dll</HintPath></Reference>
+    <Reference Include="UnityEngine.DirectorModule"><HintPath>References\UnityEngine.DirectorModule.dll</HintPath></Reference>
+    <Reference Include="UnityEngine.ParticleSystemModule"><HintPath>References\UnityEngine.ParticleSystemModule.dll</HintPath></Reference>
+    <Reference Include="UnityEngine.ClothModule"><HintPath>References\UnityEngine.ClothModule.dll</HintPath></Reference>
+    <Reference Include="UnityEngine.AIModule"><HintPath>References\UnityEngine.AIModule.dll</HintPath></Reference>
+    <Reference Include="VolumetricBloodFX"><HintPath>References\VolumetricBloodFX.dll</HintPath></Reference>
+    <Reference Include="bsg.console.core"><HintPath>References\bsg.console.core.dll</HintPath></Reference>
+    <Reference Include="Comfort"><HintPath>References\Comfort.dll</HintPath></Reference>
+    <Reference Include="Newtonsoft.Json"><HintPath>References\Newtonsoft.Json.dll</HintPath></Reference>
+    <Reference Include="0Harmony"><HintPath>References\0Harmony.dll</HintPath></Reference>
+    <Reference Include="nexus-bundleloader"><HintPath>References\nexus-bundleloader.dll</HintPath></Reference>
+    <Reference Include="AnimationSystem.Types"><HintPath>References\AnimationSystem.Types.dll</HintPath></Reference>
+    <Reference Include="Sirenix.Serialization"><HintPath>References\Sirenix.Serialization.dll</HintPath></Reference>
   </ItemGroup>
 </Project>

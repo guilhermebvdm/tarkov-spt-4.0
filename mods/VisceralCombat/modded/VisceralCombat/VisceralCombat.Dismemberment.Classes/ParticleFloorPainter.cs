@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Systems.Effects;
 using Comfort.Common;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace VisceralCombat.Dismemberment.Classes;
 
@@ -11,26 +12,35 @@ public class ParticleFloorPainter : MonoBehaviour
 
 	public List<ParticleCollisionEvent> collisionEvents;
 
+	private static readonly List<ParticleCollisionEvent> SharedCollisionEvents = new List<ParticleCollisionEvent>();
+	private static int _playerLayer = -1;
+	private static int _hitColliderLayer = -1;
+	private static int _deadbodyLayer = -1;
+
 	private void Start()
 	{
-		ps = ((Component)this).GetComponent<ParticleSystem>();
+		ps = GetComponent<ParticleSystem>();
+		if (_playerLayer < 0)
+		{
+			_playerLayer = LayerMask.NameToLayer("Player");
+			_hitColliderLayer = LayerMask.NameToLayer("HitCollider");
+			_deadbodyLayer = LayerMask.NameToLayer("Deadbody");
+		}
 	}
 
 	private void OnParticleCollision(GameObject collidedObject)
 	{
-		//IL_0021: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0026: Unknown result type (might be due to invalid IL or missing references)
-		//IL_007f: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0086: Unknown result type (might be due to invalid IL or missing references)
-		List<ParticleCollisionEvent> list = new List<ParticleCollisionEvent>();
-		ParticlePhysicsExtensions.GetCollisionEvents(ps, collidedObject, list);
-		foreach (ParticleCollisionEvent item in list)
+		if (collidedObject == null || Singleton<Effects>.Instance == null) return;
+
+		int layer = collidedObject.layer;
+		if (layer == _playerLayer || layer == _hitColliderLayer || layer == _deadbodyLayer) return;
+
+		SharedCollisionEvents.Clear();
+		ParticlePhysicsExtensions.GetCollisionEvents(ps, collidedObject, SharedCollisionEvents);
+		for (int i = 0; i < SharedCollisionEvents.Count; i++)
 		{
-			ParticleCollisionEvent current = item;
-			if (collidedObject.gameObject.layer != LayerMask.NameToLayer("Player") && collidedObject.gameObject.layer != LayerMask.NameToLayer("HitCollider") && collidedObject.gameObject.layer != LayerMask.NameToLayer("Deadbody"))
-			{
-				Singleton<Effects>.Instance.EmitBleeding(((ParticleCollisionEvent)(ref current)).intersection, ((ParticleCollisionEvent)(ref current)).normal);
-			}
+			ParticleCollisionEvent ev = SharedCollisionEvents[i];
+			Singleton<Effects>.Instance.EmitBleeding(ev.intersection, ev.normal);
 		}
 	}
 }

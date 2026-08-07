@@ -1,4 +1,5 @@
 using UnityEngine;
+using Object = UnityEngine.Object;
 using UnityEngine.Playables;
 
 namespace VisceralCombat.Ragdolls.Classes.RootMotion;
@@ -111,7 +112,7 @@ public class HumanoidBaker : Baker
 
 	protected override void OnSetCurves(ref AnimationClip clip)
 	{
-		float time = ((Keyframe)(ref bakerMuscles[0].curve.keys[bakerMuscles[0].curve.keys.Length - 1])).time;
+		float time = bakerMuscles[0].curve.keys[bakerMuscles[0].curve.keys.Length - 1].time;
 		float lengthMlp = ((mode != Mode.Realtime) ? (base.clipLength / time) : 1f);
 		for (int i = 0; i < bakerMuscles.Length; i++)
 		{

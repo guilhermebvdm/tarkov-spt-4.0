@@ -1,6 +1,7 @@
 using System.Reflection;
 using SPT.Reflection.Patching;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace VisceralCombat.Ragdolls.Patches;
 

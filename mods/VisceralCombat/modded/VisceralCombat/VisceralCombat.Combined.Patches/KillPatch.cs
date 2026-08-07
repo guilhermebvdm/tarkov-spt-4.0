@@ -14,6 +14,8 @@ using Fika.Core.Networking.LiteNetLib;
 using HarmonyLib;
 using SPT.Reflection.Patching;
 using UnityEngine;
+using Random = UnityEngine.Random;
+using Object = UnityEngine.Object;
 using VisceralCombat.Dismemberment.Classes;
 using VisceralCombat.Dismemberment.Classes.Packets;
 using VisceralCombat.Ragdolls.Classes;
@@ -31,8 +33,6 @@ public class KillPatch : ModulePatch
 		object? obj = typeof(Player).GetField("_inventoryController", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(player);
 		return (InventoryController)((obj is InventoryController) ? obj : null);
 	};
-
-	private static Func<Player, BindableStateClass> _getItemInHands = (Player player) => typeof(Player).GetField("_itemInHands", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(player) as BindableStateClass;
 
 	private static Dictionary<EBodyPart, string> bodyparts = new Dictionary<EBodyPart, string>
 	{
@@ -58,7 +58,7 @@ public class KillPatch : ModulePatch
 		}
 	};
 
-	public static string[] limbNames { get; set; }
+	public static string[] limbNames { get; set; } = Array.Empty<string>();
 
 	public int RandomNumberOutcome { get; set; }
 
@@ -152,7 +152,7 @@ public class KillPatch : ModulePatch
 		}
 		if ((int)damageInfo.DamageType != 2048 && (int)damageInfo.DamageType != 4 && (int)damageInfo.DamageType != 32 && (int)damageInfo.DamageType != 8 && (int)damageInfo.DamageType != 16 && (int)damageInfo.DamageType != 8192)
 		{
-			if (!((Dictionary<MongoID, ItemTemplate>)(object)Singleton<ItemFactoryClass>.Instance.ItemTemplates).TryGetValue(MongoID.op_Implicit(damageInfo.SourceId), out ItemTemplate value))
+			if (!Singleton<ItemFactoryClass>.Instance.ItemTemplates.TryGetValue((MongoID)damageInfo.SourceId, out ItemTemplate value))
 			{
 				return;
 			}
@@ -292,7 +292,7 @@ public class KillPatch : ModulePatch
 				Transform[] array2 = affectedLimbs;
 				foreach (Transform val2 in array2)
 				{
-					CollectionExtensions.AddItem<string>((IEnumerable<string>)limbNames, ((Object)val2).name);
+					limbNames = HarmonyLib.CollectionExtensions.AddItem<string>(limbNames, val2.name).ToArray();
 				}
 				FikaPlayer val3 = (FikaPlayer)(object)((player is FikaPlayer) ? player : null);
 				DismembermentPacket dismembermentPacket = default(DismembermentPacket);
@@ -364,6 +364,13 @@ public class KillPatch : ModulePatch
 			Vector3 val11 = -forward * 10f + Random.insideUnitSphere * 2f;
 			val10.AddForce(val11, (ForceMode)1);
 			val10.AddTorque(Random.insideUnitSphere * 5f, (ForceMode)1);
+			GClass855.WaitSeconds((MonoBehaviour)(object)StaticManager.Instance, 5f, (Action)delegate
+			{
+				if (val9 != null)
+				{
+					Object.Destroy((Object)(object)val9);
+				}
+			});
 		}
 	}
 
@@ -426,7 +433,7 @@ public class KillPatch : ModulePatch
 		brainObject.transform.position = target.position;
 		Transform transform = brainObject.transform;
 		Quaternion rotation = target.rotation;
-		transform.rotation = Quaternion.Euler(0f, ((Quaternion)(ref rotation)).eulerAngles.y, 0f);
+		transform.rotation = Quaternion.Euler(0f, rotation.eulerAngles.y, 0f);
 		GClass855.WaitSeconds((MonoBehaviour)(object)StaticManager.Instance, 5f, (Action)delegate
 		{
 			Object.Destroy((Object)(object)brainObject);
@@ -456,15 +463,15 @@ public class KillPatch : ModulePatch
 		bloodParticleObject.transform.localPosition = new Vector3(0f, 0f, 0f);
 		bloodParticleObject.transform.localRotation = new Quaternion(-0.0923f, 0.7011f, -0.0923f, -0.7011f);
 		ParticleSystem[] componentsInChildren = bloodParticleObject.GetComponentsInChildren<ParticleSystem>();
-		float num = Random.Range(VisceralEntry.Instance.ArterySprayMin.Value, VisceralEntry.Instance.ArterySprayMax.Value);
+		float num = UnityEngine.Random.Range(VisceralEntry.Instance.ArterySprayMin.Value, VisceralEntry.Instance.ArterySprayMax.Value);
 		ParticleSystem[] array = componentsInChildren;
 		foreach (ParticleSystem val in array)
 		{
 			val.loop = false;
-			MainModule main = val.main;
-			((MainModule)(ref main)).duration = num;
-			CollisionModule collision = val.collision;
-			((CollisionModule)(ref collision)).sendCollisionMessages = true;
+			ParticleSystem.MainModule main = val.main;
+			main.duration = num;
+			ParticleSystem.CollisionModule collision = val.collision;
+			collision.sendCollisionMessages = true;
 			((Component)val).gameObject.AddComponent<ParticleFloorPainter>();
 			val.Play();
 		}
@@ -476,15 +483,6 @@ public class KillPatch : ModulePatch
 
 	public static void DeathSetup(Player p, EBodyPart eBodyPart, int Chance)
 	{
-		//IL_0042: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0061: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0317: Unknown result type (might be due to invalid IL or missing references)
-		//IL_031d: Expected O, but got Unknown
-		//IL_035e: Unknown result type (might be due to invalid IL or missing references)
-		//IL_052e: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0539: Unknown result type (might be due to invalid IL or missing references)
-		//IL_053e: Unknown result type (might be due to invalid IL or missing references)
-		int num = 0;
 		if (FikaBackendUtils.IsServer)
 		{
 			Player obj = p;
@@ -496,88 +494,81 @@ public class KillPatch : ModulePatch
 			QuickLogger.Log(ELogType.Log, $"Ragdoll Packet Sent: {ragdollSyncPacket2.PlayerID}, {ragdollSyncPacket2.BodyPart}, {ragdollSyncPacket2.RandomChance}");
 			Singleton<FikaServer>.Instance.SendData<RagdollSyncPacket>(ref ragdollSyncPacket2, (DeliveryMethod)0, false);
 		}
-		ConsoleScreen.Log("START " + num++);
+
 		RagdollHelperClass.limbsToCheck.Clear();
-		ConsoleScreen.Log(num++.ToString());
-		if ((Object)(object)p == (Object)null)
+		if ((Object)(object)p == (Object)null || (Object)(object)((Component)p).gameObject == (Object)null || (Object)(object)((Component)p).gameObject.transform == (Object)null)
 		{
-			QuickLogger.Log(ELogType.Error, "Player is Null!!!!");
 			return;
 		}
-		if ((Object)(object)((Component)p).gameObject == (Object)null)
-		{
-			QuickLogger.Log(ELogType.Error, $"Player Gameobject Null!!!! {p.Id}");
-			return;
-		}
-		ConsoleScreen.Log(num++.ToString());
-		if ((Object)(object)((Component)p).gameObject.transform == (Object)null)
-		{
-			QuickLogger.Log(ELogType.Error, $"Player Gameobject's Transform is Null!!!! {p.Id}");
-			return;
-		}
-		ConsoleScreen.Log(num++.ToString());
+
 		PuppetMaster componentInChildren = ((Component)((Component)p).gameObject.transform.parent).GetComponentInChildren<PuppetMaster>();
 		if ((Object)(object)componentInChildren == (Object)null)
 		{
 			QuickLogger.Log(ELogType.Error, "No PuppetMaster found in player's hierarchy!");
 			return;
 		}
-		ConsoleScreen.Log(num++.ToString());
+
 		componentInChildren.pinWeight = 0.25f;
-		ConsoleScreen.Log(num++.ToString());
 		componentInChildren.stateSettings.enableAngularLimitsOnKill = true;
-		ConsoleScreen.Log(num++.ToString());
 		componentInChildren.stateSettings.deadMuscleWeight = 0.01f;
-		ConsoleScreen.Log(num++.ToString());
 		componentInChildren.muscleSpring = 175f;
-		ConsoleScreen.Log(num++.ToString());
 		componentInChildren.muscleDamper = 1.5f;
-		ConsoleScreen.Log(num++.ToString());
 		((Behaviour)componentInChildren).enabled = true;
-		ConsoleScreen.Log(num++.ToString());
+
 		if (p.BodyAnimatorCommon == null)
 		{
 			QuickLogger.Log(ELogType.Error, "Player's BodyAnimatorCommon is null!");
 			return;
 		}
-		ConsoleScreen.Log(num++.ToString());
+
 		p.BodyAnimatorCommon.enabled = true;
-		ConsoleScreen.Log(num++.ToString());
 		AnimatorOverrideController runtimeAnimatorController = new AnimatorOverrideController(p.BodyAnimatorCommon.runtimeAnimatorController);
-		ConsoleScreen.Log(num++.ToString());
 		p.BodyAnimatorCommon.runtimeAnimatorController = (RuntimeAnimatorController)(object)runtimeAnimatorController;
-		ConsoleScreen.Log(num++.ToString());
 		RagdollHelperClass.PlayDeathAnimation(p, componentInChildren, eBodyPart);
-		if ((Object)(object)p.PlayerBones?.Pelvis?.Original == (Object)null)
+
+		if (p.PlayerBones?.Pelvis?.Original != null)
 		{
-			QuickLogger.Log(ELogType.Error, "PlayerBones or Pelvis is null!");
-			return;
+			TransformHelperClass.SetLayersRecursively(((Component)((Component)p.PlayerBones.Pelvis.Original).transform).gameObject, LayerMask.NameToLayer("Deadbody"));
 		}
-		ConsoleScreen.Log(num++.ToString());
-		TransformHelperClass.SetLayersRecursively(((Component)((Component)p.PlayerBones.Pelvis.Original).transform).gameObject, LayerMask.NameToLayer("Deadbody"));
-		ConsoleScreen.Log(num++.ToString());
-		((Component)p.PlayerBones.HolsterPrimary).gameObject.SetActive(false);
-		ConsoleScreen.Log(num++.ToString());
-		((Component)p.PlayerBones.HolsterSecondary).gameObject.SetActive(false);
-		ConsoleScreen.Log(num++.ToString());
-		((Component)p.PlayerBones.HolsterPrimaryAlternative).gameObject.SetActive(false);
-		ConsoleScreen.Log(num++.ToString());
-		((Component)p.PlayerBones.HolsterSecondaryAlternative).gameObject.SetActive(false);
-		ConsoleScreen.Log(num++.ToString());
-		((Component)p.PlayerBones.HolsterPistol).gameObject.SetActive(false);
-		ConsoleScreen.Log(num++.ToString());
-		((Component)p.PlayerBones.LeftLegHolsterPistol).gameObject.SetActive(false);
-		ConsoleScreen.Log(num++.ToString());
+
+		if (p.PlayerBones != null)
+		{
+			if (p.PlayerBones.HolsterPrimary != null) ((Component)p.PlayerBones.HolsterPrimary).gameObject.SetActive(false);
+			if (p.PlayerBones.HolsterSecondary != null) ((Component)p.PlayerBones.HolsterSecondary).gameObject.SetActive(false);
+			if (p.PlayerBones.HolsterPrimaryAlternative != null) ((Component)p.PlayerBones.HolsterPrimaryAlternative).gameObject.SetActive(false);
+			if (p.PlayerBones.HolsterSecondaryAlternative != null) ((Component)p.PlayerBones.HolsterSecondaryAlternative).gameObject.SetActive(false);
+			if (p.PlayerBones.HolsterPistol != null) ((Component)p.PlayerBones.HolsterPistol).gameObject.SetActive(false);
+			if (p.PlayerBones.LeftLegHolsterPistol != null) ((Component)p.PlayerBones.LeftLegHolsterPistol).gameObject.SetActive(false);
+		}
+
 		componentInChildren.Teleport(((Component)p).gameObject.transform.position, Quaternion.LookRotation(p.LookDirection), moveToTarget: true);
-		ConsoleScreen.Log(num++.ToString());
-		((MonoBehaviour)p).StartCoroutine(RagdollHelperClass.LerpMappingWeight(componentInChildren, 0f, 1f, 0.8f));
-		ConsoleScreen.Log(num++.ToString());
+
+		float lerpDuration = (VisceralEntry.Instance != null && VisceralEntry.Instance.MappingWeightDuration != null) 
+			? VisceralEntry.Instance.MappingWeightDuration.Value 
+			: 0.8f;
+		((MonoBehaviour)p).StartCoroutine(RagdollHelperClass.LerpMappingWeight(componentInChildren, 0f, 1f, lerpDuration));
+
 		componentInChildren.state = PuppetMaster.State.Dead;
-		ConsoleScreen.Log(num++.ToString());
 		GClass855.WaitSeconds((MonoBehaviour)(object)StaticManager.Instance, 0.1f, (Action)delegate
 		{
-			p.BodyAnimatorCommon.enabled = true;
+			if (p.BodyAnimatorCommon != null)
+			{
+				p.BodyAnimatorCommon.enabled = true;
+			}
 		});
-		ConsoleScreen.Log("END " + num++);
+
+		// Ragdoll Sleep System: desativa PuppetMaster após o tempo configurado (default: 3.5s) para liberar CPU/physics
+		if (VisceralEntry.Instance != null && VisceralEntry.Instance.DisableRagdollsAfterTime != null && VisceralEntry.Instance.DisableRagdollsAfterTime.Value)
+		{
+			float sleepDelay = (VisceralEntry.Instance.RagdollDisableTime != null) ? VisceralEntry.Instance.RagdollDisableTime.Value : 3.5f;
+			GClass855.WaitSeconds((MonoBehaviour)(object)StaticManager.Instance, sleepDelay, (Action)delegate
+			{
+				if (componentInChildren != null)
+				{
+					componentInChildren.mode = PuppetMaster.Mode.Kinematic;
+					((Behaviour)componentInChildren).enabled = false;
+				}
+			});
+		}
 	}
 }

@@ -10,6 +10,8 @@ using EFT.AssetsManager;
 using EFT.InventoryLogic;
 using HarmonyLib;
 using UnityEngine;
+using Random = UnityEngine.Random;
+using Object = UnityEngine.Object;
 
 namespace VisceralCombat.Ragdolls.Classes.Debug;
 
@@ -86,7 +88,7 @@ public class RagdollSpawner
 			while (_003CtransformQueue_003E5__1.Count > 0)
 			{
 				_003CparentTransform_003E5__2 = _003CtransformQueue_003E5__1.Dequeue();
-				if (!Object.op_Implicit((Object)(object)_003CparentTransform_003E5__2))
+				if (!_003CparentTransform_003E5__2 != null)
 				{
 					continue;
 				}
@@ -137,48 +139,6 @@ public class RagdollSpawner
 		{
 			return ((IEnumerable<Transform>)this).GetEnumerator();
 		}
-	}
-
-	private static string[] _boneArray = new string[20]
-	{
-		"Base HumanLUpperarm", "Base HumanLForearm1", "Base HumanRUpperarm", "Base HumanRForearm1", "Base HumanSpine3", "Base HumanSpine2", "Base HumanSpine1", "Base HumanPelvis", "Base HumanNeck", "Base HumanHead",
-		"Base HumanLThigh1", "Base HumanLThigh2", "Base HumanLCalf", "Base HumanLFoot", "Base HumanLToe", "Base HumanRThigh1", "Base HumanRThigh2", "Base HumanRCalf", "Base HumanRFoot", "Base HumanRToe"
-	};
-
-	private static async Task DebugSpawnRagdoll(Player p)
-	{
-		Player localPlayer = Singleton<GameWorld>.Instance.MainPlayer;
-		InventoryEquipment newEquipment = GClass3380.CloneItem<InventoryEquipment>(localPlayer.Equipment, (IIdGenerator)null);
-		Transform localPlayerTransform = localPlayer.Transform.Original;
-		BindableStateClass itemInHands = Traverse.Create((object)localPlayer).Field<BindableStateClass>("_itemInHands").Value;
-		BindableStateClass newItemInHands = new BindableStateClass((_00210)((GClass1642<Item>)(object)itemInHands).Value, (IEqualityComparer<_00210>)null);
-		GameObject ragdollGameObject = Singleton<PoolManagerClass>.Instance.CreatePlayerObject(ResourceKeyManagerAbstractClass.PLAYER_BUNDLE_NAME);
-		Transform ragdollTransform = ragdollGameObject.transform;
-		PlayerBody playerBody = ragdollGameObject.GetComponentInChildren<PlayerBody>();
-		((Object)ragdollGameObject).name = $"RAGDOLL_{localPlayer.Id}";
-		ragdollTransform.parent = null;
-		ragdollTransform.position = localPlayerTransform.position;
-		ragdollTransform.rotation = localPlayerTransform.rotation;
-		await playerBody.Init(localPlayer.Profile.Customization, newEquipment, newItemInHands, LayerMask.NameToLayer("Player"), localPlayer.Side, localPlayer.Profile.Id, (Dictionary<EquipmentSlot, Transform>)null, false);
-		Animator animator = ragdollGameObject.GetComponentInChildren<Animator>();
-		playerBody.UpdatePlayerRenders((EPointOfView)1, localPlayer.Profile.Info.Side);
-		((Behaviour)animator).enabled = false;
-		new RagdollClass(ragdollGameObject.gameObject.GetComponent<PlayerPoolObject>().RigidbodySpawners, ragdollGameObject.gameObject.GetComponent<PlayerPoolObject>().JointSpawners, ragdollGameObject.gameObject.GetComponent<PlayerPoolObject>().PlayerRigidbodySleepHierarchy, new Vector3(0f, 0f, 0f), EFTHardSettings.Instance.CorpseMaxDepenetrationVelocity, (CollisionDetectionMode)0, (MonoBehaviour)(object)playerBody, (Func<bool, float, bool>)CheckCorpseIsStill, playerBody, (Func<bool>)p.PlayerBody.IsVisible, (Action)OnRigidbodyStopped, false, false);
-		SetLayersRecursively(ragdollGameObject.gameObject, LayerMask.NameToLayer("Deadbody"), LayerMask.NameToLayer("Player"), _boneArray, "Shells");
-		SetLayersRecursively(ragdollGameObject.gameObject, LayerMask.NameToLayer("Deadbody"), LayerMask.NameToLayer("HitCollider"), _boneArray, "Shells");
-		SetLayersRecursively(ragdollGameObject.gameObject, LayerMask.NameToLayer("Deadbody"), LayerMask.NameToLayer("Default"), _boneArray, "Shells");
-		foreach (Transform child in EnumerateHierarchyCore(ragdollGameObject.transform))
-		{
-			Collider collider = ((Component)child).GetComponent<Collider>();
-			if ((Object)(object)collider != (Object)null)
-			{
-				collider.enabled = true;
-			}
-		}
-	}
-
-	public static void OnRigidbodyStopped()
-	{
 	}
 
 	public static bool CheckCorpseIsStill(bool sleeping, float timePass)

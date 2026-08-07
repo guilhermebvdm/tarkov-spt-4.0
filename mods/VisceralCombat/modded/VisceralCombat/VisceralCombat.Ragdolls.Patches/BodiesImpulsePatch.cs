@@ -10,6 +10,8 @@ using EFT.Interactive;
 using EFT.InventoryLogic;
 using SPT.Reflection.Patching;
 using UnityEngine;
+using Random = UnityEngine.Random;
+using Object = UnityEngine.Object;
 
 namespace VisceralCombat.Ragdolls.Patches;
 
@@ -200,7 +202,39 @@ public class BodiesImpulsePatch : ModulePatch
 	[PatchPostfix]
 	private static void Postfix(EftBulletClass shot)
 	{
-		((MonoBehaviour)StaticManager.Instance).StartCoroutine(WatchShot(shot));
+		if (shot == null) return;
+
+		if (shot.IsShotFinished)
+		{
+			ProcessImpulse(shot);
+		}
+		else
+		{
+			((MonoBehaviour)StaticManager.Instance).StartCoroutine(WatchShot(shot));
+		}
+	}
+
+	private static void ProcessImpulse(EftBulletClass shot)
+	{
+		if (shot.HitCollider == null) return;
+
+		Transform rootTransform = shot.HitCollider.transform.root;
+		if (rootTransform == null) return;
+
+		VisceralCombat.Ragdolls.Classes.RootMotion.Dynamics.PuppetMaster puppet = rootTransform.GetComponentInChildren<VisceralCombat.Ragdolls.Classes.RootMotion.Dynamics.PuppetMaster>();
+		if (puppet != null && puppet.state == VisceralCombat.Ragdolls.Classes.RootMotion.Dynamics.PuppetMaster.State.Dead)
+		{
+			Rigidbody body = shot.HitCollider.GetComponent<Rigidbody>();
+			if (body != null && shot.Ammo != null)
+			{
+				string caliber = (shot.Ammo is AmmoItemClass ammoItem) ? ammoItem.Caliber : string.Empty;
+				float baseForce = _dictionary.TryGetValue(caliber, out float val) ? val : 25f;
+				float boneMult = _bonedictionary.TryGetValue(shot.HitCollider.name, out float mult) ? mult : 1f;
+
+				Vector3 impulse = shot.Direction * (baseForce * boneMult * VisceralEntry.Instance.ShotIntensity.Value);
+				body.AddForceAtPosition(impulse, shot.HitPoint, ForceMode.Impulse);
+			}
+		}
 	}
 
 	[IteratorStateMachine(typeof(_003CWatchShot_003Ed__4))]

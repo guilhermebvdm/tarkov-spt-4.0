@@ -1,5 +1,7 @@
 using System;
 using UnityEngine;
+using Random = UnityEngine.Random;
+using Object = UnityEngine.Object;
 
 namespace VisceralCombat.Ragdolls.Classes.RootMotion.Dynamics;
 
@@ -208,7 +210,7 @@ public class SubBehaviourCOM : SubBehaviourBase
 		Vector3 val = Vector3.zero;
 		for (int i = 0; i < collision.contacts.Length; i++)
 		{
-			val += ((ContactPoint)(ref collision.contacts[i])).point;
+			val += collision.contacts[i].point;
 		}
 		return val / (float)collision.contacts.Length;
 	}

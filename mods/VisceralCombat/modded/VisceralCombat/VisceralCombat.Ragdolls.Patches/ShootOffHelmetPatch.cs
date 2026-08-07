@@ -5,6 +5,7 @@ using EFT.Ballistics;
 using EFT.InventoryLogic;
 using SPT.Reflection.Patching;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace VisceralCombat.Ragdolls.Patches;
 

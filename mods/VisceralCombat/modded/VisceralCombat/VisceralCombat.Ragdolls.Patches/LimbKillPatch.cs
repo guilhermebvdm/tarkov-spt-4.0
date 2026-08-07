@@ -11,6 +11,8 @@ using EFT.HealthSystem;
 using EFT.InventoryLogic;
 using SPT.Reflection.Patching;
 using UnityEngine;
+using Random = UnityEngine.Random;
+using Object = UnityEngine.Object;
 using VisceralCombat.Dismemberment.Classes;
 using VisceralCombat.Ragdolls.Classes.RootMotion.Dynamics;
 
@@ -132,7 +134,7 @@ public class LimbKillPatch : ModulePatch
 			}
 			_003CplayerRoot_003E5__6 = Utils.GetRootGameObject(((Component)_003Cpm_003E5__5).gameObject);
 			_003Cplayer_003E5__7 = _003CplayerRoot_003E5__6.GetComponentInChildren<Player>();
-			if ((Object)(object)_003Cplayer_003E5__7 == (Object)null || ((GClass3009<GClass3008>)(object)_003Cplayer_003E5__7.ActiveHealthController).IsAlive)
+			if ((Object)(object)_003Cplayer_003E5__7 == (Object)null || _003Cplayer_003E5__7.ActiveHealthController == null || _003Cplayer_003E5__7.ActiveHealthController.IsAlive)
 			{
 				return false;
 			}

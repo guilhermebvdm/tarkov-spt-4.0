@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Nexus.BundleLoader;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace VisceralCombat.Dismemberment.Classes;
 

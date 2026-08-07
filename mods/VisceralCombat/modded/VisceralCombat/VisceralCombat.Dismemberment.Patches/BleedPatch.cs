@@ -13,6 +13,8 @@ using EFT.InventoryLogic;
 using HarmonyLib;
 using SPT.Reflection.Patching;
 using UnityEngine;
+using Random = UnityEngine.Random;
+using Object = UnityEngine.Object;
 using VisceralCombat.Dismemberment.Classes;
 
 namespace VisceralCombat.Dismemberment.Patches;
@@ -243,9 +245,40 @@ public class BleedPatch : ModulePatch
 	[PatchPostfix]
 	private static void Postfix(BallisticsCalculator __instance, EftBulletClass __result, AmmoItemClass __0, Vector3 __1, Vector3 __2, int __3, string __4, Item __5, float __6, int __7)
 	{
-		if (VisceralEntry.Instance.EnableBloodEffects.Value)
+		if (VisceralEntry.Instance != null && VisceralEntry.Instance.EnableBloodEffects.Value && __result != null)
 		{
-			((MonoBehaviour)StaticManager.Instance).StartCoroutine(WatchShot(__result));
+			if (__result.IsShotFinished)
+			{
+				ProcessWatchShot(__result);
+			}
+			else
+			{
+				((MonoBehaviour)StaticManager.Instance).StartCoroutine(WatchShot(__result));
+			}
+		}
+	}
+
+	private static void ProcessWatchShot(EftBulletClass shot)
+	{
+		if (shot == null || shot.HitCollider == null) return;
+
+		Transform rootTransform = shot.HitCollider.transform.root;
+		if (rootTransform == null) return;
+
+		Player player = rootTransform.GetComponent<Player>();
+		if (player != null && shot.Ammo != null)
+		{
+			string caliber = (shot.Ammo is AmmoItemClass ammoItem) ? ammoItem.Caliber : string.Empty;
+			bool isAlive = player.HealthController != null && player.HealthController.IsAlive;
+
+			if (light_calibers.Contains(caliber))
+			{
+				HitEffect(player, shot.HitCollider, shot, isAlive, 1f, 18);
+			}
+			if (heavy_calibers.Contains(caliber))
+			{
+				HitEffect(player, shot.HitCollider, shot, isAlive, 1f, 17);
+			}
 		}
 	}
 
@@ -305,10 +338,10 @@ public class BleedPatch : ModulePatch
 		foreach (ParticleSystem val2 in array)
 		{
 			val2.loop = false;
-			MainModule main = val2.main;
-			((MainModule)(ref main)).duration = time;
-			CollisionModule collision = val2.collision;
-			((CollisionModule)(ref collision)).sendCollisionMessages = true;
+			ParticleSystem.MainModule main = val2.main;
+			main.duration = time;
+			ParticleSystem.CollisionModule collision = val2.collision;
+			collision.sendCollisionMessages = true;
 			if ((Object)(object)((Component)val2).gameObject.GetComponent<ParticleFloorPainter>() == (Object)null)
 			{
 				((Component)val2).gameObject.AddComponent<ParticleFloorPainter>();
@@ -370,10 +403,10 @@ public class BleedPatch : ModulePatch
 		foreach (ParticleSystem val2 in array)
 		{
 			val2.loop = false;
-			MainModule main = val2.main;
-			((MainModule)(ref main)).duration = time;
-			CollisionModule collision = val2.collision;
-			((CollisionModule)(ref collision)).sendCollisionMessages = true;
+			ParticleSystem.MainModule main = val2.main;
+			main.duration = time;
+			ParticleSystem.CollisionModule collision = val2.collision;
+			collision.sendCollisionMessages = true;
 			if ((Object)(object)((Component)val2).gameObject.GetComponent<ParticleFloorPainter>() == (Object)null)
 			{
 				((Component)val2).gameObject.AddComponent<ParticleFloorPainter>();
