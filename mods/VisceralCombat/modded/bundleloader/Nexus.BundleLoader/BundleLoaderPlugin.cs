@@ -52,10 +52,14 @@ public class BundleLoaderPlugin : BaseUnityPlugin
 
 	public AssetBundle GetAssetBundle(string bundleName)
 	{
-		if (_loadedBundles.TryGetValue(bundleName, out var value) && ((AsyncOperation)value).isDone)
+		if (string.IsNullOrEmpty(bundleName)) return null;
+		bundleName = bundleName.ToLower();
+
+		if (_loadedBundles.TryGetValue(bundleName, out var value))
 		{
 			return value.assetBundle;
 		}
+		Logger.LogWarning((object)$"GetAssetBundle: Bundle '{bundleName}' not found in loaded bundles list.");
 		return null;
 	}
 
