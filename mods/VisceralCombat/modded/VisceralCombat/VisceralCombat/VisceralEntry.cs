@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using BepInEx;
 using BepInEx.Configuration;
+using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
 using EFT.UI;
@@ -14,8 +15,6 @@ using Fika.Core.Networking;
 using Newtonsoft.Json;
 using SPT.Reflection.Patching;
 using UnityEngine;
-using Random = UnityEngine.Random;
-using Object = UnityEngine.Object;
 using VisceralCombat.Combat.Patches;
 using VisceralCombat.Combined.Patches;
 using VisceralCombat.Dismemberment.Classes;
@@ -71,6 +70,7 @@ public class VisceralEntry : BaseUnityPlugin
 	public CollisionDetectionMode collisionDetectionMode_0;
 
 	public static VisceralEntry Instance { get; private set; }
+	public static ManualLogSource LogSource { get; private set; }
 
 	public AssetBundle goreBundle { get; set; }
 
@@ -156,19 +156,9 @@ public class VisceralEntry : BaseUnityPlugin
 
 	public void Awake()
 	{
-		//IL_0046: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0050: Expected O, but got Unknown
-		//IL_0094: Unknown result type (might be due to invalid IL or missing references)
-		//IL_009e: Expected O, but got Unknown
-		//IL_0148: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0152: Expected O, but got Unknown
-		//IL_019a: Unknown result type (might be due to invalid IL or missing references)
-		//IL_01a4: Expected O, but got Unknown
-		//IL_01ec: Unknown result type (might be due to invalid IL or missing references)
-		//IL_01f6: Expected O, but got Unknown
-		//IL_023e: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0248: Expected O, but got Unknown
 		Instance = this;
+		LogSource = Logger;
+
 		EnableDismemberment = ((BaseUnityPlugin)this).Config.Bind<bool>("Dismemberment", "Dismemberment Enabled", true, new ConfigDescription("Disables literally EVERYTHING for dismemberment.", (AcceptableValueBase)null, new object[1]
 		{
 			new ConfigurationManagerAttributes
@@ -223,14 +213,20 @@ public class VisceralEntry : BaseUnityPlugin
 		((ModulePatch)new VisceralCombat.Dismemberment.Patches.GameStartedPatch()).Enable();
 		((ModulePatch)new KillPatch()).Enable();
 		((ModulePatch)new BleedPatch()).Enable();
-		ConsoleScreen.Processor.RegisterCommand("UpdateCalibers", (Action)delegate
+
+		try
 		{
-			ParseDismembermentJson();
-		}, (string)null);
-		ConsoleScreen.Processor.RegisterCommand("LayerCheck", (Action)delegate
-		{
-			LayerMaskRun();
-		}, (string)null);
+			ConsoleScreen.Processor.RegisterCommand("UpdateCalibers", (Action)delegate
+			{
+				ParseDismembermentJson();
+			}, (string)null);
+			ConsoleScreen.Processor.RegisterCommand("LayerCheck", (Action)delegate
+			{
+				LayerMaskRun();
+			}, (string)null);
+		}
+		catch { }
+
 		FikaEventDispatcher.SubscribeEvent<FikaNetworkManagerCreatedEvent>((Action<FikaNetworkManagerCreatedEvent>)onFikaNetworkManagerCreatedEvent);
 		ShotIntensity = ((BaseUnityPlugin)this).Config.Bind<float>("Ragdolls | Ragdoll Phsyical Properties", "Bullet Intensity", 85f, "How much force is applied to a shot. This is also dependent on caliber. Default is 85");
 		GrenadeExplIntensity = ((BaseUnityPlugin)this).Config.Bind<float>("Ragdolls | Ragdoll Phsyical Properties", "Grenade Intensity", 190f, "How much force is applied to a grenade explosion. This is also dependent on caliber. Default is 190");
@@ -256,7 +252,6 @@ public class VisceralEntry : BaseUnityPlugin
 		((ModulePatch)new LimbKillPatch()).Enable();
 		((ModulePatch)new CreateBSGRagdollPatch()).Enable();
 		((ModulePatch)new RagdollClassPatch()).Enable();
-		((ModulePatch)new VisceralCombat.Ragdolls.Patches.MovementContextPatch()).Enable();
 		NeverDeleteShells = ((BaseUnityPlugin)this).Config.Bind<bool>("Combat | Visuals", "Infinite Shell Casing Lifetime", false, "Turns off Used Shell Casing Deletion");
 		((ModulePatch)new ShellCasingPatch()).Enable();
 		ItemForce = ((BaseUnityPlugin)this).Config.Bind<bool>("Physics | Item Physical Properties", "Item Physics", false, "If you are getting too much lag turn this off. But most capable PC's should run this fine. (Besides on SoT)");
@@ -274,10 +269,6 @@ public class VisceralEntry : BaseUnityPlugin
 
 	private void OnDismembermentPacket(DismembermentPacket packet)
 	{
-		//IL_0022: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0031: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0082: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0089: Unknown result type (might be due to invalid IL or missing references)
 		Transform[] affectedLimbs = null;
 		QuickLogger.Log(ELogType.Log, $"Dismemberment Packet Received: {packet.playerID}, {packet.Direction}, {packet.bodyPartType}, {packet.bone}, {packet.capAssetName}, {packet.assetNames}");
 		KillPatch.DismemberLimb((Player)(object)Singleton<FikaClient>.Instance.CoopHandler.Players[packet.playerID], packet.Direction, packet.bodyPartType, packet.bone, packet.capAssetName, packet.assetNames, out affectedLimbs);
@@ -285,22 +276,16 @@ public class VisceralEntry : BaseUnityPlugin
 
 	private void OnRagdollSyncPacket(RagdollSyncPacket packet)
 	{
-		//IL_0015: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0053: Unknown result type (might be due to invalid IL or missing references)
 		QuickLogger.Log(ELogType.Log, $"Ragdoll Packet Received: {packet.PlayerID}, {packet.BodyPart}, {packet.RandomChance}");
 		KillPatch.DeathSetup((Player)(object)Singleton<FikaClient>.Instance.CoopHandler.Players[packet.PlayerID], packet.BodyPart, packet.RandomChance);
 	}
 
 	private void Start()
 	{
-		// BepInEx.Paths.PluginPath is the definitive path to BepInEx/plugins — never relative, never wrong
 		string pluginRoot = BepInEx.Paths.PluginPath;
 		string moddedPath1 = Path.Combine(pluginRoot, "VisceralCombat", "ssh", "VD_Calibers.json");
 		string moddedPath2 = Path.Combine(pluginRoot, "VisceralCombat", "VD_Calibers.json");
 		string legacyPath  = Path.Combine(pluginRoot, "ssh", "VD_Calibers.json");
-
-		QuickLogger.Log(ELogType.Log, $"[VisceralCombat] PluginPath = {pluginRoot}");
-		QuickLogger.Log(ELogType.Log, $"[VisceralCombat] Checking moddedPath2: {moddedPath2} → exists={File.Exists(moddedPath2)}");
 
 		if (File.Exists(moddedPath1))      filePath = moddedPath1;
 		else if (File.Exists(moddedPath2)) filePath = moddedPath2;
@@ -313,27 +298,22 @@ public class VisceralEntry : BaseUnityPlugin
 		}
 		else
 		{
-			QuickLogger.Log(ELogType.Error, $"[VisceralCombat] VD_Calibers.json NOT FOUND! Checked:\n  {moddedPath1}\n  {moddedPath2}\n  {legacyPath}");
+			QuickLogger.Log(ELogType.Error, $"[VisceralCombat] VD_Calibers.json NOT FOUND!");
 		}
 	}
 
 	internal LayerMask LayerMaskConstructor(string[] layers)
 	{
-		//IL_0029: Unknown result type (might be due to invalid IL or missing references)
-		//IL_002e: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0032: Unknown result type (might be due to invalid IL or missing references)
 		int num = 0;
 		foreach (string text in layers)
 		{
 			num |= 1 << LayerMask.NameToLayer(text);
 		}
-		return num;
+		return (LayerMask)num;
 	}
 
 	internal void LayerMaskRun()
 	{
-		//IL_0021: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0026: Unknown result type (might be due to invalid IL or missing references)
 		LayerMask val = LayerMaskConstructor(WorldLayers.Concat(DeadBodyLayers.Concat(HitColliderLayers)).ToArray());
 		QuickLogger.Log(ELogType.Log, val.ToString());
 	}
@@ -342,8 +322,6 @@ public class VisceralEntry : BaseUnityPlugin
 	{
 		string text = File.ReadAllText(filePath);
 		List<Dictionary<string, object>> list = JsonConvert.DeserializeObject<List<Dictionary<string, object>>>(text);
-		BleedPatch.light_calibers.Clear();
-		BleedPatch.heavy_calibers.Clear();
 		foreach (Dictionary<string, object> item in list)
 		{
 			if (item.ContainsKey("dismember_calibers"))
@@ -385,44 +363,5 @@ public class VisceralEntry : BaseUnityPlugin
 		{
 			QuickLogger.Log(ELogType.Log, "Calibers Found & Added.");
 		}
-	}
-
-	private void LayerMaskOutput()
-	{
-		List<LayerCollisionData> list = new List<LayerCollisionData>();
-		for (int i = 0; i < 32; i++)
-		{
-			string text = LayerMask.LayerToName(i);
-			if (string.IsNullOrEmpty(text))
-			{
-				text = $"Layer_{i}";
-			}
-			LayerCollisionData layerCollisionData = new LayerCollisionData();
-			layerCollisionData.layerName = text;
-			layerCollisionData.collidesWith = new List<string>();
-			for (int j = 0; j < 32; j++)
-			{
-				if (i != j)
-				{
-					string text2 = LayerMask.LayerToName(j);
-					if (string.IsNullOrEmpty(text2))
-					{
-						text2 = $"{j}";
-					}
-					if (!Physics.GetIgnoreLayerCollision(i, j))
-					{
-						layerCollisionData.collidesWith.Add(text2);
-					}
-				}
-			}
-			list.Add(layerCollisionData);
-		}
-		string contents = JsonConvert.SerializeObject((object)new
-		{
-			layers = list
-		}, (Formatting)1);
-		string text3 = Path.Combine(Application.dataPath, "LayerCollisionData.json");
-		File.WriteAllText(text3, contents);
-		Debug.Log((object)("Layer collision data saved to: " + text3));
 	}
 }
