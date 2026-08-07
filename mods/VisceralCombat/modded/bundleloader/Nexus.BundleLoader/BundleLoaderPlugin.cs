@@ -7,8 +7,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using BepInEx;
 using UnityEngine;
-using Random = UnityEngine.Random;
-using Object = UnityEngine.Object;
 
 namespace Nexus.BundleLoader;
 
@@ -22,7 +20,11 @@ public class BundleLoaderPlugin : BaseUnityPlugin
 	private void Awake()
 	{
 		Instance = this;
-		string path = Path.Combine(Environment.CurrentDirectory, "BepInEx", "plugins", "ssh", "Bundles");
+		string moddedPath1 = Path.Combine(Environment.CurrentDirectory, "BepInEx", "plugins", "VisceralCombat", "ssh", "Bundles");
+		string moddedPath2 = Path.Combine(Environment.CurrentDirectory, "BepInEx", "plugins", "VisceralCombat", "Bundles");
+		string legacyPath = Path.Combine(Environment.CurrentDirectory, "BepInEx", "plugins", "ssh", "Bundles");
+
+		string path = Directory.Exists(moddedPath1) ? moddedPath1 : (Directory.Exists(moddedPath2) ? moddedPath2 : legacyPath);
 		if (Directory.Exists(path))
 		{
 			_loadedBundles = (from f in Directory.GetFiles(path)
@@ -34,7 +36,7 @@ public class BundleLoaderPlugin : BaseUnityPlugin
 			Directory.CreateDirectory(path);
 			_loadedBundles = new Dictionary<string, AssetBundleCreateRequest>();
 		}
-		Logger.LogInfo((object)$"Loaded {_loadedBundles.Count} bundles...");
+		Logger.LogInfo((object)$"Loaded {_loadedBundles.Count} bundles from {path}...");
 	}
 
 	public bool IsLoading(string bundleName, out bool isFinished)
@@ -69,31 +71,14 @@ public class BundleLoaderPlugin : BaseUnityPlugin
 			}
 			await Task.Yield();
 		}
-		if (isFinished)
+		while (!isFinished)
 		{
-			return _loadedBundles[name].assetBundle;
-		}
-		AssetBundleCreateRequest request = _loadedBundles[name];
-		if (request == null)
-		{
-			return null;
-		}
-		while (!((AsyncOperation)request).isDone && !cancellationToken.IsCancellationRequested)
-		{
+			if (cancellationToken.IsCancellationRequested)
+			{
+				return null;
+			}
 			await Task.Yield();
 		}
-		return cancellationToken.IsCancellationRequested ? null : request.assetBundle;
-	}
-
-	public IEnumerator GetAssetBundleWaitForLoad(string bundleName)
-	{
-		if (_loadedBundles.TryGetValue(bundleName, out var request))
-		{
-			while (!((AsyncOperation)request).isDone)
-			{
-				yield return null;
-			}
-			yield return request.assetBundle;
-		}
+		return GetAssetBundle(name);
 	}
 }

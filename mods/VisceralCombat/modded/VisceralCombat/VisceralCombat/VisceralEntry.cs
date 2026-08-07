@@ -292,6 +292,14 @@ public class VisceralEntry : BaseUnityPlugin
 
 	private void Start()
 	{
+		string moddedPath1 = Path.Combine(Environment.CurrentDirectory, "BepInEx", "plugins", "VisceralCombat", "ssh", "VD_Calibers.json");
+		string moddedPath2 = Path.Combine(Environment.CurrentDirectory, "BepInEx", "plugins", "VisceralCombat", "VD_Calibers.json");
+		string legacyPath = Path.Combine(Environment.CurrentDirectory, "BepInEx", "plugins", "ssh", "VD_Calibers.json");
+
+		if (File.Exists(moddedPath1)) filePath = moddedPath1;
+		else if (File.Exists(moddedPath2)) filePath = moddedPath2;
+		else if (File.Exists(legacyPath)) filePath = legacyPath;
+
 		if (File.Exists(filePath))
 		{
 			ParseDismembermentJson();
