@@ -231,6 +231,17 @@ public static class RagdollHelperClass
 		return false;
 	}
 
+	internal static bool ParentIsDismembered(Transform t)
+	{
+		Transform curr = t;
+		while (curr != null)
+		{
+			if (curr.localScale == limbSize) return true;
+			curr = curr.parent;
+		}
+		return false;
+	}
+
 	internal static void DisableLiveActiveRagdoll(Player p, PuppetMaster pm)
 	{
 		if (p != null && p.BodyAnimatorCommon != null)
@@ -252,10 +263,16 @@ public static class RagdollHelperClass
 						foreach (Rigidbody rb in componentsInChildren)
 						{
 							if (rb == null) continue;
+							if (ParentIsDismembered(rb.transform))
+							{
+								rb.isKinematic = true;
+								rb.detectCollisions = false;
+								continue;
+							}
 							rb.isKinematic = true;
 							GClass855.WaitSeconds((MonoBehaviour)(object)StaticManager.Instance, 0.06f, (Action)delegate
 							{
-								if (rb != null && Singleton<GameWorld>.Instantiated)
+								if (rb != null && Singleton<GameWorld>.Instantiated && !ParentIsDismembered(rb.transform))
 								{
 									rb.isKinematic = false;
 								}

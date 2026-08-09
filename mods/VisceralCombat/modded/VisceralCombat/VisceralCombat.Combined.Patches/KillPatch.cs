@@ -207,12 +207,34 @@ public class KillPatch : ModulePatch
 
 			val.localScale = RagdollHelperClass.limbSize;
 
+			// Permanently set all Rigidbodies under the dismembered limb to isKinematic = true to stop PhysX joint solver
+			Rigidbody[] limbRbs = val.GetComponentsInChildren<Rigidbody>(true);
+			foreach (Rigidbody rb in limbRbs)
+			{
+				if (rb != null)
+				{
+					rb.isKinematic = true;
+					rb.detectCollisions = false;
+				}
+			}
+
 			// Destroy PhysX Joint constraints on scaled limb transforms to prevent 1000x joint anchor scale explosion
 			Joint[] limbJoints = val.GetComponentsInChildren<Joint>(true);
 			foreach (Joint j in limbJoints)
 			{
 				if (j != null)
 				{
+					Object.Destroy(j);
+				}
+			}
+
+			// Clear any joint in the entire player body that connects to this dismembered limb
+			Joint[] allPlayerJoints = player.GetComponentsInChildren<Joint>(true);
+			foreach (Joint j in allPlayerJoints)
+			{
+				if (j != null && j.connectedBody != null && (j.connectedBody.transform == val || j.connectedBody.transform.IsChildOf(val)))
+				{
+					j.connectedBody = null;
 					Object.Destroy(j);
 				}
 			}
