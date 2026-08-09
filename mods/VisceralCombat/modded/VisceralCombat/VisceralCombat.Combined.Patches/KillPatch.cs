@@ -102,10 +102,7 @@ public class KillPatch : ModulePatch
 						}
 					}
 				}
-				if (isFirstDeath)
-				{
-					return;
-				}
+				return;
 			}
 		}
 

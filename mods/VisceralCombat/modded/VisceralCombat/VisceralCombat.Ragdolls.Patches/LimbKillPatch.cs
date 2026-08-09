@@ -22,8 +22,21 @@ public class LimbKillPatch : ModulePatch
 	private static void Postfix(EftBulletClass shot)
 	{
 		if (shot == null) return;
+		((MonoBehaviour)StaticManager.Instance).StartCoroutine(WatchShot(shot));
+	}
 
-		if (shot.IsShotFinished)
+	private static System.Collections.IEnumerator WatchShot(EftBulletClass shot)
+	{
+		if (shot == null) yield break;
+
+		float timeout = 3.0f;
+		while (!shot.IsShotFinished && timeout > 0f)
+		{
+			timeout -= Time.deltaTime;
+			yield return null;
+		}
+
+		if (shot != null && shot.IsShotFinished && shot.HitCollider != null)
 		{
 			ProcessLimbKill(shot);
 		}
