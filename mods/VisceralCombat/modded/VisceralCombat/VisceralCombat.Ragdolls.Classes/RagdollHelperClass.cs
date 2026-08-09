@@ -1,8 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using Comfort.Common;
 using EFT;
 using Nexus.BundleLoader;
@@ -15,92 +13,6 @@ namespace VisceralCombat.Ragdolls.Classes;
 
 public static class RagdollHelperClass
 {
-	[CompilerGenerated]
-	private sealed class _003CLerpMappingWeight_003Ed__9 : IEnumerator<object>, IEnumerator, IDisposable
-	{
-		private int _003C_003E1__state;
-
-		private object _003C_003E2__current;
-
-		public PuppetMaster pm;
-
-		public float startValue;
-
-		public float endValue;
-
-		public float duration;
-
-		private float _003CelapsedTime_003E5__1;
-
-		object IEnumerator<object>.Current
-		{
-			[DebuggerHidden]
-			get
-			{
-				return _003C_003E2__current;
-			}
-		}
-
-		object IEnumerator.Current
-		{
-			[DebuggerHidden]
-			get
-			{
-				return _003C_003E2__current;
-			}
-		}
-
-		[DebuggerHidden]
-		public _003CLerpMappingWeight_003Ed__9(int _003C_003E1__state)
-		{
-			this._003C_003E1__state = _003C_003E1__state;
-		}
-
-		[DebuggerHidden]
-		void IDisposable.Dispose()
-		{
-			_003C_003E1__state = -2;
-		}
-
-		private bool MoveNext()
-		{
-			switch (_003C_003E1__state)
-			{
-			default:
-				return false;
-			case 0:
-				_003C_003E1__state = -1;
-				_003CelapsedTime_003E5__1 = 0f;
-				break;
-			case 1:
-				_003C_003E1__state = -1;
-				break;
-			}
-			if (_003CelapsedTime_003E5__1 < duration)
-			{
-				pm.mappingWeight = Mathf.Lerp(startValue, endValue, _003CelapsedTime_003E5__1 / duration);
-				_003CelapsedTime_003E5__1 += Time.deltaTime;
-				_003C_003E2__current = null;
-				_003C_003E1__state = 1;
-				return true;
-			}
-			pm.mappingWeight = endValue;
-			return false;
-		}
-
-		bool IEnumerator.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			return this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		void IEnumerator.Reset()
-		{
-			throw new NotSupportedException();
-		}
-	}
-
 	internal static Dictionary<string, float> limb_chances = new Dictionary<string, float>();
 
 	internal static List<Transform> limbsToCheck = new List<Transform>();
@@ -119,14 +31,6 @@ public static class RagdollHelperClass
 
 	internal static void PlayDeathAnimation(Player p, PuppetMaster pm, EBodyPart eBodyPart)
 	{
-		//IL_0015: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0017: Invalid comparison between Unknown and I4
-		//IL_0077: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0078: Unknown result type (might be due to invalid IL or missing references)
-		//IL_007a: Unknown result type (might be due to invalid IL or missing references)
-		//IL_007c: Unknown result type (might be due to invalid IL or missing references)
-		//IL_007e: Unknown result type (might be due to invalid IL or missing references)
-		//IL_00a1: Expected I4, but got Unknown
 		if ((int)eBodyPart > 0)
 		{
 			((MonoBehaviour)p).StartCoroutine(Utils.LerpLayerWeight(p, 18, 0f, 1f, VisceralEntry.Instance.AnimSwapDuration.Value));
@@ -270,7 +174,6 @@ public static class RagdollHelperClass
 		}
 		default:
 			QuickLogger.Log(ELogType.Warn, "Body part not detected.");
-			p.BodyAnimatorCommon.enabled = false;
 			break;
 		}
 
@@ -284,22 +187,25 @@ public static class RagdollHelperClass
 		});
 	}
 
-	[IteratorStateMachine(typeof(_003CLerpMappingWeight_003Ed__9))]
 	internal static IEnumerator LerpMappingWeight(PuppetMaster pm, float startValue, float endValue, float duration)
 	{
-		return new _003CLerpMappingWeight_003Ed__9(0)
+		float elapsedTime = 0f;
+		while (elapsedTime < duration)
 		{
-			pm = pm,
-			startValue = startValue,
-			endValue = endValue,
-			duration = duration
-		};
+			if (pm == null) yield break;
+			pm.mappingWeight = Mathf.Lerp(startValue, endValue, elapsedTime / duration);
+			elapsedTime += Time.deltaTime;
+			yield return null;
+		}
+		if (pm != null)
+		{
+			pm.mappingWeight = endValue;
+		}
 	}
 
 	internal static bool ShouldRagdoll(EBodyPart bodyPartType)
 	{
 		float num = Random.Range(0f, 1f);
-		float num2 = 0f;
 		if ((int)bodyPartType switch
 		{
 			0 => limb_chances.TryGetValue("Head", out var value) ? value : 0f, 
@@ -319,19 +225,15 @@ public static class RagdollHelperClass
 
 	internal static void DisableLiveActiveRagdoll(Player p, PuppetMaster pm)
 	{
-		if (p != null && p.BodyAnimatorCommon != null)
-		{
-			p.BodyAnimatorCommon.SetLayerWeight(18, 0f);
-			p.BodyAnimatorCommon.enabled = false;
-		}
-
+		// DO NOT reset BodyAnimatorCommon (enabled=false or SetLayerWeight(18, 0)) here,
+		// because disabling the animator while in an agony pose causes Unity Animator to snap
+		// back to T-pose / standing position before physics disables!
 		if (pm != null && ((Component)pm).gameObject != null)
 		{
 			if (p?.PlayerBody != null && ((Component)p.PlayerBody).gameObject != null)
 			{
 				Rigidbody[] componentsInChildren = ((Component)p.PlayerBody).gameObject.GetComponentsInChildren<Rigidbody>();
-				Rigidbody[] array = componentsInChildren;
-				foreach (Rigidbody rb in array)
+				foreach (Rigidbody rb in componentsInChildren)
 				{
 					if (rb == null) continue;
 					rb.isKinematic = true;
