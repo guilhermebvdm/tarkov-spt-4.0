@@ -31,6 +31,8 @@ public static class RagdollHelperClass
 
 	internal static void PlayDeathAnimation(Player p, PuppetMaster pm, EBodyPart eBodyPart)
 	{
+		VisceralCombat.Combined.Classes.DeathAudioController.HandleDeathAudio(p, eBodyPart);
+
 		if ((int)eBodyPart > 0)
 		{
 			((MonoBehaviour)p).StartCoroutine(Utils.LerpLayerWeight(p, 18, 0f, 1f, VisceralEntry.Instance.AnimSwapDuration.Value));
@@ -254,6 +256,10 @@ public static class RagdollHelperClass
 						}
 					}
 					((Component)pm).gameObject.SetActive(false);
+					if (p != null && p.BodyAnimatorCommon != null)
+					{
+						p.BodyAnimatorCommon.enabled = false;
+					}
 				}
 			});
 		}
