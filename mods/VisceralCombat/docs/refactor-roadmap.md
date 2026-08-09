@@ -28,7 +28,7 @@ authors: [AI Assistant, Tarkov Dev Team]
 ```mermaid
 graph TD
     Phase1["Fase 1: Correção de Segurança, Crashes e Threading (CONCLUÍDO)"] --> Phase2["Fase 2: Otimização de Agonia e Desmembramento (CONCLUÍDO)"]
-    Phase2 --> Phase3["Fase 3: Auditoria 002 — Vazamento de Memória Pós-Raid & Scripts Mortos"]
+    Phase2 --> Phase3["Fase 3: Auditoria 002 — Vazamento de Memória Pós-Raid & Scripts Mortos (CONCLUÍDO)"]
     Phase3 --> Phase4["Fase 4: Conexão de Propriedades F12 e Limpeza Final"]
 ```
 
@@ -43,34 +43,33 @@ graph TD
 
 ### ✅ 2. Resolução do Loop Infinito de Agonia e Teleporte em Pé
 - **Problema:** Quando um bot entrava em agonia no chão de dor, ao término do tempo o corpo dava um "snap" instantâneo em pé e entrava em loop infinito da animação.
-- **Causa Raiz:** A camada 18 do `BodyAnimatorCommon` continuava em peso `1.0f` com uma animação em loop. Ao desativar o `PuppetMaster`, a Unity resetava o esqueleto para a pose inicial em pé.
 - **Solução:** Em [`RagdollHelperClass.cs`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/VisceralCombat/modded/VisceralCombat/VisceralCombat.Ragdolls.Classes/RagdollHelperClass.cs#L170), implementado desacoplamento gradual:
   1. Redução suave do peso da camada 18 para `0f` (`LerpLayerWeight`).
   2. Redução suave do `mappingWeight` do `PuppetMaster` para `0f`.
   3. Desativação do `PuppetMaster` somente após o peso zerar, mantendo o corpo no chão em ragdoll puro.
-- **Resultado:** **Confirmado e Validado via logs `[SPY-AGONY]` e no Jogo.**
+- **Resultado:** **Confirmado e Validado via logs e no Jogo.**
 
----
-
-## 🚨 Fases de Atuação Atuais (`002-refactor`)
-
-### 🔴 002-A: Vazamentos de Memória Pós-Raid (Em Andamento)
-- **VisceralEntry.cs:** `deadPlayers` e `dismemberedPlayers` são mantidos entre raids sem `Clear()`. Retêm instâncias destruídas de `Player` na RAM.
-- **Ragdolls/GameStartedPatch.cs:** Linhas 40-42 contêm duplo `Object.Instantiate` de `active_ragdoll_base` sem atribuição (cria objetos fantasma na cena).
-- **EffectContainer.cs:** Linhas 78-79 instanciam `val2` na raiz da cena e criam um objeto órfão na memória.
-- **GoreObjectPool.cs:** O pool de sangue não é limpo ao mudar de raid (`ClearPool()`).
-
-### 🟡 002-B: Scripts Mortos e Residuais do Asset Store
-- **BFX_MouseOrbit.cs:** Script de teste de câmera do Asset Store rodando `LateUpdate()` e tentando alterar o ponteiro do mouse (`Cursor.visible`).
-- **RagdollSpawner.cs & Navigator.cs:** Classes residuais de teste e NavMesh sem chamadas no mod.
-- **BFX_DecaGizmo.cs:** Desenho de editor Gizmo inutilizável em runtime.
+### ✅ 3. Auditoria 002: Vazamento de RAM Pós-Raid, Objetos Órfãos & Scripts Mortos
+- **002-A (RAM Leaks & Instanciação Órfã):**
+  - Limpeza de `VisceralEntry.Instance.deadPlayers.Clear()` e `GoreObjectPool.Instance?.ClearPool()` no `Postfix` de `OnGameStarted` ([`GameStartedPatch.cs`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/VisceralCombat/modded/VisceralCombat/VisceralCombat.Ragdolls.Patches/GameStartedPatch.cs#L35)).
+  - Eliminado duplo `Object.Instantiate` sem pai criando objetos fantasmas em `GameStartedPatch.cs` e `EffectContainer.cs`.
+- **002-B (Remoção de Scripts Mortos):**
+  - Removidos 4 arquivos obsoletos (`BFX_MouseOrbit.cs`, `BFX_DecaGizmo.cs`, `RagdollSpawner.cs`, `Navigator.cs`), eliminando 569 linhas de código inútil.
+- **002-C (Micro-Otimizações VolumetricBloodFX):**
+  - Desinscrição de event delegates em `BFX_DecalSettings.cs` (`OnDestroy`).
+  - Remoção de chamada dupla `OnEnable()` do `Awake()` em `BFX_ShaderProperies.cs`.
+  - Tratamento de nulos no `Update()` em `BFX_ManualAnimationUpdate.cs`.
+- **Resultado:** **Compilado com 0 Erros, Code Review 01 Aprovado e DLL Sincronizada.**
 
 ---
 
 ## 📋 Checklist de Validação Final
 
+- [x] A pasta `original/` permaneceu intacta e sem alterações.
+- [x] O mod compila limpo em `modded/VisceralCombat/VisceralCombat.csproj`.
 - [x] Desmembramento funcionando em raid (cabeça, braços, pernas).
 - [x] Animação de agonia transicionando suavemente para ragdoll morto sem teleporte em pé.
-- [ ] Coleções de `deadPlayers` e `GoreObjectPool` limpos no `OnGameStarted`.
-- [ ] Instanciações órfãs de `GameObject` eliminadas.
-- [ ] Scripts residuais do Asset Store removidos.
+- [x] Coleções de `deadPlayers` e `GoreObjectPool` limpos no `OnGameStarted`.
+- [x] Instanciações órfãs de `GameObject` eliminadas.
+- [x] Scripts residuais do Asset Store removidos (569 linhas mortas limpas).
+- [x] Event delegates desinscritos e chamadas redundantes de `OnEnable` corrigidas.
