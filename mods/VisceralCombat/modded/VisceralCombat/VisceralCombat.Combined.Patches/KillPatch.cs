@@ -83,13 +83,10 @@ public class KillPatch : ModulePatch
 			dismemberChance = chance;
 		}
 
-		QuickLogger.Log(ELogType.Log, $"[SPY] KillPatch.Postfix: Victim='{__instance.Profile?.Nickname}', DamageType={(int)damageInfo.DamageType}, SourceId='{damageInfo.SourceId}', BodyPart={bodyPartType}, Caliber='{caliber}', DismemberChance={dismemberChance}");
-
 		if ((int)damageInfo.DamageType != 2048 && (int)damageInfo.DamageType != 4 && (int)damageInfo.DamageType != 32 && (int)damageInfo.DamageType != 8 && (int)damageInfo.DamageType != 16 && (int)damageInfo.DamageType != 8192)
 		{
 			if (Random.value > dismemberChance)
 			{
-				QuickLogger.Log(ELogType.Log, $"[SPY] Dismemberment chance roll failed ({dismemberChance}). Falling back to Active Ragdoll.");
 				if (VisceralEntry.Instance.UseActiveRagdolls.Value && (FikaBackendUtils.IsServer || FikaBackendUtils.IsSinglePlayer))
 				{
 					if (!VisceralEntry.Instance.OnlyPlayersCanActiveRagdollEnemies.Value || !damageInfo.Player.IsAI)
@@ -110,7 +107,6 @@ public class KillPatch : ModulePatch
 
 		if (!VisceralEntry.Instance.EnableDismemberment.Value)
 		{
-			QuickLogger.Log(ELogType.Warn, "[SPY] EnableDismemberment config is FALSE. Aborting.");
 			return;
 		}
 
@@ -171,12 +167,6 @@ public class KillPatch : ModulePatch
 						: ((Object)t).name.ToLower().Contains(boneLower)) &&
 				  !VisceralCombat.Dismemberment.Classes.Utils.ParentContains(t, "weapon_holster")
 			select t).ToArray();
-
-		QuickLogger.Log(ELogType.Log, $"[SPY] DismemberLimb: Victim='{player.Profile?.Nickname}', BodyPart={bodyPartType}, Bone='{bone}', Cap='{capAssetName}', FoundLimbs={affectedLimbs.Length}");
-		foreach (var limb in affectedLimbs)
-		{
-			QuickLogger.Log(ELogType.Log, $"[SPY] -> Found Limb Transform: '{limb.name}' (current scale={limb.localScale})");
-		}
 
 		Transform[] array = affectedLimbs;
 		foreach (Transform val in array)
@@ -280,6 +270,8 @@ public class KillPatch : ModulePatch
 				return;
 			}
 
+			QuickLogger.Log(ELogType.Log, $"[SPY-AGONY] DeathSetup START: Player='{p.Profile?.Nickname}', BodyPart={eBodyPart}, Chance={Chance}");
+
 			if (FikaBackendUtils.IsServer && FikaBackendUtils.IsClient)
 			{
 				if (p is FikaPlayer fikaPlayer && fikaPlayer != null && Singleton<FikaServer>.Instantiated && Singleton<FikaServer>.Instance != null)
@@ -311,7 +303,7 @@ public class KillPatch : ModulePatch
 
 			if ((Object)(object)componentInChildren == (Object)null)
 			{
-				QuickLogger.Log(ELogType.Warn, $"[SPY] DeathSetup: PuppetMaster missing on '{p.Profile?.Nickname}'. Retrying SetupPuppetMaster on the fly...");
+				QuickLogger.Log(ELogType.Warn, $"[SPY-AGONY] DeathSetup: PuppetMaster missing on '{p.Profile?.Nickname}'. Retrying SetupPuppetMaster on the fly...");
 				VisceralCombat.Ragdolls.Classes.Utils.SetupPuppetMaster(p);
 				componentInChildren = ((Component)p).GetComponentInChildren<PuppetMaster>();
 			}

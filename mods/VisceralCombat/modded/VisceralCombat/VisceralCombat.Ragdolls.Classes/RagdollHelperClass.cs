@@ -31,6 +31,8 @@ public static class RagdollHelperClass
 
 	internal static void PlayDeathAnimation(Player p, PuppetMaster pm, EBodyPart eBodyPart)
 	{
+		QuickLogger.Log(ELogType.Log, $"[SPY-AGONY] PlayDeathAnimation START: Player='{p.Profile?.Nickname}', BodyPart={eBodyPart}");
+
 		if ((int)eBodyPart > 0)
 		{
 			((MonoBehaviour)p).StartCoroutine(Utils.LerpLayerWeight(p, 18, 0f, 1f, VisceralEntry.Instance.AnimSwapDuration.Value));
@@ -173,9 +175,11 @@ public static class RagdollHelperClass
 			break;
 		}
 		default:
-			QuickLogger.Log(ELogType.Warn, "Body part not detected.");
+			QuickLogger.Log(ELogType.Warn, "[SPY-AGONY] Body part not detected.");
 			break;
 		}
+
+		QuickLogger.Log(ELogType.Log, $"[SPY-AGONY] PlayDeathAnimation scheduled disable in {pm.stateSettings.killDuration}s for '{p.Profile?.Nickname}'");
 
 		float totalDuration = Mathf.Max(3f, pm.stateSettings.killDuration + 1f);
 		GClass855.WaitSeconds((MonoBehaviour)(object)StaticManager.Instance, totalDuration, (Action)delegate
@@ -189,6 +193,7 @@ public static class RagdollHelperClass
 
 	internal static IEnumerator LerpMappingWeight(PuppetMaster pm, float startValue, float endValue, float duration)
 	{
+		QuickLogger.Log(ELogType.Log, $"[SPY-AGONY] LerpMappingWeight START: start={startValue} -> end={endValue}, duration={duration}");
 		float elapsedTime = 0f;
 		while (elapsedTime < duration)
 		{
@@ -200,6 +205,7 @@ public static class RagdollHelperClass
 		if (pm != null)
 		{
 			pm.mappingWeight = endValue;
+			QuickLogger.Log(ELogType.Log, $"[SPY-AGONY] LerpMappingWeight FINISHED: mappingWeight={pm.mappingWeight}");
 		}
 	}
 
@@ -225,28 +231,43 @@ public static class RagdollHelperClass
 
 	internal static void DisableLiveActiveRagdoll(Player p, PuppetMaster pm)
 	{
-		// DO NOT reset BodyAnimatorCommon (enabled=false or SetLayerWeight(18, 0)) here,
-		// because disabling the animator while in an agony pose causes Unity Animator to snap
-		// back to T-pose / standing position before physics disables!
+		QuickLogger.Log(ELogType.Log, $"[SPY-AGONY] DisableLiveActiveRagdoll START: Player='{p?.Profile?.Nickname}'");
+
+		if (p != null && p.BodyAnimatorCommon != null)
+		{
+			QuickLogger.Log(ELogType.Log, $"[SPY-AGONY] Lerping Animator Layer 18 weight to 0 for '{p.Profile?.Nickname}'");
+			((MonoBehaviour)p).StartCoroutine(Utils.LerpLayerWeight(p, 18, 1f, 0f, 1f));
+		}
+
 		if (pm != null && ((Component)pm).gameObject != null)
 		{
-			if (p?.PlayerBody != null && ((Component)p.PlayerBody).gameObject != null)
+			QuickLogger.Log(ELogType.Log, $"[SPY-AGONY] Lerping PuppetMaster mappingWeight to 0 for '{p?.Profile?.Nickname}'");
+			((MonoBehaviour)p).StartCoroutine(LerpMappingWeight(pm, pm.mappingWeight, 0f, 1f));
+
+			GClass855.WaitSeconds((MonoBehaviour)(object)StaticManager.Instance, 1.2f, (Action)delegate
 			{
-				Rigidbody[] componentsInChildren = ((Component)p.PlayerBody).gameObject.GetComponentsInChildren<Rigidbody>();
-				foreach (Rigidbody rb in componentsInChildren)
+				if (pm != null && ((Component)pm).gameObject != null && Singleton<GameWorld>.Instantiated)
 				{
-					if (rb == null) continue;
-					rb.isKinematic = true;
-					GClass855.WaitSeconds((MonoBehaviour)(object)StaticManager.Instance, 0.06f, (Action)delegate
+					if (p?.PlayerBody != null && ((Component)p.PlayerBody).gameObject != null)
 					{
-						if (rb != null && Singleton<GameWorld>.Instantiated)
+						Rigidbody[] componentsInChildren = ((Component)p.PlayerBody).gameObject.GetComponentsInChildren<Rigidbody>();
+						foreach (Rigidbody rb in componentsInChildren)
 						{
-							rb.isKinematic = false;
+							if (rb == null) continue;
+							rb.isKinematic = true;
+							GClass855.WaitSeconds((MonoBehaviour)(object)StaticManager.Instance, 0.06f, (Action)delegate
+							{
+								if (rb != null && Singleton<GameWorld>.Instantiated)
+								{
+									rb.isKinematic = false;
+								}
+							});
 						}
-					});
+					}
+					((Component)pm).gameObject.SetActive(false);
+					QuickLogger.Log(ELogType.Log, $"[SPY-AGONY] DisableLiveActiveRagdoll COMPLETE: PuppetMaster disabled for '{p?.Profile?.Nickname}'");
 				}
-			}
-			((Component)pm).gameObject.SetActive(false);
+			});
 		}
 	}
 }
