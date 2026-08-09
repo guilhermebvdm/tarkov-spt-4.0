@@ -44,16 +44,15 @@ public class BFX_DecalSettings : MonoBehaviour
 
 	private void Awake()
 	{
-		//IL_0008: Unknown result type (might be due to invalid IL or missing references)
-		//IL_000d: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0019: Unknown result type (might be due to invalid IL or missing references)
-		//IL_001e: Unknown result type (might be due to invalid IL or missing references)
 		startOffset = ((Component)this).transform.localPosition;
 		startScale = ((Component)this).transform.localScale;
 		t = ((Component)this).transform;
 		tParent = ((Component)parent).transform;
 		shaderProperies = ((Component)this).GetComponent<BFX_ShaderProperies>();
-		shaderProperies.OnAnimationFinished += ShaderCurve_OnAnimationFinished;
+		if (shaderProperies != null)
+		{
+			shaderProperies.OnAnimationFinished += ShaderCurve_OnAnimationFinished;
+		}
 	}
 
 	private void ShaderCurve_OnAnimationFinished()
@@ -61,14 +60,21 @@ public class BFX_DecalSettings : MonoBehaviour
 		((Component)this).GetComponent<Renderer>().enabled = false;
 	}
 
+	private void OnDestroy()
+	{
+		if (shaderProperies != null)
+		{
+			shaderProperies.OnAnimationFinished -= ShaderCurve_OnAnimationFinished;
+		}
+	}
+
 	private void Update()
 	{
-		//IL_0042: Unknown result type (might be due to invalid IL or missing references)
 		if (!isPositionInitialized)
 		{
 			InitializePosition();
 		}
-		if (((Behaviour)shaderProperies).enabled && initializedPosition.x < float.PositiveInfinity)
+		if (shaderProperies != null && ((Behaviour)shaderProperies).enabled && initializedPosition.x < float.PositiveInfinity)
 		{
 			((Component)this).transform.position = initializedPosition;
 		}
@@ -76,50 +82,9 @@ public class BFX_DecalSettings : MonoBehaviour
 
 	private void InitializePosition()
 	{
-		//IL_0014: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0031: Unknown result type (might be due to invalid IL or missing references)
-		//IL_008e: Unknown result type (might be due to invalid IL or missing references)
-		//IL_00a8: Unknown result type (might be due to invalid IL or missing references)
-		//IL_00ae: Unknown result type (might be due to invalid IL or missing references)
-		//IL_00b5: Unknown result type (might be due to invalid IL or missing references)
-		//IL_00ba: Unknown result type (might be due to invalid IL or missing references)
-		//IL_00c2: Unknown result type (might be due to invalid IL or missing references)
-		//IL_00e0: Unknown result type (might be due to invalid IL or missing references)
-		//IL_00f3: Unknown result type (might be due to invalid IL or missing references)
-		//IL_00ff: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0105: Unknown result type (might be due to invalid IL or missing references)
-		//IL_010c: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0111: Unknown result type (might be due to invalid IL or missing references)
-		//IL_011a: Unknown result type (might be due to invalid IL or missing references)
-		//IL_011f: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0121: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0138: Unknown result type (might be due to invalid IL or missing references)
-		//IL_014f: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0159: Unknown result type (might be due to invalid IL or missing references)
-		//IL_01cc: Unknown result type (might be due to invalid IL or missing references)
-		//IL_01d7: Unknown result type (might be due to invalid IL or missing references)
-		//IL_01e1: Unknown result type (might be due to invalid IL or missing references)
-		//IL_01e6: Unknown result type (might be due to invalid IL or missing references)
-		//IL_01f1: Unknown result type (might be due to invalid IL or missing references)
-		//IL_01f6: Unknown result type (might be due to invalid IL or missing references)
-		//IL_01fb: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0200: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0206: Unknown result type (might be due to invalid IL or missing references)
-		//IL_022b: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0230: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0234: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0239: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0241: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0248: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0258: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0278: Unknown result type (might be due to invalid IL or missing references)
-		//IL_027d: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0281: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0288: Unknown result type (might be due to invalid IL or missing references)
-		//IL_02a7: Unknown result type (might be due to invalid IL or missing references)
 		((Component)this).GetComponent<Renderer>().enabled = false;
 		float y = parent.position.y;
-		float groundHeight = BloodSettings.GroundHeight;
+		float groundHeight = (BloodSettings != null) ? BloodSettings.GroundHeight : -9999999f;
 		float y2 = parent.localScale.y;
 		float num = TimeHeightMax * y2;
 		float num2 = TimeHeightMin * y2;
@@ -139,9 +104,13 @@ public class BFX_DecalSettings : MonoBehaviour
 		t.localPosition = startOffset + val2;
 		t.position = new Vector3(t.position.x, groundHeight + 0.05f, t.position.z);
 		timeDelay = TimeByHeight.Evaluate(num3);
-		((Behaviour)shaderProperies).enabled = false;
-		((MonoBehaviour)this).Invoke("EnableDecalAnimation", Mathf.Max(0f, timeDelay / BloodSettings.AnimationSpeed));
-		if (BloodSettings.DecalRenderinMode == BFX_BloodSettings._DecalRenderinMode.AverageRayBetwenForwardAndFloor)
+		if (shaderProperies != null)
+		{
+			((Behaviour)shaderProperies).enabled = false;
+		}
+		float animSpeed = (BloodSettings != null) ? BloodSettings.AnimationSpeed : 1f;
+		((MonoBehaviour)this).Invoke("EnableDecalAnimation", Mathf.Max(0f, timeDelay / animSpeed));
+		if (BloodSettings != null && BloodSettings.DecalRenderinMode == BFX_BloodSettings._DecalRenderinMode.AverageRayBetwenForwardAndFloor)
 		{
 			averageRay = GetAverageRay(tParent.position + tParent.right * 0.05f, tParent.right);
 			float num4 = Vector3.Angle(Vector3.up, averageRay);
@@ -153,7 +122,7 @@ public class BFX_DecalSettings : MonoBehaviour
 			localScale.y = Mathf.Lerp(localScale.y, localScale.x * 1.5f, num6);
 			t.localScale = localScale;
 		}
-		if (BloodSettings.ClampDecalSideSurface)
+		if (BloodSettings != null && BloodSettings.ClampDecalSideSurface)
 		{
 			Shader.EnableKeyword("CLAMP_SIDE_SURFACE");
 		}
@@ -162,7 +131,7 @@ public class BFX_DecalSettings : MonoBehaviour
 
 	private void OnDisable()
 	{
-		if (BloodSettings.ClampDecalSideSurface)
+		if (BloodSettings != null && BloodSettings.ClampDecalSideSurface)
 		{
 			Shader.DisableKeyword("CLAMP_SIDE_SURFACE");
 		}
@@ -182,24 +151,15 @@ public class BFX_DecalSettings : MonoBehaviour
 
 	private void EnableDecalAnimation()
 	{
-		//IL_0015: Unknown result type (might be due to invalid IL or missing references)
-		//IL_001a: Unknown result type (might be due to invalid IL or missing references)
-		((Behaviour)shaderProperies).enabled = true;
+		if (shaderProperies != null)
+		{
+			((Behaviour)shaderProperies).enabled = true;
+		}
 		initializedPosition = ((Component)this).transform.position;
 	}
 
 	private void OnDrawGizmos()
 	{
-		//IL_0031: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0042: Unknown result type (might be due to invalid IL or missing references)
-		//IL_004d: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0058: Unknown result type (might be due to invalid IL or missing references)
-		//IL_005d: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0068: Unknown result type (might be due to invalid IL or missing references)
-		//IL_006d: Unknown result type (might be due to invalid IL or missing references)
-		//IL_008c: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0097: Unknown result type (might be due to invalid IL or missing references)
-		//IL_009c: Unknown result type (might be due to invalid IL or missing references)
 		if ((Object)(object)t == (Object)null)
 		{
 			t = ((Component)this).transform;
