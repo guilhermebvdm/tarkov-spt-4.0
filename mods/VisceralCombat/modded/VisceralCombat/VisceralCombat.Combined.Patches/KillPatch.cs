@@ -333,56 +333,98 @@ public class KillPatch : ModulePatch
 		}
 	}
 
-	internal static void SpawnOldVolumetricBlood(Transform val, Vector3 Direction, float mul)
+	internal static void SpawnOldVolumetricBlood(Transform target, Vector3 direction, float Scale)
 	{
-		if (VisceralEntry.Instance.EnableBloodEffects.Value && (Object)(object)VisceralEntry.Instance.effectContainer.limbSquirter != (Object)null)
-		{
-			GameObject val2 = GoreObjectPool.Instance.Spawn(VisceralEntry.Instance.effectContainer.limbSquirter, val.position, Quaternion.LookRotation(Direction));
-			ParticleSystem component = val2.GetComponent<ParticleSystem>();
-			if ((Object)(object)component != (Object)null)
-			{
-				ParticleSystem.MainModule main = component.main;
-				main.startSizeMultiplier *= mul;
-				main.startLifetimeMultiplier *= mul;
-			}
-			GClass855.WaitSeconds((MonoBehaviour)(object)StaticManager.Instance, 30f, (Action)delegate
-			{
-				if (GoreObjectPool.Instance != null && val2 != null)
-				{
-					GoreObjectPool.Instance.Recycle(val2);
-				}
-			});
-		}
-	}
+		if (!VisceralEntry.Instance.EnableBloodEffects.Value)
+			return;
 
-	private static void SpawnArterialSprays(Transform val, Vector3 Direction)
-	{
-		if (!VisceralEntry.Instance.ArterySpray.Value || !VisceralEntry.Instance.EnableBloodEffects.Value || (Object)(object)VisceralEntry.Instance.effectContainer.squirtEffect1 == (Object)null || (Object)(object)VisceralEntry.Instance.effectContainer.squirtEffect2 == (Object)null)
+		List<GameObject> bloodParticles = VisceralEntry.Instance.effectContainer.bloodParticles;
+		if (bloodParticles == null || bloodParticles.Count == 0)
 		{
+			QuickLogger.Log(ELogType.Warn, "bloodParticles list is empty or null!");
 			return;
 		}
-		GameObject val2 = GoreObjectPool.Instance.Spawn((Random.value > 0.5f) ? VisceralEntry.Instance.effectContainer.squirtEffect1 : VisceralEntry.Instance.effectContainer.squirtEffect2, val.position, Quaternion.LookRotation(-Direction));
-		val2.transform.parent = val;
-		ParticleSystem component = val2.GetComponent<ParticleSystem>();
-		if ((Object)(object)component != (Object)null)
+		int num = Random.Range(0, bloodParticles.Count);
+		GameObject val = bloodParticles[num];
+		if ((Object)(object)val == (Object)null)
 		{
-			ParticleSystem.MainModule main = component.main;
-			main.loop = false;
+			QuickLogger.Log(ELogType.Warn, $"bloodParticles[{num}] is null, aborting spawn.");
+			return;
 		}
-		GClass855.WaitSeconds((MonoBehaviour)(object)StaticManager.Instance, Random.Range(VisceralEntry.Instance.ArterySprayMin.Value, VisceralEntry.Instance.ArterySprayMax.Value), (Action)delegate
+		GameObject val2 = Object.Instantiate<GameObject>(val);
+		GameObject brainParticles = VisceralEntry.Instance.effectContainer.brainParticles;
+		if ((Object)(object)brainParticles == (Object)null)
 		{
-			if ((Object)(object)component != (Object)null)
+			QuickLogger.Log(ELogType.Warn, "brainParticles prefab is null, aborting spawn.");
+			Object.Destroy((Object)(object)val2);
+			return;
+		}
+		GameObject brainObject = Object.Instantiate<GameObject>(brainParticles);
+		BFX_BloodSettings component = val2.GetComponent<BFX_BloodSettings>();
+		val2.transform.position = target.position;
+		float num2 = VisceralEntry.Instance.BloodSplatterSize.Value * Scale;
+		val2.transform.localScale = new Vector3(num2, num2, num2);
+		direction.y = 0f;
+		Quaternion val3 = Quaternion.LookRotation(direction);
+		val3 *= Quaternion.Euler(0f, 180f, 0f);
+		val2.transform.rotation = val3;
+		if (component != null)
+		{
+			if (VisceralEntry.Instance.UseOldBloodDecal.Value)
 			{
-				ParticleSystem.MainModule main2 = component.main;
-				main2.loop = false;
+				component.GroundHeight = target.position.y - 1.9f;
 			}
-			GClass855.WaitSeconds((MonoBehaviour)(object)StaticManager.Instance, 5f, (Action)delegate
+			else
 			{
-				if (GoreObjectPool.Instance != null && val2 != null)
-				{
-					GoreObjectPool.Instance.Recycle(val2);
-				}
-			});
+				component.GroundHeight = -9999999f;
+			}
+			component.ClampDecalSideSurface = true;
+		}
+		brainObject.transform.position = target.position;
+		Transform transform = brainObject.transform;
+		Quaternion rotation = target.rotation;
+		transform.rotation = Quaternion.Euler(0f, rotation.eulerAngles.y, 0f);
+		GClass855.WaitSeconds((MonoBehaviour)(object)StaticManager.Instance, 5f, (Action)delegate
+		{
+			Object.Destroy((Object)(object)brainObject);
+		});
+	}
+
+	private static void SpawnArterialSprays(Transform target, Vector3 direction)
+	{
+		if (!VisceralEntry.Instance.ArterySpray.Value || !VisceralEntry.Instance.EnableBloodEffects.Value)
+			return;
+		if ((Object)(object)VisceralEntry.Instance.effectContainer.limbSquirter == (Object)null)
+			return;
+
+		GameObject bloodParticleObject = Object.Instantiate<GameObject>(VisceralEntry.Instance.effectContainer.limbSquirter);
+		bloodParticleObject.AddComponent<ParticleFloorPainter>();
+		if (((Component)target).transform.localScale == Vector3.zero)
+		{
+			bloodParticleObject.transform.parent = ((Component)target).transform.parent;
+		}
+		else
+		{
+			bloodParticleObject.transform.parent = ((Component)target).transform;
+		}
+		bloodParticleObject.transform.localPosition = new Vector3(0f, 0f, 0f);
+		bloodParticleObject.transform.localRotation = new Quaternion(-0.0923f, 0.7011f, -0.0923f, -0.7011f);
+		ParticleSystem[] componentsInChildren = bloodParticleObject.GetComponentsInChildren<ParticleSystem>();
+		float num = Random.Range(VisceralEntry.Instance.ArterySprayMin.Value, VisceralEntry.Instance.ArterySprayMax.Value);
+		ParticleSystem[] array = componentsInChildren;
+		foreach (ParticleSystem val in array)
+		{
+			val.loop = false;
+			var main = val.main;
+			main.duration = num;
+			var collision = val.collision;
+			collision.sendCollisionMessages = true;
+			((Component)val).gameObject.AddComponent<ParticleFloorPainter>();
+			val.Play();
+		}
+		GClass855.WaitSeconds((MonoBehaviour)(object)StaticManager.Instance, num + 1f, (Action)delegate
+		{
+			Object.Destroy((Object)(object)bloodParticleObject);
 		});
 	}
 }
