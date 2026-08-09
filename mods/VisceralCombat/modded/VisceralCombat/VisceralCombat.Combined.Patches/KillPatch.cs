@@ -270,8 +270,6 @@ public class KillPatch : ModulePatch
 				return;
 			}
 
-			QuickLogger.Log(ELogType.Log, $"[SPY-AGONY] DeathSetup START: Player='{p.Profile?.Nickname}', BodyPart={eBodyPart}, Chance={Chance}");
-
 			if (FikaBackendUtils.IsServer && FikaBackendUtils.IsClient)
 			{
 				if (p is FikaPlayer fikaPlayer && fikaPlayer != null && Singleton<FikaServer>.Instantiated && Singleton<FikaServer>.Instance != null)
@@ -303,7 +301,6 @@ public class KillPatch : ModulePatch
 
 			if ((Object)(object)componentInChildren == (Object)null)
 			{
-				QuickLogger.Log(ELogType.Warn, $"[SPY-AGONY] DeathSetup: PuppetMaster missing on '{p.Profile?.Nickname}'. Retrying SetupPuppetMaster on the fly...");
 				VisceralCombat.Ragdolls.Classes.Utils.SetupPuppetMaster(p);
 				componentInChildren = ((Component)p).GetComponentInChildren<PuppetMaster>();
 			}

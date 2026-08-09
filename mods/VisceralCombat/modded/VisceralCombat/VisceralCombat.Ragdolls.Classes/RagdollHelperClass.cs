@@ -31,8 +31,6 @@ public static class RagdollHelperClass
 
 	internal static void PlayDeathAnimation(Player p, PuppetMaster pm, EBodyPart eBodyPart)
 	{
-		QuickLogger.Log(ELogType.Log, $"[SPY-AGONY] PlayDeathAnimation START: Player='{p.Profile?.Nickname}', BodyPart={eBodyPart}");
-
 		if ((int)eBodyPart > 0)
 		{
 			((MonoBehaviour)p).StartCoroutine(Utils.LerpLayerWeight(p, 18, 0f, 1f, VisceralEntry.Instance.AnimSwapDuration.Value));
@@ -175,11 +173,8 @@ public static class RagdollHelperClass
 			break;
 		}
 		default:
-			QuickLogger.Log(ELogType.Warn, "[SPY-AGONY] Body part not detected.");
 			break;
 		}
-
-		QuickLogger.Log(ELogType.Log, $"[SPY-AGONY] PlayDeathAnimation scheduled disable in {pm.stateSettings.killDuration}s for '{p.Profile?.Nickname}'");
 
 		float totalDuration = Mathf.Max(3f, pm.stateSettings.killDuration + 1f);
 		GClass855.WaitSeconds((MonoBehaviour)(object)StaticManager.Instance, totalDuration, (Action)delegate
@@ -193,7 +188,6 @@ public static class RagdollHelperClass
 
 	internal static IEnumerator LerpMappingWeight(PuppetMaster pm, float startValue, float endValue, float duration)
 	{
-		QuickLogger.Log(ELogType.Log, $"[SPY-AGONY] LerpMappingWeight START: start={startValue} -> end={endValue}, duration={duration}");
 		float elapsedTime = 0f;
 		while (elapsedTime < duration)
 		{
@@ -205,7 +199,6 @@ public static class RagdollHelperClass
 		if (pm != null)
 		{
 			pm.mappingWeight = endValue;
-			QuickLogger.Log(ELogType.Log, $"[SPY-AGONY] LerpMappingWeight FINISHED: mappingWeight={pm.mappingWeight}");
 		}
 	}
 
@@ -231,17 +224,13 @@ public static class RagdollHelperClass
 
 	internal static void DisableLiveActiveRagdoll(Player p, PuppetMaster pm)
 	{
-		QuickLogger.Log(ELogType.Log, $"[SPY-AGONY] DisableLiveActiveRagdoll START: Player='{p?.Profile?.Nickname}'");
-
 		if (p != null && p.BodyAnimatorCommon != null)
 		{
-			QuickLogger.Log(ELogType.Log, $"[SPY-AGONY] Lerping Animator Layer 18 weight to 0 for '{p.Profile?.Nickname}'");
 			((MonoBehaviour)p).StartCoroutine(Utils.LerpLayerWeight(p, 18, 1f, 0f, 1f));
 		}
 
 		if (pm != null && ((Component)pm).gameObject != null)
 		{
-			QuickLogger.Log(ELogType.Log, $"[SPY-AGONY] Lerping PuppetMaster mappingWeight to 0 for '{p?.Profile?.Nickname}'");
 			((MonoBehaviour)p).StartCoroutine(LerpMappingWeight(pm, pm.mappingWeight, 0f, 1f));
 
 			GClass855.WaitSeconds((MonoBehaviour)(object)StaticManager.Instance, 1.2f, (Action)delegate
@@ -265,7 +254,6 @@ public static class RagdollHelperClass
 						}
 					}
 					((Component)pm).gameObject.SetActive(false);
-					QuickLogger.Log(ELogType.Log, $"[SPY-AGONY] DisableLiveActiveRagdoll COMPLETE: PuppetMaster disabled for '{p?.Profile?.Nickname}'");
 				}
 			});
 		}

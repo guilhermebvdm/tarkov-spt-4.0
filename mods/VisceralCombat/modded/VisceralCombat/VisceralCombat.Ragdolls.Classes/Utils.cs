@@ -35,7 +35,6 @@ public class Utils
 
 	internal static IEnumerator LerpLayerWeight(Player __instance, int layer, float startValue, float endValue, float duration)
 	{
-		QuickLogger.Log(ELogType.Log, $"[SPY-AGONY] LerpLayerWeight START: Player='{__instance?.Profile?.Nickname}', layer={layer}, start={startValue} -> end={endValue}, duration={duration}");
 		float timeElapsed = 0f;
 		while (timeElapsed < duration)
 		{
@@ -50,7 +49,6 @@ public class Utils
 		if (__instance != null && __instance.BodyAnimatorCommon != null)
 		{
 			__instance.BodyAnimatorCommon.SetLayerWeight(layer, endValue);
-			QuickLogger.Log(ELogType.Log, $"[SPY-AGONY] LerpLayerWeight FINISHED: Player='{__instance?.Profile?.Nickname}', layer={layer}, finalWeight={endValue}");
 		}
 	}
 
@@ -68,7 +66,7 @@ public class Utils
 		if ((Object)(object)VisceralEntry.Instance?.effectContainer?.activeRagdollBase == (Object)null)
 		{
 			Profile profile = p.Profile;
-			QuickLogger.Log(ELogType.Warn, "[SPY] Ragdoll Base Isn't Loaded in Effects yet! Skipping Player! " + ((profile != null) ? profile.Nickname : null));
+			QuickLogger.Log(ELogType.Warn, "Ragdoll Base Isn't Loaded in Effects yet! Skipping Player! " + ((profile != null) ? profile.Nickname : null));
 			return;
 		}
 		try
