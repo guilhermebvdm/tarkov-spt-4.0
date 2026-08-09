@@ -29,7 +29,7 @@ authors: [AI Assistant, Tarkov Dev Team]
 graph TD
     Phase1["Fase 1: Correção de Segurança, Crashes e Threading (CONCLUÍDO)"] --> Phase2["Fase 2: Otimização de Agonia e Desmembramento (CONCLUÍDO)"]
     Phase2 --> Phase3["Fase 3: Auditoria 002 — Vazamento de Memória Pós-Raid & Scripts Mortos (CONCLUÍDO)"]
-    Phase3 --> Phase4["Fase 4: Conexão de Propriedades F12 e Limpeza Final"]
+    Phase3 --> Phase4["Fase 4: Auditoria 003 — Desmembramento Pós-Morte, FPS Thief & Menu F12 (EM ANDAMENTO)"]
 ```
 
 ---
@@ -63,6 +63,15 @@ graph TD
 
 ---
 
+## 🚨 Fases de Atuação Atuais (`003-refactor`)
+
+### 🔴 003-refactor: Desmembramento Pós-Morte, Otimização de CPU e Conexão F12
+- **Desmembramento Pós-Morte:** Permitir que tiros em cadáveres no chão estourem a cabeça ou amputem braços/pernas sem disparar a agonia.
+- **Remoção do FPS Thief (Corrotinas `WatchShot`):** Eliminar o polling por frame no `StaticManager` em `LimbKillPatch`, `BodiesImpulsePatch` e `BleedPatch`.
+- **Conexão Real do Menu F12:** Conectar multiplicadores anatômicos de força e `MappingWeightDuration`.
+
+---
+
 ## 📋 Checklist de Validação Final
 
 - [x] A pasta `original/` permaneceu intacta e sem alterações.
@@ -73,3 +82,6 @@ graph TD
 - [x] Instanciações órfãs de `GameObject` eliminadas.
 - [x] Scripts residuais do Asset Store removidos (569 linhas mortas limpas).
 - [x] Event delegates desinscritos e chamadas redundantes de `OnEnable` corrigidas.
+- [ ] Suporte a desmembramento pós-morte em cadáveres ativado.
+- [ ] Corrotinas `WatchShot` substituídas por chamadas síncronas de impacto.
+- [ ] Propriedades do menu F12 conectadas à física.

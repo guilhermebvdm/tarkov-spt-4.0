@@ -8,7 +8,7 @@ authors:
 
 # 003-refactor — Auditoria de Desempenho (FPS Thief), Corrotinas e Menu F12
 
-Este documento registra a terceira fase de auditoria técnica no repositório [`mods/VisceralCombat/modded/`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/VisceralCombat/modded/), com foco na eliminação de **gargalos de FPS durante tiroteios intensos (Corrotinas `WatchShot`)**, **conexão real das propriedades placebo do menu F12 (BepInEx Config)** e **limpeza de classes descompiladas do ILSpy**.
+Este documento registra a terceira fase de auditoria técnica no repositório [`mods/VisceralCombat/modded/`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/VisceralCombat/modded/), com foco na eliminação de **gargalos de FPS durante tiroteios intensos (Corrotinas `WatchShot`)**, **desmembramento pós-morte em cadáveres**, **conexão real das propriedades placebo do menu F12 (BepInEx Config)** e **limpeza de classes descompiladas do ILSpy**.
 
 ---
 
@@ -17,6 +17,7 @@ Este documento registra a terceira fase de auditoria técnica no repositório [`
 | Severidade | Categoria | Quantidade | Descrição Principal |
 |---|---|---|---|
 | 🔴 **Alta** | Desempenho / CPU (FPS Thief) | 3 | Corrotinas `WatchShot` disparadas no `StaticManager` a cada bala no ar em `LimbKillPatch`, `BodiesImpulsePatch` e `BleedPatch`. |
+| 🟡 **Média** | Funcionalidade Visceral | 1 | Suporte a desmembramento pós-morte em cadáveres no chão (`DismemberLimb`). |
 | 🟡 **Média** | Configurações Placebo (F12) | 5 | Propriedades BepInEx (`headForceIntensity`, `TorsoForceIntensity`, `MappingWeightDuration`, etc.) ignoradas ou desconectadas da física real. |
 | 🟢 **Baixa** | Legibilidade / ILSpy Residue | 3 | Classes geradas de iterador ILSpy (`_003CWatchShot_003E...`) e sliders abandonados (`x`, `y`, `z`, `timer`). |
 
@@ -39,6 +40,11 @@ Este documento registra a terceira fase de auditoria técnica no repositório [`
 - **Local:** [`mods/VisceralCombat/modded/VisceralCombat/VisceralCombat.Dismemberment.Patches/BleedPatch.cs:240-250`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/VisceralCombat/modded/VisceralCombat/VisceralCombat.Dismemberment.Patches/BleedPatch.cs#L240-L250)
 - **Problema:** Terceira corrotina idêntica agendada a cada disparo.
 - **Solução Recomendada:** Unificar o tratamento de disparo em um único ponto ou invocar `ProcessWatchShot` de forma limpa sem overhead de corrotinas persistentes.
+
+### 1.4 `KillPatch.cs` — Habilitação de Desmembramento Pós-Morte em Cadáveres
+- **Local:** [`mods/VisceralCombat/modded/VisceralCombat/VisceralCombat.Combined.Patches/KillPatch.cs:57-65`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/VisceralCombat/modded/VisceralCombat/VisceralCombat.Combined.Patches/KillPatch.cs#L57-L65)
+- **Problema:** Impactos de projéteis em corpos mortos eram abortados ou não aplicavam a redução de escala de osso e posicionamento de GoreCap em ragdolls repousando no chão.
+- **Solução Recomendada:** Permitir a execução de `DismemberLimb` em `deadPlayers` enquanto bloqueia `DeathSetup` para não disparar animações de agonia repetidas.
 
 ---
 
@@ -72,4 +78,4 @@ Este documento registra a terceira fase de auditoria técnica no repositório [`
 
 ## 📋 Conclusão
 
-Esta auditoria define as ações necessárias para tornar o Visceral Combat leve em tiroteios e totalmente configurável através do menu F12 do BepInEx.
+Esta auditoria define as ações necessárias para tornar o Visceral Combat leve em tiroteios, com suporte a desmembramento pós-morte e totalmente configurável através do menu F12 do BepInEx.
