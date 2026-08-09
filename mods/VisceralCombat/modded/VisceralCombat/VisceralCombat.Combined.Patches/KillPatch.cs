@@ -302,7 +302,14 @@ public class KillPatch : ModulePatch
 			if ((Object)(object)componentInChildren == (Object)null)
 			{
 				VisceralCombat.Ragdolls.Classes.Utils.SetupPuppetMaster(p);
-				componentInChildren = ((Component)p).GetComponentInChildren<PuppetMaster>();
+				if (((Component)p).gameObject.transform.parent != null)
+				{
+					componentInChildren = ((Component)((Component)p).gameObject.transform.parent).GetComponentInChildren<PuppetMaster>();
+				}
+				if ((Object)(object)componentInChildren == (Object)null)
+				{
+					componentInChildren = ((Component)p).GetComponentInChildren<PuppetMaster>();
+				}
 			}
 
 			if ((Object)(object)componentInChildren == (Object)null)
