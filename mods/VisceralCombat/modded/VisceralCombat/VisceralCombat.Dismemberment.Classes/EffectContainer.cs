@@ -75,8 +75,7 @@ public class EffectContainer : MonoBehaviour
 			select prefab).ToList();
 		if (array3.Length != 0 && (Object)(object)array3[0] != (Object)null)
 		{
-			GameObject val2 = Object.Instantiate<GameObject>(array3[0]);
-			activeRagdollBase = Object.Instantiate<GameObject>(val2, val.transform);
+			activeRagdollBase = Object.Instantiate<GameObject>(array3[0], val.transform);
 		}
 		bloodSFX = (from prefab in source.Take(3)
 			where (Object)(object)prefab != (Object)null
