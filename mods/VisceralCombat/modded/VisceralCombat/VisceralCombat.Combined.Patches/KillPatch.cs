@@ -162,9 +162,7 @@ public class KillPatch : ModulePatch
 		string boneLower = bone.ToLower();
 		affectedLimbs = (from t in VisceralCombat.Ragdolls.Classes.Utils.EnumerateHierarchyCore(player.Transform.Original)
 			where ((Object)t != null) &&
-				  (((int)bodyPartType == 0 || boneLower.Contains("head"))
-						? ((Object)t).name.ToLower().Contains("head")
-						: ((Object)t).name.ToLower().Contains(boneLower)) &&
+				  ((Object)t).name.ToLower().Contains(boneLower) &&
 				  !VisceralCombat.Dismemberment.Classes.Utils.ParentContains(t, "weapon_holster")
 			select t).ToArray();
 
@@ -348,13 +346,16 @@ public class KillPatch : ModulePatch
 			componentInChildren.Teleport(((Component)p).gameObject.transform.position, Quaternion.LookRotation(p.LookDirection), moveToTarget: true);
 			((MonoBehaviour)p).StartCoroutine(RagdollHelperClass.LerpMappingWeight(componentInChildren, 0f, 1f, 0.8f));
 			componentInChildren.state = PuppetMaster.State.Dead;
-			GClass855.WaitSeconds((MonoBehaviour)(object)StaticManager.Instance, 0.1f, (Action)delegate
+			if ((int)eBodyPart > 0)
 			{
-				if ((Object)(object)p != (Object)null && p.BodyAnimatorCommon != null)
+				GClass855.WaitSeconds((MonoBehaviour)(object)StaticManager.Instance, 0.1f, (Action)delegate
 				{
-					p.BodyAnimatorCommon.enabled = true;
-				}
-			});
+					if ((Object)(object)p != (Object)null && p.BodyAnimatorCommon != null)
+					{
+						p.BodyAnimatorCommon.enabled = true;
+					}
+				});
+			}
 		}
 		catch (Exception ex)
 		{

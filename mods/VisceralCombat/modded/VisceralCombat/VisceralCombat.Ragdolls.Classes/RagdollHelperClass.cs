@@ -37,6 +37,13 @@ public static class RagdollHelperClass
 		{
 			((MonoBehaviour)p).StartCoroutine(Utils.LerpLayerWeight(p, 18, 0f, 1f, VisceralEntry.Instance.AnimSwapDuration.Value));
 		}
+		else
+		{
+			if (p.BodyAnimatorCommon != null)
+			{
+				p.BodyAnimatorCommon.enabled = false;
+			}
+		}
 		RuntimeAnimatorController runtimeAnimatorController = p.BodyAnimatorCommon.runtimeAnimatorController;
 		AnimatorOverrideController overrideController = (AnimatorOverrideController)(object)((runtimeAnimatorController is AnimatorOverrideController) ? runtimeAnimatorController : null);
 		AssetBundle assetBundle = BundleLoaderPlugin.Instance.GetAssetBundle("death_animations");
