@@ -36,7 +36,7 @@ public class KillPatch : ModulePatch
 
 	private static Dictionary<EBodyPart, string> bodyparts = new Dictionary<EBodyPart, string>
 	{
-		{ (EBodyPart)0, "base humanhead" },
+		{ (EBodyPart)0, "head" },
 		{ (EBodyPart)3, "lforearm1" },
 		{ (EBodyPart)4, "rforearm1" },
 		{ (EBodyPart)5, "lthigh1" },
@@ -65,28 +65,31 @@ public class KillPatch : ModulePatch
 			deadPlayers.Add(__instance, 0);
 		}
 
-		if ((int)damageInfo.DamageType != 2048 && (int)damageInfo.DamageType != 4 && (int)damageInfo.DamageType != 32 && (int)damageInfo.DamageType != 8 && (int)damageInfo.DamageType != 16 && (int)damageInfo.DamageType != 8192)
+		string caliber = null;
+		if (!string.IsNullOrEmpty(damageInfo.SourceId) && Singleton<ItemFactoryClass>.Instantiated && Singleton<ItemFactoryClass>.Instance.ItemTemplates != null)
 		{
-			string caliber = null;
-			if (!string.IsNullOrEmpty(damageInfo.SourceId) && Singleton<ItemFactoryClass>.Instantiated && Singleton<ItemFactoryClass>.Instance.ItemTemplates != null)
+			if (((Dictionary<MongoID, ItemTemplate>)(object)Singleton<ItemFactoryClass>.Instance.ItemTemplates).TryGetValue((MongoID)damageInfo.SourceId, out ItemTemplate itemTemplate) && itemTemplate != null)
 			{
-				if (((Dictionary<MongoID, ItemTemplate>)(object)Singleton<ItemFactoryClass>.Instance.ItemTemplates).TryGetValue((MongoID)damageInfo.SourceId, out ItemTemplate itemTemplate) && itemTemplate != null)
+				if (itemTemplate is AmmoTemplate ammoTemplate)
 				{
-					if (itemTemplate is AmmoTemplate ammoTemplate)
-					{
-						caliber = ammoTemplate.Caliber;
-					}
+					caliber = ammoTemplate.Caliber;
 				}
 			}
+		}
 
-			float dismemberChance = 1.0f; // Default to 100% if caliber cannot be checked
-			if (!string.IsNullOrEmpty(caliber) && calibers.TryGetValue(caliber, out var chance))
-			{
-				dismemberChance = chance;
-			}
+		float dismemberChance = 1.0f; // Default to 100% if caliber cannot be checked
+		if (!string.IsNullOrEmpty(caliber) && calibers.TryGetValue(caliber, out var chance))
+		{
+			dismemberChance = chance;
+		}
 
+		QuickLogger.Log(ELogType.Log, $"[SPY] KillPatch.Postfix: Victim='{__instance.Profile?.Nickname}', DamageType={(int)damageInfo.DamageType}, SourceId='{damageInfo.SourceId}', BodyPart={bodyPartType}, Caliber='{caliber}', DismemberChance={dismemberChance}");
+
+		if ((int)damageInfo.DamageType != 2048 && (int)damageInfo.DamageType != 4 && (int)damageInfo.DamageType != 32 && (int)damageInfo.DamageType != 8 && (int)damageInfo.DamageType != 16 && (int)damageInfo.DamageType != 8192)
+		{
 			if (Random.value > dismemberChance)
 			{
+				QuickLogger.Log(ELogType.Log, $"[SPY] Dismemberment chance roll failed ({dismemberChance}). Falling back to Active Ragdoll.");
 				if (VisceralEntry.Instance.UseActiveRagdolls.Value && (FikaBackendUtils.IsServer || FikaBackendUtils.IsSinglePlayer))
 				{
 					if (!VisceralEntry.Instance.OnlyPlayersCanActiveRagdollEnemies.Value || !damageInfo.Player.IsAI)
@@ -107,31 +110,15 @@ public class KillPatch : ModulePatch
 
 		if (!VisceralEntry.Instance.EnableDismemberment.Value)
 		{
+			QuickLogger.Log(ELogType.Warn, "[SPY] EnableDismemberment config is FALSE. Aborting.");
 			return;
 		}
 
 		Transform[] affectedLimbs = null;
 		string value3;
-		if ((int)damageInfo.DamageType == 2048 || (int)damageInfo.DamageType == 4)
-		{
-			if (Random.Range(0, 3) == 0)
-			{
-				DismemberLimb(__instance, damageInfo.Direction, bodyPartType, "lthigh1", "Leg_LeftCap", new string[1] { "gore_leg_torn01" }, out affectedLimbs);
-			}
-			if (Random.Range(0, 3) == 0)
-			{
-				DismemberLimb(__instance, damageInfo.Direction, bodyPartType, "rthigh1", "Leg_RightCap", new string[1] { "gore_leg_torn02" }, out affectedLimbs);
-			}
-			if (Random.Range(0, 3) == 0)
-			{
-				DismemberLimb(__instance, damageInfo.Direction, bodyPartType, "lforearm1", "Arm_LeftCap", new string[2] { "Arm_L_1", "Arm_L_2" }, out affectedLimbs);
-			}
-			if (Random.Range(0, 3) == 0)
-			{
-				DismemberLimb(__instance, damageInfo.Direction, bodyPartType, "rforearm1", "Arm_RightCap", new string[2] { "Arm_R_1", "Arm_R_2" }, out affectedLimbs);
-			}
-		}
-		else if (bodyparts.TryGetValue(bodyPartType, out value3))
+
+		// If hit in specific dismemberable bodypart, dismember that bodypart
+		if (bodyparts.TryGetValue(bodyPartType, out value3))
 		{
 			switch ((int)bodyPartType)
 			{
@@ -150,18 +137,46 @@ public class KillPatch : ModulePatch
 			case 0:
 				DismemberLimb(__instance, damageInfo.Direction, bodyPartType, value3, $"Head_{Random.Range(1, 4)}", Array.Empty<string>(), out affectedLimbs);
 				break;
-			case 1:
-			case 2:
-				break;
+			}
+		}
+		else if ((int)damageInfo.DamageType == 2048 || (int)damageInfo.DamageType == 4)
+		{
+			// Explosions or heavy damage dismember random limbs
+			if (Random.Range(0, 3) == 0)
+			{
+				DismemberLimb(__instance, damageInfo.Direction, bodyPartType, "lthigh1", "Leg_LeftCap", new string[1] { "gore_leg_torn01" }, out affectedLimbs);
+			}
+			if (Random.Range(0, 3) == 0)
+			{
+				DismemberLimb(__instance, damageInfo.Direction, bodyPartType, "rthigh1", "Leg_RightCap", new string[1] { "gore_leg_torn02" }, out affectedLimbs);
+			}
+			if (Random.Range(0, 3) == 0)
+			{
+				DismemberLimb(__instance, damageInfo.Direction, bodyPartType, "lforearm1", "Arm_LeftCap", new string[2] { "Arm_L_1", "Arm_L_2" }, out affectedLimbs);
+			}
+			if (Random.Range(0, 3) == 0)
+			{
+				DismemberLimb(__instance, damageInfo.Direction, bodyPartType, "rforearm1", "Arm_RightCap", new string[2] { "Arm_R_1", "Arm_R_2" }, out affectedLimbs);
 			}
 		}
 	}
 
 	internal static void DismemberLimb(Player player, Vector3 Direction, EBodyPart bodyPartType, string bone, string capAssetName, string[] assetNames, out Transform[] affectedLimbs)
 	{
+		string boneLower = bone.ToLower();
 		affectedLimbs = (from t in VisceralCombat.Ragdolls.Classes.Utils.EnumerateHierarchyCore(player.Transform.Original)
-			where ((Object)t).name.ToLower().Contains(bone) || (((int)bodyPartType == 0 || bone.Contains("head")) && ((Object)t).name.ToLower().Contains("head")) && !VisceralCombat.Dismemberment.Classes.Utils.ParentContains(t, "weapon_holster")
+			where ((Object)t != null) &&
+				  (((int)bodyPartType == 0 || boneLower.Contains("head"))
+						? ((Object)t).name.ToLower().Contains("head")
+						: ((Object)t).name.ToLower().Contains(boneLower)) &&
+				  !VisceralCombat.Dismemberment.Classes.Utils.ParentContains(t, "weapon_holster")
 			select t).ToArray();
+
+		QuickLogger.Log(ELogType.Log, $"[SPY] DismemberLimb: Victim='{player.Profile?.Nickname}', BodyPart={bodyPartType}, Bone='{bone}', Cap='{capAssetName}', FoundLimbs={affectedLimbs.Length}");
+		foreach (var limb in affectedLimbs)
+		{
+			QuickLogger.Log(ELogType.Log, $"[SPY] -> Found Limb Transform: '{limb.name}' (current scale={limb.localScale})");
+		}
 
 		Transform[] array = affectedLimbs;
 		foreach (Transform val in array)
@@ -199,44 +214,55 @@ public class KillPatch : ModulePatch
 				VisceralEntry.Instance.dismemberedPlayers.Add(player);
 			}
 			val.localScale = RagdollHelperClass.limbSize;
-			GameObject val4 = VisceralEntry.Instance.effectContainer.goreCaps.FirstOrDefault((GameObject cap) => (Object)(object)cap != (Object)null && ((Object)cap).name == capAssetName);
-			if ((Object)(object)val4 == (Object)null)
+
+			if (VisceralEntry.Instance.effectContainer != null && VisceralEntry.Instance.effectContainer.goreCaps != null)
 			{
-				QuickLogger.Log(ELogType.Warn, "Gore cap '" + capAssetName + "' not found in list.");
-			}
-			else
-			{
-				GameObject val5 = Object.Instantiate<GameObject>(val4);
-				Skin componentInChildren = val5.GetComponentInChildren<Skin>();
-				if ((Object)(object)componentInChildren != (Object)null)
+				GameObject val4 = VisceralEntry.Instance.effectContainer.goreCaps.FirstOrDefault((GameObject cap) => (Object)(object)cap != (Object)null && ((Object)cap).name == capAssetName);
+				if ((Object)(object)val4 == (Object)null)
 				{
-					componentInChildren.Init(player.PlayerBody.SkeletonRootJoint);
-					((AbstractSkin)componentInChildren).ApplySkin();
+					QuickLogger.Log(ELogType.Warn, "Gore cap '" + capAssetName + "' not found in list.");
+				}
+				else
+				{
+					GameObject val5 = Object.Instantiate<GameObject>(val4);
+					Skin componentInChildren = val5.GetComponentInChildren<Skin>();
+					if ((Object)(object)componentInChildren != (Object)null)
+					{
+						componentInChildren.Init(player.PlayerBody.SkeletonRootJoint);
+						((AbstractSkin)componentInChildren).ApplySkin();
+					}
+				}
+				foreach (string assetName in assetNames)
+				{
+					GameObject val6 = VisceralEntry.Instance.effectContainer.goreCaps.FirstOrDefault((GameObject a) => (Object)(object)a != (Object)null && ((Object)a).name == assetName);
+					if ((Object)(object)val6 == (Object)null)
+					{
+						QuickLogger.Log(ELogType.Error, "Dismemberment: DismemberLimb | [" + assetName + "] not found in gorecaps");
+						continue;
+					}
+					GameObject val7 = Object.Instantiate<GameObject>(val6);
+					val7.transform.position = val.position;
 				}
 			}
-			foreach (string assetName in assetNames)
-			{
-				GameObject val6 = VisceralEntry.Instance.effectContainer.goreCaps.FirstOrDefault((GameObject a) => (Object)(object)a != (Object)null && ((Object)a).name == assetName);
-				if ((Object)(object)val6 == (Object)null)
-				{
-					QuickLogger.Log(ELogType.Error, "Dismemberment: DismemberLimb | [" + assetName + "] not found in gorecaps");
-					continue;
-				}
-				GameObject val7 = Object.Instantiate<GameObject>(val6);
-				val7.transform.position = val.position;
-			}
+
 			if ((int)bodyPartType == 0 && Random.value >= 0.5f)
 			{
-				int index = Random.Range(0, VisceralEntry.Instance.effectContainer.bloodSFX.Count);
-				GameObject val8 = Object.Instantiate<GameObject>(VisceralEntry.Instance.effectContainer.bloodSFX[index]);
-				val8.transform.position = val.position;
+				if (VisceralEntry.Instance.effectContainer != null && VisceralEntry.Instance.effectContainer.bloodSFX != null && VisceralEntry.Instance.effectContainer.bloodSFX.Count > 0)
+				{
+					int index = Random.Range(0, VisceralEntry.Instance.effectContainer.bloodSFX.Count);
+					GameObject val8 = Object.Instantiate<GameObject>(VisceralEntry.Instance.effectContainer.bloodSFX[index]);
+					val8.transform.position = val.position;
+				}
 			}
 			SpawnOldVolumetricBlood(val, Direction, 1f);
 			SpawnArterialSprays(val, Direction);
 		}
 		if (player.IsYourPlayer && (int)bodyPartType == 0)
 		{
-			VisceralEntry.Instance.effectContainer.blood3dFxEffects[0].SetActive(true);
+			if (VisceralEntry.Instance.effectContainer != null && VisceralEntry.Instance.effectContainer.blood3dFxEffects != null && VisceralEntry.Instance.effectContainer.blood3dFxEffects.Count > 0)
+			{
+				VisceralEntry.Instance.effectContainer.blood3dFxEffects[0].SetActive(true);
+			}
 		}
 		if (VisceralEntry.Instance.UseActiveRagdolls.Value && (FikaBackendUtils.IsServer || FikaBackendUtils.IsSinglePlayer))
 		{
@@ -285,7 +311,14 @@ public class KillPatch : ModulePatch
 
 			if ((Object)(object)componentInChildren == (Object)null)
 			{
-				QuickLogger.Log(ELogType.Warn, "DeathSetup: No PuppetMaster found in player's hierarchy!");
+				QuickLogger.Log(ELogType.Warn, $"[SPY] DeathSetup: PuppetMaster missing on '{p.Profile?.Nickname}'. Retrying SetupPuppetMaster on the fly...");
+				VisceralCombat.Ragdolls.Classes.Utils.SetupPuppetMaster(p);
+				componentInChildren = ((Component)p).GetComponentInChildren<PuppetMaster>();
+			}
+
+			if ((Object)(object)componentInChildren == (Object)null)
+			{
+				QuickLogger.Log(ELogType.Warn, $"DeathSetup: Still no PuppetMaster found for '{p.Profile?.Nickname}'!");
 				return;
 			}
 
@@ -336,6 +369,8 @@ public class KillPatch : ModulePatch
 	internal static void SpawnOldVolumetricBlood(Transform target, Vector3 direction, float Scale)
 	{
 		if (!VisceralEntry.Instance.EnableBloodEffects.Value)
+			return;
+		if (VisceralEntry.Instance.effectContainer == null)
 			return;
 
 		List<GameObject> bloodParticles = VisceralEntry.Instance.effectContainer.bloodParticles;
@@ -394,7 +429,7 @@ public class KillPatch : ModulePatch
 	{
 		if (!VisceralEntry.Instance.ArterySpray.Value || !VisceralEntry.Instance.EnableBloodEffects.Value)
 			return;
-		if ((Object)(object)VisceralEntry.Instance.effectContainer.limbSquirter == (Object)null)
+		if (VisceralEntry.Instance.effectContainer == null || (Object)(object)VisceralEntry.Instance.effectContainer.limbSquirter == (Object)null)
 			return;
 
 		GameObject bloodParticleObject = Object.Instantiate<GameObject>(VisceralEntry.Instance.effectContainer.limbSquirter);
