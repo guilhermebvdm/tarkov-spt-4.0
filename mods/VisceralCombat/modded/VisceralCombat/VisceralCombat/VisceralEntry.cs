@@ -26,7 +26,7 @@ using VisceralCombat.Ragdolls.Patches;
 
 namespace VisceralCombat;
 
-[BepInPlugin("com.servph.VisceralCombat", "Visceral Combat", "3.7.1")]
+[BepInPlugin("com.servph.VisceralCombat", "Visceral Combat", "3.8.0")]
 public class VisceralEntry : BaseUnityPlugin
 {
 	public List<string> SoundsList = new List<string> { "ThroatGargle1", "ThroatGargle2", "ThroatGargle3", "ThroatGargle4" };
@@ -142,14 +142,6 @@ public class VisceralEntry : BaseUnityPlugin
 
 	public ConfigEntry<int> RagdollSleepTime { get; set; }
 
-	public ConfigEntry<float> timer { get; set; }
-
-	public ConfigEntry<float> x { get; set; }
-
-	public ConfigEntry<float> y { get; set; }
-
-	public ConfigEntry<float> z { get; set; }
-
 	public GameObject ragdollAnimMaster { get; set; }
 
 	public ConfigEntry<bool> NeverDeleteShells { get; set; }
@@ -213,6 +205,9 @@ public class VisceralEntry : BaseUnityPlugin
 		((ModulePatch)new VisceralCombat.Dismemberment.Patches.GameStartedPatch()).Enable();
 		((ModulePatch)new KillPatch()).Enable();
 		((ModulePatch)new BleedPatch()).Enable();
+		((ModulePatch)new VisceralCombat.Combined.Patches.PlaySoundBankPatch()).Enable();
+		((ModulePatch)new VisceralCombat.Combined.Patches.PlayStepSoundPatch()).Enable();
+		((ModulePatch)new VisceralCombat.Combined.Patches.DefaultPlayPatch()).Enable();
 
 		try
 		{

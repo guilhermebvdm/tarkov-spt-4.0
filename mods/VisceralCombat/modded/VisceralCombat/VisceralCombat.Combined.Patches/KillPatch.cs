@@ -60,7 +60,8 @@ public class KillPatch : ModulePatch
 		{
 			return;
 		}
-		if (!deadPlayers.ContainsKey(__instance))
+		bool isFirstDeath = !deadPlayers.ContainsKey(__instance);
+		if (isFirstDeath)
 		{
 			deadPlayers.Add(__instance, 0);
 		}
@@ -87,7 +88,7 @@ public class KillPatch : ModulePatch
 		{
 			if (Random.value > dismemberChance)
 			{
-				if (VisceralEntry.Instance.UseActiveRagdolls.Value && (FikaBackendUtils.IsServer || FikaBackendUtils.IsSinglePlayer))
+				if (isFirstDeath && VisceralEntry.Instance.UseActiveRagdolls.Value && (FikaBackendUtils.IsServer || FikaBackendUtils.IsSinglePlayer))
 				{
 					if (!VisceralEntry.Instance.OnlyPlayersCanActiveRagdollEnemies.Value || !damageInfo.Player.IsAI)
 					{
@@ -344,7 +345,7 @@ public class KillPatch : ModulePatch
 			if ((Object)(object)p.PlayerBones.HolsterPistol != (Object)null) ((Component)p.PlayerBones.HolsterPistol).gameObject.SetActive(false);
 			if ((Object)(object)p.PlayerBones.LeftLegHolsterPistol != (Object)null) ((Component)p.PlayerBones.LeftLegHolsterPistol).gameObject.SetActive(false);
 			componentInChildren.Teleport(((Component)p).gameObject.transform.position, Quaternion.LookRotation(p.LookDirection), moveToTarget: true);
-			((MonoBehaviour)p).StartCoroutine(RagdollHelperClass.LerpMappingWeight(componentInChildren, 0f, 1f, 0.8f));
+			((MonoBehaviour)p).StartCoroutine(RagdollHelperClass.LerpMappingWeight(componentInChildren, 0f, 1f, VisceralEntry.Instance.MappingWeightDuration.Value));
 			componentInChildren.state = PuppetMaster.State.Dead;
 			if ((int)eBodyPart > 0)
 			{
