@@ -205,11 +205,33 @@ public class KillPatch : ModulePatch
 				}
 			}
 
-			if (!VisceralEntry.Instance.dismemberedPlayers.Contains(player))
-			{
-				VisceralEntry.Instance.dismemberedPlayers.Add(player);
-			}
 			val.localScale = RagdollHelperClass.limbSize;
+
+			// Destroy PhysX Joint constraints on scaled limb transforms to prevent 1000x joint anchor scale explosion
+			Joint[] limbJoints = val.GetComponentsInChildren<Joint>(true);
+			foreach (Joint j in limbJoints)
+			{
+				if (j != null)
+				{
+					Object.Destroy(j);
+				}
+			}
+
+			PuppetMaster pm = player.GetComponentInChildren<PuppetMaster>();
+			if (pm == null && player.gameObject.transform.parent != null)
+			{
+				pm = player.gameObject.transform.parent.GetComponentInChildren<PuppetMaster>();
+			}
+			if (pm != null && pm.muscles != null)
+			{
+				foreach (Muscle m in pm.muscles)
+				{
+					if (m != null && m.joint != null && (m.joint.transform == val || m.joint.transform.IsChildOf(val)))
+					{
+						m.props.muscleWeight = 0f;
+					}
+				}
+			}
 
 			if (VisceralEntry.Instance.effectContainer != null && VisceralEntry.Instance.effectContainer.goreCaps != null)
 			{
