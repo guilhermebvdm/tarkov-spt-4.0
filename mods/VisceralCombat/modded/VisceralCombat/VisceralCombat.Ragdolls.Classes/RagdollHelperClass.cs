@@ -262,7 +262,7 @@ public static class RagdollHelperClass
 							});
 						}
 					}
-					((Component)pm).gameObject.SetActive(false);
+					((Behaviour)pm).enabled = false;
 					if (p != null && p.BodyAnimatorCommon != null)
 					{
 						p.BodyAnimatorCommon.enabled = false;

@@ -102,7 +102,10 @@ public class KillPatch : ModulePatch
 						}
 					}
 				}
-				return;
+				if (isFirstDeath)
+				{
+					return;
+				}
 			}
 		}
 
@@ -160,6 +163,10 @@ public class KillPatch : ModulePatch
 
 	internal static void DismemberLimb(Player player, Vector3 Direction, EBodyPart bodyPartType, string bone, string capAssetName, string[] assetNames, out Transform[] affectedLimbs)
 	{
+		if (player != null && player.BodyAnimatorCommon != null)
+		{
+			player.BodyAnimatorCommon.enabled = false;
+		}
 		string boneLower = bone.ToLower();
 		affectedLimbs = (from t in VisceralCombat.Ragdolls.Classes.Utils.EnumerateHierarchyCore(player.Transform.Original)
 			where ((Object)t != null) &&
