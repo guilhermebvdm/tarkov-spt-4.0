@@ -274,7 +274,15 @@ public class KillPatch : ModulePatch
 			{
 				foreach (Muscle m in pm.muscles)
 				{
-					if (m != null && m.joint != null && (m.joint.transform == val || m.joint.transform.IsChildOf(val)))
+					if (m == null) continue;
+
+					bool isTargetMatch = m.target != null && (m.target == val || m.target.IsChildOf(val));
+					bool isJointMatch  = m.joint != null && (m.joint.transform == val || m.joint.transform.IsChildOf(val));
+					bool isRbMatch     = m.rigidbody != null && (m.rigidbody.transform == val || m.rigidbody.transform.IsChildOf(val));
+					bool isNameMatch   = !string.IsNullOrEmpty(m.name) && !string.IsNullOrEmpty(val.name) &&
+					                     m.name.Equals(val.name, StringComparison.OrdinalIgnoreCase);
+
+					if (isTargetMatch || isJointMatch || isRbMatch || isNameMatch)
 					{
 						m.props.muscleWeight = 0f;
 						m.props.pinWeight = 0f;
@@ -282,6 +290,18 @@ public class KillPatch : ModulePatch
 						m.state.muscleWeightMlp = 0f;
 						m.state.pinWeightMlp = 0f;
 						m.state.mappingWeightMlp = 0f;
+
+						// Also scale ragdoll rigidbody transform to 0.001f if separate from animated target transform
+						if (m.rigidbody != null && m.rigidbody.transform != null && m.rigidbody.transform != val)
+						{
+							m.rigidbody.transform.localScale = RagdollHelperClass.limbSize;
+							if (m.rigidbody.transform.gameObject.GetComponent<DismemberedLimbScaler>() == null)
+							{
+								m.rigidbody.transform.gameObject.AddComponent<DismemberedLimbScaler>();
+							}
+							m.rigidbody.isKinematic = true;
+							m.rigidbody.detectCollisions = false;
+						}
 					}
 				}
 			}

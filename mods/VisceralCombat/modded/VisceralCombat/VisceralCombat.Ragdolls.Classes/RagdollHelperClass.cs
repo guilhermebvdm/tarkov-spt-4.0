@@ -42,10 +42,10 @@ public static class RagdollHelperClass
 
 		string[] muscleKeywords = dismemberedPart switch
 		{
-			(EBodyPart)3 => new[] { "larm", "lupperarm", "lforearm", "lhand", "lpalm", "lfinger", "ldigit" },  // LeftArm
-			(EBodyPart)4 => new[] { "rarm", "rupperarm", "rforearm", "rhand", "rpalm", "rfinger", "rdigit" },  // RightArm
-			(EBodyPart)5 => new[] { "lthigh", "lleg", "lcalf", "lfoot", "ltoe" },                               // LeftLeg
-			(EBodyPart)6 => new[] { "rthigh", "rleg", "rcalf", "rfoot", "rtoe" },                               // RightLeg
+			(EBodyPart)3 => new[] { "humanlupperarm", "humanlforearm", "humanlpalm", "humanlhand", "humanldigit", "lupperarm", "lforearm", "lpalm", "lhand" }, // LeftArm
+			(EBodyPart)4 => new[] { "humanrupperarm", "humanrforearm", "humanrpalm", "humanrhand", "humanrdigit", "rupperarm", "rforearm", "rpalm", "rhand" }, // RightArm
+			(EBodyPart)5 => new[] { "humanlthigh", "humanlleg", "humanlcalf", "humanlfoot", "humanltoe", "lthigh", "lleg", "lcalf", "lfoot" },                // LeftLeg
+			(EBodyPart)6 => new[] { "humanrthigh", "humanrleg", "humanrcalf", "humanrfoot", "humanrtoe", "rthigh", "rleg", "rcalf", "rfoot" },                // RightLeg
 			_ => Array.Empty<string>()
 		};
 
@@ -53,11 +53,13 @@ public static class RagdollHelperClass
 
 		foreach (Muscle muscle in pm.muscles)
 		{
-			if (muscle?.name == null) continue;
-			string mNameLow = muscle.name.ToLower();
+			if (muscle == null) continue;
+			string mNameLow = muscle.name?.ToLower() ?? "";
+			string tNameLow = muscle.target?.name?.ToLower() ?? "";
+
 			foreach (string kw in muscleKeywords)
 			{
-				if (mNameLow.Contains(kw))
+				if ((mNameLow.Length > 0 && mNameLow.Contains(kw)) || (tNameLow.Length > 0 && tNameLow.Contains(kw)))
 				{
 					muscle.props.muscleWeight = 0f;
 					muscle.props.pinWeight    = 0f;
@@ -65,7 +67,7 @@ public static class RagdollHelperClass
 					muscle.state.muscleWeightMlp = 0f;
 					muscle.state.pinWeightMlp    = 0f;
 					muscle.state.mappingWeightMlp = 0f;
-					QuickLogger.Log(ELogType.Log, $"DisableDismemberedMuscles: zeroed muscle '{muscle.name}' for {dismemberedPart}");
+					QuickLogger.Log(ELogType.Log, $"DisableDismemberedMuscles: zeroed muscle '{muscle.name}' (target: {muscle.target?.name}) for {dismemberedPart}");
 					break;
 				}
 			}
@@ -395,6 +397,11 @@ public static class RagdollHelperClass
 /// </summary>
 public class DismemberedLimbScaler : MonoBehaviour
 {
+	private void Update()
+	{
+		transform.localScale = RagdollHelperClass.limbSize;
+	}
+
 	private void LateUpdate()
 	{
 		transform.localScale = RagdollHelperClass.limbSize;
