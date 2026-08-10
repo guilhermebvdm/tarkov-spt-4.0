@@ -277,6 +277,11 @@ public class KillPatch : ModulePatch
 					if (m != null && m.joint != null && (m.joint.transform == val || m.joint.transform.IsChildOf(val)))
 					{
 						m.props.muscleWeight = 0f;
+						m.props.pinWeight = 0f;
+						m.props.mappingWeight = 0f;
+						m.state.muscleWeightMlp = 0f;
+						m.state.pinWeightMlp = 0f;
+						m.state.mappingWeightMlp = 0f;
 					}
 				}
 			}

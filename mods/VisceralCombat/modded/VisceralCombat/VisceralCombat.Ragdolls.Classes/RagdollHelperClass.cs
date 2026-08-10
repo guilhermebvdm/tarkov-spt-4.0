@@ -61,6 +61,10 @@ public static class RagdollHelperClass
 				{
 					muscle.props.muscleWeight = 0f;
 					muscle.props.pinWeight    = 0f;
+					muscle.props.mappingWeight = 0f;
+					muscle.state.muscleWeightMlp = 0f;
+					muscle.state.pinWeightMlp    = 0f;
+					muscle.state.mappingWeightMlp = 0f;
 					QuickLogger.Log(ELogType.Log, $"DisableDismemberedMuscles: zeroed muscle '{muscle.name}' for {dismemberedPart}");
 					break;
 				}
