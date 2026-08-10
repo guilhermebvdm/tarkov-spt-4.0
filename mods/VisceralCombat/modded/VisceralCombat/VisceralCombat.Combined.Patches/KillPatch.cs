@@ -137,10 +137,30 @@ public class KillPatch : ModulePatch
 				DismemberLimb(__instance, damageInfo.Direction, bodyPartType, value3, "Leg_RightCap", new string[1] { "gore_leg_torn02" }, out affectedLimbs);
 				break;
 			case 0:
+				// Head dismemberment → direct ragdoll, no agony animation.
 				DismemberLimb(__instance, damageInfo.Direction, bodyPartType, value3, $"Head_{Random.Range(1, 4)}", Array.Empty<string>(), out affectedLimbs);
 				break;
 			}
+
+			// After dismembering an arm or leg, trigger agony animation on the remaining body.
+			// Head (case 0) is intentionally excluded — agony with a 0.001f skull bone is not safe.
+			bool isLimbDismember = (int)bodyPartType == 3 || (int)bodyPartType == 4
+			                    || (int)bodyPartType == 5 || (int)bodyPartType == 6;
+			if (isLimbDismember
+			    && isFirstDeath
+			    && VisceralEntry.Instance.UseActiveRagdolls.Value
+			    && (FikaBackendUtils.IsServer || FikaBackendUtils.IsSinglePlayer)
+			    && !VisceralEntry.Instance.dismemberedPlayers.Contains(__instance)
+			    && (!VisceralEntry.Instance.OnlyPlayersCanActiveRagdollEnemies.Value || !damageInfo.Player.IsAI)
+			    && Vector3.Distance(damageInfo.Player.iPlayer.Position, __instance.Position)
+			           <= (float)VisceralEntry.Instance.RagdollMaxDistance.Value
+			    && RagdollHelperClass.ShouldRagdoll(bodyPartType))
+			{
+				int dismemberDeathChance = Random.Range(0, 10);
+				DeathSetup(__instance, bodyPartType, dismemberDeathChance);
+			}
 		}
+
 		else if ((int)damageInfo.DamageType == 2048 || (int)damageInfo.DamageType == 4)
 		{
 			// Explosions or heavy damage dismember random limbs
@@ -394,6 +414,9 @@ public class KillPatch : ModulePatch
 			if ((Object)(object)p.PlayerBones.HolsterPistol != (Object)null) ((Component)p.PlayerBones.HolsterPistol).gameObject.SetActive(false);
 			if ((Object)(object)p.PlayerBones.LeftLegHolsterPistol != (Object)null) ((Component)p.PlayerBones.LeftLegHolsterPistol).gameObject.SetActive(false);
 			componentInChildren.Teleport(((Component)p).gameObject.transform.position, Quaternion.LookRotation(p.LookDirection), moveToTarget: true);
+			// Zero muscle weights for the dismembered limb BEFORE the mapping weight ramps up,
+			// otherwise PuppetMaster will try to drive a 0.001f-scaled bone and cause gigantism.
+			RagdollHelperClass.DisableDismemberedMuscles(componentInChildren, eBodyPart);
 			((MonoBehaviour)p).StartCoroutine(RagdollHelperClass.LerpMappingWeight(componentInChildren, 0f, 1f, VisceralEntry.Instance.MappingWeightDuration.Value));
 			componentInChildren.state = PuppetMaster.State.Dead;
 			if ((int)eBodyPart > 0)

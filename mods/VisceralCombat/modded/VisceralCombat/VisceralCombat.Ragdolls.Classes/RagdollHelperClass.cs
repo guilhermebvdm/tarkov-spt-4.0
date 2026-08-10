@@ -29,6 +29,45 @@ public static class RagdollHelperClass
 
 	internal static Vector3 limbSize = new Vector3(0.001f, 0.001f, 0.001f);
 
+	/// <summary>
+	/// Zeroes the muscle weight of muscles belonging to a dismembered limb so that
+	/// PuppetMaster does not attempt to animate a bone scaled to 0.001f during agony,
+	/// which would cause the "giant bot" physics explosion.
+	/// Keywords are lower-case substrings matched against muscle.name (same pattern
+	/// already used in PlayDeathAnimation case 0 and LimbKillPatch).
+	/// </summary>
+	internal static void DisableDismemberedMuscles(PuppetMaster pm, EBodyPart dismemberedPart)
+	{
+		if (pm?.muscles == null) return;
+
+		string[] muscleKeywords = dismemberedPart switch
+		{
+			(EBodyPart)3 => new[] { "lforearm", "lhand", "lfinger" },  // LeftArm
+			(EBodyPart)4 => new[] { "rforearm", "rhand", "rfinger" },  // RightArm
+			(EBodyPart)5 => new[] { "lthigh", "lleg", "lfoot" },       // LeftLeg
+			(EBodyPart)6 => new[] { "rthigh", "rleg", "rfoot" },       // RightLeg
+			_ => Array.Empty<string>()
+		};
+
+		if (muscleKeywords.Length == 0) return;
+
+		foreach (Muscle muscle in pm.muscles)
+		{
+			if (muscle?.name == null) continue;
+			string mNameLow = muscle.name.ToLower();
+			foreach (string kw in muscleKeywords)
+			{
+				if (mNameLow.Contains(kw))
+				{
+					muscle.props.muscleWeight = 0f;
+					muscle.props.pinWeight    = 0f;
+					QuickLogger.Log(ELogType.Log, $"DisableDismemberedMuscles: zeroed muscle '{muscle.name}' for {dismemberedPart}");
+					break;
+				}
+			}
+		}
+	}
+
 	internal static void PlayDeathAnimation(Player p, PuppetMaster pm, EBodyPart eBodyPart)
 	{
 		VisceralCombat.Combined.Classes.DeathAudioController.HandleDeathAudio(p, eBodyPart);
