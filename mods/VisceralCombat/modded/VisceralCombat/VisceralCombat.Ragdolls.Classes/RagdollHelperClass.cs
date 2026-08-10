@@ -431,49 +431,56 @@ public static class RagdollHelperClass
 	}
 
 	/// <summary>
-	/// Configures a blood particle system to display realistic dark coagulated blood,
-	/// logs all shader/material properties via SPY, and removes white specular glow/emission overdraw.
+	/// Configures a blood particle system to display realistic dark coagulated blood
+	/// and removes white glow / emission overdraw.
+	/// Scope: only the particle prefab subtree (ps.gameObject), never the character root.
+	/// Two shader paths handled:
+	///   - "Particles/VD 3D Blood Shader V14" (custom mod shader): _TintColor + _Color
+	///   - "Legacy Shaders/Particles/Alpha Blended Premultiply" (Unity built-in): low-alpha _Color kills white premultiply glow
 	/// </summary>
 	public static void ApplyDarkCoagulatedBloodFx(ParticleSystem ps)
 	{
 		if (ps == null) return;
 
-		// 1. Dark Coagulated Blood Color (RGB ~ 0.22, 0.02, 0.02, Alpha 0.95)
-		var main = ps.main;
-		Color darkCoagulatedRed = new Color(0.22f, 0.02f, 0.02f, 0.95f);
-		main.startColor = new ParticleSystem.MinMaxGradient(darkCoagulatedRed);
+		// 1. Dark Coagulated Blood startColor on the ParticleSystem itself
+		Color darkBlood = new Color(0.22f, 0.02f, 0.02f, 0.95f);
+		// Low-alpha variant for Legacy/Premultiply shader: high alpha causes white premultiply blowout
+		Color darkBloodPremultiply = new Color(0.22f, 0.02f, 0.02f, 0.35f);
 
-		// 2. Disable Lights module to stop point lights / dynamic glows
+		var main = ps.main;
+		main.startColor = new ParticleSystem.MinMaxGradient(darkBlood);
+
+		// 2. Disable Lights module — stops dynamic point lights emitted per particle
 		var lights = ps.lights;
 		lights.enabled = false;
 
-		// 3. Inspect and configure ALL Renderers in hierarchy (ParticleSystemRenderer, TrailRenderer, MeshRenderer, etc.)
-		GameObject rootGO = ps.transform.root != null ? ps.transform.root.gameObject : ps.gameObject;
-		Renderer[] allRenderers = rootGO.GetComponentsInChildren<Renderer>(true);
-
-		foreach (Renderer r in allRenderers)
+		// 3. Only traverse this prefab's own subtree — never climb to the character root
+		Renderer[] renderers = ps.gameObject.GetComponentsInChildren<Renderer>(true);
+		foreach (Renderer r in renderers)
 		{
 			if (r == null || r.material == null) continue;
 			Material mat = r.material;
-			Shader shader = mat.shader;
+			string shaderName = mat.shader != null ? mat.shader.name : string.Empty;
 
-			QuickLogger.Log(ELogType.Log, $"[SPY-BLOOD-FX] GO='{r.gameObject.name}' Renderer='{r.GetType().Name}' Material='{mat.name}' Shader='{shader?.name}'");
-
-			// Kill Emission & Glow
+			// Kill emission on all paths
 			if (mat.HasProperty("_EmissionColor")) mat.SetColor("_EmissionColor", Color.black);
 			mat.DisableKeyword("_EMISSION");
 
-			// Kill Specular & Glossiness (white shine on liquid stream)
-			if (mat.HasProperty("_SpecColor")) mat.SetColor("_SpecColor", Color.black);
-			if (mat.HasProperty("_Shininess")) mat.SetFloat("_Shininess", 0f);
-			if (mat.HasProperty("_Glossiness")) mat.SetFloat("_Glossiness", 0f);
-			if (mat.HasProperty("_GlossMapScale")) mat.SetFloat("_GlossMapScale", 0f);
-			if (mat.HasProperty("_Smoothness")) mat.SetFloat("_Smoothness", 0f);
-			if (mat.HasProperty("_ReflectColor")) mat.SetColor("_ReflectColor", Color.black);
-
-			// Apply Dark Coagulated Red tint
-			if (mat.HasProperty("_Color")) mat.SetColor("_Color", darkCoagulatedRed);
-			if (mat.HasProperty("_TintColor")) mat.SetColor("_TintColor", darkCoagulatedRed);
+			if (shaderName.Contains("Premultiply") || shaderName.Contains("Alpha Blended"))
+			{
+				// Legacy premultiply shader: white glow comes from high alpha, not emission.
+				// Force low alpha so the premultiply step doesn't blow out to white.
+				if (mat.HasProperty("_Color")) mat.SetColor("_Color", darkBloodPremultiply);
+			}
+			else
+			{
+				// VD 3D Blood Shader V14 and similar custom shaders
+				if (mat.HasProperty("_Color")) mat.SetColor("_Color", darkBlood);
+				if (mat.HasProperty("_TintColor")) mat.SetColor("_TintColor", darkBlood);
+				if (mat.HasProperty("_SpecColor")) mat.SetColor("_SpecColor", Color.black);
+				if (mat.HasProperty("_Glossiness")) mat.SetFloat("_Glossiness", 0f);
+				if (mat.HasProperty("_Smoothness")) mat.SetFloat("_Smoothness", 0f);
+			}
 		}
 	}
 }
