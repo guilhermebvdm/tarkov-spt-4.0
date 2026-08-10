@@ -155,7 +155,6 @@ public class LimbKillPatch : ModulePatch
 
 		// Strategy B: ragdoll physics bone names (dead corpses — EFT format: "Base Human[L/R][Part]")
 		// Confirmed from log capture: "Base HumanRThigh1", "Base HumanLCalf", etc.
-		// Head ("Base HumanHead") deliberately skipped — it is the mesh root.
 		if (dismemberPart == null)
 		{
 			string rbLow = rb.gameObject.name.ToLower();
@@ -191,6 +190,16 @@ public class LimbKillPatch : ModulePatch
 				boneName = "rthigh1";
 				capAsset = "Leg_RightCap";
 				extraAssets = new[] { "gore_leg_torn02" };
+			}
+			else if (rbLow.Contains("humanhead") || rbLow.Contains("humanskull"))
+			{
+				// SPY-HEAD confirmed safe: 'Base HumanHead' parent='Base HumanNeck', NOT mesh root.
+				// All 8 bones found by Contains('head') are dangerous=False.
+				// Using identical params to KillPatch case 0 (live bot head dismemberment).
+				dismemberPart = (EBodyPart)0;
+				boneName = "head";
+				capAsset = $"Head_{UnityEngine.Random.Range(1, 4)}";
+				extraAssets = Array.Empty<string>();
 			}
 		}
 
