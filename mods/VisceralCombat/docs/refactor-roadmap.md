@@ -1,6 +1,6 @@
 ---
 title: Visceral Combat — Roadmap de Refatoração e Otimização
-date: 2026-08-09
+date: 2026-08-10
 status: 🟢 Vivo
 authors: [AI Assistant, Tarkov Dev Team]
 ---
@@ -19,7 +19,7 @@ authors: [AI Assistant, Tarkov Dev Team]
 2. **Eliminar vazamentos de memória (RAM leaks)** e picos de Garbage Collector (GC).
 3. **Corrigir falhas críticas de thread-safety, exceções nulas e comportamentos maliciosos**.
 4. **Conectar e validar todas as propriedades do menu F12 (BepInEx ConfigurationManager)** que atualmente funcionam como placebo.
-5. **Eliminar códigos mortos, patches duplicados e spams de logs**.
+5. **Implementar mecânicas imersivas avançadas** (desmembramento de perna em bots vivos com rastejamento e rastro de sangue).
 
 ---
 
@@ -30,56 +30,34 @@ graph TD
     Phase1["Fase 1: Correção de Segurança, Crashes e Threading (CONCLUÍDO)"] --> Phase2["Fase 2: Otimização de Agonia e Desmembramento (CONCLUÍDO)"]
     Phase2 --> Phase3["Fase 3: Auditoria 002 — Vazamento de Memória Pós-Raid & Scripts Mortos (CONCLUÍDO)"]
     Phase3 --> Phase4["Fase 4: Auditoria 003 — Desmembramento Pós-Morte, FPS Thief & Menu F12 (CONCLUÍDO)"]
+    Phase4 --> Phase5["Fase 5: Feature Imersiva — Desmembramento de Perna em Bots Vivos (PLANEJADO)"]
 ```
 
 ---
 
-## 📅 Histórico de Correções Concluídas
+## 📅 Histórico de Correções & Próximas Fases
 
-### ✅ 1. Correção do Gerador de Desmembramento (`FoundLimbs=0`)
-- **Problema:** O desmembramento (estourar cabeça/braços/pernas) falhava em 100% dos casos porque o descompilador gerou `if (!_003CparentTransform_003E5__2 != null) continue;`. Na Unity, `(!transform) != null` sempre avaliava como `true`, fazendo o buscador descartar todos os ossos.
-- **Solução:** O método `EnumerateHierarchyCore` foi totalmente reescrito em C# puro (`yield return` com `Queue<Transform>`) em [`VisceralCombat.Ragdolls.Classes.Utils`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/VisceralCombat/modded/VisceralCombat/VisceralCombat.Ragdolls.Classes/Utils.cs#L14) e [`VisceralCombat.Dismemberment.Classes.Utils`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/VisceralCombat/modded/VisceralCombat/VisceralCombat.Dismemberment.Classes/Utils.cs#L119).
-- **Resultado:** **Validado e Aprovado pelo Usuário em Raid.**
+### 🟡 5. Fase 5: Feature Imersiva — Desmembramento de Perna em Bots Vivos (Item `001`)
+- **Objetivo:** Permitir amputação de pernas por tiros de alto impacto em bots que sobrevivam ao tiro inicial.
+- **Mecânicas:**
+  - Queda forçada e instantânea para *Prone* com execução de agonia.
+  - Bloqueio permanente de postura em *Prone* (bot impossibilitado de se levantar).
+  - Emissão contínua de sangramento arterial e rastro de poças de sangue no chão durante o rastejamento.
+  - Exsanguição progressiva até o decesso do bot.
+- **Backlog:** Documentado na spec [`backlog/001-alive-leg-dismemberment/001-alive-leg-dismemberment-01-spec.md`](../backlog/001-alive-leg-dismemberment/001-alive-leg-dismemberment-01-spec.md).
 
-### ✅ 2. Resolução do Loop Infinito de Agonia e Teleporte em Pé
-- **Problema:** Quando um bot entrava em agonia no chão de dor, ao término do tempo o corpo dava um "snap" instantâneo em pé e entrava em loop infinito da animação.
-- **Solução:** Em [`RagdollHelperClass.cs`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/VisceralCombat/modded/VisceralCombat/VisceralCombat.Ragdolls.Classes/RagdollHelperClass.cs#L170), implementado desacoplamento gradual:
-  1. Redução suave do peso da camada 18 para `0f` (`LerpLayerWeight`).
-  2. Redução suave do `mappingWeight` do `PuppetMaster` para `0f`.
-  3. Desativação do `PuppetMaster` somente após o peso zerar, mantendo o corpo no chão em ragdoll puro.
-- **Resultado:** **Confirmado e Validado via logs e no Jogo.**
-
-### ✅ 3. Auditoria 002: Vazamento de RAM Pós-Raid, Objetos Órfãos & Scripts Mortos
-- **002-A (RAM Leaks & Instanciação Órfã):**
-  - Limpeza de `VisceralEntry.Instance.deadPlayers.Clear()` e `GoreObjectPool.Instance?.ClearPool()` no `Postfix` de `OnGameStarted` ([`GameStartedPatch.cs`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/VisceralCombat/modded/VisceralCombat/VisceralCombat.Ragdolls.Patches/GameStartedPatch.cs#L35)).
-  - Eliminado duplo `Object.Instantiate` sem pai criando objetos fantasmas em `GameStartedPatch.cs` e `EffectContainer.cs`.
-- **002-B (Remoção de Scripts Mortos):**
-  - Removidos 4 arquivos obsoletos (`BFX_MouseOrbit.cs`, `BFX_DecaGizmo.cs`, `RagdollSpawner.cs`, `Navigator.cs`), eliminando 569 linhas de código inútil.
-- **002-C (Micro-Otimizações VolumetricBloodFX):**
-  - Desinscrição de event delegates em `BFX_DecalSettings.cs` (`OnDestroy`).
-  - Remoção de chamada dupla `OnEnable()` do `Awake()` em `BFX_ShaderProperies.cs`.
-  - Tratamento de nulos no `Update()` em `BFX_ManualAnimationUpdate.cs`.
-- **Resultado:** **Compilado com 0 Erros, Code Review 01 Aprovado e DLL Sincronizada.**
-
-### ✅ 4. Auditoria 003: Desmembramento Pós-Morte, Otimização de CPU & Conexão F12 (v3.8.0)
-- **Desmembramento Pós-Morte em Cadáveres:** Habilitado `DismemberLimb` em projéteis que colidem com cadáveres no chão sem reiniciar agonia.
+### ✅ 4. Auditoria 003: Desmembramento Pós-Morte, Otimização de CPU & Menu F12 (v3.8.0 / v3.8.1)
+- **Desmembramento Pós-Morte em Cadáveres:** Habilitado `DismemberLimb` em projéteis que colidem com cadáveres no chão para braços, pernas e cabeça sem reiniciar agonia.
+- **Estilização de Sangue Escuro & Zero Glow:** Criado o manipulador `ApplyDarkCoagulatedBloodFx` em C# que desativa emissão/brilho branco e aplica vermelho escuro coagulado.
 - **Remoção do FPS Thief (Corrotinas `WatchShot`):** Removidos loops de polling por frame em `BodiesImpulsePatch.cs`, `LimbKillPatch.cs` e `BleedPatch.cs`.
 - **Conexão Real F12:** Conectados multiplicadores anatômicos (`headForceIntensity`, `TorsoForceIntensity`, `ArmsForceIntensity`, `LegsForceIntensity`) e `MappingWeightDuration`.
-- **Limpeza ILSpy:** Removidas 3 subclasses geradas obfuscadas (`_003CWatchShot_003E...`), limpando 675 linhas de código poluído.
-- **Resultado:** **Versão 3.8.0 compilada com 0 Erros e sincronizada no jogo.**
 
----
+### ✅ 3. Auditoria 002: Vazamento de RAM Pós-Raid, Objetos Órfãos & Scripts Mortos
+- **002-A (RAM Leaks & Instanciação Órfã):** Limpeza de `deadPlayers` e `dismemberedPlayers` no início/fim de raid.
+- **002-B (Remoção de Scripts Mortos):** Removidos 4 arquivos obsoletos (569 linhas limpas).
 
-## 📋 Checklist de Validação Final
+### ✅ 2. Resolução do Loop Infinito de Agonia e Teleporte em Pé
+- Desacoplamento suave do `PuppetMaster` e transição direta em ragdoll sem teleporte em pé.
 
-- [x] A pasta `original/` permaneceu intacta e sem alterações.
-- [x] O mod compila limpo em `modded/VisceralCombat/VisceralCombat.csproj`.
-- [x] Desmembramento funcionando em raid (cabeça, braços, pernas).
-- [x] Animação de agonia transicionando suavemente para ragdoll morto sem teleporte em pé.
-- [x] Coleções de `deadPlayers` e `GoreObjectPool` limpos no `OnGameStarted`.
-- [x] Instanciações órfãs de `GameObject` eliminadas.
-- [x] Scripts residuais do Asset Store removidos (569 linhas mortas limpas).
-- [x] Event delegates desinscritos e chamadas redundantes de `OnEnable` corrigidas.
-- [x] Suporte a desmembramento pós-morte em cadáveres ativado.
-- [x] Corrotinas `WatchShot` substituídas por chamadas síncronas de impacto.
-- [x] Propriedades do menu F12 conectadas à física.
+### ✅ 1. Correção do Gerador de Desmembramento (`FoundLimbs=0`)
+- Método `EnumerateHierarchyCore` reescrito em C# puro.

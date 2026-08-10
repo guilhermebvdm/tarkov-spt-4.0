@@ -431,8 +431,8 @@ public static class RagdollHelperClass
 	}
 
 	/// <summary>
-	/// Configures a blood particle system to display realistic dark coagulated blood
-	/// and removes artificial white glow / emission overdraw.
+	/// Configures a blood particle system to display realistic dark coagulated blood,
+	/// logs all shader/material properties via SPY, and removes white specular glow/emission overdraw.
 	/// </summary>
 	public static void ApplyDarkCoagulatedBloodFx(ParticleSystem ps)
 	{
@@ -447,26 +447,33 @@ public static class RagdollHelperClass
 		var lights = ps.lights;
 		lights.enabled = false;
 
-		// 3. Configure Renderer Material to kill white emission and set dark tint
-		ParticleSystemRenderer psRenderer = ps.GetComponent<ParticleSystemRenderer>();
-		if (psRenderer != null && psRenderer.material != null)
-		{
-			Material mat = psRenderer.material;
+		// 3. Inspect and configure ALL Renderers in hierarchy (ParticleSystemRenderer, TrailRenderer, MeshRenderer, etc.)
+		GameObject rootGO = ps.transform.root != null ? ps.transform.root.gameObject : ps.gameObject;
+		Renderer[] allRenderers = rootGO.GetComponentsInChildren<Renderer>(true);
 
-			if (mat.HasProperty("_EmissionColor"))
-			{
-				mat.SetColor("_EmissionColor", Color.black);
-			}
+		foreach (Renderer r in allRenderers)
+		{
+			if (r == null || r.material == null) continue;
+			Material mat = r.material;
+			Shader shader = mat.shader;
+
+			QuickLogger.Log(ELogType.Log, $"[SPY-BLOOD-FX] GO='{r.gameObject.name}' Renderer='{r.GetType().Name}' Material='{mat.name}' Shader='{shader?.name}'");
+
+			// Kill Emission & Glow
+			if (mat.HasProperty("_EmissionColor")) mat.SetColor("_EmissionColor", Color.black);
 			mat.DisableKeyword("_EMISSION");
 
-			if (mat.HasProperty("_Color"))
-			{
-				mat.SetColor("_Color", darkCoagulatedRed);
-			}
-			if (mat.HasProperty("_TintColor"))
-			{
-				mat.SetColor("_TintColor", darkCoagulatedRed);
-			}
+			// Kill Specular & Glossiness (white shine on liquid stream)
+			if (mat.HasProperty("_SpecColor")) mat.SetColor("_SpecColor", Color.black);
+			if (mat.HasProperty("_Shininess")) mat.SetFloat("_Shininess", 0f);
+			if (mat.HasProperty("_Glossiness")) mat.SetFloat("_Glossiness", 0f);
+			if (mat.HasProperty("_GlossMapScale")) mat.SetFloat("_GlossMapScale", 0f);
+			if (mat.HasProperty("_Smoothness")) mat.SetFloat("_Smoothness", 0f);
+			if (mat.HasProperty("_ReflectColor")) mat.SetColor("_ReflectColor", Color.black);
+
+			// Apply Dark Coagulated Red tint
+			if (mat.HasProperty("_Color")) mat.SetColor("_Color", darkCoagulatedRed);
+			if (mat.HasProperty("_TintColor")) mat.SetColor("_TintColor", darkCoagulatedRed);
 		}
 	}
 }
