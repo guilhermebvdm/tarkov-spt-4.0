@@ -227,10 +227,22 @@ public class KillPatch : ModulePatch
 				}
 			}
 
-			val.localScale = RagdollHelperClass.limbSize;
-			if (val.gameObject.GetComponent<DismemberedLimbScaler>() == null)
+			if (VisceralEntry.Instance != null && player != null && !VisceralEntry.Instance.dismemberedPlayers.Contains(player))
 			{
-				val.gameObject.AddComponent<DismemberedLimbScaler>();
+				VisceralEntry.Instance.dismemberedPlayers.Add(player);
+			}
+
+			Transform[] allBranchTransforms = val.GetComponentsInChildren<Transform>(true);
+			foreach (Transform tBranch in allBranchTransforms)
+			{
+				if (tBranch != null)
+				{
+					tBranch.localScale = RagdollHelperClass.limbSize;
+					if (tBranch.gameObject.GetComponent<DismemberedLimbScaler>() == null)
+					{
+						tBranch.gameObject.AddComponent<DismemberedLimbScaler>();
+					}
+				}
 			}
 
 			// Permanently set all Rigidbodies under the dismembered limb to isKinematic = true to stop PhysX joint solver

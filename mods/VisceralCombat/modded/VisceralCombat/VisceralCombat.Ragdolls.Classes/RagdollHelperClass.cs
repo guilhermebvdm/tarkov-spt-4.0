@@ -241,6 +241,15 @@ public static class RagdollHelperClass
 		}
 
 		float totalDuration = Mathf.Max(3f, pm.stateSettings.killDuration + 1f);
+		if (p != null)
+		{
+			DismemberedLimbScaler[] scalers = p.GetComponentsInChildren<DismemberedLimbScaler>(true);
+			foreach (DismemberedLimbScaler scaler in scalers)
+			{
+				if (scaler != null) scaler.transform.localScale = limbSize;
+			}
+		}
+
 		GClass855.WaitSeconds((MonoBehaviour)(object)StaticManager.Instance, totalDuration, (Action)delegate
 		{
 			if (Singleton<GameWorld>.Instantiated)
@@ -274,6 +283,7 @@ public static class RagdollHelperClass
 	internal static void InterruptAgony(Player p, PuppetMaster pm)
 	{
 		if (p == null || pm == null) return;
+		if (VisceralEntry.Instance != null) VisceralEntry.Instance.dismemberedPlayers.Remove(p);
 
 		// 1. Instantly disable animator to freeze animation pose at current frame
 		if (p.BodyAnimatorCommon != null)
@@ -348,6 +358,8 @@ public static class RagdollHelperClass
 
 	internal static void DisableLiveActiveRagdoll(Player p, PuppetMaster pm)
 	{
+		if (VisceralEntry.Instance != null && p != null) VisceralEntry.Instance.dismemberedPlayers.Remove(p);
+
 		if (p != null && p.BodyAnimatorCommon != null)
 		{
 			((MonoBehaviour)p).StartCoroutine(Utils.LerpLayerWeight(p, 18, 1f, 0f, 1f));
@@ -391,13 +403,19 @@ public static class RagdollHelperClass
 }
 
 /// <summary>
-/// Enforces RagdollHelperClass.limbSize in LateUpdate() on dismembered bone transforms.
-/// LateUpdate runs AFTER Unity's Animator updates bone transforms in Update(),
-/// preventing the Animator from overriding the bone scale back to 1.0 or lerping it over time.
+/// Enforces RagdollHelperClass.limbSize in Update(), OnAnimatorMove(), and LateUpdate()
+/// on dismembered bone transforms.
+/// OnAnimatorMove() runs IMMEDIATELY after Unity's Animator updates bone transforms in internal animation pass,
+/// preventing the Animator from displaying or overriding the bone scale back to 1.0 during agony.
 /// </summary>
 public class DismemberedLimbScaler : MonoBehaviour
 {
 	private void Update()
+	{
+		transform.localScale = RagdollHelperClass.limbSize;
+	}
+
+	private void OnAnimatorMove()
 	{
 		transform.localScale = RagdollHelperClass.limbSize;
 	}
