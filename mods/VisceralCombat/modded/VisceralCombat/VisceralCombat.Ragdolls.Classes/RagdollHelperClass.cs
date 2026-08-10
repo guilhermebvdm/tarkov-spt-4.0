@@ -285,44 +285,50 @@ public static class RagdollHelperClass
 		if (p == null || pm == null) return;
 		if (VisceralEntry.Instance != null) VisceralEntry.Instance.dismemberedPlayers.Remove(p);
 
-		// 1. Instantly disable animator to freeze animation pose at current frame
-		if (p.BodyAnimatorCommon != null)
-		{
-			p.BodyAnimatorCommon.enabled = false;
-		}
-
-		// 2. Terminate PuppetMaster active agony state immediately
+		// 1. Instantly drop all animation pin and muscle spring stiffness to 0 so the body collapses under gravity
 		pm.stateSettings.killDuration = 0f;
 		pm.pinWeight = 0f;
 		pm.muscleWeight = 0f;
-		pm.mappingWeight = 0f;
+		pm.muscleSpring = 0f;
+		pm.mappingWeight = 1f; // KEEP mappingWeight = 1 so PuppetMaster continuously maps ragdoll physics onto PlayerBody
 		pm.state = PuppetMaster.State.Dead;
 
-		// 3. Release non-dismembered rigidbodies to physical ragdoll
-		if (p.PlayerBody != null && ((Component)p.PlayerBody).gameObject != null)
+		// 2. Disable layer 18 agony animation so animator doesn't try to override skeletal pose
+		if (p.BodyAnimatorCommon != null)
 		{
-			Rigidbody[] rbs = ((Component)p.PlayerBody).gameObject.GetComponentsInChildren<Rigidbody>();
-			foreach (Rigidbody rb in rbs)
+			p.BodyAnimatorCommon.SetLayerWeight(18, 0f);
+		}
+
+		// 3. Release non-dismembered rigidbodies to physical ragdoll
+		Muscle[] muscles = pm.muscles;
+		if (muscles != null)
+		{
+			foreach (Muscle m in muscles)
 			{
-				if (rb == null) continue;
-				if (ParentIsDismembered(rb.transform))
+				if (m != null && m.rigidbody != null)
 				{
-					rb.isKinematic = true;
-					rb.detectCollisions = false;
-				}
-				else
-				{
-					rb.isKinematic = false;
-					rb.detectCollisions = true;
+					if (ParentIsDismembered(m.rigidbody.transform))
+					{
+						m.rigidbody.isKinematic = true;
+						m.rigidbody.detectCollisions = false;
+					}
+					else
+					{
+						m.rigidbody.isKinematic = false;
+						m.rigidbody.detectCollisions = true;
+					}
 				}
 			}
 		}
 
-		// 4. Deactivate PuppetMaster component so base Tarkov ragdoll takes over
-		if (((Component)pm).gameObject != null)
+		// 4. Keep PuppetMaster active while body falls to floor, then cleanly deactivate after 3 seconds
+		GClass855.WaitSeconds((MonoBehaviour)(object)StaticManager.Instance, 3f, (Action)delegate
 		{
-			((Component)pm).gameObject.SetActive(false);
-		}
+			if (pm != null && ((Component)pm).gameObject != null && Singleton<GameWorld>.Instantiated)
+			{
+				((Component)pm).gameObject.SetActive(false);
+			}
+		});
 	}
 
 	internal static bool ShouldRagdoll(EBodyPart bodyPartType)

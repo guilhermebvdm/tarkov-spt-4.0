@@ -86,10 +86,14 @@ public class LimbKillPatch : ModulePatch
 		}
 
 		// Fix 4: If agony animation is active, interrupt it on any bullet hit so the bot
-		// collapses into physical ragdoll immediately instead of continuing to writhe.
+		// collapses into physical ragdoll immediately from its current floor pose.
 		if (pm.mappingWeight > 0.05f && player != null)
 		{
 			RagdollHelperClass.InterruptAgony(player, pm);
+			if (rb != null && !rb.isKinematic)
+			{
+				rb.AddForceAtPosition(shot.Direction * (shot.Speed * 0.15f), shot.HitPoint, ForceMode.Impulse);
+			}
 		}
 	}
 }
