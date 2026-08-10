@@ -247,10 +247,12 @@ public class VisceralEntry : BaseUnityPlugin
 		((ModulePatch)new LimbKillPatch()).Enable();
 		((ModulePatch)new CreateBSGRagdollPatch()).Enable();
 		((ModulePatch)new RagdollClassPatch()).Enable();
-		NeverDeleteShells = ((BaseUnityPlugin)this).Config.Bind<bool>("Combat | Visuals", "Infinite Shell Casing Lifetime", false, "Turns off Used Shell Casing Deletion");
-		((ModulePatch)new ShellCasingPatch()).Enable();
 		ItemForce = ((BaseUnityPlugin)this).Config.Bind<bool>("Physics | Item Physical Properties", "Item Physics", false, "If you are getting too much lag turn this off. But most capable PC's should run this fine. (Besides on SoT)");
 		objectIntensity = ((BaseUnityPlugin)this).Config.Bind<float>("Physics | Item Physical Properties", "Item Force Intensity", 0.3f, "Multiplier that determines the amount of force applied to physics objects.");
+		headForceIntensity = ((BaseUnityPlugin)this).Config.Bind<float>("Ragdolls | Ragdoll Physical Properties", "Head Impulse Intensity", 1.0f, "Multiplier for head shot force.");
+		TorsoForceIntensity = ((BaseUnityPlugin)this).Config.Bind<float>("Ragdolls | Ragdoll Physical Properties", "Torso Impulse Intensity", 1.0f, "Multiplier for torso shot force.");
+		ArmsForceIntensity = ((BaseUnityPlugin)this).Config.Bind<float>("Ragdolls | Ragdoll Physical Properties", "Arms Impulse Intensity", 1.0f, "Multiplier for arms shot force.");
+		LegsForceIntensity = ((BaseUnityPlugin)this).Config.Bind<float>("Ragdolls | Ragdoll Physical Properties", "Legs Impulse Intensity", 1.0f, "Multiplier for legs shot force.");
 	}
 
 	private void onFikaNetworkManagerCreatedEvent(FikaNetworkManagerCreatedEvent @event)

@@ -133,13 +133,13 @@ public class BodiesImpulsePatch : ModulePatch
 		float bodyPartMult = 1.0f;
 		if (VisceralEntry.Instance != null)
 		{
-			if (hitName.Contains("head")) bodyPartMult = VisceralEntry.Instance.headForceIntensity.Value;
-			else if (hitName.Contains("pelvis") || hitName.Contains("spine") || hitName.Contains("rib")) bodyPartMult = VisceralEntry.Instance.TorsoForceIntensity.Value;
-			else if (hitName.Contains("arm")) bodyPartMult = VisceralEntry.Instance.ArmsForceIntensity.Value;
-			else if (hitName.Contains("thigh") || hitName.Contains("calf") || hitName.Contains("foot")) bodyPartMult = VisceralEntry.Instance.LegsForceIntensity.Value;
+			if (hitName.Contains("head")) bodyPartMult = VisceralEntry.Instance.headForceIntensity?.Value ?? 1f;
+			else if (hitName.Contains("pelvis") || hitName.Contains("spine") || hitName.Contains("rib")) bodyPartMult = VisceralEntry.Instance.TorsoForceIntensity?.Value ?? 1f;
+			else if (hitName.Contains("arm")) bodyPartMult = VisceralEntry.Instance.ArmsForceIntensity?.Value ?? 1f;
+			else if (hitName.Contains("thigh") || hitName.Contains("calf") || hitName.Contains("foot")) bodyPartMult = VisceralEntry.Instance.LegsForceIntensity?.Value ?? 1f;
 		}
 
-		float totalIntensity = (VisceralEntry.Instance != null) ? VisceralEntry.Instance.ShotIntensity.Value : 1f;
+		float totalIntensity = (VisceralEntry.Instance != null && VisceralEntry.Instance.ShotIntensity != null) ? VisceralEntry.Instance.ShotIntensity.Value : 1f;
 		Vector3 impulse = shot.Direction * (modifier * bodyPartMult * totalIntensity);
 		rb.AddForceAtPosition(impulse, shot.HitPoint, ForceMode.Impulse);
 	}
