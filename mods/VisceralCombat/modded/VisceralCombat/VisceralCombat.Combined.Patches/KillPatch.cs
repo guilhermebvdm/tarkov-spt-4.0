@@ -78,8 +78,13 @@ public class KillPatch : ModulePatch
 			}
 		}
 
-		float dismemberChance = 1.0f; // Default to 100% if caliber cannot be checked
-		if (!string.IsNullOrEmpty(caliber) && calibers.TryGetValue(caliber, out var chance))
+		string cleanCaliber = caliber;
+		if (!string.IsNullOrEmpty(cleanCaliber) && cleanCaliber.StartsWith("Caliber"))
+		{
+			cleanCaliber = cleanCaliber.Substring(7);
+		}
+		float dismemberChance = 0.5f; // Default to 50% if caliber cannot be checked
+		if (!string.IsNullOrEmpty(caliber) && (calibers.TryGetValue(caliber, out var chance) || (!string.IsNullOrEmpty(cleanCaliber) && calibers.TryGetValue(cleanCaliber, out chance))))
 		{
 			dismemberChance = chance;
 		}
@@ -300,10 +305,6 @@ public class KillPatch : ModulePatch
 			{
 				VisceralEntry.Instance.effectContainer.blood3dFxEffects[0].SetActive(true);
 			}
-		}
-		if (VisceralEntry.Instance.UseActiveRagdolls.Value && (FikaBackendUtils.IsServer || FikaBackendUtils.IsSinglePlayer))
-		{
-			DeathSetup(player, bodyPartType, 10);
 		}
 	}
 
