@@ -54,13 +54,13 @@ public class LimbKillPatch : ModulePatch
 		GameObject rootGO = VisceralCombat.Dismemberment.Classes.Utils.GetRootGameObject(rb.gameObject);
 		if (rootGO == null) return;
 
-		PuppetMaster pm = rootGO.GetComponentInChildren<PuppetMaster>();
+		PuppetMaster pm = rootGO.GetComponentInChildren<PuppetMaster>(true);
 		if (pm == null || !pm.initiated) return;
 
 		GameObject playerRoot = VisceralCombat.Dismemberment.Classes.Utils.GetRootGameObject(pm.gameObject);
 		if (playerRoot == null) return;
 
-		Player player = playerRoot.GetComponentInChildren<Player>();
+		Player player = playerRoot.GetComponentInChildren<Player>(true);
 		if (player == null || player.ActiveHealthController == null || player.ActiveHealthController.IsAlive) return;
 
 		string rbName = rb.gameObject.name;
