@@ -249,14 +249,63 @@ public static class RagdollHelperClass
 		float elapsedTime = 0f;
 		while (elapsedTime < duration)
 		{
-			if (pm == null) yield break;
+			if (pm == null || ((Component)pm).gameObject == null || !((Component)pm).gameObject.activeInHierarchy) yield break;
 			pm.mappingWeight = Mathf.Lerp(startValue, endValue, elapsedTime / duration);
 			elapsedTime += Time.deltaTime;
 			yield return null;
 		}
-		if (pm != null)
+		if (pm != null && ((Component)pm).gameObject != null && ((Component)pm).gameObject.activeInHierarchy)
 		{
 			pm.mappingWeight = endValue;
+		}
+	}
+
+	/// <summary>
+	/// Immediately interrupts an active agony animation when a bot is shot.
+	/// Disables the animator immediately (avoiding T-pose / idle pose reset),
+	/// zeroes muscle/pin weights, sets rigidbodies to physical ragdoll, and deactivates PuppetMaster.
+	/// </summary>
+	internal static void InterruptAgony(Player p, PuppetMaster pm)
+	{
+		if (p == null || pm == null) return;
+
+		// 1. Instantly disable animator to freeze animation pose at current frame
+		if (p.BodyAnimatorCommon != null)
+		{
+			p.BodyAnimatorCommon.enabled = false;
+		}
+
+		// 2. Terminate PuppetMaster active agony state immediately
+		pm.stateSettings.killDuration = 0f;
+		pm.pinWeight = 0f;
+		pm.muscleWeight = 0f;
+		pm.mappingWeight = 0f;
+		pm.state = PuppetMaster.State.Dead;
+
+		// 3. Release non-dismembered rigidbodies to physical ragdoll
+		if (p.PlayerBody != null && ((Component)p.PlayerBody).gameObject != null)
+		{
+			Rigidbody[] rbs = ((Component)p.PlayerBody).gameObject.GetComponentsInChildren<Rigidbody>();
+			foreach (Rigidbody rb in rbs)
+			{
+				if (rb == null) continue;
+				if (ParentIsDismembered(rb.transform))
+				{
+					rb.isKinematic = true;
+					rb.detectCollisions = false;
+				}
+				else
+				{
+					rb.isKinematic = false;
+					rb.detectCollisions = true;
+				}
+			}
+		}
+
+		// 4. Deactivate PuppetMaster component so base Tarkov ragdoll takes over
+		if (((Component)pm).gameObject != null)
+		{
+			((Component)pm).gameObject.SetActive(false);
 		}
 	}
 

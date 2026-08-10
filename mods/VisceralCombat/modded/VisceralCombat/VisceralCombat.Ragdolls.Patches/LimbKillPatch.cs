@@ -89,7 +89,7 @@ public class LimbKillPatch : ModulePatch
 		// collapses into physical ragdoll immediately instead of continuing to writhe.
 		if (pm.mappingWeight > 0.05f && player != null)
 		{
-			RagdollHelperClass.DisableLiveActiveRagdoll(player, pm);
+			RagdollHelperClass.InterruptAgony(player, pm);
 		}
 	}
 }
