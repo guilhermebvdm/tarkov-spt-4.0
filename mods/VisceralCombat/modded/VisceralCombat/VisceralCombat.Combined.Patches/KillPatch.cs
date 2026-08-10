@@ -228,6 +228,10 @@ public class KillPatch : ModulePatch
 			}
 
 			val.localScale = RagdollHelperClass.limbSize;
+			if (val.gameObject.GetComponent<DismemberedLimbScaler>() == null)
+			{
+				val.gameObject.AddComponent<DismemberedLimbScaler>();
+			}
 
 			// Permanently set all Rigidbodies under the dismembered limb to isKinematic = true to stop PhysX joint solver
 			Rigidbody[] limbRbs = val.GetComponentsInChildren<Rigidbody>(true);

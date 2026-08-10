@@ -74,7 +74,17 @@ public static class RagdollHelperClass
 
 		if ((int)eBodyPart > 0)
 		{
-			((MonoBehaviour)p).StartCoroutine(Utils.LerpLayerWeight(p, 18, 0f, 1f, VisceralEntry.Instance.AnimSwapDuration.Value));
+			if (VisceralEntry.Instance != null && VisceralEntry.Instance.dismemberedPlayers.Contains(p))
+			{
+				if (p.BodyAnimatorCommon != null)
+				{
+					p.BodyAnimatorCommon.SetLayerWeight(18, 1f);
+				}
+			}
+			else
+			{
+				((MonoBehaviour)p).StartCoroutine(Utils.LerpLayerWeight(p, 18, 0f, 1f, VisceralEntry.Instance.AnimSwapDuration.Value));
+			}
 		}
 		else
 		{
@@ -322,5 +332,18 @@ public static class RagdollHelperClass
 				}
 			});
 		}
+	}
+}
+
+/// <summary>
+/// Enforces RagdollHelperClass.limbSize in LateUpdate() on dismembered bone transforms.
+/// LateUpdate runs AFTER Unity's Animator updates bone transforms in Update(),
+/// preventing the Animator from overriding the bone scale back to 1.0 or lerping it over time.
+/// </summary>
+public class DismemberedLimbScaler : MonoBehaviour
+{
+	private void LateUpdate()
+	{
+		transform.localScale = RagdollHelperClass.limbSize;
 	}
 }
