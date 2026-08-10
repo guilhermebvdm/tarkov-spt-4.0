@@ -26,7 +26,7 @@ using VisceralCombat.Ragdolls.Patches;
 
 namespace VisceralCombat;
 
-[BepInPlugin("com.servph.VisceralCombat", "Visceral Combat", "3.8.0")]
+[BepInPlugin("com.servph.VisceralCombat", "Visceral Combat", "3.8.1")]
 public class VisceralEntry : BaseUnityPlugin
 {
 	public List<string> SoundsList = new List<string> { "ThroatGargle1", "ThroatGargle2", "ThroatGargle3", "ThroatGargle4" };
