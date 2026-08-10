@@ -294,10 +294,16 @@ public static class RagdollHelperClass
 		pm.mappingWeight = 1f; // KEEP mappingWeight = 1 so PuppetMaster continuously maps ragdoll physics onto PlayerBody
 		pm.state = PuppetMaster.State.Dead;
 
-		// 2. Disable layer 18 agony animation so animator doesn't try to override skeletal pose
+		// 2. Disable animator component completely so Layer 0 never evaluates scale 1.0f keyframes on bones
 		if (p.BodyAnimatorCommon != null)
 		{
-			p.BodyAnimatorCommon.SetLayerWeight(18, 0f);
+			p.BodyAnimatorCommon.enabled = false;
+		}
+
+		DismemberedLimbScaler[] scalers = p.GetComponentsInChildren<DismemberedLimbScaler>(true);
+		foreach (DismemberedLimbScaler scaler in scalers)
+		{
+			if (scaler != null) scaler.transform.localScale = limbSize;
 		}
 
 		// 3. Release non-dismembered rigidbodies to physical ragdoll while disconnecting dismembered muscles
