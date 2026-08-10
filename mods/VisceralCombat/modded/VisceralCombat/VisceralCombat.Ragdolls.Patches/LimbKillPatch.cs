@@ -54,42 +54,47 @@ public class LimbKillPatch : ModulePatch
 		GameObject rootGO = VisceralCombat.Dismemberment.Classes.Utils.GetRootGameObject(rb.gameObject);
 		if (rootGO == null) return;
 
-		PuppetMaster pm = rootGO.GetComponentInChildren<PuppetMaster>(true);
-		if (pm == null || !pm.initiated) return;
-
-		GameObject playerRoot = VisceralCombat.Dismemberment.Classes.Utils.GetRootGameObject(pm.gameObject);
-		if (playerRoot == null) return;
-
-		Player player = playerRoot.GetComponentInChildren<Player>(true);
-		if (player == null || player.ActiveHealthController == null || player.ActiveHealthController.IsAlive) return;
-
-		string rbName = rb.gameObject.name;
-		if (pm.muscles == null) return;
-
-		foreach (Muscle muscle in pm.muscles)
+		Player player = rootGO.GetComponentInChildren<Player>(true);
+		if (player == null && rb.gameObject != null)
 		{
-			if (muscle != null && muscle.name != null && muscle.name.Contains(rbName))
-			{
-				if (rbName.Contains("Head"))
-				{
-					if (pm.mappingWeight > 0.05f)
-					{
-						pm.stateSettings.killDuration = 0f;
-						pm.state = PuppetMaster.State.Dead;
-					}
-				}
-				muscle.props.muscleWeight *= 0.5f;
-			}
+			player = rb.gameObject.GetComponentInParent<Player>();
 		}
+		if (player == null) return;
 
-		// If agony animation is active, interrupt it on any bullet hit so the bot
-		// collapses into physical ragdoll immediately from its current floor pose.
-		if (pm.mappingWeight > 0.05f && player != null)
+		// Check if player is dead (HealthController is null or IsAlive is false)
+		bool isDead = (player.HealthController == null || !player.HealthController.IsAlive);
+		if (!isDead) return;
+
+		PuppetMaster pm = rootGO.GetComponentInChildren<PuppetMaster>(true);
+		string rbName = rb.gameObject.name;
+
+		if (pm != null && pm.muscles != null)
 		{
-			RagdollHelperClass.InterruptAgony(player, pm);
-			if (rb != null && !rb.isKinematic)
+			foreach (Muscle muscle in pm.muscles)
 			{
-				rb.AddForceAtPosition(shot.Direction * (shot.Speed * 0.15f), shot.HitPoint, ForceMode.Impulse);
+				if (muscle != null && muscle.name != null && muscle.name.Contains(rbName))
+				{
+					if (rbName.Contains("Head"))
+					{
+						if (pm.mappingWeight > 0.05f)
+						{
+							pm.stateSettings.killDuration = 0f;
+							pm.state = PuppetMaster.State.Dead;
+						}
+					}
+					muscle.props.muscleWeight *= 0.5f;
+				}
+			}
+
+			// If agony animation is active, interrupt it on any bullet hit so the bot
+			// collapses into physical ragdoll immediately from its current floor pose.
+			if (pm.mappingWeight > 0.05f && player != null)
+			{
+				RagdollHelperClass.InterruptAgony(player, pm);
+				if (rb != null && !rb.isKinematic)
+				{
+					rb.AddForceAtPosition(shot.Direction * (shot.Speed * 0.15f), shot.HitPoint, ForceMode.Impulse);
+				}
 			}
 		}
 
