@@ -8,6 +8,7 @@ using SPT.Reflection.Patching;
 using UnityEngine;
 using Object = UnityEngine.Object;
 using VisceralCombat.Ragdolls.Classes.RootMotion.Dynamics;
+using VisceralCombat.Ragdolls.Classes;
 
 namespace VisceralCombat.Ragdolls.Patches;
 
@@ -71,11 +72,24 @@ public class LimbKillPatch : ModulePatch
 			{
 				if (rbName.Contains("Head"))
 				{
-					pm.stateSettings.killDuration = 0f;
-					pm.state = PuppetMaster.State.Dead;
+					// Fix 3: Only force agony-end state when agony is actually running (mappingWeight > 0).
+					// For pure BSG-ragdoll corpses (mappingWeight ≈ 0) this would call
+					// DisableLiveActiveRagdoll → SetActive(false) on the PM GameObject, making the body vanish.
+					if (pm.mappingWeight > 0.05f)
+					{
+						pm.stateSettings.killDuration = 0f;
+						pm.state = PuppetMaster.State.Dead;
+					}
 				}
 				muscle.props.muscleWeight *= 0.5f;
 			}
+		}
+
+		// Fix 4: If agony animation is active, interrupt it on any bullet hit so the bot
+		// collapses into physical ragdoll immediately instead of continuing to writhe.
+		if (pm.mappingWeight > 0.05f && player != null)
+		{
+			RagdollHelperClass.DisableLiveActiveRagdoll(player, pm);
 		}
 	}
 }

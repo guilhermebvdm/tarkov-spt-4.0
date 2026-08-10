@@ -129,6 +129,16 @@ public class BodiesImpulsePatch : ModulePatch
 			}
 		}
 
+		// Cap impulse on dead bodies to prevent ragdoll-launch.
+		// Dead player rigidbodies still react to bullets but at 25% intensity.
+		Player bodyOwner = rb.gameObject.GetComponentInParent<Player>();
+		if (bodyOwner != null
+		    && bodyOwner.ActiveHealthController != null
+		    && !bodyOwner.ActiveHealthController.IsAlive)
+		{
+			modifier *= 0.25f;
+		}
+
 		string hitName = hitCollider.name.ToLower();
 		float bodyPartMult = 1.0f;
 		if (VisceralEntry.Instance != null)

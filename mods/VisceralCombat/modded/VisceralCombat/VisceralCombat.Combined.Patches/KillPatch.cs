@@ -392,6 +392,9 @@ public class KillPatch : ModulePatch
 			componentInChildren.muscleSpring = 175f;
 			componentInChildren.muscleDamper = 1.5f;
 			((Behaviour)componentInChildren).enabled = true;
+			// Zero muscle weights for the dismembered limb BEFORE the animator starts evaluating,
+			// so LerpLayerWeight on layer 18 never drives a 0.001f-scaled bone (which causes gigantism).
+			RagdollHelperClass.DisableDismemberedMuscles(componentInChildren, eBodyPart);
 			if (p.BodyAnimatorCommon == null)
 			{
 				QuickLogger.Log(ELogType.Error, "Player's BodyAnimatorCommon is null!");
@@ -414,9 +417,6 @@ public class KillPatch : ModulePatch
 			if ((Object)(object)p.PlayerBones.HolsterPistol != (Object)null) ((Component)p.PlayerBones.HolsterPistol).gameObject.SetActive(false);
 			if ((Object)(object)p.PlayerBones.LeftLegHolsterPistol != (Object)null) ((Component)p.PlayerBones.LeftLegHolsterPistol).gameObject.SetActive(false);
 			componentInChildren.Teleport(((Component)p).gameObject.transform.position, Quaternion.LookRotation(p.LookDirection), moveToTarget: true);
-			// Zero muscle weights for the dismembered limb BEFORE the mapping weight ramps up,
-			// otherwise PuppetMaster will try to drive a 0.001f-scaled bone and cause gigantism.
-			RagdollHelperClass.DisableDismemberedMuscles(componentInChildren, eBodyPart);
 			((MonoBehaviour)p).StartCoroutine(RagdollHelperClass.LerpMappingWeight(componentInChildren, 0f, 1f, VisceralEntry.Instance.MappingWeightDuration.Value));
 			componentInChildren.state = PuppetMaster.State.Dead;
 			if ((int)eBodyPart > 0)
