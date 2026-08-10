@@ -209,10 +209,12 @@ public class LimbKillPatch : ModulePatch
 		float chance = 0.5f;
 		if (shot.Ammo is AmmoItemClass ammo && !string.IsNullOrEmpty(ammo.Caliber))
 		{
-			if (!VisceralCombat.Combined.Patches.KillPatch.calibers.TryGetValue(ammo.Caliber, out chance))
+			string calStr = ammo.Caliber;
+			string cleanCalStr = calStr.StartsWith("Caliber") ? calStr.Substring(7) : calStr;
+			if (VisceralCombat.Combined.Patches.KillPatch.calibers.TryGetValue(calStr, out float foundChance) ||
+			    VisceralCombat.Combined.Patches.KillPatch.calibers.TryGetValue(cleanCalStr, out foundChance))
 			{
-				string clean = ammo.Caliber.StartsWith("Caliber") ? ammo.Caliber.Substring(7) : ammo.Caliber;
-				VisceralCombat.Combined.Patches.KillPatch.calibers.TryGetValue(clean, out chance);
+				chance = foundChance;
 			}
 		}
 
