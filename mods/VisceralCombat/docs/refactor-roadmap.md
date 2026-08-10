@@ -44,6 +44,7 @@ graph TD
   - Bloqueio permanente de postura em *Prone* (bot impossibilitado de se levantar).
   - Emissão contínua de sangramento arterial e rastro de poças de sangue no chão durante o rastejamento.
   - Exsanguição progressiva até o decesso do bot.
+- **⚠️ Pré-requisito FIKA (a investigar):** Em sessões coop, convidados sem o mod veriam o bot rastejando com pernas intactas. Antes de implementar, investigar API FIKA para verificar se todos os clientes têm o mod instalado e só habilitar a feature quando universal. Ver spec para detalhes.
 - **Backlog:** Documentado na spec [`backlog/001-alive-leg-dismemberment/001-alive-leg-dismemberment-01-spec.md`](../backlog/001-alive-leg-dismemberment/001-alive-leg-dismemberment-01-spec.md).
 
 ### ✅ 4. Auditoria 003: Desmembramento Pós-Morte, Otimização de CPU & Menu F12 (v3.8.0 / v3.8.1)

@@ -26,7 +26,7 @@ Esta funcionalidade visa adicionar um nível extremo de imersão ao combate: per
 4. **Bloqueio de Postura (Lock em Prone):** Interceptar e bloquear qualquer comando da IA de bot que tente levantar o personagem (*Stand* ou *Crouch*). O bot permanece preso no estado *Prone*.
 
 ### 3. Sangramento Arterial & Rastro de Sangue
-1. **Fluxo Contínuo de Sangue:** Iniciar um emissor de sangue continuo no coto da perna amputada (`limbSquirter` / `ArterialSpray`).
+1. **Fluxo Contínuo de Sangue:** Iniciar um emissor de sangue contínuo no coto da perna amputada (`limbSquirter` / `ArterialSpray`).
 2. **Rastro de Poças no Chão (Bleed Trail):** Conforme o bot se move/rasteja em prone, instanciar decalques de poça de sangue em intervalos regulares na posição atual do bot, criando um rastro visível de sangue pelo chão.
 3. **Morte por Exsanguição:** Aplicar dano por sangramento contínuo na saúde do bot até o decesso definitivo por perda de sangue.
 
@@ -41,9 +41,27 @@ Esta funcionalidade visa adicionar um nível extremo de imersão ao combate: per
 
 ---
 
+## 🌐 Compatibilidade FIKA (Multiplayer Coop) — A Investigar
+
+> [!IMPORTANT]
+> Esta seção deve ser investigada e spec-tecada antes da implementação desta feature.
+
+**Problema identificado:** Em sessões FIKA (coop), se um convidado não tiver o mod Visceral Combat instalado, ele verá o bot **rastejando com as duas pernas intactas visualmente**, sem animação de desmembramento — comportamento imersivamente inconsistente e perturbador.
+
+**Proposta de Solução (a validar):** O host da partida verifica, via FIKA, se todos os clientes convidados têm o plugin Visceral Combat carregado antes de habilitar a feature de desmembramento vivo. Se algum convidado não tiver o mod, a feature fica desligada na sessão.
+
+**Pontos a Investigar:**
+- Mecanismo FIKA de listagem de plugins carregados por cliente: verificar se `Fika.Core` expõe alguma API de handshake ou troca de capacidades entre host/clients (ex: `FikaPlugin`, `IFikaPlugin`, `FikaBackendUtils`).
+- Se a API não existir nativamente: avaliar envio de uma packet customizada FIKA (Fika Network Packets via Nakama/NPM) com flag `HasVisceralCombat: bool` no momento do join de raid.
+- Referências a examinar: `references/fika-plugin/Fika.Core/` (API coop) e `references/fika-server/` (servidor Nakama).
+- Questão de autoridade: definir se a verificação roda no **host** (único) ou em todos os clientes simultaneamente.
+
+---
+
 ## ✅ Critérios de Aceite
 1. Bot atingido por calibre pesado na perna perde o membro e cai instantaneamente em prone.
 2. Bot não consegue se colocar em pé ou agachado sob nenhuma circunstância.
 3. Rastro de sangue visível se forma no chão ao longo do trajeto de rastejamento do bot.
 4. Bot morre naturalmente por sangramento após o tempo configurado.
-5. Zero erros de console e sem vazamento de RAM ao descarregar a raid.
+5. **Em sessão FIKA:** feature ativa APENAS se todos os convidados tiverem o mod instalado (ou fallback gracioso).
+6. Zero erros de console e sem vazamento de RAM ao descarregar a raid.
