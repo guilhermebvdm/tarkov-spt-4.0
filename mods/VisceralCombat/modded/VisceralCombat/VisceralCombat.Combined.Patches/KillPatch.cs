@@ -567,6 +567,7 @@ public class KillPatch : ModulePatch
 			var collision = val.collision;
 			collision.sendCollisionMessages = true;
 			((Component)val).gameObject.AddComponent<ParticleFloorPainter>();
+			RagdollHelperClass.ApplyDarkCoagulatedBloodFx(val);
 			val.Play();
 		}
 		GClass855.WaitSeconds((MonoBehaviour)(object)StaticManager.Instance, num + 1f, (Action)delegate

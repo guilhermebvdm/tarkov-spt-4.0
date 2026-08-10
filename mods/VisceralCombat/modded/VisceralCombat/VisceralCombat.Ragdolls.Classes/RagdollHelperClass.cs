@@ -429,6 +429,46 @@ public static class RagdollHelperClass
 			});
 		}
 	}
+
+	/// <summary>
+	/// Configures a blood particle system to display realistic dark coagulated blood
+	/// and removes artificial white glow / emission overdraw.
+	/// </summary>
+	public static void ApplyDarkCoagulatedBloodFx(ParticleSystem ps)
+	{
+		if (ps == null) return;
+
+		// 1. Dark Coagulated Blood Color (RGB ~ 0.22, 0.02, 0.02, Alpha 0.95)
+		var main = ps.main;
+		Color darkCoagulatedRed = new Color(0.22f, 0.02f, 0.02f, 0.95f);
+		main.startColor = new ParticleSystem.MinMaxGradient(darkCoagulatedRed);
+
+		// 2. Disable Lights module to stop point lights / dynamic glows
+		var lights = ps.lights;
+		lights.enabled = false;
+
+		// 3. Configure Renderer Material to kill white emission and set dark tint
+		ParticleSystemRenderer psRenderer = ps.GetComponent<ParticleSystemRenderer>();
+		if (psRenderer != null && psRenderer.material != null)
+		{
+			Material mat = psRenderer.material;
+
+			if (mat.HasProperty("_EmissionColor"))
+			{
+				mat.SetColor("_EmissionColor", Color.black);
+			}
+			mat.DisableKeyword("_EMISSION");
+
+			if (mat.HasProperty("_Color"))
+			{
+				mat.SetColor("_Color", darkCoagulatedRed);
+			}
+			if (mat.HasProperty("_TintColor"))
+			{
+				mat.SetColor("_TintColor", darkCoagulatedRed);
+			}
+		}
+	}
 }
 
 /// <summary>

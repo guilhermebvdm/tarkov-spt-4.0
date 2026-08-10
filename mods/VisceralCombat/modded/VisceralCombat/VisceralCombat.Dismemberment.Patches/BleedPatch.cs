@@ -13,6 +13,7 @@ using UnityEngine;
 using Random = UnityEngine.Random;
 using Object = UnityEngine.Object;
 using VisceralCombat.Dismemberment.Classes;
+using VisceralCombat.Ragdolls.Classes;
 
 namespace VisceralCombat.Dismemberment.Patches;
 
@@ -159,6 +160,7 @@ public class BleedPatch : ModulePatch
 				{
 					ps.gameObject.AddComponent<ParticleFloorPainter>();
 				}
+				RagdollHelperClass.ApplyDarkCoagulatedBloodFx(ps);
 				ps.Play();
 			}
 			Object.Destroy(bloodParticleObject, time + 1f);
@@ -205,6 +207,7 @@ public class BleedPatch : ModulePatch
 				{
 					ps.gameObject.AddComponent<ParticleFloorPainter>();
 				}
+				RagdollHelperClass.ApplyDarkCoagulatedBloodFx(ps);
 				ps.Play();
 			}
 			Object.Destroy(bloodParticleObject, time + 1f);
