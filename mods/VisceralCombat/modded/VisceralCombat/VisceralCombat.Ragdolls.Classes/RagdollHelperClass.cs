@@ -42,10 +42,10 @@ public static class RagdollHelperClass
 
 		string[] muscleKeywords = dismemberedPart switch
 		{
-			(EBodyPart)3 => new[] { "lforearm", "lhand", "lfinger" },  // LeftArm
-			(EBodyPart)4 => new[] { "rforearm", "rhand", "rfinger" },  // RightArm
-			(EBodyPart)5 => new[] { "lthigh", "lleg", "lfoot" },       // LeftLeg
-			(EBodyPart)6 => new[] { "rthigh", "rleg", "rfoot" },       // RightLeg
+			(EBodyPart)3 => new[] { "larm", "lupperarm", "lforearm", "lhand", "lpalm", "lfinger", "ldigit" },  // LeftArm
+			(EBodyPart)4 => new[] { "rarm", "rupperarm", "rforearm", "rhand", "rpalm", "rfinger", "rdigit" },  // RightArm
+			(EBodyPart)5 => new[] { "lthigh", "lleg", "lcalf", "lfoot", "ltoe" },                               // LeftLeg
+			(EBodyPart)6 => new[] { "rthigh", "rleg", "rcalf", "rfoot", "rtoe" },                               // RightLeg
 			_ => Array.Empty<string>()
 		};
 
