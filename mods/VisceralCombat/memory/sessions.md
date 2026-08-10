@@ -2,13 +2,17 @@
 
 ## Snapshot Delta
 - **Versão:** 3.8.1 (SPT 4.0 / FIKA 2.2.6)
-- **Estado:** Compilação 100% limpa em C# 12 (0 erros). Desmembramento pós-morte (braços, pernas e cabeça) totalmente funcional e testado em jogo sem regressão. Calibres leves de pistolas e PDWs configurados com 0.0 de probabilidade de amputação. Todos os achados dos Code Reviews 01 e 02 resolvidos e aplicados em `modded/`.
+- **Estado:** Compilação 100% limpa em C# 12 (0 erros). Desmembramento pós-morte (braços, pernas e cabeça) totalmente funcional e testado em jogo sem regressão. Efeitos de esguicho e sangramento customizados via C# para vermelho escuro coagulado e remoção completa do brilho/emissão branco.
 - **Origem dos Bugs de Gigantismo/Inflamento:** Registrado que todos os episódios de "gigantismo" e "corpo inflando" foram causados por código experimental no `modded/` durante a refatoração de agonia/músculos e foram 100% corrigidos por nós. **Não vieram do mod original.**
 - **Pendências:** 🟢 Nenhuma pendência blocker ou alta aberta.
 
 ---
 
-## Sessão 2026-08-10 — Desmembramento Pós-Morte, Refino de Calibres & Correções de Agonia e Estabilidade
+## Sessão 2026-08-10 — Desmembramento Pós-Morte, Estilização de Sangue Escuro & Correções de Agonia
+- **Estilização de Sangue Escuro Coagulado & Remoção de Brilho Branco:**
+  - Criado o helper `RagdollHelperClass.ApplyDarkCoagulatedBloodFx(ParticleSystem ps)` aplicado em `BleedPatch.cs` (`HitEffect`, `BleedEffect`), `KillPatch.cs` (`SpawnArterialSprays`) e `PlayerDetonationPatch.cs`.
+  - Desativado o módulo de luzes (`ps.lights.enabled = false`) e zerada a iluminação/emissão do material (`_EmissionColor = Color.black` / `DisableKeyword("_EMISSION")`), eliminando clarões brancos e estouro de iluminação HDR em runtime sem precisar editar AssetBundles 3D.
+  - Ajustado o `startColor` e a cor do material para vermelho escuro coagulado (`RGB(0.22, 0.02, 0.02, 0.95)`).
 - **Esclarecimento sobre Gigantismo & Inflamento:**
   - Identificado e registrado que os comportamentos de "corpo inflando" e "gigantismo" surgiram devido a inconsistências nas primeiras alterações do `modded/` (resets de escala de músculos pelo `PuppetMaster.State.Dead`, transições de camada de agonia e desacoplamento do `Animator`).
   - **Não foram defeitos herdados do mod original.** Todos foram corrigidos no `modded/`.
