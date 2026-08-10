@@ -51,7 +51,10 @@ public class LimbKillPatch : ModulePatch
 		Rigidbody rb = hitCollider.attachedRigidbody;
 		if (rb == null) return;
 
-		// --- 1. Resolve the Player via BodyPartCollider (precise, no string matching) ---
+		// --- 1. Resolve Player ---
+		// On live bots: BodyPartCollider is present with a direct Player reference.
+		// On dead ragdolls: colliders are physics bones ("Base HumanRThigh1" etc.) —
+		// no BodyPartCollider attached. Use hierarchy fallback.
 		BodyPartCollider bpc = hitCollider.GetComponent<BodyPartCollider>();
 		if (bpc == null) bpc = hitCollider.GetComponentInParent<BodyPartCollider>();
 
@@ -61,20 +64,20 @@ public class LimbKillPatch : ModulePatch
 			player = bpcPlayer;
 		}
 
-		// Fallback: walk the hierarchy
 		if (player == null)
 		{
 			GameObject rootGO = VisceralCombat.Dismemberment.Classes.Utils.GetRootGameObject(rb.gameObject);
 			if (rootGO != null) player = rootGO.GetComponentInChildren<Player>(true);
 		}
+
 		if (player == null) player = rb.gameObject.GetComponentInParent<Player>();
 		if (player == null) return;
 
-		// Only process dead players
+		// Only process dead players (ActiveHealthController is NOT reliable post-death)
 		bool isDead = (player.HealthController == null || !player.HealthController.IsAlive);
 		if (!isDead) return;
 
-		// --- 2. PuppetMaster: agony interruption (only relevant while pm is active) ---
+		// --- 2. PuppetMaster: agony interruption ---
 		GameObject rootForPm = VisceralCombat.Dismemberment.Classes.Utils.GetRootGameObject(rb.gameObject);
 		PuppetMaster pm = rootForPm?.GetComponentInChildren<PuppetMaster>(true);
 
@@ -94,7 +97,6 @@ public class LimbKillPatch : ModulePatch
 				}
 			}
 
-			// If agony animation is active, collapse the bot from its current floor pose
 			if (pm.mappingWeight > 0.05f)
 			{
 				RagdollHelperClass.InterruptAgony(player, pm);
@@ -105,50 +107,96 @@ public class LimbKillPatch : ModulePatch
 			}
 		}
 
-		// --- 3. Post-mortem dismemberment using EBodyPartColliderType (exact, no string guessing) ---
+		// --- 3. Post-mortem dismemberment ---
+		// Head and torso are intentionally excluded: "Base HumanHead" is the mesh root —
+		// scaling it to 0.001f collapses the entire body model.
 		if (VisceralEntry.Instance == null || !VisceralEntry.Instance.EnableDismemberment.Value) return;
-		if (bpc == null) return; // Can only dismember if we have a typed collider
 
 		EBodyPart? dismemberPart = null;
 		string boneName = null;
 		string capAsset = null;
 		string[] extraAssets = Array.Empty<string>();
 
-		switch (bpc.BodyPartColliderType)
+		// Strategy A: typed BodyPartColliderType (live-bot shot-detection colliders)
+		if (bpc != null)
 		{
-			case EBodyPartColliderType.LeftUpperArm:
-			case EBodyPartColliderType.LeftForearm:
+			switch (bpc.BodyPartColliderType)
+			{
+				case EBodyPartColliderType.LeftUpperArm:
+				case EBodyPartColliderType.LeftForearm:
+					dismemberPart = (EBodyPart)3;
+					boneName = "lforearm1";
+					capAsset = "Arm_LeftCap";
+					extraAssets = new[] { "Arm_L_1", "Arm_L_2" };
+					break;
+				case EBodyPartColliderType.RightUpperArm:
+				case EBodyPartColliderType.RightForearm:
+					dismemberPart = (EBodyPart)4;
+					boneName = "rforearm1";
+					capAsset = "Arm_RightCap";
+					extraAssets = new[] { "Arm_R_1", "Arm_R_2" };
+					break;
+				case EBodyPartColliderType.LeftThigh:
+				case EBodyPartColliderType.LeftCalf:
+					dismemberPart = (EBodyPart)5;
+					boneName = "lthigh1";
+					capAsset = "Leg_LeftCap";
+					extraAssets = new[] { "gore_leg_torn01" };
+					break;
+				case EBodyPartColliderType.RightThigh:
+				case EBodyPartColliderType.RightCalf:
+					dismemberPart = (EBodyPart)6;
+					boneName = "rthigh1";
+					capAsset = "Leg_RightCap";
+					extraAssets = new[] { "gore_leg_torn02" };
+					break;
+			}
+		}
+
+		// Strategy B: ragdoll physics bone names (dead corpses — EFT format: "Base Human[L/R][Part]")
+		// Confirmed from log capture: "Base HumanRThigh1", "Base HumanLCalf", etc.
+		// Head ("Base HumanHead") deliberately skipped — it is the mesh root.
+		if (dismemberPart == null)
+		{
+			string rbLow = rb.gameObject.name.ToLower();
+
+			if (rbLow.Contains("humanlupperarm") || rbLow.Contains("humanlforearm") ||
+			    rbLow.Contains("humanlarm") || rbLow.Contains("humanl_arm"))
+			{
 				dismemberPart = (EBodyPart)3;
 				boneName = "lforearm1";
 				capAsset = "Arm_LeftCap";
 				extraAssets = new[] { "Arm_L_1", "Arm_L_2" };
-				break;
-			case EBodyPartColliderType.RightUpperArm:
-			case EBodyPartColliderType.RightForearm:
+			}
+			else if (rbLow.Contains("humanrupperarm") || rbLow.Contains("humanrforearm") ||
+			         rbLow.Contains("humanrarm") || rbLow.Contains("humanr_arm"))
+			{
 				dismemberPart = (EBodyPart)4;
 				boneName = "rforearm1";
 				capAsset = "Arm_RightCap";
 				extraAssets = new[] { "Arm_R_1", "Arm_R_2" };
-				break;
-			case EBodyPartColliderType.LeftThigh:
-			case EBodyPartColliderType.LeftCalf:
+			}
+			else if (rbLow.Contains("humanlthigh") || rbLow.Contains("humanlcalf") ||
+			         rbLow.Contains("humanlleg"))
+			{
 				dismemberPart = (EBodyPart)5;
 				boneName = "lthigh1";
 				capAsset = "Leg_LeftCap";
 				extraAssets = new[] { "gore_leg_torn01" };
-				break;
-			case EBodyPartColliderType.RightThigh:
-			case EBodyPartColliderType.RightCalf:
+			}
+			else if (rbLow.Contains("humanrthigh") || rbLow.Contains("humanrcalf") ||
+			         rbLow.Contains("humanrleg"))
+			{
 				dismemberPart = (EBodyPart)6;
 				boneName = "rthigh1";
 				capAsset = "Leg_RightCap";
 				extraAssets = new[] { "gore_leg_torn02" };
-				break;
-			// Head and torso excluded: scaling Head bone would collapse body mesh
+			}
 		}
 
 		if (!dismemberPart.HasValue || boneName == null) return;
 
+		// --- Caliber-based dismemberment chance (same table as KillPatch) ---
 		float chance = 0.5f;
 		if (shot.Ammo is AmmoItemClass ammo && !string.IsNullOrEmpty(ammo.Caliber))
 		{
