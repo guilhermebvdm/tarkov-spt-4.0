@@ -61,6 +61,7 @@ public static class RagdollHelperClass
 			{
 				if ((mNameLow.Length > 0 && mNameLow.Contains(kw)) || (tNameLow.Length > 0 && tNameLow.Contains(kw)))
 				{
+					muscle.state.isDisconnected = true;
 					muscle.props.muscleWeight = 0f;
 					muscle.props.pinWeight    = 0f;
 					muscle.props.mappingWeight = 0f;
@@ -299,20 +300,36 @@ public static class RagdollHelperClass
 			p.BodyAnimatorCommon.SetLayerWeight(18, 0f);
 		}
 
-		// 3. Release non-dismembered rigidbodies to physical ragdoll
+		// 3. Release non-dismembered rigidbodies to physical ragdoll while disconnecting dismembered muscles
 		Muscle[] muscles = pm.muscles;
 		if (muscles != null)
 		{
 			foreach (Muscle m in muscles)
 			{
-				if (m != null && m.rigidbody != null)
+				if (m == null) continue;
+
+				bool isDismembered = (m.rigidbody != null && ParentIsDismembered(m.rigidbody.transform))
+				                     || (m.target != null && ParentIsDismembered(m.target))
+				                     || (m.joint != null && ParentIsDismembered(m.joint.transform));
+
+				if (isDismembered)
 				{
-					if (ParentIsDismembered(m.rigidbody.transform))
+					m.state.isDisconnected = true;
+					m.props.muscleWeight = 0f;
+					m.props.pinWeight = 0f;
+					m.props.mappingWeight = 0f;
+					m.state.muscleWeightMlp = 0f;
+					m.state.pinWeightMlp = 0f;
+					m.state.mappingWeightMlp = 0f;
+					if (m.rigidbody != null)
 					{
 						m.rigidbody.isKinematic = true;
 						m.rigidbody.detectCollisions = false;
 					}
-					else
+				}
+				else
+				{
+					if (m.rigidbody != null)
 					{
 						m.rigidbody.isKinematic = false;
 						m.rigidbody.detectCollisions = true;
@@ -357,6 +374,7 @@ public static class RagdollHelperClass
 		while (curr != null)
 		{
 			if (curr.localScale == limbSize) return true;
+			if (curr.GetComponent<DismemberedLimbScaler>() != null) return true;
 			curr = curr.parent;
 		}
 		return false;

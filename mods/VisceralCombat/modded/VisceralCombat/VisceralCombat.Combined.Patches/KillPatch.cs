@@ -291,6 +291,7 @@ public class KillPatch : ModulePatch
 
 					if (isTargetMatch || isJointMatch || isRbMatch || isNameMatch)
 					{
+						m.state.isDisconnected = true;
 						m.props.muscleWeight = 0f;
 						m.props.pinWeight = 0f;
 						m.props.mappingWeight = 0f;
