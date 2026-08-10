@@ -227,11 +227,6 @@ public class KillPatch : ModulePatch
 				}
 			}
 
-			if (VisceralEntry.Instance != null && player != null && !VisceralEntry.Instance.dismemberedPlayers.Contains(player))
-			{
-				VisceralEntry.Instance.dismemberedPlayers.Add(player);
-			}
-
 			Transform[] allBranchTransforms = val.GetComponentsInChildren<Transform>(true);
 			foreach (Transform tBranch in allBranchTransforms)
 			{
@@ -377,6 +372,11 @@ public class KillPatch : ModulePatch
 			{
 				QuickLogger.Log(ELogType.Error, "DeathSetup: Player or GameObject is Null!");
 				return;
+			}
+
+			if (VisceralEntry.Instance != null && !VisceralEntry.Instance.dismemberedPlayers.Contains(p))
+			{
+				VisceralEntry.Instance.dismemberedPlayers.Add(p);
 			}
 
 			if (FikaBackendUtils.IsServer && FikaBackendUtils.IsClient)
