@@ -193,9 +193,7 @@ public class LimbKillPatch : ModulePatch
 			}
 			else if (rbLow.Contains("humanhead") || rbLow.Contains("humanskull"))
 			{
-				// SPY-HEAD confirmed safe: 'Base HumanHead' parent='Base HumanNeck', NOT mesh root.
-				// All 8 bones found by Contains('head') are dangerous=False.
-				// Using identical params to KillPatch case 0 (live bot head dismemberment).
+				// Post-mortem head dismemberment using identical bone/cap parameters to KillPatch case 0.
 				dismemberPart = (EBodyPart)0;
 				boneName = "head";
 				capAsset = $"Head_{UnityEngine.Random.Range(1, 4)}";

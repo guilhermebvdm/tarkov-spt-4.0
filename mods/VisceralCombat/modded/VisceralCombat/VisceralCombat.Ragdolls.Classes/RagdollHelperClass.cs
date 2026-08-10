@@ -344,12 +344,11 @@ public static class RagdollHelperClass
 			}
 		}
 
-		// 4. Keep PuppetMaster active while body falls to floor, then cleanly deactivate after 3 seconds
 		GClass855.WaitSeconds((MonoBehaviour)(object)StaticManager.Instance, 3f, (Action)delegate
 		{
-			if (pm != null && ((Component)pm).gameObject != null && Singleton<GameWorld>.Instantiated)
+			if ((UnityEngine.Object)pm != null && pm.gameObject != null && Singleton<GameWorld>.Instantiated)
 			{
-				((Component)pm).gameObject.SetActive(false);
+				pm.gameObject.SetActive(false);
 			}
 		});
 	}
