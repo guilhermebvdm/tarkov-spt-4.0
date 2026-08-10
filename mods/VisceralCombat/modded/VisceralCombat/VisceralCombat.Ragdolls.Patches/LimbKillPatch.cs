@@ -72,9 +72,6 @@ public class LimbKillPatch : ModulePatch
 			{
 				if (rbName.Contains("Head"))
 				{
-					// Fix 3: Only force agony-end state when agony is actually running (mappingWeight > 0).
-					// For pure BSG-ragdoll corpses (mappingWeight ≈ 0) this would call
-					// DisableLiveActiveRagdoll → SetActive(false) on the PM GameObject, making the body vanish.
 					if (pm.mappingWeight > 0.05f)
 					{
 						pm.stateSettings.killDuration = 0f;
@@ -85,7 +82,7 @@ public class LimbKillPatch : ModulePatch
 			}
 		}
 
-		// Fix 4: If agony animation is active, interrupt it on any bullet hit so the bot
+		// If agony animation is active, interrupt it on any bullet hit so the bot
 		// collapses into physical ragdoll immediately from its current floor pose.
 		if (pm.mappingWeight > 0.05f && player != null)
 		{
@@ -93,6 +90,63 @@ public class LimbKillPatch : ModulePatch
 			if (rb != null && !rb.isKinematic)
 			{
 				rb.AddForceAtPosition(shot.Direction * (shot.Speed * 0.15f), shot.HitPoint, ForceMode.Impulse);
+			}
+		}
+
+		// Post-mortem dismemberment: Allow shooting off arms and legs on dead corpses
+		if (VisceralEntry.Instance != null && VisceralEntry.Instance.EnableDismemberment.Value && player != null)
+		{
+			string rbLow = rbName.ToLower();
+			EBodyPart? dismemberPart = null;
+			string boneName = null;
+			string capAsset = null;
+			string[] extraAssets = Array.Empty<string>();
+
+			if (rbLow.Contains("lupperarm") || rbLow.Contains("lforearm") || rbLow.Contains("larm") || rbLow.Contains("lhand") || rbLow.Contains("lpalm"))
+			{
+				dismemberPart = (EBodyPart)3;
+				boneName = "lforearm1";
+				capAsset = "Arm_LeftCap";
+				extraAssets = new[] { "Arm_L_1", "Arm_L_2" };
+			}
+			else if (rbLow.Contains("rupperarm") || rbLow.Contains("rforearm") || rbLow.Contains("rarm") || rbLow.Contains("rhand") || rbLow.Contains("rpalm"))
+			{
+				dismemberPart = (EBodyPart)4;
+				boneName = "rforearm1";
+				capAsset = "Arm_RightCap";
+				extraAssets = new[] { "Arm_R_1", "Arm_R_2" };
+			}
+			else if (rbLow.Contains("lthigh") || rbLow.Contains("lleg") || rbLow.Contains("lcalf") || rbLow.Contains("lfoot"))
+			{
+				dismemberPart = (EBodyPart)5;
+				boneName = "lthigh1";
+				capAsset = "Leg_LeftCap";
+				extraAssets = new[] { "gore_leg_torn01" };
+			}
+			else if (rbLow.Contains("rthigh") || rbLow.Contains("rleg") || rbLow.Contains("rcalf") || rbLow.Contains("rfoot"))
+			{
+				dismemberPart = (EBodyPart)6;
+				boneName = "rthigh1";
+				capAsset = "Leg_RightCap";
+				extraAssets = new[] { "gore_leg_torn02" };
+			}
+
+			if (dismemberPart.HasValue && boneName != null)
+			{
+				float chance = 0.5f;
+				if (shot.Ammo is AmmoItemClass ammo && !string.IsNullOrEmpty(ammo.Caliber))
+				{
+					if (!VisceralCombat.Combined.Patches.KillPatch.calibers.TryGetValue(ammo.Caliber, out chance))
+					{
+						string clean = ammo.Caliber.StartsWith("Caliber") ? ammo.Caliber.Substring(7) : ammo.Caliber;
+						VisceralCombat.Combined.Patches.KillPatch.calibers.TryGetValue(clean, out chance);
+					}
+				}
+				if (UnityEngine.Random.value <= chance)
+				{
+					Transform[] dummyLimbs;
+					VisceralCombat.Combined.Patches.KillPatch.DismemberLimb(player, shot.Direction, dismemberPart.Value, boneName, capAsset, extraAssets, out dummyLimbs);
+				}
 			}
 		}
 	}
