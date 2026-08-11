@@ -73,8 +73,15 @@ public class LivingDismembermentController : MonoBehaviour
 	{
 		if (_botOwner != null && _botOwner.BotLay != null)
 		{
-			_botOwner.BotLay.IsLay = true;
+			// Prevent GetUp by pushing NextPosibleGetUp into the far future
 			_botOwner.BotLay.NextPosibleGetUp = Time.time + 99999f;
+
+			// Only trigger IsLay = true if bot is not already in prone
+			// (Calling IsLay = true repeatedly invokes Mover.Stop() every frame, breaking navigation and spamming LookRotation warnings)
+			if (!_botOwner.BotLay.IsLay)
+			{
+				_botOwner.BotLay.IsLay = true;
+			}
 		}
 	}
 
