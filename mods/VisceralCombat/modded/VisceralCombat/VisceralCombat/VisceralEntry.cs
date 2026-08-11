@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -12,6 +13,7 @@ using Fika.Core.Main.Utils;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking;
+using Fika.Core.Networking.LiteNetLib;
 using Newtonsoft.Json;
 using SPT.Reflection.Patching;
 using UnityEngine;
@@ -27,6 +29,9 @@ using VisceralCombat.Ragdolls.Patches;
 namespace VisceralCombat;
 
 [BepInPlugin("com.servph.VisceralCombat", "Visceral Combat", "3.8.1")]
+/// <remarks>
+/// GUID used for FIKA mod-presence checks. Must match BepInPlugin first arg.
+/// </remarks>
 public class VisceralEntry : BaseUnityPlugin
 {
 	public List<string> SoundsList = new List<string> { "ThroatGargle1", "ThroatGargle2", "ThroatGargle3", "ThroatGargle4" };
@@ -71,6 +76,17 @@ public class VisceralEntry : BaseUnityPlugin
 
 	public static VisceralEntry Instance { get; private set; }
 	public static ManualLogSource LogSource { get; private set; }
+
+	/// <summary>
+	/// True only when ALL human players in the current FIKA raid have VisceralCombat.
+	/// Always true in solo SPT (no FIKA). Feature-gating flag for living-leg dismemberment.
+	/// </summary>
+	public static bool AllPlayersHaveVisceralCombat { get; private set; } = false;
+
+	// Handshake internals
+	private readonly HashSet<int> _handshakeAcks = new();
+	private int _expectedHumanCount = 0;
+	private const string VisceralGuid = "com.servph.VisceralCombat";
 
 	public AssetBundle goreBundle { get; set; }
 
@@ -261,7 +277,84 @@ public class VisceralEntry : BaseUnityPlugin
 		{
 			@event.Manager.RegisterPacket<DismembermentPacket>((Action<DismembermentPacket>)OnDismembermentPacket);
 			@event.Manager.RegisterPacket<RagdollSyncPacket>((Action<RagdollSyncPacket>)OnRagdollSyncPacket);
+			// Client-side: receive handshake ping from host and reply with ACK
+			@event.Manager.RegisterPacket<VisceralHandshakePacket>((Action<VisceralHandshakePacket>)OnVisceralHandshakePacketClient);
 		}
+		if (FikaBackendUtils.IsServer || FikaBackendUtils.IsHeadless)
+		{
+			// Host-side: receive ACK responses from clients
+			@event.Manager.RegisterPacket<VisceralHandshakePacket>((Action<VisceralHandshakePacket>)OnVisceralHandshakePacketServer);
+		}
+	}
+
+	/// <summary>Called on clients when the host broadcasts a handshake ping.</summary>
+	private void OnVisceralHandshakePacketClient(VisceralHandshakePacket packet)
+	{
+		if (!packet.IsRequest) return; // ignore stray ACKs
+		// Reply ACK to host: we have the mod
+		if (!Singleton<FikaClient>.Instantiated || Singleton<FikaClient>.Instance == null) return;
+		var myPlayer = Singleton<FikaClient>.Instance.CoopHandler?.MyPlayer;
+		if (myPlayer == null) return;
+
+		VisceralHandshakePacket ack = new()
+		{
+			IsRequest = false,
+			ResponderNetId = myPlayer.NetId
+		};
+		Singleton<FikaClient>.Instance.SendData<VisceralHandshakePacket>(ref ack, (DeliveryMethod)0, false);
+	}
+
+	/// <summary>Called on the host when a client sends an ACK.</summary>
+	private void OnVisceralHandshakePacketServer(VisceralHandshakePacket packet)
+	{
+		if (packet.IsRequest) return; // ignore stray pings
+		_handshakeAcks.Add(packet.ResponderNetId);
+	}
+
+	/// <summary>
+	/// Called by GameStartedPatch to begin the handshake.
+	/// In solo SPT (no FIKA server running) the flag is enabled immediately.
+	/// In FIKA, the host broadcasts a ping and waits up to 5 seconds for all ACKs.
+	/// </summary>
+	public void StartVisceralHandshake()
+	{
+		_handshakeAcks.Clear();
+		AllPlayersHaveVisceralCombat = false;
+
+		bool fikaServerUp = Singleton<FikaServer>.Instantiated && Singleton<FikaServer>.Instance != null;
+		if (!fikaServerUp)
+		{
+			// Solo SPT: always enable
+			AllPlayersHaveVisceralCombat = true;
+			QuickLogger.Log(ELogType.Log, "[VisceralCombat] Solo raid — LivingDismemberment enabled.");
+			return;
+		}
+
+		// FIKA raid: host sends ping to all clients
+		// Use CoopHandler.AmountOfHumans from the FIKA server
+		var serverCoopHandler = Singleton<FikaServer>.Instance.CoopHandler;
+		_expectedHumanCount = serverCoopHandler != null ? serverCoopHandler.AmountOfHumans - 1 : 0; // -1 for host (host counts as confirmed)
+
+		VisceralHandshakePacket ping = new() { IsRequest = true, ResponderNetId = 0 };
+		Singleton<FikaServer>.Instance.SendData<VisceralHandshakePacket>(ref ping, (DeliveryMethod)0, false);
+		QuickLogger.Log(ELogType.Log, $"[VisceralCombat] FIKA handshake sent — expecting {_expectedHumanCount} client ACKs.");
+
+		// Wait up to 5 seconds then evaluate
+		StartCoroutine(EvaluateHandshakeAfterDelay(5f));
+	}
+
+	private IEnumerator EvaluateHandshakeAfterDelay(float delay)
+	{
+		yield return new WaitForSeconds(delay);
+
+		int acks = _handshakeAcks.Count;
+		bool allConfirmed = acks >= _expectedHumanCount;
+		AllPlayersHaveVisceralCombat = allConfirmed;
+
+		if (allConfirmed)
+			QuickLogger.Log(ELogType.Log, $"[VisceralCombat] All {acks}/{_expectedHumanCount} players confirmed mod — LivingDismemberment ENABLED.");
+		else
+			QuickLogger.Log(ELogType.Log, $"[VisceralCombat] Only {acks}/{_expectedHumanCount} players confirmed mod — LivingDismemberment DISABLED.");
 	}
 
 	private void OnDismembermentPacket(DismembermentPacket packet)

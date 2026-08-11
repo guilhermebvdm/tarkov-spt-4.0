@@ -3,6 +3,8 @@ using System.Linq;
 using System.Reflection;
 using Comfort.Common;
 using EFT;
+using Fika.Core.Main.Utils;
+using Fika.Core.Networking;
 using Nexus.BundleLoader;
 using SPT.Reflection.Patching;
 using UnityEngine;
@@ -38,6 +40,13 @@ public class GameStartedPatch : ModulePatch
 		VisceralEntry.Instance.deadPlayers.Clear();
 		GoreObjectPool.Instance?.ClearPool();
 		QuickLogger.Log(ELogType.Log, "GameStartedPatch: Cleaned deadPlayers, dismemberedPlayers, and GoreObjectPool for new raid.");
+
+		// Only the host (FikaServer) initiates the handshake; solo SPT also triggers immediately.
+		// Clients skip — they respond to the host's ping via VisceralEntry registered packets.
+		if (!FikaBackendUtils.IsClient)
+		{
+			VisceralEntry.Instance.StartVisceralHandshake();
+		}
 
 		if (VisceralEntry.Instance.BodyCollision.Value)
 		{
