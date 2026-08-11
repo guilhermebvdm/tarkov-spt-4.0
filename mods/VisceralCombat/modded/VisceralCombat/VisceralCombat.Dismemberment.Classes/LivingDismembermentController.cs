@@ -12,7 +12,7 @@ namespace VisceralCombat.Dismemberment.Classes;
 /// Controls living AI bots that survive a leg dismemberment:
 ///   1. Forces immediate prone pose (via BotLay.IsLay = true) and prevents all get-up / crouch attempts.
 ///   2. Emits heavy bleeding damage continually until exanguination death.
-///   3. Paints blood trails (Tarkov native deferred decals + VisceralCombat 3D blood pools) on the floor as the bot crawls.
+///   3. Attaches continuous blood spray (limbSquirter) with ParticleFloorPainter — physical droplets paint floor decals as the bot crawls.
 ///   4. Plays agony audio phrases periodically.
 ///   5. Strictly gated by VisceralEntry.AllPlayersHaveVisceralCombat (FIKA handshake).
 /// </summary>
@@ -21,7 +21,6 @@ public class LivingDismembermentController : MonoBehaviour
 	private Player _player;
 	private BotOwner _botOwner;
 	private EBodyPart _dismemberedLeg;
-	private Vector3 _lastBloodPos;
 	private float _nextBleedTick;
 	private float _nextVoiceTick;
 	private bool _isInitialized;
@@ -52,7 +51,6 @@ public class LivingDismembermentController : MonoBehaviour
 		_player = player;
 		_dismemberedLeg = leg;
 		_botOwner = player.AIData?.BotOwner;
-		_lastBloodPos = player.Transform.position;
 		_nextBleedTick = Time.time + 1.0f;
 		_nextVoiceTick = Time.time + 2.0f;
 		_isInitialized = true;
@@ -60,14 +58,11 @@ public class LivingDismembermentController : MonoBehaviour
 		// 1. Force Prone immediately
 		ForceProneLock();
 
-		// 2. Attach continuous arterial blood spray effect to coto
+		// 2. Attach continuous arterial blood spray effect (Visceral Abordagem A: ParticleFloorPainter)
 		AttachBloodSpray();
 
 		// 3. Initial agony voice
 		PlayAgonyVoice();
-
-		// 4. Spawn initial blood puddle at amputation site
-		EmitBloodDecal();
 
 		QuickLogger.Log(ELogType.Log, $"[LivingDismemberment] Controller initialized on bot '{player.Profile?.Nickname}' ({leg}).");
 	}
@@ -91,21 +86,61 @@ public class LivingDismembermentController : MonoBehaviour
 	{
 		try
 		{
-			if (VisceralEntry.Instance?.effectContainer?.heavyBleedEffect == null) return;
+			var container = VisceralEntry.Instance?.effectContainer;
+			if (container == null) return;
 
-			Transform parentBone = _player.PlayerBones?.Ribcage?.Original;
-			if (parentBone == null) parentBone = _player.Transform.Original;
+			GameObject prefabToUse = container.limbSquirter ?? container.heavyBleedEffect;
+			if (prefabToUse == null) return;
 
-			_bloodSprayInstance = Object.Instantiate(VisceralEntry.Instance.effectContainer.heavyBleedEffect, parentBone, false);
+			// Target bone for the amputated leg
+			string targetBoneName = (_dismemberedLeg == EBodyPart.LeftLeg) ? "lthigh1" : "rthigh1";
+			Transform targetBone = null;
+
+			if (_player.Transform?.Original != null)
+			{
+				foreach (Transform t in VisceralCombat.Ragdolls.Classes.Utils.EnumerateHierarchyCore(_player.Transform.Original))
+				{
+					if (t != null && t.name.ToLower().Contains(targetBoneName))
+					{
+						targetBone = t;
+						break;
+					}
+				}
+			}
+
+			if (targetBone == null) targetBone = _player.PlayerBones?.Ribcage?.Original ?? _player.Transform.Original;
+
+			_bloodSprayInstance = Object.Instantiate(prefabToUse, targetBone, false);
 			_bloodSprayInstance.transform.localPosition = Vector3.zero;
-			_bloodSprayInstance.transform.localRotation = Quaternion.identity;
+			_bloodSprayInstance.transform.localRotation = Quaternion.Euler(-90f, 0f, 0f);
 
-			// Dark coagulated blood styling (matching VisceralCombat aesthetics)
+			if (_bloodSprayInstance.GetComponent<ParticleFloorPainter>() == null)
+			{
+				_bloodSprayInstance.AddComponent<ParticleFloorPainter>();
+			}
+
 			ParticleSystem[] particleSystems = _bloodSprayInstance.GetComponentsInChildren<ParticleSystem>();
 			foreach (ParticleSystem ps in particleSystems)
 			{
+				if (ps == null) continue;
+
+				var main = ps.main;
+				main.loop = true; // Continuous spray while alive
+
+				var collision = ps.collision;
+				collision.enabled = true;
+				collision.sendCollisionMessages = true;
+
+				if (ps.gameObject.GetComponent<ParticleFloorPainter>() == null)
+				{
+					ps.gameObject.AddComponent<ParticleFloorPainter>();
+				}
+
 				RagdollHelperClass.ApplyDarkCoagulatedBloodFx(ps);
+				ps.Play();
 			}
+
+			QuickLogger.Log(ELogType.Log, $"[LivingDismemberment] Attached continuous blood spray with ParticleFloorPainter to '{targetBone.name}'.");
 		}
 		catch (System.Exception ex)
 		{
@@ -134,14 +169,7 @@ public class LivingDismembermentController : MonoBehaviour
 			ApplyHeavyBleedDamage();
 		}
 
-		// 3. Blood trail decals & 3D pools as bot crawls (every 0.5m moved)
-		if (Vector3.Distance(_player.Transform.position, _lastBloodPos) >= 0.5f)
-		{
-			_lastBloodPos = _player.Transform.position;
-			EmitBloodDecal();
-		}
-
-		// 4. Periodic agony voice (every 8-14s)
+		// 3. Periodic agony voice (every 8-14s)
 		if (Time.time >= _nextVoiceTick)
 		{
 			_nextVoiceTick = Time.time + Random.Range(8.0f, 14.0f);
@@ -157,63 +185,6 @@ public class LivingDismembermentController : MonoBehaviour
 			_player.ActiveHealthController.ApplyDamage(_dismemberedLeg, 15f, GClass3051.HeavyBleedingDamage);
 		}
 		catch { }
-	}
-
-	private void EmitBloodDecal()
-	{
-		try
-		{
-			Vector3 origin = _player.Transform.position + Vector3.up * 0.5f;
-			int layerMask = LayerMask.GetMask("Terrain", "HighPolyCollider", "LowPolyCollider", "Default");
-
-			if (Physics.Raycast(origin, Vector3.down, out RaycastHit hit, 3.0f, layerMask))
-			{
-				Vector3 normal = hit.normal.sqrMagnitude > 0.001f ? hit.normal : Vector3.up;
-
-				// A. Tarkov Native Deferred Decals (Ground Blood)
-				if (Singleton<Effects>.Instantiated && Singleton<Effects>.Instance != null)
-				{
-					Singleton<Effects>.Instance.EmitBleeding(hit.point, normal);
-					Singleton<Effects>.Instance.EmitBloodOnEnvironment(hit.point, normal);
-				}
-
-				// B. VisceralCombat 3D Blood FX Puddle Prefabs from blood3dFxEffects
-				var container = VisceralEntry.Instance?.effectContainer;
-				if (container != null && container.blood3dFxEffects != null && container.blood3dFxEffects.Count > 0 && GoreObjectPool.Instance != null)
-				{
-					int maxIndex = Mathf.Min(12, container.blood3dFxEffects.Count);
-					int randomIndex = Random.Range(0, maxIndex);
-					GameObject prefab = container.blood3dFxEffects[randomIndex];
-
-					if (prefab != null)
-					{
-						Quaternion rot = Quaternion.LookRotation(normal) * Quaternion.Euler(90f, Random.Range(0f, 360f), 0f);
-						GameObject spawned = GoreObjectPool.Instance.Spawn(prefab, hit.point + normal * 0.015f, rot);
-
-						if (spawned != null)
-						{
-							spawned.transform.localScale = Vector3.one * Random.Range(0.6f, 1.2f);
-
-							// Dark coagulated blood styling
-							ParticleSystem[] particleSystems = spawned.GetComponentsInChildren<ParticleSystem>();
-							foreach (ParticleSystem ps in particleSystems)
-							{
-								RagdollHelperClass.ApplyDarkCoagulatedBloodFx(ps);
-							}
-
-							// Recycle pool asset after 30 seconds
-							GoreObjectPool.Instance.Recycle(spawned, 30f);
-						}
-					}
-				}
-
-				QuickLogger.Log(ELogType.Log, $"[LivingDismemberment] Emitted blood trail puddle at {hit.point}");
-			}
-		}
-		catch (System.Exception ex)
-		{
-			QuickLogger.Log(ELogType.Error, $"[LivingDismemberment] EmitBloodDecal failed: {ex.Message}");
-		}
 	}
 
 	private void PlayAgonyVoice()
