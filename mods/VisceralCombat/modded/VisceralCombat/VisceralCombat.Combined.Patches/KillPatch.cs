@@ -185,7 +185,8 @@ public class KillPatch : ModulePatch
 
 	internal static void DismemberLimb(Player player, Vector3 Direction, EBodyPart bodyPartType, string bone, string capAssetName, string[] assetNames, out Transform[] affectedLimbs)
 	{
-		if (player != null && player.BodyAnimatorCommon != null)
+		bool isDeadPlayer = (player == null || player.HealthController == null || !player.HealthController.IsAlive);
+		if (isDeadPlayer && player != null && player.BodyAnimatorCommon != null)
 		{
 			player.BodyAnimatorCommon.enabled = false;
 		}
