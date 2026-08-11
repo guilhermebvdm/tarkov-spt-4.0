@@ -1,7 +1,7 @@
 ---
 title: Spec — Desmembramento de Perna em Bots Vivos (Prone, Agonia & Rastro de Sangue)
 date: 2026-08-10
-status: 🟡 Planejado
+status: 🔵 Investigado / Aguardando Implementação
 authors: [AI Assistant, USER]
 ---
 
@@ -21,40 +21,101 @@ Esta funcionalidade visa adicionar um nível extremo de imersão ao combate: per
 
 ### 2. Fluxo de Animação & Comportamento
 1. **Disparo & Amputação:** Ao receber um tiro de grosso calibre na perna e sobreviver, a perna é amputada via `KillPatch.DismemberLimb`.
-2. **Queda Instantânea em Prone:** O bot é imediatamente forçado para a postura de bruços (`Player.IsInPronePose = true` / transição imediata no Animator).
+2. **Queda Instantânea em Prone:** O bot é forçado para a postura de bruços via `botOwner.Mover.DoProne(true)` + `botOwner.Mover.SetPose(0f)`.
 3. **Execução da Agonia:** A animação de agonia de perna é iniciada no chão.
-4. **Bloqueio de Postura (Lock em Prone):** Interceptar e bloquear qualquer comando da IA de bot que tente levantar o personagem (*Stand* ou *Crouch*). O bot permanece preso no estado *Prone*.
+4. **Bloqueio de Postura (Lock em Prone):** Um `MonoBehaviour` customizado (`LivingDismembermentController`) intercepta a lógica de `BotLay.GetUp()` e `BotLay.CheckGetUp()` periodicamente para impedir o bot de se levantar.
 
 ### 3. Sangramento Arterial & Rastro de Sangue
 1. **Fluxo Contínuo de Sangue:** Iniciar um emissor de sangue contínuo no coto da perna amputada (`limbSquirter` / `ArterialSpray`).
-2. **Rastro de Poças no Chão (Bleed Trail):** Conforme o bot se move/rasteja em prone, instanciar decalques de poça de sangue em intervalos regulares na posição atual do bot, criando um rastro visível de sangue pelo chão.
-3. **Morte por Exsanguição:** Aplicar dano por sangramento contínuo na saúde do bot até o decesso definitivo por perda de sangue.
+2. **Rastro de Poças no Chão (Bleed Trail):** Conforme o bot rasteja em prone, instanciar decalques/poças de sangue em intervalos regulares (`GoreObjectPool`) na posição atual, criando um rastro visível.
+3. **Morte por Exsanguição:** Chamar `player.ActiveHealthController.ApplyDamage(legBodyPart, damagePerSec, GClass3051.HeavyBleedingDamage)` em intervalos via `GClass855.WaitSeconds` até a morte.
 
 ---
 
-## ⚙️ Especificação Técnica Detalhada (Arquitetura)
+## ⚙️ Especificação Técnica Detalhada — Resultado da Investigação
 
-### Componentes Envolvidos:
-- **`LimbKillPatch.cs` / `KillPatch.cs`:** Interceptação do dano na perna quando `player.HealthController.IsAlive == true`.
-- **`LivingDismembermentController` (Novo Componente C#):** `MonoBehaviour` anexado ao bot vivo amputado para gerenciar o loop de rastejamento, bloqueio de postura, decalques de rastro de sangue e sangramento por segundo.
-- **`GoreObjectPool`:** Reuso dos prefabs de sangue para manter alta performance de FPS durante o rastro no chão.
+### 2.1 Prone Forçado (Confirmado no Assembly EFT)
+
+A API de prone do bot existe e é direta via `BotOwner`:
+```csharp
+// EFT: BotMover.cs:L383-390
+botOwner.Mover.DoProne(true);   // força prone + para movimento
+botOwner.Mover.SetPose(0f);     // seta poseLevel = 0 (totalmente deitado)
+```
+O `BotLay.IsLay = true` é a abstração de alto nível que faz o mesmo — porém também registra eventos de rotação. Para nosso uso, chamar `DoProne` diretamente é mais seguro.
+
+**Bloqueio de GetUp:** `BotLay.GetUp()` e `BotLay.Damaged()` são as funções que levantam o bot. Para bloquear:
+- Sobrescrever `BotLay.NextPosibleGetUp = Time.time + 999f` em loop no `LivingDismembermentController.Update()`.
+- Ou fazer patch Harmony em `BotLay.GetUp` para retornar quando o bot estiver marcado como `VisceralLegDismembered`.
+
+### 2.2 Sangramento via HealthController (Confirmado no Assembly EFT)
+
+O sistema de dano por sangramento é nativo e seguro de chamar:
+```csharp
+// EFT: GClass3051.cs:L40-43 — HeavyBleedingDamage = EDamageType.HeavyBleeding
+player.ActiveHealthController.ApplyDamage(
+    EBodyPart.LeftLeg,
+    3f,                               // HP por tick (configurável)
+    GClass3051.HeavyBleedingDamage    // tipo: HeavyBleeding
+);
+```
+`GClass3051.HeavyBleedingDamage` é um `DamageInfoStruct` pronto com `EDamageType.HeavyBleeding`, sem necessidade de instanciar manualmente.
+
+### 2.3 Componentes Envolvidos
+- **`LimbKillPatch.cs`:** Detectar dano de perna em bot vivo → instanciar `LivingDismembermentController`.
+- **`LivingDismembermentController` (Novo `MonoBehaviour`):**
+  - `Start()`: chama `DoProne(true)` + `SetPose(0f)`, inicia ArterialSpray.
+  - `Update()`: mantém `NextPosibleGetUp` alto para impedir levantamento.
+  - Coroutine de `HeavyBleedingDamage` a cada N segundos.
+  - Coroutine de rastro de poças (`GoreObjectPool.Instance.Spawn`) a cada X metros.
+  - `OnDestroy()`: para o ArterialSpray e limpa decalques.
+- **`GoreObjectPool`:** Reuso dos prefabs para manter FPS estável durante o rastro.
 
 ---
 
-## 🌐 Compatibilidade FIKA (Multiplayer Coop) — A Investigar
+## 🌐 Compatibilidade FIKA (Multiplayer Coop) — Investigado ✅
 
 > [!IMPORTANT]
-> Esta seção deve ser investigada e spec-tecada antes da implementação desta feature.
+> **RESULTADO DA INVESTIGAÇÃO:** A solução via FIKA-Server é **100% VIÁVEL** com uma mod de servidor SPT simples. **Não é necessário criar um packet FIKA customizado.**
 
-**Problema identificado:** Em sessões FIKA (coop), se um convidado não tiver o mod Visceral Combat instalado, ele verá o bot **rastejando com as duas pernas intactas visualmente**, sem animação de desmembramento — comportamento imersivamente inconsistente e perturbador.
+### Mecanismo Nativo Existente: `FikaServer/ClientService.cs`
 
-**Proposta de Solução (a validar):** O host da partida verifica, via FIKA, se todos os clientes convidados têm o plugin Visceral Combat carregado antes de habilitar a feature de desmembramento vivo. Se algum convidado não tiver o mod, a feature fica desligada na sessão.
+O FIKA já possui um sistema completo de verificação de mods obrigatórios entre host e clientes:
 
-**Pontos a Investigar:**
-- Mecanismo FIKA de listagem de plugins carregados por cliente: verificar se `Fika.Core` expõe alguma API de handshake ou troca de capacidades entre host/clients (ex: `FikaPlugin`, `IFikaPlugin`, `FikaBackendUtils`).
-- Se a API não existir nativamente: avaliar envio de uma packet customizada FIKA (Fika Network Packets via Nakama/NPM) com flag `HasVisceralCombat: bool` no momento do join de raid.
-- Referências a examinar: `references/fika-plugin/Fika.Core/` (API coop) e `references/fika-server/` (servidor Nakama).
-- Questão de autoridade: definir se a verificação roda no **host** (único) ou em todos os clientes simultaneamente.
+```csharp
+// fika-server/FikaServer/Services/ClientService.cs:L15
+private readonly List<string> _requiredMods = ["com.fika.core", "com.SPT.custom", ...];
+
+// Config: fika-server/FikaServer/Models/Fika/Config/FikaConfigClient.cs
+// "Mods.Required" → Lista de GUIDs obrigatórios configurável
+```
+
+**Fluxo de verificação:**
+1. No boot, cada cliente FIKA envia todos os seus plugins carregados (GUID + CRC32 hash) via `POST /fika/client/check/mods`.
+2. O servidor FIKA verifica se os `_requiredMods` estão presentes. Se ausentes → `MissingRequired` → cliente é expulso.
+3. A lista `_requiredMods` é configurável via `FikaConfigClient.Mods.Required` no `Fika.jsonc` do servidor.
+
+### Solução para VisceralCombat
+
+**Abordagem A — Zero código extra (via configuração):**
+O host adiciona `"com.nexus.visceralcombat"` (GUID do plugin) na lista `Client.Mods.Required` do arquivo `Fika.jsonc`. Clientes sem o mod são impedidos de joinar.
+
+**Abordagem B — Mod de Servidor SPT (recomendada, mais elegante):**
+Criar um mod servidor TypeScript mínimo que, no `postDBLoad`, adiciona programaticamente o GUID do VisceralCombat à lista `_requiredMods` do FIKA. Assim o host nunca precisa editar configs manualmente.
+
+```typescript
+// Exemplo conceitual de mod server SPT (src/mod.ts)
+class VisceralCombatServerMod implements IPreSptLoadMod {
+    public preSptLoad(container: DependencyContainer): void {
+        // Adiciona VisceralCombat como mod obrigatório no FIKA
+        const clientService = container.resolve<ClientService>("ClientService");
+        clientService.addRequiredMod("com.nexus.visceralcombat");
+    }
+}
+```
+
+> [!NOTE]
+> A Abordagem B requer investigar se `ClientService` do FIKA expõe um método público `addRequiredMod()` ou se é necessário acessar `_requiredMods` via reflection. Se não exposto, Abordagem A (configuração manual) é suficiente para a primeira versão.
 
 ---
 
@@ -62,6 +123,6 @@ Esta funcionalidade visa adicionar um nível extremo de imersão ao combate: per
 1. Bot atingido por calibre pesado na perna perde o membro e cai instantaneamente em prone.
 2. Bot não consegue se colocar em pé ou agachado sob nenhuma circunstância.
 3. Rastro de sangue visível se forma no chão ao longo do trajeto de rastejamento do bot.
-4. Bot morre naturalmente por sangramento após o tempo configurado.
-5. **Em sessão FIKA:** feature ativa APENAS se todos os convidados tiverem o mod instalado (ou fallback gracioso).
+4. Bot morre naturalmente por `HeavyBleeding` após o tempo configurado.
+5. **Em sessão FIKA:** feature ativa APENAS se todos os jogadores tiverem o mod — garantido via `Mods.Required` no FIKA server (Abordagem A) ou mod SPT server (Abordagem B).
 6. Zero erros de console e sem vazamento de RAM ao descarregar a raid.

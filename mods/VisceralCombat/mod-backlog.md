@@ -6,4 +6,4 @@
 
 | ID | Título | Status | Data Criação | Pasta |
 | :--- | :--- | :--- | :--- | :--- |
-| `001` | Desmembramento de Perna em Bots Vivos (Forçar Prone, Rastro de Sangue & Agonia) | 🟡 Planejado | 2026-08-10 | [`backlog/001-alive-leg-dismemberment/`](backlog/001-alive-leg-dismemberment/) |
+| `001` | Desmembramento de Perna em Bots Vivos (Forçar Prone, Rastro de Sangue & Agonia) | 🔵 Investigado — Pronto para Implementar | 2026-08-10 | [`backlog/001-alive-leg-dismemberment/`](backlog/001-alive-leg-dismemberment/) |
