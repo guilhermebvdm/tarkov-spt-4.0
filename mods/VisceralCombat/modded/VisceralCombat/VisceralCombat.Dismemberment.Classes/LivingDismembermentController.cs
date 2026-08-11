@@ -1,18 +1,17 @@
-using System.Collections;
 using EFT;
 using EFT.HealthSystem;
 using Systems.Effects;
 using Comfort.Common;
 using UnityEngine;
-using VisceralCombat.Ragdolls.Classes;
 
 namespace VisceralCombat.Dismemberment.Classes;
 
 /// <summary>
 /// Controls living AI bots that survive a leg dismemberment:
-///   1. Forces immediate prone pose (via BotLay.IsLay = true) and prevents all get-up / crouch attempts.
-///   2. Emits heavy bleeding damage continually until exanguination death.
-///   3. Attaches continuous blood spray (limbSquirter) with ParticleFloorPainter — physical droplets paint floor decals as the bot crawls.
+///   1. Forces immediate prone pose (BotLay.IsLay = true) and prevents all get-up attempts.
+///   2. Emits heavy bleeding damage continually until exsanguination death.
+///   3. Creates blood decals on the floor via vanilla-identical Raycast (player.Position -> Vector3.down)
+///      — no ParticleSystem parented to any bone, so LookRotation warnings are impossible.
 ///   4. Plays agony audio phrases periodically.
 ///   5. Strictly gated by VisceralEntry.AllPlayersHaveVisceralCombat (FIKA handshake).
 /// </summary>
@@ -21,11 +20,18 @@ public class LivingDismembermentController : MonoBehaviour
 	private Player _player;
 	private BotOwner _botOwner;
 	private EBodyPart _dismemberedLeg;
+
 	private float _nextBleedTick;
 	private float _nextVoiceTick;
+	private float _nextDecalTick;
+
 	private bool _isInitialized;
-	private GameObject _bloodSprayInstance;
-	private Transform _targetBone;
+
+	// Vanilla-identical blood decal interval (0.5s — tighter than vanilla 1-3s for a crawling trail feel)
+	private const float DecalInterval = 0.5f;
+
+	// Vanilla bleeding: max Raycast distance downward from player.Position
+	private static int? _cachedEnvMask;
 
 	public static LivingDismembermentController Attach(Player player, EBodyPart leg)
 	{
@@ -39,6 +45,7 @@ public class LivingDismembermentController : MonoBehaviour
 			return null;
 		}
 
+		// One controller per bot
 		var existing = player.gameObject.GetComponent<LivingDismembermentController>();
 		if (existing != null) return existing;
 
@@ -52,17 +59,16 @@ public class LivingDismembermentController : MonoBehaviour
 		_player = player;
 		_dismemberedLeg = leg;
 		_botOwner = player.AIData?.BotOwner;
+
 		_nextBleedTick = Time.time + 1.0f;
 		_nextVoiceTick = Time.time + 2.0f;
+		_nextDecalTick = Time.time + DecalInterval;
 		_isInitialized = true;
 
 		// 1. Force Prone immediately
 		ForceProneLock();
 
-		// 2. Attach continuous arterial blood spray effect (Visceral Abordagem A: ParticleFloorPainter)
-		AttachBloodSpray();
-
-		// 3. Initial agony voice
+		// 2. Initial agony voice
 		PlayAgonyVoice();
 
 		QuickLogger.Log(ELogType.Log, $"[LivingDismemberment] Controller initialized on bot '{player.Profile?.Nickname}' ({leg}).");
@@ -70,83 +76,40 @@ public class LivingDismembermentController : MonoBehaviour
 
 	private void ForceProneLock()
 	{
-		if (_botOwner != null && _botOwner.BotLay != null)
-		{
-			// Prevent GetUp by pushing NextPosibleGetUp into the far future
-			_botOwner.BotLay.NextPosibleGetUp = Time.time + 99999f;
+		if (_botOwner?.BotLay == null) return;
 
-			// Only trigger IsLay = true if bot is not already in prone
-			if (!_botOwner.BotLay.IsLay)
-			{
-				_botOwner.BotLay.IsLay = true;
-			}
-		}
+		// Push NextPossibleGetUp very far into the future so the bot never stands up
+		_botOwner.BotLay.NextPosibleGetUp = Time.time + 99999f;
+
+		if (!_botOwner.BotLay.IsLay)
+			_botOwner.BotLay.IsLay = true;
 	}
 
-	private void AttachBloodSpray()
+	/// <summary>
+	/// Emits a blood decal on the floor using the exact same method as vanilla EffectsCommutator:
+	/// Raycast from player.Position straight down, then call EmitBleeding at the hit point.
+	/// No ParticleSystem, no bone attachment, no LookRotation warnings.
+	/// </summary>
+	private void EmitFloorBloodDecal()
 	{
-		try
+		if (Singleton<Effects>.Instance == null) return;
+
+		// Cache env mask once — same mask used by EffectsCommutator.UpdatePlayersBleedings()
+		if (!_cachedEnvMask.HasValue)
 		{
-			var container = VisceralEntry.Instance?.effectContainer;
-			if (container == null) return;
-
-			GameObject prefabToUse = container.limbSquirter ?? container.heavyBleedEffect;
-			if (prefabToUse == null) return;
-
-			// Target bone for the amputated leg
-			string targetBoneName = (_dismemberedLeg == EBodyPart.LeftLeg) ? "lthigh1" : "rthigh1";
-			_targetBone = null;
-
-			if (_player.Transform?.Original != null)
-			{
-				foreach (Transform t in VisceralCombat.Ragdolls.Classes.Utils.EnumerateHierarchyCore(_player.Transform.Original))
-				{
-					if (t != null && t.name.ToLower().Contains(targetBoneName))
-					{
-						_targetBone = t;
-						break;
-					}
-				}
-			}
-
-			// Parent to root transform (scale 1.0, 1.0, 1.0) so particle velocity/scale is never 0.0001f
-			Transform parentTransform = _player.Transform?.Original ?? _player.gameObject.transform;
-
-			_bloodSprayInstance = Object.Instantiate(prefabToUse, parentTransform, false);
-			_bloodSprayInstance.transform.position = _targetBone != null ? _targetBone.position : parentTransform.position;
-			_bloodSprayInstance.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
-			_bloodSprayInstance.transform.localScale = Vector3.one;
-
-			var painter = _bloodSprayInstance.GetComponent<ParticleFloorPainter>() ?? _bloodSprayInstance.AddComponent<ParticleFloorPainter>();
-			painter.CooldownSeconds = 1.0f; // 1 blood decal per second max
-
-			ParticleSystem[] particleSystems = _bloodSprayInstance.GetComponentsInChildren<ParticleSystem>();
-			foreach (ParticleSystem ps in particleSystems)
-			{
-				if (ps == null) continue;
-
-				var main = ps.main;
-				main.loop = true; // Continuous spray while alive
-
-				var emission = ps.emission;
-				emission.rateOverTime = 3f; // Moderate, clean squirt rate
-
-				var collision = ps.collision;
-				collision.enabled = true;
-				collision.sendCollisionMessages = true;
-
-				var childPainter = ps.gameObject.GetComponent<ParticleFloorPainter>() ?? ps.gameObject.AddComponent<ParticleFloorPainter>();
-				childPainter.CooldownSeconds = 1.0f; // 1 blood decal per second max
-
-				RagdollHelperClass.ApplyDarkCoagulatedBloodFx(ps);
-				ps.Play();
-			}
-
-			QuickLogger.Log(ELogType.Log, $"[LivingDismemberment] Attached continuous blood spray with 1s decal cooldown to '{(_targetBone != null ? _targetBone.name : parentTransform.name)}'.");
+			_cachedEnvMask = EFTHardSettings.Instance != null
+				? (int)EFTHardSettings.Instance.ENVIRONMENT_HIT_MASK
+				: ~(LayerMask.GetMask("Player", "HitCollider", "Deadbody"));
 		}
-		catch (System.Exception ex)
+
+		Vector3 origin = _player.Position;
+		float maxDist = EFTHardSettings.Instance != null
+			? EFTHardSettings.Instance.DRAW_BLEEDING_MAX_DISTANCE
+			: 10f;
+
+		if (Physics.Raycast(origin, Vector3.down, out var hit, maxDist, _cachedEnvMask.Value))
 		{
-			QuickLogger.Log(ELogType.Error, $"[LivingDismemberment] AttachBloodSpray failed: {ex.Message}");
+			Singleton<Effects>.Instance.EmitBleeding(hit.point, hit.normal);
 		}
 	}
 
@@ -154,23 +117,24 @@ public class LivingDismembermentController : MonoBehaviour
 	{
 		if (!_isInitialized || _player == null) return;
 
-		// Self-destruct if bot dies
+		// Self-destruct when bot dies
 		if (_player.HealthController == null || !_player.HealthController.IsAlive)
 		{
 			Destroy(this);
 			return;
 		}
 
-		// 1. Re-assert Prone Lock every frame
+		// 1. Re-assert prone lock every frame
 		ForceProneLock();
 
-		// 2. Keep blood spray positioned at leg coto without inheriting 0.0001 scale
-		if (_bloodSprayInstance != null && _targetBone != null)
+		// 2. Blood decal on floor — vanilla Raycast method (0.5s cadence → crawling trail)
+		if (Time.time >= _nextDecalTick)
 		{
-			_bloodSprayInstance.transform.position = _targetBone.position;
+			_nextDecalTick = Time.time + DecalInterval;
+			EmitFloorBloodDecal();
 		}
 
-		// 3. Heavy Bleed damage loop (15 HP every 2.5s) — irremediable
+		// 3. Heavy bleed damage tick (15 HP every 2.5s — irremediable, bleeds to death)
 		if (Time.time >= _nextBleedTick)
 		{
 			_nextBleedTick = Time.time + 2.5f;
@@ -200,9 +164,7 @@ public class LivingDismembermentController : MonoBehaviour
 		try
 		{
 			if (_player?.Speaker != null && _player.HealthController != null && _player.HealthController.IsAlive)
-			{
 				_player.Speaker.Play(EPhraseTrigger.OnAgony, ETagStatus.Dying, true);
-			}
 		}
 		catch { }
 	}
@@ -210,10 +172,5 @@ public class LivingDismembermentController : MonoBehaviour
 	private void OnDestroy()
 	{
 		_isInitialized = false;
-		if (_bloodSprayInstance != null)
-		{
-			Destroy(_bloodSprayInstance);
-			_bloodSprayInstance = null;
-		}
 	}
 }
