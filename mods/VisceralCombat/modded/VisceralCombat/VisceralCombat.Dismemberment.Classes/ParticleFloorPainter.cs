@@ -17,6 +17,10 @@ public class ParticleFloorPainter : MonoBehaviour
 	private static int _hitColliderLayer = -1;
 	private static int _deadbodyLayer = -1;
 
+	// Cooldown to limit blood decal generation to ~1x per second per particle system
+	private float _nextAllowedEmitTime;
+	public float CooldownSeconds = 1.0f;
+
 	private void Start()
 	{
 		ps = GetComponent<ParticleSystem>();
@@ -31,17 +35,20 @@ public class ParticleFloorPainter : MonoBehaviour
 	private void OnParticleCollision(GameObject collidedObject)
 	{
 		if (collidedObject == null || Singleton<Effects>.Instance == null) return;
+		if (Time.time < _nextAllowedEmitTime) return; // Limit decal creation rate
 
 		int layer = collidedObject.layer;
 		if (layer == _playerLayer || layer == _hitColliderLayer || layer == _deadbodyLayer) return;
 
 		SharedCollisionEvents.Clear();
 		ParticlePhysicsExtensions.GetCollisionEvents(ps, collidedObject, SharedCollisionEvents);
-		for (int i = 0; i < SharedCollisionEvents.Count; i++)
+		if (SharedCollisionEvents.Count > 0)
 		{
-			ParticleCollisionEvent ev = SharedCollisionEvents[i];
+			ParticleCollisionEvent ev = SharedCollisionEvents[0];
 			Vector3 normal = ev.normal;
 			if (normal.sqrMagnitude < 0.001f) normal = Vector3.up;
+
+			_nextAllowedEmitTime = Time.time + CooldownSeconds;
 			Singleton<Effects>.Instance.EmitBleeding(ev.intersection, normal);
 		}
 	}

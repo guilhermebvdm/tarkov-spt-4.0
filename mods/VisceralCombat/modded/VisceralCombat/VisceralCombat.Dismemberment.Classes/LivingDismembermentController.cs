@@ -25,6 +25,7 @@ public class LivingDismembermentController : MonoBehaviour
 	private float _nextVoiceTick;
 	private bool _isInitialized;
 	private GameObject _bloodSprayInstance;
+	private Transform _targetBone;
 
 	public static LivingDismembermentController Attach(Player player, EBodyPart leg)
 	{
@@ -94,7 +95,7 @@ public class LivingDismembermentController : MonoBehaviour
 
 			// Target bone for the amputated leg
 			string targetBoneName = (_dismemberedLeg == EBodyPart.LeftLeg) ? "lthigh1" : "rthigh1";
-			Transform targetBone = null;
+			_targetBone = null;
 
 			if (_player.Transform?.Original != null)
 			{
@@ -102,22 +103,22 @@ public class LivingDismembermentController : MonoBehaviour
 				{
 					if (t != null && t.name.ToLower().Contains(targetBoneName))
 					{
-						targetBone = t;
+						_targetBone = t;
 						break;
 					}
 				}
 			}
 
-			if (targetBone == null) targetBone = _player.PlayerBones?.Ribcage?.Original ?? _player.Transform.Original;
+			// Parent to root transform (scale 1.0, 1.0, 1.0) so particle velocity/scale is never 0.0001f
+			Transform parentTransform = _player.Transform?.Original ?? _player.gameObject.transform;
 
-			_bloodSprayInstance = Object.Instantiate(prefabToUse, targetBone, false);
-			_bloodSprayInstance.transform.localPosition = Vector3.zero;
-			_bloodSprayInstance.transform.localRotation = Quaternion.Euler(-90f, 0f, 0f);
+			_bloodSprayInstance = Object.Instantiate(prefabToUse, parentTransform, false);
+			_bloodSprayInstance.transform.position = _targetBone != null ? _targetBone.position : parentTransform.position;
+			_bloodSprayInstance.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
+			_bloodSprayInstance.transform.localScale = Vector3.one;
 
-			if (_bloodSprayInstance.GetComponent<ParticleFloorPainter>() == null)
-			{
-				_bloodSprayInstance.AddComponent<ParticleFloorPainter>();
-			}
+			var painter = _bloodSprayInstance.GetComponent<ParticleFloorPainter>() ?? _bloodSprayInstance.AddComponent<ParticleFloorPainter>();
+			painter.CooldownSeconds = 1.0f; // 1 blood decal per second max
 
 			ParticleSystem[] particleSystems = _bloodSprayInstance.GetComponentsInChildren<ParticleSystem>();
 			foreach (ParticleSystem ps in particleSystems)
@@ -127,20 +128,21 @@ public class LivingDismembermentController : MonoBehaviour
 				var main = ps.main;
 				main.loop = true; // Continuous spray while alive
 
+				var emission = ps.emission;
+				emission.rateOverTime = 3f; // Moderate, clean squirt rate
+
 				var collision = ps.collision;
 				collision.enabled = true;
 				collision.sendCollisionMessages = true;
 
-				if (ps.gameObject.GetComponent<ParticleFloorPainter>() == null)
-				{
-					ps.gameObject.AddComponent<ParticleFloorPainter>();
-				}
+				var childPainter = ps.gameObject.GetComponent<ParticleFloorPainter>() ?? ps.gameObject.AddComponent<ParticleFloorPainter>();
+				childPainter.CooldownSeconds = 1.0f; // 1 blood decal per second max
 
 				RagdollHelperClass.ApplyDarkCoagulatedBloodFx(ps);
 				ps.Play();
 			}
 
-			QuickLogger.Log(ELogType.Log, $"[LivingDismemberment] Attached continuous blood spray with ParticleFloorPainter to '{targetBone.name}'.");
+			QuickLogger.Log(ELogType.Log, $"[LivingDismemberment] Attached continuous blood spray with 1s decal cooldown to '{(_targetBone != null ? _targetBone.name : parentTransform.name)}'.");
 		}
 		catch (System.Exception ex)
 		{
@@ -162,14 +164,20 @@ public class LivingDismembermentController : MonoBehaviour
 		// 1. Re-assert Prone Lock every frame
 		ForceProneLock();
 
-		// 2. Heavy Bleed damage loop (15 HP every 2.5s) — irremediable
+		// 2. Keep blood spray positioned at leg coto without inheriting 0.0001 scale
+		if (_bloodSprayInstance != null && _targetBone != null)
+		{
+			_bloodSprayInstance.transform.position = _targetBone.position;
+		}
+
+		// 3. Heavy Bleed damage loop (15 HP every 2.5s) — irremediable
 		if (Time.time >= _nextBleedTick)
 		{
 			_nextBleedTick = Time.time + 2.5f;
 			ApplyHeavyBleedDamage();
 		}
 
-		// 3. Periodic agony voice (every 8-14s)
+		// 4. Periodic agony voice (every 8-14s)
 		if (Time.time >= _nextVoiceTick)
 		{
 			_nextVoiceTick = Time.time + Random.Range(8.0f, 14.0f);
