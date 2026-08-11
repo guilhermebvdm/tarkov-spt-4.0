@@ -46,18 +46,22 @@ graph TD
 | **Prone forçado no bot** | ✅ API nativa existe | `BotMover.DoProne(true)` + `SetPose(0f)` — `BotMover.cs:L383-390` |
 | **Bloqueio de GetUp** | ✅ Viável | Sobrescrever `BotLay.NextPosibleGetUp = Time.time + 999f` em loop no `LivingDismembermentController` |
 | **Sangramento (exsanguição)** | ✅ API nativa | `player.ActiveHealthController.ApplyDamage(leg, dmg, GClass3051.HeavyBleedingDamage)` — `GClass3051.cs:L40` |
-| **FIKA: detecção de mod** | ✅ Mecanismo nativo existe | `ClientService._requiredMods` + `/fika/client/check/mods` — `ClientService.cs:L15-130` |
-| **Mod de Servidor SPT** | ✅ Opcional (Abordagem A não precisa) | Config `Fika.jsonc` → `Client.Mods.Required: ["com.nexus.visceralcombat"]` |
+| **FIKA: detecção de mod** | ✅ **Implementado** | `VisceralHandshakePacket` + `AllPlayersHaveVisceralCombat` — handshake in-raid |
+| **Mod de Servidor SPT** | ✅ Não necessário | Handshake C# puro; zero dependência de config extra |
 
-**Componentes a criar:**
-- `LivingDismembermentController.cs` — `MonoBehaviour` com prone lock, bleed trail e exsanguição.
-- Ponto de entrada em `LimbKillPatch.cs` para detectar bot vivo + perna amputada.
-- *(Opcional)* Mod servidor SPT mínimo para adicionar GUID como `requiredMod` automaticamente no FIKA.
+**Componentes implementados / a criar:**
+- ✅ `VisceralHandshakePacket.cs` — packet bidirecional host↔cliente para verificar presença do mod em raid FIKA.
+- ✅ `VisceralEntry.AllPlayersHaveVisceralCombat` — flag global gating da feature; solo SPT = sempre `true`.
+- ✅ `GameStartedPatch` chama `StartVisceralHandshake()` no início de cada raid (host/solo only).
+- 🔲 `LivingDismembermentController.cs` — `MonoBehaviour` com prone lock, bleed trail e exsanguição (próxima etapa).
+- 🔲 Ponto de entrada em `LimbKillPatch.cs` para detectar bot vivo + perna + `AllPlayersHaveVisceralCombat`.
 
-**⚠️ Pré-requisito FIKA:**
-Em sessões coop, convidados sem o mod veriam o bot rastejando com pernas intactas. Solução confirmada:
-- **Abordagem A (simples):** host adiciona `"com.nexus.visceralcombat"` em `Fika.jsonc` → `Client.Mods.Required`.
-- **Abordagem B (elegante):** mod servidor SPT TypeScript que adiciona o GUID programaticamente no `preSptLoad`.
+**✅ Garantia FIKA implementada (handshake nativo):**
+- **Solo SPT:** flag `true` imediatamente — sem overhead.
+- **FIKA host:** broadcast `VisceralHandshakePacket (IsRequest=true)` para todos ao iniciar raid.
+- **FIKA client com mod:** responde ACK automaticamente com seu `NetId`.
+- **Após 5 s:** host compara ACKs vs `CoopHandler.AmountOfHumans - 1`. Se `ACKs == esperado` → feature ON; senão → feature OFF para toda a sessão.
+- **Cliente sem mod:** não registra o packet → não responde → contagem falha → **feature bloqueada** para todos, sem crash.
 
 **Backlog:** [`backlog/001-alive-leg-dismemberment/001-alive-leg-dismemberment-01-spec.md`](../backlog/001-alive-leg-dismemberment/001-alive-leg-dismemberment-01-spec.md)
 
