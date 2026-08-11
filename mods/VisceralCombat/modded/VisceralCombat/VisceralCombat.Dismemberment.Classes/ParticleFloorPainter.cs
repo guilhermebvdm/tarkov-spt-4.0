@@ -17,9 +17,9 @@ public class ParticleFloorPainter : MonoBehaviour
 	private static int _hitColliderLayer = -1;
 	private static int _deadbodyLayer = -1;
 
-	// Cooldown to limit blood decal generation to ~1x per second per particle system
+	// Cooldown to limit blood decal generation to ~1x per 0.5s per particle system
 	private float _nextAllowedEmitTime;
-	public float CooldownSeconds = 1.0f;
+	public float CooldownSeconds = 0.5f;
 
 	private void Start()
 	{

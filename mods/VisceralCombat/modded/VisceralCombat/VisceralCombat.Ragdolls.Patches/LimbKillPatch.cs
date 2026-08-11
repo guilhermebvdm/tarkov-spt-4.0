@@ -206,6 +206,12 @@ public class LimbKillPatch : ModulePatch
 
 		if (!dismemberPart.HasValue || boneName == null) return;
 
+		// Living bots/players can ONLY lose LEGS (LeftLeg=5 or RightLeg=6). Arms and Head are strictly dead-only!
+		if (!isDead && dismemberPart.Value != (EBodyPart)5 && dismemberPart.Value != (EBodyPart)6)
+		{
+			return;
+		}
+
 		// --- Caliber-based dismemberment chance (same table as KillPatch) ---
 		float chance = 0.5f;
 		if (shot.Ammo is AmmoItemClass ammo && !string.IsNullOrEmpty(ammo.Caliber))

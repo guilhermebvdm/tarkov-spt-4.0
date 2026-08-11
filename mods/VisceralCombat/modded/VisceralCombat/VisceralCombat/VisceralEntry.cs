@@ -167,6 +167,14 @@ public class VisceralEntry : BaseUnityPlugin
 		Instance = this;
 		LogSource = Logger;
 
+		Application.logMessageReceived += (condition, stackTrace, type) =>
+		{
+			if (!string.IsNullOrEmpty(condition) && condition.Contains("Look rotation viewing vector is zero"))
+			{
+				QuickLogger.Log(ELogType.Error, $"[SPY-LOOKROT] Unity Warning Captured: '{condition}'\nStack Trace:\n{stackTrace}");
+			}
+		};
+
 		EnableDismemberment = ((BaseUnityPlugin)this).Config.Bind<bool>("Dismemberment", "Dismemberment Enabled", true, new ConfigDescription("Disables literally EVERYTHING for dismemberment.", (AcceptableValueBase)null, new object[1]
 		{
 			new ConfigurationManagerAttributes
