@@ -549,7 +549,7 @@ public class KillPatch : ModulePatch
 
 		GameObject bloodParticleObject = Object.Instantiate<GameObject>(VisceralEntry.Instance.effectContainer.limbSquirter);
 		bloodParticleObject.AddComponent<ParticleFloorPainter>();
-		if (((Component)target).transform.localScale == Vector3.zero)
+		if (((Component)target).transform.localScale.x <= 0.01f)
 		{
 			bloodParticleObject.transform.parent = ((Component)target).transform.parent;
 		}
@@ -557,8 +557,8 @@ public class KillPatch : ModulePatch
 		{
 			bloodParticleObject.transform.parent = ((Component)target).transform;
 		}
-		bloodParticleObject.transform.localPosition = new Vector3(0f, 0f, 0f);
-		bloodParticleObject.transform.localRotation = new Quaternion(-0.0923f, 0.7011f, -0.0923f, -0.7011f);
+		bloodParticleObject.transform.position = ((Component)target).transform.position;
+		bloodParticleObject.transform.rotation = Quaternion.Euler(-90f, 0f, 0f);
 		ParticleSystem[] componentsInChildren = bloodParticleObject.GetComponentsInChildren<ParticleSystem>();
 		float num = Random.Range(VisceralEntry.Instance.ArterySprayMin.Value, VisceralEntry.Instance.ArterySprayMax.Value);
 		ParticleSystem[] array = componentsInChildren;
