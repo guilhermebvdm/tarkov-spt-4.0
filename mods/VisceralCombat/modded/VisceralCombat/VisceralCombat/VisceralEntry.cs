@@ -167,38 +167,6 @@ public class VisceralEntry : BaseUnityPlugin
 		Instance = this;
 		LogSource = Logger;
 
-		Application.logMessageReceived += (condition, stackTrace, type) =>
-		{
-			if (!string.IsNullOrEmpty(condition) && condition.Contains("Look rotation viewing vector is zero"))
-			{
-				QuickLogger.Log(ELogType.Error, $"[SPY-LOOKROT] Unity Warning Captured: '{condition}'");
-				try
-				{
-					ParticleSystem[] allPs = UnityEngine.Object.FindObjectsOfType<ParticleSystem>();
-					int suspectCount = 0;
-					foreach (ParticleSystem ps in allPs)
-					{
-						if (ps == null || !ps.isPlaying) continue;
-
-						Vector3 lScale = ps.transform.lossyScale;
-						Vector3 locScale = ps.transform.localScale;
-						string pName = ps.transform.parent != null ? ps.transform.parent.name : "null";
-
-						if (lScale.magnitude < 0.01f || locScale.magnitude < 0.01f || ps.transform.forward.sqrMagnitude < 0.001f)
-						{
-							suspectCount++;
-							QuickLogger.Log(ELogType.Error, $"[SPY-LOOKROT-SUSPECT #{suspectCount}] PS: '{ps.name}', GO: '{ps.gameObject.name}', Parent: '{pName}', lossyScale: {lScale}, localScale: {locScale}");
-						}
-					}
-					if (suspectCount == 0)
-					{
-						QuickLogger.Log(ELogType.Warn, $"[SPY-LOOKROT] Scan finished: No active ParticleSystem found with scale < 0.01f. Warning may come from character transforms, ragdoll joints, or camera/animator solvers.");
-					}
-				}
-				catch { }
-			}
-		};
-
 		EnableDismemberment = ((BaseUnityPlugin)this).Config.Bind<bool>("Dismemberment", "Dismemberment Enabled", true, new ConfigDescription("Disables literally EVERYTHING for dismemberment.", (AcceptableValueBase)null, new object[1]
 		{
 			new ConfigurationManagerAttributes

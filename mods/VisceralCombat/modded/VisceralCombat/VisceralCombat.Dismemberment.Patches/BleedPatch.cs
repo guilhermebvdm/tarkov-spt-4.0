@@ -146,7 +146,15 @@ public class BleedPatch : ModulePatch
 		{
 			GameObject bloodParticleObject = Object.Instantiate<GameObject>(val);
 			bloodParticleObject.AddComponent<ParticleFloorPainter>();
-			bloodParticleObject.transform.SetParent(col.transform, false);
+			if (col.transform.localScale.x <= 0.01f && col.transform.parent != null)
+			{
+				bloodParticleObject.transform.SetParent(col.transform.parent, false);
+				bloodParticleObject.transform.position = col.transform.position;
+			}
+			else
+			{
+				bloodParticleObject.transform.SetParent(col.transform, false);
+			}
 			Vector3 hitNorm1 = -shot.HitNormal;
 			if (hitNorm1.sqrMagnitude < 0.001f) hitNorm1 = Vector3.forward;
 			bloodParticleObject.transform.localRotation = Quaternion.LookRotation(hitNorm1);
@@ -194,7 +202,15 @@ public class BleedPatch : ModulePatch
 		{
 			GameObject bloodParticleObject = Object.Instantiate<GameObject>(val);
 			bloodParticleObject.AddComponent<ParticleFloorPainter>();
-			bloodParticleObject.transform.SetParent(col.transform, false);
+			if (col.transform.localScale.x <= 0.01f && col.transform.parent != null)
+			{
+				bloodParticleObject.transform.SetParent(col.transform.parent, false);
+				bloodParticleObject.transform.position = col.transform.position;
+			}
+			else
+			{
+				bloodParticleObject.transform.SetParent(col.transform, false);
+			}
 			Vector3 hitNorm2 = -shot.HitNormal;
 			if (hitNorm2.sqrMagnitude < 0.001f) hitNorm2 = Vector3.forward;
 			bloodParticleObject.transform.localRotation = Quaternion.LookRotation(hitNorm2);

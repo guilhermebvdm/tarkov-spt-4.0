@@ -233,6 +233,20 @@ public class KillPatch : ModulePatch
 			{
 				if (tBranch != null)
 				{
+					// Unparent any attached blood particle systems so they aren't crushed by 0.0001f scale
+					ParticleSystem[] existingPs = tBranch.GetComponentsInChildren<ParticleSystem>(true);
+					foreach (ParticleSystem ps in existingPs)
+					{
+						if (ps != null && ps.transform.parent == tBranch && tBranch.parent != null)
+						{
+							Vector3 worldPos = ps.transform.position;
+							Quaternion worldRot = ps.transform.rotation;
+							ps.transform.SetParent(tBranch.parent, true);
+							ps.transform.position = worldPos;
+							ps.transform.rotation = worldRot;
+						}
+					}
+
 					tBranch.localScale = RagdollHelperClass.limbSize;
 					if (tBranch.gameObject.GetComponent<DismemberedLimbScaler>() == null)
 					{
