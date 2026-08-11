@@ -458,8 +458,9 @@ public class KillPatch : ModulePatch
 			if ((Object)(object)p.PlayerBones.HolsterPrimaryAlternative != (Object)null) ((Component)p.PlayerBones.HolsterPrimaryAlternative).gameObject.SetActive(false);
 			if ((Object)(object)p.PlayerBones.HolsterSecondaryAlternative != (Object)null) ((Component)p.PlayerBones.HolsterSecondaryAlternative).gameObject.SetActive(false);
 			if ((Object)(object)p.PlayerBones.HolsterPistol != (Object)null) ((Component)p.PlayerBones.HolsterPistol).gameObject.SetActive(false);
-			if ((Object)(object)p.PlayerBones.LeftLegHolsterPistol != (Object)null) ((Component)p.PlayerBones.LeftLegHolsterPistol).gameObject.SetActive(false);
-			componentInChildren.Teleport(((Component)p).gameObject.transform.position, Quaternion.LookRotation(p.LookDirection), moveToTarget: true);
+			Vector3 lookDir = p.LookDirection;
+			if (lookDir.sqrMagnitude < 0.001f) lookDir = Vector3.forward;
+			componentInChildren.Teleport(((Component)p).gameObject.transform.position, Quaternion.LookRotation(lookDir), moveToTarget: true);
 			((MonoBehaviour)p).StartCoroutine(RagdollHelperClass.LerpMappingWeight(componentInChildren, 0f, 1f, VisceralEntry.Instance.MappingWeightDuration.Value));
 			componentInChildren.state = PuppetMaster.State.Dead;
 			if ((int)eBodyPart > 0)
@@ -513,6 +514,7 @@ public class KillPatch : ModulePatch
 		float num2 = VisceralEntry.Instance.BloodSplatterSize.Value * Scale;
 		val2.transform.localScale = new Vector3(num2, num2, num2);
 		direction.y = 0f;
+		if (direction.sqrMagnitude < 0.001f) direction = Vector3.forward;
 		Quaternion val3 = Quaternion.LookRotation(direction);
 		val3 *= Quaternion.Euler(0f, 180f, 0f);
 		val2.transform.rotation = val3;

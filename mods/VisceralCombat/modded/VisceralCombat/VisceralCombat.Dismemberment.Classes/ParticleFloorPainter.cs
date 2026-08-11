@@ -40,7 +40,9 @@ public class ParticleFloorPainter : MonoBehaviour
 		for (int i = 0; i < SharedCollisionEvents.Count; i++)
 		{
 			ParticleCollisionEvent ev = SharedCollisionEvents[i];
-			Singleton<Effects>.Instance.EmitBleeding(ev.intersection, ev.normal);
+			Vector3 normal = ev.normal;
+			if (normal.sqrMagnitude < 0.001f) normal = Vector3.up;
+			Singleton<Effects>.Instance.EmitBleeding(ev.intersection, normal);
 		}
 	}
 }

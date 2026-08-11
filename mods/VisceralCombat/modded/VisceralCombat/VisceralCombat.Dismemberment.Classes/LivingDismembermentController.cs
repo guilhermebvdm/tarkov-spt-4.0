@@ -12,7 +12,7 @@ namespace VisceralCombat.Dismemberment.Classes;
 /// Controls living AI bots that survive a leg dismemberment:
 ///   1. Forces immediate prone pose (via BotLay.IsLay = true) and prevents all get-up / crouch attempts.
 ///   2. Emits heavy bleeding damage continually until exanguination death.
-///   3. Paints a blood trail on the floor as the bot crawls.
+///   3. Paints blood trails (Tarkov native deferred decals + VisceralCombat 3D blood pools) on the floor as the bot crawls.
 ///   4. Plays agony audio phrases periodically.
 ///   5. Strictly gated by VisceralEntry.AllPlayersHaveVisceralCombat (FIKA handshake).
 /// </summary>
@@ -66,6 +66,9 @@ public class LivingDismembermentController : MonoBehaviour
 		// 3. Initial agony voice
 		PlayAgonyVoice();
 
+		// 4. Spawn initial blood puddle at amputation site
+		EmitBloodDecal();
+
 		QuickLogger.Log(ELogType.Log, $"[LivingDismemberment] Controller initialized on bot '{player.Profile?.Nickname}' ({leg}).");
 	}
 
@@ -77,7 +80,6 @@ public class LivingDismembermentController : MonoBehaviour
 			_botOwner.BotLay.NextPosibleGetUp = Time.time + 99999f;
 
 			// Only trigger IsLay = true if bot is not already in prone
-			// (Calling IsLay = true repeatedly invokes Mover.Stop() every frame, breaking navigation and spamming LookRotation warnings)
 			if (!_botOwner.BotLay.IsLay)
 			{
 				_botOwner.BotLay.IsLay = true;
@@ -132,8 +134,8 @@ public class LivingDismembermentController : MonoBehaviour
 			ApplyHeavyBleedDamage();
 		}
 
-		// 3. Blood trail decals as bot crawls
-		if (Vector3.Distance(_player.Transform.position, _lastBloodPos) >= 0.8f)
+		// 3. Blood trail decals & 3D pools as bot crawls (every 0.5m moved)
+		if (Vector3.Distance(_player.Transform.position, _lastBloodPos) >= 0.5f)
 		{
 			_lastBloodPos = _player.Transform.position;
 			EmitBloodDecal();
@@ -161,13 +163,57 @@ public class LivingDismembermentController : MonoBehaviour
 	{
 		try
 		{
-			if (Singleton<Effects>.Instantiated && Singleton<Effects>.Instance != null)
+			Vector3 origin = _player.Transform.position + Vector3.up * 0.5f;
+			int layerMask = LayerMask.GetMask("Terrain", "HighPolyCollider", "LowPolyCollider", "Default");
+
+			if (Physics.Raycast(origin, Vector3.down, out RaycastHit hit, 3.0f, layerMask))
 			{
-				Vector3 pos = _player.Transform.position + Vector3.up * 0.1f;
-				Singleton<Effects>.Instance.EmitBleeding(pos, Vector3.up);
+				Vector3 normal = hit.normal.sqrMagnitude > 0.001f ? hit.normal : Vector3.up;
+
+				// A. Tarkov Native Deferred Decals (Ground Blood)
+				if (Singleton<Effects>.Instantiated && Singleton<Effects>.Instance != null)
+				{
+					Singleton<Effects>.Instance.EmitBleeding(hit.point, normal);
+					Singleton<Effects>.Instance.EmitBloodOnEnvironment(hit.point, normal);
+				}
+
+				// B. VisceralCombat 3D Blood FX Puddle Prefabs from blood3dFxEffects
+				var container = VisceralEntry.Instance?.effectContainer;
+				if (container != null && container.blood3dFxEffects != null && container.blood3dFxEffects.Count > 0 && GoreObjectPool.Instance != null)
+				{
+					int maxIndex = Mathf.Min(12, container.blood3dFxEffects.Count);
+					int randomIndex = Random.Range(0, maxIndex);
+					GameObject prefab = container.blood3dFxEffects[randomIndex];
+
+					if (prefab != null)
+					{
+						Quaternion rot = Quaternion.LookRotation(normal) * Quaternion.Euler(90f, Random.Range(0f, 360f), 0f);
+						GameObject spawned = GoreObjectPool.Instance.Spawn(prefab, hit.point + normal * 0.015f, rot);
+
+						if (spawned != null)
+						{
+							spawned.transform.localScale = Vector3.one * Random.Range(0.6f, 1.2f);
+
+							// Dark coagulated blood styling
+							ParticleSystem[] particleSystems = spawned.GetComponentsInChildren<ParticleSystem>();
+							foreach (ParticleSystem ps in particleSystems)
+							{
+								RagdollHelperClass.ApplyDarkCoagulatedBloodFx(ps);
+							}
+
+							// Recycle pool asset after 30 seconds
+							GoreObjectPool.Instance.Recycle(spawned, 30f);
+						}
+					}
+				}
+
+				QuickLogger.Log(ELogType.Log, $"[LivingDismemberment] Emitted blood trail puddle at {hit.point}");
 			}
 		}
-		catch { }
+		catch (System.Exception ex)
+		{
+			QuickLogger.Log(ELogType.Error, $"[LivingDismemberment] EmitBloodDecal failed: {ex.Message}");
+		}
 	}
 
 	private void PlayAgonyVoice()

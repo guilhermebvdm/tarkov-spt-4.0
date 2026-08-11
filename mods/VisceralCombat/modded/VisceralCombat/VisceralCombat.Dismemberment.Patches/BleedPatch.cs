@@ -147,8 +147,9 @@ public class BleedPatch : ModulePatch
 			GameObject bloodParticleObject = Object.Instantiate<GameObject>(val);
 			bloodParticleObject.AddComponent<ParticleFloorPainter>();
 			bloodParticleObject.transform.SetParent(col.transform, false);
-			bloodParticleObject.transform.position = shot.HitPoint;
-			bloodParticleObject.transform.localRotation = Quaternion.LookRotation(-shot.HitNormal);
+			Vector3 hitNorm1 = -shot.HitNormal;
+			if (hitNorm1.sqrMagnitude < 0.001f) hitNorm1 = Vector3.forward;
+			bloodParticleObject.transform.localRotation = Quaternion.LookRotation(hitNorm1);
 			ParticleSystem[] componentsInChildren = bloodParticleObject.GetComponentsInChildren<ParticleSystem>();
 			foreach (ParticleSystem ps in componentsInChildren)
 			{
@@ -194,8 +195,9 @@ public class BleedPatch : ModulePatch
 			GameObject bloodParticleObject = Object.Instantiate<GameObject>(val);
 			bloodParticleObject.AddComponent<ParticleFloorPainter>();
 			bloodParticleObject.transform.SetParent(col.transform, false);
-			bloodParticleObject.transform.position = shot.HitPoint;
-			bloodParticleObject.transform.localRotation = Quaternion.LookRotation(-shot.HitNormal);
+			Vector3 hitNorm2 = -shot.HitNormal;
+			if (hitNorm2.sqrMagnitude < 0.001f) hitNorm2 = Vector3.forward;
+			bloodParticleObject.transform.localRotation = Quaternion.LookRotation(hitNorm2);
 			ParticleSystem[] componentsInChildren = bloodParticleObject.GetComponentsInChildren<ParticleSystem>();
 			foreach (ParticleSystem ps in componentsInChildren)
 			{
