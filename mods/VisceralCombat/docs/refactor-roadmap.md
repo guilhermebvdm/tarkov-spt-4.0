@@ -43,8 +43,8 @@ graph TD
 
 | Aspecto | Resultado | Evidência |
 | :--- | :--- | :--- |
-| **Prone forçado no bot** | ✅ API nativa existe | `BotMover.DoProne(true)` + `SetPose(0f)` — `BotMover.cs:L383-390` |
-| **Bloqueio de GetUp** | ✅ Viável | Sobrescrever `BotLay.NextPosibleGetUp = Time.time + 999f` em loop no `LivingDismembermentController` |
+| **Prone forçado no bot** | ✅ API nativa existe | `botOwner.BotLay.IsLay = true` — `BotLay.cs:L34-72` |
+| **Bloqueio de GetUp** | ✅ Viável | Re-assegurar `BotLay.IsLay = true` e `NextPosibleGetUp = Time.time + 99999f` no `Update()` |
 | **Sangramento (exsanguição)** | ✅ API nativa | `player.ActiveHealthController.ApplyDamage(leg, dmg, GClass3051.HeavyBleedingDamage)` — `GClass3051.cs:L40` |
 | **FIKA: detecção de mod** | ✅ **Implementado** | `VisceralHandshakePacket` + `AllPlayersHaveVisceralCombat` — handshake in-raid |
 | **Mod de Servidor SPT** | ✅ Não necessário | Handshake C# puro; zero dependência de config extra |

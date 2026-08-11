@@ -21,9 +21,9 @@ Esta funcionalidade visa adicionar um nível extremo de imersão ao combate: per
 
 ### 2. Fluxo de Animação & Comportamento
 1. **Disparo & Amputação:** Ao receber um tiro de grosso calibre na perna e sobreviver, a perna é amputada via `KillPatch.DismemberLimb`.
-2. **Queda Instantânea em Prone:** O bot é forçado para a postura de bruços via `botOwner.Mover.DoProne(true)` + `botOwner.Mover.SetPose(0f)`.
+2. **Queda Instantânea em Prone:** O bot é forçado para a postura de bruços via `botOwner.BotLay.IsLay = true`.
 3. **Execução da Agonia:** A animação de agonia de perna é iniciada no chão.
-4. **Bloqueio de Postura (Lock em Prone):** Um `MonoBehaviour` customizado (`LivingDismembermentController`) intercepta a lógica de `BotLay.GetUp()` e `BotLay.CheckGetUp()` periodicamente para impedir o bot de se levantar.
+4. **Bloqueio de Postura (Lock em Prone):** Um `MonoBehaviour` customizado (`LivingDismembermentController`) intercepta a IA e mantém `botOwner.BotLay.IsLay = true` e `botOwner.BotLay.NextPosibleGetUp = Time.time + 99999f` no `Update()` para impedir permanentemente o bot de agachar ou se levantar.
 
 ### 3. Sangramento Arterial & Rastro de Sangue
 1. **Fluxo Contínuo de Sangue:** Iniciar um emissor de sangue contínuo no coto da perna amputada (`limbSquirter` / `ArterialSpray`).
@@ -36,17 +36,16 @@ Esta funcionalidade visa adicionar um nível extremo de imersão ao combate: per
 
 ### 2.1 Prone Forçado (Confirmado no Assembly EFT)
 
-A API de prone do bot existe e é direta via `BotOwner`:
+A API de prone correta e nativa do bot é acionada por `BotLay.IsLay`:
 ```csharp
-// EFT: BotMover.cs:L383-390
-botOwner.Mover.DoProne(true);   // força prone + para movimento
-botOwner.Mover.SetPose(0f);     // seta poseLevel = 0 (totalmente deitado)
+// EFT: BotLay.cs — aciona DoProne e trava pose da IA
+botOwner.BotLay.IsLay = true;
+botOwner.BotLay.NextPosibleGetUp = Time.time + 99999f;
 ```
-O `BotLay.IsLay = true` é a abstração de alto nível que faz o mesmo — porém também registra eventos de rotação. Para nosso uso, chamar `DoProne` diretamente é mais seguro.
+> [!CAUTION]
+> **Atenção:** `SetPose(0f)` ou `SetPoseLevel(0f, true)` apenas agacham o bot na altura mínima, permitindo que a IA levante em seguida. O uso correto é estritamente `BotLay.IsLay = true` mantido no `Update()`.
 
-**Bloqueio de GetUp:** `BotLay.GetUp()` e `BotLay.Damaged()` são as funções que levantam o bot. Para bloquear:
-- Sobrescrever `BotLay.NextPosibleGetUp = Time.time + 999f` em loop no `LivingDismembermentController.Update()`.
-- Ou fazer patch Harmony em `BotLay.GetUp` para retornar quando o bot estiver marcado como `VisceralLegDismembered`.
+**Bloqueio de GetUp:** `BotLay.GetUp()` é neutralizado mantendo `NextPosibleGetUp` no futuro distante.
 
 ### 2.2 Sangramento via HealthController (Confirmado no Assembly EFT)
 

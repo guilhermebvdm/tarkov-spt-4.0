@@ -73,9 +73,12 @@ public class LimbKillPatch : ModulePatch
 		if (player == null) player = rb.gameObject.GetComponentInParent<Player>();
 		if (player == null) return;
 
-		// Only process dead players (ActiveHealthController is NOT reliable post-death)
+		// Only process dead players OR living AI bots when VisceralCombat is present for all players
 		bool isDead = (player.HealthController == null || !player.HealthController.IsAlive);
-		if (!isDead) return;
+		if (!isDead)
+		{
+			if (!player.IsAI || !VisceralEntry.AllPlayersHaveVisceralCombat) return;
+		}
 
 		// --- 2. PuppetMaster: agony interruption ---
 		GameObject rootForPm = VisceralCombat.Dismemberment.Classes.Utils.GetRootGameObject(rb.gameObject);
@@ -220,6 +223,12 @@ public class LimbKillPatch : ModulePatch
 		{
 			Transform[] dummyLimbs;
 			VisceralCombat.Combined.Patches.KillPatch.DismemberLimb(player, shot.Direction, dismemberPart.Value, boneName, capAsset, extraAssets, out dummyLimbs);
+
+			// Attach LivingDismembermentController if the bot survived and lost a leg (LeftLeg=5, RightLeg=6)
+			if (!isDead && player.IsAI && (dismemberPart.Value == (EBodyPart)5 || dismemberPart.Value == (EBodyPart)6))
+			{
+				VisceralCombat.Dismemberment.Classes.LivingDismembermentController.Attach(player, dismemberPart.Value);
+			}
 		}
 	}
 }
