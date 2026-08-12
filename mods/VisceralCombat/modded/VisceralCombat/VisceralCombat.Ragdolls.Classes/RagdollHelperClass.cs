@@ -453,10 +453,22 @@ public static class RagdollHelperClass
 		float specG = VisceralEntry.Instance != null && VisceralEntry.Instance.BloodSpecularG != null ? VisceralEntry.Instance.BloodSpecularG.Value : 0.0f;
 		float specB = VisceralEntry.Instance != null && VisceralEntry.Instance.BloodSpecularB != null ? VisceralEntry.Instance.BloodSpecularB.Value : 0.0f;
 
+		float rimR = VisceralEntry.Instance != null && VisceralEntry.Instance.BloodRimColorR != null ? VisceralEntry.Instance.BloodRimColorR.Value : 0.0f;
+		float rimG = VisceralEntry.Instance != null && VisceralEntry.Instance.BloodRimColorG != null ? VisceralEntry.Instance.BloodRimColorG.Value : 0.0f;
+		float rimB = VisceralEntry.Instance != null && VisceralEntry.Instance.BloodRimColorB != null ? VisceralEntry.Instance.BloodRimColorB.Value : 0.0f;
+		float rimPower = VisceralEntry.Instance != null && VisceralEntry.Instance.BloodRimPower != null ? VisceralEntry.Instance.BloodRimPower.Value : 0.0f;
+
+		float fresnelR = VisceralEntry.Instance != null && VisceralEntry.Instance.BloodFresnelColorR != null ? VisceralEntry.Instance.BloodFresnelColorR.Value : 0.0f;
+		float fresnelG = VisceralEntry.Instance != null && VisceralEntry.Instance.BloodFresnelColorG != null ? VisceralEntry.Instance.BloodFresnelColorG.Value : 0.0f;
+		float fresnelB = VisceralEntry.Instance != null && VisceralEntry.Instance.BloodFresnelColorB != null ? VisceralEntry.Instance.BloodFresnelColorB.Value : 0.0f;
+		float fresnelPower = VisceralEntry.Instance != null && VisceralEntry.Instance.BloodFresnelPower != null ? VisceralEntry.Instance.BloodFresnelPower.Value : 0.0f;
+
 		Color darkBlood = new Color(r, g, b, a);
 		Color darkBloodPremultiply = new Color(r, g, b, legacyA);
 		Color emissionColor = new Color(emission, emission, emission, 1f);
 		Color specColor = new Color(specR, specG, specB, 1f);
+		Color rimColor = new Color(rimR, rimG, rimB, 1f);
+		Color fresnelColor = new Color(fresnelR, fresnelG, fresnelB, 1f);
 
 		var main = ps.main;
 		main.startColor = new ParticleSystem.MinMaxGradient(darkBlood);
@@ -464,38 +476,81 @@ public static class RagdollHelperClass
 		var lights = ps.lights;
 		lights.enabled = false;
 
+		if (VisceralEntry.Instance != null && VisceralEntry.Instance.DisableColorOverLifetime != null && VisceralEntry.Instance.DisableColorOverLifetime.Value)
+		{
+			var colLifetime = ps.colorOverLifetime;
+			colLifetime.enabled = false;
+			var colSpeed = ps.colorBySpeed;
+			colSpeed.enabled = false;
+		}
+
+		if (VisceralEntry.Instance != null && VisceralEntry.Instance.DisableParticleTrails != null && VisceralEntry.Instance.DisableParticleTrails.Value)
+		{
+			var trails = ps.trails;
+			trails.enabled = false;
+		}
+
+		ParticleSystemRenderer psRend = ps.GetComponent<ParticleSystemRenderer>();
+		if (psRend != null)
+		{
+			if (VisceralEntry.Instance != null && VisceralEntry.Instance.ForceReceiveShadows != null && VisceralEntry.Instance.ForceReceiveShadows.Value)
+			{
+				psRend.receiveShadows = true;
+				psRend.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
+			}
+			if (psRend.trailMaterial != null)
+			{
+				ApplyMaterialSettings(psRend.trailMaterial, darkBlood, darkBloodPremultiply, emissionColor, emission, specColor, smoothness, rimColor, rimPower, fresnelColor, fresnelPower);
+			}
+		}
+
 		Renderer[] renderers = ps.gameObject.GetComponentsInChildren<Renderer>(true);
 		foreach (Renderer rend in renderers)
 		{
 			if (rend == null || rend.material == null) continue;
-			Material mat = rend.material;
-			string shaderName = mat.shader != null ? mat.shader.name : string.Empty;
+			ApplyMaterialSettings(rend.material, darkBlood, darkBloodPremultiply, emissionColor, emission, specColor, smoothness, rimColor, rimPower, fresnelColor, fresnelPower);
+		}
+	}
 
-			if (mat.HasProperty("_EmissionColor"))
-			{
-				mat.SetColor("_EmissionColor", emissionColor);
-			}
-			if (emission > 0.001f)
-			{
-				mat.EnableKeyword("_EMISSION");
-			}
-			else
-			{
-				mat.DisableKeyword("_EMISSION");
-			}
+	private static void ApplyMaterialSettings(Material mat, Color darkBlood, Color darkBloodPremultiply, Color emissionColor, float emission, Color specColor, float smoothness, Color rimColor, float rimPower, Color fresnelColor, float fresnelPower)
+	{
+		if (mat == null) return;
+		string shaderName = mat.shader != null ? mat.shader.name : string.Empty;
 
-			if (shaderName.Contains("Premultiply") || shaderName.Contains("Alpha Blended"))
-			{
-				if (mat.HasProperty("_Color")) mat.SetColor("_Color", darkBloodPremultiply);
-			}
-			else
-			{
-				if (mat.HasProperty("_Color")) mat.SetColor("_Color", darkBlood);
-				if (mat.HasProperty("_TintColor")) mat.SetColor("_TintColor", darkBlood);
-				if (mat.HasProperty("_SpecColor")) mat.SetColor("_SpecColor", specColor);
-				if (mat.HasProperty("_Glossiness")) mat.SetFloat("_Glossiness", smoothness);
-				if (mat.HasProperty("_Smoothness")) mat.SetFloat("_Smoothness", smoothness);
-			}
+		if (mat.HasProperty("_EmissionColor"))
+		{
+			mat.SetColor("_EmissionColor", emissionColor);
+		}
+		if (emission > 0.001f)
+		{
+			mat.EnableKeyword("_EMISSION");
+		}
+		else
+		{
+			mat.DisableKeyword("_EMISSION");
+		}
+
+		if (mat.HasProperty("_RimColor")) mat.SetColor("_RimColor", rimColor);
+		if (mat.HasProperty("_RimPower")) mat.SetFloat("_RimPower", rimPower);
+		if (mat.HasProperty("_RimIntensity")) mat.SetFloat("_RimIntensity", rimPower);
+		if (mat.HasProperty("_RimScale")) mat.SetFloat("_RimScale", rimPower);
+
+		if (mat.HasProperty("_Fresnel")) mat.SetColor("_Fresnel", fresnelColor);
+		if (mat.HasProperty("_FresnelColor")) mat.SetColor("_FresnelColor", fresnelColor);
+		if (mat.HasProperty("_FresnelPower")) mat.SetFloat("_FresnelPower", fresnelPower);
+		if (mat.HasProperty("_FresnelScale")) mat.SetFloat("_FresnelScale", fresnelPower);
+
+		if (shaderName.Contains("Premultiply") || shaderName.Contains("Alpha Blended"))
+		{
+			if (mat.HasProperty("_Color")) mat.SetColor("_Color", darkBloodPremultiply);
+		}
+		else
+		{
+			if (mat.HasProperty("_Color")) mat.SetColor("_Color", darkBlood);
+			if (mat.HasProperty("_TintColor")) mat.SetColor("_TintColor", darkBlood);
+			if (mat.HasProperty("_SpecColor")) mat.SetColor("_SpecColor", specColor);
+			if (mat.HasProperty("_Glossiness")) mat.SetFloat("_Glossiness", smoothness);
+			if (mat.HasProperty("_Smoothness")) mat.SetFloat("_Smoothness", smoothness);
 		}
 	}
 

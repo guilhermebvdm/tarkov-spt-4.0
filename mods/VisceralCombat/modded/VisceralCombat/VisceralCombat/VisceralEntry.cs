@@ -138,6 +138,28 @@ public class VisceralEntry : BaseUnityPlugin
 
 	public ConfigEntry<float> BloodSpecularB { get; set; }
 
+	public ConfigEntry<float> BloodRimColorR { get; set; }
+
+	public ConfigEntry<float> BloodRimColorG { get; set; }
+
+	public ConfigEntry<float> BloodRimColorB { get; set; }
+
+	public ConfigEntry<float> BloodRimPower { get; set; }
+
+	public ConfigEntry<float> BloodFresnelColorR { get; set; }
+
+	public ConfigEntry<float> BloodFresnelColorG { get; set; }
+
+	public ConfigEntry<float> BloodFresnelColorB { get; set; }
+
+	public ConfigEntry<float> BloodFresnelPower { get; set; }
+
+	public ConfigEntry<bool> DisableColorOverLifetime { get; set; }
+
+	public ConfigEntry<bool> DisableParticleTrails { get; set; }
+
+	public ConfigEntry<bool> ForceReceiveShadows { get; set; }
+
 	public ConfigEntry<bool> BodyCollision { get; set; }
 
 	public ConfigEntry<bool> ItemForce { get; set; }
@@ -251,6 +273,20 @@ public class VisceralEntry : BaseUnityPlugin
 		BloodSpecularG = ((BaseUnityPlugin)this).Config.Bind<float>(debugCat, "Blood Specular - Green (G)", 0f, new ConfigDescription("Reflexo especular Verde", new AcceptableValueRange<float>(0f, 1f)));
 		BloodSpecularB = ((BaseUnityPlugin)this).Config.Bind<float>(debugCat, "Blood Specular - Blue (B)", 0f, new ConfigDescription("Reflexo especular Azul", new AcceptableValueRange<float>(0f, 1f)));
 
+		BloodRimColorR = ((BaseUnityPlugin)this).Config.Bind<float>(debugCat, "Blood Rim Light - Red (R)", 0f, new ConfigDescription("Luz de borda Rim Vermelho", new AcceptableValueRange<float>(0f, 1f)));
+		BloodRimColorG = ((BaseUnityPlugin)this).Config.Bind<float>(debugCat, "Blood Rim Light - Green (G)", 0f, new ConfigDescription("Luz de borda Rim Verde", new AcceptableValueRange<float>(0f, 1f)));
+		BloodRimColorB = ((BaseUnityPlugin)this).Config.Bind<float>(debugCat, "Blood Rim Light - Blue (B)", 0f, new ConfigDescription("Luz de borda Rim Azul", new AcceptableValueRange<float>(0f, 1f)));
+		BloodRimPower = ((BaseUnityPlugin)this).Config.Bind<float>(debugCat, "Blood Rim Light - Power / Intensity", 0f, new ConfigDescription("Intensidade da luz de borda Rim", new AcceptableValueRange<float>(0f, 10f)));
+
+		BloodFresnelColorR = ((BaseUnityPlugin)this).Config.Bind<float>(debugCat, "Blood Fresnel - Red (R)", 0f, new ConfigDescription("Reflexo Fresnel Vermelho", new AcceptableValueRange<float>(0f, 1f)));
+		BloodFresnelColorG = ((BaseUnityPlugin)this).Config.Bind<float>(debugCat, "Blood Fresnel - Green (G)", 0f, new ConfigDescription("Reflexo Fresnel Verde", new AcceptableValueRange<float>(0f, 1f)));
+		BloodFresnelColorB = ((BaseUnityPlugin)this).Config.Bind<float>(debugCat, "Blood Fresnel - Blue (B)", 0f, new ConfigDescription("Reflexo Fresnel Azul", new AcceptableValueRange<float>(0f, 1f)));
+		BloodFresnelPower = ((BaseUnityPlugin)this).Config.Bind<float>(debugCat, "Blood Fresnel - Power", 0f, new ConfigDescription("Intensidade do efeito Fresnel", new AcceptableValueRange<float>(0f, 10f)));
+
+		DisableColorOverLifetime = ((BaseUnityPlugin)this).Config.Bind<bool>(debugCat, "Disable Color Over Lifetime Module", false, "Desativa a curva de gradiente de cor ao longo da vida da particula.");
+		DisableParticleTrails = ((BaseUnityPlugin)this).Config.Bind<bool>(debugCat, "Disable Particle Trails Module", false, "Desativa o modulo de rastros (trails) de sangue.");
+		ForceReceiveShadows = ((BaseUnityPlugin)this).Config.Bind<bool>(debugCat, "Force Receive Shadows & Cast Shadows", true, "Forca as particulas de sangue a receber sombras do mapa (evita brilho Unlit).");
+
 		EventHandler bloodDebugSettingChanged = (sender, args) =>
 		{
 			VisceralCombat.Ragdolls.Classes.RagdollHelperClass.UpdateAllActiveBloodFxInScene();
@@ -265,6 +301,17 @@ public class VisceralEntry : BaseUnityPlugin
 		BloodSpecularR.SettingChanged += bloodDebugSettingChanged;
 		BloodSpecularG.SettingChanged += bloodDebugSettingChanged;
 		BloodSpecularB.SettingChanged += bloodDebugSettingChanged;
+		BloodRimColorR.SettingChanged += bloodDebugSettingChanged;
+		BloodRimColorG.SettingChanged += bloodDebugSettingChanged;
+		BloodRimColorB.SettingChanged += bloodDebugSettingChanged;
+		BloodRimPower.SettingChanged += bloodDebugSettingChanged;
+		BloodFresnelColorR.SettingChanged += bloodDebugSettingChanged;
+		BloodFresnelColorG.SettingChanged += bloodDebugSettingChanged;
+		BloodFresnelColorB.SettingChanged += bloodDebugSettingChanged;
+		BloodFresnelPower.SettingChanged += bloodDebugSettingChanged;
+		DisableColorOverLifetime.SettingChanged += bloodDebugSettingChanged;
+		DisableParticleTrails.SettingChanged += bloodDebugSettingChanged;
+		ForceReceiveShadows.SettingChanged += bloodDebugSettingChanged;
 		((ModulePatch)new VisceralCombat.Dismemberment.Patches.GameStartedPatch()).Enable();
 		((ModulePatch)new KillPatch()).Enable();
 		((ModulePatch)new BleedPatch()).Enable();
