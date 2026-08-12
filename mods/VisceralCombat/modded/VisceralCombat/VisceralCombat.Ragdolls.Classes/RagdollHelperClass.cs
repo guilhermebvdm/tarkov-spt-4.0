@@ -458,6 +458,19 @@ public static class RagdollHelperClass
 				}
 			}
 		}
+
+		Renderer[] renderers = go.GetComponentsInChildren<Renderer>(true);
+		if (renderers != null)
+		{
+			foreach (Renderer rend in renderers)
+			{
+				if (rend != null)
+				{
+					rend.reflectionProbeUsage = UnityEngine.Rendering.ReflectionProbeUsage.Off;
+					rend.lightProbeUsage = UnityEngine.Rendering.LightProbeUsage.Off;
+				}
+			}
+		}
 	}
 }
 
