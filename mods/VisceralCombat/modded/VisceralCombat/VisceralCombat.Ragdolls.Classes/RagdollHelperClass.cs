@@ -442,44 +442,72 @@ public static class RagdollHelperClass
 	{
 		if (ps == null) return;
 
-		// 1. Dark Coagulated Blood startColor on the ParticleSystem itself
-		Color darkBlood = new Color(0.22f, 0.02f, 0.02f, 0.95f);
-		// Low-alpha variant for Legacy/Premultiply shader: high alpha causes white premultiply blowout
-		Color darkBloodPremultiply = new Color(0.22f, 0.02f, 0.02f, 0.35f);
+		float r = VisceralEntry.Instance != null && VisceralEntry.Instance.BloodColorR != null ? VisceralEntry.Instance.BloodColorR.Value : 0.22f;
+		float g = VisceralEntry.Instance != null && VisceralEntry.Instance.BloodColorG != null ? VisceralEntry.Instance.BloodColorG.Value : 0.02f;
+		float b = VisceralEntry.Instance != null && VisceralEntry.Instance.BloodColorB != null ? VisceralEntry.Instance.BloodColorB.Value : 0.02f;
+		float a = VisceralEntry.Instance != null && VisceralEntry.Instance.BloodColorA != null ? VisceralEntry.Instance.BloodColorA.Value : 0.95f;
+		float legacyA = VisceralEntry.Instance != null && VisceralEntry.Instance.BloodLegacyAlpha != null ? VisceralEntry.Instance.BloodLegacyAlpha.Value : 0.35f;
+		float emission = VisceralEntry.Instance != null && VisceralEntry.Instance.BloodEmission != null ? VisceralEntry.Instance.BloodEmission.Value : 0.0f;
+		float smoothness = VisceralEntry.Instance != null && VisceralEntry.Instance.BloodSmoothness != null ? VisceralEntry.Instance.BloodSmoothness.Value : 0.0f;
+		float specR = VisceralEntry.Instance != null && VisceralEntry.Instance.BloodSpecularR != null ? VisceralEntry.Instance.BloodSpecularR.Value : 0.0f;
+		float specG = VisceralEntry.Instance != null && VisceralEntry.Instance.BloodSpecularG != null ? VisceralEntry.Instance.BloodSpecularG.Value : 0.0f;
+		float specB = VisceralEntry.Instance != null && VisceralEntry.Instance.BloodSpecularB != null ? VisceralEntry.Instance.BloodSpecularB.Value : 0.0f;
+
+		Color darkBlood = new Color(r, g, b, a);
+		Color darkBloodPremultiply = new Color(r, g, b, legacyA);
+		Color emissionColor = new Color(emission, emission, emission, 1f);
+		Color specColor = new Color(specR, specG, specB, 1f);
 
 		var main = ps.main;
 		main.startColor = new ParticleSystem.MinMaxGradient(darkBlood);
 
-		// 2. Disable Lights module — stops dynamic point lights emitted per particle
 		var lights = ps.lights;
 		lights.enabled = false;
 
-		// 3. Only traverse this prefab's own subtree — never climb to the character root
 		Renderer[] renderers = ps.gameObject.GetComponentsInChildren<Renderer>(true);
-		foreach (Renderer r in renderers)
+		foreach (Renderer rend in renderers)
 		{
-			if (r == null || r.material == null) continue;
-			Material mat = r.material;
+			if (rend == null || rend.material == null) continue;
+			Material mat = rend.material;
 			string shaderName = mat.shader != null ? mat.shader.name : string.Empty;
 
-			// Kill emission on all paths
-			if (mat.HasProperty("_EmissionColor")) mat.SetColor("_EmissionColor", Color.black);
-			mat.DisableKeyword("_EMISSION");
+			if (mat.HasProperty("_EmissionColor"))
+			{
+				mat.SetColor("_EmissionColor", emissionColor);
+			}
+			if (emission > 0.001f)
+			{
+				mat.EnableKeyword("_EMISSION");
+			}
+			else
+			{
+				mat.DisableKeyword("_EMISSION");
+			}
 
 			if (shaderName.Contains("Premultiply") || shaderName.Contains("Alpha Blended"))
 			{
-				// Legacy premultiply shader: white glow comes from high alpha, not emission.
-				// Force low alpha so the premultiply step doesn't blow out to white.
 				if (mat.HasProperty("_Color")) mat.SetColor("_Color", darkBloodPremultiply);
 			}
 			else
 			{
-				// VD 3D Blood Shader V14 and similar custom shaders
 				if (mat.HasProperty("_Color")) mat.SetColor("_Color", darkBlood);
 				if (mat.HasProperty("_TintColor")) mat.SetColor("_TintColor", darkBlood);
-				if (mat.HasProperty("_SpecColor")) mat.SetColor("_SpecColor", Color.black);
-				if (mat.HasProperty("_Glossiness")) mat.SetFloat("_Glossiness", 0f);
-				if (mat.HasProperty("_Smoothness")) mat.SetFloat("_Smoothness", 0f);
+				if (mat.HasProperty("_SpecColor")) mat.SetColor("_SpecColor", specColor);
+				if (mat.HasProperty("_Glossiness")) mat.SetFloat("_Glossiness", smoothness);
+				if (mat.HasProperty("_Smoothness")) mat.SetFloat("_Smoothness", smoothness);
+			}
+		}
+	}
+
+	public static void UpdateAllActiveBloodFxInScene()
+	{
+		ParticleSystem[] allPs = UnityEngine.Object.FindObjectsOfType<ParticleSystem>();
+		if (allPs == null) return;
+		foreach (ParticleSystem ps in allPs)
+		{
+			if (ps != null && ps.gameObject != null && (ps.gameObject.name.Contains("blood") || ps.gameObject.name.Contains("Blood") || ps.gameObject.name.Contains("squirt") || ps.gameObject.name.Contains("Bleed") || ps.gameObject.name.Contains("gore")))
+			{
+				ApplyDarkCoagulatedBloodFx(ps);
 			}
 		}
 	}

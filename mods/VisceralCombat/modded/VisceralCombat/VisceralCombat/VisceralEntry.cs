@@ -118,6 +118,26 @@ public class VisceralEntry : BaseUnityPlugin
 
 	public ConfigEntry<bool> UseOldBloodDecal { get; set; }
 
+	public ConfigEntry<float> BloodColorR { get; set; }
+
+	public ConfigEntry<float> BloodColorG { get; set; }
+
+	public ConfigEntry<float> BloodColorB { get; set; }
+
+	public ConfigEntry<float> BloodColorA { get; set; }
+
+	public ConfigEntry<float> BloodLegacyAlpha { get; set; }
+
+	public ConfigEntry<float> BloodEmission { get; set; }
+
+	public ConfigEntry<float> BloodSmoothness { get; set; }
+
+	public ConfigEntry<float> BloodSpecularR { get; set; }
+
+	public ConfigEntry<float> BloodSpecularG { get; set; }
+
+	public ConfigEntry<float> BloodSpecularB { get; set; }
+
 	public ConfigEntry<bool> BodyCollision { get; set; }
 
 	public ConfigEntry<bool> ItemForce { get; set; }
@@ -218,6 +238,33 @@ public class VisceralEntry : BaseUnityPlugin
 				Order = 3
 			}
 		}));
+
+		string debugCat = "Blood | Debug & Colors";
+		BloodColorR = ((BaseUnityPlugin)this).Config.Bind<float>(debugCat, "Blood Color - Red (R)", 0.22f, new ConfigDescription("Vermelho da cor base do sangue", new AcceptableValueRange<float>(0f, 1f)));
+		BloodColorG = ((BaseUnityPlugin)this).Config.Bind<float>(debugCat, "Blood Color - Green (G)", 0.02f, new ConfigDescription("Verde da cor base do sangue", new AcceptableValueRange<float>(0f, 1f)));
+		BloodColorB = ((BaseUnityPlugin)this).Config.Bind<float>(debugCat, "Blood Color - Blue (B)", 0.02f, new ConfigDescription("Azul da cor base do sangue", new AcceptableValueRange<float>(0f, 1f)));
+		BloodColorA = ((BaseUnityPlugin)this).Config.Bind<float>(debugCat, "Blood Color - Alpha (A)", 0.95f, new ConfigDescription("Opacidade da cor base do sangue", new AcceptableValueRange<float>(0f, 1f)));
+		BloodLegacyAlpha = ((BaseUnityPlugin)this).Config.Bind<float>(debugCat, "Blood Color - Legacy Alpha (A)", 0.35f, new ConfigDescription("Opacidade para shaders legados de premultiply", new AcceptableValueRange<float>(0f, 1f)));
+		BloodEmission = ((BaseUnityPlugin)this).Config.Bind<float>(debugCat, "Blood Emission - Brightness", 0f, new ConfigDescription("Intensidade de emissao de luz propria (brilho)", new AcceptableValueRange<float>(0f, 2f)));
+		BloodSmoothness = ((BaseUnityPlugin)this).Config.Bind<float>(debugCat, "Blood Glossiness / Smoothness", 0f, new ConfigDescription("Brilho especular/polimento de superficie", new AcceptableValueRange<float>(0f, 1f)));
+		BloodSpecularR = ((BaseUnityPlugin)this).Config.Bind<float>(debugCat, "Blood Specular - Red (R)", 0f, new ConfigDescription("Reflexo especular Vermelho", new AcceptableValueRange<float>(0f, 1f)));
+		BloodSpecularG = ((BaseUnityPlugin)this).Config.Bind<float>(debugCat, "Blood Specular - Green (G)", 0f, new ConfigDescription("Reflexo especular Verde", new AcceptableValueRange<float>(0f, 1f)));
+		BloodSpecularB = ((BaseUnityPlugin)this).Config.Bind<float>(debugCat, "Blood Specular - Blue (B)", 0f, new ConfigDescription("Reflexo especular Azul", new AcceptableValueRange<float>(0f, 1f)));
+
+		EventHandler bloodDebugSettingChanged = (sender, args) =>
+		{
+			VisceralCombat.Ragdolls.Classes.RagdollHelperClass.UpdateAllActiveBloodFxInScene();
+		};
+		BloodColorR.SettingChanged += bloodDebugSettingChanged;
+		BloodColorG.SettingChanged += bloodDebugSettingChanged;
+		BloodColorB.SettingChanged += bloodDebugSettingChanged;
+		BloodColorA.SettingChanged += bloodDebugSettingChanged;
+		BloodLegacyAlpha.SettingChanged += bloodDebugSettingChanged;
+		BloodEmission.SettingChanged += bloodDebugSettingChanged;
+		BloodSmoothness.SettingChanged += bloodDebugSettingChanged;
+		BloodSpecularR.SettingChanged += bloodDebugSettingChanged;
+		BloodSpecularG.SettingChanged += bloodDebugSettingChanged;
+		BloodSpecularB.SettingChanged += bloodDebugSettingChanged;
 		((ModulePatch)new VisceralCombat.Dismemberment.Patches.GameStartedPatch()).Enable();
 		((ModulePatch)new KillPatch()).Enable();
 		((ModulePatch)new BleedPatch()).Enable();
