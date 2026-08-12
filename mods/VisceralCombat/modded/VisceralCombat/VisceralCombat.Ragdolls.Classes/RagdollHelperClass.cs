@@ -463,6 +463,10 @@ public static class RagdollHelperClass
 		float fresnelB = VisceralEntry.Instance != null && VisceralEntry.Instance.BloodFresnelColorB != null ? VisceralEntry.Instance.BloodFresnelColorB.Value : 0.0f;
 		float fresnelPower = VisceralEntry.Instance != null && VisceralEntry.Instance.BloodFresnelPower != null ? VisceralEntry.Instance.BloodFresnelPower.Value : 0.0f;
 
+		float reflection = VisceralEntry.Instance != null && VisceralEntry.Instance.BloodReflection != null ? VisceralEntry.Instance.BloodReflection.Value : 0.0f;
+		float metallic = VisceralEntry.Instance != null && VisceralEntry.Instance.BloodMetallic != null ? VisceralEntry.Instance.BloodMetallic.Value : 0.0f;
+		bool disableReflectionProbes = VisceralEntry.Instance != null && VisceralEntry.Instance.DisableReflectionProbes != null ? VisceralEntry.Instance.DisableReflectionProbes.Value : true;
+
 		Color darkBlood = new Color(r, g, b, a);
 		Color darkBloodPremultiply = new Color(r, g, b, legacyA);
 		Color emissionColor = new Color(emission, emission, emission, 1f);
@@ -498,9 +502,13 @@ public static class RagdollHelperClass
 				psRend.receiveShadows = true;
 				psRend.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
 			}
+			if (disableReflectionProbes)
+			{
+				psRend.reflectionProbeUsage = UnityEngine.Rendering.ReflectionProbeUsage.Off;
+			}
 			if (psRend.trailMaterial != null)
 			{
-				ApplyMaterialSettings(psRend.trailMaterial, darkBlood, darkBloodPremultiply, emissionColor, emission, specColor, smoothness, rimColor, rimPower, fresnelColor, fresnelPower);
+				ApplyMaterialSettings(psRend.trailMaterial, darkBlood, darkBloodPremultiply, emissionColor, emission, specColor, smoothness, rimColor, rimPower, fresnelColor, fresnelPower, reflection, metallic);
 			}
 		}
 
@@ -508,11 +516,15 @@ public static class RagdollHelperClass
 		foreach (Renderer rend in renderers)
 		{
 			if (rend == null || rend.material == null) continue;
-			ApplyMaterialSettings(rend.material, darkBlood, darkBloodPremultiply, emissionColor, emission, specColor, smoothness, rimColor, rimPower, fresnelColor, fresnelPower);
+			if (disableReflectionProbes)
+			{
+				rend.reflectionProbeUsage = UnityEngine.Rendering.ReflectionProbeUsage.Off;
+			}
+			ApplyMaterialSettings(rend.material, darkBlood, darkBloodPremultiply, emissionColor, emission, specColor, smoothness, rimColor, rimPower, fresnelColor, fresnelPower, reflection, metallic);
 		}
 	}
 
-	private static void ApplyMaterialSettings(Material mat, Color darkBlood, Color darkBloodPremultiply, Color emissionColor, float emission, Color specColor, float smoothness, Color rimColor, float rimPower, Color fresnelColor, float fresnelPower)
+	private static void ApplyMaterialSettings(Material mat, Color darkBlood, Color darkBloodPremultiply, Color emissionColor, float emission, Color specColor, float smoothness, Color rimColor, float rimPower, Color fresnelColor, float fresnelPower, float reflection, float metallic)
 	{
 		if (mat == null) return;
 		string shaderName = mat.shader != null ? mat.shader.name : string.Empty;
@@ -539,6 +551,28 @@ public static class RagdollHelperClass
 		if (mat.HasProperty("_FresnelColor")) mat.SetColor("_FresnelColor", fresnelColor);
 		if (mat.HasProperty("_FresnelPower")) mat.SetFloat("_FresnelPower", fresnelPower);
 		if (mat.HasProperty("_FresnelScale")) mat.SetFloat("_FresnelScale", fresnelPower);
+
+		Color reflectColor = new Color(reflection, reflection, reflection, 1f);
+		if (mat.HasProperty("_ReflectColor")) mat.SetColor("_ReflectColor", reflectColor);
+		if (mat.HasProperty("_ReflectionColor")) mat.SetColor("_ReflectionColor", reflectColor);
+		if (mat.HasProperty("_ReflectionStrength")) mat.SetFloat("_ReflectionStrength", reflection);
+		if (mat.HasProperty("_ReflectStrength")) mat.SetFloat("_ReflectStrength", reflection);
+		if (mat.HasProperty("_ReflectionAmount")) mat.SetFloat("_ReflectionAmount", reflection);
+		if (mat.HasProperty("_EnvMapStrength")) mat.SetFloat("_EnvMapStrength", reflection);
+		if (mat.HasProperty("_ReflectionScale")) mat.SetFloat("_ReflectionScale", reflection);
+
+		if (mat.HasProperty("_Metallic")) mat.SetFloat("_Metallic", metallic);
+		if (mat.HasProperty("_Metalic")) mat.SetFloat("_Metalic", metallic);
+
+		if (reflection < 0.001f)
+		{
+			mat.EnableKeyword("_GLOSSYREFLECTIONS_OFF");
+		}
+
+		if (smoothness < 0.001f && specColor.r < 0.001f && specColor.g < 0.001f && specColor.b < 0.001f)
+		{
+			mat.EnableKeyword("_SPECULARHIGHLIGHTS_OFF");
+		}
 
 		if (shaderName.Contains("Premultiply") || shaderName.Contains("Alpha Blended"))
 		{

@@ -160,6 +160,12 @@ public class VisceralEntry : BaseUnityPlugin
 
 	public ConfigEntry<bool> ForceReceiveShadows { get; set; }
 
+	public ConfigEntry<float> BloodReflection { get; set; }
+
+	public ConfigEntry<float> BloodMetallic { get; set; }
+
+	public ConfigEntry<bool> DisableReflectionProbes { get; set; }
+
 	public ConfigEntry<bool> BodyCollision { get; set; }
 
 	public ConfigEntry<bool> ItemForce { get; set; }
@@ -287,6 +293,10 @@ public class VisceralEntry : BaseUnityPlugin
 		DisableParticleTrails = ((BaseUnityPlugin)this).Config.Bind<bool>(debugCat, "Disable Particle Trails Module", false, "Desativa o modulo de rastros (trails) de sangue.");
 		ForceReceiveShadows = ((BaseUnityPlugin)this).Config.Bind<bool>(debugCat, "Force Receive Shadows & Cast Shadows", true, "Forca as particulas de sangue a receber sombras do mapa (evita brilho Unlit).");
 
+		BloodReflection = ((BaseUnityPlugin)this).Config.Bind<float>(debugCat, "Blood Cubemap / Skybox Reflection", 0f, new ConfigDescription("Intensidade do reflexo do mapa/ceu no sangue", new AcceptableValueRange<float>(0f, 1f)));
+		BloodMetallic = ((BaseUnityPlugin)this).Config.Bind<float>(debugCat, "Blood Metallic Factor", 0f, new ConfigDescription("Fator metalico do material de sangue", new AcceptableValueRange<float>(0f, 1f)));
+		DisableReflectionProbes = ((BaseUnityPlugin)this).Config.Bind<bool>(debugCat, "Disable Reflection Probes (Sky Reflection)", true, "Desativa o Reflection Probe do mapa na malha de sangue (elimina reflexo dourado do cenario).");
+
 		EventHandler bloodDebugSettingChanged = (sender, args) =>
 		{
 			VisceralCombat.Ragdolls.Classes.RagdollHelperClass.UpdateAllActiveBloodFxInScene();
@@ -312,6 +322,9 @@ public class VisceralEntry : BaseUnityPlugin
 		DisableColorOverLifetime.SettingChanged += bloodDebugSettingChanged;
 		DisableParticleTrails.SettingChanged += bloodDebugSettingChanged;
 		ForceReceiveShadows.SettingChanged += bloodDebugSettingChanged;
+		BloodReflection.SettingChanged += bloodDebugSettingChanged;
+		BloodMetallic.SettingChanged += bloodDebugSettingChanged;
+		DisableReflectionProbes.SettingChanged += bloodDebugSettingChanged;
 		((ModulePatch)new VisceralCombat.Dismemberment.Patches.GameStartedPatch()).Enable();
 		((ModulePatch)new KillPatch()).Enable();
 		((ModulePatch)new BleedPatch()).Enable();
