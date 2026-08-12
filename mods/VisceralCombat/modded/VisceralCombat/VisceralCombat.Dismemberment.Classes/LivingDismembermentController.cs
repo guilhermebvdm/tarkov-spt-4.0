@@ -125,7 +125,7 @@ public class LivingDismembermentController : MonoBehaviour
 			{
 				if (_player?.ActiveHealthController != null && _player.HealthController.IsAlive)
 				{
-					_player.ActiveHealthController.ApplyDamage(_dismemberedLeg, 10f, GClass3051.HeavyBleedingDamage);
+					_player.ActiveHealthController.ApplyDamage(_dismemberedLeg, 20f, GClass3051.HeavyBleedingDamage);
 				}
 			}
 			catch { }
