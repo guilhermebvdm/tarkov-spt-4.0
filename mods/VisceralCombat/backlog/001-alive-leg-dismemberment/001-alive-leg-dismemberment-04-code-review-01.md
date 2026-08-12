@@ -16,7 +16,7 @@
 
 | ID | Categoria | Impacto | Título | Status |
 | --- | --- | --- | --- | --- |
-| CR-01-01 | F — Melhoria opcional | 🟢 Menor | Expor a taxa de dano por sangramento em vida como ConfigEntry no BepInEx | Pendente |
+| CR-01-01 | F — Melhoria opcional | 🟢 Menor | Expor a taxa de dano por sangramento em vida como ConfigEntry no BepInEx | Rejeitado |
 
 ## Categorias
 
@@ -58,7 +58,9 @@ _player.ActiveHealthController.ApplyDamage(_dismemberedLeg, 10f, GClass3051.Heav
 - `[ ]` Pendente
 - `[ ]` Aceitar sugestão
 - `[ ]` Aceitar com modificação: _________________
-- `[ ]` Rejeitar (deferir / aceitar como dívida): _________________
+- `[x]` Rejeitar (deferir / aceitar como dívida): Mantido 10 HP/s direto no código como constante fixa.
+
+**Resolução:** Ponto rejeitado pelo usuário em 2026-08-11. Valor mantido fixo em 10 HP/s no código sem expor no F12.
 
 ---
 
