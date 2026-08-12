@@ -48,7 +48,6 @@ public class PlayerDetonationPatch : ModulePatch
 	{
 		GameObject val = BundleLoaderPlugin.Instance.GetAssetBundle("blood_3dfx").LoadAllAssets<GameObject>()[20];
 		GameObject ExtremeGoreObject = Object.Instantiate<GameObject>(val);
-		VisceralCombat.Ragdolls.Classes.RagdollHelperClass.ApplyLightIntensityToBloodObject(ExtremeGoreObject);
 		ExtremeGoreObject.transform.parent = go.transform;
 		ExtremeGoreObject.transform.localPosition = new Vector3(0f, 0f, 0f);
 		ExtremeGoreObject.transform.position = go.transform.position;

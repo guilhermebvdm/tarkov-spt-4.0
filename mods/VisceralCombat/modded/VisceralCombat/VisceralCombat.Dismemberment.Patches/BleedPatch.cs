@@ -145,7 +145,6 @@ public class BleedPatch : ModulePatch
 		if (val != null)
 		{
 			GameObject bloodParticleObject = Object.Instantiate<GameObject>(val);
-			RagdollHelperClass.ApplyLightIntensityToBloodObject(bloodParticleObject);
 			bloodParticleObject.AddComponent<ParticleFloorPainter>();
 			Transform rootParent = player != null && player.Transform?.Original != null ? player.Transform.Original : col.transform.root;
 			bloodParticleObject.transform.SetParent(rootParent, false);
@@ -198,7 +197,6 @@ public class BleedPatch : ModulePatch
 		if (val != null)
 		{
 			GameObject bloodParticleObject = Object.Instantiate<GameObject>(val);
-			RagdollHelperClass.ApplyLightIntensityToBloodObject(bloodParticleObject);
 			bloodParticleObject.AddComponent<ParticleFloorPainter>();
 			Player targetPlayer = col != null ? col.GetComponentInParent<Player>() : null;
 			Transform rootParent = targetPlayer != null && targetPlayer.Transform?.Original != null ? targetPlayer.Transform.Original : (col != null ? col.transform.root : null);

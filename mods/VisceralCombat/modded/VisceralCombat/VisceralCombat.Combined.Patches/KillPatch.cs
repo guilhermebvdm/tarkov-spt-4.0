@@ -563,7 +563,6 @@ public class KillPatch : ModulePatch
 			return;
 		}
 		GameObject val2 = Object.Instantiate<GameObject>(val);
-		RagdollHelperClass.ApplyLightIntensityToBloodObject(val2);
 		GameObject brainParticles = VisceralEntry.Instance.effectContainer.brainParticles;
 		if ((Object)(object)brainParticles == (Object)null)
 		{
@@ -572,7 +571,6 @@ public class KillPatch : ModulePatch
 			return;
 		}
 		GameObject brainObject = Object.Instantiate<GameObject>(brainParticles);
-		RagdollHelperClass.ApplyLightIntensityToBloodObject(brainObject);
 		BFX_BloodSettings component = val2.GetComponent<BFX_BloodSettings>();
 		val2.transform.position = target.position;
 		float num2 = VisceralEntry.Instance.BloodSplatterSize.Value * Scale;
@@ -612,7 +610,6 @@ public class KillPatch : ModulePatch
 			return;
 
 		GameObject bloodParticleObject = Object.Instantiate<GameObject>(VisceralEntry.Instance.effectContainer.limbSquirter);
-		RagdollHelperClass.ApplyLightIntensityToBloodObject(bloodParticleObject);
 		bloodParticleObject.AddComponent<ParticleFloorPainter>();
 		Transform targetParent = ((Component)target).transform.parent != null ? ((Component)target).transform.parent : ((Component)target).transform;
 		bloodParticleObject.transform.SetParent(targetParent, false);
