@@ -116,7 +116,7 @@ public class LivingDismembermentController : MonoBehaviour
 		// 1. Re-assert prone lock every frame
 		ForceProneLock();
 
-		// 2. Ensure HeavyBleeding is active and apply 35 HP bleed damage per second to accelerate death (making AI healing useless)
+		// 2. Ensure HeavyBleeding is active and apply 10 HP bleed damage per second (allows bot time to crawl & leave trail while outpacing healing)
 		if (Time.time >= _nextBleedCheck)
 		{
 			_nextBleedCheck = Time.time + 1.0f;
@@ -125,7 +125,7 @@ public class LivingDismembermentController : MonoBehaviour
 			{
 				if (_player?.ActiveHealthController != null && _player.HealthController.IsAlive)
 				{
-					_player.ActiveHealthController.ApplyDamage(_dismemberedLeg, 35f, GClass3051.HeavyBleedingDamage);
+					_player.ActiveHealthController.ApplyDamage(_dismemberedLeg, 10f, GClass3051.HeavyBleedingDamage);
 				}
 			}
 			catch { }
