@@ -66,6 +66,7 @@ public class KillPatch : ModulePatch
 			deadPlayers.Add(__instance, 0);
 		}
 
+		AmmoTemplate currentAmmoTemplate = null;
 		string caliber = null;
 		if (!string.IsNullOrEmpty(damageInfo.SourceId) && Singleton<ItemFactoryClass>.Instantiated && Singleton<ItemFactoryClass>.Instance.ItemTemplates != null)
 		{
@@ -73,6 +74,7 @@ public class KillPatch : ModulePatch
 			{
 				if (itemTemplate is AmmoTemplate ammoTemplate)
 				{
+					currentAmmoTemplate = ammoTemplate;
 					caliber = ammoTemplate.Caliber;
 				}
 			}
@@ -89,11 +91,26 @@ public class KillPatch : ModulePatch
 			dismemberChance = chance;
 		}
 
+		bool isHeavyNoAgony = IsHeavyCaliberNoAgony(caliber, currentAmmoTemplate);
+
 		if ((int)damageInfo.DamageType != 2048 && (int)damageInfo.DamageType != 4 && (int)damageInfo.DamageType != 32 && (int)damageInfo.DamageType != 8 && (int)damageInfo.DamageType != 16 && (int)damageInfo.DamageType != 8192)
 		{
 			if (Random.value > dismemberChance)
 			{
-				if (isFirstDeath && VisceralEntry.Instance.UseActiveRagdolls.Value && (FikaBackendUtils.IsServer || FikaBackendUtils.IsSinglePlayer))
+				if (isHeavyNoAgony)
+				{
+					// Heavy caliber fatal kill: block agony animation so the corpse reacts pure physically to shot impulse
+					PuppetMaster pm = __instance.gameObject.GetComponentInChildren<PuppetMaster>(true);
+					if (pm != null)
+					{
+						RagdollHelperClass.InterruptAgony(__instance, pm);
+					}
+					else if (__instance.BodyAnimatorCommon != null)
+					{
+						__instance.BodyAnimatorCommon.enabled = false;
+					}
+				}
+				else if (isFirstDeath && VisceralEntry.Instance.UseActiveRagdolls.Value && (FikaBackendUtils.IsServer || FikaBackendUtils.IsSinglePlayer))
 				{
 					if (!VisceralEntry.Instance.OnlyPlayersCanActiveRagdollEnemies.Value || !damageInfo.Player.IsAI)
 					{
@@ -147,6 +164,7 @@ public class KillPatch : ModulePatch
 			bool isLimbDismember = (int)bodyPartType == 3 || (int)bodyPartType == 4
 			                    || (int)bodyPartType == 5 || (int)bodyPartType == 6;
 			if (isLimbDismember
+			    && !isHeavyNoAgony
 			    && isFirstDeath
 			    && VisceralEntry.Instance.UseActiveRagdolls.Value
 			    && (FikaBackendUtils.IsServer || FikaBackendUtils.IsSinglePlayer)
@@ -616,5 +634,37 @@ public class KillPatch : ModulePatch
 		{
 			Object.Destroy((Object)(object)bloodParticleObject);
 		});
+	}
+
+	private static bool IsHeavyCaliberNoAgony(string caliber, AmmoTemplate ammo)
+	{
+		if (ammo != null)
+		{
+			float massKg = (ammo.BulletMassGram > 0f) ? (ammo.BulletMassGram / 1000f) : 0.008f;
+			float speed = (ammo.InitialSpeed > 0f) ? ammo.InitialSpeed : 400f;
+			float rawMomentum = massKg * speed; // p = m * v in N.s
+			if (rawMomentum >= 5.0f)
+			{
+				return true;
+			}
+		}
+
+		if (string.IsNullOrEmpty(caliber)) return false;
+		string c = caliber.StartsWith("Caliber") ? caliber.Substring(7) : caliber;
+
+		if (c == "86x70" || c == "20g" || c == "23x75" || c == "40x46" || c == "127x108" || c == "12.7x99" || c == "127x55" || c == "30x29")
+		{
+			return true;
+		}
+
+		if (c == "12g" && ammo != null)
+		{
+			if (ammo.ProjectileCount <= 1 || ammo.BulletMassGram > 15f || (ammo.Name != null && ammo.Name.ToLower().Contains("slug")))
+			{
+				return true;
+			}
+		}
+
+		return false;
 	}
 }

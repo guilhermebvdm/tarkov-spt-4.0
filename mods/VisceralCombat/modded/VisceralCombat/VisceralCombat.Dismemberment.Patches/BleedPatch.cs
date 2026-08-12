@@ -122,7 +122,7 @@ public class BleedPatch : ModulePatch
 
 	public static void HitEffect(Player player, Collider col, EftBulletClass shot, bool isAlive, float time, int bundleIndex)
 	{
-		if (VisceralEntry.Instance?.effectContainer == null) return;
+		if (VisceralEntry.Instance == null || !VisceralEntry.Instance.EnableBloodEffects.Value || VisceralEntry.Instance.effectContainer == null) return;
 		EffectContainer container = VisceralEntry.Instance.effectContainer;
 
 		GameObject val = null;
@@ -174,7 +174,7 @@ public class BleedPatch : ModulePatch
 
 	public static void BleedEffect(Collider col, EftBulletClass shot, bool isAlive, float chance, float time, int bundleIndex)
 	{
-		if (chance < 8f || VisceralEntry.Instance?.effectContainer == null) return;
+		if (chance < 8f || VisceralEntry.Instance == null || !VisceralEntry.Instance.EnableBloodEffects.Value || !VisceralEntry.Instance.ArterySpray.Value || VisceralEntry.Instance.effectContainer == null) return;
 		EffectContainer container = VisceralEntry.Instance.effectContainer;
 
 		GameObject val = null;
