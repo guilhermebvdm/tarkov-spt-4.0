@@ -27,7 +27,7 @@ public static class RagdollHelperClass
 
 	private static float Anim_Stomach2_Length = 7f;
 
-	internal static Vector3 limbSize = new Vector3(0.001f, 0.001f, 0.001f);
+	internal static Vector3 limbSize = new Vector3(0.01f, 0.01f, 0.01f);
 
 	/// <summary>
 	/// Zeroes the muscle weight of muscles belonging to a dismembered limb so that
