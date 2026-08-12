@@ -2,11 +2,39 @@
 
 ## Snapshot Delta
 - **Versão:** 3.8.2 (SPT 4.0 / FIKA 2.2.6)
-- **Estado:** Compilação 100% limpa em C# 12 (0 erros). Feature de desmembramento de perna em bots vivos (`LivingDismembermentController`) totalmente entregue e testada. Física de impacto em ragdolls unificada sob momento linear universal ($p = m \cdot v$).
-- **Origem dos Bugs de Gigantismo/Inflamento:** Todos os episódios de "gigantismo" e "corpo inflando" foram causados por código experimental no `modded/` durante a refatoração de agonia/músculos. Corrigidos por nós — **não vieram do mod original.**
-- **Pendências:** 🟢 Nenhuma pendência aberta. Item 001 (`001-alive-leg-dismemberment`) concluído e entregue.
+- **Estado:** Compilação 100% limpa em C# 12 (0 erros). Físicas de impacto reduzidas por fator universal de 0.25x. Tiros fatais de calibres pesados (>= 5 N.s) bloqueiam animação de agonia. Dano de exsanguição ajustado para 20f HP/s. Materiais originais de sangue preservados intactos. Nuvem de sangue de impacto (vanilla) ajustável via F12. Tiros em placas de colete/capacete substituem sangue por faíscas metálicas nativas.
+- **Pendências:** 🟢 Nenhuma pendência aberta.
 
 ---
+
+## 2026-08-12 10:00 (GMT-3) — Sessão 2026-08-12: Balanceamento 0.25x, Bloqueio de Agonia, Exsanguição 20f, Nuvem Vanilla e Faíscas em Coletes
+
+**Tema central:** Balanceamento fino do impulso de ragdolls (fator 0.25x), remoção de agonia em mortes por calibres pesados, ajuste de dano de sangramento para 20f HP/s, reversão completa de overrides de materiais de sangue e implementação dos controles de nuvem vanilla e faíscas de colete.
+
+**Decisões-chave:**
+- **Massa de Chumbinho de Calibre 12 Corrigida:** Removida divisão duplicada `/ projectileCount` em `BodiesImpulsePatch.cs`.
+- **Fator Redutor de Impulso 0.25x:** Aplicado multiplicador `0.25f` no momento linear $p = m \cdot v$ em `BodiesImpulsePatch.cs`, reduzindo a projeção do cadáver para valores altamente realistas.
+- **Bloqueio de Animação de Agonia em Kills Fatais por Calibres Pesados:** Em `KillPatch.cs`, mortes fatais com calibres pesados (.338 Lapua, 12g/20g Slugs, 23x75mm, 40x46mm, .50 BMG, 30x29mm) ou $p_{\text{raw}} \ge 5.0\text{ N}\cdot\text{s}$ chamam `InterruptAgony` diretamente, permitindo movimentação física imediata do corpo.
+- **Toggle "Arterial Spraying":** Adicionado cheque `!ArterySpray.Value` em `BleedPatch.cs` para pausar jorros de sangue ao desativar a opção no F12.
+- **Dano de Exsanguição (20f HP/s):** Alterado dano em `LivingDismembermentController.cs` para `20f`. Validação em `ActiveHealthController.cs` provou que a Unity aplica o `OverDamageFactor` ($\sim 0,7$) em membros destruídos, resultando em perda líquida real de $\sim 14$ HP/s de vida total.
+- **Reversão de Materiais de Sangue:** Revertidas todas as alterações de materiais/shaders via C# para manter 100% dos shaders e transparências originais do mod intactos sem quads pretos.
+- **Ajuste F12 da Nuvem de Sangue (Vanilla):** Adicionadas configurações BepInEx em `VisceralEntry.cs` (`EnableImpactBloodCloud`, `ImpactBloodCloudParticleCount`, `ImpactBloodCloudScale`) que atuam sobre o `Systems.Effects.Effects.Instance` para `MaterialType.Body`.
+- **Faíscas Metálicas ao Atingir Placa de Colete/Capacete:** Em `BleedPatch.cs`, tiros que atingem placas de blindagem (`HitArmorItemID != null`) ou capacetes/metais desativam a nuvem de sangue e disparam o efeito nativo de faíscas metálicas (`MaterialType.MetalThick`).
+
+**Lições / hipóteses descartadas:**
+- *Overdamage Factor no Tarkov:* Danos aplicados a membros já destruídos (HP = 0) sofrem uma redução de $\sim 30\%$ via `OverDamageFactor` na redistribuição de dano para o restante do corpo do bot.
+- *MaterialPropertyBlock em VolumetricBloodFX:* Modificar materiais/shaders via C# não sobrescreve os `MaterialPropertyBlock` aplicados no `Update()` das partículas pelo `VolumetricBloodFX`. Restaurar os materiais originais foi a solução mais estável.
+
+**Atividade cronológica:**
+1. Ajustada massa de calibre 12 e aplicado fator `0.25f` de impulso em `BodiesImpulsePatch.cs`.
+2. Adicionada verificação de `!ArterySpray.Value` em `BleedPatch.cs`.
+3. Implementado filtro `IsHeavyCaliberNoAgony` em `KillPatch.cs`.
+4. Analisado erro de stack trace `BotWeaponManager.UpdateHandsController` e entregue laudo.
+5. Ajustado dano de exsanguição para `20f` em `LivingDismembermentController.cs`.
+6. Revertidos os testes de alteração de cor/shader de sangue para preservar o material original.
+7. Investigado `references/eft-decompiled` para a nuvem de sangue vanilla (`Systems.Effects.Effects.cs`) e faíscas metálicas.
+8. Criadas propriedades BepInEx e rotinas de injeção para nuvem de impacto e faíscas em placas de colete.
+9. Recompilado o mod e realizado commit git (`ebaf7a1f`).
 
 ## 2026-08-11 22:37 (GMT-3) — Sessão 2026-08-11: Física de Impacto Realista, Fix de LookRotation e Finalização da Spec 001
 
