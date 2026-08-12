@@ -101,12 +101,11 @@ public class BodiesImpulsePatch : ModulePatch
 		Rigidbody rb = hitCollider.attachedRigidbody;
 		if (rb == null) return;
 
-		// Calculate realistic physical momentum: p = m * v (mass in kg * speed in m/s)
+		// Calculate realistic physical momentum: p = m * v (mass in kg * speed in m/s) with 0.5f scale (divided by 2 for natural ragdoll movement)
 		float massKg = (shot.BulletMassGram > 0f) ? (shot.BulletMassGram / 1000f) : 0.008f; // Default 8g fallback
 		float speed = (shot.Speed > 0f) ? shot.Speed : 400f; // Default 400 m/s fallback
-		int projectileCount = (shot.Ammo is AmmoItemClass ammoItem) ? Mathf.Max(ammoItem.ProjectileCount, 1) : 1;
 
-		float physicalImpulse = (massKg * speed) / projectileCount; // Linear momentum in N.s
+		float physicalImpulse = (massKg * speed) * 0.5f; // Linear momentum in N.s (scaled by 0.5)
 
 		// Check if hitting dropped loot item
 		if (rb.gameObject.GetComponent<ObservedLootItem>() != null)
