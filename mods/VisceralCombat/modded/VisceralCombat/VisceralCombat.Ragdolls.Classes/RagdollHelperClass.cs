@@ -527,6 +527,17 @@ public static class RagdollHelperClass
 	private static void ApplyMaterialSettings(Material mat, Color darkBlood, Color darkBloodPremultiply, Color emissionColor, float emission, Color specColor, float smoothness, Color rimColor, float rimPower, Color fresnelColor, float fresnelPower, float reflection, float metallic)
 	{
 		if (mat == null) return;
+
+		string shaderOverride = VisceralEntry.Instance != null && VisceralEntry.Instance.BloodShaderOverride != null ? VisceralEntry.Instance.BloodShaderOverride.Value : "Original";
+		if (!string.IsNullOrEmpty(shaderOverride) && shaderOverride != "Original")
+		{
+			Shader newShader = Shader.Find(shaderOverride);
+			if (newShader != null && mat.shader != newShader)
+			{
+				mat.shader = newShader;
+			}
+		}
+
 		string shaderName = mat.shader != null ? mat.shader.name : string.Empty;
 
 		if (mat.HasProperty("_EmissionColor"))

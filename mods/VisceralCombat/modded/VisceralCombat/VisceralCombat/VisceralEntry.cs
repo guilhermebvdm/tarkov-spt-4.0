@@ -166,6 +166,8 @@ public class VisceralEntry : BaseUnityPlugin
 
 	public ConfigEntry<bool> DisableReflectionProbes { get; set; }
 
+	public ConfigEntry<string> BloodShaderOverride { get; set; }
+
 	public ConfigEntry<bool> BodyCollision { get; set; }
 
 	public ConfigEntry<bool> ItemForce { get; set; }
@@ -296,6 +298,7 @@ public class VisceralEntry : BaseUnityPlugin
 		BloodReflection = ((BaseUnityPlugin)this).Config.Bind<float>(debugCat, "Blood Cubemap / Skybox Reflection", 0f, new ConfigDescription("Intensidade do reflexo do mapa/ceu no sangue", new AcceptableValueRange<float>(0f, 1f)));
 		BloodMetallic = ((BaseUnityPlugin)this).Config.Bind<float>(debugCat, "Blood Metallic Factor", 0f, new ConfigDescription("Fator metalico do material de sangue", new AcceptableValueRange<float>(0f, 1f)));
 		DisableReflectionProbes = ((BaseUnityPlugin)this).Config.Bind<bool>(debugCat, "Disable Reflection Probes (Sky Reflection)", true, "Desativa o Reflection Probe do mapa na malha de sangue (elimina reflexo dourado do cenario).");
+		BloodShaderOverride = ((BaseUnityPlugin)this).Config.Bind<string>(debugCat, "Blood Shader Override", "Original", new ConfigDescription("Troca o shader de sangue por um limpo/fosco sem reflexo de cenario.", new AcceptableValueList<string>(new string[] { "Original", "Sprites/Default", "Unlit/Transparent", "Legacy Shaders/Transparent/Diffuse", "Standard" })));
 
 		EventHandler bloodDebugSettingChanged = (sender, args) =>
 		{
@@ -325,6 +328,7 @@ public class VisceralEntry : BaseUnityPlugin
 		BloodReflection.SettingChanged += bloodDebugSettingChanged;
 		BloodMetallic.SettingChanged += bloodDebugSettingChanged;
 		DisableReflectionProbes.SettingChanged += bloodDebugSettingChanged;
+		BloodShaderOverride.SettingChanged += bloodDebugSettingChanged;
 		((ModulePatch)new VisceralCombat.Dismemberment.Patches.GameStartedPatch()).Enable();
 		((ModulePatch)new KillPatch()).Enable();
 		((ModulePatch)new BleedPatch()).Enable();
