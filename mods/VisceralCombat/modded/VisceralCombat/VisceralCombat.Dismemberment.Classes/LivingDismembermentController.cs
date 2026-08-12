@@ -22,6 +22,7 @@ public class LivingDismembermentController : MonoBehaviour
 	private EBodyPart _dismemberedLeg;
 
 	private float _nextBleedCheck;
+	private float _nextDecalTick;
 	private float _nextVoiceTick;
 	private bool _isInitialized;
 
@@ -53,6 +54,7 @@ public class LivingDismembermentController : MonoBehaviour
 		_botOwner = player.AIData?.BotOwner;
 
 		_nextBleedCheck = Time.time;
+		_nextDecalTick = Time.time;
 		_nextVoiceTick = Time.time + 2.0f;
 		_isInitialized = true;
 
@@ -121,12 +123,35 @@ public class LivingDismembermentController : MonoBehaviour
 			EnsureNativeHeavyBleeding();
 		}
 
-		// 3. Periodic agony voice (every 8-14s)
+		// 3. 5x faster visual floor blood decal trail (every 0.2s) without increasing HP damage
+		if (Time.time >= _nextDecalTick)
+		{
+			_nextDecalTick = Time.time + 0.2f;
+			EmitVisualFloorDecal();
+		}
+
+		// 4. Periodic agony voice (every 8-14s)
 		if (Time.time >= _nextVoiceTick)
 		{
 			_nextVoiceTick = Time.time + Random.Range(8.0f, 14.0f);
 			PlayAgonyVoice();
 		}
+	}
+
+	private void EmitVisualFloorDecal()
+	{
+		try
+		{
+			if (Singleton<Systems.Effects.Effects>.Instantiated && _player != null)
+			{
+				Vector3 origin = _player.Position + Vector3.up * 0.5f;
+				if (Physics.Raycast(origin, Vector3.down, out RaycastHit hit, 3f, EFTHardSettings.Instance.ENVIRONMENT_HIT_MASK))
+				{
+					Singleton<Systems.Effects.Effects>.Instance.EmitBleeding(hit.point, hit.normal);
+				}
+			}
+		}
+		catch { }
 	}
 
 	private void PlayAgonyVoice()
