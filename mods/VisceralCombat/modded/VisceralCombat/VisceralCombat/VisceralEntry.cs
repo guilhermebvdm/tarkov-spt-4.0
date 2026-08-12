@@ -118,6 +118,14 @@ public class VisceralEntry : BaseUnityPlugin
 
 	public ConfigEntry<bool> UseOldBloodDecal { get; set; }
 
+	public ConfigEntry<bool> EnableImpactBloodCloud { get; set; }
+
+	public ConfigEntry<int> ImpactBloodCloudParticleCount { get; set; }
+
+	public ConfigEntry<float> ImpactBloodCloudScale { get; set; }
+
+	public ConfigEntry<bool> EnableArmorSparks { get; set; }
+
 	public ConfigEntry<bool> BodyCollision { get; set; }
 
 	public ConfigEntry<bool> ItemForce { get; set; }
@@ -218,6 +226,21 @@ public class VisceralEntry : BaseUnityPlugin
 				Order = 3
 			}
 		}));
+
+		string cloudCat = "Blood | Impact Cloud";
+		EnableImpactBloodCloud = ((BaseUnityPlugin)this).Config.Bind<bool>(cloudCat, "Enable Impact Blood Cloud", true, "Ativa/desativa a nuvem vermelha instantanea de impacto de bala (vanilla).");
+		ImpactBloodCloudParticleCount = ((BaseUnityPlugin)this).Config.Bind<int>(cloudCat, "Blood Cloud Particle Count", 10, new ConfigDescription("Quantidade de particulas na nuvem de sangue de impacto.", new AcceptableValueRange<int>(0, 50)));
+		ImpactBloodCloudScale = ((BaseUnityPlugin)this).Config.Bind<float>(cloudCat, "Blood Cloud Scale", 1.0f, new ConfigDescription("Escala/tamanho da nuvem de sangue de impacto.", new AcceptableValueRange<float>(0.1f, 5.0f)));
+		EnableArmorSparks = ((BaseUnityPlugin)this).Config.Bind<bool>(cloudCat, "Enable Armor Plate Metal Sparks", true, "Substitui o sangue por faiscas metalicas ao acertar placas de colete e capacetes.");
+
+		EventHandler cloudSettingChanged = (sender, args) =>
+		{
+			VisceralCombat.Ragdolls.Classes.RagdollHelperClass.ApplyBloodCloudSettings();
+		};
+		EnableImpactBloodCloud.SettingChanged += cloudSettingChanged;
+		ImpactBloodCloudParticleCount.SettingChanged += cloudSettingChanged;
+		ImpactBloodCloudScale.SettingChanged += cloudSettingChanged;
+
 		((ModulePatch)new VisceralCombat.Dismemberment.Patches.GameStartedPatch()).Enable();
 		((ModulePatch)new KillPatch()).Enable();
 		((ModulePatch)new BleedPatch()).Enable();

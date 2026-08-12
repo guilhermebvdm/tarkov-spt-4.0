@@ -90,6 +90,20 @@ public class BleedPatch : ModulePatch
 		Player targetPlayer = VisceralCombat.Dismemberment.Classes.Utils.GetComponentInParentRecursive<Player>(colGO);
 		if (targetPlayer != null)
 		{
+			if (IsArmorOrPlateHit(shot))
+			{
+				if (VisceralEntry.Instance != null && VisceralEntry.Instance.EnableArmorSparks != null && VisceralEntry.Instance.EnableArmorSparks.Value)
+				{
+					if (Singleton<Effects>.Instantiated && shot.HittedBallisticCollider != null)
+					{
+						Singleton<Effects>.Instance.Emit(EFT.Ballistics.MaterialType.MetalThick, shot.HittedBallisticCollider, shot.HitPoint, shot.HitNormal);
+					}
+				}
+				return;
+			}
+
+			VisceralCombat.Ragdolls.Classes.RagdollHelperClass.ApplyBloodCloudSettings();
+
 			List<BodyRendererDataStruct> renderers = Traverse.Create(targetPlayer).Field<List<BodyRendererDataStruct>>("_preAllocatedRenderersList").Value;
 			if (renderers != null && renderers.Count > 0 && Singleton<Effects>.Instantiated)
 			{
@@ -118,6 +132,24 @@ public class BleedPatch : ModulePatch
 				BleedEffect(col, shot, isAlive, diceRoll, randomTime, (bloodIndex <= 7) ? 10 : 11);
 			}
 		}
+	}
+
+	public static bool IsArmorOrPlateHit(EftBulletClass shot)
+	{
+		if (shot == null) return false;
+		if (shot.HitArmorItemID != null && !string.IsNullOrEmpty(shot.HitArmorItemID.Value))
+		{
+			return true;
+		}
+		if (shot.HittedBallisticCollider != null)
+		{
+			EFT.Ballistics.MaterialType mat = shot.HittedBallisticCollider.TypeOfMaterial;
+			if (mat == EFT.Ballistics.MaterialType.BodyArmor || mat == EFT.Ballistics.MaterialType.Helmet || mat == EFT.Ballistics.MaterialType.HelmetRicochet || mat == EFT.Ballistics.MaterialType.MetalThick || mat == EFT.Ballistics.MaterialType.MetalThin || mat == EFT.Ballistics.MaterialType.MetalNoDecal)
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public static void HitEffect(Player player, Collider col, EftBulletClass shot, bool isAlive, float time, int bundleIndex)

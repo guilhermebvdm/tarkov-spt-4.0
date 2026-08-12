@@ -442,6 +442,45 @@ public static class RagdollHelperClass
 	{
 		// Restored to original mod behavior: materials and shaders are preserved untouched
 	}
+
+	public static void ApplyBloodCloudSettings()
+	{
+		if (VisceralEntry.Instance == null || !Comfort.Common.Singleton<Systems.Effects.Effects>.Instantiated) return;
+
+		bool enabled = VisceralEntry.Instance.EnableImpactBloodCloud != null ? VisceralEntry.Instance.EnableImpactBloodCloud.Value : true;
+		int particleCount = VisceralEntry.Instance.ImpactBloodCloudParticleCount != null ? VisceralEntry.Instance.ImpactBloodCloudParticleCount.Value : 10;
+		float scaleMult = VisceralEntry.Instance.ImpactBloodCloudScale != null ? VisceralEntry.Instance.ImpactBloodCloudScale.Value : 1.0f;
+
+		var effectsManager = Comfort.Common.Singleton<Systems.Effects.Effects>.Instance;
+		if (effectsManager == null || effectsManager.EffectsArray == null) return;
+
+		foreach (var effect in effectsManager.EffectsArray)
+		{
+			if (effect == null || effect.MaterialTypes == null) continue;
+			if (System.Array.IndexOf(effect.MaterialTypes, EFT.Ballistics.MaterialType.Body) >= 0)
+			{
+				if (effect.Particles != null)
+				{
+					foreach (var ps in effect.Particles)
+					{
+						if (ps == null) continue;
+						if (!enabled)
+						{
+							ps.MinCount = 0;
+							ps.RandomCountRange = 0;
+						}
+						else
+						{
+							ps.MinCount = particleCount;
+							ps.RandomCountRange = particleCount / 2;
+							ps.UseRandomScale = true;
+							ps.RandomScale = new Vector3(scaleMult, scaleMult, scaleMult);
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 /// <summary>
