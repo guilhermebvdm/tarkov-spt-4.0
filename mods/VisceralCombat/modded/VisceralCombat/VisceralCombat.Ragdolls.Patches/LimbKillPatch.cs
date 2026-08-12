@@ -103,10 +103,6 @@ public class LimbKillPatch : ModulePatch
 			if (pm.mappingWeight > 0.05f)
 			{
 				RagdollHelperClass.InterruptAgony(player, pm);
-				if (rb != null && !rb.isKinematic)
-				{
-					rb.AddForceAtPosition(shot.Direction * (shot.Speed * 0.15f), shot.HitPoint, ForceMode.Impulse);
-				}
 			}
 		}
 
