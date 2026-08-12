@@ -146,9 +146,10 @@ public class BleedPatch : ModulePatch
 		{
 			GameObject bloodParticleObject = Object.Instantiate<GameObject>(val);
 			bloodParticleObject.AddComponent<ParticleFloorPainter>();
-			Transform parentToUse = col.transform.parent != null ? col.transform.parent : col.transform;
-			bloodParticleObject.transform.SetParent(parentToUse, false);
+			Transform rootParent = player != null && player.Transform?.Original != null ? player.Transform.Original : col.transform.root;
+			bloodParticleObject.transform.SetParent(rootParent, false);
 			bloodParticleObject.transform.position = shot.HitPoint;
+			bloodParticleObject.transform.localScale = Vector3.one;
 
 			Vector3 hitNorm1 = -shot.HitNormal;
 			if (hitNorm1.sqrMagnitude < 0.001f) hitNorm1 = Vector3.forward;
@@ -197,9 +198,14 @@ public class BleedPatch : ModulePatch
 		{
 			GameObject bloodParticleObject = Object.Instantiate<GameObject>(val);
 			bloodParticleObject.AddComponent<ParticleFloorPainter>();
-			Transform parentToUse2 = col.transform.parent != null ? col.transform.parent : col.transform;
-			bloodParticleObject.transform.SetParent(parentToUse2, false);
+			Player targetPlayer = col != null ? col.GetComponentInParent<Player>() : null;
+			Transform rootParent = targetPlayer != null && targetPlayer.Transform?.Original != null ? targetPlayer.Transform.Original : (col != null ? col.transform.root : null);
+			if (rootParent != null)
+			{
+				bloodParticleObject.transform.SetParent(rootParent, false);
+			}
 			bloodParticleObject.transform.position = shot.HitPoint;
+			bloodParticleObject.transform.localScale = Vector3.one;
 
 			Vector3 hitNorm2 = -shot.HitNormal;
 			if (hitNorm2.sqrMagnitude < 0.001f) hitNorm2 = Vector3.forward;

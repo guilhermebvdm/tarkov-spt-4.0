@@ -248,9 +248,10 @@ public class KillPatch : ModulePatch
 						{
 							Vector3 worldPos = child.position;
 							Quaternion worldRot = child.rotation;
-							child.SetParent(tBranch.parent, true);
+							child.SetParent(tBranch.parent, false);
 							child.position = worldPos;
 							child.rotation = worldRot;
+							child.localScale = Vector3.one;
 						}
 					}
 
@@ -324,6 +325,28 @@ public class KillPatch : ModulePatch
 						// Also scale ragdoll rigidbody transform to 0.001f if separate from animated target transform
 						if (m.rigidbody != null && m.rigidbody.transform != null && m.rigidbody.transform != val)
 						{
+							// Reparent any attached blood particle systems on ragdoll bone before scaling
+							List<Transform> rbChildrenToReparent = new List<Transform>();
+							foreach (Transform rbChild in m.rigidbody.transform)
+							{
+								if (rbChild != null && rbChild != m.rigidbody.transform && rbChild.GetComponentInChildren<ParticleSystem>() != null)
+								{
+									rbChildrenToReparent.Add(rbChild);
+								}
+							}
+							foreach (Transform rbChild in rbChildrenToReparent)
+							{
+								if (m.rigidbody.transform.parent != null)
+								{
+									Vector3 wPos = rbChild.position;
+									Quaternion wRot = rbChild.rotation;
+									rbChild.SetParent(m.rigidbody.transform.parent, false);
+									rbChild.position = wPos;
+									rbChild.rotation = wRot;
+									rbChild.localScale = Vector3.one;
+								}
+							}
+
 							m.rigidbody.transform.localScale = RagdollHelperClass.limbSize;
 							if (m.rigidbody.transform.gameObject.GetComponent<DismemberedLimbScaler>() == null)
 							{
@@ -570,16 +593,11 @@ public class KillPatch : ModulePatch
 
 		GameObject bloodParticleObject = Object.Instantiate<GameObject>(VisceralEntry.Instance.effectContainer.limbSquirter);
 		bloodParticleObject.AddComponent<ParticleFloorPainter>();
-		if (((Component)target).transform.localScale.x <= 0.01f)
-		{
-			bloodParticleObject.transform.parent = ((Component)target).transform.parent;
-		}
-		else
-		{
-			bloodParticleObject.transform.parent = ((Component)target).transform;
-		}
+		Transform targetParent = ((Component)target).transform.parent != null ? ((Component)target).transform.parent : ((Component)target).transform;
+		bloodParticleObject.transform.SetParent(targetParent, false);
 		bloodParticleObject.transform.position = ((Component)target).transform.position;
 		bloodParticleObject.transform.rotation = Quaternion.Euler(-90f, 0f, 0f);
+		bloodParticleObject.transform.localScale = Vector3.one;
 		ParticleSystem[] componentsInChildren = bloodParticleObject.GetComponentsInChildren<ParticleSystem>();
 		float num = Random.Range(VisceralEntry.Instance.ArterySprayMin.Value, VisceralEntry.Instance.ArterySprayMax.Value);
 		ParticleSystem[] array = componentsInChildren;
