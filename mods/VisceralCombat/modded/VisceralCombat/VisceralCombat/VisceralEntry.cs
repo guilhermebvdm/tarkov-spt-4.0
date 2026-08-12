@@ -167,50 +167,6 @@ public class VisceralEntry : BaseUnityPlugin
 		Instance = this;
 		LogSource = Logger;
 
-		Application.logMessageReceived += (condition, stackTrace, type) =>
-		{
-			if (!string.IsNullOrEmpty(condition) && condition.Contains("Look rotation viewing vector is zero"))
-			{
-				QuickLogger.Log(ELogType.Error, $"[SPY-LOOKROT] Unity Warning Captured: '{condition}'");
-				try
-				{
-					// 1. Scan ParticleSystems
-					ParticleSystem[] allPs = UnityEngine.Object.FindObjectsOfType<ParticleSystem>();
-					int suspectPsCount = 0;
-					foreach (ParticleSystem ps in allPs)
-					{
-						if (ps == null || !ps.isPlaying) continue;
-
-						Vector3 lScale = ps.transform.lossyScale;
-						Vector3 locScale = ps.transform.localScale;
-						string pName = ps.transform.parent != null ? ps.transform.parent.name : "null";
-
-						if (lScale.magnitude < 0.05f || locScale.magnitude < 0.05f || ps.transform.forward.sqrMagnitude < 0.001f)
-						{
-							suspectPsCount++;
-							QuickLogger.Log(ELogType.Error, $"[SPY-LOOKROT-PS #{suspectPsCount}] PS: '{ps.name}', GO: '{ps.gameObject.name}', Parent: '{pName}', lossyScale: {lScale}, localScale: {locScale}");
-						}
-					}
-
-					// 2. Scan PuppetMasters / Ragdolls
-					VisceralCombat.Ragdolls.Classes.RootMotion.Dynamics.PuppetMaster[] allPm = UnityEngine.Object.FindObjectsOfType<VisceralCombat.Ragdolls.Classes.RootMotion.Dynamics.PuppetMaster>();
-					int suspectPmCount = 0;
-					foreach (var pm in allPm)
-					{
-						if (pm == null || !pm.enabled) continue;
-						suspectPmCount++;
-						QuickLogger.Log(ELogType.Warn, $"[SPY-LOOKROT-PM #{suspectPmCount}] PM on '{pm.gameObject.name}', state: {pm.state}, mappingWeight: {pm.mappingWeight}, pinWeight: {pm.pinWeight}");
-					}
-
-					if (suspectPsCount == 0 && suspectPmCount == 0)
-					{
-						QuickLogger.Log(ELogType.Warn, $"[SPY-LOOKROT] Scan finished: No suspect PS (<0.05 scale) or active PM found. Warning likely comes from Tarkov native C++ animator/bone solver.");
-					}
-				}
-				catch { }
-			}
-		};
-
 		EnableDismemberment = ((BaseUnityPlugin)this).Config.Bind<bool>("Dismemberment", "Dismemberment Enabled", true, new ConfigDescription("Disables literally EVERYTHING for dismemberment.", (AcceptableValueBase)null, new object[1]
 		{
 			new ConfigurationManagerAttributes
