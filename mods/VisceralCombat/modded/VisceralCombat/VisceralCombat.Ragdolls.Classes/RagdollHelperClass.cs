@@ -442,6 +442,23 @@ public static class RagdollHelperClass
 	{
 		// Restored to original mod behavior: materials and shaders are preserved untouched
 	}
+
+	public static void ApplyLightIntensityToBloodObject(GameObject go)
+	{
+		if (go == null) return;
+		float lightMult = VisceralEntry.Instance != null && VisceralEntry.Instance.BloodLightIntensity != null ? VisceralEntry.Instance.BloodLightIntensity.Value : 0.35f;
+		BFX_BloodSettings[] bfxSettings = go.GetComponentsInChildren<BFX_BloodSettings>(true);
+		if (bfxSettings != null)
+		{
+			foreach (BFX_BloodSettings bfx in bfxSettings)
+			{
+				if (bfx != null)
+				{
+					bfx.LightIntensityMultiplier = lightMult;
+				}
+			}
+		}
+	}
 }
 
 /// <summary>

@@ -118,6 +118,8 @@ public class VisceralEntry : BaseUnityPlugin
 
 	public ConfigEntry<bool> UseOldBloodDecal { get; set; }
 
+	public ConfigEntry<float> BloodLightIntensity { get; set; }
+
 	public ConfigEntry<bool> BodyCollision { get; set; }
 
 	public ConfigEntry<bool> ItemForce { get; set; }
@@ -218,6 +220,17 @@ public class VisceralEntry : BaseUnityPlugin
 				Order = 3
 			}
 		}));
+		BloodLightIntensity = ((BaseUnityPlugin)this).Config.Bind<float>("Blood | Trails & Flows", "Blood Light Intensity Multiplier", 0.35f, new ConfigDescription("Multiplicador nativo de intensidade de luz no sangue. Reduz brilho e reflexo em tempo real (0.01 a 1.00).", new AcceptableValueRange<float>(0.01f, 1f)));
+		BloodLightIntensity.SettingChanged += (sender, args) =>
+		{
+			BFX_BloodSettings[] allBfx = UnityEngine.Object.FindObjectsOfType<BFX_BloodSettings>();
+			if (allBfx == null) return;
+			float lightMult = BloodLightIntensity.Value;
+			foreach (BFX_BloodSettings bfx in allBfx)
+			{
+				if (bfx != null) bfx.LightIntensityMultiplier = lightMult;
+			}
+		};
 		((ModulePatch)new VisceralCombat.Dismemberment.Patches.GameStartedPatch()).Enable();
 		((ModulePatch)new KillPatch()).Enable();
 		((ModulePatch)new BleedPatch()).Enable();
