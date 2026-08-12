@@ -116,11 +116,19 @@ public class LivingDismembermentController : MonoBehaviour
 		// 1. Re-assert prone lock every frame
 		ForceProneLock();
 
-		// 2. Ensure HeavyBleeding is active (re-applies if bot tries to cure/bandage it)
+		// 2. Ensure HeavyBleeding is active and apply 35 HP bleed damage per second to accelerate death (making AI healing useless)
 		if (Time.time >= _nextBleedCheck)
 		{
 			_nextBleedCheck = Time.time + 1.0f;
 			EnsureNativeHeavyBleeding();
+			try
+			{
+				if (_player?.ActiveHealthController != null && _player.HealthController.IsAlive)
+				{
+					_player.ActiveHealthController.ApplyDamage(_dismemberedLeg, 35f, GClass3051.HeavyBleedingDamage);
+				}
+			}
+			catch { }
 		}
 
 		// 3. 5x faster visual floor blood decal trail (every 0.2s) without increasing HP damage
