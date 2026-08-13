@@ -7,8 +7,8 @@ namespace TRL_SpeakFromTarkov.UI
 {
     /// <summary>
     /// Interactive Voice Calibration Wizard Component (100% English UI).
-    /// Guides the player through 3 voice recording phases (Whisper, Normal, Loud)
-    /// to calculate exact personal RMS sensitivity thresholds for their microphone.
+    /// Uses Peak (P95) and Active Trough (P10) statistical analysis across 3 recording phases
+    /// (Whisper, Normal, Loud) to calculate exact personal RMS sensitivity thresholds for the player.
     /// </summary>
     public class VoiceCalibrationHUD : MonoBehaviour
     {
@@ -39,12 +39,16 @@ namespace TRL_SpeakFromTarkov.UI
 
         // Recording & Stats
         private bool _isRecordingPhase = false;
-        private float _recordingTimer = 0f;
         private readonly List<float> _samplesRecorded = new List<float>();
 
-        private float _calibratedWhisper = 0.015f;
-        private float _calibratedNormal  = 0.060f;
-        private float _calibratedLoud    = 0.180f;
+        // Statistically captured Peak (P95) and Trough (P10) values per voice level
+        private float _whisperMin = 0.003f, _whisperMax = 0.020f;
+        private float _normalMin  = 0.025f, _normalMax  = 0.080f;
+        private float _loudMin    = 0.090f, _loudMax    = 0.200f;
+
+        private float _calibratedWhisperToNormal = 0.022f; // Traço 1
+        private float _calibratedNormalToLoud    = 0.085f; // Traço 2
+        private float _calibratedLoudMax         = 0.200f; // Topo 100%
 
         public void Initialize()
         {
@@ -59,9 +63,9 @@ namespace TRL_SpeakFromTarkov.UI
             _yellowTex   = MakeTex(new Color(0.95f, 0.85f, 0.20f, 0.90f));
             _redTex      = MakeTex(new Color(0.90f, 0.20f, 0.20f, 0.90f));
 
-            if (VoIPPlugin.WhisperThreshold != null) _calibratedWhisper = VoIPPlugin.WhisperThreshold.Value;
-            if (VoIPPlugin.NormalThreshold != null)  _calibratedNormal  = VoIPPlugin.NormalThreshold.Value;
-            if (VoIPPlugin.LoudThreshold != null)    _calibratedLoud    = VoIPPlugin.LoudThreshold.Value;
+            if (VoIPPlugin.WhisperThreshold != null) _calibratedWhisperToNormal = VoIPPlugin.WhisperThreshold.Value;
+            if (VoIPPlugin.NormalThreshold != null)  _calibratedNormalToLoud    = VoIPPlugin.NormalThreshold.Value;
+            if (VoIPPlugin.LoudThreshold != null)    _calibratedLoudMax         = VoIPPlugin.LoudThreshold.Value;
         }
 
         private Texture2D MakeTex(Color c)
@@ -130,17 +134,14 @@ namespace TRL_SpeakFromTarkov.UI
         {
             if (!IsOpen) return;
 
-            // Recarrega o ponteiro do cursor para manter o mouse ativo na interface
             if (Cursor.lockState != CursorLockMode.None)
             {
                 Cursor.lockState = CursorLockMode.None;
                 Cursor.visible = true;
             }
 
-            // Coleta de amostras RMS durante a gravação ativa
             if (_isRecordingPhase && Processor != null)
             {
-                _recordingTimer += Time.deltaTime;
                 float currentRms = Processor.RawLevel;
                 if (currentRms > 0.001f)
                 {
@@ -155,10 +156,8 @@ namespace TRL_SpeakFromTarkov.UI
 
             GUI.depth = -1500;
 
-            // 1. Overlay de fundo escuro
             GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), _bgTex);
 
-            // 2. Modal Centralizado (520px x 360px)
             float modalW = 520f;
             float modalH = 360f;
             float posX = (Screen.width - modalW) / 2f;
@@ -167,7 +166,6 @@ namespace TRL_SpeakFromTarkov.UI
             GUI.DrawTexture(new Rect(posX - 2, posY - 2, modalW + 4, modalH + 4), _borderTex);
             GUI.DrawTexture(new Rect(posX, posY, modalW, modalH), _panelTex);
 
-            // Estilos de Texto em Inglês
             GUIStyle headerStyle = new GUIStyle(GUI.skin.label)
             {
                 fontSize = 16,
@@ -201,7 +199,6 @@ namespace TRL_SpeakFromTarkov.UI
                 hover = { textColor = Color.yellow, background = _btnHoverTex }
             };
 
-            // Título Principal
             GUI.Label(new Rect(posX, posY + 15, modalW, 25), "VOICE CALIBRATION WIZARD", headerStyle);
 
             switch (CurrentStep)
@@ -236,7 +233,7 @@ namespace TRL_SpeakFromTarkov.UI
 
         private void DrawIntroScreen(float posX, float posY, float modalW, float modalH, GUIStyle subStyle, GUIStyle btnStyle)
         {
-            GUI.Label(new Rect(posX + 20, posY + 50, modalW - 40, 20), "Calibrate your microphone sensitivity for Whisper, Normal, and Loud voice levels.", subStyle);
+            GUI.Label(new Rect(posX + 20, posY + 45, modalW - 40, 20), "Calibrate your microphone sensitivity for Whisper, Normal, and Loud voice levels.", subStyle);
 
             GUIStyle descStyle = new GUIStyle(GUI.skin.label)
             {
@@ -246,13 +243,13 @@ namespace TRL_SpeakFromTarkov.UI
                 normal = { textColor = new Color(0.85f, 0.85f, 0.85f) }
             };
 
-            string infoText = "This wizard will guide you through 3 voice recording steps:\n\n" +
+            string infoText = "This wizard analyzes your active voice Peak (P95) and Trough (P10) levels:\n\n" +
                               "1. Whisper (Level 1)\n" +
                               "2. Normal Voice (Level 2)\n" +
                               "3. Loud Voice / Shouting (Level 3)\n\n" +
-                              "You will read short tactical phrases while holding the recording button. Your personal threshold values will be automatically saved to BepInEx.";
+                              "You will read tactical phrases while holding the recording button. Your exact boundary thresholds (Notch 1 & Notch 2) will be calculated and saved.";
 
-            GUI.Label(new Rect(posX + 35, posY + 90, modalW - 70, 160), infoText, descStyle);
+            GUI.Label(new Rect(posX + 35, posY + 85, modalW - 70, 160), infoText, descStyle);
 
             if (GUI.Button(new Rect(posX + 150, posY + 280, 220, 35), "Start Calibration", btnStyle))
             {
@@ -280,10 +277,8 @@ namespace TRL_SpeakFromTarkov.UI
 
             GUI.Label(new Rect(posX + 20, posY + 70, modalW - 40, 20), "Hold the button below and read out loud the phrase:", instructionStyle);
 
-            // Caixa com a Frase em Inglês
             GUI.Box(new Rect(posX + 40, posY + 95, modalW - 80, 55), phraseText, phraseStyle);
 
-            // VU Meter de Gravação ao Vivo
             float barX = posX + 40;
             float barY = posY + 165;
             float barW = modalW - 80;
@@ -297,7 +292,6 @@ namespace TRL_SpeakFromTarkov.UI
                 GUI.DrawTexture(new Rect(barX, barY, fillW, barH), _barFillTex);
             }
 
-            // Feedback visual do status de gravação
             GUIStyle recStatusStyle = new GUIStyle(GUI.skin.label)
             {
                 fontSize = 11,
@@ -306,19 +300,17 @@ namespace TRL_SpeakFromTarkov.UI
             };
 
             string statusMsg = _isRecordingPhase 
-                ? $"RECORDING VOICE... ({_samplesRecorded.Count} samples captured)" 
+                ? $"RECORDING... ({_samplesRecorded.Count} samples captured)" 
                 : (_samplesRecorded.Count > 0 ? "Voice Sample Captured!" : "Ready to Record");
             
             GUI.Label(new Rect(posX, posY + 190, modalW, 20), statusMsg, recStatusStyle);
 
-            // Botão "Segurar para Gravar"
             Rect holdBtnRect = new Rect(posX + 130, posY + 220, 260, 38);
             Event e = Event.current;
 
             if (e.type == EventType.MouseDown && holdBtnRect.Contains(e.mousePosition))
             {
                 _isRecordingPhase = true;
-                _recordingTimer = 0f;
                 _samplesRecorded.Clear();
             }
             else if (e.type == EventType.MouseUp && _isRecordingPhase)
@@ -330,7 +322,6 @@ namespace TRL_SpeakFromTarkov.UI
             string btnHoldText = _isRecordingPhase ? ">>> RECORDING (RELEASE TO FINISH) <<<" : "HOLD TO RECORD VOICE SAMPLE";
             GUI.Button(holdBtnRect, btnHoldText, btnStyle);
 
-            // Botões de Navegação ("Next Step" / "Cancel")
             bool canAdvance = _samplesRecorded.Count >= 5;
             if (canAdvance)
             {
@@ -350,31 +341,44 @@ namespace TRL_SpeakFromTarkov.UI
 
         private void ProcessStepResult(CalibrationStep step)
         {
-            if (_samplesRecorded.Count == 0) return;
+            if (_samplesRecorded.Count < 5) return;
 
-            float sum = 0f;
-            float max = 0f;
-            foreach (float s in _samplesRecorded)
-            {
-                sum += s;
-                if (s > max) max = s;
-            }
-            float avg = sum / _samplesRecorded.Count;
+            // Ordena as amostras para extrair os percentis P10 (Vale Ativo) e P95 (Pico Ativo)
+            _samplesRecorded.Sort();
+
+            int p10Idx = Mathf.Clamp((int)(_samplesRecorded.Count * 0.10f), 0, _samplesRecorded.Count - 1);
+            int p95Idx = Mathf.Clamp((int)(_samplesRecorded.Count * 0.95f), 0, _samplesRecorded.Count - 1);
+
+            float activeTrough = _samplesRecorded[p10Idx];
+            float activePeak   = _samplesRecorded[p95Idx];
 
             switch (step)
             {
                 case CalibrationStep.Whisper:
-                    _calibratedWhisper = Mathf.Max(0.005f, avg);
+                    _whisperMin = activeTrough;
+                    _whisperMax = activePeak;
                     break;
                 case CalibrationStep.Normal:
-                    _calibratedNormal = Mathf.Max(_calibratedWhisper + 0.010f, avg);
+                    _normalMin = activeTrough;
+                    _normalMax = activePeak;
                     break;
                 case CalibrationStep.Loud:
-                    _calibratedLoud = Mathf.Max(_calibratedNormal + 0.020f, max);
+                    _loudMin = activeTrough;
+                    _loudMax = activePeak;
+
+                    // Ao concluir as 3 fases, calcula os pontos de corte exatos dos Traços:
+                    // Traço 1 = Ponto médio entre o Pico do Sussurro e o Vale da Voz Normal
+                    _calibratedWhisperToNormal = (_whisperMax + _normalMin) / 2f;
+                    
+                    // Traço 2 = Ponto médio entre o Pico da Voz Normal e o Vale do Grito
+                    _calibratedNormalToLoud = (_normalMax + _loudMin) / 2f;
+                    
+                    // Topo 100% da Barra = Pico da Voz Alta
+                    _calibratedLoudMax = Mathf.Max(_calibratedNormalToLoud + 0.020f, _loudMax);
                     break;
             }
 
-            VoIPPlugin.Log?.LogInfo($"[SFT-WIZARD] Step {step} recorded. Result -> Whisper: {_calibratedWhisper:F4}, Normal: {_calibratedNormal:F4}, Loud: {_calibratedLoud:F4}");
+            VoIPPlugin.Log?.LogInfo($"[SFT-WIZARD] Step {step} analyzed (P10={activeTrough:F4}, P95={activePeak:F4}). Notch1 (Whisper->Normal): {_calibratedWhisperToNormal:F4}, Notch2 (Normal->Loud): {_calibratedNormalToLoud:F4}, Max: {_calibratedLoudMax:F4}");
         }
 
         private void DrawSummaryScreen(float posX, float posY, float modalW, float modalH, GUIStyle subStyle, GUIStyle btnStyle)
@@ -383,18 +387,18 @@ namespace TRL_SpeakFromTarkov.UI
 
             GUIStyle summaryStyle = new GUIStyle(GUI.skin.label)
             {
-                fontSize = 12,
+                fontSize = 11,
                 alignment = TextAnchor.MiddleCenter,
                 normal = { textColor = new Color(0.9f, 0.95f, 0.9f) }
             };
 
-            string summaryText = $"Calculated Microphone Thresholds:\n\n" +
-                                 $"Level 1 (Whisper):  {_calibratedWhisper:F4} RMS\n" +
-                                 $"Level 2 (Normal):   {_calibratedNormal:F4} RMS\n" +
-                                 $"Level 3 (Loud):     {_calibratedLoud:F4} RMS\n\n" +
-                                 $"Click 'Save & Apply' to update your BepInEx settings.";
+            string summaryText = $"Calculated Boundaries (Peak & Trough Analysis):\n\n" +
+                                 $"Notch 1 (Whisper -> Normal):  {_calibratedWhisperToNormal:F4} RMS\n" +
+                                 $"Notch 2 (Normal -> Loud):    {_calibratedNormalToLoud:F4} RMS\n" +
+                                 $"Max Ceiling (100% Top):       {_calibratedLoudMax:F4} RMS\n\n" +
+                                 $"Whisper Range: [{_whisperMin:F4} - {_whisperMax:F4}] | Normal Range: [{_normalMin:F4} - {_normalMax:F4}]";
 
-            GUI.Label(new Rect(posX + 40, posY + 85, modalW - 80, 150), summaryText, summaryStyle);
+            GUI.Label(new Rect(posX + 30, posY + 75, modalW - 60, 160), summaryText, summaryStyle);
 
             if (GUI.Button(new Rect(posX + 70, posY + 270, 160, 36), "Save & Apply", btnStyle))
             {
@@ -417,11 +421,11 @@ namespace TRL_SpeakFromTarkov.UI
 
         private void SaveAndApply()
         {
-            if (VoIPPlugin.WhisperThreshold != null) VoIPPlugin.WhisperThreshold.Value = _calibratedWhisper;
-            if (VoIPPlugin.NormalThreshold != null)  VoIPPlugin.NormalThreshold.Value  = _calibratedNormal;
-            if (VoIPPlugin.LoudThreshold != null)    VoIPPlugin.LoudThreshold.Value    = _calibratedLoud;
+            if (VoIPPlugin.WhisperThreshold != null) VoIPPlugin.WhisperThreshold.Value = _calibratedWhisperToNormal;
+            if (VoIPPlugin.NormalThreshold != null)  VoIPPlugin.NormalThreshold.Value  = _calibratedNormalToLoud;
+            if (VoIPPlugin.LoudThreshold != null)    VoIPPlugin.LoudThreshold.Value    = _calibratedLoudMax;
 
-            VoIPPlugin.Log?.LogInfo($"[SFT-WIZARD] Calibrated thresholds saved to BepInEx! Whisper: {_calibratedWhisper:F4}, Normal: {_calibratedNormal:F4}, Loud: {_calibratedLoud:F4}");
+            VoIPPlugin.Log?.LogInfo($"[SFT-WIZARD] Calibrated P95/P10 boundaries saved to BepInEx! Notch1: {_calibratedWhisperToNormal:F4}, Notch2: {_calibratedNormalToLoud:F4}, Max: {_calibratedLoudMax:F4}");
         }
     }
 }
