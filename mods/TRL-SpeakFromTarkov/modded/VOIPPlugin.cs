@@ -49,6 +49,13 @@ namespace TRL_SpeakFromTarkov
         public static ConfigEntry<float> InRaidHUDOffsetX { get; private set; }
         public static ConfigEntry<float> InRaidHUDOffsetY { get; private set; }
         public static ConfigEntry<bool> EnableDebugVoipHUD { get; private set; }
+
+        // Calibração de Voz Personalizada (Wizard)
+        public static ConfigEntry<float> WhisperThreshold { get; private set; }
+        public static ConfigEntry<float> NormalThreshold { get; private set; }
+        public static ConfigEntry<float> LoudThreshold { get; private set; }
+        public static ConfigEntry<KeyboardShortcut> OpenCalibrationKey { get; private set; }
+
         public static ConfigEntry<bool> EnableDebugLogs { get; private set; }
         public static bool IsAudioDebugActive { get; set; } = false;
 
@@ -182,6 +189,12 @@ namespace TRL_SpeakFromTarkov
                 new ConfigDescription("Deslocamento vertical da barra de VOIP em partida (Y). Positivo = Baixo, Negativo = Cima.",
                     new AcceptableValueRange<float>(-300f, 300f)));
             EnableDebugVoipHUD = Config.Bind("Interface / HUD", "Exibir HUD de Profiler / Debug", false, "Exibe o painel de diagnósticos estendido no topo da tela.");
+
+            // Voice Calibration Wizard (English Interface)
+            WhisperThreshold = Config.Bind("Voice Calibration", "Whisper Threshold", 0.015f, "Calibrated RMS sensitivity threshold for Whisper (Level 1).");
+            NormalThreshold = Config.Bind("Voice Calibration", "Normal Voice Threshold", 0.060f, "Calibrated RMS sensitivity threshold for Normal Voice (Level 2).");
+            LoudThreshold = Config.Bind("Voice Calibration", "Loud Voice Threshold", 0.180f, "Calibrated RMS sensitivity threshold for Loud Voice / Shouting (Level 3).");
+            OpenCalibrationKey = Config.Bind("Voice Calibration", "Open Calibration Wizard Shortcut", new KeyboardShortcut(KeyCode.F8), "Shortcut key to open the interactive Voice Calibration Wizard.");
             EnableDebugLogs = Config.Bind("Diagnostico", "Habilitar Logs de Debug", false, "Se ativado, imprime mensagens detalhadas de enfileiramento no console. Padrão: false");
 
             VADDecayTime = Config.Bind("VOIP", "VAD Decay Time", 0.7f);

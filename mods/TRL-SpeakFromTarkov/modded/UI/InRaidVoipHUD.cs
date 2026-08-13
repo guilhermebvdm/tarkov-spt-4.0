@@ -160,10 +160,19 @@ namespace TRL_SpeakFromTarkov.UI
 
             GUI.DrawTexture(new Rect(posX + 2, posY + 2, barWidth - 4, 3), statusDotTex);
 
-            // 3. Preenchimento do VU Meter Vertical (De Baixo para Cima)
+            // 3. Preenchimento do VU Meter Vertical com Limiares Calibrados
             float fillAreaY = posY + 7;
             float fillAreaH = barHeight - 9;
-            float fill = (_peakMax > 0f) ? Mathf.Clamp01(_smoothLevel / _peakMax) : 0f;
+
+            float whisperThresh = (VoIPPlugin.WhisperThreshold != null) ? VoIPPlugin.WhisperThreshold.Value : 0.015f;
+            float normalThresh  = (VoIPPlugin.NormalThreshold != null)  ? VoIPPlugin.NormalThreshold.Value  : 0.060f;
+            float loudThresh    = (VoIPPlugin.LoudThreshold != null)    ? VoIPPlugin.LoudThreshold.Value    : 0.180f;
+
+            float maxRange = Mathf.Max(0.05f, loudThresh);
+            float fill = Mathf.Clamp01(_smoothLevel / maxRange);
+
+            float n1Pct = Mathf.Clamp(whisperThresh / maxRange, 0.15f, 0.40f);
+            float n2Pct = Mathf.Clamp(normalThresh / maxRange, 0.45f, 0.80f);
 
             if (fill > 0.001f)
             {
@@ -172,16 +181,16 @@ namespace TRL_SpeakFromTarkov.UI
 
                 Color color = !Processor.IsTransmitting
                     ? new Color(0.4f, 0.45f, 0.4f, 0.4f)
-                    : (fill > 0.65f ? Color.red : fill > 0.25f ? Color.yellow : Color.green);
+                    : (fill > n2Pct ? Color.red : fill > n1Pct ? Color.yellow : Color.green);
 
                 var fillTex = MakeTex(color);
                 GUI.DrawTexture(new Rect(posX + 2, currentFillY, barWidth - 4, currentFillH), fillTex);
                 Destroy(fillTex);
             }
 
-            // 4. Traços de Divisão dos Níveis de Voz (Nv1 Sussurro < 25%, Nv2 Normal 25-65%, Nv3 Grito > 65%)
-            float notch1Y = fillAreaY + fillAreaH * (1f - 0.25f);
-            float notch2Y = fillAreaY + fillAreaH * (1f - 0.65f);
+            // 4. Traços de Divisão dos Níveis de Voz Calibrados (Sussurro, Normal, Grito)
+            float notch1Y = fillAreaY + fillAreaH * (1f - n1Pct);
+            float notch2Y = fillAreaY + fillAreaH * (1f - n2Pct);
 
             GUI.DrawTexture(new Rect(posX + 1, notch1Y, barWidth - 2, 1), _borderTex);
             GUI.DrawTexture(new Rect(posX + 1, notch2Y, barWidth - 2, 1), _borderTex);

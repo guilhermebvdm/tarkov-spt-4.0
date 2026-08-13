@@ -21,6 +21,7 @@ namespace TRL_SpeakFromTarkov.Core
         private SftNetwork network;
         private VoipHUD hud;
         public InRaidVoipHUD inRaidHud { get; private set; }
+        public VoiceCalibrationHUD calibrationHud { get; private set; }
         private ConcurrentQueue<Action> mainThreadActions = new ConcurrentQueue<Action>();
         
         public byte CurrentChannel { get; private set; } = 1;
@@ -74,6 +75,10 @@ namespace TRL_SpeakFromTarkov.Core
             inRaidHud = gameObject.AddComponent<InRaidVoipHUD>();
             inRaidHud.Initialize();
             inRaidHud.Processor = processor;
+
+            calibrationHud = gameObject.AddComponent<VoiceCalibrationHUD>();
+            calibrationHud.Initialize();
+            calibrationHud.Processor = processor;
             
             menuHud = gameObject.AddComponent<MenuVoipHUD>();
             
@@ -343,6 +348,14 @@ namespace TRL_SpeakFromTarkov.Core
             {
                 processor.IsMuted = !processor.IsMuted;
                 VoIPPlugin.Log.LogInfo($"[SFT] Mute: {(processor.IsMuted ? "ON" : "OFF")}");
+            }
+
+            if (VoIPPlugin.OpenCalibrationKey != null && IsShortcutDown(VoIPPlugin.OpenCalibrationKey.Value))
+            {
+                if (calibrationHud != null)
+                {
+                    calibrationHud.ToggleWizard();
+                }
             }
 
             processor.IsPTTActive = IsShortcutHeld(VoIPPlugin.PushToTalkKey.Value);

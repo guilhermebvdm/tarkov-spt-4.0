@@ -11,6 +11,7 @@
 | 005 | interacao-ia-bots-sain | Percepção 3D da voz pelos bots via EPhraseTrigger.OnMutter (0% humano, 100% IA) e resposta verbal dos bots. | [005-interacao-ia-bots-sain/](./005-interacao-ia-bots-sain/) | ⚪ |
 | 006 | walkie-talkie-radio-hideout | Walkie-Talkie equipável no inventário, efeitos de estática/squelch e rádio no menu via Intelligence Center do Hideout. | [006-walkie-talkie-radio-hideout/](./006-walkie-talkie-radio-hideout/) | ⚪ |
 | 007 | otimizacoes-hud-multithread | Decodificação Opus paralela em ThreadPool, HUD minimalista discreto de gameplay e volume individual por jogador no F12. | [007-otimizacoes-hud-multithread/](./007-otimizacoes-hud-multithread/) | ⚪ |
+| 008 | calibrador-voz-assistente | Assistente de calibração interativo em 3 fases (Sussurro, Voz Normal, Falar Alto) com frases temáticas, medição de RMS e cálculo de limiares dinâmicos por jogador. | [008-calibrador-voz-assistente/](./008-calibrador-voz-assistente/) | 🟡 |
 
 ## Legenda
 

@@ -80,5 +80,7 @@
 - **Ancoragem Dinâmica sem Dependência Externa:** O componente localiza a instância ativa do `BattleStancePanel` por reflexão segura de nome do tipo (sem arrastar dependência da DLL `Sirenix.Serialization`), calculando os vértices de tela (`RectTransform.GetWorldCorners`) e posicionando o HUD à esquerda da barra de posture em qualquer resolução.
 - **Centralização de Visibilidade no BepInEx (F12):** Criadas as entradas `Enable In-Raid VOIP HUD` (padrão `true`) e `Enable Debug VOIP HUD` (padrão `false`) no menu de configurações F12. Atalho `F9` desativado.
 
+- **Voice Calibration Wizard ([VoiceCalibrationHUD.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded/UI/VoiceCalibrationHUD.cs)):** Desenvolvido o assistente modal interativo em 3 fases (Whisper, Normal, Loud) com interface 100% em Inglês, frases táticas, controle liberado de cursor de mouse e gravação dinâmica de RMS gravada no BepInEx (`F8` / F12).
+
 **Pendências abertas nesta sessão:**
 - 🟢 Nenhuma pendência blocker. Tudo compilado com 0 erros e 100% pronto.
