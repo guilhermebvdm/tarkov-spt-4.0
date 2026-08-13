@@ -20,6 +20,7 @@
 - **Reversão de Materiais de Sangue:** Revertidas todas as alterações de materiais/shaders via C# para manter 100% dos shaders e transparências originais do mod intactos sem quads pretos.
 - **Ajuste F12 da Nuvem de Sangue (Vanilla):** Adicionadas configurações BepInEx em `VisceralEntry.cs` (`EnableImpactBloodCloud`, `ImpactBloodCloudParticleCount`, `ImpactBloodCloudScale`) que atuam sobre o `Systems.Effects.Effects.Instance` para `MaterialType.Body`.
 - **Faíscas Metálicas ao Atingir Placa de Colete/Capacete:** Em `BleedPatch.cs`, tiros que atingem placas de blindagem (`HitArmorItemID != null`) ou capacetes/metais desativam a nuvem de sangue e disparam o efeito nativo de faíscas metálicas (`MaterialType.MetalThick`).
+- **Desmembramento de Bots Vivos a 30% por Disparo (Agrupamento de Chumbinhos):** Em `LimbKillPatch.cs`, a chance de desmembramento de perna em bots vivos foi fixada em **30% por disparo** (`0.30f`). Para escopetas/chumbinhos, todas as esferas do mesmo disparo compartilham o mesmo `shot.FireIndex` e são agrupadas em `_evaluatedLivingVolleys`, garantindo exatamente 1 teste de 30% por tiro (e não 30% por esfera).
 
 **Lições / hipóteses descartadas:**
 - *Overdamage Factor no Tarkov:* Danos aplicados a membros já destruídos (HP = 0) sofrem uma redução de $\sim 30\%$ via `OverDamageFactor` na redistribuição de dano para o restante do corpo do bot.
