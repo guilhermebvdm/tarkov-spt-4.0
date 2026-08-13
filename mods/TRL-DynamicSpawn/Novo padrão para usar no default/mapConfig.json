@@ -1,0 +1,185 @@
+{
+  "customs": {
+    "sniperQuantity": 3,
+    "initialSpawnDelay": 15,
+    "smoothingDistribution": 0.9,
+    "mapCullingNearPointValuePlayer": 12,
+    "mapCullingNearPointValuePmc": 12,
+    "mapCullingNearPointValueScav": 22,
+    "spawnMinDistance": 30,
+    "pmcWaveCount": 12,
+    "scavWaveCount": 24,
+    "zombieWaveCount": 9,
+    "scavHotZones": [
+      "ZoneDormitory"
+    ],
+    "pmcHotZones": [
+      "ZoneDormitory"
+    ]
+  },
+  "factoryDay": {
+    "sniperQuantity": 0,
+    "initialSpawnDelay": 15,
+    "smoothingDistribution": 0.6,
+    "mapCullingNearPointValuePlayer": 2,
+    "mapCullingNearPointValuePmc": 2,
+    "mapCullingNearPointValueScav": 1,
+    "spawnMinDistance": 15,
+    "maxBotCapOverride": 12,
+    "maxBotPerZoneOverride": 12,
+    "pmcWaveCount": 8,
+    "scavWaveCount": 12,
+    "zombieWaveCount": 6
+  },
+  "factoryNight": {
+    "sniperQuantity": 0,
+    "initialSpawnDelay": 15,
+    "smoothingDistribution": 0.6,
+    "mapCullingNearPointValuePlayer": 2,
+    "mapCullingNearPointValuePmc": 2,
+    "mapCullingNearPointValueScav": 1,
+    "spawnMinDistance": 15,
+    "maxBotCapOverride": 12,
+    "maxBotPerZoneOverride": 12,
+    "pmcWaveCount": 8,
+    "scavWaveCount": 12,
+    "zombieWaveCount": 6
+  },
+  "interchange": {
+    "sniperQuantity": 0,
+    "initialSpawnDelay": 20,
+    "smoothingDistribution": 0.9,
+    "mapCullingNearPointValuePlayer": 12,
+    "mapCullingNearPointValuePmc": 4,
+    "mapCullingNearPointValueScav": 1,
+    "spawnMinDistance": 30,
+    "pmcWaveCount": 14,
+    "scavWaveCount": 36,
+    "zombieWaveCount": 12,
+    "scavHotZones": [
+      "ZoneCenterBot",
+      "ZoneCenter"
+    ]
+  },
+  "laboratory": {
+    "sniperQuantity": 0,
+    "initialSpawnDelay": 15,
+    "smoothingDistribution": 0.9,
+    "mapCullingNearPointValuePlayer": 3,
+    "mapCullingNearPointValuePmc": 3,
+    "mapCullingNearPointValueScav": 2,
+    "spawnMinDistance": 30,
+    "pmcWaveCount": 12,
+    "scavWaveCount": 0,
+    "zombieWaveCount": 12
+  },
+  "lighthouse": {
+    "sniperQuantity": 1,
+    "initialSpawnDelay": 20,
+    "smoothingDistribution": 0.9,
+    "mapCullingNearPointValuePlayer": 6,
+    "mapCullingNearPointValuePmc": 5,
+    "mapCullingNearPointValueScav": 8,
+    "maxBotCapOverride": 22,
+    "spawnMinDistance": 30,
+    "pmcWaveCount": 12,
+    "scavWaveCount": 24,
+    "zombieWaveCount": 10,
+    "scavHotZones": [
+      "Zone_LongRoad"
+    ]
+  },
+  "rezervbase": {
+    "sniperQuantity": 0,
+    "initialSpawnDelay": 20,
+    "smoothingDistribution": 0.9,
+    "mapCullingNearPointValuePlayer": 12,
+    "mapCullingNearPointValuePmc": 6,
+    "mapCullingNearPointValueScav": 1,
+    "spawnMinDistance": 30,
+    "pmcWaveCount": 11,
+    "scavWaveCount": 28,
+    "zombieWaveCount": 9,
+    "scavHotZones": [
+      "ZoneRailStrorage"
+    ],
+    "pmcHotZones": [
+      "ZoneBarrack"
+    ]
+  },
+  "shoreline": {
+    "sniperQuantity": 3,
+    "initialSpawnDelay": 20,
+    "smoothingDistribution": 0.9,
+    "mapCullingNearPointValuePlayer": 12,
+    "mapCullingNearPointValuePmc": 6,
+    "mapCullingNearPointValueScav": 15,
+    "spawnMinDistance": 30,
+    "pmcWaveCount": 14,
+    "scavWaveCount": 36,
+    "zombieWaveCount": 12,
+    "scavHotZones": [
+      "ZoneSanatorium1"
+    ],
+    "pmcHotZones": [
+      "ZoneSanatorium2"
+    ]
+  },
+  "tarkovstreets": {
+    "sniperQuantity": 5,
+    "initialSpawnDelay": 20,
+    "smoothingDistribution": 0.9,
+    "mapCullingNearPointValuePlayer": 12,
+    "mapCullingNearPointValuePmc": 6,
+    "mapCullingNearPointValueScav": 6,
+    "maxBotCapOverride": 18,
+    "spawnMinDistance": 30,
+    "pmcWaveCount": 10,
+    "scavWaveCount": 20,
+    "zombieWaveCount": 13
+  },
+  "woods": {
+    "sniperQuantity": 1,
+    "initialSpawnDelay": 15,
+    "smoothingDistribution": 0.9,
+    "mapCullingNearPointValuePlayer": 12,
+    "mapCullingNearPointValuePmc": 30,
+    "mapCullingNearPointValueScav": 36,
+    "spawnMinDistance": 30,
+    "pmcWaveCount": 14,
+    "scavWaveCount": 36,
+    "zombieWaveCount": 10,
+    "scavHotZones": [
+      "ZoneWoodCutter"
+    ],
+    "pmcHotZones": [
+      "ZoneWoodCutter"
+    ]
+  },
+  "gzLow": {
+    "sniperQuantity": 1,
+    "initialSpawnDelay": 15,
+    "smoothingDistribution": 0.7,
+    "mapCullingNearPointValuePlayer": 6,
+    "mapCullingNearPointValuePmc": 5,
+    "mapCullingNearPointValueScav": 1,
+    "maxBotCapOverride": 15,
+    "spawnMinDistance": 15,
+    "pmcWaveCount": 10,
+    "scavWaveCount": 18,
+    "zombieWaveCount": 9
+  },
+  "gzHigh": {
+    "sniperQuantity": 1,
+    "initialSpawnDelay": 15,
+    "smoothingDistribution": 0.7,
+    "mapCullingNearPointValuePlayer": 6,
+    "mapCullingNearPointValuePmc": 5,
+    "mapCullingNearPointValueScav": 1,
+    "maxBotCapOverride": 15,
+    "spawnMinDistance": 15,
+    "pmcWaveCount": 12,
+    "scavWaveCount": 18,
+    "zombieWaveCount": 9
+  }
+}

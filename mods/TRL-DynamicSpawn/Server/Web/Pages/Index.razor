@@ -315,7 +315,9 @@ html, body {
 .trl-subtab-btn { background: transparent; border: 1px solid var(--trl-edge); color: var(--trl-fg-muted); font-family: var(--trl-font-display); font-size: var(--trl-text-xs); text-transform: uppercase; padding: 6px 12px; cursor: pointer; }
 .trl-subtab-btn.is-active { border-color: var(--trl-accent); background: var(--trl-bg-active); color: var(--trl-accent); }
 
-.trl-boss-card { background: var(--trl-surface-1); border: 1px solid var(--trl-edge); padding: var(--trl-space-3); margin-bottom: var(--trl-space-3); border-left: 2px solid var(--trl-accent); }
+.trl-boss-card { border: 1px solid var(--trl-edge); padding: var(--trl-space-3); margin-bottom: var(--trl-space-3); border-left: 2px solid var(--trl-accent); }
+.trl-boss-card:nth-child(odd) { background: var(--trl-surface-1); }
+.trl-boss-card:nth-child(even) { background: rgba(255, 255, 255, 0.035); }
 .trl-boss-card__title { font-family: var(--trl-font-display); font-size: var(--trl-text-sm); text-transform: uppercase; color: var(--trl-fg); margin-bottom: var(--trl-space-2); }
 
 .is-disabled {
@@ -475,19 +477,19 @@ html, body {
                 <span data-i18n="nav_home">INÍCIO</span>
             </button>
             <button type="button" class="trl-nav__item" onclick="switchMainTab('sec-map-configs', this)">
-                <span data-i18n="nav_maps">CONFIGURAÇÃO DE MAPAS</span>
+                <span data-i18n="nav_maps">ONDAS</span>
             </button>
             <button type="button" class="trl-nav__item" onclick="switchMainTab('sec-boss-config', this)">
-                <span data-i18n="nav_bosses">CONFIGURAÇÃO DE BOSSES</span>
+                <span data-i18n="nav_bosses">BOTS</span>
             </button>
             <button type="button" class="trl-nav__item" onclick="switchMainTab('sec-difficulty-config', this)">
-                <span data-i18n="nav_difficulty">DIFICULDADE DE BOTS</span>
+                <span data-i18n="nav_difficulty">DIFICULDADE IA</span>
             </button>
             <button type="button" class="trl-nav__item" onclick="switchMainTab('sec-events-config', this)">
                 <span data-i18n="nav_events">EVENTOS & INVASÕES</span>
             </button>
             <button type="button" class="trl-nav__item" onclick="switchMainTab('sec-custom-spawns', this)">
-                <span data-i18n="nav_custom">SPAWNS CUSTOMIZADOS</span>
+                <span data-i18n="nav_custom">SPAWNPOINTS ADICIONAIS</span>
             </button>
         </nav>
     </aside>
@@ -1000,29 +1002,29 @@ html, body {
         { id: "rezervbase", key: "rezervbase", name: "Reserve" },
         { id: "shoreline", key: "shoreline", name: "Shoreline" },
         { id: "tarkovstreets", key: "tarkovstreets", name: "Streets" },
-        { id: "sandbox", key: "sandbox", name: "Ground Zero" },
-        { id: "sandbox_high", key: "sandbox_high", name: "Ground Zero (High)" },
+        { id: "sandbox", key: "sandbox", name: "Ground Zero (Nv. 1-20)" },
+        { id: "sandbox_high", key: "sandbox_high", name: "Ground Zero High (Nv. 21+)" },
         { id: "woods", key: "woods", name: "Woods" },
         { id: "labyrinth", key: "labyrinth", name: "Labyrinth (Labrys)" }
     ];
 
     const BOT_CATEGORIES = [
-        { prop: "bossReshala", name_pt: "Reshala (Customs)", name_en: "Reshala (Customs)" },
-        { prop: "bossKilla", name_pt: "Killa (Interchange)", name_en: "Killa (Interchange)" },
-        { prop: "bossTagilla", name_pt: "Tagilla (Factory)", name_en: "Tagilla (Factory)" },
-        { prop: "bossGluhar", name_pt: "Glukhar (Reserve)", name_en: "Glukhar (Reserve)" },
-        { prop: "bossSanitar", name_pt: "Sanitar (Shoreline)", name_en: "Sanitar (Shoreline)" },
-        { prop: "bossShturman", name_pt: "Shturman (Woods)", name_en: "Shturman (Woods)" },
-        { prop: "bossZryachiy", name_pt: "Zryachiy (Lighthouse)", name_en: "Zryachiy (Lighthouse)" },
-        { prop: "bossKaban", name_pt: "Kaban (Streets)", name_en: "Kaban (Streets)" },
-        { prop: "bossKolontay", name_pt: "Kollontay (Ground Zero / Streets)", name_en: "Kollontay (Ground Zero / Streets)" },
-        { prop: "bossKnight", name_pt: "Goons (Knight, Big Pipe, Birdeye)", name_en: "Goons (Knight, Big Pipe, Birdeye)" },
+        { prop: "bossReshala", name_pt: "Reshala", name_en: "Reshala" },
+        { prop: "bossKilla", name_pt: "Killa", name_en: "Killa" },
+        { prop: "bossTagilla", name_pt: "Tagilla", name_en: "Tagilla" },
+        { prop: "bossGluhar", name_pt: "Glukhar", name_en: "Glukhar" },
+        { prop: "bossSanitar", name_pt: "Sanitar", name_en: "Sanitar" },
+        { prop: "bossShturman", name_pt: "Shturman", name_en: "Shturman" },
+        { prop: "bossZryachiy", name_pt: "Zryachiy", name_en: "Zryachiy" },
+        { prop: "bossKaban", name_pt: "Kaban", name_en: "Kaban" },
+        { prop: "bossKolontay", name_pt: "Kollontay", name_en: "Kollontay" },
+        { prop: "bossKnight", name_pt: "Goons", name_en: "Goons" },
         { prop: "bossPartisan", name_pt: "Partisan", name_en: "Partisan" },
         { prop: "pmcBot", name_pt: "Raiders", name_en: "Raiders" },
         { prop: "exUsec", name_pt: "Rogues", name_en: "Rogues" },
         { prop: "arenaFighterEvent", name_pt: "Bloodhounds", name_en: "Bloodhounds" },
         { prop: "sectantPriest", name_pt: "Cultistas", name_en: "Cultists" },
-        { prop: "gifter", name_pt: "Santa (Gifter)", name_en: "Santa (Gifter)" },
+        { prop: "gifter", name_pt: "Santa", name_en: "Santa" },
         { prop: "sptBear", name_pt: "BEAR (PMCs)", name_en: "BEAR (PMCs)" },
         { prop: "sptUsec", name_pt: "USEC (PMCs)", name_en: "USEC (PMCs)" },
         { prop: "assault", name_pt: "SCAVs (Assault)", name_en: "SCAVs (Assault)" }

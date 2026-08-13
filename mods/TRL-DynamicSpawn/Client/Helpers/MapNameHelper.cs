@@ -47,8 +47,6 @@ namespace TRLDynamicSpawn.Helpers
                 return settings;
             if (key == "factory4_night" && config.MapConfigs.TryGetValue("factory4_day", out settings))
                 return settings;
-            if (key == "sandbox_high" && config.MapConfigs.TryGetValue("sandbox", out settings))
-                return settings;
 
             return null;
         }
@@ -69,8 +67,6 @@ namespace TRLDynamicSpawn.Helpers
             if (key == "customs" && config.MapTimers.TryGetValue("bigmap", out timerConfig))
                 return timerConfig;
             if (key == "factory4_night" && config.MapTimers.TryGetValue("factory4_day", out timerConfig))
-                return timerConfig;
-            if (key == "sandbox_high" && config.MapTimers.TryGetValue("sandbox", out timerConfig))
                 return timerConfig;
 
             if (config.MapTimers.TryGetValue("global", out timerConfig))

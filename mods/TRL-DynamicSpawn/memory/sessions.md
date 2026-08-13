@@ -6,31 +6,18 @@ Memória cronológica de sessões de trabalho (timestamps em GMT-3). Cada entrad
 
 ---
 
-## Estado Atual (Snapshot ao Fim da Sessão — 2026-08-06)
+## Estado Atual (Snapshot ao Fim da Sessão — 2026-08-12)
 
-**Mod C# Client (v3.2.3) + C# Server (v3.2.3) compilados com sucesso (0 erros).**
+**Mod C# Client (v3.2.8) + C# Server (v3.2.8) compilados com sucesso (0 erros).**
 
 - **Identity**: `TRL-DynamicSpawn` (Client BepInEx DLL: `TRL-DynamicSpawn.dll`, Server C# DLL: `TRL-DynamicSpawn-Server.dll` com Web UI). Compatível com SPT 4.0.13 e EFT 0.16.9.
-- **MaxBot Dinâmico (`GetDynamicCap` / `ApplyDynamicMaxBot`)**:
-  - `MaxBot` dinâmico (`dynamicCap = playerCap + specialBots`). A cota de `playerCap` é preservada exclusivamente para PMCs/Scavs, enquanto bots especiais (Bosses, Guardas, Rogues, Raiders, Cultistas, Bloodhounds, Snipers) expandem o limite do motor do jogo em tempo real sem drenar vagas de PMC/Scav.
-- **Invasão Dinâmica de Elites & Rogues Não-Nativos (v3.2.3)**:
-  - **Fix do `isFirstWave`**: Resolvido bug em `SpawnHordeLoop` onde `ProcessWave(false)` era chamado com `false` hardcoded, impedindo o spawn de Rogues e Elites não-nativos em mapas sem ondas vanilla nativas (Customs `bigmap`, Ground Zero `sandbox`).
-  - **Integridade do Esquadrão de Rogues**: Elites enfileirados como um único grupo de esquadrão (`GroupSize = MaxGroupSize`) e posicionados na sub-lista `elites` no topo do `spawnList`, garantindo nascimento conjunto e imediato na mesma zona no segundo 0 da onda.
-  - **Isenção de Bolha para Bots Especiais**: Validado que Rogues (`exUsec`) e Elites já possuem isenção total da bolha de distância (`enableSpawnBubble`) em `IsValidSpawnZone`.
-- **Sincronização do Raio da Bolha & DynamicMaps Overlay (`TRLMapBubbleOverlay.cs` / `MapNameHelper.cs` / `Index.razor`)**:
-  - Slider do painel web (`#mc_despawn_dist`) atualiza em sincronia tanto `spawnBubbleDistance` quanto `despawnDistance`.
-  - `MapNameHelper.Normalize("bigmap")` normalizado para `"bigmap"`, garantindo correspondência com a chave de `mapConfigs` do `config.json` e Web UI.
-  - `TRLMapBubbleOverlay` e `DynamicSpawnManager` consultam `ServerConfigProvider.Config` continuamente (polling a cada 5s), permitindo ajustes em tempo real durante a partida.
-- **Painel Web & Nomenclaturas (Backlog 002 — 🟢 Entregue)**:
-  - Abas renomeadas: *"Configuração de mapas"* -> **"ONDAS"** (`WAVES`), *"Configuração de Bosses"* -> **"BOTS"**.
-  - Slider de espera inicial da primeira onda (`delayBeforeFirstWave`) ajustado para o limite máximo de **120 segundos** (0 a 120s).
-- **Labs Exclusivo para PMCs (Backlog 003 — 🟢 Entregue)**:
-  - Quando a partida for no mapa Labs (`laboratory`), `idealScavs` e `scavSlots` no `DynamicSpawnManager` são forçados para `0`.
-  - 100% da cota do `MaxBot` em Labs é alocada para PMCs (`sptBear` e `sptUsec`).
-- **Dificuldade de Bots & Integração com SAIN (Backlog 004 — 🟢 Entregue)**:
-  - Detecção automática do mod SAIN (`IsSainInstalled`). Se ativo, ignora a sobreposição e repassa `BotDifficulty.normal` para ceder 100% do controle da IA ao SAIN.
-- **Revisão de Bloqueadores de Spawn (Backlog 005 — 🟢 Entregue)**:
-  - Isenção de Bosses Nativos de SafeZone e LoS no `TryToSpawnInZoneAndDelayPatch`.
+- **Agressividade Total do Zryachiy Não-Nativo (`v3.2.8`)**:
+  - Implementado `ZryachiyAggressivenessPatch.cs` (patcheando `ZyriachyBossLogicClass.IsEnemyNow` e `Activate`).
+  - Quando Zryachiy spawna em mapas diferentes do Lighthouse (ex: Woods, Customs, Factory, Ground Zero, Shoreline), o mod ignora sua passividade nativa de negociador e força **100% de agressividade imediata** contra todos os jogadores/PMCs na partida.
+- **Regra Especial de SnipeZone para Zryachiy (`v3.2.7`)**:
+  - Quando Zryachiy for configurado para spawnar em mapas que não sejam Lighthouse sem `bossZone` específica definida pelo usuário, o `GetZoneFromConfig` busca dinamicamente qualquer `BotZone` marcada com `SnipeZone == true` no mapa (ex: "Pedra do Sniper" em Woods).
+- **Preenchimento Padrão dos BossZones (`config.default.json`)**:
+  - Padrão de fábrica atualizado a partir do arquivo de referência (`Novo padrão para usar no default/config.json`) com todos os `bossZone` oficiais marcados por padrão (ex: `ZoneCarShowroom` para Kaban em Streets, `ZoneMeteoStation,ZoneGasStation` para Goons em Shoreline).
 
 ---
 
@@ -43,11 +30,24 @@ Memória cronológica de sessões de trabalho (timestamps em GMT-3). Cada entrad
 
 ## Histórico de Sessões
 
+### 2026-08-12 — Agressividade Zryachiy (v3.2.8), SnipeZone (v3.2.7), Ground Zero (v3.2.6), Trio Goons (v3.2.5), Restrição Cultistas (v3.2.4)
+
+- **Agressividade Total do Zryachiy Não-Nativo (`v3.2.8`)**:
+  - Criado `ZryachiyAggressivenessPatch.cs` forçando agressividade imediata contra alvos em mapas não-Lighthouse.
+- **Regra Especial de SnipeZone para Zryachiy (`v3.2.7`)**:
+  - Implemetada consulta de `BotZone.SnipeZone` no `GetZoneFromConfig` para Zryachiy fora de Lighthouse.
+- **Preenchimento dos BossZones Padrão (`v3.2.7`)**:
+  - `config.default.json` atualizado com todas as zonas Vanilla oficiais selecionadas por padrão.
+- **Validação de Build**:
+  - `TRL-DynamicSpawn-Client.csproj` e `TRL-DynamicSpawn-Server.csproj` compilados com **0 Erros**.
+
+
+
+
 ### 2026-08-06 — Invasão Dinâmica de Elites/Rogues (v3.2.3), MaxBot Dinâmico (v3.2.0) e Code Review 008
 
 - **Correção da Causa Raiz do Spawning de Rogues/Elites Não-Nativos (`DynamicSpawnManager.cs`)**:
   - `SpawnHordeLoop` invocava `ProcessWave(false)` de forma hardcoded. Ajustado para `ProcessWave(warmupAttempt == 1)`, ativando `isFirstWave = true` no 1º ciclo de Warmup da raid.
-  - Rogues configurados no painel Web para mapas sem ondas nativas (ex: Customs/Ground Zero) agora sorteiam e enfileiram normalmente.
 - **Integridade e Spawn Conjunto de Esquadrões de Rogues**:
   - Eliminado o fracionamento de grupos em instâncias de 1 bot. O grupo é enfileirado como uma única unidade (`GroupSize = MaxGroupSize`).
   - Removido `exUsec` da sub-lista de PMCs comuns no algoritmo de interleaving, alocando Rogues no topo da lista (`elites`) para nascerem juntos no segundo 0 da onda na mesma zona.
@@ -57,7 +57,6 @@ Memória cronológica de sessões de trabalho (timestamps em GMT-3). Cada entrad
   - Adicionado pré-carregamento síncrono de Rogues (`exUsec`) no `AddToTargetBackup` do SPT.
 - **Validação de Build & SemVer (`v3.2.3`)**:
   - BepInPlugin e Server csproj atualizados para `3.2.3`. Compilados com **0 Erros**.
-
 
 ### 2026-08-05 — Suporte a Copiar Mapa, Referência Imutável config.default.json, Modal do Default e Remoção do BotMountPatch
 

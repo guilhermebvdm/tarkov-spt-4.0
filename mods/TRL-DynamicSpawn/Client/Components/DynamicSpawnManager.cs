@@ -145,6 +145,12 @@ namespace TRLDynamicSpawn.Components
                     {
                         _botCreator.AddToTargetBackup(BotDifficulty.normal, WildSpawnType.exUsec, 10);
                     }
+                    if (_serverConfig?.EliteConfig?.BossKnight != null && _serverConfig.EliteConfig.BossKnight.Enable)
+                    {
+                        _botCreator.AddToTargetBackup(BotDifficulty.normal, WildSpawnType.bossKnight, 5);
+                        _botCreator.AddToTargetBackup(BotDifficulty.normal, WildSpawnType.followerBigPipe, 5);
+                        _botCreator.AddToTargetBackup(BotDifficulty.normal, WildSpawnType.followerBirdEye, 5);
+                    }
                 }
 
                 // Ajusta as waves de boss originais do vanilla baseado nas configurações recebidas do servidor
@@ -558,6 +564,13 @@ namespace TRLDynamicSpawn.Components
                 {
                     if (entry.info == null || !entry.info.Enable) continue;
 
+                    // Regra Vanilla: Cultistas (sectantPriest) só nascem de noite (22:00 às 06:00)
+                    if (entry.role == WildSpawnType.sectantPriest && !IsNightTimeForCultists())
+                    {
+                        Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Skipping Cultists (sectantPriest) spawn on {mapName}: Raid hour is day time (Cultists only spawn between 22:00 and 06:00).");
+                        continue;
+                    }
+
                     int spawnChance = GetBossChanceForMap(entry.info.SpawnChance, mapName);
                     if (spawnChance <= 0) continue;
 
@@ -568,6 +581,18 @@ namespace TRLDynamicSpawn.Components
                     // Se NÃO possui wave nativa no mapa (ex: Rogues no Customs ou Ground Zero), geramos o spawn dinamicamente!
                     if (UnityEngine.Random.Range(1, 101) <= spawnChance)
                     {
+                        // Regra Especial: Trio Goons (Knight, BigPipe, BirdEye)
+                        if (entry.role == WildSpawnType.bossKnight && !entry.info.DisableFollowers)
+                        {
+                            BotZone goonZone = GetZoneFromConfig(entry.info, mapName, entry.role);
+                            Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Non-Native Goon Trio Invasion: Queueing full Goon Squad (Knight, BigPipe, BirdEye) on {mapName} in zone '{goonZone?.NameZone ?? "Random"}' (Chance: {spawnChance}%)...");
+                            
+                            spawnList.Add(new Tuple<SpawnGroupData, BotZone>(new SpawnGroupData { Role = WildSpawnType.bossKnight, Difficulty = BotDifficulty.normal, GroupSize = 1, Info = entry.info }, goonZone));
+                            spawnList.Add(new Tuple<SpawnGroupData, BotZone>(new SpawnGroupData { Role = WildSpawnType.followerBigPipe, Difficulty = BotDifficulty.normal, GroupSize = 1, Info = entry.info }, goonZone));
+                            spawnList.Add(new Tuple<SpawnGroupData, BotZone>(new SpawnGroupData { Role = WildSpawnType.followerBirdEye, Difficulty = BotDifficulty.normal, GroupSize = 1, Info = entry.info }, goonZone));
+                            continue;
+                        }
+
                         int targetGroupSize = entry.info.MaxGroupSize > 0 ? entry.info.MaxGroupSize : 1;
                         if (entry.info.GroupChance > 0 && entry.info.GroupChance < 100)
                         {
@@ -581,7 +606,7 @@ namespace TRLDynamicSpawn.Components
                             }
                         }
 
-                        BotZone selectedZone = GetZoneFromConfig(entry.info, mapName);
+                        BotZone selectedZone = GetZoneFromConfig(entry.info, mapName, entry.role);
                         Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Non-Native Elite Invasion: Queueing squad of {targetGroupSize}x {entry.role} ({entry.bossName}) on {mapName} in zone '{selectedZone?.NameZone ?? "Random"}' (Chance: {spawnChance}%)...");
                         
                         var gData = new SpawnGroupData
@@ -1246,6 +1271,14 @@ namespace TRLDynamicSpawn.Components
 
                     if (bossInfo != null)
                     {
+                        // Regra Vanilla: Se for wave de Cultistas nativos e a raid for diurna, desativa o spawn nativo
+                        if (bossNameLower == "sectantpriest" && !IsNightTimeForCultists())
+                        {
+                            Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Disabling native Cultists (sectantpriest) wave on {mapName} due to day time.");
+                            wave.BossChance = 0;
+                            continue;
+                        }
+
                         int spawnChance = GetBossChanceForMap(bossInfo.SpawnChance, mapName);
                         string spawnZones = GetBossZoneForMap(bossInfo.BossZone, mapName);
 
@@ -1274,21 +1307,63 @@ namespace TRLDynamicSpawn.Components
             return game.BossSpawnScenario.BossSpawnWaves.Any(w => w != null && w.BossName != null && w.BossName.ToLower() == bossNameLower);
         }
 
-        private BotZone GetZoneFromConfig(EliteLocationInfo info, string mapName)
+        private bool IsNightTimeForCultists()
         {
-            if (info == null) return null;
-            string zonesString = GetBossZoneForMap(info.BossZone, mapName);
-            if (!string.IsNullOrEmpty(zonesString))
+            try
             {
-                string[] possibleZones = zonesString.Split(',').Select(z => z.Trim()).Where(z => !string.IsNullOrEmpty(z)).ToArray();
-                if (possibleZones.Length > 0)
+                var gameWorld = Singleton<GameWorld>.Instance;
+                if (gameWorld == null || gameWorld.GameDateTime == null) return true;
+
+                DateTime currentInRaidTime = gameWorld.GameDateTime.Calculate();
+                int hour = currentInRaidTime.Hour;
+
+                // Regra Vanilla Tarkov: Cultistas só nascem de noite (22:00 às 06:00)
+                return hour >= 22 || hour < 6;
+            }
+            catch
+            {
+                return true;
+            }
+        }
+
+        private BotZone GetZoneFromConfig(EliteLocationInfo info, string mapName, WildSpawnType role = WildSpawnType.assault)
+        {
+            if (info != null)
+            {
+                string zonesString = GetBossZoneForMap(info.BossZone, mapName);
+                if (!string.IsNullOrEmpty(zonesString))
                 {
-                    string selectedZoneName = possibleZones[UnityEngine.Random.Range(0, possibleZones.Length)];
-                    var allZones = LocationScene.GetAllObjects<BotZone>();
-                    var zone = allZones != null ? allZones.FirstOrDefault(z => z != null && string.Equals(z.NameZone, selectedZoneName, StringComparison.OrdinalIgnoreCase)) : null;
-                    if (zone != null) return zone;
+                    string[] possibleZones = zonesString.Split(',').Select(z => z.Trim()).Where(z => !string.IsNullOrEmpty(z)).ToArray();
+                    if (possibleZones.Length > 0)
+                    {
+                        string selectedZoneName = possibleZones[UnityEngine.Random.Range(0, possibleZones.Length)];
+                        var allZones = LocationScene.GetAllObjects<BotZone>();
+                        var zone = allZones != null ? allZones.FirstOrDefault(z => z != null && string.Equals(z.NameZone, selectedZoneName, StringComparison.OrdinalIgnoreCase)) : null;
+                        if (zone != null) return zone;
+                    }
                 }
             }
+
+            // Regra Especial: Zryachiy fora de Lighthouse procura preferencialmente uma SnipeZone no mapa (ex: Pedra do Sniper em Woods)
+            if (role == WildSpawnType.bossZryachiy && mapName.ToLower() != "lighthouse")
+            {
+                try
+                {
+                    var allZones = LocationScene.GetAllObjects<BotZone>();
+                    var snipeZones = allZones != null ? allZones.Where(z => z != null && z.SnipeZone).ToList() : null;
+                    if (snipeZones != null && snipeZones.Count > 0)
+                    {
+                        BotZone selectedSnipeZone = snipeZones[UnityEngine.Random.Range(0, snipeZones.Count)];
+                        Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Zryachiy Sniper Rule: Assigned SnipeZone '{selectedSnipeZone.NameZone}' on {mapName}.");
+                        return selectedSnipeZone;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Plugin.LogSource.LogError($"[TRL-DynamicSpawn] Error searching SnipeZone for Zryachiy: {ex.Message}");
+                }
+            }
+
             return TRLDynamicSpawn.Helpers.Methods.GetRandomZone(_botsController?.BotSpawner);
         }
 
