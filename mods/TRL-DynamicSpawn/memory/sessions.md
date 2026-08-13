@@ -11,6 +11,9 @@ Memória cronológica de sessões de trabalho (timestamps em GMT-3). Cada entrad
 **Mod C# Client (v3.2.8) + C# Server (v3.2.8) compilados com sucesso (0 erros).**
 
 - **Identity**: `TRL-DynamicSpawn` (Client BepInEx DLL: `TRL-DynamicSpawn.dll`, Server C# DLL: `TRL-DynamicSpawn-Server.dll` com Web UI). Compatível com SPT 4.0.13 e EFT 0.16.9.
+- **Nível de Log de Falha na Criação de Perfil (`DynamicSpawnManager.cs`)**:
+  - Rebaixada a mensagem quando o gerador assíncrono do SPT não retorna um perfil no frame de `LogError` para `LogWarning` (`Bot profile creation skipped... Member safely skipped`), indicando com clareza que o integrante foi pulado com segurança sem afetar a raid.
+  - Adicionada retentativa suave de `0.1s` antes do fallback de dificuldade, reduzindo a frequência de mensagens no console.
 - **Agressividade Total do Zryachiy Não-Nativo (`v3.2.8`)**:
   - Implementado `ZryachiyAggressivenessPatch.cs` (patcheando `ZyriachyBossLogicClass.IsEnemyNow` e `Activate`).
   - Quando Zryachiy spawna em mapas diferentes do Lighthouse (ex: Woods, Customs, Factory, Ground Zero, Shoreline), o mod ignora sua passividade nativa de negociador e força **100% de agressividade imediata** contra todos os jogadores/PMCs na partida.

@@ -976,6 +976,17 @@ namespace TRLDynamicSpawn.Components
                 }
 
                 BotCreationDataClass botResult = task.Result;
+                if (botResult == null)
+                {
+                    yield return new WaitForSeconds(0.1f);
+                    var retryTask = BotCreationDataClass.Create(botProfile, _botCreator, 1, _botsController.BotSpawner);
+                    while (!retryTask.IsCompleted)
+                    {
+                        yield return null;
+                    }
+                    botResult = retryTask.Result;
+                }
+
                 if (botResult == null && diff != BotDifficulty.normal)
                 {
                     Plugin.LogSource.LogWarning($"[TRL-DynamicSpawn][SPY-FALLBACK] Profile creation returned NULL for {role} at difficulty {diff}! Triggering safety fallback to BotDifficulty.normal...");
@@ -1012,7 +1023,7 @@ namespace TRLDynamicSpawn.Components
                 }
                 else
                 {
-                    Plugin.LogSource.LogError($"[TRL-DynamicSpawn][SPY-ERROR] Bot creation failed even after fallback for {role} in zone {zone.NameZone}. Member skipped.");
+                    Plugin.LogSource.LogWarning($"[TRL-DynamicSpawn] Bot profile creation skipped for {role} in zone '{zone?.NameZone ?? "Unknown"}'. Member safely skipped.");
                 }
 
                 if (i < groupSize - 1)
