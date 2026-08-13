@@ -141,6 +141,10 @@ namespace TRL_SpeakFromTarkov.UI
                 }
             }
 
+            // Aplicar offsets configurados no BepInEx F12
+            if (VoIPPlugin.InRaidHUDOffsetX != null) posX += VoIPPlugin.InRaidHUDOffsetX.Value;
+            if (VoIPPlugin.InRaidHUDOffsetY != null) posY += VoIPPlugin.InRaidHUDOffsetY.Value;
+
             GUI.depth = -900;
 
             // 1. Fundo e Borda Externa Tática

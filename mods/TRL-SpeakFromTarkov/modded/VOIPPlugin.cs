@@ -46,6 +46,8 @@ namespace TRL_SpeakFromTarkov
         public static ConfigEntry<KeyboardShortcut> ToggleModeKey { get; private set; }
         public static ConfigEntry<KeyboardShortcut> MuteKey { get; private set; }
         public static ConfigEntry<bool> EnableInRaidVoipHUD { get; private set; }
+        public static ConfigEntry<float> InRaidHUDOffsetX { get; private set; }
+        public static ConfigEntry<float> InRaidHUDOffsetY { get; private set; }
         public static ConfigEntry<bool> EnableDebugVoipHUD { get; private set; }
         public static ConfigEntry<bool> EnableDebugLogs { get; private set; }
         public static bool IsAudioDebugActive { get; set; } = false;
@@ -173,6 +175,12 @@ namespace TRL_SpeakFromTarkov
 
             // Interface / HUD
             EnableInRaidVoipHUD = Config.Bind("Interface / HUD", "Exibir HUD de VOIP em Raid", true, "Exibe a barra vertical fina de VOIP em partida posicionada à esquerda do painel de postura (BattleStancePanel).");
+            InRaidHUDOffsetX = Config.Bind("Interface / HUD", "Ajuste Offset X (Pixels)", 0f,
+                new ConfigDescription("Deslocamento horizontal da barra de VOIP em partida (X). Positivo = Direita, Negativo = Esquerda.",
+                    new AcceptableValueRange<float>(-300f, 300f)));
+            InRaidHUDOffsetY = Config.Bind("Interface / HUD", "Ajuste Offset Y (Pixels)", 0f,
+                new ConfigDescription("Deslocamento vertical da barra de VOIP em partida (Y). Positivo = Baixo, Negativo = Cima.",
+                    new AcceptableValueRange<float>(-300f, 300f)));
             EnableDebugVoipHUD = Config.Bind("Interface / HUD", "Exibir HUD de Profiler / Debug", false, "Exibe o painel de diagnósticos estendido no topo da tela.");
             EnableDebugLogs = Config.Bind("Diagnostico", "Habilitar Logs de Debug", false, "Se ativado, imprime mensagens detalhadas de enfileiramento no console. Padrão: false");
 
