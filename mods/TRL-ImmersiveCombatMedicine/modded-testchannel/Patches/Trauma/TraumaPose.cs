@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using EFT;
@@ -27,9 +27,27 @@ namespace TRLImmersiveCombatMedicine.Trauma
         /// instante permitido. Limpo via ClearPronePending na transição p/ Released e no Disengage.</summary>
         private static readonly Dictionary<Player, float> _pronePending = new Dictionary<Player, float>();
         private static readonly List<Player> _proneScratch = new List<Player>();
+        private static readonly Dictionary<string, float> _crouchLockUntil = new Dictionary<string, float>();
+
+        internal static void SetCrouchLock(Player p, float duration = 1.0f)
+        {
+            if (p == null || string.IsNullOrEmpty(p.ProfileId)) return;
+            _crouchLockUntil[p.ProfileId] = Time.time + duration;
+        }
+
+        internal static bool IsCrouchLocked(Player p)
+        {
+            if (p == null || string.IsNullOrEmpty(p.ProfileId)) return false;
+            if (_crouchLockUntil.TryGetValue(p.ProfileId, out float lockUntil))
+            {
+                if (Time.time < lockUntil) return true;
+                _crouchLockUntil.Remove(p.ProfileId);
+            }
+            return false;
+        }
 
         /// <summary>ref: item 020 — resíduo desta primitiva para a auditoria de fronteira de raid.</summary>
-        internal static int ResidualCount => _deferred.Count + _botRestores.Count + _pronePending.Count;
+        internal static int ResidualCount => _deferred.Count + _botRestores.Count + _pronePending.Count + _crouchLockUntil.Count;
 
         private static int _lastPumpFrame = -1; // PA-01-12: pump idempotente por FRAME, agnóstico ao chamador (003 e 004 chamam)
 
@@ -138,6 +156,7 @@ namespace TRLImmersiveCombatMedicine.Trauma
                 Defer(p, region, kind, "internal-guard", internalEntry: false, onExecuted: null);
                 return;
             }
+            SetCrouchLock(p, 1.0f);
             TraumaEngine.ReportOneShotExecuted(p, kind); // D7 — cooldown conta da EXECUÇÃO
             TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"[Trauma2] {KindWord(kind, region)} EXECUTED {p.ProfileId}");
         }
@@ -278,6 +297,7 @@ namespace TRLImmersiveCombatMedicine.Trauma
                 if (!CanForcePose(p, out _)) continue;   // segue adiado
                 if (!mc.SetPoseLevel(0f)) continue;      // guard interno ainda recusa — segue adiado
                 _deferred.RemoveAt(i);
+                SetCrouchLock(p, 1.0f);
                 TraumaEngine.ReportOneShotExecuted(p, e.Kind); // cooldown conta da execução (D7)
                 TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"[Trauma2] {KindWord(e.Kind, e.Region)} EXECUTED {p.ProfileId}");
             }
@@ -346,6 +366,7 @@ namespace TRLImmersiveCombatMedicine.Trauma
             }
             _deferred.Clear();
             _pronePending.Clear();
+            _crouchLockUntil.Clear();
         }
 
         /// <summary>PA-01-04 (estendido no 006 — spec 006 §2): cancela SÓ (kind, região) — toggle-off do 003 usa
@@ -414,7 +435,8 @@ namespace TRLImmersiveCombatMedicine.Trauma
             bool sain = TrySainSetTargetPose(botPlayer, 0f);      // em combate o SAIN dirige a pose — target via reflection
             bo.SetPose(0f);                                        // ref: BotOwner.cs:1120 — target de pose da IA vanilla
             botPlayer.MovementContext.SetPoseLevel(0f, true);      // dip imediato no dono (host/headless)
-            float dip = Mathf.Clamp(TRLImmersiveCombatMedicinePlugin.ConfigBotCrouchDipSeconds.Value, 0.3f, 1.5f);
+            float dip = Mathf.Max(1.0f, Mathf.Clamp(TRLImmersiveCombatMedicinePlugin.ConfigBotCrouchDipSeconds.Value, 0.3f, 1.5f));
+            SetCrouchLock(botPlayer, dip);
             _botRestores.Add(new BotRestore { Player = botPlayer, RestoreAt = Time.time + dip });
             TraumaEngine.ReportOneShotExecuted(botPlayer, TraumaOneShotKind.InvoluntaryCrouch); // cooldown vale p/ bot
             TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo(

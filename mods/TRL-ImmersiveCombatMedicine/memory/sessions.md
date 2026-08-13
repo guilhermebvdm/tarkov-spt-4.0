@@ -330,3 +330,22 @@
 **Atividade cronológica:**
 1. Análise técnica da interação entre a baixa de itens e as mensagens de cura em rede coop.
 2. Criação do `ROADMAP.md` formalizando o Canal 3 Compartilhado TRL com Magic Header `TRLM`.
+
+---
+
+## 2026-08-12 — Sessão 7: Trava de Pose de 1 Segundo para Agachamento Involuntário por 1 Perna (v1.13.2)
+
+**Tema central:** Implementação do cooldown de trava de postura por 1,0 segundo (1f) quando o jogador ou a IA sofrem agachamento involuntário por 1 perna fraturada/zerada.
+
+**Alterações Realizadas:**
+1. **`TraumaPose.cs`**:
+   - Adicionada a gestão de tempo `SetCrouchLock` e `IsCrouchLocked` baseada em `ProfileId` e `Time.time`.
+   - Injetada a trava de 1.0s ao executar `TryInvoluntaryCrouch` (humano) e em `BotCrouchDip` (bots com no mínimo 1.0s de dip).
+2. **`InputPatches.cs` (`CantStandUpPatch`)**:
+   - Atualizado o patch em `MovementContext.CanStandAt` para checar `TraumaPose.IsCrouchLocked(player)`.
+   - Impede o jogador de subir a postura (`h > PoseLevel + 0.05f`) durante 1 segundo após o agachamento involuntário, liberando total movimento em seguida.
+3. **`TRLImmersiveCombatMedicinePlugin.cs` & `.csproj`**:
+   - Bump de versão SemVer para `1.13.2`.
+4. **Validação de Build**:
+   - Compilado `TRL-ImmersiveCombatMedicine.csproj` com **0 Erros**.
+

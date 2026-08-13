@@ -61,6 +61,13 @@ namespace TrueTrauma
                         return false;
                     }
 
+                    // Trava de agachamento involuntário (1 perna quebrada): bloqueia subir de postura por 1s (1f)
+                    if (TraumaPose.IsCrouchLocked(player) && h > __instance.PoseLevel + 0.05f)
+                    {
+                        __result = false;
+                        return false;
+                    }
+
                     // ref: spec 003 §4 (D10) — branches legados de pernas removidos (ImpactTimers 1 s;
                     // bloqueio de levantar 10 s humano / 90 s bot com 2 pernas zeradas): levantar não é mais
                     // travado pelo sistema legado — o ciclo de queda real é o branch abaixo (item 004).
