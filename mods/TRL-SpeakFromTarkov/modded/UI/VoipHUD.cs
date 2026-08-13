@@ -61,11 +61,12 @@ namespace TRL_SpeakFromTarkov.UI
         
         void OnGUI()
         {
+            if (VoIPPlugin.EnableDebugVoipHUD == null || !VoIPPlugin.EnableDebugVoipHUD.Value) return;
             if (Processor == null) return;
             GUI.depth = -1000;
             
-            // Botão Interativo de Debug / Profiler
-            string btnText = VoIPPlugin.IsAudioDebugActive ? "[PROFILER ON (F9)]" : "[PROFILER OFF (F9)]";
+            // Botão Interativo de Profiler
+            string btnText = VoIPPlugin.IsAudioDebugActive ? "[PROFILER ON]" : "[PROFILER OFF]";
             GUIStyle btnStyle = new GUIStyle(GUI.skin.button) { fontSize = 9 };
             if (GUI.Button(new Rect(205, 8, 115, 20), btnText, btnStyle))
             {

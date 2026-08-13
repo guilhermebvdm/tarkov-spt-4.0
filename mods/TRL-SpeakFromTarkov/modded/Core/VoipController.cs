@@ -20,6 +20,7 @@ namespace TRL_SpeakFromTarkov.Core
         public BotVoiceBridge botVoiceBridge { get; private set; }
         private SftNetwork network;
         private VoipHUD hud;
+        public InRaidVoipHUD inRaidHud { get; private set; }
         private ConcurrentQueue<Action> mainThreadActions = new ConcurrentQueue<Action>();
         
         public byte CurrentChannel { get; private set; } = 1;
@@ -69,6 +70,10 @@ namespace TRL_SpeakFromTarkov.Core
             hud = gameObject.AddComponent<VoipHUD>();
             hud.Initialize();
             hud.Processor = processor;
+
+            inRaidHud = gameObject.AddComponent<InRaidVoipHUD>();
+            inRaidHud.Initialize();
+            inRaidHud.Processor = processor;
             
             menuHud = gameObject.AddComponent<MenuVoipHUD>();
             
@@ -243,6 +248,7 @@ namespace TRL_SpeakFromTarkov.Core
             
             HandleKeys();
             if (hud != null) hud.CurrentChannel = CurrentChannel;
+            if (inRaidHud != null) inRaidHud.CurrentChannel = CurrentChannel;
             
             // Interação de Voz com Bots (Main Thread Safe + Janela de Amostragem 250ms)
             if (processor != null && botVoiceBridge != null)
@@ -339,12 +345,6 @@ namespace TRL_SpeakFromTarkov.Core
                 VoIPPlugin.Log.LogInfo($"[SFT] Mute: {(processor.IsMuted ? "ON" : "OFF")}");
             }
 
-            if (IsShortcutDown(VoIPPlugin.DebugToggleKey.Value))
-            {
-                VoIPPlugin.IsAudioDebugActive = !VoIPPlugin.IsAudioDebugActive;
-                VoIPPlugin.Log.LogInfo($"[SFT-PROFILER] Sessão de Profiler de Áudio: {(VoIPPlugin.IsAudioDebugActive ? ">>> ATIVADA (F9) <<<" : "--- DESATIVADA ---")}");
-            }
-            
             processor.IsPTTActive = IsShortcutHeld(VoIPPlugin.PushToTalkKey.Value);
         }
         

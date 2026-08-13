@@ -68,5 +68,17 @@
 
 - **Validação de Produção & Harmonia de Logs:** Confirmado nos logs de runtime real que o servidor C# e o cliente funcionam 100% sem exceções de `UnsupportedMediaType`, e as buscas `/sft/channels/list` rodam perfeitamente pareadas com `/fika/presence/get` a cada 10.0s.
 
+
+---
+
+## 2026-08-12 — Sessão 5: HUD de VOIP em Raid (In-Raid VOIP HUD Vertical & Ancoragem Vanilla)
+
+**Tema central:** Criação do HUD de VOIP em partida (In-Raid), posicionado como uma barra vertical fina ancorada dinamicamente à esquerda do painel de postura (`BattleStancePanel`) da UI vanilla do EFT.
+
+**Decisões-chave:**
+- **In-Raid VOIP HUD Vertical ([InRaidVoipHUD.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded/UI/InRaidVoipHUD.cs)):** Criado novo componente visual fino (`14px` x `110px`) posicionado no canto inferior esquerdo da tela, com VU Meter vertical (de baixo para cima), ponto de status no topo e canal miniaturizado.
+- **Ancoragem Dinâmica sem Dependência Externa:** O componente localiza a instância ativa do `BattleStancePanel` por reflexão segura de nome do tipo (sem arrastar dependência da DLL `Sirenix.Serialization`), calculando os vértices de tela (`RectTransform.GetWorldCorners`) e posicionando o HUD à esquerda da barra de posture em qualquer resolução.
+- **Centralização de Visibilidade no BepInEx (F12):** Criadas as entradas `Enable In-Raid VOIP HUD` (padrão `true`) e `Enable Debug VOIP HUD` (padrão `false`) no menu de configurações F12. Atalho `F9` desativado.
+
 **Pendências abertas nesta sessão:**
-- 🟢 Nenhuma pendência blocker. Tudo 100% compilado, testado e validado.
+- 🟢 Nenhuma pendência blocker. Tudo compilado com 0 erros e 100% pronto.

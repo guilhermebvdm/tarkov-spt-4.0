@@ -45,7 +45,8 @@ namespace TRL_SpeakFromTarkov
         public static ConfigEntry<KeyboardShortcut> PushToTalkKey { get; private set; }
         public static ConfigEntry<KeyboardShortcut> ToggleModeKey { get; private set; }
         public static ConfigEntry<KeyboardShortcut> MuteKey { get; private set; }
-        public static ConfigEntry<KeyboardShortcut> DebugToggleKey { get; private set; }
+        public static ConfigEntry<bool> EnableInRaidVoipHUD { get; private set; }
+        public static ConfigEntry<bool> EnableDebugVoipHUD { get; private set; }
         public static ConfigEntry<bool> EnableDebugLogs { get; private set; }
         public static bool IsAudioDebugActive { get; set; } = false;
 
@@ -169,7 +170,10 @@ namespace TRL_SpeakFromTarkov
             PushToTalkKey = Config.Bind("VOIP", "PushToTalk", new KeyboardShortcut(KeyCode.V), "PTT (ex: V)");
             ToggleModeKey = Config.Bind("VOIP", "Toggle Mode", new KeyboardShortcut(KeyCode.P), "Alternar modo");
             MuteKey = Config.Bind("VOIP", "Mute", new KeyboardShortcut(KeyCode.M, KeyCode.LeftControl), "Mutar");
-            DebugToggleKey = Config.Bind("Diagnostico", "Teclar Debug Audio (Profiler)", new KeyboardShortcut(KeyCode.F9), "Pressione para iniciar/parar o profiler de áudio no console.");
+
+            // Interface / HUD
+            EnableInRaidVoipHUD = Config.Bind("Interface / HUD", "Exibir HUD de VOIP em Raid", true, "Exibe a barra vertical fina de VOIP em partida posicionada à esquerda do painel de postura (BattleStancePanel).");
+            EnableDebugVoipHUD = Config.Bind("Interface / HUD", "Exibir HUD de Profiler / Debug", false, "Exibe o painel de diagnósticos estendido no topo da tela.");
             EnableDebugLogs = Config.Bind("Diagnostico", "Habilitar Logs de Debug", false, "Se ativado, imprime mensagens detalhadas de enfileiramento no console. Padrão: false");
 
             VADDecayTime = Config.Bind("VOIP", "VAD Decay Time", 0.7f);
