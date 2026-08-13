@@ -84,3 +84,35 @@
 3. **Validação de Build**:
    - `TRLFixes.csproj` compilado com **0 Erros e 0 Warnings**.
 
+---
+
+## 2026-08-12 — Sessão 6: BotWeaponManagerSafetyPatch (v1.2.1)
+
+**Tema central:** Adição de patch defensivo global em `BotWeaponManager.UpdateHandsController` para suprimir `NullReferenceException` ao trocar armas de bots durante interrupções assíncronas de IA.
+
+**Alterações Realizadas:**
+1. **`BotWeaponManagerSafetyPatch.cs`**:
+   - Criado patch com `HarmonyPrefix` em `BotWeaponManager.UpdateHandsController(IHandsController handsController, out bool allFine)`.
+   - Valida se `__instance`, `BotOwner_0` ou `WeaponManager` são nulos, e se `handsController is IFirearmHandsController` possui `Item == null`.
+   - Aborta o método vanilla com segurança e define `allFine = false` com log *throttled* (máx 1 log a cada 5s), evitando que eventos de animação órfãos ou bots desmaiados/despawnados provoquem exceções nulas.
+2. **`Plugin.cs` & `TRLFixes.csproj`**:
+   - Ativado o patch `BotWeaponManagerSafetyPatch` no `Awake()`.
+   - Bump de versão SemVer para `1.2.1`.
+3. **Validação de Build**:
+   - Compilado `TRLFixes.csproj` (`TRL-Fixes.dll`) com **0 Erros e 0 Warnings**.
+
+---
+
+## 2026-08-12 — Sessão 7: Resolução do Achado CR-01-01 em BotWeaponSelector.OnWeaponTaken (v1.2.2)
+
+**Tema central:** Correção do achado **CR-01-01** do code review, adicionando proteção contra `NullReferenceException` ao ler `BotOwner_0.BotState` em `BotWeaponSelector.OnWeaponTaken`.
+
+**Alterações Realizadas:**
+1. **`BotWeaponManagerSafetyPatch.cs`**:
+   - Adicionada a proteção `PrefixOnWeaponTaken` interceptando `BotWeaponSelector.OnWeaponTaken`.
+   - Valida se `__instance` ou `__instance.BotOwner_0` é nulo, abortando a execução com `return false;` antes do acesso a `BotOwner_0.BotState`.
+2. **`Plugin.cs` & `TRLFixes.csproj`**:
+   - Bump de versão SemVer para `1.2.2`.
+3. **Validação de Build**:
+   - Compilado `TRLFixes.csproj` (`TRL-Fixes.dll`) com **0 Erros e 0 Warnings**.
+
