@@ -9,6 +9,7 @@ namespace TRLFixes.Patches
     /// Previne NullReferenceException em BotWeaponManager.UpdateHandsController e BotWeaponSelector.OnWeaponTaken
     /// quando um bot desmaia, morre ou tem sua IA desativada enquanto uma transição de mãos/arma estava sendo
     /// finalizada em LateUpdate.
+    /// Utiliza Harmony Finalizers para capturar e engolir qualquer NullReferenceException lançada pelo código vanilla.
     /// </summary>
     public class BotWeaponManagerSafetyPatch
     {
@@ -26,17 +27,19 @@ namespace TRLFixes.Patches
                 if (targetUpdateHands != null)
                 {
                     var prefixUpdateHands = AccessTools.Method(typeof(BotWeaponManagerSafetyPatch), nameof(PrefixUpdateHandsController));
-                    harmony.Patch(targetUpdateHands, prefix: new HarmonyMethod(prefixUpdateHands));
+                    var finalizerUpdateHands = AccessTools.Method(typeof(BotWeaponManagerSafetyPatch), nameof(FinalizerUpdateHandsController));
+                    harmony.Patch(targetUpdateHands, prefix: new HarmonyMethod(prefixUpdateHands), finalizer: new HarmonyMethod(finalizerUpdateHands));
                 }
 
                 var targetOnWeaponTaken = AccessTools.Method(typeof(BotWeaponSelector), nameof(BotWeaponSelector.OnWeaponTaken));
                 if (targetOnWeaponTaken != null)
                 {
                     var prefixOnWeaponTaken = AccessTools.Method(typeof(BotWeaponManagerSafetyPatch), nameof(PrefixOnWeaponTaken));
-                    harmony.Patch(targetOnWeaponTaken, prefix: new HarmonyMethod(prefixOnWeaponTaken));
+                    var finalizerOnWeaponTaken = AccessTools.Method(typeof(BotWeaponManagerSafetyPatch), nameof(FinalizerOnWeaponTaken));
+                    harmony.Patch(targetOnWeaponTaken, prefix: new HarmonyMethod(prefixOnWeaponTaken), finalizer: new HarmonyMethod(finalizerOnWeaponTaken));
                 }
 
-                Debug.Log("TRL-Fixes: Hooks em BotWeaponManager e BotWeaponSelector (weapon safety) aplicados com sucesso!");
+                Debug.Log("TRL-Fixes: Hooks e Finalizers em BotWeaponManager e BotWeaponSelector aplicados com sucesso!");
             }
             catch (Exception ex)
             {
@@ -66,6 +69,20 @@ namespace TRLFixes.Patches
             return true; // Prossegue com a execução vanilla normal
         }
 
+        public static Exception FinalizerUpdateHandsController(Exception __exception, ref bool allFine)
+        {
+            if (__exception != null)
+            {
+                allFine = false;
+                if (__exception is NullReferenceException)
+                {
+                    LogThrottled("NullReferenceException engolida em BotWeaponManager.UpdateHandsController");
+                    return null; // Instrução para o Harmony engolir a exceção!
+                }
+            }
+            return __exception;
+        }
+
         public static bool PrefixOnWeaponTaken(BotWeaponSelector __instance)
         {
             if (__instance == null || __instance.BotOwner_0 == null)
@@ -75,6 +92,16 @@ namespace TRLFixes.Patches
             }
 
             return true;
+        }
+
+        public static Exception FinalizerOnWeaponTaken(Exception __exception)
+        {
+            if (__exception is NullReferenceException)
+            {
+                LogThrottled("NullReferenceException engolida em BotWeaponSelector.OnWeaponTaken");
+                return null; // Instrução para o Harmony engolir a exceção!
+            }
+            return __exception;
         }
 
         private static void LogThrottled(string reason)

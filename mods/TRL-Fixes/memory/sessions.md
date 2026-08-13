@@ -116,3 +116,19 @@
 3. **Validação de Build**:
    - Compilado `TRLFixes.csproj` (`TRL-Fixes.dll`) com **0 Erros e 0 Warnings**.
 
+---
+
+## 2026-08-12 — Sessão 8: Adição de Harmony Finalizers em BotWeaponManagerSafetyPatch (v1.2.3)
+
+**Tema central:** Inclusão de Harmony Finalizers em `BotWeaponManager.UpdateHandsController` e `BotWeaponSelector.OnWeaponTaken` para capturar e engolir qualquer `NullReferenceException` remanescente em trocas de armas de bots.
+
+**Alterações Realizadas:**
+1. **`BotWeaponManagerSafetyPatch.cs`**:
+   - Adicionados `FinalizerUpdateHandsController` e `FinalizerOnWeaponTaken` com o operador `[HarmonyFinalizer]`.
+   - Se ocorrer qualquer `NullReferenceException` no código vanilla (por exemplo, na arma antiga `ShootController.Item`), o Finalizer captura a exceção, zera o erro com `return null;` e garante `allFine = false`.
+2. **`Plugin.cs` & `TRLFixes.csproj`**:
+   - Bump de versão SemVer para `1.2.3`.
+3. **Validação de Build**:
+   - Compilado `TRLFixes.csproj` (`TRL-Fixes.dll`) com **0 Erros e 0 Warnings**.
+
+
