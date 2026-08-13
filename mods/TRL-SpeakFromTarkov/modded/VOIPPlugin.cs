@@ -190,10 +190,16 @@ namespace TRL_SpeakFromTarkov
                     new AcceptableValueRange<float>(-300f, 300f)));
             EnableDebugVoipHUD = Config.Bind("Interface / HUD", "Exibir HUD de Profiler / Debug", false, "Exibe o painel de diagnósticos estendido no topo da tela.");
 
-            // Voice Calibration Wizard (English Interface)
-            WhisperThreshold = Config.Bind("Voice Calibration", "Whisper Threshold", 0.015f, "Calibrated RMS sensitivity threshold for Whisper (Level 1).");
-            NormalThreshold = Config.Bind("Voice Calibration", "Normal Voice Threshold", 0.060f, "Calibrated RMS sensitivity threshold for Normal Voice (Level 2).");
-            LoudThreshold = Config.Bind("Voice Calibration", "Loud Voice Threshold", 0.180f, "Calibrated RMS sensitivity threshold for Loud Voice / Shouting (Level 3).");
+            // Voice Calibration Wizard (English Interface & Manual F12 Sliders)
+            WhisperThreshold = Config.Bind("Voice Calibration", "Whisper Threshold (Notch 1)", 0.015f,
+                new ConfigDescription("Calibrated RMS sensitivity threshold for Whisper (Level 1). Can be fine-tuned manually.",
+                    new AcceptableValueRange<float>(0.001f, 0.300f)));
+            NormalThreshold = Config.Bind("Voice Calibration", "Normal Voice Threshold (Notch 2)", 0.060f,
+                new ConfigDescription("Calibrated RMS sensitivity threshold for Normal Voice (Level 2). Can be fine-tuned manually.",
+                    new AcceptableValueRange<float>(0.002f, 0.400f)));
+            LoudThreshold = Config.Bind("Voice Calibration", "Loud Voice Threshold (Max Ceiling)", 0.180f,
+                new ConfigDescription("Calibrated RMS sensitivity threshold for Loud Voice / Shouting (Level 3). Can be fine-tuned manually.",
+                    new AcceptableValueRange<float>(0.005f, 0.500f)));
             OpenCalibrationKey = Config.Bind("Voice Calibration", "Open Calibration Wizard Shortcut", new KeyboardShortcut(KeyCode.F8), "Shortcut key to open the interactive Voice Calibration Wizard.");
             EnableDebugLogs = Config.Bind("Diagnostico", "Habilitar Logs de Debug", false, "Se ativado, imprime mensagens detalhadas de enfileiramento no console. Padrão: false");
 
