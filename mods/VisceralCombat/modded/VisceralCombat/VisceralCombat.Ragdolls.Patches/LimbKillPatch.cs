@@ -14,6 +14,13 @@ namespace VisceralCombat.Ragdolls.Patches;
 
 public class LimbKillPatch : ModulePatch
 {
+	private static readonly System.Collections.Generic.HashSet<long> _evaluatedLivingVolleys = new System.Collections.Generic.HashSet<long>();
+
+	public static void ClearLivingVolleys()
+	{
+		_evaluatedLivingVolleys.Clear();
+	}
+
 	protected override MethodBase GetTargetMethod()
 	{
 		return typeof(BallisticsCalculator).GetMethods(BindingFlags.Instance | BindingFlags.Public).First((MethodInfo m) => m.Name == "Shoot" && m.GetParameters().Length == 1 && m.GetParameters()[0].ParameterType == typeof(EftBulletClass));
@@ -202,13 +209,36 @@ public class LimbKillPatch : ModulePatch
 
 		if (!dismemberPart.HasValue || boneName == null) return;
 
-		// Living bots/players can ONLY lose LEGS (LeftLeg=5 or RightLeg=6). Arms and Head are strictly dead-only!
-		if (!isDead && dismemberPart.Value != (EBodyPart)5 && dismemberPart.Value != (EBodyPart)6)
+		// --- Living bots/players branch ---
+		// Can ONLY lose LEGS (LeftLeg=5 or RightLeg=6). Arms and Head are strictly dead-only!
+		if (!isDead)
 		{
+			if (dismemberPart.Value != (EBodyPart)5 && dismemberPart.Value != (EBodyPart)6) return;
+
+			// If the living bot already has a LivingDismembermentController, skip further leg dismemberment
+			if (player.GetComponent<VisceralCombat.Dismemberment.Classes.LivingDismembermentController>() != null) return;
+
+			// Buckshot protection: group all pellets from the same trigger pull/shot using (player.Id + shot.FireIndex)
+			long volleyKey = ((long)player.Id << 32) | (uint)(shot.FireIndex & 0xFFFFFFFF);
+			if (_evaluatedLivingVolleys.Contains(volleyKey))
+			{
+				return;
+			}
+			_evaluatedLivingVolleys.Add(volleyKey);
+			if (_evaluatedLivingVolleys.Count > 1000) _evaluatedLivingVolleys.Clear();
+
+			// Fixed 30% chance per hit/shot (counted once per shotgun volley)
+			float livingChance = 0.30f;
+			if (UnityEngine.Random.value <= livingChance)
+			{
+				Transform[] dummyLimbs;
+				VisceralCombat.Combined.Patches.KillPatch.DismemberLimb(player, shot.Direction, dismemberPart.Value, boneName, capAsset, extraAssets, out dummyLimbs);
+				VisceralCombat.Dismemberment.Classes.LivingDismembermentController.Attach(player, dismemberPart.Value);
+			}
 			return;
 		}
 
-		// --- Caliber-based dismemberment chance (same table as KillPatch) ---
+		// --- Dead corpses branch (uses caliber chance table) ---
 		float chance = 0.5f;
 		if (shot.Ammo is AmmoItemClass ammo && !string.IsNullOrEmpty(ammo.Caliber))
 		{
@@ -225,12 +255,6 @@ public class LimbKillPatch : ModulePatch
 		{
 			Transform[] dummyLimbs;
 			VisceralCombat.Combined.Patches.KillPatch.DismemberLimb(player, shot.Direction, dismemberPart.Value, boneName, capAsset, extraAssets, out dummyLimbs);
-
-			// Attach LivingDismembermentController if the bot survived and lost a leg (LeftLeg=5, RightLeg=6)
-			if (!isDead && player.IsAI && (dismemberPart.Value == (EBodyPart)5 || dismemberPart.Value == (EBodyPart)6))
-			{
-				VisceralCombat.Dismemberment.Classes.LivingDismembermentController.Attach(player, dismemberPart.Value);
-			}
 		}
 	}
 }

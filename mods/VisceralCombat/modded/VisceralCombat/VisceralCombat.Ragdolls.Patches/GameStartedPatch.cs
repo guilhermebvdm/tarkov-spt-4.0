@@ -38,8 +38,9 @@ public class GameStartedPatch : ModulePatch
 		
 		VisceralEntry.Instance.dismemberedPlayers.Clear();
 		VisceralEntry.Instance.deadPlayers.Clear();
+		VisceralCombat.Ragdolls.Patches.LimbKillPatch.ClearLivingVolleys();
 		GoreObjectPool.Instance?.ClearPool();
-		QuickLogger.Log(ELogType.Log, "GameStartedPatch: Cleaned deadPlayers, dismemberedPlayers, and GoreObjectPool for new raid.");
+		QuickLogger.Log(ELogType.Log, "GameStartedPatch: Cleaned deadPlayers, dismemberedPlayers, GoreObjectPool, and living volleys for new raid.");
 
 		// Only the host (FikaServer) initiates the handshake; solo SPT also triggers immediately.
 		// Clients skip — they respond to the host's ping via VisceralEntry registered packets.
