@@ -424,8 +424,9 @@ namespace TRL_SpeakFromTarkov.UI
             if (VoIPPlugin.WhisperThreshold != null) VoIPPlugin.WhisperThreshold.Value = _calibratedWhisperToNormal;
             if (VoIPPlugin.NormalThreshold != null)  VoIPPlugin.NormalThreshold.Value  = _calibratedNormalToLoud;
             if (VoIPPlugin.LoudThreshold != null)    VoIPPlugin.LoudThreshold.Value    = _calibratedLoudMax;
+            if (VoIPPlugin.VADThreshold != null)     VoIPPlugin.VADThreshold.Value     = Mathf.Max(0.002f, _whisperMin);
 
-            VoIPPlugin.Log?.LogInfo($"[SFT-WIZARD] Calibrated P95/P10 boundaries saved to BepInEx! Notch1: {_calibratedWhisperToNormal:F4}, Notch2: {_calibratedNormalToLoud:F4}, Max: {_calibratedLoudMax:F4}");
+            VoIPPlugin.Log?.LogInfo($"[SFT-WIZARD] Calibrated P95/P10 boundaries saved to BepInEx! Notch1: {_calibratedWhisperToNormal:F4}, Notch2: {_calibratedNormalToLoud:F4}, Max: {_calibratedLoudMax:F4}, VAD: {_whisperMin:F4}");
         }
     }
 }

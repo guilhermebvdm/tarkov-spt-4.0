@@ -171,8 +171,8 @@ namespace TRL_SpeakFromTarkov.UI
             float maxRange = Mathf.Max(0.05f, loudThresh);
             float fill = Mathf.Clamp01(_smoothLevel / maxRange);
 
-            float n1Pct = Mathf.Clamp(whisperThresh / maxRange, 0.15f, 0.40f);
-            float n2Pct = Mathf.Clamp(normalThresh / maxRange, 0.45f, 0.80f);
+            float n1Pct = Mathf.Clamp01(whisperThresh / maxRange);
+            float n2Pct = Mathf.Clamp01(normalThresh / maxRange);
 
             if (fill > 0.001f)
             {
