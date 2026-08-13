@@ -168,14 +168,21 @@ namespace TRL_SpeakFromTarkov.UI
 
                 Color color = !Processor.IsTransmitting
                     ? new Color(0.4f, 0.45f, 0.4f, 0.4f)
-                    : (fill > 0.8f ? Color.red : fill > 0.4f ? Color.yellow : Color.green);
+                    : (fill > 0.65f ? Color.red : fill > 0.25f ? Color.yellow : Color.green);
 
                 var fillTex = MakeTex(color);
                 GUI.DrawTexture(new Rect(posX + 2, currentFillY, barWidth - 4, currentFillH), fillTex);
                 Destroy(fillTex);
             }
 
-            // 4. Texto Miniaturizado da Frequência / Canal (Abaixo da Barra)
+            // 4. Traços de Divisão dos Níveis de Voz (Nv1 Sussurro < 25%, Nv2 Normal 25-65%, Nv3 Grito > 65%)
+            float notch1Y = fillAreaY + fillAreaH * (1f - 0.25f);
+            float notch2Y = fillAreaY + fillAreaH * (1f - 0.65f);
+
+            GUI.DrawTexture(new Rect(posX + 1, notch1Y, barWidth - 2, 1), _borderTex);
+            GUI.DrawTexture(new Rect(posX + 1, notch2Y, barWidth - 2, 1), _borderTex);
+
+            // 5. Texto Miniaturizado da Frequência / Canal (Abaixo da Barra)
             string channelText = CurrentChannel == 0 ? "RAID" : CurrentChannel == 2 ? "SPEC" : $"CH{CurrentChannel}";
             GUIStyle labelStyle = new GUIStyle(GUI.skin.label)
             {
