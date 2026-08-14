@@ -1,8 +1,8 @@
 # TRL-SpeakFromTarkov — Memória de Sessões
 
 ## Snapshot Delta
-- **Versão:** 1.6.0 (SPT 4.0 / FIKA)
-- **Estado:** v1.6.0 compilada e testada com 0 erros. Implementação completa de Canais de VOIP no Menu Principal com P2P 2D estéreo, HUD alinhado ao FIKA, moderação de jogadores (Remover/Banir), confirmação anti-missclick, rolagem automática (ScrollView) e reconexão automática contínua pós-raid.
+- **Versão:** 1.6.1 (SPT 4.0 / FIKA)
+- **Estado:** v1.6.1 compilada e testada com 0 erros e 0 avisos (100% Clean Build). HUD In-Raid sincronizado 1:1 com a opacidade/autohide do `BattleStancePanel` vanilla, com offset X ajustável (+15px), ícones de modo de captura em 40px posicionados na parte inferior da barra (PTT, VAD, OPEN, MUTE), remoção do texto RAID e eliminação completa de todos os 133 avisos de compilação C#.
 - **Pendências:** 🟢 Nenhuma pendência blocker registrada.
 
 ---
@@ -68,7 +68,6 @@
 
 - **Validação de Produção & Harmonia de Logs:** Confirmado nos logs de runtime real que o servidor C# e o cliente funcionam 100% sem exceções de `UnsupportedMediaType`, e as buscas `/sft/channels/list` rodam perfeitamente pareadas com `/fika/presence/get` a cada 10.0s.
 
-
 ---
 
 ## 2026-08-12 — Sessão 5: HUD de VOIP em Raid (In-Raid VOIP HUD Vertical & Ancoragem Vanilla)
@@ -79,13 +78,24 @@
 - **In-Raid VOIP HUD Vertical ([InRaidVoipHUD.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded/UI/InRaidVoipHUD.cs)):** Criado novo componente visual fino (`14px` x `110px`) posicionado no canto inferior esquerdo da tela, com VU Meter vertical (de baixo para cima), ponto de status no topo e canal miniaturizado.
 - **Ancoragem Dinâmica sem Dependência Externa:** O componente localiza a instância ativa do `BattleStancePanel` por reflexão segura de nome do tipo (sem arrastar dependência da DLL `Sirenix.Serialization`), calculando os vértices de tela (`RectTransform.GetWorldCorners`) e posicionando o HUD à esquerda da barra de posture em qualquer resolução.
 - **Centralização de Visibilidade no BepInEx (F12):** Criadas as entradas `Enable In-Raid VOIP HUD` (padrão `true`) e `Enable Debug VOIP HUD` (padrão `false`) no menu de configurações F12. Atalho `F9` desativado.
-
 - **Voice Calibration Wizard ([VoiceCalibrationHUD.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded/UI/VoiceCalibrationHUD.cs)):** Desenvolvido o assistente modal interativo em 3 fases (Whisper, Normal, Loud) com interface 100% em Inglês, frases táticas, controle liberado de cursor de mouse e atalho de acionamento `F8`.
 - **Análise Estatística de Pico (P95) e Vale (P10):** O calibrador analisa os percentis de áudio ativo de cada fase para calcular dinamicamente os pontos médios exatos de transição (Traço 1 Sussurro $\rightarrow$ Voz Normal e Traço 2 Voz Normal $\rightarrow$ Grito), descartando micro-pausas e respirações.
 - **Sincronização 1:1 com Sliders F12 e Gate VAD:** Os valores obtidos são persistidos no BepInEx como sliders ajustáveis no F12 (`WhisperThreshold`, `NormalThreshold`, `LoudThreshold`) e ajustam simultaneamente o ponto de abertura do VAD (`VADThreshold`) e a barra vertical do HUD in-raid em tempo real.
-
 - **Redução da Largura da Barra (`7px`):** Largura do HUD vertical in-raid reduzida pela metade (de `14px` para `7px`), tornando a barra extremamente compacta e discreta ao lado do indicador de postura vanilla.
-- **Ícones PNG de Modo de Captura (`ptt.png`, `vad.png`, `open.png`):** Carregamento em tempo real dos ícones fornecidos pelo usuário redimensionados para `14px` x `14px` no topo da barra de captura. O ícone alterna dinamicamente conforme o modo ativo (`PTT`, `VAD` e `OPEN`) e aplica iluminação por estado (Muted, Transmitindo, Standby).
+
+---
+
+## 2026-08-14 — Sessão 6: Integração Visual do HUD In-Raid, Deslocamento Vanilla & Limpeza de 100% dos Warnings C#
+
+**Tema central:** Sincronização avançada de transparência/autohide com a UI vanilla do Tarkov (`BattleStancePanel`), suporte ao ícone `mute.png`, reposicionamento dos ícones de modo (40px) na parte inferior da barra, deslocamento configurável (+15px) do painel de postura nativo e resolução de 100% dos avisos de compilação C#.
+
+**Decisões-chave:**
+- **Sincronização de Autohide Vanilla via `CanvasGroup`:** Recuperada a referência ao `CanvasGroup` do `BattleStancePanel` ([InRaidVoipHUD.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded/UI/InRaidVoipHUD.cs)), multiplicando `GUI.color` pelo `alpha` da animação do Tarkov (`DOFade`). Nosso HUD de VOIP agora esmaece e reaparece exatamente junto com o HUD do jogo.
+- **Guard Estrito de Existência:** Se o `BattleStancePanel` não existir ou estiver inativo na hierarquia da cena, o HUD de VOIP não é renderizado.
+- **Opção F12 `AlwaysVisibleInRaidHUD`:** Adicionada a opção no BepInEx ([VOIPPlugin.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded/VOIPPlugin.cs)) para manter o HUD de VOIP continuamente visível em raid se o jogador desejar, sem ignorar a regra de existência.
+- **Deslocamento X do Painel de Postura Vanilla (+15px):** O `BattleStancePanel` nativo do jogo agora é deslocado +15px para a direita (ajustável no F12 via `ShiftStancePanelX`), criando um alinhamento tático limpo sem colar os elementos na borda esquerda da tela.
+- **Ícones de Modo de Captura (40px na Parte Inferior) & Remoção do Texto "RAID":** Integrados os ícones `ptt.png`, `vad.png`, `open.png` e `mute.png` escalados suavemente para **40px** na parte inferior da barra vertical. A escrita miniaturizada "RAID" foi removida para um visual minimalista e moderno.
+- **Resolução de 100% dos Avisos (133 Warnings $\rightarrow$ 0 Warnings):** Eliminados todos os 133 avisos C# (`CS8618`, `CS0414`, `CS0169`, `CS8600`, `CS8601`, `CS8603`, `CS8625`) em 12 arquivos C# do mod Client, alcançando compilação **100% limpa (0 Erros e 0 Avisos)**.
 
 **Pendências abertas nesta sessão:**
-- 🟢 Nenhuma pendência blocker. Tudo compilado com 0 erros e 100% pronto.
+- 🟢 Nenhuma pendência blocker. Build concluído com 0 erros e 0 avisos.
