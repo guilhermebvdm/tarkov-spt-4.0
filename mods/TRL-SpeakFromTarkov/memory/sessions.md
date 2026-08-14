@@ -144,3 +144,25 @@
 
 **Pendências abertas nesta sessão:**
 - 🟢 Nenhuma pendência blocker. Build concluído com 0 erros e 0 avisos.
+
+---
+
+## 2026-08-14 — Sessão 10: Reorganização de Seções F12, Seção `Debug` Unificada & Ajuste de Valores Padrão
+
+**Tema central:** Reorganização completa das seções no menu F12 do BepInEx, agrupamento das opções de diagnóstico na nova seção unificada `Debug`, eliminação do prefixo `Enable` e atualização dos valores padrões.
+
+**Decisões-chave:**
+- **Seção `Debug` Unificada ([VOIPPlugin.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded/VOIPPlugin.cs)):** Agrupadas as opções `Local Echo Loopback`, `Echo Delay (s)`, `Echo Volume`, `Profiler / Debug HUD`, `Debug Logs` e `Bot Speech Debug Volume` em uma única seção `Debug`.
+- **Remoção do Prefixo `Enable` ([VOIPPlugin.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded/VOIPPlugin.cs)):** Eliminado o prefixo `Enable` de todas as chaves (ex: `Enable Voice Mod` $\rightarrow$ `Voice Mod`, `Enable AGC` $\rightarrow$ `AGC`, `Enable RNNoise Suppressor` $\rightarrow$ `RNNoise Suppressor`, `Enable Bot Reactivity` $\rightarrow$ `Bot Reactivity`).
+- **Valores Padrão Atualizados:**
+  - `Local Echo Loopback`: `false`
+  - `Voice Mod`: `true`
+  - `Debug Logs`: `false`
+  - `AGC (Automatic Gain Control)`: `false`
+  - `RNNoise Suppressor`: `true`
+  - `Forward Error Correction (FEC)`: `false`
+  - `Bot Speech Debug Volume`: `0.0` (0%)
+  - `Bot Reactivity`: `true`
+
+**Pendências abertas nesta sessão:**
+- 🟢 Nenhuma pendência blocker. Build concluído com 0 erros e 0 avisos.
