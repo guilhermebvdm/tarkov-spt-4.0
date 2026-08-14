@@ -48,6 +48,10 @@
       <HintPath>References/UnityEngine.CoreModule.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="UnityEngine.UIModule">
+      <HintPath>References/UnityEngine.UIModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
     <Reference Include="UnityEngine.AudioModule">
       <HintPath>References/UnityEngine.AudioModule.dll</HintPath>
       <Private>false</Private>

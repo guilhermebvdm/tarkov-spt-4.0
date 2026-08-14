@@ -17,6 +17,7 @@ namespace TRL_SpeakFromTarkov.UI
         public byte CurrentChannel { get; set; }
 
         private Component _battleStancePanel;
+        private CanvasGroup _battleStanceCanvasGroup;
         private float _searchTimer = 0f;
 
         private Texture2D _bgTex;
@@ -135,6 +136,11 @@ namespace TRL_SpeakFromTarkov.UI
                             if (comps[i] != null && comps[i].GetType().Name == "BattleStancePanel")
                             {
                                 _battleStancePanel = comps[i];
+                                _battleStanceCanvasGroup = _battleStancePanel.GetComponent<CanvasGroup>();
+                                if (_battleStanceCanvasGroup == null)
+                                {
+                                    _battleStanceCanvasGroup = _battleStancePanel.GetComponentInParent<CanvasGroup>();
+                                }
                                 break;
                             }
                         }
@@ -161,6 +167,25 @@ namespace TRL_SpeakFromTarkov.UI
             if (VoIPPlugin.EnableInRaidVoipHUD == null || !VoIPPlugin.EnableInRaidVoipHUD.Value) return;
             if (Processor == null) return;
             if (Event.current.type != EventType.Repaint) return;
+
+            // Sincronização 1:1 de Opacidade com a mecânica de Autohide / Always Visible do HUD do Tarkov
+            float hudAlpha = 1f;
+            if (_battleStanceCanvasGroup != null)
+            {
+                hudAlpha = _battleStanceCanvasGroup.alpha;
+            }
+
+            // Se o jogador estiver ativamente transmitindo voz, acorda/exibe o HUD visual temporariamente
+            if (Processor.IsTransmitting)
+            {
+                hudAlpha = Mathf.Max(hudAlpha, 0.95f);
+            }
+
+            // Se o HUD vanilla estiver completamente ocultado e o jogador não estiver falando, oculta 100%
+            if (hudAlpha <= 0.01f) return;
+
+            Color oldGuiColor = GUI.color;
+            GUI.color = new Color(oldGuiColor.r, oldGuiColor.g, oldGuiColor.b, oldGuiColor.a * hudAlpha);
 
             // Largura reduzida pela metade (7px)
             float barWidth = 7f;
@@ -294,6 +319,7 @@ namespace TRL_SpeakFromTarkov.UI
                 normal = { textColor = new Color(0.8f, 0.85f, 0.8f, 0.9f) }
             };
             GUI.Label(new Rect(posX - 10, posY + barHeight + 1, barWidth + 20, 12), channelText, labelStyle);
+            GUI.color = oldGuiColor;
         }
     }
 }
