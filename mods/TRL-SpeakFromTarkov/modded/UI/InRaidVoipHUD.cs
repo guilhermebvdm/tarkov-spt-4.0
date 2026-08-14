@@ -1,12 +1,15 @@
 using System;
+using System.IO;
+using System.Reflection;
 using UnityEngine;
 using TRL_SpeakFromTarkov.Audio;
 
 namespace TRL_SpeakFromTarkov.UI
 {
     /// <summary>
-    /// HUD de VOIP em Raid: Barra vertical fina e elegante no canto inferior esquerdo da tela,
+    /// HUD de VOIP em Raid: Barra vertical fina e elegante (largura reduzida de 14px para 7px),
     /// ancorada dinamicamente ao bordo esquerdo do painel de postura/stamina vanilla (BattleStancePanel).
+    /// Exibe no topo os ícones de modo de captura (PTT, VAD, OPEN) redimensionados.
     /// </summary>
     public class InRaidVoipHUD : MonoBehaviour
     {
@@ -24,6 +27,11 @@ namespace TRL_SpeakFromTarkov.UI
         private Texture2D _cyanTex;
         private Texture2D _grayTex;
 
+        // Ícones de Modo de Captura (PNG 400px escalados na UI)
+        private Texture2D _pttIconTex;
+        private Texture2D _vadIconTex;
+        private Texture2D _openIconTex;
+
         private float _smoothLevel = 0f;
         private float _peakMax = 0.02f;
 
@@ -36,6 +44,11 @@ namespace TRL_SpeakFromTarkov.UI
             _redTex    = MakeTex(new Color(0.90f, 0.20f, 0.20f, 0.90f));
             _cyanTex   = MakeTex(new Color(0.20f, 0.85f, 0.95f, 0.90f));
             _grayTex   = MakeTex(new Color(0.40f, 0.45f, 0.40f, 0.40f));
+
+            // Carregamento dos ícones de modo de captura
+            _pttIconTex  = LoadPNG("ptt.png");
+            _vadIconTex  = LoadPNG("vad.png");
+            _openIconTex = LoadPNG("open.png");
         }
 
         private Texture2D MakeTex(Color c)
@@ -44,6 +57,38 @@ namespace TRL_SpeakFromTarkov.UI
             t.SetPixel(0, 0, c);
             t.Apply();
             return t;
+        }
+
+        private Texture2D LoadPNG(string filename)
+        {
+            try
+            {
+                string dllDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                string path = Path.Combine(dllDir, "assets", filename);
+                if (!File.Exists(path))
+                {
+                    path = Path.Combine(dllDir, filename);
+                }
+                if (!File.Exists(path))
+                {
+                    // Fallback para pasta raiz do mod
+                    path = Path.Combine(dllDir, "..", filename);
+                }
+                if (File.Exists(path))
+                {
+                    byte[] bytes = File.ReadAllBytes(path);
+                    Texture2D tex = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+                    if (ImageConversion.LoadImage(tex, bytes))
+                    {
+                        return tex;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                VoIPPlugin.Log?.LogError($"[SFT] Erro ao carregar ícone {filename}: {ex.Message}");
+            }
+            return null;
         }
 
         private void OnDestroy()
@@ -55,6 +100,9 @@ namespace TRL_SpeakFromTarkov.UI
             DestroyTex(ref _redTex);
             DestroyTex(ref _cyanTex);
             DestroyTex(ref _grayTex);
+            DestroyTex(ref _pttIconTex);
+            DestroyTex(ref _vadIconTex);
+            DestroyTex(ref _openIconTex);
         }
 
         private void DestroyTex(ref Texture2D tex)
@@ -70,7 +118,6 @@ namespace TRL_SpeakFromTarkov.UI
         {
             if (Processor == null) return;
 
-            // Busca por reflexão/nome do tipo para não arrastar dependência de DLLs externas (OdinSerializer)
             if (_battleStancePanel == null)
             {
                 _searchTimer += Time.deltaTime;
@@ -93,14 +140,13 @@ namespace TRL_SpeakFromTarkov.UI
                 }
             }
 
-            // Animação VU Meter suave (resposta de balística de áudio)
+            // Animação VU Meter suave
             float target = Processor.DisplayLevel;
             if (target > _smoothLevel)
                 _smoothLevel = Mathf.Lerp(_smoothLevel, target, Time.deltaTime * 30f);
             else
                 _smoothLevel = Mathf.Lerp(_smoothLevel, target, Time.deltaTime * 8f);
 
-            // Ajuste automático do pico máximo
             if (Processor.PeakLevel > _peakMax)
                 _peakMax = Processor.PeakLevel;
             else
@@ -109,18 +155,16 @@ namespace TRL_SpeakFromTarkov.UI
 
         private void OnGUI()
         {
-            // Valida se o HUD de Raid está ativado no BepInEx (F12)
             if (VoIPPlugin.EnableInRaidVoipHUD == null || !VoIPPlugin.EnableInRaidVoipHUD.Value) return;
             if (Processor == null) return;
             if (Event.current.type != EventType.Repaint) return;
 
-            // Posição base de ancoragem no canto esquerdo
+            // Largura reduzida pela metade (7px)
+            float barWidth = 7f;
+            float barHeight = 110f;
             float posX = 15f;
             float posY = Screen.height - 150f;
-            float barWidth = 14f;
-            float barHeight = 110f;
 
-            // Se o BattleStancePanel vanilla estiver ativo na hierarquia, ancorar perfeitamente ao seu lado esquerdo!
             if (_battleStancePanel != null && _battleStancePanel.gameObject != null && _battleStancePanel.gameObject.activeInHierarchy)
             {
                 var rectTransform = _battleStancePanel.GetComponent<RectTransform>();
@@ -129,7 +173,6 @@ namespace TRL_SpeakFromTarkov.UI
                     Vector3[] corners = new Vector3[4];
                     rectTransform.GetWorldCorners(corners);
 
-                    // corners[0] = bottom-left, corners[1] = top-left
                     float panelLeft = corners[0].x;
                     float panelBottomOnScreen = Screen.height - corners[0].y;
                     float panelTopOnScreen = Screen.height - corners[1].y;
@@ -141,28 +184,65 @@ namespace TRL_SpeakFromTarkov.UI
                 }
             }
 
-            // Aplicar offsets configurados no BepInEx F12
             if (VoIPPlugin.InRaidHUDOffsetX != null) posX += VoIPPlugin.InRaidHUDOffsetX.Value;
             if (VoIPPlugin.InRaidHUDOffsetY != null) posY += VoIPPlugin.InRaidHUDOffsetY.Value;
 
             GUI.depth = -900;
 
-            // 1. Fundo e Borda Externa Tática
+            // 1. Ícone do Modo de Captura (PTT / VAD / OPEN) no topo da barra
+            Texture2D modeIcon = null;
+            switch (Processor.CurrentMode)
+            {
+                case VoipProcessor.VoipMode.PTT:
+                    modeIcon = _pttIconTex;
+                    break;
+                case VoipProcessor.VoipMode.VAD:
+                    modeIcon = _vadIconTex;
+                    break;
+                case VoipProcessor.VoipMode.Open:
+                    modeIcon = _openIconTex;
+                    break;
+            }
+
+            float iconSize = 14f; // Tamanho ideal redimensionado suavemente pela GUI
+            float iconX = posX + (barWidth / 2f) - (iconSize / 2f);
+            float iconY = posY - iconSize - 4f;
+
+            if (modeIcon != null)
+            {
+                Color prevColor = GUI.color;
+                if (Processor.IsMuted)
+                {
+                    GUI.color = new Color(1.0f, 0.4f, 0.4f, 0.60f);
+                }
+                else if (Processor.IsTransmitting)
+                {
+                    GUI.color = Color.white;
+                }
+                else
+                {
+                    GUI.color = new Color(0.85f, 0.90f, 0.85f, 0.75f);
+                }
+
+                GUI.DrawTexture(new Rect(iconX, iconY, iconSize, iconSize), modeIcon);
+                GUI.color = prevColor;
+            }
+
+            // 2. Fundo e Borda Externa Tática (Largura de 7px)
             GUI.DrawTexture(new Rect(posX - 1, posY - 1, barWidth + 2, barHeight + 2), _borderTex);
             GUI.DrawTexture(new Rect(posX, posY, barWidth, barHeight), _bgTex);
 
-            // 2. Indicador do Ponto de Status no Topo (3px de altura)
+            // 3. Ponto Indicador de Status de Transmissão no Topo da Barra (3px)
             Texture2D statusDotTex = _redTex;
             if (!Processor.IsMuted)
             {
                 statusDotTex = Processor.IsTransmitting ? _greenTex : _yellowTex;
             }
+            GUI.DrawTexture(new Rect(posX + 1, posY + 1, barWidth - 2, 3), statusDotTex);
 
-            GUI.DrawTexture(new Rect(posX + 2, posY + 2, barWidth - 4, 3), statusDotTex);
-
-            // 3. Preenchimento do VU Meter Vertical com Limiares Calibrados
-            float fillAreaY = posY + 7;
-            float fillAreaH = barHeight - 9;
+            // 4. Preenchimento do VU Meter Vertical com Limiares Calibrados
+            float fillAreaY = posY + 5;
+            float fillAreaH = barHeight - 7;
 
             float whisperThresh = (VoIPPlugin.WhisperThreshold != null) ? VoIPPlugin.WhisperThreshold.Value : 0.015f;
             float normalThresh  = (VoIPPlugin.NormalThreshold != null)  ? VoIPPlugin.NormalThreshold.Value  : 0.060f;
@@ -184,25 +264,26 @@ namespace TRL_SpeakFromTarkov.UI
                     : (fill > n2Pct ? Color.red : fill > n1Pct ? Color.yellow : Color.green);
 
                 var fillTex = MakeTex(color);
-                GUI.DrawTexture(new Rect(posX + 2, currentFillY, barWidth - 4, currentFillH), fillTex);
+                GUI.DrawTexture(new Rect(posX + 1, currentFillY, barWidth - 2, currentFillH), fillTex);
                 Destroy(fillTex);
             }
 
-            // 4. Traços de Divisão dos Níveis de Voz Calibrados (Sussurro, Normal, Grito)
+            // 5. Traços de Divisão dos Níveis de Voz Calibrados
             float notch1Y = fillAreaY + fillAreaH * (1f - n1Pct);
             float notch2Y = fillAreaY + fillAreaH * (1f - n2Pct);
 
-            GUI.DrawTexture(new Rect(posX + 1, notch1Y, barWidth - 2, 1), _borderTex);
-            GUI.DrawTexture(new Rect(posX + 1, notch2Y, barWidth - 2, 1), _borderTex);
+            GUI.DrawTexture(new Rect(posX, notch1Y, barWidth, 1), _borderTex);
+            GUI.DrawTexture(new Rect(posX, notch2Y, barWidth, 1), _borderTex);
 
-            // 5. Texto Miniaturizado da Frequência / Canal (Abaixo da Barra)
+            // 6. Texto Miniaturizado da Frequência / Canal (Abaixo da Barra)
             string channelText = CurrentChannel == 0 ? "RAID" : CurrentChannel == 2 ? "SPEC" : $"CH{CurrentChannel}";
             GUIStyle labelStyle = new GUIStyle(GUI.skin.label)
             {
                 fontSize = 8,
+                alignment = TextAnchor.MiddleCenter,
                 normal = { textColor = new Color(0.8f, 0.85f, 0.8f, 0.9f) }
             };
-            GUI.Label(new Rect(posX - 8, posY + barHeight + 1, barWidth + 16, 12), channelText, labelStyle);
+            GUI.Label(new Rect(posX - 10, posY + barHeight + 1, barWidth + 20, 12), channelText, labelStyle);
         }
     }
 }

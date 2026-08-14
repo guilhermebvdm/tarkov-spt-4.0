@@ -84,5 +84,8 @@
 - **Análise Estatística de Pico (P95) e Vale (P10):** O calibrador analisa os percentis de áudio ativo de cada fase para calcular dinamicamente os pontos médios exatos de transição (Traço 1 Sussurro $\rightarrow$ Voz Normal e Traço 2 Voz Normal $\rightarrow$ Grito), descartando micro-pausas e respirações.
 - **Sincronização 1:1 com Sliders F12 e Gate VAD:** Os valores obtidos são persistidos no BepInEx como sliders ajustáveis no F12 (`WhisperThreshold`, `NormalThreshold`, `LoudThreshold`) e ajustam simultaneamente o ponto de abertura do VAD (`VADThreshold`) e a barra vertical do HUD in-raid em tempo real.
 
+- **Redução da Largura da Barra (`7px`):** Largura do HUD vertical in-raid reduzida pela metade (de `14px` para `7px`), tornando a barra extremamente compacta e discreta ao lado do indicador de postura vanilla.
+- **Ícones PNG de Modo de Captura (`ptt.png`, `vad.png`, `open.png`):** Carregamento em tempo real dos ícones fornecidos pelo usuário redimensionados para `14px` x `14px` no topo da barra de captura. O ícone alterna dinamicamente conforme o modo ativo (`PTT`, `VAD` e `OPEN`) e aplica iluminação por estado (Muted, Transmitindo, Standby).
+
 **Pendências abertas nesta sessão:**
 - 🟢 Nenhuma pendência blocker. Tudo compilado com 0 erros e 100% pronto.
