@@ -168,6 +168,12 @@ namespace TRL_SpeakFromTarkov.UI
             if (Processor == null) return;
             if (Event.current.type != EventType.Repaint) return;
 
+            // O nosso HUD existe ESTRITAMENTE se o HUD do jogo (BattleStancePanel) existir e estiver ativo na hierarquia
+            if (_battleStancePanel == null || _battleStancePanel.gameObject == null || !_battleStancePanel.gameObject.activeInHierarchy)
+            {
+                return;
+            }
+
             // Sincronização 1:1 de Opacidade com a mecânica de Autohide / Always Visible do HUD do Tarkov
             float hudAlpha = 1f;
             if (_battleStanceCanvasGroup != null)
@@ -175,13 +181,7 @@ namespace TRL_SpeakFromTarkov.UI
                 hudAlpha = _battleStanceCanvasGroup.alpha;
             }
 
-            // Se o jogador estiver ativamente transmitindo voz, acorda/exibe o HUD visual temporariamente
-            if (Processor.IsTransmitting)
-            {
-                hudAlpha = Mathf.Max(hudAlpha, 0.95f);
-            }
-
-            // Se o HUD vanilla estiver completamente ocultado e o jogador não estiver falando, oculta 100%
+            // Se o HUD do jogo estiver ocultado pelo autohide (opacidade zero), o nosso HUD não aparece
             if (hudAlpha <= 0.01f) return;
 
             Color oldGuiColor = GUI.color;
@@ -193,23 +193,20 @@ namespace TRL_SpeakFromTarkov.UI
             float posX = 15f;
             float posY = Screen.height - 150f;
 
-            if (_battleStancePanel != null && _battleStancePanel.gameObject != null && _battleStancePanel.gameObject.activeInHierarchy)
+            var rectTransform = _battleStancePanel.GetComponent<RectTransform>();
+            if (rectTransform != null)
             {
-                var rectTransform = _battleStancePanel.GetComponent<RectTransform>();
-                if (rectTransform != null)
-                {
-                    Vector3[] corners = new Vector3[4];
-                    rectTransform.GetWorldCorners(corners);
+                Vector3[] corners = new Vector3[4];
+                rectTransform.GetWorldCorners(corners);
 
-                    float panelLeft = corners[0].x;
-                    float panelBottomOnScreen = Screen.height - corners[0].y;
-                    float panelTopOnScreen = Screen.height - corners[1].y;
-                    float panelH = Mathf.Clamp(panelBottomOnScreen - panelTopOnScreen, 80f, 140f);
+                float panelLeft = corners[0].x;
+                float panelBottomOnScreen = Screen.height - corners[0].y;
+                float panelTopOnScreen = Screen.height - corners[1].y;
+                float panelH = Mathf.Clamp(panelBottomOnScreen - panelTopOnScreen, 80f, 140f);
 
-                    posX = Mathf.Max(5f, panelLeft - barWidth - 8f);
-                    posY = panelTopOnScreen;
-                    barHeight = panelH;
-                }
+                posX = Mathf.Max(5f, panelLeft - barWidth - 8f);
+                posY = panelTopOnScreen;
+                barHeight = panelH;
             }
 
             if (VoIPPlugin.InRaidHUDOffsetX != null) posX += VoIPPlugin.InRaidHUDOffsetX.Value;
