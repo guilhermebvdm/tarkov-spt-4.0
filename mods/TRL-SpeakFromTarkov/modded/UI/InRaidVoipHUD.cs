@@ -31,6 +31,7 @@ namespace TRL_SpeakFromTarkov.UI
         private Texture2D _pttIconTex;
         private Texture2D _vadIconTex;
         private Texture2D _openIconTex;
+        private Texture2D _muteIconTex;
 
         private float _smoothLevel = 0f;
         private float _peakMax = 0.02f;
@@ -49,6 +50,7 @@ namespace TRL_SpeakFromTarkov.UI
             _pttIconTex  = LoadPNG("ptt.png");
             _vadIconTex  = LoadPNG("vad.png");
             _openIconTex = LoadPNG("open.png");
+            _muteIconTex = LoadPNG("mute.png");
         }
 
         private Texture2D MakeTex(Color c)
@@ -103,6 +105,7 @@ namespace TRL_SpeakFromTarkov.UI
             DestroyTex(ref _pttIconTex);
             DestroyTex(ref _vadIconTex);
             DestroyTex(ref _openIconTex);
+            DestroyTex(ref _muteIconTex);
         }
 
         private void DestroyTex(ref Texture2D tex)
@@ -189,19 +192,26 @@ namespace TRL_SpeakFromTarkov.UI
 
             GUI.depth = -900;
 
-            // 1. Ícone do Modo de Captura (PTT / VAD / OPEN) no topo da barra
+            // 1. Ícone do Modo de Captura (PTT / VAD / OPEN / MUTE) no topo da barra
             Texture2D modeIcon = null;
-            switch (Processor.CurrentMode)
+            if (Processor.IsMuted && _muteIconTex != null)
             {
-                case VoipProcessor.VoipMode.PTT:
-                    modeIcon = _pttIconTex;
-                    break;
-                case VoipProcessor.VoipMode.VAD:
-                    modeIcon = _vadIconTex;
-                    break;
-                case VoipProcessor.VoipMode.Open:
-                    modeIcon = _openIconTex;
-                    break;
+                modeIcon = _muteIconTex;
+            }
+            else
+            {
+                switch (Processor.CurrentMode)
+                {
+                    case VoipProcessor.VoipMode.PTT:
+                        modeIcon = _pttIconTex;
+                        break;
+                    case VoipProcessor.VoipMode.VAD:
+                        modeIcon = _vadIconTex;
+                        break;
+                    case VoipProcessor.VoipMode.Open:
+                        modeIcon = _openIconTex;
+                        break;
+                }
             }
 
             float iconSize = 14f; // Tamanho ideal redimensionado suavemente pela GUI
