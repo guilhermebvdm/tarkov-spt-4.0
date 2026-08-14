@@ -117,3 +117,17 @@
 
 **Pendências abertas nesta sessão:**
 - 🟢 Nenhuma pendência blocker. Build concluído com 0 erros e 0 avisos.
+
+---
+
+## 2026-08-14 — Sessão 8: Code-Review & Blindagem da Configuração `EnableMod` ("Habilitar Mod de Voz")
+
+**Tema central:** Investigação rigorosa e resolução dos bugs e travamentos do BepInEx F12 provocados ao desativar/alternar a chave `EnableMod` ("Habilitar Mod de Voz").
+
+**Decisões-chave:**
+- **Eliminação da Trava Nula na Inicialização ([VoipController.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs)):** Removido o `return` precoce em `Awake()` caso o jogo iniciasse com `EnableMod = false`. Todos os subcomponentes (`capturer`, `processor`, `hud`, etc.) agora são instanciados e inicializados de forma segura, prevenindo `NullReferenceException` ao reativar a opção no F12.
+- **Bloqueio do Loop Infinito de Reabertura de Mic ([VoipController.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs)):** Adicionado o guard `if (VoIPPlugin.EnableMod != null && !VoIPPlugin.EnableMod.Value) return;` no topo de `VoipController.Update()`. Impede que o timer de retry (`micRetryTimer`) continue forçando `capturer.StartCapture()` a cada 5s quando o mod está desativado, eliminando os travamentos na main thread da Unity.
+- **Guards de Desativação nos HUDs ([InRaidVoipHUD.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded/UI/InRaidVoipHUD.cs) e [MenuVoipHUD.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs)):** Adicionados os guards no topo de `OnGUI()` e `Update()`, garantindo que requisições HTTP e renderizações visuais sejam imediatamente pausadas quando `EnableMod` estiver em `false`.
+
+**Pendências abertas nesta sessão:**
+- 🟢 Nenhuma pendência blocker. Build concluído com 0 erros e 0 avisos.
