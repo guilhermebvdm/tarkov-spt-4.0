@@ -3,6 +3,7 @@
 ## Snapshot Delta
 - **Versão:** 1.6.1 (SPT 4.0 / FIKA)
 - **Estado:** v1.6.1 compilada e testada com 0 erros e 0 avisos (100% Clean Build). HUD In-Raid sincronizado 1:1 com a opacidade/autohide do `BattleStancePanel` vanilla, com offset X ajustável (+15px), ícones de modo de captura em 40px posicionados na parte inferior da barra (PTT, VAD, OPEN, MUTE), remoção do texto RAID e eliminação completa de todos os 133 avisos de compilação C#.
+- **Próximo Passo (Amanhã):** Iniciar a execução das otimizações V2 na pasta `mods/TRL-SpeakFromTarkov/modded-V2-otimização` (Opus DTX/VBR, RMS Gate RNNoise, `ArrayPool<byte>.Shared` blindado, Decodificação Assincrona, Oclusão Zero-Alloc `Physics.LinecastNonAlloc`, Spatial Culling Host-Side e Otimização `sqrMagnitude` na Varredura de Bots).
 - **Pendências:** 🟢 Nenhuma pendência blocker registrada.
 
 ---
@@ -65,7 +66,6 @@
 - **Debounce Anti-Spam Global (0.8s):** Aplicada trava de 0.8s no `BroadcastChannelAnnouncement` ([SftNetwork.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded/Network/SftNetwork.cs#L290)) para todas as ações, zerando requisições multiplicadas no mesmo milissegundo.
 - **Sincronização com Frequência do FIKA (10s):** Ajustados os timers de fetch e heartbeat do `MenuVoipHUD` ([MenuVoipHUD.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs#L125)) para **10.0s**, casando 1:1 com a atualização do painel "JOGADORES ON-LINE" do FIKA.
 - **Solução Definitiva do Erro HTTP 415 (UnsupportedMediaType):** Atualizado [SftNetwork.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded/Network/SftNetwork.cs#L330) para enviar JSON puro e não-compactado via `HttpClient` (Content-Type `application/json`), e adicionado descompactador `ZLibStream` em [SftChannelController.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/Server/TRL-SpeakFromTarkov.Server/Controllers/SftChannelController.cs#L75) como fallback. Zera definitivamente os erros de `UnsupportedMediaType` no BepInEx.
-
 - **Validação de Produção & Harmonia de Logs:** Confirmado nos logs de runtime real que o servidor C# e o cliente funcionam 100% sem exceções de `UnsupportedMediaType`, e as buscas `/sft/channels/list` rodam perfeitamente pareadas com `/fika/presence/get` a cada 10.0s.
 
 ---
@@ -97,9 +97,6 @@
 - **Ícones de Modo de Captura (40px na Parte Inferior) & Remoção do Texto "RAID":** Integrados os ícones `ptt.png`, `vad.png`, `open.png` e `mute.png` escalados suavemente para **40px** na parte inferior da barra vertical. A escrita miniaturizada "RAID" foi removida para um visual minimalista e moderno.
 - **Resolução de 100% dos Avisos (133 Warnings $\rightarrow$ 0 Warnings):** Eliminados todos os 133 avisos C# (`CS8618`, `CS0414`, `CS0169`, `CS8600`, `CS8601`, `CS8603`, `CS8625`) em 12 arquivos C# do mod Client, alcançando compilação **100% limpa (0 Erros e 0 Avisos)**.
 
-**Pendências abertas nesta sessão:**
-- 🟢 Nenhuma pendência blocker. Build concluído com 0 erros e 0 avisos.
-
 ---
 
 ## 2026-08-14 — Sessão 7: Menu Selecionável `Visibilidade do HUD` (Oculto, SempreVisivel, SyncHUD, CaptaVoz)
@@ -115,9 +112,6 @@
 - **Funcionalidade `CaptaVoz` ([InRaidVoipHUD.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded/UI/InRaidVoipHUD.cs)):** Implementado o timer de sustentação (`_voiceHoldTimer = 1.0f`) acionado por `Processor.IsTransmitting || Processor.DisplayLevel > 0.002f`, com transição suave de fade-out nos últimos 0.3s.
 - **Substituição BepInEx `HudVisibility` ([VOIPPlugin.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded/VOIPPlugin.cs)):** Substituído o booleano `AlwaysVisibleInRaidHUD` por `HudVisibility` (`ConfigEntry<HudVisibilityMode>`), mantendo `SyncHUD` como padrão.
 
-**Pendências abertas nesta sessão:**
-- 🟢 Nenhuma pendência blocker. Build concluído com 0 erros e 0 avisos.
-
 ---
 
 ## 2026-08-14 — Sessão 8: Code-Review & Blindagem da Configuração `EnableMod` ("Habilitar Mod de Voz")
@@ -129,9 +123,6 @@
 - **Bloqueio do Loop Infinito de Reabertura de Mic ([VoipController.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs)):** Adicionado o guard `if (VoIPPlugin.EnableMod != null && !VoIPPlugin.EnableMod.Value) return;` no topo de `VoipController.Update()`. Impede que o timer de retry (`micRetryTimer`) continue forçando `capturer.StartCapture()` a cada 5s quando o mod está desativado, eliminando os travamentos na main thread da Unity.
 - **Guards de Desativação nos HUDs ([InRaidVoipHUD.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded/UI/InRaidVoipHUD.cs) e [MenuVoipHUD.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs)):** Adicionados os guards no topo de `OnGUI()` e `Update()`, garantindo que requisições HTTP e renderizações visuais sejam imediatamente pausadas quando `EnableMod` estiver em `false`.
 
-**Pendências abertas nesta sessão:**
-- 🟢 Nenhuma pendência blocker. Build concluído com 0 erros e 0 avisos.
-
 ---
 
 ## 2026-08-14 — Sessão 9: Padronização Internacional das Configurações F12 em Inglês & `VoiceActivity` como Padrão
@@ -142,9 +133,6 @@
 - **Padrão `VoiceActivity` ([InRaidVoipHUD.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded/UI/InRaidVoipHUD.cs)):** `VoiceActivity` definido como o valor padrão da chave `HudVisibility`. As opções do dropdown foram traduzidas para `Hidden`, `AlwaysVisible`, `SyncHUD` e `VoiceActivity`.
 - **Tradução Completa das Configurações F12 ([VOIPPlugin.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded/VOIPPlugin.cs)):** Traduzidas todas as 10 seções do BepInEx (`General`, `VOIP Settings`, `UI / HUD Settings`, `Voice Calibration`, `Diagnostics`, `Audio Filters`, `Neural Filters (RNNoise)`, `Network`, `Network (Opus)`, `AI Bot Interaction`) e suas respectivas descrições para Inglês.
 
-**Pendências abertas nesta sessão:**
-- 🟢 Nenhuma pendência blocker. Build concluído com 0 erros e 0 avisos.
-
 ---
 
 ## 2026-08-14 — Sessão 10: Reorganização de Seções F12, Seção `Debug` Unificada & Ajuste de Valores Padrão
@@ -154,18 +142,7 @@
 **Decisões-chave:**
 - **Seção `Debug` Unificada ([VOIPPlugin.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded/VOIPPlugin.cs)):** Agrupadas as opções `Local Echo Loopback`, `Echo Delay (s)`, `Echo Volume`, `Profiler / Debug HUD`, `Debug Logs` e `Bot Speech Debug Volume` em uma única seção `Debug`.
 - **Remoção do Prefixo `Enable` ([VOIPPlugin.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded/VOIPPlugin.cs)):** Eliminado o prefixo `Enable` de todas as chaves (ex: `Enable Voice Mod` $\rightarrow$ `Voice Mod`, `Enable AGC` $\rightarrow$ `AGC`, `Enable RNNoise Suppressor` $\rightarrow$ `RNNoise Suppressor`, `Enable Bot Reactivity` $\rightarrow$ `Bot Reactivity`).
-- **Valores Padrão Atualizados:**
-  - `Local Echo Loopback`: `false`
-  - `Voice Mod`: `true`
-  - `Debug Logs`: `false`
-  - `AGC (Automatic Gain Control)`: `false`
-  - `RNNoise Suppressor`: `true`
-  - `Forward Error Correction (FEC)`: `false`
-  - `Bot Speech Debug Volume`: `0.0` (0%)
-  - `Bot Reactivity`: `true`
-
-**Pendências abertas nesta sessão:**
-- 🟢 Nenhuma pendência blocker. Build concluído com 0 erros e 0 avisos.
+- **Valores Padrão Atualizados:** `Local Echo Loopback`: `false`, `Voice Mod`: `true`, `Debug Logs`: `false`, `AGC`: `false`, `RNNoise Suppressor`: `true`, `FEC`: `false`, `Bot Speech Debug Volume`: `0.0`, `Bot Reactivity`: `true`.
 
 ---
 
@@ -174,14 +151,8 @@
 **Tema central:** Atualização das opções do menu dropdown selecionável `Transmission Mode` com nomes descritivos completos em Inglês (`VAD (Voice Activity Detection)`, `PTT (Push-to-Talk)` e `Open (Always On)`).
 
 **Decisões-chave:**
-- **Opções Descritivas ([VOIPPlugin.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded/VOIPPlugin.cs)):** `TransmissionMode` convertido para `ConfigEntry<string>` com `AcceptableValueList<string>` contendo:
-  - `VAD (Voice Activity Detection)`
-  - `PTT (Push-to-Talk)`
-  - `Open (Always On)`
-- **Sincronização bidirecional com Atalhos ([VoipController.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs)):** Ao alternar o modo pelo atalho de teclado (`P`), a string selecionada no F12 é automaticamente sincronizada com a opção correspondente em tempo real.
-
-**Pendências abertas nesta sessão:**
-- 🟢 Nenhuma pendência blocker. Build concluído com 0 erros e 0 avisos.
+- **Opções Descritivas ([VOIPPlugin.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded/VOIPPlugin.cs)):** `TransmissionMode` convertido para `ConfigEntry<string>` com `AcceptableValueList<string>` contendo `VAD (Voice Activity Detection)`, `PTT (Push-to-Talk)` e `Open (Always On)`.
+- **Sincronização Bidirecional:** Alternância via atalho `P` atualiza a seleção no F12 em tempo real.
 
 ---
 
@@ -190,9 +161,34 @@
 **Tema central:** Ajuste no `VoipProcessor.cs` e `SftNetwork.cs` para transmissão inteligente no modo `Open` integrada à probabilidade do RNNoise VAD, eliminação da restrição rígida de RMS no PTT e consolidação dos artefatos visuais dos ícones no repositório.
 
 **Decisões-chave:**
-- **Transmissão Inteligente em Modo `Open` ([VoipProcessor.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded/Audio/VoipProcessor.cs)):** Integrada a verificação da probabilidade do RNNoise (`filter.LastVadProbability >= 0.30f`) ou do limiar VAD RMS no modo `Open`, permitindo transmissão fluida quando há fala clara sem desperdiçar banda.
-- **Liberdade Total no Modo `PTT` ([VoipProcessor.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded/Audio/VoipProcessor.cs)):** Removidas as travas de RMS mínimo que cortavam sussurros durante o acionamento manual por tecla PTT.
+- **Transmissão Inteligente em Modo `Open` ([VoipProcessor.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded/Audio/VoipProcessor.cs)):** Integrada a verificação da probabilidade do RNNoise (`filter.LastVadProbability >= 0.30f`) no modo `Open`, permitindo transmissão fluida quando há fala clara sem desperdiçar banda.
+- **Liberdade Total no Modo `PTT`:** Removidas as travas de RMS mínimo que cortavam sussurros durante o acionamento manual por tecla PTT.
 - **Inclusão dos Ícones PNG de UI e CDR:** Versionados no repositório os arquivos de ícone `ptt.png`, `vad.png`, `open.png`, `mute.png` e a fonte `Icones Voip.cdr`.
 
-**Pendências abertas nesta sessão:**
-- 🟢 Nenhuma pendência blocker. Build concluído com 0 erros e 0 avisos.
+---
+
+## 2026-08-14 — Sessão 13: Mapeamento Arquitetural V2 (Partes 1 a 6 com Gemini), Relatórios Técnicos e Elaboração do Plano V2
+
+**Tema central:** Mapeamento arquitetural, auditoria técnica e alinhamento completo com a IA Gemini (Partes 1, 2, 3, 4, 5 e 6), criação da réplica de desenvolvimento `modded-V2-otimização`, elaboração dos relatórios técnicos dedicados e consolidação do Plano de Otimização V2 (Zero-Alloc, Spatial Culling, Oclusão por Geometria e Segurança Host-Side).
+
+**Decisões-chave:**
+- **Criação do Workspace V2 (`modded-V2-otimização`):** Criada a cópia isolada em `mods/TRL-SpeakFromTarkov/modded-V2-otimização` para aplicar o ciclo de otimizações da versão V2 sem impactar o build estável da V1.
+- **Formatação do Diálogo com Gemini ([`Papo com Gemini.md`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/Papo%20com%20Gemini.md)):** Reorganização e conversão do histórico para `Papo com Gemini.md`, documentando integralmente as 6 partes das análises técnicas de CPU, Opus, RNNoise, LiteNetLib, acoplamento 3D, oclusão física, culling por distância, segurança autoritativa, modal de calibração e integração de voz com a IA de bots.
+- **Emissão dos Relatórios Técnicos Específicos:**
+  1. [`relatorio_tecnico_gemini.md`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/relatorio_tecnico_gemini.md): Relatório de 5 eixos para a análise inicial do Gemini.
+  2. [`relatorio_redes_fika.md`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/relatorio_redes_fika.md): Estudo da camada de transporte UDP `DeliveryMethod.Unreliable`, multiplexação de canais (Canal 1), airbag de estouro de fila (`MaxQueuedFrames = 25`) e sobrevivência a trocas de cena (`EnsurePacketsRegistered`).
+  3. [`relatorio_acustica_playback.md`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/relatorio_acustica_playback.md): Estudo de DSP/Playback (fade-out de 1ms em underrun, panning de potência constante -3dB, curva de atenuação $2.2$ e filtro IIR Air Damping).
+  4. [`relatorio_spatial_culling.md`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/relatorio_spatial_culling.md): Especificação do culling de distância Host-Side (40m / $1600\text{m}^2$ via `sqrMagnitude`) e roteamento direcionado via `SendDataToPeer`.
+  5. [`relatorio_seguranca_canais.md`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/relatorio_seguranca_canais.md): Especificação do filtro autoritativo no Host (bloqueio do reenvio de pacotes de mortos no `OnReceiveVoipDataServer` com descarte no `Channel Ghost`, eliminando exploits de sniffer) e gestão de memória sem desregistrar handlers do LiteNetLib.
+- **Consolidação do Plano de Otimização V2 (`implementation_plan.md`):** Alinhamento dos 8 pontos principais a serem executados na pasta `modded-V2-otimização`:
+  1. Habilitação de Opus `DTX` e `VBR` + PTT Hangover Time (200ms).
+  2. Pré-checagem RMS (RMS < 0.001f) antes do filtro neural RNNoise.
+  3. Refatoração do motor Zero-Allocation com `ArrayPool<byte>.Shared`, repasse exato de `payloadLength` e devolução no bloco `finally`.
+  4. Desacoplamento da decodificação Opus para a thread de rede.
+  5. Oclusão físico-acústica por paredes Zero-Alloc com `Physics.LinecastNonAlloc` e `Mathf.Lerp` no `RemoteSpeaker.cs`.
+  6. Spatial Culling Host-Side (`SendDataToPeer`) & Blindagem Autoritativa Vivo/Morto no `SftNetwork.cs`.
+  7. Otimização da varredura de bots no `BotVoiceBridge.cs` via `sqrMagnitude` e checagem de oclusão por paredes com `Physics.LinecastNonAlloc`.
+  8. Compilação e testes de validação em raid.
+
+**O que pretendemos trabalhar amanhã:**
+- **Início da Execução do Plano V2:** Iniciar as modificações de código em `mods/TRL-SpeakFromTarkov/modded-V2-otimização`, seguindo a sequência dos 8 passos descritos no `implementation_plan.md`, testando a compilação limpa (0 erros e 0 avisos) via `.agents/scripts/compile-mod.sh`.
