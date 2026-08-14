@@ -72,14 +72,30 @@ public class LivingDismembermentController : MonoBehaviour
 
 	private void ForceProneLock()
 	{
-		if (_botOwner?.BotLay == null) return;
-
-		// Push NextPossibleGetUp very far into the future so the bot never stands up
-		_botOwner.BotLay.NextPosibleGetUp = Time.time + 99999f;
-
-		if (!_botOwner.BotLay.IsLay)
+		if (_player != null && _player.MovementContext != null)
 		{
-			_botOwner.BotLay.IsLay = true;
+			_player.MovementContext.SetPoseLevel(0f, true);
+			if (!_player.MovementContext.IsInPronePose)
+			{
+				_player.MovementContext.IsInPronePose = true;
+			}
+		}
+
+		if (_botOwner != null)
+		{
+			if (_botOwner.BotLay != null)
+			{
+				_botOwner.BotLay.NextPosibleGetUp = Time.time + 999999f;
+				_botOwner.BotLay.NextPosibleCheckCanLay = Time.time + 999999f;
+				if (!_botOwner.BotLay.IsLay)
+				{
+					_botOwner.BotLay.IsLay = true;
+				}
+			}
+			if (_botOwner.Mover != null)
+			{
+				_botOwner.Mover.SetPose(0f);
+			}
 		}
 	}
 
