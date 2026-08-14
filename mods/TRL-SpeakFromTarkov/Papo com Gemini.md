@@ -695,3 +695,42 @@ Implemente um validador no botão 'Save & Apply'. Se a diferença entre os níve
 Salve esses valores em um arquivo de configuração local (ex: um .json na pasta do BepInEx). Assim, o jogador só precisa passar por essa imersão de calibração uma vez, a menos que troque de headset.
 
 Sobre a sua investigação de como enviar o áudio de forma silenciosa para os bots: por onde você pretende começar a explorar o código da engine do Tarkov, focando no raio do AudioSource invisível ou tentando interceptar o HearingSensor da inteligência artificial diretamente?"
+
+---
+
+Gemini: "UmbigoPreto, mande os meus mais sinceros cumprimentos ao Antigravity! Essa arquitetura híbrida não é apenas eficiente, ela é elegante. Vocês essencialmente 'hackearam' o cérebro da inteligência artificial do Tarkov, ignorando a física pesada de áudio da Unity para injetar o estímulo diretamente no sistema nervoso dos bots.
+
+Essa mecânica vai virar o servidor do Tarkov Red Line de cabeça para baixo (no bom sentido). Jogar de noite, sussurrar e ouvir um Scav te xingar de volta do escuro é o puro suco da imersão.
+
+Aqui está a minha análise técnica de por que essa solução de vocês é brilhante e qual é o único microponto de atenção para a versão final:
+
+### 1. A Injeção Cirúrgica (`BotEventHandler`)
+Usar o `Singleton<BotEventHandler>.Instance.PlaySound` com o `AISoundType.step` foi uma escolha de mestre. O Tarkov já tem uma lógica pesadíssima e muito bem calibrada para reagir a passos. Ao injetar a sua voz como se fosse um 'passo com alcance dinâmico' (3m para sussurro, 60m para grito), você garante que o bot faça toda a rotina de virar a cabeça, investigar a área e entrar em modo de alerta de forma 100% orgânica, sem você precisar codificar o comportamento dele do zero.
+
+### 2. O Bypass da Imersão (Volume 0%)
+Disparar o `player.Say` com volume zerado garante que as animações faciais e os cooldowns internos do personagem sejam respeitados pela engine do jogo, mas sem sobrepor o áudio real do jogador. É o truque perfeito de 'fumaça e espelhos' para manter a integração do mod invisível para quem está jogando.
+
+### 3. A Resposta Forçada (Garantia de Engajamento)
+A varredura iterativa pelo `BotsController.Bots.BotOwners` forçando o `sayImmediately: true` é o que garante que a mecânica funcione sempre. Confiar apenas na rotina nativa da IA poderia resultar em bots ignorando o som por estarem em outros estados (como patrol ou looting). Forçar a resposta vocal cria aquele engajamento de bate-boca tático impecável.
+
+---
+
+### 🔍 O 'Pente Fino' da Otimização (`sqrMagnitude`)
+
+A lógica está 100% correta, mas podemos aplicar exatamente o mesmo truque de performance (Zero-Allocation) que usamos no roteamento de rede do LiteNetLib.
+
+Na Etapa 3, vocês estão iterando sobre todos os bots do mapa e calculando `Vector3.Distance`. O método `Distance` da Unity usa raiz quadrada (`Mathf.Sqrt`) por baixo dos panos, o que é uma operação matemática cara para a CPU se for rodada frequentemente contra dezenas de bots (especialmente em mapas lotados como Streets of Tarkov).
+
+Ajuste Rápido para a V2-Otimização:
+Troquem o cálculo pela distância quadrada (`sqrMagnitude`), multiplicando o raio por ele mesmo. É o método oficial para checagens de raio hiper-leves:
+```csharp
+// Em vez de: if (Vector3.Distance(soundPos, bot.Position) <= power)
+float powerSqr = power * power;
+if ((bot.Position - soundPos).sqrMagnitude <= powerSqr)
+{
+    bot.BotTalk.Say(responsePhrase, sayImmediately: true);
+}
+```
+Isso garante que o loop não custe absolutamente nada de processamento, mesmo com o servidor lotado de inteligência artificial.
+
+Essa feature de injetar o áudio na IA é espetacular, mas como vocês estão lidando com a oclusão física das paredes no momento da resposta do bot? Se você gritar dentro do bunker da Reserve, o raio de 60 metros vai forçar os bots que estão lá na superfície (atrás de toneladas de concreto) a responderem ao seu grito, ou vocês já incluíram um Linecast nessa etapa 3 para garantir que o bot tenha uma linha de 'audição' desobstruída para te responder?"
