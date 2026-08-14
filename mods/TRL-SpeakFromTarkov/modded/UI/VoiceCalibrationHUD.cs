@@ -99,6 +99,8 @@ namespace TRL_SpeakFromTarkov.UI
             }
         }
 
+        private Behaviour? _playerOwnerBehaviour;
+
         public void OpenWizard()
         {
             IsOpen = true;
@@ -108,6 +110,29 @@ namespace TRL_SpeakFromTarkov.UI
 
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
+
+            // Bloqueia teclado, mouse e movimentacao do jogador no Tarkov (desativa PlayerOwner)
+            try
+            {
+                var mainPlayer = Comfort.Common.Singleton<EFT.GameWorld>.Instance?.MainPlayer;
+                if (mainPlayer != null)
+                {
+                    var behaviours = mainPlayer.GetComponents<Behaviour>();
+                    foreach (var b in behaviours)
+                    {
+                        if (b != null && b.GetType().Name == "PlayerOwner")
+                        {
+                            _playerOwnerBehaviour = b;
+                            b.enabled = false;
+                            break;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                VoIPPlugin.Log?.LogWarning($"[SFT-WIZARD] Nao foi possivel desativar PlayerOwner: {ex.Message}");
+            }
 
             VoIPPlugin.Log?.LogInfo("[SFT-WIZARD] Voice Calibration Wizard opened.");
         }
@@ -121,6 +146,20 @@ namespace TRL_SpeakFromTarkov.UI
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
 
+            // Restaura teclado, mouse e movimentacao do jogador no Tarkov
+            try
+            {
+                if (_playerOwnerBehaviour != null)
+                {
+                    _playerOwnerBehaviour.enabled = true;
+                    _playerOwnerBehaviour = null;
+                }
+            }
+            catch (Exception ex)
+            {
+                VoIPPlugin.Log?.LogWarning($"[SFT-WIZARD] Nao foi possivel reativar PlayerOwner: {ex.Message}");
+            }
+
             VoIPPlugin.Log?.LogInfo("[SFT-WIZARD] Voice Calibration Wizard closed.");
         }
 
@@ -133,6 +172,13 @@ namespace TRL_SpeakFromTarkov.UI
         private void Update()
         {
             if (!IsOpen) return;
+
+            // ESC fecha o calibrador sem abrir o menu de pausa do Tarkov
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                CloseWizard();
+                return;
+            }
 
             if (Cursor.lockState != CursorLockMode.None)
             {
