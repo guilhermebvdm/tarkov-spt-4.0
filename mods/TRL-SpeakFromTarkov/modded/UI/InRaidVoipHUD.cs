@@ -267,7 +267,7 @@ namespace TRL_SpeakFromTarkov.UI
                 }
             }
 
-            float iconSize = 50f; // Tamanho de 50px redimensionado suavemente pela GUI
+            float iconSize = 40f; // Tamanho de 40px redimensionado suavemente pela GUI
             float iconX = posX + (barWidth / 2f) - (iconSize / 2f);
             float iconY = posY + barHeight + 4f; // Posicionado na parte de BAIXO da barra
 
