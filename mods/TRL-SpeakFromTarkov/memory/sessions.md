@@ -166,3 +166,19 @@
 
 **Pendências abertas nesta sessão:**
 - 🟢 Nenhuma pendência blocker. Build concluído com 0 erros e 0 avisos.
+
+---
+
+## 2026-08-14 — Sessão 11: Nomes Descritivos Completos no Select `Transmission Mode`
+
+**Tema central:** Atualização das opções do menu dropdown selecionável `Transmission Mode` com nomes descritivos completos em Inglês (`VAD (Voice Activity Detection)`, `PTT (Push-to-Talk)` e `Open (Always On)`).
+
+**Decisões-chave:**
+- **Opções Descritivas ([VOIPPlugin.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded/VOIPPlugin.cs)):** `TransmissionMode` convertido para `ConfigEntry<string>` com `AcceptableValueList<string>` contendo:
+  - `VAD (Voice Activity Detection)`
+  - `PTT (Push-to-Talk)`
+  - `Open (Always On)`
+- **Sincronização bidirecional com Atalhos ([VoipController.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs)):** Ao alternar o modo pelo atalho de teclado (`P`), a string selecionada no F12 é automaticamente sincronizada com a opção correspondente em tempo real.
+
+**Pendências abertas nesta sessão:**
+- 🟢 Nenhuma pendência blocker. Build concluído com 0 erros e 0 avisos.
