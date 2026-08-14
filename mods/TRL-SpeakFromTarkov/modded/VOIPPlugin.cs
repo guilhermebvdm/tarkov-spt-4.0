@@ -46,6 +46,7 @@ namespace TRL_SpeakFromTarkov
         public static ConfigEntry<KeyboardShortcut> ToggleModeKey { get; private set; }
         public static ConfigEntry<KeyboardShortcut> MuteKey { get; private set; }
         public static ConfigEntry<bool> EnableInRaidVoipHUD { get; private set; }
+        public static ConfigEntry<bool> AlwaysVisibleInRaidHUD { get; private set; }
         public static ConfigEntry<float> InRaidHUDOffsetX { get; private set; }
         public static ConfigEntry<float> InRaidHUDOffsetY { get; private set; }
         public static ConfigEntry<bool> EnableDebugVoipHUD { get; private set; }
@@ -182,6 +183,7 @@ namespace TRL_SpeakFromTarkov
 
             // Interface / HUD
             EnableInRaidVoipHUD = Config.Bind("Interface / HUD", "Exibir HUD de VOIP em Raid", true, "Exibe a barra vertical fina de VOIP em partida posicionada à esquerda do painel de postura (BattleStancePanel).");
+            AlwaysVisibleInRaidHUD = Config.Bind("Interface / HUD", "Manter HUD de VOIP Sempre Visível", false, "Se ativado, mantém o HUD de VOIP constantemente visível em partida, ignorando o ocultamento automático (autohide) do jogo. O HUD ainda só existirá quando o HUD do jogo existir.");
             InRaidHUDOffsetX = Config.Bind("Interface / HUD", "Ajuste Offset X (Pixels)", 0f,
                 new ConfigDescription("Deslocamento horizontal da barra de VOIP em partida (X). Positivo = Direita, Negativo = Esquerda.",
                     new AcceptableValueRange<float>(-300f, 300f)));

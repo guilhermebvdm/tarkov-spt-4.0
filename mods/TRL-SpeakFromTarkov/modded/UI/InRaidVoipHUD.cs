@@ -176,12 +176,16 @@ namespace TRL_SpeakFromTarkov.UI
 
             // Sincronização 1:1 de Opacidade com a mecânica de Autohide / Always Visible do HUD do Tarkov
             float hudAlpha = 1f;
-            if (_battleStanceCanvasGroup != null)
+            if (VoIPPlugin.AlwaysVisibleInRaidHUD != null && VoIPPlugin.AlwaysVisibleInRaidHUD.Value)
+            {
+                hudAlpha = 1f; // Opção "Manter HUD de VOIP Sempre Visível" ativada no F12
+            }
+            else if (_battleStanceCanvasGroup != null)
             {
                 hudAlpha = _battleStanceCanvasGroup.alpha;
             }
 
-            // Se o HUD do jogo estiver ocultado pelo autohide (opacidade zero), o nosso HUD não aparece
+            // Se o HUD do jogo estiver ocultado pelo autohide (opacidade zero) e "Sempre Visível" estiver desativado, o nosso HUD não aparece
             if (hudAlpha <= 0.01f) return;
 
             Color oldGuiColor = GUI.color;
