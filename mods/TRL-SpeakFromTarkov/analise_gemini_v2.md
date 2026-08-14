@@ -1,6 +1,6 @@
 # 📊 Análise Comparativa: Proposta Gemini vs. Implementação Atual (V2-Otimização)
 
-Este documento condensa os aprendizados extraídos da conversa técnica sobre arquitetura de VOIP (Opus + RNNoise + Unity 3D) em `Papo com Gemini.txt` (Partes 1, 2, 3, 4 e 5), comparando-os diretamente com o código-fonte da versão `modded-V2-otimização` do mod **TRL-SpeakFromTarkov**.
+Este documento condensa os aprendizados extraídos da conversa técnica sobre arquitetura de VOIP (Opus + RNNoise + Unity 3D) em `Papo com Gemini.md` (Partes 1, 2, 3, 4, 5 e 6), comparando-os diretamente com o código-fonte da versão `modded-V2-otimização` do mod **TRL-SpeakFromTarkov**.
 
 ---
 
@@ -55,6 +55,10 @@ Este documento condensa os aprendizados extraídos da conversa técnica sobre ar
 ### 1.10. Blindagem de Segurança Host-Side (Isolação Vivo/Morto)
 - **Filtro no Servidor (Host-Side Authoritative Cutoff):** No `OnReceiveVoipDataServer`, o Host verifica a saúde do emissor via `gameWorld.GetAlivePlayerByProfileID`. Se o emissor estiver morto, o Host bloqueia o reenvio para o `Channel 0` (vivos) e roteia exclusivamente para o `Channel Ghost` (outros mortos). O pacote de voz do fantasma **nunca sai pela placa de rede do Host com destino aos vivos**, eliminando exploits de *packet sniffing*.
 
+### 1.11. Otimização da Varredura de Bots (`BotVoiceBridge`)
+- **Substituição por `sqrMagnitude`:** No `ForceBotResponsesInRadius`, trocar `Vector3.Distance(soundPos, bot.Position) <= power` por `(bot.Position - soundPos).sqrMagnitude <= power * power`, eliminando o custo de `Mathf.Sqrt` durante a varredura de bots na Main Thread.
+- **Checagem de Oclusão por Paredes no Disparo da IA:** Adicionar checagem física via `Physics.LinecastNonAlloc` antes de forçar a resposta do bot para impedir que bots em andares/bunkers separados por concreto denso reajam a sussurros ou gritos do jogador.
+
 ---
 
 ## 2. 🔍 Comparação: Gemini vs. `modded-V2-otimização`
@@ -74,53 +78,7 @@ Este documento condensa os aprendizados extraídos da conversa técnica sobre ar
 | **Oclusão Zero-Alloc por Parede** | Checagem de Raycast 200ms com `Physics.LinecastNonAlloc` e `Mathf.Lerp` | `RemoteSpeaker.cs` calcula atenuação por distância e absorção do ar, mas **não faz checagem de oclusão por parede**. | 💡 **Nova Feature V2.** Integrar `VoipOcclusionProcessor` com `Physics.LinecastNonAlloc` no `RemoteSpeaker.cs`. |
 | **Spatial Culling Host-Side** | Servidor filtra pacotes de voz 3D por distância (40m) usando `SendDataToPeer` | `SftNetwork.cs` usa `broadcast: true` em todos os pacotes. | 💡 **Nova Feature V2.** Implementar `RelaySpatialAudio` com `SendDataToPeer` no `SftNetwork.cs`. |
 | **Filtro Host-Side Vivo/Morto** | Servidor bloqueia o reenvio de pacotes dos mortos para os vivos na fonte | `SftNetwork.cs` valida canal na recepção do cliente. | 💡 **Nova Feature V2.** Adicionar validação de saúde do emissor no `OnReceiveVoipDataServer` no Host. |
-| **Ancoragem 3D e Panning** | Ancoragem na cabeça e curva Logarithmic nativa | Ancorado no osso `PlayerBones.Head.Original` com curva acústica real (-6dB), filtro de absorção do ar e panning estéreo ($-\text{3dB}$ Pan Law). | 🟢 **Superior ao proposto.** Nossa acústica física manual em `RemoteSpeaker.cs` é mais avançada que o padrão Unity. |
-
----
-
-## 3. 🎯 Pontos Importantes para Revisar e Trabalhar na V2
-
-### 📌 Ponto 1: Eliminação Total de Alocações GC (`Zero-Alloc Engine` Blindado)
-1. **No `VoipProcessor.cs` (`Transmit`):**
-   - Substituir a criação de `new byte[len]` por buffers alugados via `System.Buffers.ArrayPool<byte>.Shared.Rent(len)`.
-   - Garantir a devolução com `ArrayPool<byte>.Shared.Return(buffer, clearArray: false)` dentro do bloco `finally`.
-2. **No `SftNetwork.cs` (`OnAudioPacketReceivedV2`):**
-   - Alugar o buffer com `ArrayPool<byte>.Shared.Rent(payloadLength)`.
-   - Ler exatamente `payloadLength` via `reader.GetBytes(rentedBuffer, 0, payloadLength)`.
-   - Repassar o `payloadLength` exato para a função de roteamento `RouteAudioToPlayer` (nunca usar `rentedBuffer.Length`).
-   - Devolver o buffer no bloco `finally`.
-
-### 📌 Ponto 2: Ativação das Flags de Economia Opus (`DTX` e `VBR`)
-- No `VoipProcessor.cs` (`Initialize`):
-  ```csharp
-  encoder.UseDTX = true;
-  encoder.UseVBR = true;
-  ```
-  - **Resultado Esperado:** No modo "Sempre Aberto" (Open Mic), durante momentos de silêncio, a transmissão Opus entra em DTX, reduzindo a largura de banda enviada à rede do FIKA em até 95%.
-
-### 📌 Ponto 3: Desacoplamento da Decodificação Opus da Main Thread
-- Atualmente, o `RemoteSpeaker.cs` executa a função `decoder.Decode()` dentro do loop `Update()` (Main Thread).
-- **Proposta:** Mover a decodificação do pacote Opus para o momento da recepção na thread de rede (`SftNetwork`), entregando o buffer PCM (`float[]`) pré-decodificado direto para o `RemoteSpeaker`, mantendo a Main Thread totalmente livre.
-
-### 📌 Ponto 4: Pré-Checagem RMS antes do RNNoise (Otimização de CPU)
-- No `AudioFilter.cs` (`ApplyRNNoise`):
-  - Se o nível RMS do frame for insignificante (silêncio), pular a chamada nativa `rnnoise_process_frame` e devolver silêncio direto no buffer de saída, economizando chamadas P/Invoke e processamento de rede neural.
-
-### 📌 Ponto 5: Suavidade no PTT (PTT Hangover Time de 200ms)
-- No `VoipProcessor.cs` (`UpdateTransmittingState`):
-  - Quando a tecla PTT for solta, acionar um timer de sustentação de 200ms (`pttHoldTimer = 0.20f`) para que as últimas sílabas da fala sejam capturadas com total clareza antes do encerramento da transmissão.
-
-### 📌 Ponto 6: Oclusão Físico-Acústica Zero-Alloc (`Physics.LinecastNonAlloc`)
-- No `RemoteSpeaker.cs`:
-  - Adicionar checagem física de oclusão a cada 200ms com `Physics.LinecastNonAlloc` na camada `HighPolyWithRaycast`.
-  - Suavizar a transição com `Mathf.Lerp` e multiplicar `CurrentOcclusionVolume` e `CurrentDampingMultiplier` no `OnAudioFilterRead`.
-
-### 📌 Ponto 7: Spatial Culling Host-Side (`SendDataToPeer`) & Filtro de Segurança Vivo/Morto
-- No `SftNetwork.cs`:
-  - Interceptar pacotes de voz no Host via `RegisterPacket<SftAudioPacketV2, NetPeer>`.
-  - Se o emissor estiver MORTO, bloquear o reenvio para os vivos e encaminhar apenas para a lista de mortos (`Channel Ghost`).
-  - Se o emissor estiver VIVO e no `Channel 0` (proximidade), calcular a distância quadrada para cada `ObservedPlayer`. Se $\le 40\text{m}$, transmitir exclusivamente via `SendDataToPeer`.
-  - Para `Channel 1+` (rádios), manter a retransmissão global via `broadcast: true`.
+| **Otimização na Varredura de Bots** | Usar `sqrMagnitude` e `Physics.LinecastNonAlloc` no `BotVoiceBridge` | `BotVoiceBridge.cs` usa `Vector3.Distance` sem checagem de oclusão por parede. | ⚠️ **Ponto de Melhoria.** Usar `sqrMagnitude` e checagem de oclusão por paredes antes de disparar a resposta dos bots. |
 
 ---
 
@@ -133,6 +91,7 @@ Este documento condensa os aprendizados extraídos da conversa técnica sobre ar
 5. **Transferir a Decodificação Opus** do `RemoteSpeaker.Update()` para a thread da rede.
 6. **Implementar Oclusão por Geometria Zero-Alloc (`Physics.LinecastNonAlloc`)** no `RemoteSpeaker.cs`.
 7. **Implementar Spatial Culling Host-Side (`RelaySpatialAudio` com `SendDataToPeer`) & Filtro Vivo/Morto** no `SftNetwork.cs`.
-8. **Compilar `modded-V2-otimização`**, validar com 0 erros/0 avisos e testar estabilidade em raid.
+8. **Otimizar `BotVoiceBridge.cs` com `sqrMagnitude` e Oclusão por Paredes**.
+9. **Compilar `modded-V2-otimização`**, validar com 0 erros/0 avisos e testar estabilidade em raid.
 
 *(Nenhuma alteração foi realizada no mod nesta etapa, conforme solicitado).*
