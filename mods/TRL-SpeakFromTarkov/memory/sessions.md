@@ -182,3 +182,17 @@
 
 **Pendências abertas nesta sessão:**
 - 🟢 Nenhuma pendência blocker. Build concluído com 0 erros e 0 avisos.
+
+---
+
+## 2026-08-14 — Sessão 12: Otimização de Gatilho de Transmissão VAD/RNNoise & Preservação de Recursos
+
+**Tema central:** Ajuste no `VoipProcessor.cs` e `SftNetwork.cs` para transmissão inteligente no modo `Open` integrada à probabilidade do RNNoise VAD, eliminação da restrição rígida de RMS no PTT e consolidação dos artefatos visuais dos ícones no repositório.
+
+**Decisões-chave:**
+- **Transmissão Inteligente em Modo `Open` ([VoipProcessor.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded/Audio/VoipProcessor.cs)):** Integrada a verificação da probabilidade do RNNoise (`filter.LastVadProbability >= 0.30f`) ou do limiar VAD RMS no modo `Open`, permitindo transmissão fluida quando há fala clara sem desperdiçar banda.
+- **Liberdade Total no Modo `PTT` ([VoipProcessor.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded/Audio/VoipProcessor.cs)):** Removidas as travas de RMS mínimo que cortavam sussurros durante o acionamento manual por tecla PTT.
+- **Inclusão dos Ícones PNG de UI e CDR:** Versionados no repositório os arquivos de ícone `ptt.png`, `vad.png`, `open.png`, `mute.png` e a fonte `Icones Voip.cdr`.
+
+**Pendências abertas nesta sessão:**
+- 🟢 Nenhuma pendência blocker. Build concluído com 0 erros e 0 avisos.

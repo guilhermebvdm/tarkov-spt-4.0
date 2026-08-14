@@ -48,6 +48,7 @@ namespace TRL_SpeakFromTarkov.Audio
         
         // Filtros de áudio
         private AudioFilter audioFilter = null!;
+        public AudioFilter? Filter => audioFilter;
         
         public void Initialize(int sampleRate, int frameSize)
         {

@@ -191,9 +191,6 @@ namespace TRL_SpeakFromTarkov.Network
                 if (VoIPPlugin.EnableMod != null && !VoIPPlugin.EnableMod.Value) return;
                 if (opusData == null || opusData.Length == 0) return;
 
-                // Nível de áudio desprezível: não transmite silêncio (evita flood no LiteNetLib).
-                if (voiceLevel < 0.002f) return;
-
                 // Descarta o frame mais antigo se a main thread não estiver drenando.
                 while (sendQueue.Count >= MaxQueuedFrames && sendQueue.TryDequeue(out _)) { }
 

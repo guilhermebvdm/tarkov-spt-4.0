@@ -53,6 +53,8 @@ namespace TRL_SpeakFromTarkov.Audio
             }
         }
         
+        public AudioFilter? CapturerFilter { get; set; }
+
         public void ProcessAudio(float[] pcmSamples)
         {
             float rms = GetRMS(pcmSamples);
@@ -72,9 +74,8 @@ namespace TRL_SpeakFromTarkov.Audio
             
             UpdateTransmittingState();
             
-            // Só transmite se estiver ativo E se o nível de áudio for perceptível (RMS > 0.003f).
-            // Isso impede o envio desnecessário de 50 pacotes mudos por segundo sobre o LiteNetLib do FIKA!
-            if (IsTransmitting && RawLevel > 0.003f)
+            // Transmite quando IsTransmitting for ativado pelas regras do modo
+            if (IsTransmitting)
             {
                 float outputVolume = VoIPPlugin.OutputVolume.Value;
                 if (outputVolume != 1.0f)
@@ -96,17 +97,21 @@ namespace TRL_SpeakFromTarkov.Audio
                 return;
             }
 
+            float vadThreshold = VoIPPlugin.VADThreshold != null ? VoIPPlugin.VADThreshold.Value : 0.004f;
+
             switch (CurrentMode)
             {
                 case VoipMode.PTT:
+                    // PTT: Liberdade total se a tecla estiver pressionada (sem restrição de RMS)
                     IsTransmitting = IsPTTActive;
                     break;
-                case VoipMode.Open:
-                    IsTransmitting = true;
-                    break;
+
                 case VoipMode.VAD:
-                    if (RawLevel > VoIPPlugin.VADThreshold.Value)
-                        vadHoldTimer = VoIPPlugin.VADDecayTime.Value;
+                    // VAD: Sincronizado 100% com a calibração do usuário
+                    if (RawLevel >= vadThreshold)
+                    {
+                        vadHoldTimer = VoIPPlugin.VADDecayTime != null ? VoIPPlugin.VADDecayTime.Value : 0.5f;
+                    }
                         
                     if (vadHoldTimer > 0f)
                     {
@@ -118,6 +123,20 @@ namespace TRL_SpeakFromTarkov.Audio
                         IsTransmitting = false;
                     }
                     break;
+
+                case VoipMode.Open:
+                    // OPEN: Filtro inteligente RNNoise se ativo no F12, ou fallback seguro para o limiar VAD
+                    var filter = CapturerFilter;
+                    if (VoIPPlugin.UseRNNoise != null && VoIPPlugin.UseRNNoise.Value && filter != null)
+                    {
+                        IsTransmitting = filter.LastVadProbability >= 0.30f || RawLevel >= vadThreshold;
+                    }
+                    else
+                    {
+                        IsTransmitting = RawLevel >= vadThreshold;
+                    }
+                    break;
+
                 default:
                     IsTransmitting = false;
                     break;
