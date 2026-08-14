@@ -18,6 +18,8 @@ namespace TRL_SpeakFromTarkov.UI
 
         private Component _battleStancePanel;
         private CanvasGroup _battleStanceCanvasGroup;
+        private Vector2 _originalStanceAnchoredPos;
+        private bool _originalPosCaptured = false;
         private float _searchTimer = 0f;
 
         private Texture2D _bgTex;
@@ -147,6 +149,31 @@ namespace TRL_SpeakFromTarkov.UI
                     }
                     catch { }
                 }
+            }
+
+            // Desloca o painel de postura do jogo para a direita (eixo X) para dar respiro de tela
+            if (_battleStancePanel != null && _battleStancePanel.gameObject != null)
+            {
+                try
+                {
+                    var rect = _battleStancePanel.GetComponent<RectTransform>();
+                    if (rect != null)
+                    {
+                        if (!_originalPosCaptured)
+                        {
+                            _originalStanceAnchoredPos = rect.anchoredPosition;
+                            _originalPosCaptured = true;
+                        }
+
+                        float shiftX = (VoIPPlugin.ShiftStancePanelX != null) ? VoIPPlugin.ShiftStancePanelX.Value : 15f;
+                        Vector2 targetPos = _originalStanceAnchoredPos + new Vector2(shiftX, 0f);
+                        if ((rect.anchoredPosition - targetPos).sqrMagnitude > 0.001f)
+                        {
+                            rect.anchoredPosition = targetPos;
+                        }
+                    }
+                }
+                catch { }
             }
 
             // Animação VU Meter suave
