@@ -8,10 +8,10 @@ namespace TRL_SpeakFromTarkov.UI
 {
     public enum HudVisibilityMode
     {
-        Oculto,
-        SempreVisivel,
+        Hidden,
+        AlwaysVisible,
         SyncHUD,
-        CaptaVoz
+        VoiceActivity
     }
 
     /// <summary>
@@ -222,17 +222,17 @@ namespace TRL_SpeakFromTarkov.UI
                 return;
             }
 
-            // Seleção de Modo de Visibilidade do HUD (Oculto, SempreVisivel, SyncHUD, CaptaVoz)
-            var visibilityMode = (VoIPPlugin.HudVisibility != null) ? VoIPPlugin.HudVisibility.Value : HudVisibilityMode.SyncHUD;
+            // Seleção de Modo de Visibilidade do HUD (Hidden, AlwaysVisible, SyncHUD, VoiceActivity)
+            var visibilityMode = (VoIPPlugin.HudVisibility != null) ? VoIPPlugin.HudVisibility.Value : HudVisibilityMode.VoiceActivity;
             float hudAlpha = 1f;
 
             switch (visibilityMode)
             {
-                case HudVisibilityMode.Oculto:
+                case HudVisibilityMode.Hidden:
                     hudAlpha = 0f;
                     break;
 
-                case HudVisibilityMode.SempreVisivel:
+                case HudVisibilityMode.AlwaysVisible:
                     hudAlpha = 1f;
                     break;
 
@@ -243,7 +243,7 @@ namespace TRL_SpeakFromTarkov.UI
                     }
                     break;
 
-                case HudVisibilityMode.CaptaVoz:
+                case HudVisibilityMode.VoiceActivity:
                     if (_voiceHoldTimer > 0f)
                     {
                         hudAlpha = Mathf.Clamp01(_voiceHoldTimer / 0.3f);
