@@ -6431,7 +6431,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/VOIPPlugin.cs",
-      "source_location": "L148",
+      "source_location": "L147",
       "weight": 1.0,
       "_origin": "ast",
       "source": "voipplugin_trl_speakfromtarkov_voipplugin_awake",
@@ -11854,5 +11854,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "8a1403a197227f6704ebb741f4ef2a0b36b6251c"
+  "built_at_commit": "6ee02479ad9433ca5d773587bfa878045d42758d"
 }
