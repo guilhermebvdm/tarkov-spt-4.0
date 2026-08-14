@@ -4,23 +4,23 @@
   "graph": {},
   "nodes": [
     {
-      "label": "MicrophoneCapturer",
+      "label": "RemoteSpeaker",
       "file_type": "code",
-      "source_file": "mods/TRL-SpeakFromTarkov/modded/Audio/MicrophoneCapturer.cs",
-      "source_location": "L7",
+      "source_file": "mods/TRL-SpeakFromTarkov/modded/Audio/RemoteSpeaker.cs",
+      "source_location": "L10",
       "metadata": {
         "namespace": "TRL_SpeakFromTarkov.Audio",
         "scope_chain": [
-          "s62"
+          "s136"
         ]
       },
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "id": "audio_microphonecapturer_trl_speakfromtarkov_audio_microphonecapturer",
+      "id": "audio_remotespeaker_trl_speakfromtarkov_audio_remotespeaker",
       "community": 0,
       "community_name": "VoipController",
-      "norm_label": "microphonecapturer"
+      "norm_label": "remotespeaker"
     },
     {
       "label": "VoipController",
@@ -545,23 +545,23 @@
       "norm_label": "playerondeadpatch"
     },
     {
-      "label": "RemoteSpeaker",
+      "label": "MicrophoneCapturer",
       "file_type": "code",
-      "source_file": "mods/TRL-SpeakFromTarkov/modded/Audio/RemoteSpeaker.cs",
-      "source_location": "L10",
+      "source_file": "mods/TRL-SpeakFromTarkov/modded/Audio/MicrophoneCapturer.cs",
+      "source_location": "L7",
       "metadata": {
         "namespace": "TRL_SpeakFromTarkov.Audio",
         "scope_chain": [
-          "s136"
+          "s62"
         ]
       },
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "id": "audio_remotespeaker_trl_speakfromtarkov_audio_remotespeaker",
+      "id": "audio_microphonecapturer_trl_speakfromtarkov_audio_microphonecapturer",
       "community": 8,
-      "community_name": "RemoteSpeaker",
-      "norm_label": "remotespeaker"
+      "community_name": "MicrophoneCapturer",
+      "norm_label": "microphonecapturer"
     },
     {
       "label": "VoIPPlugin",
@@ -583,10 +583,10 @@
       "norm_label": "voipplugin"
     },
     {
-      "label": ".CaptureLoop()",
+      "label": ".Initialize()",
       "file_type": "code",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/Audio/MicrophoneCapturer.cs",
-      "source_location": "L179",
+      "source_location": "L53",
       "metadata": {
         "namespace": "TRL_SpeakFromTarkov.Audio",
         "scope_chain": [
@@ -595,154 +595,28 @@
       },
       "_callable": true,
       "_origin": "ast",
-      "id": "audio_microphonecapturer_trl_speakfromtarkov_audio_microphonecapturer_captureloop",
+      "id": "audio_microphonecapturer_trl_speakfromtarkov_audio_microphonecapturer_initialize",
       "community": 0,
       "community_name": "VoipController",
-      "norm_label": ".captureloop()"
+      "norm_label": ".initialize()"
     },
     {
-      "label": ".OnAudioFilterRead()",
+      "label": ".EnqueuePacket()",
       "file_type": "code",
-      "source_file": "mods/TRL-SpeakFromTarkov/modded/Audio/MicrophoneCapturer.cs",
-      "source_location": "L373",
+      "source_file": "mods/TRL-SpeakFromTarkov/modded/Audio/RemoteSpeaker.cs",
+      "source_location": "L133",
       "metadata": {
         "namespace": "TRL_SpeakFromTarkov.Audio",
         "scope_chain": [
-          "s62"
+          "s136"
         ]
       },
       "_callable": true,
       "_origin": "ast",
-      "id": "audio_microphonecapturer_trl_speakfromtarkov_audio_microphonecapturer_onaudiofilterread",
+      "id": "audio_remotespeaker_trl_speakfromtarkov_audio_remotespeaker_enqueuepacket",
       "community": 0,
       "community_name": "VoipController",
-      "norm_label": ".onaudiofilterread()"
-    },
-    {
-      "label": ".OnDestroy()",
-      "file_type": "code",
-      "source_file": "mods/TRL-SpeakFromTarkov/modded/Audio/MicrophoneCapturer.cs",
-      "source_location": "L379",
-      "metadata": {
-        "namespace": "TRL_SpeakFromTarkov.Audio",
-        "scope_chain": [
-          "s62"
-        ]
-      },
-      "_callable": true,
-      "_origin": "ast",
-      "id": "audio_microphonecapturer_trl_speakfromtarkov_audio_microphonecapturer_ondestroy",
-      "community": 0,
-      "community_name": "VoipController",
-      "norm_label": ".ondestroy()"
-    },
-    {
-      "label": ".PollMicrophoneData()",
-      "file_type": "code",
-      "source_file": "mods/TRL-SpeakFromTarkov/modded/Audio/MicrophoneCapturer.cs",
-      "source_location": "L256",
-      "metadata": {
-        "namespace": "TRL_SpeakFromTarkov.Audio",
-        "scope_chain": [
-          "s62"
-        ]
-      },
-      "_callable": true,
-      "_origin": "ast",
-      "id": "audio_microphonecapturer_trl_speakfromtarkov_audio_microphonecapturer_pollmicrophonedata",
-      "community": 0,
-      "community_name": "VoipController",
-      "norm_label": ".pollmicrophonedata()"
-    },
-    {
-      "label": ".ProcessFrame()",
-      "file_type": "code",
-      "source_file": "mods/TRL-SpeakFromTarkov/modded/Audio/MicrophoneCapturer.cs",
-      "source_location": "L327",
-      "metadata": {
-        "namespace": "TRL_SpeakFromTarkov.Audio",
-        "scope_chain": [
-          "s62"
-        ]
-      },
-      "_callable": true,
-      "_origin": "ast",
-      "id": "audio_microphonecapturer_trl_speakfromtarkov_audio_microphonecapturer_processframe",
-      "community": 0,
-      "community_name": "VoipController",
-      "norm_label": ".processframe()"
-    },
-    {
-      "label": ".Resample()",
-      "file_type": "code",
-      "source_file": "mods/TRL-SpeakFromTarkov/modded/Audio/MicrophoneCapturer.cs",
-      "source_location": "L346",
-      "metadata": {
-        "namespace": "TRL_SpeakFromTarkov.Audio",
-        "scope_chain": [
-          "s62"
-        ]
-      },
-      "_callable": true,
-      "_origin": "ast",
-      "id": "audio_microphonecapturer_trl_speakfromtarkov_audio_microphonecapturer_resample",
-      "community": 0,
-      "community_name": "VoipController",
-      "norm_label": ".resample()"
-    },
-    {
-      "label": ".StartCapture()",
-      "file_type": "code",
-      "source_file": "mods/TRL-SpeakFromTarkov/modded/Audio/MicrophoneCapturer.cs",
-      "source_location": "L66",
-      "metadata": {
-        "namespace": "TRL_SpeakFromTarkov.Audio",
-        "scope_chain": [
-          "s62"
-        ]
-      },
-      "_callable": true,
-      "_origin": "ast",
-      "id": "audio_microphonecapturer_trl_speakfromtarkov_audio_microphonecapturer_startcapture",
-      "community": 0,
-      "community_name": "VoipController",
-      "norm_label": ".startcapture()"
-    },
-    {
-      "label": ".StopCapture()",
-      "file_type": "code",
-      "source_file": "mods/TRL-SpeakFromTarkov/modded/Audio/MicrophoneCapturer.cs",
-      "source_location": "L157",
-      "metadata": {
-        "namespace": "TRL_SpeakFromTarkov.Audio",
-        "scope_chain": [
-          "s62"
-        ]
-      },
-      "_callable": true,
-      "_origin": "ast",
-      "id": "audio_microphonecapturer_trl_speakfromtarkov_audio_microphonecapturer_stopcapture",
-      "community": 0,
-      "community_name": "VoipController",
-      "norm_label": ".stopcapture()"
-    },
-    {
-      "label": ".Update()",
-      "file_type": "code",
-      "source_file": "mods/TRL-SpeakFromTarkov/modded/Audio/MicrophoneCapturer.cs",
-      "source_location": "L211",
-      "metadata": {
-        "namespace": "TRL_SpeakFromTarkov.Audio",
-        "scope_chain": [
-          "s62"
-        ]
-      },
-      "_callable": true,
-      "_origin": "ast",
-      "id": "audio_microphonecapturer_trl_speakfromtarkov_audio_microphonecapturer_update",
-      "community": 0,
-      "community_name": "VoipController",
-      "norm_label": ".update()"
+      "norm_label": ".enqueuepacket()"
     },
     {
       "label": ".GetRecentUnderruns()",
@@ -763,10 +637,154 @@
       "norm_label": ".getrecentunderruns()"
     },
     {
+      "label": ".Initialize()",
+      "file_type": "code",
+      "source_file": "mods/TRL-SpeakFromTarkov/modded/Audio/RemoteSpeaker.cs",
+      "source_location": "L64",
+      "metadata": {
+        "namespace": "TRL_SpeakFromTarkov.Audio",
+        "scope_chain": [
+          "s136"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "audio_remotespeaker_trl_speakfromtarkov_audio_remotespeaker_initialize",
+      "community": 0,
+      "community_name": "VoipController",
+      "norm_label": ".initialize()"
+    },
+    {
+      "label": ".OnAudioFilterRead()",
+      "file_type": "code",
+      "source_file": "mods/TRL-SpeakFromTarkov/modded/Audio/RemoteSpeaker.cs",
+      "source_location": "L242",
+      "metadata": {
+        "namespace": "TRL_SpeakFromTarkov.Audio",
+        "scope_chain": [
+          "s136"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "audio_remotespeaker_trl_speakfromtarkov_audio_remotespeaker_onaudiofilterread",
+      "community": 0,
+      "community_name": "VoipController",
+      "norm_label": ".onaudiofilterread()"
+    },
+    {
+      "label": ".OnDestroy()",
+      "file_type": "code",
+      "source_file": "mods/TRL-SpeakFromTarkov/modded/Audio/RemoteSpeaker.cs",
+      "source_location": "L411",
+      "metadata": {
+        "namespace": "TRL_SpeakFromTarkov.Audio",
+        "scope_chain": [
+          "s136"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "audio_remotespeaker_trl_speakfromtarkov_audio_remotespeaker_ondestroy",
+      "community": 0,
+      "community_name": "VoipController",
+      "norm_label": ".ondestroy()"
+    },
+    {
+      "label": ".SetEmergency2DMode()",
+      "file_type": "code",
+      "source_file": "mods/TRL-SpeakFromTarkov/modded/Audio/RemoteSpeaker.cs",
+      "source_location": "L154",
+      "metadata": {
+        "namespace": "TRL_SpeakFromTarkov.Audio",
+        "scope_chain": [
+          "s136"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "audio_remotespeaker_trl_speakfromtarkov_audio_remotespeaker_setemergency2dmode",
+      "community": 0,
+      "community_name": "VoipController",
+      "norm_label": ".setemergency2dmode()"
+    },
+    {
+      "label": ".SetVolume()",
+      "file_type": "code",
+      "source_file": "mods/TRL-SpeakFromTarkov/modded/Audio/RemoteSpeaker.cs",
+      "source_location": "L124",
+      "metadata": {
+        "namespace": "TRL_SpeakFromTarkov.Audio",
+        "scope_chain": [
+          "s136"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "audio_remotespeaker_trl_speakfromtarkov_audio_remotespeaker_setvolume",
+      "community": 0,
+      "community_name": "VoipController",
+      "norm_label": ".setvolume()"
+    },
+    {
+      "label": ".Update()",
+      "file_type": "code",
+      "source_file": "mods/TRL-SpeakFromTarkov/modded/Audio/RemoteSpeaker.cs",
+      "source_location": "L166",
+      "metadata": {
+        "namespace": "TRL_SpeakFromTarkov.Audio",
+        "scope_chain": [
+          "s136"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "audio_remotespeaker_trl_speakfromtarkov_audio_remotespeaker_update",
+      "community": 0,
+      "community_name": "VoipController",
+      "norm_label": ".update()"
+    },
+    {
+      "label": ".Initialize()",
+      "file_type": "code",
+      "source_file": "mods/TRL-SpeakFromTarkov/modded/Audio/VoipProcessor.cs",
+      "source_location": "L34",
+      "metadata": {
+        "namespace": "TRL_SpeakFromTarkov.Audio",
+        "scope_chain": [
+          "s110"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "audio_voipprocessor_trl_speakfromtarkov_audio_voipprocessor_initialize",
+      "community": 0,
+      "community_name": "VoipController",
+      "norm_label": ".initialize()"
+    },
+    {
+      "label": ".Awake()",
+      "file_type": "code",
+      "source_file": "mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs",
+      "source_location": "L36",
+      "metadata": {
+        "namespace": "TRL_SpeakFromTarkov.Core",
+        "scope_chain": [
+          "s244"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "core_voipcontroller_trl_speakfromtarkov_core_voipcontroller_awake",
+      "community": 0,
+      "community_name": "VoipController",
+      "norm_label": ".awake()"
+    },
+    {
       "label": ".Cleanup()",
       "file_type": "code",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs",
-      "source_location": "L418",
+      "source_location": "L423",
       "metadata": {
         "namespace": "TRL_SpeakFromTarkov.Core",
         "scope_chain": [
@@ -779,6 +797,24 @@
       "community": 0,
       "community_name": "VoipController",
       "norm_label": ".cleanup()"
+    },
+    {
+      "label": ".DelayEcho()",
+      "file_type": "code",
+      "source_file": "mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs",
+      "source_location": "L130",
+      "metadata": {
+        "namespace": "TRL_SpeakFromTarkov.Core",
+        "scope_chain": [
+          "s244"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "core_voipcontroller_trl_speakfromtarkov_core_voipcontroller_delayecho",
+      "community": 0,
+      "community_name": "VoipController",
+      "norm_label": ".delayecho()"
     },
     {
       "label": ".DelayedStartVoipCaptureCo()",
@@ -797,24 +833,6 @@
       "community": 0,
       "community_name": "VoipController",
       "norm_label": ".delayedstartvoipcaptureco()"
-    },
-    {
-      "label": ".EnableMenuCapture()",
-      "file_type": "code",
-      "source_file": "mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs",
-      "source_location": "L166",
-      "metadata": {
-        "namespace": "TRL_SpeakFromTarkov.Core",
-        "scope_chain": [
-          "s244"
-        ]
-      },
-      "_callable": true,
-      "_origin": "ast",
-      "id": "core_voipcontroller_trl_speakfromtarkov_core_voipcontroller_enablemenucapture",
-      "community": 0,
-      "community_name": "VoipController",
-      "norm_label": ".enablemenucapture()"
     },
     {
       "label": ".GetEftMicrophone()",
@@ -838,7 +856,7 @@
       "label": ".HandleKeys()",
       "file_type": "code",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs",
-      "source_location": "L345",
+      "source_location": "L350",
       "metadata": {
         "namespace": "TRL_SpeakFromTarkov.Core",
         "scope_chain": [
@@ -856,7 +874,7 @@
       "label": ".IsShortcutDown()",
       "file_type": "code",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs",
-      "source_location": "L387",
+      "source_location": "L392",
       "metadata": {
         "namespace": "TRL_SpeakFromTarkov.Core",
         "scope_chain": [
@@ -874,7 +892,7 @@
       "label": ".IsShortcutEmpty()",
       "file_type": "code",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs",
-      "source_location": "L370",
+      "source_location": "L375",
       "metadata": {
         "namespace": "TRL_SpeakFromTarkov.Core",
         "scope_chain": [
@@ -892,7 +910,7 @@
       "label": ".IsShortcutHeld()",
       "file_type": "code",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs",
-      "source_location": "L375",
+      "source_location": "L380",
       "metadata": {
         "namespace": "TRL_SpeakFromTarkov.Core",
         "scope_chain": [
@@ -910,7 +928,7 @@
       "label": ".OnDestroy()",
       "file_type": "code",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs",
-      "source_location": "L424",
+      "source_location": "L429",
       "metadata": {
         "namespace": "TRL_SpeakFromTarkov.Core",
         "scope_chain": [
@@ -943,28 +961,10 @@
       "norm_label": ".onmenusceneloaded()"
     },
     {
-      "label": ".OnMicrophoneChanged()",
-      "file_type": "code",
-      "source_file": "mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs",
-      "source_location": "L213",
-      "metadata": {
-        "namespace": "TRL_SpeakFromTarkov.Core",
-        "scope_chain": [
-          "s244"
-        ]
-      },
-      "_callable": true,
-      "_origin": "ast",
-      "id": "core_voipcontroller_trl_speakfromtarkov_core_voipcontroller_onmicrophonechanged",
-      "community": 0,
-      "community_name": "VoipController",
-      "norm_label": ".onmicrophonechanged()"
-    },
-    {
       "label": ".RunAudioProfilerReport()",
       "file_type": "code",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs",
-      "source_location": "L298",
+      "source_location": "L303",
       "metadata": {
         "namespace": "TRL_SpeakFromTarkov.Core",
         "scope_chain": [
@@ -1000,7 +1000,7 @@
       "label": ".SetPlayerStatus()",
       "file_type": "code",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs",
-      "source_location": "L413",
+      "source_location": "L418",
       "metadata": {
         "namespace": "TRL_SpeakFromTarkov.Core",
         "scope_chain": [
@@ -1054,7 +1054,7 @@
       "label": ".Update()",
       "file_type": "code",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs",
-      "source_location": "L251",
+      "source_location": "L255",
       "metadata": {
         "namespace": "TRL_SpeakFromTarkov.Core",
         "scope_chain": [
@@ -1069,10 +1069,64 @@
       "norm_label": ".update()"
     },
     {
+      "label": ".CreateRemoteSpeaker()",
+      "file_type": "code",
+      "source_file": "mods/TRL-SpeakFromTarkov/modded/Network/SftNetwork.cs",
+      "source_location": "L426",
+      "metadata": {
+        "namespace": "TRL_SpeakFromTarkov.Network",
+        "scope_chain": [
+          "s308"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "network_sftnetwork_trl_speakfromtarkov_network_sftnetwork_createremotespeaker",
+      "community": 0,
+      "community_name": "VoipController",
+      "norm_label": ".createremotespeaker()"
+    },
+    {
+      "label": ".HandleVoipPacket()",
+      "file_type": "code",
+      "source_file": "mods/TRL-SpeakFromTarkov/modded/Network/SftNetwork.cs",
+      "source_location": "L371",
+      "metadata": {
+        "namespace": "TRL_SpeakFromTarkov.Network",
+        "scope_chain": [
+          "s308"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "network_sftnetwork_trl_speakfromtarkov_network_sftnetwork_handlevoippacket",
+      "community": 0,
+      "community_name": "VoipController",
+      "norm_label": ".handlevoippacket()"
+    },
+    {
+      "label": ".Initialize()",
+      "file_type": "code",
+      "source_file": "mods/TRL-SpeakFromTarkov/modded/Network/SftNetwork.cs",
+      "source_location": "L127",
+      "metadata": {
+        "namespace": "TRL_SpeakFromTarkov.Network",
+        "scope_chain": [
+          "s308"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "network_sftnetwork_trl_speakfromtarkov_network_sftnetwork_initialize",
+      "community": 0,
+      "community_name": "VoipController",
+      "norm_label": ".initialize()"
+    },
+    {
       "label": ".SetGameStateChannel()",
       "file_type": "code",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs",
-      "source_location": "L399",
+      "source_location": "L404",
       "metadata": {
         "namespace": "TRL_SpeakFromTarkov.Core",
         "scope_chain": [
@@ -1720,7 +1774,7 @@
       "label": ".AutoRestoreMenuChannel()",
       "file_type": "code",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L194",
+      "source_location": "L196",
       "metadata": {
         "namespace": "TRL_SpeakFromTarkov.UI",
         "scope_chain": [
@@ -1756,7 +1810,7 @@
       "label": ".CleanupStaleChannels()",
       "file_type": "code",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L206",
+      "source_location": "L208",
       "metadata": {
         "namespace": "TRL_SpeakFromTarkov.UI",
         "scope_chain": [
@@ -1774,7 +1828,7 @@
       "label": ".CreateNewChannel()",
       "file_type": "code",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L322",
+      "source_location": "L324",
       "metadata": {
         "namespace": "TRL_SpeakFromTarkov.UI",
         "scope_chain": [
@@ -1792,7 +1846,7 @@
       "label": ".DrawConfirmationModal()",
       "file_type": "code",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L689",
+      "source_location": "L691",
       "metadata": {
         "namespace": "TRL_SpeakFromTarkov.UI",
         "scope_chain": [
@@ -1810,7 +1864,7 @@
       "label": ".ExecutePendingAction()",
       "file_type": "code",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L433",
+      "source_location": "L435",
       "metadata": {
         "namespace": "TRL_SpeakFromTarkov.UI",
         "scope_chain": [
@@ -1828,7 +1882,7 @@
       "label": ".FetchServerChannels()",
       "file_type": "code",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L147",
+      "source_location": "L149",
       "metadata": {
         "namespace": "TRL_SpeakFromTarkov.UI",
         "scope_chain": [
@@ -1864,7 +1918,7 @@
       "label": ".GetMyNickname()",
       "file_type": "code",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L460",
+      "source_location": "L462",
       "metadata": {
         "namespace": "TRL_SpeakFromTarkov.UI",
         "scope_chain": [
@@ -1882,7 +1936,7 @@
       "label": ".HandleChannelAnnouncement()",
       "file_type": "code",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L259",
+      "source_location": "L261",
       "metadata": {
         "namespace": "TRL_SpeakFromTarkov.UI",
         "scope_chain": [
@@ -1918,7 +1972,7 @@
       "label": ".InitStyles()",
       "file_type": "code",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L473",
+      "source_location": "L475",
       "metadata": {
         "namespace": "TRL_SpeakFromTarkov.UI",
         "scope_chain": [
@@ -1936,7 +1990,7 @@
       "label": ".IsFikaHUDVisible()",
       "file_type": "code",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L515",
+      "source_location": "L517",
       "metadata": {
         "namespace": "TRL_SpeakFromTarkov.UI",
         "scope_chain": [
@@ -1954,7 +2008,7 @@
       "label": ".JoinChannel()",
       "file_type": "code",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L348",
+      "source_location": "L350",
       "metadata": {
         "namespace": "TRL_SpeakFromTarkov.UI",
         "scope_chain": [
@@ -1972,7 +2026,7 @@
       "label": ".LeaveChannel()",
       "file_type": "code",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L382",
+      "source_location": "L384",
       "metadata": {
         "namespace": "TRL_SpeakFromTarkov.UI",
         "scope_chain": [
@@ -2008,7 +2062,7 @@
       "label": ".OnGUI()",
       "file_type": "code",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L542",
+      "source_location": "L544",
       "metadata": {
         "namespace": "TRL_SpeakFromTarkov.UI",
         "scope_chain": [
@@ -2026,7 +2080,7 @@
       "label": ".OpenConfirmationModal()",
       "file_type": "code",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L425",
+      "source_location": "L427",
       "metadata": {
         "namespace": "TRL_SpeakFromTarkov.UI",
         "scope_chain": [
@@ -2044,7 +2098,7 @@
       "label": ".SendChannelHeartbeats()",
       "file_type": "code",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L232",
+      "source_location": "L234",
       "metadata": {
         "namespace": "TRL_SpeakFromTarkov.UI",
         "scope_chain": [
@@ -2977,10 +3031,10 @@
       "norm_label": ".postfix()"
     },
     {
-      "label": ".Initialize()",
+      "label": ".CaptureLoop()",
       "file_type": "code",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/Audio/MicrophoneCapturer.cs",
-      "source_location": "L53",
+      "source_location": "L179",
       "metadata": {
         "namespace": "TRL_SpeakFromTarkov.Audio",
         "scope_chain": [
@@ -2989,160 +3043,160 @@
       },
       "_callable": true,
       "_origin": "ast",
-      "id": "audio_microphonecapturer_trl_speakfromtarkov_audio_microphonecapturer_initialize",
+      "id": "audio_microphonecapturer_trl_speakfromtarkov_audio_microphonecapturer_captureloop",
       "community": 8,
-      "community_name": "RemoteSpeaker",
-      "norm_label": ".initialize()"
-    },
-    {
-      "label": ".EnqueuePacket()",
-      "file_type": "code",
-      "source_file": "mods/TRL-SpeakFromTarkov/modded/Audio/RemoteSpeaker.cs",
-      "source_location": "L133",
-      "metadata": {
-        "namespace": "TRL_SpeakFromTarkov.Audio",
-        "scope_chain": [
-          "s136"
-        ]
-      },
-      "_callable": true,
-      "_origin": "ast",
-      "id": "audio_remotespeaker_trl_speakfromtarkov_audio_remotespeaker_enqueuepacket",
-      "community": 8,
-      "community_name": "RemoteSpeaker",
-      "norm_label": ".enqueuepacket()"
-    },
-    {
-      "label": ".Initialize()",
-      "file_type": "code",
-      "source_file": "mods/TRL-SpeakFromTarkov/modded/Audio/RemoteSpeaker.cs",
-      "source_location": "L64",
-      "metadata": {
-        "namespace": "TRL_SpeakFromTarkov.Audio",
-        "scope_chain": [
-          "s136"
-        ]
-      },
-      "_callable": true,
-      "_origin": "ast",
-      "id": "audio_remotespeaker_trl_speakfromtarkov_audio_remotespeaker_initialize",
-      "community": 8,
-      "community_name": "RemoteSpeaker",
-      "norm_label": ".initialize()"
+      "community_name": "MicrophoneCapturer",
+      "norm_label": ".captureloop()"
     },
     {
       "label": ".OnAudioFilterRead()",
       "file_type": "code",
-      "source_file": "mods/TRL-SpeakFromTarkov/modded/Audio/RemoteSpeaker.cs",
-      "source_location": "L242",
+      "source_file": "mods/TRL-SpeakFromTarkov/modded/Audio/MicrophoneCapturer.cs",
+      "source_location": "L373",
       "metadata": {
         "namespace": "TRL_SpeakFromTarkov.Audio",
         "scope_chain": [
-          "s136"
+          "s62"
         ]
       },
       "_callable": true,
       "_origin": "ast",
-      "id": "audio_remotespeaker_trl_speakfromtarkov_audio_remotespeaker_onaudiofilterread",
+      "id": "audio_microphonecapturer_trl_speakfromtarkov_audio_microphonecapturer_onaudiofilterread",
       "community": 8,
-      "community_name": "RemoteSpeaker",
+      "community_name": "MicrophoneCapturer",
       "norm_label": ".onaudiofilterread()"
     },
     {
       "label": ".OnDestroy()",
       "file_type": "code",
-      "source_file": "mods/TRL-SpeakFromTarkov/modded/Audio/RemoteSpeaker.cs",
-      "source_location": "L411",
+      "source_file": "mods/TRL-SpeakFromTarkov/modded/Audio/MicrophoneCapturer.cs",
+      "source_location": "L379",
       "metadata": {
         "namespace": "TRL_SpeakFromTarkov.Audio",
         "scope_chain": [
-          "s136"
+          "s62"
         ]
       },
       "_callable": true,
       "_origin": "ast",
-      "id": "audio_remotespeaker_trl_speakfromtarkov_audio_remotespeaker_ondestroy",
+      "id": "audio_microphonecapturer_trl_speakfromtarkov_audio_microphonecapturer_ondestroy",
       "community": 8,
-      "community_name": "RemoteSpeaker",
+      "community_name": "MicrophoneCapturer",
       "norm_label": ".ondestroy()"
     },
     {
-      "label": ".SetEmergency2DMode()",
+      "label": ".PollMicrophoneData()",
       "file_type": "code",
-      "source_file": "mods/TRL-SpeakFromTarkov/modded/Audio/RemoteSpeaker.cs",
-      "source_location": "L154",
+      "source_file": "mods/TRL-SpeakFromTarkov/modded/Audio/MicrophoneCapturer.cs",
+      "source_location": "L256",
       "metadata": {
         "namespace": "TRL_SpeakFromTarkov.Audio",
         "scope_chain": [
-          "s136"
+          "s62"
         ]
       },
       "_callable": true,
       "_origin": "ast",
-      "id": "audio_remotespeaker_trl_speakfromtarkov_audio_remotespeaker_setemergency2dmode",
+      "id": "audio_microphonecapturer_trl_speakfromtarkov_audio_microphonecapturer_pollmicrophonedata",
       "community": 8,
-      "community_name": "RemoteSpeaker",
-      "norm_label": ".setemergency2dmode()"
+      "community_name": "MicrophoneCapturer",
+      "norm_label": ".pollmicrophonedata()"
     },
     {
-      "label": ".SetVolume()",
+      "label": ".ProcessFrame()",
       "file_type": "code",
-      "source_file": "mods/TRL-SpeakFromTarkov/modded/Audio/RemoteSpeaker.cs",
-      "source_location": "L124",
+      "source_file": "mods/TRL-SpeakFromTarkov/modded/Audio/MicrophoneCapturer.cs",
+      "source_location": "L327",
       "metadata": {
         "namespace": "TRL_SpeakFromTarkov.Audio",
         "scope_chain": [
-          "s136"
+          "s62"
         ]
       },
       "_callable": true,
       "_origin": "ast",
-      "id": "audio_remotespeaker_trl_speakfromtarkov_audio_remotespeaker_setvolume",
+      "id": "audio_microphonecapturer_trl_speakfromtarkov_audio_microphonecapturer_processframe",
       "community": 8,
-      "community_name": "RemoteSpeaker",
-      "norm_label": ".setvolume()"
+      "community_name": "MicrophoneCapturer",
+      "norm_label": ".processframe()"
+    },
+    {
+      "label": ".Resample()",
+      "file_type": "code",
+      "source_file": "mods/TRL-SpeakFromTarkov/modded/Audio/MicrophoneCapturer.cs",
+      "source_location": "L346",
+      "metadata": {
+        "namespace": "TRL_SpeakFromTarkov.Audio",
+        "scope_chain": [
+          "s62"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "audio_microphonecapturer_trl_speakfromtarkov_audio_microphonecapturer_resample",
+      "community": 8,
+      "community_name": "MicrophoneCapturer",
+      "norm_label": ".resample()"
+    },
+    {
+      "label": ".StartCapture()",
+      "file_type": "code",
+      "source_file": "mods/TRL-SpeakFromTarkov/modded/Audio/MicrophoneCapturer.cs",
+      "source_location": "L66",
+      "metadata": {
+        "namespace": "TRL_SpeakFromTarkov.Audio",
+        "scope_chain": [
+          "s62"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "audio_microphonecapturer_trl_speakfromtarkov_audio_microphonecapturer_startcapture",
+      "community": 8,
+      "community_name": "MicrophoneCapturer",
+      "norm_label": ".startcapture()"
+    },
+    {
+      "label": ".StopCapture()",
+      "file_type": "code",
+      "source_file": "mods/TRL-SpeakFromTarkov/modded/Audio/MicrophoneCapturer.cs",
+      "source_location": "L157",
+      "metadata": {
+        "namespace": "TRL_SpeakFromTarkov.Audio",
+        "scope_chain": [
+          "s62"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "audio_microphonecapturer_trl_speakfromtarkov_audio_microphonecapturer_stopcapture",
+      "community": 8,
+      "community_name": "MicrophoneCapturer",
+      "norm_label": ".stopcapture()"
     },
     {
       "label": ".Update()",
       "file_type": "code",
-      "source_file": "mods/TRL-SpeakFromTarkov/modded/Audio/RemoteSpeaker.cs",
-      "source_location": "L166",
+      "source_file": "mods/TRL-SpeakFromTarkov/modded/Audio/MicrophoneCapturer.cs",
+      "source_location": "L211",
       "metadata": {
         "namespace": "TRL_SpeakFromTarkov.Audio",
         "scope_chain": [
-          "s136"
+          "s62"
         ]
       },
       "_callable": true,
       "_origin": "ast",
-      "id": "audio_remotespeaker_trl_speakfromtarkov_audio_remotespeaker_update",
+      "id": "audio_microphonecapturer_trl_speakfromtarkov_audio_microphonecapturer_update",
       "community": 8,
-      "community_name": "RemoteSpeaker",
+      "community_name": "MicrophoneCapturer",
       "norm_label": ".update()"
     },
     {
-      "label": ".Initialize()",
-      "file_type": "code",
-      "source_file": "mods/TRL-SpeakFromTarkov/modded/Audio/VoipProcessor.cs",
-      "source_location": "L34",
-      "metadata": {
-        "namespace": "TRL_SpeakFromTarkov.Audio",
-        "scope_chain": [
-          "s110"
-        ]
-      },
-      "_callable": true,
-      "_origin": "ast",
-      "id": "audio_voipprocessor_trl_speakfromtarkov_audio_voipprocessor_initialize",
-      "community": 8,
-      "community_name": "RemoteSpeaker",
-      "norm_label": ".initialize()"
-    },
-    {
-      "label": ".Awake()",
+      "label": ".EnableMenuCapture()",
       "file_type": "code",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs",
-      "source_location": "L36",
+      "source_location": "L166",
       "metadata": {
         "namespace": "TRL_SpeakFromTarkov.Core",
         "scope_chain": [
@@ -3151,16 +3205,16 @@
       },
       "_callable": true,
       "_origin": "ast",
-      "id": "core_voipcontroller_trl_speakfromtarkov_core_voipcontroller_awake",
+      "id": "core_voipcontroller_trl_speakfromtarkov_core_voipcontroller_enablemenucapture",
       "community": 8,
-      "community_name": "RemoteSpeaker",
-      "norm_label": ".awake()"
+      "community_name": "MicrophoneCapturer",
+      "norm_label": ".enablemenucapture()"
     },
     {
-      "label": ".DelayEcho()",
+      "label": ".OnMicrophoneChanged()",
       "file_type": "code",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs",
-      "source_location": "L130",
+      "source_location": "L213",
       "metadata": {
         "namespace": "TRL_SpeakFromTarkov.Core",
         "scope_chain": [
@@ -3169,64 +3223,10 @@
       },
       "_callable": true,
       "_origin": "ast",
-      "id": "core_voipcontroller_trl_speakfromtarkov_core_voipcontroller_delayecho",
+      "id": "core_voipcontroller_trl_speakfromtarkov_core_voipcontroller_onmicrophonechanged",
       "community": 8,
-      "community_name": "RemoteSpeaker",
-      "norm_label": ".delayecho()"
-    },
-    {
-      "label": ".CreateRemoteSpeaker()",
-      "file_type": "code",
-      "source_file": "mods/TRL-SpeakFromTarkov/modded/Network/SftNetwork.cs",
-      "source_location": "L426",
-      "metadata": {
-        "namespace": "TRL_SpeakFromTarkov.Network",
-        "scope_chain": [
-          "s308"
-        ]
-      },
-      "_callable": true,
-      "_origin": "ast",
-      "id": "network_sftnetwork_trl_speakfromtarkov_network_sftnetwork_createremotespeaker",
-      "community": 8,
-      "community_name": "RemoteSpeaker",
-      "norm_label": ".createremotespeaker()"
-    },
-    {
-      "label": ".HandleVoipPacket()",
-      "file_type": "code",
-      "source_file": "mods/TRL-SpeakFromTarkov/modded/Network/SftNetwork.cs",
-      "source_location": "L371",
-      "metadata": {
-        "namespace": "TRL_SpeakFromTarkov.Network",
-        "scope_chain": [
-          "s308"
-        ]
-      },
-      "_callable": true,
-      "_origin": "ast",
-      "id": "network_sftnetwork_trl_speakfromtarkov_network_sftnetwork_handlevoippacket",
-      "community": 8,
-      "community_name": "RemoteSpeaker",
-      "norm_label": ".handlevoippacket()"
-    },
-    {
-      "label": ".Initialize()",
-      "file_type": "code",
-      "source_file": "mods/TRL-SpeakFromTarkov/modded/Network/SftNetwork.cs",
-      "source_location": "L127",
-      "metadata": {
-        "namespace": "TRL_SpeakFromTarkov.Network",
-        "scope_chain": [
-          "s308"
-        ]
-      },
-      "_callable": true,
-      "_origin": "ast",
-      "id": "network_sftnetwork_trl_speakfromtarkov_network_sftnetwork_initialize",
-      "community": 8,
-      "community_name": "RemoteSpeaker",
-      "norm_label": ".initialize()"
+      "community_name": "MicrophoneCapturer",
+      "norm_label": ".onmicrophonechanged()"
     },
     {
       "label": ".Awake()",
@@ -3373,23 +3373,12 @@
       "norm_label": ".update()"
     },
     {
-      "label": "Action",
-      "file_type": "code",
-      "source_file": "",
-      "source_location": "",
-      "_origin": "ast",
-      "id": "audio_microphonecapturer_cs_action",
-      "community": 0,
-      "community_name": "VoipController",
-      "norm_label": "action"
-    },
-    {
       "label": "AudioSource",
       "file_type": "code",
       "source_file": "",
       "source_location": "",
       "_origin": "ast",
-      "id": "audio_microphonecapturer_cs_audiosource",
+      "id": "audio_remotespeaker_cs_audiosource",
       "community": 0,
       "community_name": "VoipController",
       "norm_label": "audiosource"
@@ -3400,10 +3389,21 @@
       "source_file": "",
       "source_location": "",
       "_origin": "ast",
-      "id": "audio_microphonecapturer_cs_bool",
+      "id": "audio_remotespeaker_cs_bool",
       "community": 0,
       "community_name": "VoipController",
       "norm_label": "bool"
+    },
+    {
+      "label": "ConcurrentQueue",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "audio_remotespeaker_cs_concurrentqueue",
+      "community": 0,
+      "community_name": "VoipController",
+      "norm_label": "concurrentqueue"
     },
     {
       "label": "float",
@@ -3411,7 +3411,7 @@
       "source_file": "",
       "source_location": "",
       "_origin": "ast",
-      "id": "audio_microphonecapturer_cs_float",
+      "id": "audio_remotespeaker_cs_float",
       "community": 0,
       "community_name": "VoipController",
       "norm_label": "float"
@@ -3422,32 +3422,10 @@
       "source_file": "",
       "source_location": "",
       "_origin": "ast",
-      "id": "audio_microphonecapturer_cs_int",
+      "id": "audio_remotespeaker_cs_int",
       "community": 0,
       "community_name": "VoipController",
       "norm_label": "int"
-    },
-    {
-      "label": "string",
-      "file_type": "code",
-      "source_file": "",
-      "source_location": "",
-      "_origin": "ast",
-      "id": "audio_microphonecapturer_cs_string",
-      "community": 0,
-      "community_name": "VoipController",
-      "norm_label": "string"
-    },
-    {
-      "label": "AudioClip",
-      "file_type": "code",
-      "source_file": "",
-      "source_location": "",
-      "_origin": "ast",
-      "id": "audioclip",
-      "community": 0,
-      "community_name": "VoipController",
-      "norm_label": "audioclip"
     },
     {
       "label": "bool",
@@ -3505,26 +3483,15 @@
       "norm_label": "ienumerator"
     },
     {
-      "label": "object",
+      "label": "OpusDecoder",
       "file_type": "code",
       "source_file": "",
       "source_location": "",
       "_origin": "ast",
-      "id": "object",
+      "id": "opusdecoder",
       "community": 0,
       "community_name": "VoipController",
-      "norm_label": "object"
-    },
-    {
-      "label": "Thread",
-      "file_type": "code",
-      "source_file": "",
-      "source_location": "",
-      "_origin": "ast",
-      "id": "thread",
-      "community": 0,
-      "community_name": "VoipController",
-      "norm_label": "thread"
+      "norm_label": "opusdecoder"
     },
     {
       "label": "Exception",
@@ -4729,14 +4696,25 @@
       "norm_label": "patchprefix"
     },
     {
+      "label": "Action",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "audio_microphonecapturer_cs_action",
+      "community": 8,
+      "community_name": "MicrophoneCapturer",
+      "norm_label": "action"
+    },
+    {
       "label": "AudioSource",
       "file_type": "code",
       "source_file": "",
       "source_location": "",
       "_origin": "ast",
-      "id": "audio_remotespeaker_cs_audiosource",
+      "id": "audio_microphonecapturer_cs_audiosource",
       "community": 8,
-      "community_name": "RemoteSpeaker",
+      "community_name": "MicrophoneCapturer",
       "norm_label": "audiosource"
     },
     {
@@ -4745,21 +4723,10 @@
       "source_file": "",
       "source_location": "",
       "_origin": "ast",
-      "id": "audio_remotespeaker_cs_bool",
+      "id": "audio_microphonecapturer_cs_bool",
       "community": 8,
-      "community_name": "RemoteSpeaker",
+      "community_name": "MicrophoneCapturer",
       "norm_label": "bool"
-    },
-    {
-      "label": "ConcurrentQueue",
-      "file_type": "code",
-      "source_file": "",
-      "source_location": "",
-      "_origin": "ast",
-      "id": "audio_remotespeaker_cs_concurrentqueue",
-      "community": 8,
-      "community_name": "RemoteSpeaker",
-      "norm_label": "concurrentqueue"
     },
     {
       "label": "float",
@@ -4767,9 +4734,9 @@
       "source_file": "",
       "source_location": "",
       "_origin": "ast",
-      "id": "audio_remotespeaker_cs_float",
+      "id": "audio_microphonecapturer_cs_float",
       "community": 8,
-      "community_name": "RemoteSpeaker",
+      "community_name": "MicrophoneCapturer",
       "norm_label": "float"
     },
     {
@@ -4778,21 +4745,54 @@
       "source_file": "",
       "source_location": "",
       "_origin": "ast",
-      "id": "audio_remotespeaker_cs_int",
+      "id": "audio_microphonecapturer_cs_int",
       "community": 8,
-      "community_name": "RemoteSpeaker",
+      "community_name": "MicrophoneCapturer",
       "norm_label": "int"
     },
     {
-      "label": "OpusDecoder",
+      "label": "string",
       "file_type": "code",
       "source_file": "",
       "source_location": "",
       "_origin": "ast",
-      "id": "opusdecoder",
+      "id": "audio_microphonecapturer_cs_string",
       "community": 8,
-      "community_name": "RemoteSpeaker",
-      "norm_label": "opusdecoder"
+      "community_name": "MicrophoneCapturer",
+      "norm_label": "string"
+    },
+    {
+      "label": "AudioClip",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "audioclip",
+      "community": 8,
+      "community_name": "MicrophoneCapturer",
+      "norm_label": "audioclip"
+    },
+    {
+      "label": "object",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "object",
+      "community": 8,
+      "community_name": "MicrophoneCapturer",
+      "norm_label": "object"
+    },
+    {
+      "label": "Thread",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "thread",
+      "community": 8,
+      "community_name": "MicrophoneCapturer",
+      "norm_label": "thread"
     },
     {
       "label": "BaseUnityPlugin",
@@ -5399,7 +5399,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs",
-      "source_location": "L347",
+      "source_location": "L352",
       "weight": 1.0,
       "_origin": "ast",
       "source": "core_voipcontroller_trl_speakfromtarkov_core_voipcontroller_handlekeys",
@@ -5411,7 +5411,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs",
-      "source_location": "L367",
+      "source_location": "L372",
       "weight": 1.0,
       "_origin": "ast",
       "source": "core_voipcontroller_trl_speakfromtarkov_core_voipcontroller_handlekeys",
@@ -5423,7 +5423,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs",
-      "source_location": "L389",
+      "source_location": "L394",
       "weight": 1.0,
       "_origin": "ast",
       "source": "core_voipcontroller_trl_speakfromtarkov_core_voipcontroller_isshortcutdown",
@@ -5435,7 +5435,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs",
-      "source_location": "L377",
+      "source_location": "L382",
       "weight": 1.0,
       "_origin": "ast",
       "source": "core_voipcontroller_trl_speakfromtarkov_core_voipcontroller_isshortcutheld",
@@ -5447,7 +5447,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs",
-      "source_location": "L426",
+      "source_location": "L431",
       "weight": 1.0,
       "_origin": "ast",
       "source": "core_voipcontroller_trl_speakfromtarkov_core_voipcontroller_ondestroy",
@@ -5471,7 +5471,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs",
-      "source_location": "L307",
+      "source_location": "L312",
       "weight": 1.0,
       "_origin": "ast",
       "source": "core_voipcontroller_trl_speakfromtarkov_core_voipcontroller_runaudioprofilerreport",
@@ -5495,7 +5495,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs",
-      "source_location": "L233",
+      "source_location": "L234",
       "weight": 1.0,
       "_origin": "ast",
       "source": "core_voipcontroller_trl_speakfromtarkov_core_voipcontroller_togglemodstate",
@@ -5507,7 +5507,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs",
-      "source_location": "L260",
+      "source_location": "L265",
       "weight": 1.0,
       "_origin": "ast",
       "source": "core_voipcontroller_trl_speakfromtarkov_core_voipcontroller_update",
@@ -5519,7 +5519,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs",
-      "source_location": "L285",
+      "source_location": "L290",
       "weight": 1.0,
       "_origin": "ast",
       "source": "core_voipcontroller_trl_speakfromtarkov_core_voipcontroller_update",
@@ -5531,7 +5531,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs",
-      "source_location": "L294",
+      "source_location": "L299",
       "weight": 1.0,
       "_origin": "ast",
       "source": "core_voipcontroller_trl_speakfromtarkov_core_voipcontroller_update",
@@ -5747,7 +5747,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/InRaidVoipHUD.cs",
-      "source_location": "L371",
+      "source_location": "L372",
       "weight": 1.0,
       "_origin": "ast",
       "source": "ui_inraidvoiphud_trl_speakfromtarkov_ui_inraidvoiphud_ongui",
@@ -5759,7 +5759,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L202",
+      "source_location": "L204",
       "weight": 1.0,
       "_origin": "ast",
       "source": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud_autorestoremenuchannel",
@@ -5783,7 +5783,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L209",
+      "source_location": "L211",
       "weight": 1.0,
       "_origin": "ast",
       "source": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud_cleanupstalechannels",
@@ -5795,7 +5795,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L226",
+      "source_location": "L228",
       "weight": 1.0,
       "_origin": "ast",
       "source": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud_cleanupstalechannels",
@@ -5807,7 +5807,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L326",
+      "source_location": "L328",
       "weight": 1.0,
       "_origin": "ast",
       "source": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud_createnewchannel",
@@ -5819,7 +5819,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L327",
+      "source_location": "L329",
       "weight": 1.0,
       "_origin": "ast",
       "source": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud_createnewchannel",
@@ -5831,7 +5831,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L342",
+      "source_location": "L344",
       "weight": 1.0,
       "_origin": "ast",
       "source": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud_createnewchannel",
@@ -5844,7 +5844,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L344",
+      "source_location": "L346",
       "weight": 1.0,
       "_origin": "ast",
       "source": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud_createnewchannel",
@@ -5855,7 +5855,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L719",
+      "source_location": "L721",
       "weight": 1.0,
       "_origin": "ast",
       "source": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud_drawconfirmationmodal",
@@ -5868,7 +5868,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L441",
+      "source_location": "L443",
       "weight": 1.0,
       "_origin": "ast",
       "source": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud_executependingaction",
@@ -5879,7 +5879,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L441",
+      "source_location": "L443",
       "weight": 1.0,
       "_origin": "ast",
       "source": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud_executependingaction",
@@ -5891,7 +5891,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L441",
+      "source_location": "L443",
       "weight": 1.0,
       "_origin": "ast",
       "source": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud_executependingaction",
@@ -5903,7 +5903,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L261",
+      "source_location": "L263",
       "weight": 1.0,
       "_origin": "ast",
       "source": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud_handlechannelannouncement",
@@ -5915,7 +5915,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L268",
+      "source_location": "L270",
       "weight": 1.0,
       "_origin": "ast",
       "source": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud_handlechannelannouncement",
@@ -5939,7 +5939,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L350",
+      "source_location": "L352",
       "weight": 1.0,
       "_origin": "ast",
       "source": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud_joinchannel",
@@ -5952,7 +5952,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L378",
+      "source_location": "L380",
       "weight": 1.0,
       "_origin": "ast",
       "source": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud_joinchannel",
@@ -5963,7 +5963,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L378",
+      "source_location": "L380",
       "weight": 1.0,
       "_origin": "ast",
       "source": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud_joinchannel",
@@ -5975,7 +5975,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L384",
+      "source_location": "L386",
       "weight": 1.0,
       "_origin": "ast",
       "source": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud_leavechannel",
@@ -5988,7 +5988,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L403",
+      "source_location": "L405",
       "weight": 1.0,
       "_origin": "ast",
       "source": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud_leavechannel",
@@ -5999,23 +5999,11 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L409",
+      "source_location": "L411",
       "weight": 1.0,
       "_origin": "ast",
       "source": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud_leavechannel",
       "target": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud_getmynickname",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L547",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud_ongui",
-      "target": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud_isfikahudvisible",
       "confidence_score": 1.0
     },
     {
@@ -6027,6 +6015,18 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud_ongui",
+      "target": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud_isfikahudvisible",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
+      "source_location": "L551",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud_ongui",
       "target": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud_initstyles",
       "confidence_score": 1.0
     },
@@ -6035,7 +6035,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L577",
+      "source_location": "L579",
       "weight": 1.0,
       "_origin": "ast",
       "source": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud_ongui",
@@ -6047,7 +6047,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L584",
+      "source_location": "L586",
       "weight": 1.0,
       "_origin": "ast",
       "source": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud_ongui",
@@ -6059,7 +6059,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L605",
+      "source_location": "L607",
       "weight": 1.0,
       "_origin": "ast",
       "source": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud_ongui",
@@ -6071,7 +6071,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L625",
+      "source_location": "L627",
       "weight": 1.0,
       "_origin": "ast",
       "source": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud_ongui",
@@ -6083,7 +6083,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L673",
+      "source_location": "L675",
       "weight": 1.0,
       "_origin": "ast",
       "source": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud_ongui",
@@ -6095,7 +6095,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L686",
+      "source_location": "L688",
       "weight": 1.0,
       "_origin": "ast",
       "source": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud_ongui",
@@ -6107,7 +6107,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L237",
+      "source_location": "L239",
       "weight": 1.0,
       "_origin": "ast",
       "source": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud_sendchannelheartbeats",
@@ -6120,7 +6120,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L254",
+      "source_location": "L256",
       "weight": 1.0,
       "_origin": "ast",
       "source": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud_sendchannelheartbeats",
@@ -6131,7 +6131,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L122",
+      "source_location": "L124",
       "weight": 1.0,
       "_origin": "ast",
       "source": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud_update",
@@ -6143,7 +6143,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L135",
+      "source_location": "L137",
       "weight": 1.0,
       "_origin": "ast",
       "source": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud_update",
@@ -6155,7 +6155,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L141",
+      "source_location": "L143",
       "weight": 1.0,
       "_origin": "ast",
       "source": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud_update",
@@ -6167,7 +6167,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L142",
+      "source_location": "L144",
       "weight": 1.0,
       "_origin": "ast",
       "source": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud_update",
@@ -7605,7 +7605,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs",
-      "source_location": "L297",
+      "source_location": "L302",
       "weight": 1.0,
       "context": "field",
       "metadata": {
@@ -8441,7 +8441,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs",
-      "source_location": "L387",
+      "source_location": "L392",
       "weight": 1.0,
       "context": "parameter_type",
       "metadata": {
@@ -8456,7 +8456,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs",
-      "source_location": "L370",
+      "source_location": "L375",
       "weight": 1.0,
       "context": "parameter_type",
       "metadata": {
@@ -8471,7 +8471,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs",
-      "source_location": "L375",
+      "source_location": "L380",
       "weight": 1.0,
       "context": "parameter_type",
       "metadata": {
@@ -8591,7 +8591,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L425",
+      "source_location": "L427",
       "weight": 1.0,
       "context": "parameter_type",
       "metadata": {
@@ -8711,7 +8711,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L259",
+      "source_location": "L261",
       "weight": 1.0,
       "context": "parameter_type",
       "metadata": {
@@ -10356,22 +10356,11 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs",
-      "source_location": "L251",
+      "source_location": "L255",
       "weight": 1.0,
       "_origin": "ast",
       "source": "core_voipcontroller_trl_speakfromtarkov_core_voipcontroller",
       "target": "core_voipcontroller_trl_speakfromtarkov_core_voipcontroller_update",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs",
-      "source_location": "L298",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "core_voipcontroller_trl_speakfromtarkov_core_voipcontroller",
-      "target": "core_voipcontroller_trl_speakfromtarkov_core_voipcontroller_runaudioprofilerreport",
       "confidence_score": 1.0
     },
     {
@@ -10389,7 +10378,18 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs",
-      "source_location": "L345",
+      "source_location": "L303",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "core_voipcontroller_trl_speakfromtarkov_core_voipcontroller",
+      "target": "core_voipcontroller_trl_speakfromtarkov_core_voipcontroller_runaudioprofilerreport",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs",
+      "source_location": "L350",
       "weight": 1.0,
       "_origin": "ast",
       "source": "core_voipcontroller_trl_speakfromtarkov_core_voipcontroller",
@@ -10411,7 +10411,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs",
-      "source_location": "L370",
+      "source_location": "L375",
       "weight": 1.0,
       "_origin": "ast",
       "source": "core_voipcontroller_trl_speakfromtarkov_core_voipcontroller",
@@ -10422,7 +10422,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs",
-      "source_location": "L375",
+      "source_location": "L380",
       "weight": 1.0,
       "_origin": "ast",
       "source": "core_voipcontroller_trl_speakfromtarkov_core_voipcontroller",
@@ -10433,7 +10433,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs",
-      "source_location": "L387",
+      "source_location": "L392",
       "weight": 1.0,
       "_origin": "ast",
       "source": "core_voipcontroller_trl_speakfromtarkov_core_voipcontroller",
@@ -10444,7 +10444,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs",
-      "source_location": "L399",
+      "source_location": "L404",
       "weight": 1.0,
       "_origin": "ast",
       "source": "core_voipcontroller_trl_speakfromtarkov_core_voipcontroller",
@@ -10455,7 +10455,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs",
-      "source_location": "L413",
+      "source_location": "L418",
       "weight": 1.0,
       "_origin": "ast",
       "source": "core_voipcontroller_trl_speakfromtarkov_core_voipcontroller",
@@ -10466,7 +10466,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs",
-      "source_location": "L418",
+      "source_location": "L423",
       "weight": 1.0,
       "_origin": "ast",
       "source": "core_voipcontroller_trl_speakfromtarkov_core_voipcontroller",
@@ -10477,7 +10477,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs",
-      "source_location": "L424",
+      "source_location": "L429",
       "weight": 1.0,
       "_origin": "ast",
       "source": "core_voipcontroller_trl_speakfromtarkov_core_voipcontroller",
@@ -10961,7 +10961,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L147",
+      "source_location": "L149",
       "weight": 1.0,
       "_origin": "ast",
       "source": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud",
@@ -10972,7 +10972,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L194",
+      "source_location": "L196",
       "weight": 1.0,
       "_origin": "ast",
       "source": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud",
@@ -10983,7 +10983,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L206",
+      "source_location": "L208",
       "weight": 1.0,
       "_origin": "ast",
       "source": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud",
@@ -10994,7 +10994,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L232",
+      "source_location": "L234",
       "weight": 1.0,
       "_origin": "ast",
       "source": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud",
@@ -11005,7 +11005,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L259",
+      "source_location": "L261",
       "weight": 1.0,
       "_origin": "ast",
       "source": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud",
@@ -11016,7 +11016,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L322",
+      "source_location": "L324",
       "weight": 1.0,
       "_origin": "ast",
       "source": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud",
@@ -11027,7 +11027,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L348",
+      "source_location": "L350",
       "weight": 1.0,
       "_origin": "ast",
       "source": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud",
@@ -11038,7 +11038,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L382",
+      "source_location": "L384",
       "weight": 1.0,
       "_origin": "ast",
       "source": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud",
@@ -11049,7 +11049,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L425",
+      "source_location": "L427",
       "weight": 1.0,
       "_origin": "ast",
       "source": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud",
@@ -11060,7 +11060,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L433",
+      "source_location": "L435",
       "weight": 1.0,
       "_origin": "ast",
       "source": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud",
@@ -11071,7 +11071,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L460",
+      "source_location": "L462",
       "weight": 1.0,
       "_origin": "ast",
       "source": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud",
@@ -11082,7 +11082,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L473",
+      "source_location": "L475",
       "weight": 1.0,
       "_origin": "ast",
       "source": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud",
@@ -11093,7 +11093,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L515",
+      "source_location": "L517",
       "weight": 1.0,
       "_origin": "ast",
       "source": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud",
@@ -11104,7 +11104,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L542",
+      "source_location": "L544",
       "weight": 1.0,
       "_origin": "ast",
       "source": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud",
@@ -11115,7 +11115,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "mods/TRL-SpeakFromTarkov/modded/UI/MenuVoipHUD.cs",
-      "source_location": "L689",
+      "source_location": "L691",
       "weight": 1.0,
       "_origin": "ast",
       "source": "ui_menuvoiphud_trl_speakfromtarkov_ui_menuvoiphud",
@@ -11702,7 +11702,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs",
-      "source_location": "L363",
+      "source_location": "L368",
       "weight": 1.0,
       "_origin": "ast",
       "source": "core_voipcontroller_trl_speakfromtarkov_core_voipcontroller_handlekeys",
@@ -11738,7 +11738,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs",
-      "source_location": "L326",
+      "source_location": "L331",
       "weight": 1.0,
       "_origin": "ast",
       "source": "core_voipcontroller_trl_speakfromtarkov_core_voipcontroller_runaudioprofilerreport",
@@ -11750,7 +11750,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs",
-      "source_location": "L405",
+      "source_location": "L410",
       "weight": 1.0,
       "_origin": "ast",
       "source": "core_voipcontroller_trl_speakfromtarkov_core_voipcontroller_setgamestatechannel",
@@ -11762,7 +11762,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs",
-      "source_location": "L409",
+      "source_location": "L414",
       "weight": 1.0,
       "_origin": "ast",
       "source": "core_voipcontroller_trl_speakfromtarkov_core_voipcontroller_setgamestatechannel",
@@ -11786,7 +11786,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs",
-      "source_location": "L242",
+      "source_location": "L243",
       "weight": 1.0,
       "_origin": "ast",
       "source": "core_voipcontroller_trl_speakfromtarkov_core_voipcontroller_togglemodstate",
@@ -11798,7 +11798,19 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs",
-      "source_location": "L269",
+      "source_location": "L247",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "core_voipcontroller_trl_speakfromtarkov_core_voipcontroller_togglemodstate",
+      "target": "audio_remotespeaker_trl_speakfromtarkov_audio_remotespeaker_setvolume"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs",
+      "source_location": "L274",
       "weight": 1.0,
       "_origin": "ast",
       "source": "core_voipcontroller_trl_speakfromtarkov_core_voipcontroller_update",
@@ -11810,7 +11822,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "mods/TRL-SpeakFromTarkov/modded/Core/VoipController.cs",
-      "source_location": "L286",
+      "source_location": "L291",
       "weight": 1.0,
       "_origin": "ast",
       "source": "core_voipcontroller_trl_speakfromtarkov_core_voipcontroller_update",
@@ -11842,5 +11854,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "2f13843e80c525008b79505033e73520025605ed"
+  "built_at_commit": "8a1403a197227f6704ebb741f4ef2a0b36b6251c"
 }
