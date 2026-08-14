@@ -12,67 +12,67 @@ namespace TRL_SpeakFromTarkov
     [BepInDependency("com.fika.core", BepInDependency.DependencyFlags.HardDependency)]
     public class VoIPPlugin : BaseUnityPlugin
     {
-        internal static ManualLogSource Log;
+        internal static ManualLogSource Log = null!;
 
-        public static ConfigEntry<string> MicrophoneDevice { get; private set; }
-        public static string[] MicrophoneNames { get; private set; }
+        public static ConfigEntry<string> MicrophoneDevice { get; private set; } = null!;
+        public static string[] MicrophoneNames { get; private set; } = null!;
         public static System.Collections.Generic.Dictionary<string, string> MicRealNames = new System.Collections.Generic.Dictionary<string, string>();
-        public static ConfigEntry<bool> EnableMod { get; private set; }
-        public static ConfigEntry<TRL_SpeakFromTarkov.Audio.VoipProcessor.VoipMode> TransmissionMode { get; private set; }
-        public static ConfigEntry<float> VADThreshold { get; private set; }
-        public static ConfigEntry<bool> EnableEcho { get; private set; }
-        public static ConfigEntry<float> EchoDelay { get; private set; }
-        public static ConfigEntry<float> EchoVolume { get; private set; }
-        public static ConfigEntry<float> MicGain { get; private set; }
-        public static ConfigEntry<int> SampleRate { get; private set; }
-        public static ConfigEntry<float> NetworkJitterBufferMs { get; private set; }
+        public static ConfigEntry<bool> EnableMod { get; private set; } = null!;
+        public static ConfigEntry<TRL_SpeakFromTarkov.Audio.VoipProcessor.VoipMode> TransmissionMode { get; private set; } = null!;
+        public static ConfigEntry<float> VADThreshold { get; private set; } = null!;
+        public static ConfigEntry<bool> EnableEcho { get; private set; } = null!;
+        public static ConfigEntry<float> EchoDelay { get; private set; } = null!;
+        public static ConfigEntry<float> EchoVolume { get; private set; } = null!;
+        public static ConfigEntry<float> MicGain { get; private set; } = null!;
+        public static ConfigEntry<int> SampleRate { get; private set; } = null!;
+        public static ConfigEntry<float> NetworkJitterBufferMs { get; private set; } = null!;
         
         // Studio Quality configs
-        public static ConfigEntry<int> OpusBitrate { get; private set; }
-        public static ConfigEntry<int> OpusComplexity { get; private set; }
-        public static ConfigEntry<bool> OpusFEC { get; private set; }
-        public static ConfigEntry<bool> EnableAGC { get; private set; }
-        public static ConfigEntry<bool> EnableLimiter { get; private set; }
-        public static ConfigEntry<float> LPFCutoff { get; private set; }
-        public static ConfigEntry<float> MaxHearingDistance { get; private set; }
-        public static ConfigEntry<float> OutputVolume { get; private set; }
+        public static ConfigEntry<int> OpusBitrate { get; private set; } = null!;
+        public static ConfigEntry<int> OpusComplexity { get; private set; } = null!;
+        public static ConfigEntry<bool> OpusFEC { get; private set; } = null!;
+        public static ConfigEntry<bool> EnableAGC { get; private set; } = null!;
+        public static ConfigEntry<bool> EnableLimiter { get; private set; } = null!;
+        public static ConfigEntry<float> LPFCutoff { get; private set; } = null!;
+        public static ConfigEntry<float> MaxHearingDistance { get; private set; } = null!;
+        public static ConfigEntry<float> OutputVolume { get; private set; } = null!;
 
         // Bot Interaction
-        public static ConfigEntry<bool> EnableBotInteraction { get; private set; }
-        public static ConfigEntry<float> BotVoiceDebugVolume { get; private set; }
+        public static ConfigEntry<bool> EnableBotInteraction { get; private set; } = null!;
+        public static ConfigEntry<float> BotVoiceDebugVolume { get; private set; } = null!;
 
         // CONFIGURAÇÃO IDEAL: KeyboardShortcut
-        public static ConfigEntry<KeyboardShortcut> PushToTalkKey { get; private set; }
-        public static ConfigEntry<KeyboardShortcut> ToggleModeKey { get; private set; }
-        public static ConfigEntry<KeyboardShortcut> MuteKey { get; private set; }
-        public static ConfigEntry<bool> EnableInRaidVoipHUD { get; private set; }
-        public static ConfigEntry<bool> AlwaysVisibleInRaidHUD { get; private set; }
-        public static ConfigEntry<float> ShiftStancePanelX { get; private set; }
-        public static ConfigEntry<float> InRaidHUDOffsetX { get; private set; }
-        public static ConfigEntry<float> InRaidHUDOffsetY { get; private set; }
-        public static ConfigEntry<bool> EnableDebugVoipHUD { get; private set; }
+        public static ConfigEntry<KeyboardShortcut> PushToTalkKey { get; private set; } = null!;
+        public static ConfigEntry<KeyboardShortcut> ToggleModeKey { get; private set; } = null!;
+        public static ConfigEntry<KeyboardShortcut> MuteKey { get; private set; } = null!;
+        public static ConfigEntry<bool> EnableInRaidVoipHUD { get; private set; } = null!;
+        public static ConfigEntry<bool> AlwaysVisibleInRaidHUD { get; private set; } = null!;
+        public static ConfigEntry<float> ShiftStancePanelX { get; private set; } = null!;
+        public static ConfigEntry<float> InRaidHUDOffsetX { get; private set; } = null!;
+        public static ConfigEntry<float> InRaidHUDOffsetY { get; private set; } = null!;
+        public static ConfigEntry<bool> EnableDebugVoipHUD { get; private set; } = null!;
 
         // Calibração de Voz Personalizada (Wizard)
-        public static ConfigEntry<float> WhisperThreshold { get; private set; }
-        public static ConfigEntry<float> NormalThreshold { get; private set; }
-        public static ConfigEntry<float> LoudThreshold { get; private set; }
-        public static ConfigEntry<KeyboardShortcut> OpenCalibrationKey { get; private set; }
+        public static ConfigEntry<float> WhisperThreshold { get; private set; } = null!;
+        public static ConfigEntry<float> NormalThreshold { get; private set; } = null!;
+        public static ConfigEntry<float> LoudThreshold { get; private set; } = null!;
+        public static ConfigEntry<KeyboardShortcut> OpenCalibrationKey { get; private set; } = null!;
 
-        public static ConfigEntry<bool> EnableDebugLogs { get; private set; }
+        public static ConfigEntry<bool> EnableDebugLogs { get; private set; } = null!;
         public static bool IsAudioDebugActive { get; set; } = false;
 
-        public static ConfigEntry<float> VADDecayTime { get; private set; }
-        public static ConfigEntry<float> MaxAudioLevel { get; private set; }
+        public static ConfigEntry<float> VADDecayTime { get; private set; } = null!;
+        public static ConfigEntry<float> MaxAudioLevel { get; private set; } = null!;
 
         // Filtros de áudio
-        public static ConfigEntry<float> HPFCutoff          { get; private set; }
-        public static ConfigEntry<float> NoiseGateThreshold { get; private set; }
-        public static ConfigEntry<float> NoiseGateHoldMs    { get; private set; }
+        public static ConfigEntry<float> HPFCutoff          { get; private set; } = null!;
+        public static ConfigEntry<float> NoiseGateThreshold { get; private set; } = null!;
+        public static ConfigEntry<float> NoiseGateHoldMs    { get; private set; } = null!;
 
-        public static ConfigEntry<bool> UseRNNoise          { get; private set; }
-        public static ConfigEntry<float> RNNoiseVADThreshold { get; private set; }
-        public static ConfigEntry<float> RNNoiseGateHoldMs    { get; private set; }
-        public static ConfigEntry<int> RNNoiseLatency       { get; private set; }
+        public static ConfigEntry<bool> UseRNNoise          { get; private set; } = null!;
+        public static ConfigEntry<float> RNNoiseVADThreshold { get; private set; } = null!;
+        public static ConfigEntry<float> RNNoiseGateHoldMs    { get; private set; } = null!;
+        public static ConfigEntry<int> RNNoiseLatency       { get; private set; } = null!;
 
         public static int FrameSize => (int)Math.Round(SampleRate.Value * 0.040);
 
@@ -311,7 +311,7 @@ namespace TRL_SpeakFromTarkov
             string display = MicrophoneDevice.Value;
             if (display != null && MicRealNames.TryGetValue(display, out string realName))
                 return realName;
-            return display;
+            return display ?? string.Empty;
         }
 
         /// <summary>

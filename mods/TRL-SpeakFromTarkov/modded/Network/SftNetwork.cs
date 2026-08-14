@@ -39,7 +39,7 @@ namespace TRL_SpeakFromTarkov.Network
         /// o delegate registrado no NetPacketProcessor do FIKA sobrevive à destruição do MonoBehaviour,
         /// então capturar `this` deixaria um callback apontando para um objeto Unity destruído.
         /// </summary>
-        private static SftNetwork _instance;
+        private static SftNetwork _instance = null!;
         public static SftNetwork Instance => _instance;
 
         /// <summary>
@@ -47,7 +47,7 @@ namespace TRL_SpeakFromTarkov.Network
         /// IFikaNetworkManager em cada transição menu → lobby → raid, e a nova instância tem o
         /// NetPacketProcessor vazio. Comparar a referência é o que detecta essa troca.
         /// </summary>
-        private static IFikaNetworkManager _lastRegisteredManager;
+        private static IFikaNetworkManager _lastRegisteredManager = null!;
 
         /// <summary>Frame de áudio aguardando envio na main thread.</summary>
         private struct PendingAudio
@@ -149,7 +149,7 @@ namespace TRL_SpeakFromTarkov.Network
         {
             if (!Singleton<IFikaNetworkManager>.Instantiated)
             {
-                _lastRegisteredManager = null;
+                _lastRegisteredManager = null!;
                 return;
             }
 
@@ -259,6 +259,7 @@ namespace TRL_SpeakFromTarkov.Network
         /// </summary>
         private static void OnReceiveVoipDataV2(SftAudioPacketV2 packet)
         {
+            if (packet.AudioData == null) return;
             DispatchVoipPacket(packet.ProfileId, packet.Channel, packet.AudioData, packet.VoiceLevel,
                 nameof(OnReceiveVoipDataV2));
         }
@@ -457,7 +458,7 @@ namespace TRL_SpeakFromTarkov.Network
 
         void OnDestroy()
         {
-            if (_instance == this) _instance = null;
+            if (_instance == this) _instance = null!;
             StopSession();
         }
     }

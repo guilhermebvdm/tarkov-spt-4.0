@@ -12,7 +12,7 @@ namespace TRL_SpeakFromTarkov.UI
     /// </summary>
     public class VoiceCalibrationHUD : MonoBehaviour
     {
-        public VoipProcessor Processor { get; set; }
+        public VoipProcessor Processor { get; set; } = null!;
         public bool IsOpen { get; private set; } = false;
 
         public enum CalibrationStep
@@ -26,16 +26,16 @@ namespace TRL_SpeakFromTarkov.UI
 
         public CalibrationStep CurrentStep { get; private set; } = CalibrationStep.Intro;
 
-        private Texture2D _bgTex;
-        private Texture2D _panelTex;
-        private Texture2D _borderTex;
-        private Texture2D _btnTex;
-        private Texture2D _btnHoverTex;
-        private Texture2D _barBgTex;
-        private Texture2D _barFillTex;
-        private Texture2D _greenTex;
-        private Texture2D _yellowTex;
-        private Texture2D _redTex;
+        private Texture2D? _bgTex;
+        private Texture2D? _panelTex;
+        private Texture2D? _borderTex;
+        private Texture2D? _btnTex;
+        private Texture2D? _btnHoverTex;
+        private Texture2D? _barBgTex;
+        private Texture2D? _barFillTex;
+        private Texture2D? _greenTex;
+        private Texture2D? _yellowTex;
+        private Texture2D? _redTex;
 
         // Recording & Stats
         private bool _isRecordingPhase = false;
@@ -90,7 +90,7 @@ namespace TRL_SpeakFromTarkov.UI
             DestroyTex(ref _redTex);
         }
 
-        private void DestroyTex(ref Texture2D tex)
+        private void DestroyTex(ref Texture2D? tex)
         {
             if (tex != null)
             {

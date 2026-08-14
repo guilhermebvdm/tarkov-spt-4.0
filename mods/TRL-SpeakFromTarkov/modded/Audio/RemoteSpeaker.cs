@@ -9,8 +9,8 @@ namespace TRL_SpeakFromTarkov.Audio
 {
     public class RemoteSpeaker : MonoBehaviour
     {
-        private OpusDecoder decoder;
-        private AudioSource audioSource;
+        private OpusDecoder decoder = null!;
+        private AudioSource audioSource = null!;
         public float CurrentOutputLevel { get; private set; }
         public bool IsPlaying => audioSource != null && audioSource.isPlaying;
         public int PacketsEnqueued => packetsEnqueuedCount;
@@ -19,7 +19,7 @@ namespace TRL_SpeakFromTarkov.Audio
         public int BufferAvailable => (streamBuffer != null && streamBuffer.Length > 0) ? (streamWritePos - streamReadPos + streamBuffer.Length) % streamBuffer.Length : 0;
         public int UnderrunCount { get; private set; }
         private int lastUnderrunCheckCount = -1;
-        public string TargetProfileId { get; set; }
+        public string TargetProfileId { get; set; } = null!;
         private float lpfState = 0f;
 
         public int GetRecentUnderruns()
@@ -43,12 +43,12 @@ namespace TRL_SpeakFromTarkov.Audio
 
         private int sampleRate;
         private int frameSize;
-        private float[] opusDecodeBuffer;
+        private float[] opusDecodeBuffer = null!;
 
         private float currentDistanceTarget = 30f;
         private float smoothedDistance = 30f;
 
-        private float[] streamBuffer;
+        private float[] streamBuffer = null!;
         private volatile int streamWritePos = 0;
         private volatile int streamReadPos  = 0;
 
@@ -410,7 +410,7 @@ namespace TRL_SpeakFromTarkov.Audio
 
         void OnDestroy()
         {
-            decoder = null;
+            decoder = null!;
         }
     }
 }

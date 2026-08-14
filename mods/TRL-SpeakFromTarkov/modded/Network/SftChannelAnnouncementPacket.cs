@@ -7,13 +7,15 @@ namespace TRL_SpeakFromTarkov.Network
     public struct SftChannelAnnouncementPacket : INetSerializable
     {
         public byte ChannelId;
+#pragma warning disable CS8618
         public string ChannelName;
         public string HostProfileId;
         public string HostNickname;
         public string TargetProfileId;
         public byte Action; // 0 = Announce, 1 = Close, 2 = Join, 3 = Leave, 4 = Kick, 5 = Ban
 
-        [ThreadStatic] private static NetDataWriter _innerWriter;
+        [ThreadStatic] private static NetDataWriter? _innerWriter;
+#pragma warning restore CS8618
 
         public void Serialize(NetDataWriter writer)
         {

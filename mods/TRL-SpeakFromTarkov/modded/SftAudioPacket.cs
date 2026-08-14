@@ -44,7 +44,7 @@ namespace TRL_SpeakFromTarkov
         {
             ProfileId = string.Empty;
             Channel = 0;
-            AudioData = null;
+            AudioData = null!;
             VoiceLevel = 0f;
 
             // Sem envelope no formato legado: lemos campo a campo com as variantes TryGet, que não
@@ -76,14 +76,16 @@ namespace TRL_SpeakFromTarkov
         /// bytes (VoipProcessor.opusBuffer); acima disso o pacote veio de peer bugado/hostil.</summary>
         internal const int MaxAudioBytes = 1500;
 
+#pragma warning disable CS8618
         public string ProfileId;
         public byte Channel;
-        public byte[] AudioData;
+        public byte[]? AudioData;
         public float VoiceLevel;
 
         // Buffer por thread: hoje Serialize roda na main thread (drain da fila do SftNetwork),
         // mas [ThreadStatic] mantém a garantia se algum caller futuro serializar de outra thread.
-        [ThreadStatic] private static NetDataWriter _innerWriter;
+        [ThreadStatic] private static NetDataWriter? _innerWriter;
+#pragma warning restore CS8618
 
         public void Serialize(NetDataWriter writer)
         {
@@ -125,7 +127,7 @@ namespace TRL_SpeakFromTarkov
             catch (Exception ex)
             {
                 // Falha contida no envelope: o stream principal já avançou o tamanho declarado.
-                AudioData = null;
+                AudioData = null!;
                 Network.SftNetwork.LogErrorThrottled("SftAudioPacketV2.Deserialize", ex);
             }
         }

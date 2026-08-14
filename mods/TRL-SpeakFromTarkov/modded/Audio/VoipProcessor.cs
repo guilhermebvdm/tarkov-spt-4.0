@@ -8,9 +8,9 @@ namespace TRL_SpeakFromTarkov.Audio
 {
     public class VoipProcessor : MonoBehaviour
     {
-        public Action<byte[], float> OnOpusDataEncoded;
+        public Action<byte[], float> OnOpusDataEncoded = null!;
         
-        private OpusEncoder encoder;
+        private OpusEncoder encoder = null!;
         private int frameSize;
         
         // VAD e Níveis
@@ -22,7 +22,7 @@ namespace TRL_SpeakFromTarkov.Audio
         private byte[] opusBuffer = new byte[1275]; // Alocação única
         private float vadHoldTimer = 0f;
         
-        public BotVoiceBridge botVoiceBridge { get; set; }
+        public BotVoiceBridge botVoiceBridge { get; set; } = null!;
         
         public bool IsMuted { get; set; }
         public bool IsPTTActive { get; set; }
@@ -174,7 +174,7 @@ namespace TRL_SpeakFromTarkov.Audio
         
         void OnDestroy()
         {
-            encoder = null;
+            encoder = null!;
         }
     }
 }

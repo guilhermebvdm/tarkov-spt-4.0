@@ -56,9 +56,11 @@ namespace TRL_SpeakFromTarkov.Audio
         private bool  _gateOpen      = false;
 
         // ── RNNoise Noise Gate ────────────────────────────────────────────────
+#pragma warning disable CS0414
         private float _rnGateGain      = 0f;
         private float _rnGateHoldTimer = 0f;
         private bool  _rnGateOpen      = false;
+#pragma warning restore CS0414
 
         private readonly float _frameDuration;
         private readonly float _attackRate;

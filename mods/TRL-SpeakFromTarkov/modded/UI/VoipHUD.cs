@@ -5,17 +5,17 @@ namespace TRL_SpeakFromTarkov.UI
 {
     public class VoipHUD : MonoBehaviour
     {
-        public VoipProcessor Processor { get; set; }
+        public VoipProcessor Processor { get; set; } = null!;
         public byte CurrentChannel { get; set; }
         
-        private Texture2D fillTexture;
-        private Texture2D bgTexture;
-        private Texture2D whiteTexture;
-        private Texture2D redTex;
-        private Texture2D greenTex;
-        private Texture2D yellowTex;
-        private Texture2D cyanTex;
-        private Texture2D grayTex;
+        private Texture2D fillTexture = null!;
+        private Texture2D bgTexture = null!;
+        private Texture2D whiteTexture = null!;
+        private Texture2D redTex = null!;
+        private Texture2D greenTex = null!;
+        private Texture2D yellowTex = null!;
+        private Texture2D cyanTex = null!;
+        private Texture2D grayTex = null!;
         
         private float smoothLevel = 0f;
         

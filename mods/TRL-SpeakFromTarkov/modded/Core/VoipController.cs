@@ -12,20 +12,20 @@ namespace TRL_SpeakFromTarkov.Core
 {
     public class VoipController : MonoBehaviour
     {
-        public static VoipController Instance { get; private set; }
+        public static VoipController Instance { get; private set; } = null!;
         
-        public MicrophoneCapturer capturer { get; private set; }
-        public VoipProcessor processor { get; private set; }
-        public RemoteSpeaker echoSpeaker { get; private set; }
-        public BotVoiceBridge botVoiceBridge { get; private set; }
-        private SftNetwork network;
-        private VoipHUD hud;
-        public InRaidVoipHUD inRaidHud { get; private set; }
-        public VoiceCalibrationHUD calibrationHud { get; private set; }
+        public MicrophoneCapturer capturer { get; private set; } = null!;
+        public VoipProcessor processor { get; private set; } = null!;
+        public RemoteSpeaker echoSpeaker { get; private set; } = null!;
+        public BotVoiceBridge botVoiceBridge { get; private set; } = null!;
+        private SftNetwork network = null!;
+        private VoipHUD hud = null!;
+        public InRaidVoipHUD inRaidHud { get; private set; } = null!;
+        public VoiceCalibrationHUD calibrationHud { get; private set; } = null!;
         private ConcurrentQueue<Action> mainThreadActions = new ConcurrentQueue<Action>();
         
         public byte CurrentChannel { get; private set; } = 1;
-        public MenuVoipHUD menuHud { get; private set; }
+        public MenuVoipHUD menuHud { get; private set; } = null!;
 
         public void SetCurrentChannel(byte channelId)
         {

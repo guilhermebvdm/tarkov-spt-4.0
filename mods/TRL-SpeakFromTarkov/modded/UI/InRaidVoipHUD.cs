@@ -13,28 +13,28 @@ namespace TRL_SpeakFromTarkov.UI
     /// </summary>
     public class InRaidVoipHUD : MonoBehaviour
     {
-        public VoipProcessor Processor { get; set; }
+        public VoipProcessor Processor { get; set; } = null!;
         public byte CurrentChannel { get; set; }
 
-        private Component _battleStancePanel;
-        private CanvasGroup _battleStanceCanvasGroup;
+        private Component _battleStancePanel = null!;
+        private CanvasGroup _battleStanceCanvasGroup = null!;
         private Vector2 _originalStanceAnchoredPos;
         private bool _originalPosCaptured = false;
         private float _searchTimer = 0f;
 
-        private Texture2D _bgTex;
-        private Texture2D _borderTex;
-        private Texture2D _greenTex;
-        private Texture2D _yellowTex;
-        private Texture2D _redTex;
-        private Texture2D _cyanTex;
-        private Texture2D _grayTex;
+        private Texture2D? _bgTex;
+        private Texture2D? _borderTex;
+        private Texture2D? _greenTex;
+        private Texture2D? _yellowTex;
+        private Texture2D? _redTex;
+        private Texture2D? _cyanTex;
+        private Texture2D? _grayTex;
 
         // Ícones de Modo de Captura (PNG 400px escalados na UI)
-        private Texture2D _pttIconTex;
-        private Texture2D _vadIconTex;
-        private Texture2D _openIconTex;
-        private Texture2D _muteIconTex;
+        private Texture2D? _pttIconTex;
+        private Texture2D? _vadIconTex;
+        private Texture2D? _openIconTex;
+        private Texture2D? _muteIconTex;
 
         private float _smoothLevel = 0f;
         private float _peakMax = 0.02f;
@@ -64,7 +64,7 @@ namespace TRL_SpeakFromTarkov.UI
             return t;
         }
 
-        private Texture2D LoadPNG(string filename)
+        private Texture2D? LoadPNG(string filename)
         {
             try
             {
@@ -111,7 +111,7 @@ namespace TRL_SpeakFromTarkov.UI
             DestroyTex(ref _muteIconTex);
         }
 
-        private void DestroyTex(ref Texture2D tex)
+        private void DestroyTex(ref Texture2D? tex)
         {
             if (tex != null)
             {
@@ -246,7 +246,7 @@ namespace TRL_SpeakFromTarkov.UI
             GUI.depth = -900;
 
             // 1. Ícone do Modo de Captura (PTT / VAD / OPEN / MUTE) na parte de BAIXO da barra
-            Texture2D modeIcon = null;
+            Texture2D? modeIcon = null;
             if (Processor.IsMuted && _muteIconTex != null)
             {
                 modeIcon = _muteIconTex;
@@ -296,7 +296,7 @@ namespace TRL_SpeakFromTarkov.UI
             GUI.DrawTexture(new Rect(posX, posY, barWidth, barHeight), _bgTex);
 
             // 3. Ponto Indicador de Status de Transmissão no Topo da Barra (3px)
-            Texture2D statusDotTex = _redTex;
+            Texture2D? statusDotTex = _redTex;
             if (!Processor.IsMuted)
             {
                 statusDotTex = Processor.IsTransmitting ? _greenTex : _yellowTex;

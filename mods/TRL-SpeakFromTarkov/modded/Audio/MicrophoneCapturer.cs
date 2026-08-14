@@ -7,30 +7,30 @@ namespace TRL_SpeakFromTarkov.Audio
     [RequireComponent(typeof(AudioSource))]
     public class MicrophoneCapturer : MonoBehaviour
     {
-        public Action<float[]> OnAudioDataCaptured;
+        public Action<float[]> OnAudioDataCaptured = null!;
         
-        private string deviceName;
+        private string? deviceName;
         private int targetSampleRate;
         private int targetFrameSize;
         
         private int actualSampleRate;
         private int captureFrameSize;
         
-        private AudioClip micClip;
-        private float[] captureBuffer;
-        private float[] outputBuffer;
+        private AudioClip? micClip;
+        private float[] captureBuffer = null!;
+        private float[] outputBuffer = null!;
         
-        private AudioSource _audioSource;
+        private AudioSource _audioSource = null!;
         
         // Ring Buffer (Thread Safe)
-        private float[] ringBuffer;
+        private float[] ringBuffer = null!;
         private volatile int writePos;
         private volatile int readPos;
         private volatile int availableSamples;
         private readonly object bufferLock = new object();
         
         // Thread de processamento em background (imune ao FPS do jogo)
-        private Thread captureThread;
+        private Thread captureThread = null!;
         private volatile bool isThreadRunning = false;
         
         // Controle de estado
@@ -38,15 +38,16 @@ namespace TRL_SpeakFromTarkov.Audio
         public int ActualSampleRate => actualSampleRate;
         public bool IsResampling => actualSampleRate != targetSampleRate;
         public int ClipCount { get; private set; }
+#pragma warning disable CS0414
         private bool hasPlayed = false;
         private int dspConfirmed = 0;
+#pragma warning restore CS0414
         private float restartCooldown = 0f;
         private int lastMicPosition = 0;
         private float[] micPollBuffer = new float[48000];
         
         // Filtros de áudio
-        private AudioFilter audioFilter;
-        private AudioFilter echoAudioFilter;
+        private AudioFilter audioFilter = null!;
         
         public void Initialize(int sampleRate, int frameSize)
         {
@@ -170,7 +171,7 @@ namespace TRL_SpeakFromTarkov.Audio
             hasPlayed = false;
             dspConfirmed = 0;
             audioFilter?.Dispose();
-            audioFilter = null;
+            audioFilter = null!;
         }
         
         // O loop de extração agora roda numa Thread própria (imune aos FPS do Tarkov)
@@ -225,7 +226,7 @@ namespace TRL_SpeakFromTarkov.Audio
                     restartCooldown = 0f;
                     VoIPPlugin.Log.LogWarning("[SFT] Microphone parou. Reiniciando captura...");
                     StopCapture();
-                    StartCapture(deviceName);
+                    StartCapture(deviceName!);
                     return;
                 }
             }
