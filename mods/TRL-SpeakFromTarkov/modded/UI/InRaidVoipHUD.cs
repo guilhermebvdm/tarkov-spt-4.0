@@ -245,7 +245,7 @@ namespace TRL_SpeakFromTarkov.UI
 
             GUI.depth = -900;
 
-            // 1. Ícone do Modo de Captura (PTT / VAD / OPEN / MUTE) no topo da barra
+            // 1. Ícone do Modo de Captura (PTT / VAD / OPEN / MUTE) na parte de BAIXO da barra
             Texture2D modeIcon = null;
             if (Processor.IsMuted && _muteIconTex != null)
             {
@@ -267,9 +267,9 @@ namespace TRL_SpeakFromTarkov.UI
                 }
             }
 
-            float iconSize = 30f; // Tamanho de 30px redimensionado suavemente pela GUI
+            float iconSize = 50f; // Tamanho de 50px redimensionado suavemente pela GUI
             float iconX = posX + (barWidth / 2f) - (iconSize / 2f);
-            float iconY = posY - iconSize - 4f;
+            float iconY = posY + barHeight + 4f; // Posicionado na parte de BAIXO da barra
 
             if (modeIcon != null)
             {
@@ -338,15 +338,6 @@ namespace TRL_SpeakFromTarkov.UI
             GUI.DrawTexture(new Rect(posX, notch1Y, barWidth, 1), _borderTex);
             GUI.DrawTexture(new Rect(posX, notch2Y, barWidth, 1), _borderTex);
 
-            // 6. Texto Miniaturizado da Frequência / Canal (Abaixo da Barra)
-            string channelText = CurrentChannel == 0 ? "RAID" : CurrentChannel == 2 ? "SPEC" : $"CH{CurrentChannel}";
-            GUIStyle labelStyle = new GUIStyle(GUI.skin.label)
-            {
-                fontSize = 8,
-                alignment = TextAnchor.MiddleCenter,
-                normal = { textColor = new Color(0.8f, 0.85f, 0.8f, 0.9f) }
-            };
-            GUI.Label(new Rect(posX - 10, posY + barHeight + 1, barWidth + 20, 12), channelText, labelStyle);
             GUI.color = oldGuiColor;
         }
     }
