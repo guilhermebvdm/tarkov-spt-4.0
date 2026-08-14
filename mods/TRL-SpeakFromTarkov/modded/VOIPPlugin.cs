@@ -46,7 +46,7 @@ namespace TRL_SpeakFromTarkov
         public static ConfigEntry<KeyboardShortcut> ToggleModeKey { get; private set; } = null!;
         public static ConfigEntry<KeyboardShortcut> MuteKey { get; private set; } = null!;
         public static ConfigEntry<bool> EnableInRaidVoipHUD { get; private set; } = null!;
-        public static ConfigEntry<bool> AlwaysVisibleInRaidHUD { get; private set; } = null!;
+        public static ConfigEntry<TRL_SpeakFromTarkov.UI.HudVisibilityMode> HudVisibility { get; private set; } = null!;
         public static ConfigEntry<float> ShiftStancePanelX { get; private set; } = null!;
         public static ConfigEntry<float> InRaidHUDOffsetX { get; private set; } = null!;
         public static ConfigEntry<float> InRaidHUDOffsetY { get; private set; } = null!;
@@ -184,7 +184,8 @@ namespace TRL_SpeakFromTarkov
 
             // Interface / HUD
             EnableInRaidVoipHUD = Config.Bind("Interface / HUD", "Exibir HUD de VOIP em Raid", true, "Exibe a barra vertical fina de VOIP em partida posicionada à esquerda do painel de postura (BattleStancePanel).");
-            AlwaysVisibleInRaidHUD = Config.Bind("Interface / HUD", "Manter HUD de VOIP Sempre Visível", false, "Se ativado, mantém o HUD de VOIP constantemente visível em partida, ignorando o ocultamento automático (autohide) do jogo. O HUD ainda só existirá quando o HUD do jogo existir.");
+            HudVisibility = Config.Bind("Interface / HUD", "Visibilidade do HUD", TRL_SpeakFromTarkov.UI.HudVisibilityMode.SyncHUD,
+                "Define o modo de exibição da barra de VOIP em partida:\n• Oculto: Nunca aparece\n• SempreVisivel: Sempre visível durante a partida\n• SyncHUD: Sincroniza com o ocultamento do HUD do jogo\n• CaptaVoz: Surge automaticamente ao falar ou captar voz (RNNoise).");
             ShiftStancePanelX = Config.Bind("Interface / HUD", "Deslocamento X do Painel de Postura Vanilla (Pixels)", 15f,
                 new ConfigDescription("Desloca o painel de postura original do EFT (stamina, altura da pose) para a direita no eixo X para dar espaço extra na borda da tela. Padrão: 15px",
                     new AcceptableValueRange<float>(-50f, 150f)));

@@ -6,6 +6,14 @@ using TRL_SpeakFromTarkov.Audio;
 
 namespace TRL_SpeakFromTarkov.UI
 {
+    public enum HudVisibilityMode
+    {
+        Oculto,
+        SempreVisivel,
+        SyncHUD,
+        CaptaVoz
+    }
+
     /// <summary>
     /// HUD de VOIP em Raid: Barra vertical fina e elegante (largura reduzida de 14px para 7px),
     /// ancorada dinamicamente ao bordo esquerdo do painel de postura/stamina vanilla (BattleStancePanel).
@@ -21,6 +29,7 @@ namespace TRL_SpeakFromTarkov.UI
         private Vector2 _originalStanceAnchoredPos;
         private bool _originalPosCaptured = false;
         private float _searchTimer = 0f;
+        private float _voiceHoldTimer = 0f;
 
         private Texture2D? _bgTex;
         private Texture2D? _borderTex;
@@ -187,6 +196,17 @@ namespace TRL_SpeakFromTarkov.UI
                 _peakMax = Processor.PeakLevel;
             else
                 _peakMax = Mathf.Lerp(_peakMax, Mathf.Max(0.015f, _peakMax * 0.5f), Time.deltaTime / 3f);
+
+            // Timer do modo "CaptaVoz": surge quando a voz for captada (transmitindo ou nivel de voz ativo)
+            bool isCapturing = Processor != null && (Processor.IsTransmitting || Processor.DisplayLevel > 0.002f);
+            if (isCapturing)
+            {
+                _voiceHoldTimer = 1.0f; // Mantem visivel por 1s apos o termino da fala
+            }
+            else if (_voiceHoldTimer > 0f)
+            {
+                _voiceHoldTimer -= Time.deltaTime;
+            }
         }
 
         private void OnGUI()
@@ -201,18 +221,40 @@ namespace TRL_SpeakFromTarkov.UI
                 return;
             }
 
-            // Sincronização 1:1 de Opacidade com a mecânica de Autohide / Always Visible do HUD do Tarkov
+            // Seleção de Modo de Visibilidade do HUD (Oculto, SempreVisivel, SyncHUD, CaptaVoz)
+            var visibilityMode = (VoIPPlugin.HudVisibility != null) ? VoIPPlugin.HudVisibility.Value : HudVisibilityMode.SyncHUD;
             float hudAlpha = 1f;
-            if (VoIPPlugin.AlwaysVisibleInRaidHUD != null && VoIPPlugin.AlwaysVisibleInRaidHUD.Value)
+
+            switch (visibilityMode)
             {
-                hudAlpha = 1f; // Opção "Manter HUD de VOIP Sempre Visível" ativada no F12
-            }
-            else if (_battleStanceCanvasGroup != null)
-            {
-                hudAlpha = _battleStanceCanvasGroup.alpha;
+                case HudVisibilityMode.Oculto:
+                    hudAlpha = 0f;
+                    break;
+
+                case HudVisibilityMode.SempreVisivel:
+                    hudAlpha = 1f;
+                    break;
+
+                case HudVisibilityMode.SyncHUD:
+                    if (_battleStanceCanvasGroup != null)
+                    {
+                        hudAlpha = _battleStanceCanvasGroup.alpha;
+                    }
+                    break;
+
+                case HudVisibilityMode.CaptaVoz:
+                    if (_voiceHoldTimer > 0f)
+                    {
+                        hudAlpha = Mathf.Clamp01(_voiceHoldTimer / 0.3f);
+                    }
+                    else
+                    {
+                        hudAlpha = 0f;
+                    }
+                    break;
             }
 
-            // Se o HUD do jogo estiver ocultado pelo autohide (opacidade zero) e "Sempre Visível" estiver desativado, o nosso HUD não aparece
+            // Se o HUD estiver oculto ou transparente, não desenha
             if (hudAlpha <= 0.01f) return;
 
             Color oldGuiColor = GUI.color;
