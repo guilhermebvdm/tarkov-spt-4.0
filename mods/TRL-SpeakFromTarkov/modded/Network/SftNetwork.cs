@@ -380,7 +380,12 @@ namespace TRL_SpeakFromTarkov.Network
             bool inRaid = Singleton<GameWorld>.Instantiated;
             var gameWorld = inRaid ? Singleton<GameWorld>.Instance : null;
 
-            if (inRaid && gameWorld != null && gameWorld.MainPlayer != null && profileId == gameWorld.MainPlayer.ProfileId) return;
+            if (inRaid && gameWorld != null && gameWorld.MainPlayer != null)
+            {
+                var mainPlayer = gameWorld.MainPlayer;
+                if (profileId == mainPlayer.ProfileId || (mainPlayer.Profile != null && profileId == mainPlayer.Profile.Id))
+                    return;
+            }
 
             if (Core.VoipController.Instance != null && channel != Core.VoipController.Instance.CurrentChannel)
                 return;

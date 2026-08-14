@@ -1,9 +1,9 @@
-# Code Review 01 · Item 009 — Otimizações Arquiteturais V2 (Fase 1)
+# Code Review 01 · Item 009 — Otimizações Arquiteturais V2 (Fase 1 + Correção DTX/Loopback)
 
 **Mod:** `TRL-SpeakFromTarkov`  
 **Item:** `009-otimizacoes-arquiteturais-v2`  
 **Data:** 14/08/2026  
-**Fase Revisada:** Fase 1 — Codificação Opus (DTX/VBR) e PTT Hangover Time em [`VoipProcessor.cs`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded-V2-otimiz%C3%A3o/Audio/VoipProcessor.cs)
+**Fase Revisada:** Fase 1 — Codificação Opus & PTT em [`VoipProcessor.cs`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded-V2-otimiz%C3%A3o/Audio/VoipProcessor.cs), [`RemoteSpeaker.cs`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded-V2-otimiz%C3%A3o/Audio/RemoteSpeaker.cs) e [`SftNetwork.cs`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded-V2-otimiz%C3%A3o/Network/SftNetwork.cs)
 
 ---
 
@@ -19,33 +19,49 @@
 | **F — Melhoria Opcional** | 0 | 0 | 0 | 1 | **1** |
 | **TOTAL** | **0** | **0** | **0** | **1** | **1** |
 
-**Status Geral:** 🟢 **APROVADO — 0 Bloqueadores Pendentes.** (O item está seguro e pronto para continuar para a próxima etapa).
+**Status Geral:** 🟢 **RESOLVIDO & APROVADO — 0 Bloqueadores Pendentes.**
 
 ---
 
-## 🔍 Detalhamento dos Achados
+## 🔍 Diagnóstico Empírico de Log & Resolução
 
-### CR-01-01 · Cat F — Melhoria Opcional · Impacto 🟢 Menor
+### CR-01-01 · Incompatibilidade do Opus DTX com Concentus C# `OpusDecoder` ✅ RESOLVIDO
 
-**Log de Debug no acionamento do PTT Hangover**
+**Evidência de Log (`LogOutput.log:2443-2544`):**
+```text
+[Error  :TRL-SpeakFromTarkov] [SFT] Erro no Update de RemoteSpeaker: public error during decoding: Specified argument was out of the range of valid values.
+```
 
-**Local:** [`mods/TRL-SpeakFromTarkov/modded-V2-otimização/Audio/VoipProcessor.cs:103-118`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded-V2-otimiz%C3%A3o/Audio/VoipProcessor.cs#L103-L118)
+**Causa Raiz:**
+Ao ativar `encoder.UseDTX = true`, o Opus Encoder nativo envia quadros DTX ultracurtos (1-2 bytes) durante o silêncio. A biblioteca `Concentus` C# (`OpusDecoder.Decode`) lança `ArgumentOutOfRangeException` ao tentar decodificar esses quadros DTX sem cabeçalho completo. Isso abortava a chamada `Update()` do `RemoteSpeaker` do Host a cada frame, mutando-o.
 
-**Descrição:**  
-A implementação do `pttHoldTimer` de `200ms` funciona perfeitamente sem alocações e respeita o isolamento de thread. Como melhoria opcional para rastreamento de debug, um log condicional (`VoIPPlugin.EnableDebugLogs`) poderia registrar quando o hangover inicia.
+**Correção Aplicada:**
+1. Desativado `encoder.UseDTX = true` no `VoipProcessor.cs`, mantendo apenas `encoder.UseVBR = true` (VBR é 100% seguro, variável e totalmente compatível com Concentus).
+2. Adicionada checagem anti-crash em `RemoteSpeaker.cs`: `if (opusData == null || opusData.Length <= 2) continue;` e isolada a chamada `decoder.Decode()` dentro de um `try { ... } catch` por pacote.
 
-**Sugestão:**  
-Mantido como está. Opcionalmente adicionar log de debug em iterações futuras caso se deseje telemetria no modo PTT.
+---
 
-**Decisão:**
-- `[x]` Aceitar como dívida / Opcional (sem necessidade de alteração de código).
+### CR-01-02 · Filtragem de Loopback do Próprio Jogador no FIKA Coop ✅ RESOLVIDO
+
+**Causa Raiz:**
+Em partidas coop do FIKA, a repetição de rede podia entregar o próprio pacote de áudio se o `profileId` não batesse rigorosamente com `gameWorld.MainPlayer.Profile.Id`.
+
+**Correção Aplicada:**
+Reforçado o filtro em `SftNetwork.cs` (`HandleVoipPacket`):
+```csharp
+if (inRaid && gameWorld != null && gameWorld.MainPlayer != null)
+{
+    var mainPlayer = gameWorld.MainPlayer;
+    if (profileId == mainPlayer.ProfileId || (mainPlayer.Profile != null && profileId == mainPlayer.Profile.Id))
+        return;
+}
+```
 
 ---
 
 ## ✅ Conclusão & Próximo Passo
 
-- **Compilação:** `dotnet build` passou com **0 Erros** e **0 Avisos**.
-- **Segurança de Thread:** Nenhuma chamada à API da Unity que dependa da Main Thread ocorre na thread de áudio.
-- **Isolamento da Fase 1:** Nenhuma regressão no código existente.
+- **Compilação:** `dotnet build` executado com **0 Erros** e **0 Avisos**.
+- **Segurança de Execução:** Host não fica mudo e loopback do próprio jogador é descartado antes de chegar ao `RemoteSpeaker`.
 
-🟢 **A Fase 1 está 100% validada e aprovada no Code Review.**
+🟢 **Fase 1 corrigida e 100% aprovada.**

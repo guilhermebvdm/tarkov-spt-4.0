@@ -215,22 +215,28 @@ namespace TRL_SpeakFromTarkov.Audio
                 
                 while (packetQueue.TryDequeue(out byte[] opusData))
                 {
+                    if (opusData == null || opusData.Length <= 2) continue;
+
+                    try
+                    {
 #pragma warning disable CS0618
-                    int len = decoder.Decode(opusData, 0, opusData.Length, opusDecodeBuffer, 0, frameSize, false);
+                        int len = decoder.Decode(opusData, 0, opusData.Length, opusDecodeBuffer, 0, frameSize, false);
 #pragma warning restore CS0618
 
-                    if (len <= 0)
-                    {
-                        VoIPPlugin.Log.LogWarning($"[SFT-DEBUG] Opus Decode retornou {len} amostras!");
-                    }
+                        if (len <= 0) continue;
 
-                    int currentWritePos = streamWritePos;
-                    for (int i = 0; i < len; i++)
-                    {
-                        streamBuffer[(currentWritePos + i) % streamBuffer.Length] = opusDecodeBuffer[i];
+                        int currentWritePos = streamWritePos;
+                        for (int i = 0; i < len; i++)
+                        {
+                            streamBuffer[(currentWritePos + i) % streamBuffer.Length] = opusDecodeBuffer[i];
+                        }
+                        
+                        streamWritePos = (currentWritePos + len) % streamBuffer.Length;
                     }
-                    
-                    streamWritePos = (currentWritePos + len) % streamBuffer.Length;
+                    catch (Exception decEx)
+                    {
+                        VoIPPlugin.Log.LogWarning($"[SFT] Ignorando frame Opus corrompido/inválido ({opusData.Length} bytes): {decEx.Message}");
+                    }
                 }
             }
             catch (Exception ex)

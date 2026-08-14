@@ -41,6 +41,7 @@ namespace TRL_SpeakFromTarkov.Audio
 #pragma warning restore CS0618
                 encoder.Bitrate = VoIPPlugin.OpusBitrate.Value;
                 encoder.Complexity = VoIPPlugin.OpusComplexity.Value;
+                encoder.UseVBR = true;
                 
                 if (VoIPPlugin.OpusFEC.Value)
                 {

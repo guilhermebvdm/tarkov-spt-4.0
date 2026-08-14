@@ -42,8 +42,7 @@ namespace TRL_SpeakFromTarkov.Audio
 #pragma warning restore CS0618
                 encoder.Bitrate = VoIPPlugin.OpusBitrate.Value;
                 encoder.Complexity = VoIPPlugin.OpusComplexity.Value;
-                encoder.UseDTX = true;
-                encoder.UseVBR = true;
+                encoder.UseVBR = true; // Bitrate Variável Seguro (sem DTX que quebra o Concentus C#)
                 
                 if (VoIPPlugin.OpusFEC.Value)
                 {
