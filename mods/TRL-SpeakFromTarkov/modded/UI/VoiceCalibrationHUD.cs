@@ -101,6 +101,39 @@ namespace TRL_SpeakFromTarkov.UI
 
         private Behaviour? _playerOwnerBehaviour;
 
+        private static void SetGameInputBlocked(bool blocked)
+        {
+            try
+            {
+                var gpoType = System.Type.GetType("EFT.GamePlayerOwner, Assembly-CSharp");
+                if (gpoType != null)
+                {
+                    var flags = System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static;
+                    gpoType.GetMethod("SetIgnoreInput", flags)?.Invoke(null, new object[] { blocked });
+                    gpoType.GetMethod("SetIgnoreInputInNPCDialog", flags)?.Invoke(null, new object[] { blocked });
+                    gpoType.GetMethod("SetIgnoreInputWithKeepResetLook", flags)?.Invoke(null, new object[] { blocked });
+
+                    var cmdType = System.Type.GetType("EFT.InputSystem.ECommand, Assembly-CSharp");
+                    if (cmdType != null)
+                    {
+                        string[] cmdNames = new[] { "Escape", "ToggleInventory", "ToggleShooting", "EndShooting", "Jump", "PressThrowGrenade", "ThrowGrenade", "ToggleProne", "ToggleDuck", "ReloadWeapon" };
+                        var cmdList = System.Array.CreateInstance(cmdType, cmdNames.Length);
+                        for (int i = 0; i < cmdNames.Length; i++)
+                        {
+                            cmdList.SetValue(System.Enum.Parse(cmdType, cmdNames[i]), i);
+                        }
+
+                        string methodName = blocked ? "AddIgnoreInputCommands" : "RemoveIgnoreInputCommands";
+                        gpoType.GetMethod(methodName, flags)?.Invoke(null, new object[] { cmdList });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                VoIPPlugin.Log?.LogWarning($"[SFT-WIZARD] Reflection ignore input failed: {ex.Message}");
+            }
+        }
+
         public void OpenWizard()
         {
             IsOpen = true;
@@ -111,16 +144,18 @@ namespace TRL_SpeakFromTarkov.UI
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
 
-            // Bloqueia teclado, mouse e movimentacao do jogador no Tarkov (desativa PlayerOwner)
+            // Bloqueia teclado, mouse, camera e comandos do jogador no Tarkov
             try
             {
+                SetGameInputBlocked(true);
+
                 var mainPlayer = Comfort.Common.Singleton<EFT.GameWorld>.Instance?.MainPlayer;
                 if (mainPlayer != null)
                 {
                     var behaviours = mainPlayer.GetComponents<Behaviour>();
                     foreach (var b in behaviours)
                     {
-                        if (b != null && b.GetType().Name == "PlayerOwner")
+                        if (b != null && b.GetType().Name.Contains("PlayerOwner"))
                         {
                             _playerOwnerBehaviour = b;
                             b.enabled = false;
@@ -146,9 +181,11 @@ namespace TRL_SpeakFromTarkov.UI
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
 
-            // Restaura teclado, mouse e movimentacao do jogador no Tarkov
+            // Restaura teclado, mouse, camera e comandos do jogador no Tarkov
             try
             {
+                SetGameInputBlocked(false);
+
                 if (_playerOwnerBehaviour != null)
                 {
                     _playerOwnerBehaviour.enabled = true;
