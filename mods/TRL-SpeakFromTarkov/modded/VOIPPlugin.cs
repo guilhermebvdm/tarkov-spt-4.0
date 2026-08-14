@@ -18,7 +18,31 @@ namespace TRL_SpeakFromTarkov
         public static string[] MicrophoneNames { get; private set; } = null!;
         public static System.Collections.Generic.Dictionary<string, string> MicRealNames = new System.Collections.Generic.Dictionary<string, string>();
         public static ConfigEntry<bool> EnableMod { get; private set; } = null!;
-        public static ConfigEntry<TRL_SpeakFromTarkov.Audio.VoipProcessor.VoipMode> TransmissionMode { get; private set; } = null!;
+        public static ConfigEntry<string> TransmissionMode { get; private set; } = null!;
+        public static readonly string[] TransmissionModeOptions = new string[]
+        {
+            "VAD (Voice Activity Detection)",
+            "PTT (Push-to-Talk)",
+            "Open (Always On)"
+        };
+
+        public static TRL_SpeakFromTarkov.Audio.VoipProcessor.VoipMode ParseVoipMode(string modeStr)
+        {
+            if (string.IsNullOrEmpty(modeStr)) return TRL_SpeakFromTarkov.Audio.VoipProcessor.VoipMode.VAD;
+            if (modeStr.StartsWith("PTT", StringComparison.OrdinalIgnoreCase)) return TRL_SpeakFromTarkov.Audio.VoipProcessor.VoipMode.PTT;
+            if (modeStr.StartsWith("Open", StringComparison.OrdinalIgnoreCase)) return TRL_SpeakFromTarkov.Audio.VoipProcessor.VoipMode.Open;
+            return TRL_SpeakFromTarkov.Audio.VoipProcessor.VoipMode.VAD;
+        }
+
+        public static string GetVoipModeString(TRL_SpeakFromTarkov.Audio.VoipProcessor.VoipMode mode)
+        {
+            switch (mode)
+            {
+                case TRL_SpeakFromTarkov.Audio.VoipProcessor.VoipMode.PTT: return TransmissionModeOptions[1];
+                case TRL_SpeakFromTarkov.Audio.VoipProcessor.VoipMode.Open: return TransmissionModeOptions[2];
+                default: return TransmissionModeOptions[0];
+            }
+        }
         public static ConfigEntry<float> VADThreshold { get; private set; } = null!;
         public static ConfigEntry<bool> EnableEcho { get; private set; } = null!;
         public static ConfigEntry<float> EchoDelay { get; private set; } = null!;
@@ -157,12 +181,14 @@ namespace TRL_SpeakFromTarkov
                 }
             };
             
-            TransmissionMode = Config.Bind("General", "Transmission Mode", TRL_SpeakFromTarkov.Audio.VoipProcessor.VoipMode.VAD, "Select voice transmission mode: VAD (Voice Activity Detection), PTT (Push To Talk) or Open (Always On).");
+            var modeList = new AcceptableValueList<string>(TransmissionModeOptions);
+            TransmissionMode = Config.Bind("General", "Transmission Mode", TransmissionModeOptions[0],
+                new ConfigDescription("Select voice transmission mode: VAD (Voice Activity Detection), PTT (Push-to-Talk) or Open (Always On).", modeList));
             TransmissionMode.SettingChanged += (sender, args) =>
             {
                 if (TRL_SpeakFromTarkov.Core.VoipController.Instance != null && TRL_SpeakFromTarkov.Core.VoipController.Instance.processor != null)
                 {
-                    TRL_SpeakFromTarkov.Core.VoipController.Instance.processor.CurrentMode = TransmissionMode.Value;
+                    TRL_SpeakFromTarkov.Core.VoipController.Instance.processor.CurrentMode = ParseVoipMode(TransmissionMode.Value);
                 }
             };
             MicGain = Config.Bind("General", "Microphone Gain", 1.0f,

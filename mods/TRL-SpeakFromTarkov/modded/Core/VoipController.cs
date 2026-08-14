@@ -352,6 +352,10 @@ namespace TRL_SpeakFromTarkov.Core
             if (IsShortcutDown(VoIPPlugin.ToggleModeKey.Value))
             {
                 processor.CurrentMode = (VoipProcessor.VoipMode)(((int)processor.CurrentMode + 1) % 3);
+                if (VoIPPlugin.TransmissionMode != null)
+                {
+                    VoIPPlugin.TransmissionMode.Value = VoIPPlugin.GetVoipModeString(processor.CurrentMode);
+                }
                 VoIPPlugin.Log.LogInfo($"[SFT] Modo → {processor.CurrentMode}");
             }
 
