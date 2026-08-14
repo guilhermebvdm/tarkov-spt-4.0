@@ -131,3 +131,16 @@
 
 **Pendências abertas nesta sessão:**
 - 🟢 Nenhuma pendência blocker. Build concluído com 0 erros e 0 avisos.
+
+---
+
+## 2026-08-14 — Sessão 9: Padronização Internacional das Configurações F12 em Inglês & `VoiceActivity` como Padrão
+
+**Tema central:** Tradução completa de 100% das seções, chaves e descrições do menu de configurações BepInEx (F12) para Inglês técnico padrão, e definição de `VoiceActivity` como modo padrão de visibilidade do HUD in-raid.
+
+**Decisões-chave:**
+- **Padrão `VoiceActivity` ([InRaidVoipHUD.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded/UI/InRaidVoipHUD.cs)):** `VoiceActivity` definido como o valor padrão da chave `HudVisibility`. As opções do dropdown foram traduzidas para `Hidden`, `AlwaysVisible`, `SyncHUD` e `VoiceActivity`.
+- **Tradução Completa das Configurações F12 ([VOIPPlugin.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded/VOIPPlugin.cs)):** Traduzidas todas as 10 seções do BepInEx (`General`, `VOIP Settings`, `UI / HUD Settings`, `Voice Calibration`, `Diagnostics`, `Audio Filters`, `Neural Filters (RNNoise)`, `Network`, `Network (Opus)`, `AI Bot Interaction`) e suas respectivas descrições para Inglês.
+
+**Pendências abertas nesta sessão:**
+- 🟢 Nenhuma pendência blocker. Build concluído com 0 erros e 0 avisos.
