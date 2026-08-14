@@ -24,6 +24,7 @@ public class ProneLockPatch : ModulePatch
 			Player player = __instance.BotOwner_0?.GetPlayer;
 			if (player != null && player.GetComponent<LivingDismembermentController>() != null)
 			{
+				// Abort standing up for dismembered living bots!
 				return false;
 			}
 		}
@@ -49,32 +50,8 @@ public class ProneMoverDoPronePatch : ModulePatch
 			Player player = __instance.BotOwner_0?.GetPlayer;
 			if (player != null && player.GetComponent<LivingDismembermentController>() != null)
 			{
+				// Abort standing up for dismembered living bots!
 				return false;
-			}
-		}
-		return true;
-	}
-}
-
-/// <summary>
-/// Intercepts BotMover.SetPose(height > 0) for bots with LivingDismembermentController to force height to 0 (prone).
-/// </summary>
-public class ProneMoverSetPosePatch : ModulePatch
-{
-	protected override MethodBase GetTargetMethod()
-	{
-		return typeof(BotMover).GetMethod("SetPose", BindingFlags.Instance | BindingFlags.Public);
-	}
-
-	[PatchPrefix]
-	private static bool Prefix(BotMover __instance, ref float targetPose)
-	{
-		if (targetPose > 0f && __instance != null)
-		{
-			Player player = __instance.BotOwner_0?.GetPlayer;
-			if (player != null && player.GetComponent<LivingDismembermentController>() != null)
-			{
-				targetPose = 0f;
 			}
 		}
 		return true;

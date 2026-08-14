@@ -246,7 +246,6 @@ public class VisceralEntry : BaseUnityPlugin
 		((ModulePatch)new BleedPatch()).Enable();
 		((ModulePatch)new VisceralCombat.Dismemberment.Patches.ProneLockPatch()).Enable();
 		((ModulePatch)new VisceralCombat.Dismemberment.Patches.ProneMoverDoPronePatch()).Enable();
-		((ModulePatch)new VisceralCombat.Dismemberment.Patches.ProneMoverSetPosePatch()).Enable();
 		((ModulePatch)new VisceralCombat.Combined.Patches.PlaySoundBankPatch()).Enable();
 		((ModulePatch)new VisceralCombat.Combined.Patches.PlayStepSoundPatch()).Enable();
 		((ModulePatch)new VisceralCombat.Combined.Patches.DefaultPlayPatch()).Enable();

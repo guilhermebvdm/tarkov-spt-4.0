@@ -74,27 +74,19 @@ public class LivingDismembermentController : MonoBehaviour
 	{
 		if (_player != null && _player.MovementContext != null)
 		{
-			_player.MovementContext.SetPoseLevel(0f, true);
 			if (!_player.MovementContext.IsInPronePose)
 			{
 				_player.MovementContext.IsInPronePose = true;
 			}
 		}
 
-		if (_botOwner != null)
+		if (_botOwner != null && _botOwner.BotLay != null)
 		{
-			if (_botOwner.BotLay != null)
+			_botOwner.BotLay.NextPosibleGetUp = Time.time + 999999f;
+			_botOwner.BotLay.NextPosibleCheckCanLay = Time.time + 999999f;
+			if (!_botOwner.BotLay.IsLay)
 			{
-				_botOwner.BotLay.NextPosibleGetUp = Time.time + 999999f;
-				_botOwner.BotLay.NextPosibleCheckCanLay = Time.time + 999999f;
-				if (!_botOwner.BotLay.IsLay)
-				{
-					_botOwner.BotLay.IsLay = true;
-				}
-			}
-			if (_botOwner.Mover != null)
-			{
-				_botOwner.Mover.SetPose(0f);
+				_botOwner.BotLay.IsLay = true;
 			}
 		}
 	}
