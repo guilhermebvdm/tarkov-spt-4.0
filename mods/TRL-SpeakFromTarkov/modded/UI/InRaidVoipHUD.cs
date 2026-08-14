@@ -211,6 +211,7 @@ namespace TRL_SpeakFromTarkov.UI
 
         private void OnGUI()
         {
+            if (VoIPPlugin.EnableMod != null && !VoIPPlugin.EnableMod.Value) return;
             if (VoIPPlugin.EnableInRaidVoipHUD == null || !VoIPPlugin.EnableInRaidVoipHUD.Value) return;
             if (Processor == null) return;
             if (Event.current.type != EventType.Repaint) return;

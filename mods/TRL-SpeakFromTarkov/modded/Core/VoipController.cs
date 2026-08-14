@@ -46,9 +46,9 @@ namespace TRL_SpeakFromTarkov.Core
             network = gameObject.AddComponent<SftNetwork>();
             network.Initialize(sampleRate, frameSize);
             
-            if (isHeadless || (VoIPPlugin.EnableMod != null && !VoIPPlugin.EnableMod.Value))
+            if (isHeadless)
             {
-                VoIPPlugin.Log.LogInfo("[SFT] Headless/Mod Desativado. Inicializando apenas a rede P2P (SftNetwork) silenciosa.");
+                VoIPPlugin.Log.LogInfo("[SFT] Servidor Headless detectado. Inicializando apenas a rede P2P (SftNetwork) silenciosa.");
                 return;
             }
             
@@ -83,7 +83,13 @@ namespace TRL_SpeakFromTarkov.Core
             menuHud = gameObject.AddComponent<MenuVoipHUD>();
             
             // Wiring Events
-            capturer.OnAudioDataCaptured += processor.ProcessAudio;
+            capturer.OnAudioDataCaptured += (samples) => {
+                if (processor.CapturerFilter == null && capturer.Filter != null)
+                {
+                    processor.CapturerFilter = capturer.Filter;
+                }
+                processor.ProcessAudio(samples);
+            };
             processor.OnOpusDataEncoded += (opusData, voiceLevel) => {
                 // Roda na THREAD DE CAPTURA. Broadcast apenas ENFILEIRA; a transmissão acontece no
                 // Update do SftNetwork (main thread), porque FikaClient/FikaServer serializam todos
@@ -218,24 +224,28 @@ namespace TRL_SpeakFromTarkov.Core
         
         public void ToggleModState(bool isEnabled)
         {
-            if (!isMenuLoaded) return;
             if (isEnabled)
             {
-                if (capturer != null && !capturer.IsRecording)
+                VoIPPlugin.Log.LogInfo("[SFT] Mod de voz reativado no F12.");
+                if (isMenuLoaded && capturer != null && !capturer.IsRecording)
                 {
-                    VoIPPlugin.Log.LogInfo("[SFT] Mod reativado no F12: Iniciando captura de mic e exibindo HUD...");
-                    StartVoipCapture();
+                    if (Singleton<EFT.GameWorld>.Instantiated)
+                    {
+                        StartVoipCapture();
+                    }
                 }
-                if (hud != null) hud.gameObject.SetActive(true);
             }
             else
             {
+                VoIPPlugin.Log.LogInfo("[SFT] Mod de voz totalmente desativado no F12. Parando captura de mic...");
                 if (capturer != null && capturer.IsRecording)
                 {
-                    VoIPPlugin.Log.LogInfo("[SFT] Mod desativado no F12: Parando captura de mic e ocultando HUD...");
                     capturer.StopCapture();
                 }
-                if (hud != null) hud.gameObject.SetActive(false);
+                if (echoSpeaker != null)
+                {
+                    echoSpeaker.SetVolume(0f);
+                }
             }
         }
 
@@ -244,6 +254,7 @@ namespace TRL_SpeakFromTarkov.Core
         
         void Update()
         {
+            if (VoIPPlugin.EnableMod != null && !VoIPPlugin.EnableMod.Value) return;
             if (capturer == null || !isMenuLoaded) return;
             
             while (mainThreadActions.TryDequeue(out Action action))

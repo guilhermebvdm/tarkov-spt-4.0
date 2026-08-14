@@ -114,6 +114,8 @@ namespace TRL_SpeakFromTarkov.UI
 
         private void Update()
         {
+            if (VoIPPlugin.EnableMod != null && !VoIPPlugin.EnableMod.Value) return;
+
             // Detecção de Transição Raid ➔ Menu para Reconexão Automática do Canal
             bool inRaid = Singleton<GameWorld>.Instantiated;
             if (wasInRaid && !inRaid)
