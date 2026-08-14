@@ -21,6 +21,7 @@ namespace TRL_SpeakFromTarkov.Audio
         
         private byte[] opusBuffer = new byte[1275]; // Alocação única
         private float vadHoldTimer = 0f;
+        private float pttHoldTimer = 0f;
         
         public BotVoiceBridge botVoiceBridge { get; set; } = null!;
         
@@ -41,6 +42,8 @@ namespace TRL_SpeakFromTarkov.Audio
 #pragma warning restore CS0618
                 encoder.Bitrate = VoIPPlugin.OpusBitrate.Value;
                 encoder.Complexity = VoIPPlugin.OpusComplexity.Value;
+                encoder.UseDTX = true;
+                encoder.UseVBR = true;
                 
                 if (VoIPPlugin.OpusFEC.Value)
                 {
@@ -102,8 +105,21 @@ namespace TRL_SpeakFromTarkov.Audio
             switch (CurrentMode)
             {
                 case VoipMode.PTT:
-                    // PTT: Liberdade total se a tecla estiver pressionada (sem restrição de RMS)
-                    IsTransmitting = IsPTTActive;
+                    // PTT: Liberdade total se a tecla estiver pressionada + Hangover Time (200ms) ao soltar
+                    if (IsPTTActive)
+                    {
+                        pttHoldTimer = 0.20f;
+                        IsTransmitting = true;
+                    }
+                    else if (pttHoldTimer > 0f)
+                    {
+                        pttHoldTimer -= 0.02f;
+                        IsTransmitting = true;
+                    }
+                    else
+                    {
+                        IsTransmitting = false;
+                    }
                     break;
 
                 case VoipMode.VAD:
