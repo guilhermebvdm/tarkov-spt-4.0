@@ -1,16 +1,16 @@
 # Graph Report - modded  (2026-08-14)
 
 ## Corpus Check
-- 18 files · ~28,266 words
+- 18 files · ~28,344 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 322 nodes · 546 edges · 16 communities (15 shown, 1 thin omitted)
+- 325 nodes · 552 edges · 16 communities (15 shown, 1 thin omitted)
 - Extraction: 95% EXTRACTED · 5% INFERRED · 0% AMBIGUOUS · INFERRED: 28 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `6ee02479`
+- Built from commit: `9b7a2e0e`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -25,7 +25,7 @@
 - GameSessionPatcher
 - MicrophoneCapturer
 - VoIPPlugin
-- SftAudioPacketV2
+- SftChannelAnnouncementPacket
 - InRaidVoipHUD
 - VoipHUD
 - TRL-SpeakFromTarkov.csproj
@@ -40,8 +40,8 @@
 6. `MicrophoneCapturer` - 23 edges
 7. `VoipProcessor` - 21 edges
 8. `RemoteSpeaker` - 18 edges
-9. `InRaidVoipHUD` - 17 edges
-10. `VoIPPlugin` - 16 edges
+9. `VoIPPlugin` - 18 edges
+10. `InRaidVoipHUD` - 17 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `VoIPPlugin` --references--> `HudVisibilityMode`  [EXTRACTED]
@@ -65,8 +65,8 @@ Cohesion: 0.07
 Nodes (13): AudioSource, bool, ConcurrentQueue, float, int, RemoteSpeaker, bool, ConcurrentQueue (+5 more)
 
 ### Community 1 - "SftNetwork"
-Cohesion: 0.09
-Nodes (17): Exception, IFikaNetworkManager, byte, NetDataReader, NetDataWriter, string, SftChannelAnnouncementPacket, byte (+9 more)
+Cohesion: 0.12
+Nodes (12): Exception, IFikaNetworkManager, byte, ConcurrentQueue, Dictionary, float, HashSet, ManualLogSource (+4 more)
 
 ### Community 2 - "MenuVoipHUD"
 Cohesion: 0.14
@@ -97,12 +97,12 @@ Cohesion: 0.14
 Nodes (10): Action, AudioSource, bool, float, int, string, MicrophoneCapturer, AudioClip (+2 more)
 
 ### Community 9 - "VoIPPlugin"
-Cohesion: 0.12
-Nodes (11): BaseUnityPlugin, ConfigEntry, LoadSceneMode, Scene, Dictionary, DllImport, IntPtr, KeyboardShortcut (+3 more)
+Cohesion: 0.11
+Nodes (12): BaseUnityPlugin, ConfigEntry, LoadSceneMode, Scene, Dictionary, DllImport, IntPtr, KeyboardShortcut (+4 more)
 
-### Community 10 - "SftAudioPacketV2"
-Cohesion: 0.17
-Nodes (10): TRL_SpeakFromTarkov, INetSerializable, byte, float, int, NetDataReader, NetDataWriter, string (+2 more)
+### Community 10 - "SftChannelAnnouncementPacket"
+Cohesion: 0.11
+Nodes (15): TRL_SpeakFromTarkov, INetSerializable, byte, NetDataReader, NetDataWriter, string, SftChannelAnnouncementPacket, byte (+7 more)
 
 ### Community 11 - "InRaidVoipHUD"
 Cohesion: 0.20
@@ -125,16 +125,16 @@ Nodes (3): netstandard2.1, Concentus (1.1.7), Microsoft.NET.Sdk
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `VoipController` connect `VoipController` to `SftNetwork`, `MenuVoipHUD`, `TRL_SpeakFromTarkov.Audio`, `VoiceCalibrationHUD`, `VoipProcessor`, `MicrophoneCapturer`, `InRaidVoipHUD`, `VoipHUD`?**
-  _High betweenness centrality (0.480) - this node is a cross-community bridge._
+  _High betweenness centrality (0.479) - this node is a cross-community bridge._
 - **Why does `MenuVoipHUD` connect `MenuVoipHUD` to `VoipController`, `TRL_SpeakFromTarkov.Audio`, `VoipProcessor`?**
-  _High betweenness centrality (0.232) - this node is a cross-community bridge._
+  _High betweenness centrality (0.230) - this node is a cross-community bridge._
 - **Why does `SftNetwork` connect `SftNetwork` to `VoipController`, `MenuVoipHUD`, `TRL_SpeakFromTarkov.Audio`, `VoipProcessor`?**
-  _High betweenness centrality (0.195) - this node is a cross-community bridge._
+  _High betweenness centrality (0.193) - this node is a cross-community bridge._
 - **What connects `VoipMode`, `netstandard2.1`, `Concentus (1.1.7)` to the rest of the system?**
   _7 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `VoipController` be split into smaller, more focused modules?**
   _Cohesion score 0.07419712070874862 - nodes in this community are weakly interconnected._
 - **Should `SftNetwork` be split into smaller, more focused modules?**
-  _Cohesion score 0.08901515151515152 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.12 - nodes in this community are weakly interconnected._
 - **Should `MenuVoipHUD` be split into smaller, more focused modules?**
   _Cohesion score 0.1350806451612903 - nodes in this community are weakly interconnected._
