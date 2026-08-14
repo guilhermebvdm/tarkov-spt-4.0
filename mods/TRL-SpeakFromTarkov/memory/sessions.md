@@ -99,3 +99,21 @@
 
 **Pendências abertas nesta sessão:**
 - 🟢 Nenhuma pendência blocker. Build concluído com 0 erros e 0 avisos.
+
+---
+
+## 2026-08-14 — Sessão 7: Menu Selecionável `Visibilidade do HUD` (Oculto, SempreVisivel, SyncHUD, CaptaVoz)
+
+**Tema central:** Conversão da opção de alternância booleana do HUD in-raid para o menu dropdown selecionável `Visibilidade do HUD` (`HudVisibilityMode`), adicionando o novo modo `CaptaVoz` que exibe a barra automaticamente ao captar voz.
+
+**Decisões-chave:**
+- **Enum `HudVisibilityMode` ([InRaidVoipHUD.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded/UI/InRaidVoipHUD.cs)):** Criado o enum com 4 opções curtas para o dropdown BepInEx no F12:
+  - `Oculto`: Nunca exibe o HUD em raid.
+  - `SempreVisivel`: HUD sempre visível durante a partida (ignora autohide).
+  - `SyncHUD`: Sincroniza 1:1 com o autohide do HUD do jogo (`BattleStancePanel`).
+  - `CaptaVoz`: Surge automaticamente quando a voz é captada pelo microfone (PTT, VAD ou Open mode filtrado pelo RNNoise) e esmaece suavemente 1s após o fim da fala.
+- **Funcionalidade `CaptaVoz` ([InRaidVoipHUD.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded/UI/InRaidVoipHUD.cs)):** Implementado o timer de sustentação (`_voiceHoldTimer = 1.0f`) acionado por `Processor.IsTransmitting || Processor.DisplayLevel > 0.002f`, com transição suave de fade-out nos últimos 0.3s.
+- **Substituição BepInEx `HudVisibility` ([VOIPPlugin.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded/VOIPPlugin.cs)):** Substituído o booleano `AlwaysVisibleInRaidHUD` por `HudVisibility` (`ConfigEntry<HudVisibilityMode>`), mantendo `SyncHUD` como padrão.
+
+**Pendências abertas nesta sessão:**
+- 🟢 Nenhuma pendência blocker. Build concluído com 0 erros e 0 avisos.
