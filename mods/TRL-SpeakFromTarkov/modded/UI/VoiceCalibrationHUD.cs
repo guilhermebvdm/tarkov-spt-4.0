@@ -367,18 +367,19 @@ namespace TRL_SpeakFromTarkov.UI
                     _loudMax = activePeak;
 
                     // Ao concluir as 3 fases, calcula os pontos de corte exatos dos Traços:
-                    // Traço 1 = Ponto médio entre o Pico do Sussurro e o Vale da Voz Normal
-                    _calibratedWhisperToNormal = (_whisperMax + _normalMin) / 2f;
+                    // Traço 1 (Whisper -> Normal) = Pico da fase Sussurro
+                    _calibratedWhisperToNormal = (float)Math.Round(_whisperMax, 3);
                     
-                    // Traço 2 = Ponto médio entre o Pico da Voz Normal e o Vale do Grito
-                    _calibratedNormalToLoud = (_normalMax + _loudMin) / 2f;
+                    // Traço 2 (Normal -> Loud) = Pico da fase Voz Normal
+                    _calibratedNormalToLoud = (float)Math.Round(_normalMax, 3);
                     
-                    // Topo 100% da Barra = Pico da Voz Alta
-                    _calibratedLoudMax = Mathf.Max(_calibratedNormalToLoud + 0.020f, _loudMax);
+                    // Topo 100% da Barra = Teto de escala grafica confortavel (max 0.150)
+                    _calibratedLoudMax = (float)Math.Round(Mathf.Min(0.150f, Mathf.Max(_calibratedNormalToLoud + 0.020f, _loudMax)), 3);
+                    if (_calibratedLoudMax < 0.150f) _calibratedLoudMax = 0.150f;
                     break;
             }
 
-            VoIPPlugin.Log?.LogInfo($"[SFT-WIZARD] Step {step} analyzed (P10={activeTrough:F4}, P95={activePeak:F4}). Notch1 (Whisper->Normal): {_calibratedWhisperToNormal:F4}, Notch2 (Normal->Loud): {_calibratedNormalToLoud:F4}, Max: {_calibratedLoudMax:F4}");
+            VoIPPlugin.Log?.LogInfo($"[SFT-WIZARD] Step {step} analyzed (P10={activeTrough:F3}, P95={activePeak:F3}). Notch1 (Whisper->Normal): {_calibratedWhisperToNormal:F3}, Notch2 (Normal->Loud): {_calibratedNormalToLoud:F3}, Max: {_calibratedLoudMax:F3}");
         }
 
         private void DrawSummaryScreen(float posX, float posY, float modalW, float modalH, GUIStyle subStyle, GUIStyle btnStyle)
@@ -393,10 +394,10 @@ namespace TRL_SpeakFromTarkov.UI
             };
 
             string summaryText = $"Calculated Boundaries (Peak & Trough Analysis):\n\n" +
-                                 $"Notch 1 (Whisper -> Normal):  {_calibratedWhisperToNormal:F4} RMS\n" +
-                                 $"Notch 2 (Normal -> Loud):    {_calibratedNormalToLoud:F4} RMS\n" +
-                                 $"Max Ceiling (100% Top):       {_calibratedLoudMax:F4} RMS\n\n" +
-                                 $"Whisper Range: [{_whisperMin:F4} - {_whisperMax:F4}] | Normal Range: [{_normalMin:F4} - {_normalMax:F4}]";
+                                 $"Notch 1 (Whisper -> Normal):  {_calibratedWhisperToNormal:F3} RMS\n" +
+                                 $"Notch 2 (Normal -> Loud):    {_calibratedNormalToLoud:F3} RMS\n" +
+                                 $"Max Ceiling (100% Top):       {_calibratedLoudMax:F3} RMS\n\n" +
+                                 $"Whisper Range: [{_whisperMin:F3} - {_whisperMax:F3}] | Normal Range: [{_normalMin:F3} - {_normalMax:F3}]";
 
             GUI.Label(new Rect(posX + 30, posY + 75, modalW - 60, 160), summaryText, summaryStyle);
 
@@ -421,12 +422,17 @@ namespace TRL_SpeakFromTarkov.UI
 
         private void SaveAndApply()
         {
-            if (VoIPPlugin.WhisperThreshold != null) VoIPPlugin.WhisperThreshold.Value = _calibratedWhisperToNormal;
-            if (VoIPPlugin.NormalThreshold != null)  VoIPPlugin.NormalThreshold.Value  = _calibratedNormalToLoud;
-            if (VoIPPlugin.LoudThreshold != null)    VoIPPlugin.LoudThreshold.Value    = _calibratedLoudMax;
-            if (VoIPPlugin.VADThreshold != null)     VoIPPlugin.VADThreshold.Value     = Mathf.Max(0.002f, _whisperMin);
+            float vWhisperToNormal = (float)Math.Round(_calibratedWhisperToNormal, 3);
+            float vNormalToLoud    = (float)Math.Round(_calibratedNormalToLoud, 3);
+            float vLoudMax         = (float)Math.Round(_calibratedLoudMax, 3);
+            float vVad             = (float)Math.Round(Mathf.Max(0.002f, _whisperMin), 3);
 
-            VoIPPlugin.Log?.LogInfo($"[SFT-WIZARD] Calibrated P95/P10 boundaries saved to BepInEx! Notch1: {_calibratedWhisperToNormal:F4}, Notch2: {_calibratedNormalToLoud:F4}, Max: {_calibratedLoudMax:F4}, VAD: {_whisperMin:F4}");
+            if (VoIPPlugin.WhisperThreshold != null) VoIPPlugin.WhisperThreshold.Value = vWhisperToNormal;
+            if (VoIPPlugin.NormalThreshold != null)  VoIPPlugin.NormalThreshold.Value  = vNormalToLoud;
+            if (VoIPPlugin.LoudThreshold != null)    VoIPPlugin.LoudThreshold.Value    = vLoudMax;
+            if (VoIPPlugin.VADThreshold != null)     VoIPPlugin.VADThreshold.Value     = vVad;
+
+            VoIPPlugin.Log?.LogInfo($"[SFT-WIZARD] Calibrated P95/P10 boundaries saved to BepInEx! Notch1: {vWhisperToNormal:F3}, Notch2: {vNormalToLoud:F3}, Max: {vLoudMax:F3}, VAD: {vVad:F3}");
         }
     }
 }
