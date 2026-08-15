@@ -47,6 +47,7 @@ namespace TRL_SpeakFromTarkov.Audio
 
         private float currentDistanceTarget = 30f;
         private float smoothedDistance = 30f;
+        private float _lastReanchorTry = 0f;
 
         private float[] streamBuffer = null!;
         private volatile int streamWritePos = 0;
@@ -193,21 +194,25 @@ namespace TRL_SpeakFromTarkov.Audio
                 // Re-ancoragem Dinâmica: Se o alto-falante ainda não está preso à cabeça do jogador remoto (ficou em 0,0,0)
                 if (transform.parent == null && !string.IsNullOrEmpty(TargetProfileId) && Singleton<GameWorld>.Instantiated)
                 {
-                    var gameWorld = Singleton<GameWorld>.Instance;
-                    Player player = gameWorld.GetAlivePlayerByProfileID(TargetProfileId);
-                    if (player == null && gameWorld.AllAlivePlayersList != null)
+                    if (Time.time - _lastReanchorTry >= 2.0f)
                     {
-                        player = System.Linq.Enumerable.FirstOrDefault(gameWorld.AllAlivePlayersList, p => p != null && (p.ProfileId == TargetProfileId || (p.Profile != null && p.Profile.Id == TargetProfileId)));
-                    }
+                        _lastReanchorTry = Time.time;
+                        var gameWorld = Singleton<GameWorld>.Instance;
+                        Player player = gameWorld.GetAlivePlayerByProfileID(TargetProfileId);
+                        if (player == null && gameWorld.AllAlivePlayersList != null)
+                        {
+                            player = System.Linq.Enumerable.FirstOrDefault(gameWorld.AllAlivePlayersList, p => p != null && (p.ProfileId == TargetProfileId || (p.Profile != null && p.Profile.Id == TargetProfileId)));
+                        }
 
-                    if (player != null)
-                    {
-                        Transform targetBone = player.PlayerBones != null && player.PlayerBones.Head != null
-                            ? player.PlayerBones.Head.Original
-                            : player.Transform.Original;
-                        transform.SetParent(targetBone, false);
-                        transform.localPosition = targetBone == player.Transform.Original ? Vector3.up * 1.6f : Vector3.zero;
-                        VoIPPlugin.Log.LogInfo($"[SFT-3D] RemoteSpeaker de {TargetProfileId} re-ancorado com sucesso ao boneco {(player.Profile != null ? player.Profile.Nickname : player.ProfileId)}!");
+                        if (player != null)
+                        {
+                            Transform targetBone = player.PlayerBones != null && player.PlayerBones.Head != null
+                                ? player.PlayerBones.Head.Original
+                                : player.Transform.Original;
+                            transform.SetParent(targetBone, false);
+                            transform.localPosition = targetBone == player.Transform.Original ? Vector3.up * 1.6f : Vector3.zero;
+                            VoIPPlugin.Log.LogInfo($"[SFT-3D] RemoteSpeaker de {TargetProfileId} re-ancorado com sucesso ao boneco {(player.Profile != null ? player.Profile.Nickname : player.ProfileId)}!");
+                        }
                     }
                 }
 

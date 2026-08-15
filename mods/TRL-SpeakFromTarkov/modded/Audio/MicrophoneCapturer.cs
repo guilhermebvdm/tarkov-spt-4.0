@@ -288,35 +288,35 @@ namespace TRL_SpeakFromTarkov.Audio
                 int chunk1 = clipSamples - lastMicPosition;
                 if (chunk1 > 0)
                 {
-                    float[] buf1 = new float[chunk1];
-                    micClip.GetData(buf1, lastMicPosition);
+                    int count1 = Math.Min(chunk1, micPollBuffer.Length);
+                    micClip.GetData(micPollBuffer, lastMicPosition);
                     lock (bufferLock)
                     {
                         if (ringBuffer != null)
                         {
-                            for (int i = 0; i < chunk1; i++)
+                            for (int i = 0; i < count1; i++)
                             {
-                                ringBuffer[writePos] = buf1[i];
+                                ringBuffer[writePos] = micPollBuffer[i];
                                 writePos = (writePos + 1) % ringBuffer.Length;
                             }
-                            availableSamples += chunk1;
+                            availableSamples += count1;
                         }
                     }
                 }
                 if (currentPos > 0)
                 {
-                    float[] buf2 = new float[currentPos];
-                    micClip.GetData(buf2, 0);
+                    int count2 = Math.Min(currentPos, micPollBuffer.Length);
+                    micClip.GetData(micPollBuffer, 0);
                     lock (bufferLock)
                     {
                         if (ringBuffer != null)
                         {
-                            for (int i = 0; i < currentPos; i++)
+                            for (int i = 0; i < count2; i++)
                             {
-                                ringBuffer[writePos] = buf2[i];
+                                ringBuffer[writePos] = micPollBuffer[i];
                                 writePos = (writePos + 1) % ringBuffer.Length;
                             }
-                            availableSamples += currentPos;
+                            availableSamples += count2;
                         }
                     }
                 }
