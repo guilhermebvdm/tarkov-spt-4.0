@@ -133,7 +133,8 @@ namespace TRL_SpeakFromTarkov.Audio
 
         public void EnqueuePacket(byte[] opusData, float voiceLevel = 0f)
         {
-            packetQueue.Enqueue(opusData);
+            if (opusData == null || opusData.Length <= 2) return;
+
             packetsEnqueuedCount++;
             if (VoIPPlugin.EnableDebugLogs != null && VoIPPlugin.EnableDebugLogs.Value && packetsEnqueuedCount % 50 == 1)
             {
@@ -148,6 +149,31 @@ namespace TRL_SpeakFromTarkov.Audio
             // Whisper (~0.01) -> 0.33x (10m). Normal (~0.1) -> 1.0x (30m). Grito (>0.3) -> 2.0x (60m).
             float distanceMultiplier = Mathf.Clamp((voiceLevel * 10f), 0.33f, 2.0f);
             currentDistanceTarget = maxBase * distanceMultiplier;
+
+            // Decodificação Off-Thread imediata no callback de recepção da rede
+            if (decoder != null && opusDecodeBuffer != null && streamBuffer != null)
+            {
+                try
+                {
+#pragma warning disable CS0618
+                    int len = decoder.Decode(opusData, 0, opusData.Length, opusDecodeBuffer, 0, frameSize, false);
+#pragma warning restore CS0618
+
+                    if (len > 0)
+                    {
+                        int currentWritePos = streamWritePos;
+                        for (int i = 0; i < len; i++)
+                        {
+                            streamBuffer[(currentWritePos + i) % streamBuffer.Length] = opusDecodeBuffer[i];
+                        }
+                        streamWritePos = (currentWritePos + len) % streamBuffer.Length;
+                    }
+                }
+                catch (Exception decEx)
+                {
+                    VoIPPlugin.Log.LogWarning($"[SFT] Ignorando frame Opus corrompido/inválido ({opusData.Length} bytes): {decEx.Message}");
+                }
+            }
         }
 
         private bool isEmergency2DMode = false;
@@ -213,34 +239,6 @@ namespace TRL_SpeakFromTarkov.Audio
                             transform.localPosition = targetBone == player.Transform.Original ? Vector3.up * 1.6f : Vector3.zero;
                             VoIPPlugin.Log.LogInfo($"[SFT-3D] RemoteSpeaker de {TargetProfileId} re-ancorado com sucesso ao boneco {(player.Profile != null ? player.Profile.Nickname : player.ProfileId)}!");
                         }
-                    }
-                }
-
-                if (decoder == null || opusDecodeBuffer == null || streamBuffer == null) return;
-                
-                while (packetQueue.TryDequeue(out byte[] opusData))
-                {
-                    if (opusData == null || opusData.Length <= 2) continue;
-
-                    try
-                    {
-#pragma warning disable CS0618
-                        int len = decoder.Decode(opusData, 0, opusData.Length, opusDecodeBuffer, 0, frameSize, false);
-#pragma warning restore CS0618
-
-                        if (len <= 0) continue;
-
-                        int currentWritePos = streamWritePos;
-                        for (int i = 0; i < len; i++)
-                        {
-                            streamBuffer[(currentWritePos + i) % streamBuffer.Length] = opusDecodeBuffer[i];
-                        }
-                        
-                        streamWritePos = (currentWritePos + len) % streamBuffer.Length;
-                    }
-                    catch (Exception decEx)
-                    {
-                        VoIPPlugin.Log.LogWarning($"[SFT] Ignorando frame Opus corrompido/inválido ({opusData.Length} bytes): {decEx.Message}");
                     }
                 }
             }

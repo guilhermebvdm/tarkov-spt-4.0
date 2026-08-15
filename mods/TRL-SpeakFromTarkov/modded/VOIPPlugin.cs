@@ -301,6 +301,24 @@ namespace TRL_SpeakFromTarkov
 
             this.gameObject.AddComponent<TRL_SpeakFromTarkov.Core.VoipController>();
 
+            // Desativa o recurso Allow VOIP no BepInEx Config do FIKA para evitar logs de erro inofensivos do Dissonance
+            try
+            {
+                if (BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue("com.fika.core", out var fikaPlugin) && fikaPlugin != null && fikaPlugin.Instance != null)
+                {
+                    var allowVoipEntry = fikaPlugin.Instance.Config["Network", "Allow VOIP"] as ConfigEntry<bool>;
+                    if (allowVoipEntry != null && allowVoipEntry.Value)
+                    {
+                        allowVoipEntry.Value = false;
+                        Log.LogInfo("[SFT] Configuração 'Allow VOIP' do FIKA ajustada para FALSE automaticamente para desativar o VOIP nativo do FIKA.");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.LogWarning($"[SFT] Não foi possível ajustar 'Allow VOIP' no FIKA: {ex.Message}");
+            }
+
             Log.LogInfo("[SFT] Forçando a desativação do Fika VOIP Client nativo via ModulePatch...");
             new GameSessionPatcher.FikaVoipSendPatch().Enable();
             new GameSessionPatcher.FikaVoipReceivePatch().Enable();
