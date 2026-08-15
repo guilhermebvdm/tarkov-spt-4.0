@@ -82,9 +82,10 @@ namespace Band_Aid
                 // A estimativa acima vira só FALLBACK do timeout de 4s.
                 RegisterPendingConsume(doctor, item, patient.ProfileId, consumeCost);
 
-                // Enviar pacote para o paciente aplicar em si mesmo
+                // Enviar pacote para o paciente aplicar em si mesmo com o saldo real disponível do kit
+                float availableResource = item.GetItemComponent<MedKitComponent>()?.HpResource ?? 1.0f;
                 BandAidNetworkHandler.SendHealPacket(doctor, patient, item.TemplateId.ToString(),
-                    EBodyPart.Common, 0f, stats.IsSurgery, 0f, false, false, false, true);
+                    EBodyPart.Common, availableResource, stats.IsSurgery, 0f, false, false, false, true);
 
                 Logger.LogInfo($"Pacote de tratamento remoto enviado. Consumo aguarda report do paciente (fallback: {consumeCost:F1}).");
                 return;
@@ -502,7 +503,7 @@ namespace Band_Aid
         // → host com espelho fantasma, client com slot morto, mão travada. O descarte
         // correto (padrão vanilla SetupItem) é simulate:true + mutação DENTRO da
         // operação de rede — ver DiscardItemNetworked.
-        private static void ConsumeSafe(Player doctor, Item item, float calculatedCost, bool isRemotePatient = false)
+        public static void ConsumeSafe(Player doctor, Item item, float calculatedCost, bool isRemotePatient = false)
         {
             try
             {
@@ -565,10 +566,28 @@ namespace Band_Aid
         /// única" — um único jeito de remover item consumido no mod inteiro.
         public static void DiscardItemNetworked(Player doctor, Item item)
         {
+            if (doctor == null || item == null || item.CurrentAddress == null) return;
+
+            // Fast-path: se o médico NÃO está segurando este item ativamente e o inventário
+            // não está bloqueado, dispara o descarte de imediato no mesmo frame sem coroutine.
+            bool itemInHands = doctor.HandsController is Player.MedsController meds && meds.Item == item;
+            var inventoryController = doctor.InventoryController;
+            if (!itemInHands && inventoryController != null && !inventoryController.IsInventoryBlocked())
+            {
+                var watch = new DiscardWatch();
+                int r = StartDiscardAttempt(doctor, item, watch);
+                if (r == DISCARD_SENT || r == DISCARD_DONE)
+                {
+                    Logger.LogInfo($"[FastPath] Descarte imediato executado no mesmo frame: {item.ShortName.Localized()}");
+                    return;
+                }
+            }
+
+            // Fallback: item ainda em transição de mãos ou inventário momentaneamente bloqueado
             var controller = TRLImmersiveCombatMedicine.BandAidController.Instance;
             if (controller != null)
             {
-                Logger.LogInfo($"Descarte agendado (aguarda mãos livres): {item.ShortName.Localized()}");
+                Logger.LogInfo($"Descarte agendado (aguarda liberação de mãos): {item.ShortName.Localized()}");
                 controller.ScheduleNetworkedDiscard(doctor, item);
             }
             else

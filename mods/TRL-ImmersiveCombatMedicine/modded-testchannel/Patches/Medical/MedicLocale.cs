@@ -47,6 +47,7 @@ namespace TRLImmersiveCombatMedicine
         DenyNoCompatibleWound = 26,     // {0} = nome do item
         TreatingLabel = 27,             // {0} = rótulo curto do membro — CR-01-01 (code-review 010 r1)
         TreatingLabelWithItem = 28,     // {0} = nome do item (maiúsculo), {1} = rótulo curto do membro
+        TreatmentCancelledWithItemLoss = 29, // {0} = nome do item (cancelamento punido)
     }
 
     internal static class MedicLocale
@@ -83,6 +84,7 @@ namespace TRLImmersiveCombatMedicine
             /* DenyNoCompatibleWound    */ "{0}: no compatible wound.",
             /* TreatingLabel            */ "► TREATING: {0}",
             /* TreatingLabelWithItem    */ "► {0} → {1}",
+            /* TreatmentCancelledWithItemLoss */ "Treatment cancelled: {0} consumed/unsterilized.",
         };
 
         private static readonly string[] PtTexts =
@@ -116,6 +118,7 @@ namespace TRLImmersiveCombatMedicine
             /* DenyNoCompatibleWound    */ "{0}: Sem ferimento compatível.",
             /* TreatingLabel            */ "► TRATANDO: {0}",
             /* TreatingLabelWithItem    */ "► {0} → {1}",
+            /* TreatmentCancelledWithItemLoss */ "Tratamento cancelado: {0} consumido/desesterilizado.",
         };
 
         // === Rótulos de membro — DUAS granularidades já existiam no código pré-migração:

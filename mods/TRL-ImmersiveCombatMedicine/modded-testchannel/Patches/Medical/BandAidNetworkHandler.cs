@@ -481,18 +481,20 @@ namespace Band_Aid
                 RemoveEffectNative(hc, target, _fractureConcreteType, "Fracture"))
                 effectCost += stats.FractureCost;
 
-            // HP
+            // HP — proporção 1:1 rigorosa do EFT vanilla respeitando o saldo real do médico
             float healedTotal = 0f;
             if (stats.HealAmount > 0)
             {
                 var bodyHp = hc.GetBodyPartHealth(target);
                 float hpNeeded = bodyHp.Maximum - bodyHp.Current;
-                float heal = UnityEngine.Mathf.Min(stats.HealAmount, hpNeeded);
+                float doctorAvailableResource = packet.HealAmount > 0f ? packet.HealAmount : stats.MaxHP;
+                float availableForHp = UnityEngine.Mathf.Max(0f, doctorAvailableResource - effectCost);
+                float heal = UnityEngine.Mathf.Min(availableForHp, UnityEngine.Mathf.Min(stats.HealAmount, hpNeeded));
                 if (heal > 0)
                 {
                     activeHc.ChangeHealth(target, heal, default(DamageInfoStruct));
                     healedTotal = heal;
-                    Logger.LogInfo($"HP +{heal:F1} em {target} pelo paciente (via rede).");
+                    Logger.LogInfo($"HP +{heal:F1} em {target} pelo paciente (via rede | Disp:{availableForHp:F1}).");
                 }
             }
 

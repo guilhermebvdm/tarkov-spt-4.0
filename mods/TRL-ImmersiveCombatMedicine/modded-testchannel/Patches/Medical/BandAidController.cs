@@ -1,4 +1,4 @@
-﻿using BepInEx;
+using BepInEx;
 using Comfort.Common;
 using EFT;
 using EFT.Communications;
@@ -240,6 +240,13 @@ namespace TRLImmersiveCombatMedicine
         private void CheckManualInputs()
         {
             if (_targetPatient == null || !_targetPatient.HealthController.IsAlive) return;
+            if (_isHealingInProgress || _pendingHealTimeout > 0f) return;
+
+            var mainPlayer = Singleton<GameWorld>.Instance?.MainPlayer;
+            if (mainPlayer == null) return;
+            if (mainPlayer.HandsController is Player.MedsController) return;
+            if (mainPlayer.InventoryController != null && mainPlayer.InventoryController.IsInventoryBlocked()) return;
+
             try
             {
                 var settings = Singleton<SharedGameSettingsClass>.Instance?.Control?.Settings;
@@ -314,7 +321,12 @@ namespace TRLImmersiveCombatMedicine
 
         private void ProcessHeal(EBoundItem slot)
         {
-            var mainPlayer = Singleton<GameWorld>.Instance.MainPlayer;
+            if (_isHealingInProgress || _pendingHealTimeout > 0f) return;
+            var mainPlayer = Singleton<GameWorld>.Instance?.MainPlayer;
+            if (mainPlayer == null || _targetPatient == null) return;
+            if (mainPlayer.HandsController is Player.MedsController) return;
+            if (mainPlayer.InventoryController != null && mainPlayer.InventoryController.IsInventoryBlocked()) return;
+
             if (mainPlayer.Inventory.FastAccess.BoundItems.TryGetValue(slot, out Item item))
             {
                 ItemStats stats = ItemDatabase.GetStats(item.TemplateId.ToString());
@@ -357,6 +369,7 @@ namespace TRLImmersiveCombatMedicine
         private ItemStats _pendingHealStats;
         private Player _pendingHealPatient;
         private float _pendingHealTimeout = -1f;
+        private float _healStartTime = -1f;
 
         /// <summary>
         /// Verifica se a tecla foi ativada conforme o modo configurado (Press, Hold, DoubleTap).
@@ -477,16 +490,11 @@ namespace TRLImmersiveCombatMedicine
                 TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning($"EmergencyDrop MatarAnimação: {ex.Message}");
             }
 
-            // === PASSO 3: LIMPAR AS MÃOS (agora sem animação de fechar kit) ===
+            // === PASSO 3: LIMPAR AS MÃOS E REQUIPAR ARMA ===
             try
             {
-                var spawnController = doctor.GetType().GetMethod("SpawnController",
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                if (spawnController != null)
-                    spawnController.Invoke(doctor, null);
-
                 doctor.TrySetLastEquippedWeapon(true);
-                TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo("EmergencyDrop: Mãos limpas (HANB)");
+                TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo("EmergencyDrop: Mãos limpas e arma restaurada.");
             }
             catch (Exception ex)
             {
@@ -531,6 +539,7 @@ namespace TRLImmersiveCombatMedicine
             _isHealingInProgress = true;
             _itemBeingUsed = itemUsed;
             _patientDiedDuringHeal = false;
+            _healStartTime = Time.time;
             MedicHealPatch.BandAidHealActive = true;
 
             // G10: Subscrever morte do paciente
@@ -620,6 +629,7 @@ namespace TRLImmersiveCombatMedicine
 
             _isHealingInProgress = false;
             _itemBeingUsed = null;
+            _healStartTime = -1f;
 
             // G10: Desregistrar morte do paciente
             try { patient.OnPlayerDeadOrUnspawn -= OnPatientDiedDuringHeal; } catch { }
@@ -660,8 +670,6 @@ namespace TRLImmersiveCombatMedicine
             {
                 TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning("HealRoutine: Paciente null/morto ou item null, tratamento não aplicado.");
             }
-
-            // === RESET DAS MÃOS (sem forçar puxada de arma — o jogo já faz automaticamente) ===
         }
 
         /// <summary>
@@ -678,6 +686,7 @@ namespace TRLImmersiveCombatMedicine
             MedicHealPatch.AllyAnimSpeedMult = 1f;   // 077 — reset da velocidade extra (médico morto não passa pelo release)
             _isHealingInProgress = false;
             _itemBeingUsed = null;
+            _healStartTime = -1f;
             try { patient.OnPlayerDeadOrUnspawn -= OnPatientDiedDuringHeal; } catch { }
         }
 
@@ -701,6 +710,10 @@ namespace TRLImmersiveCombatMedicine
         {
             var doctor = Singleton<GameWorld>.Instance?.MainPlayer;
             if (doctor == null) return;
+
+            Item savedItem = _itemBeingUsed;
+            float elapsed = _healStartTime > 0f ? (Time.time - _healStartTime) : 0f;
+            _healStartTime = -1f;
 
             // Parar coroutine
             if (_activeHealCoroutine != null)
@@ -732,7 +745,34 @@ namespace TRLImmersiveCombatMedicine
             try { doctor.MovementContext.SetPhysicalCondition(EPhysicalCondition.UsingMeds, false); } catch { }
             ReleaseSurgeryImmobilize(doctor);   // 077 — solta HealingLegs + reseta anim mult
 
-            NotificationManagerClass.DisplayMessageNotification(MedicLocale.Get(MedicTextId.TreatmentCancelled), ENotificationDurationType.Default, ENotificationIconType.Alert);
+            // Punição de cancelamento conforme regra EFT (ItemRemoveAfterInterruptionTime = 1.0s):
+            // Itens de cirurgia (CMS/Surv12), itens de uso único (tala, bandagem, CALOK) ou consumíveis
+            // que foram abertos/utilizados por >= 1.0s perdem 1 uso/carga e a cirurgia NÃO é aplicada.
+            bool itemConsumed = false;
+            if (elapsed >= 1.0f && savedItem != null)
+            {
+                var stats = ItemDatabase.GetStats(savedItem.TemplateId.ToString());
+                bool isSurgeryOrUseItem = stats != null && (stats.IsSurgery || stats.HealAmount == 0 || stats.IsTourniquet);
+                if (isSurgeryOrUseItem || savedItem.GetItemComponent<ResourceComponent>() != null)
+                {
+                    TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"CancelHealInProgress: cancelamento após {elapsed:F1}s (>= 1.0s) — consumindo 1 carga do item desesterilizado ({savedItem.ShortName.Localized()}).");
+                    MedicalLogic.ConsumeSafe(doctor, savedItem, 1.0f);
+                    itemConsumed = true;
+                }
+            }
+
+            if (itemConsumed && savedItem != null)
+            {
+                NotificationManagerClass.DisplayMessageNotification(
+                    MedicLocale.Get(MedicTextId.TreatmentCancelledWithItemLoss, savedItem.ShortName?.Localized() ?? ""),
+                    ENotificationDurationType.Default, ENotificationIconType.Alert);
+            }
+            else
+            {
+                NotificationManagerClass.DisplayMessageNotification(
+                    MedicLocale.Get(MedicTextId.TreatmentCancelled),
+                    ENotificationDurationType.Default, ENotificationIconType.Alert);
+            }
             TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo("CancelHealInProgress: cura cancelada (Mouse0).");
         }
 
@@ -956,8 +996,11 @@ namespace TRLImmersiveCombatMedicine
 
         public void StopAllDeferredDiscards()
         {
-            foreach (var c in _discardCoroutines)
+            for (int i = 0; i < _discardCoroutines.Count; i++)
+            {
+                var c = _discardCoroutines[i];
                 if (c != null) StopCoroutine(c);
+            }
             _discardCoroutines.Clear();
             _activeDiscardIds.Clear();
         }
@@ -970,17 +1013,18 @@ namespace TRLImmersiveCombatMedicine
             var bornWorld = Singleton<GameWorld>.Instance;
             try
             {
-                // 1) Esperar as mãos liberarem (timeout 6s — depois tenta mesmo assim)
-                float handsDeadline = Time.time + 6f;
-                while (Time.time < handsDeadline && doctor != null &&
-                       doctor.HandsController is Player.MedsController)
+                // 1) Esperar as mãos liberarem e inventário desbloquear (checagem frame a frame, sem WaitForSeconds)
+                float handsDeadline = Time.time + 3.0f;
+                while (Time.time < handsDeadline && doctor != null && Singleton<GameWorld>.Instance == bornWorld)
                 {
-                    yield return new WaitForSeconds(0.25f);
+                    bool itemInHands = doctor.HandsController is Player.MedsController meds && meds.Item == item;
+                    bool blocked = doctor.InventoryController != null && doctor.InventoryController.IsInventoryBlocked();
+                    if (!itemInHands && !blocked) break;
+                    yield return null;
                 }
-                yield return new WaitForSeconds(0.2f); // folga p/ o pipeline fechar eventos
 
-                // 2) Até 4 tentativas espaçadas
-                for (int attempt = 1; attempt <= 4; attempt++)
+                // 2) Tentativas de descarte com polling rápido (frame a frame)
+                for (int attempt = 1; attempt <= 5; attempt++)
                 {
                     if (doctor == null || Singleton<GameWorld>.Instance != bornWorld) yield break;
 
@@ -991,9 +1035,9 @@ namespace TRLImmersiveCombatMedicine
                     if (r == MedicalLogic.DISCARD_SENT)
                     {
                         // ref: CR-04-02 — o Fika valida em async (Task.Yield): esperar
-                        // o callback disparar (cap 1.2s) antes de decidir.
-                        float cbDeadline = Time.time + 1.2f;
-                        while (!watch.CallbackFired && Time.time < cbDeadline)
+                        // o callback disparar (cap 1.0s) antes de decidir.
+                        float cbDeadline = Time.time + 1.0f;
+                        while (!watch.CallbackFired && Time.time < cbDeadline && Singleton<GameWorld>.Instance == bornWorld)
                             yield return null;
 
                         if (watch.CallbackFired && !watch.Failed)
@@ -1002,17 +1046,14 @@ namespace TRLImmersiveCombatMedicine
                                 "Descarte confirmado pelo pipeline (CR-04-02).");
                             yield break;
                         }
-                        // Failed ou timeout sem callback (ex.: player morto — callback
-                        // nunca dispara): retry; o guard de CurrentAddress da próxima
-                        // tentativa evita double-discard se a operação executou tarde.
                     }
 
-                    TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning(
-                        $"Descarte diferido: tentativa {attempt}/4 sem confirmação — nova em 0.75s.");
-                    yield return new WaitForSeconds(0.75f);
+                    // Se a simulação falhou por inventário ocupado transitório, aguarda 1 frame e retenta
+                    yield return null;
                 }
-                TRLImmersiveCombatMedicinePlugin.ModLogger.LogError(
-                    "Descarte diferido: TODAS as tentativas falharam — item zerado permanece no inventário (reportar).");
+
+                TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning(
+                    "Descarte diferido: tentativas esgotadas sem confirmação.");
             }
             finally
             {
@@ -1070,9 +1111,8 @@ namespace TRLImmersiveCombatMedicine
             _ourPromptActions = null;
             _promptTarget = null;
 
-            // ref: CR-01-10 — handshake pendente não sobrevive à raid (senão pina o
-            // Player destruído e uma resposta stale poderia iniciar cura órfã)
             _pendingHealTimeout = -1f;
+            _healStartTime = -1f;
             _pendingHealItem = null;
             _pendingHealStats = null;
             _pendingHealPatient = null;

@@ -223,7 +223,7 @@ namespace Band_Aid
         /// Resolve o Player dono da operação de meds (via MedsController_0._player).
         /// null se não conseguir resolver.
         /// </summary>
-        private static Player ResolveOperationOwner(object __instance)
+        internal static Player ResolveOperationOwner(object __instance)
         {
             try
             {
@@ -494,6 +494,45 @@ namespace Band_Aid
             MedicHealPatch.IsRedirectingHeal = false;
             MedicHealPatch.CurrentPatient = null;
             MedicHealPatch.CleanupPatientSubscription();
+        }
+    }
+
+    /// <summary>
+    /// Harmony Prefix em ObservedMedsControllerClass.method_8(IEffect effect).
+    /// No EFT Vanilla (Player.cs:19615), method_8 é o callback nativo do EffectRemovedEvent.
+    /// Em autocura, method_8 chama method_4() (fila de membros) e, quando vazia, method_9() (cleanup/abort).
+    /// Ao curar um aliado, a expiração de efeitos intermediários no paciente (ou efeitos no próprio médico)
+    /// disparava este callback e abortava a animação prematuramente no 1º segundo.
+    /// Este patch suprime method_8 durante BandAidHealActive, garantindo a duração total da animação.
+    /// </summary>
+    [HarmonyPatch]
+    public static class MedsMethod8Patch
+    {
+        private static ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("BandAid_Method8");
+
+        static MethodBase TargetMethod()
+        {
+            Type class1172 = AccessTools.Inner(
+                AccessTools.Inner(typeof(Player), "MedsController"),
+                "ObservedMedsControllerClass"
+            );
+            return AccessTools.Method(class1172, "method_8");
+        }
+
+        [HarmonyPrefix]
+        static bool Prefix(object __instance)
+        {
+            Player operationOwner = MedicHealPatch.ResolveOperationOwner(__instance);
+            var localMainPlayer = Comfort.Common.Singleton<GameWorld>.Instance?.MainPlayer;
+            bool isDoctorOperation = operationOwner != null && localMainPlayer != null && operationOwner == localMainPlayer;
+
+            // Se é o médico aplicando cura em aliado via BandAid, suprimir method_8 (que chamaria method_9 prematuramente)
+            if (isDoctorOperation && MedicHealPatch.BandAidHealActive)
+            {
+                Logger.LogInfo("MedsMethod8Patch: method_8 suprimido durante BandAidHealActive (preservando duração integral da animação).");
+                return false;
+            }
+            return true; // Autocura normal e bots seguem fluxo nativo
         }
     }
 }
