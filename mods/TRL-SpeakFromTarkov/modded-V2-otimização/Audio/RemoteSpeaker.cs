@@ -146,8 +146,8 @@ namespace TRL_SpeakFromTarkov.Audio
                 maxBase = VoIPPlugin.MaxHearingDistance.Value;
                 
             // Mapeia VoiceLevel (0 a 1) para um multiplicador de distância.
-            // Whisper (~0.01) -> 0.33x (10m). Normal (~0.1) -> 1.0x (30m). Grito (>0.3) -> 2.0x (60m).
-            float distanceMultiplier = Mathf.Clamp((voiceLevel * 10f), 0.33f, 2.0f);
+            // Whisper (~0.01) -> 0.65x (20m). Normal (~0.1) -> 1.0x (30m). Grito (>0.3) -> 2.0x (60m).
+            float distanceMultiplier = Mathf.Clamp((voiceLevel * 10f), 0.65f, 2.0f);
             currentDistanceTarget = maxBase * distanceMultiplier;
 
             // Decodificação Off-Thread imediata no callback de recepção da rede
@@ -323,13 +323,13 @@ namespace TRL_SpeakFromTarkov.Audio
                     }
                     else
                     {
-                        // 1. Curva Acústica de Decibéis Físicos (-6dB por dobra de distância em escala humana):
-                        // 1.5m -> 100% | 5m -> ~70% | 12m -> ~40% | 20m -> ~12% | 30m -> 0%
+                        // 1. Curva Acústica Suave (-3dB por dobra de distância em escala humana):
+                        // 1.5m -> 100% | 5m -> ~85% | 10m -> ~68% | 20m -> ~38% | 30m -> 0%
                         float normD = (dist - minD) / (maxD - minD);
-                        distanceAttenuation = Mathf.Pow(1.0f - normD, 2.2f);
+                        distanceAttenuation = Mathf.Pow(1.0f - normD, 1.2f);
 
-                        // 2. Absorção Atmosférica do Ar (O ar absorve agudos mais rápido que graves com a distância):
-                        airDampingAlpha = Mathf.Lerp(1.0f, 0.25f, normD);
+                        // 2. Absorção Atmosférica do Ar Nítida (preserva o brilho e agudos a média distância):
+                        airDampingAlpha = Mathf.Lerp(1.0f, 0.60f, normD);
                     }
                 }
             }

@@ -214,8 +214,9 @@ namespace TRL_SpeakFromTarkov.Audio
             
             if (micClip.frequency == 0 || micClip.samples == 0)
             {
-                VoIPPlugin.Log.LogError($"[SFT] Clip ficou inválido (freq={micClip.frequency}). Abortando.");
+                VoIPPlugin.Log.LogWarning($"[SFT] Clip ficou temporariamente inválido (freq={micClip.frequency}). Reiniciando captura...");
                 StopCapture();
+                StartCapture(deviceName ?? string.Empty);
                 return;
             }
             
