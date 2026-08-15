@@ -103,6 +103,36 @@ namespace TRL_SpeakFromTarkov
             }
         }
 
+        internal class FikaCommsNetworkUpdatePatch : ModulePatch
+        {
+            protected override MethodBase GetTargetMethod()
+            {
+                return AccessTools.Method(typeof(Fika.Core.Networking.VOIP.FikaCommsNetwork), "Update");
+            }
+
+            [PatchPrefix]
+            static bool Prefix()
+            {
+                if (VoIPPlugin.EnableMod != null && VoIPPlugin.EnableMod.Value) return false;
+                return true;
+            }
+        }
+
+        internal class FikaCommsNetworkCreateClientPatch : ModulePatch
+        {
+            protected override MethodBase GetTargetMethod()
+            {
+                return AccessTools.Method(typeof(Fika.Core.Networking.VOIP.FikaCommsNetwork), "CreateClient");
+            }
+
+            [PatchPrefix]
+            static bool Prefix()
+            {
+                if (VoIPPlugin.EnableMod != null && VoIPPlugin.EnableMod.Value) return false;
+                return true;
+            }
+        }
+
         // --- Patches para detectar o momento seguro de inicialização no menu ---
 
     }
