@@ -330,6 +330,10 @@ namespace TRL_SpeakFromTarkov
             new GameSessionPatcher.FikaClientInitializeVoipPatch().Enable();
             new GameSessionPatcher.FikaServerInitializeVoipPatch().Enable();
             new GameSessionPatcher.FikaVoipControllerUpdatePatch().Enable();
+            new GameSessionPatcher.FikaFixVoipAudioDevicePatch().Enable();
+            new GameSessionPatcher.FikaObservedPlayerInitVoipPatch().Enable();
+            new GameSessionPatcher.FikaPlayerInitVoipPatch().Enable();
+            new GameSessionPatcher.BoundSlotViewRefreshSelectViewPatch().Enable();
 
             GameSessionPatcher.Init();
             SceneManager.sceneLoaded += OnSceneLoaded;

@@ -159,5 +159,88 @@ namespace TRL_SpeakFromTarkov
                 return true;
             }
         }
+
+        internal class FikaFixVoipAudioDevicePatch : ModulePatch
+        {
+            protected override MethodBase GetTargetMethod()
+            {
+                var type = AccessTools.TypeByName("Fika.Core.Main.GameMode.BaseGameController");
+                return AccessTools.Method(type, "FixVOIPAudioDevice");
+            }
+
+            [PatchPrefix]
+            static bool Prefix(ref System.Collections.IEnumerator __result)
+            {
+                if (VoIPPlugin.EnableMod != null && VoIPPlugin.EnableMod.Value)
+                {
+                    __result = EmptyEnumerator();
+                    return false; // Silencia FixVOIPAudioDevice do FIKA que acessava DissonanceComms.Instance causando NRE
+                }
+                return true;
+            }
+
+            private static System.Collections.IEnumerator EmptyEnumerator()
+            {
+                yield break;
+            }
+        }
+
+        internal class FikaObservedPlayerInitVoipPatch : ModulePatch
+        {
+            protected override MethodBase GetTargetMethod()
+            {
+                var type = AccessTools.TypeByName("Fika.Core.Main.Players.ObservedPlayer");
+                return AccessTools.Method(type, "InitVoip");
+            }
+
+            [PatchPrefix]
+            static bool Prefix()
+            {
+                if (VoIPPlugin.EnableMod != null && VoIPPlugin.EnableMod.Value)
+                {
+                    return false; // Silencia o InitVoip do ObservedPlayer que chamava Dissonance
+                }
+                return true;
+            }
+        }
+
+        internal class FikaPlayerInitVoipPatch : ModulePatch
+        {
+            protected override MethodBase GetTargetMethod()
+            {
+                var type = AccessTools.TypeByName("Fika.Core.Main.Players.FikaPlayer");
+                return AccessTools.Method(type, "InitVoip");
+            }
+
+            [PatchPrefix]
+            static bool Prefix()
+            {
+                if (VoIPPlugin.EnableMod != null && VoIPPlugin.EnableMod.Value)
+                {
+                    return false; // Silencia o InitVoip do FikaPlayer
+                }
+                return true;
+            }
+        }
+
+        internal class BoundSlotViewRefreshSelectViewPatch : ModulePatch
+        {
+            protected override MethodBase GetTargetMethod()
+            {
+                var type = AccessTools.TypeByName("EFT.UI.DragAndDrop.BoundSlotView");
+                return AccessTools.Method(type, "RefreshSelectView");
+            }
+
+            [PatchFinalizer]
+            static System.Exception? Finalizer(System.Exception? __exception)
+            {
+                if (__exception != null)
+                {
+                    // Absorve NRE de BoundSlotView durante o spawn da raid no coop, permitindo que o ciclo de equipar a arma termine com sucesso
+                    return null;
+                }
+                return null;
+            }
+        }
     }
 }
