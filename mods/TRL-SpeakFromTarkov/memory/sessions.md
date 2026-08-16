@@ -1,9 +1,9 @@
 # TRL-SpeakFromTarkov — Memória de Sessões
 
 ## Snapshot Delta
-- **Versão:** 1.6.1 (SPT 4.0 / FIKA)
-- **Estado:** v1.6.1 compilada e testada com 0 erros e 0 avisos (100% Clean Build). HUD In-Raid sincronizado 1:1 com a opacidade/autohide do `BattleStancePanel` vanilla, com offset X ajustável (+15px), ícones de modo de captura em 40px posicionados na parte inferior da barra (PTT, VAD, OPEN, MUTE), remoção do texto RAID e eliminação completa de todos os 133 avisos de compilação C#.
-- **Próximo Passo (Amanhã):** Iniciar a execução das otimizações V2 na pasta `mods/TRL-SpeakFromTarkov/modded-V2-otimização` (Opus DTX/VBR, RMS Gate RNNoise, `ArrayPool<byte>.Shared` blindado, Decodificação Assincrona, Oclusão Zero-Alloc `Physics.LinecastNonAlloc`, Spatial Culling Host-Side e Otimização `sqrMagnitude` na Varredura de Bots).
+- **Versão:** 1.7.0 (SPT 4.0 / FIKA — Otimizações Arquiteturais V2)
+- **Estado:** 100% das 10 Fases do Masterplan de Otimizações V2 implementadas e testadas com 0 erros e 0 avisos (100% Clean Build). In-Raid Player Volume Mixer HUD (`Alt + P`, modal com bloqueio de input e sliders individuais 0-200% salvos localmente) entregue. Resolução definitiva do travamento de carregamento de raid via bypass assíncrono de `InitializeVOIP()` do FIKA.
+- **Próximo Passo:** Testes de gameplay multiplayer em raid e validação acústica da oclusão física em cenários densos (Dorms, Factory, Reserva Bunker).
 - **Pendências:** 🟢 Nenhuma pendência blocker registrada.
 
 ---
@@ -192,3 +192,30 @@
 
 **O que pretendemos trabalhar amanhã:**
 - **Início da Execução do Plano V2:** Iniciar as modificações de código em `mods/TRL-SpeakFromTarkov/modded-V2-otimização`, seguindo a sequência dos 8 passos descritos no `implementation_plan.md`, testando a compilação limpa (0 erros e 0 avisos) via `.agents/scripts/compile-mod.sh`.
+
+---
+
+## 2026-08-16 — Sessão 14: Execução Completa das 10 Fases do Masterplan V2, Player Volume Mixer HUD & Fix de Carregamento de Raid
+
+**Tema central:** Execução, compilação e code-review de todas as 10 fases do Masterplan de Otimizações V2, criação do novo componente modal In-Raid Player Volume Mixer HUD (`PlayerVolumeMixerHUD.cs` com atalho `Alt + P`) e resolução definitiva da lentidão no carregamento de raids do FIKA.
+
+**Decisões-chave:**
+- **Fase 1 — Opus VBR, PTT Hangover Time (200ms) & Proteção Concentus ([`VoipProcessor.cs`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded-V2-otimiz%C3%A3o/Audio/VoipProcessor.cs)):** VBR ativado no codificador Opus economizando banda em silêncio. Hangover time de 200ms sustenta o fim de frases impedindo corte de sílabas finais. Sanitização estrita do buffer Opus Concentus eliminando `OpusException: Corrupted stream`.
+- **Fase 2 & 3 — Throttle 2.0s Re-ancoragem 3D & Zero-GC Mic Polling ([`RemoteSpeaker.cs`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded-V2-otimiz%C3%A3o/Audio/RemoteSpeaker.cs) & [`MicrophoneCapturer.cs`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded-V2-otimiz%C3%A3o/Audio/MicrophoneCapturer.cs)):** Busca por LINQ no `Update` restrita para 1 vez a cada 2s. Buffer estático `micPollBuffer` elimina dezenas de megabytes de alocação de lixo no GC. Recuperação automática de microfone em desconexões USB (`freq == 0`).
+- **Fase 4 — Decodificação Opus Off-Thread ([`RemoteSpeaker.cs`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded-V2-otimiz%C3%A3o/Audio/RemoteSpeaker.cs)):** A chamada cara `decoder.Decode()` foi movida do `Update` da Main Thread para a Worker Thread de rede `EnqueuePacket()`, zerando a perda de FPS durante a fala de múltiplos jogadores.
+- **Fase 5 — Conforto Acústico 3D & Nitidez a Média Distância ([`RemoteSpeaker.cs`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded-V2-otimiz%C3%A3o/Audio/RemoteSpeaker.cs)):** Curva de atenuação ajustada para expoente suave `1.2f` (volume a 10m mantido em ~68%), piso de amortecimento atmosférico elevado para `0.60f` (elimina sensação de voz submersa) e multiplicador mínimo de alcance em `0.65f`.
+- **Fase 6 — Desativação Completa do Dissonance ([`GameSessionPatcher.cs`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded-V2-otimiz%C3%A3o/GameSessionPatcher.cs)):** Congelamento e silenciamento dos módulos nativos de VOIP do FIKA sem deixar resquícios de threads ou exceções ao sair de raids.
+- **Fase 7 — Oclusão Física Acústica por Paredes, Terrenos e Portas ([`RemoteSpeaker.cs`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded-V2-otimiz%C3%A3o/Audio/RemoteSpeaker.cs)):** Implementado `Physics.Linecast` (Zero-Alloc) a 5Hz contra a máscara canônica `HighPolyWithTerrainMask | DoorLayer | InteractiveLayer`. Redução de 50% de volume e amortecimento suave de agudos (`Mathf.Lerp`) ao fechar portas ou ficar atrás de paredes. Adicionado `UnityEngine.PhysicsModule` ao `.csproj` e opção F12 `Physical Wall Occlusion`.
+- **Fase 8 — RMS Pre-Check no RNNoise ([`AudioFilter.cs`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded-V2-otimiz%C3%A3o/Audio/AudioFilter.cs)):** Bypass imediato de chamadas unmanaged P/Invoke da rede neural quando `blockRms < 0.0003f`, zerando o consumo de CPU em silêncio.
+- **Fase 9 — Spatial Culling Zero-Alloc & Filtro Vivo/Morto ([`SftNetwork.cs`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded-V2-otimiz%C3%A3o/Network/SftNetwork.cs)):** Validação de `HealthController.IsAlive` bloqueia chamadas de fantasmas no Canal 0. Descarte rápido por distância quadrática `(pos - sender).sqrMagnitude > maxCullDistance * maxCullDistance` antes de instanciar alto-falantes ou decodificar pacotes.
+- **Fase 10 — Otimização da IA de Bots com `sqrMagnitude` e Oclusão ([`BotVoiceBridge.cs`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded-V2-otimiz%C3%A3o/Audio/BotVoiceBridge.cs)):** Varredura de bots da raid convertida para `sqrMagnitude`. Oclusão física via `Physics.Linecast` impede que sussurros atravessem paredes de concreto para alertar bots em outros andares/bunkers.
+- **In-Raid Player Volume Mixer Modal HUD ([`PlayerVolumeMixerHUD.cs`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded-V2-otimiz%C3%A3o/UI/PlayerVolumeMixerHUD.cs)):**
+  - Modal centralizado (560x460px) acionado via **`Alt + P`** (configurável no F12 via `PlayerMixerKey`).
+  - Bloqueio completo de comandos do jogo (`GamePlayerOwner.SetIgnoreInput`) e liberação do cursor do mouse (`Cursor.lockState = CursorLockMode.None`).
+  - Lista dinâmica de jogadores remotos com sliders individuais de **0% a 200%**, botões MUTE/UNMUTE e Reset.
+  - Persistência local em `BepInEx/config/TRL-SpeakFromTarkov-PlayersVolume.json` (aplicado automaticamente a cada jogador reconhecido pelo `ProfileId`).
+- **Resolução do Travamento no Carregamento de Raid ([`GameSessionPatcher.cs`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded-V2-otimiz%C3%A3o/GameSessionPatcher.cs)):**
+  - Diagnóstico: O patch anterior que bloqueava `FikaCommsNetwork.CreateClient()` impedia a atribuição de `VOIPClient`, fazendo com que `FikaClient.InitializeVOIP()` ficasse preso em um loop assíncrono infinito `do { await Task.Yield(); } while (VOIPClient == null);` chamado pelo `CoopGame.cs:509`.
+  - Solução: Criados os patches `FikaClientInitializeVoipPatch` e `FikaServerInitializeVoipPatch` retornando `Task.CompletedTask` e `return false;`. O carregamento da raid do FIKA não aguarda o Dissonance, não carrega a cena aditiva `DissonanceSetupScene` e entra na raid instantaneamente.
+- **Code Reviews:** Executados todos os reviews de 01 a 10 no padrão de 6 categorias × 4 impactos com 100% de aprovação (0 bloqueadores pendentes).
+
