@@ -60,6 +60,7 @@ namespace TRL_SpeakFromTarkov
         public static ConfigEntry<float> LPFCutoff { get; private set; } = null!;
         public static ConfigEntry<float> MaxHearingDistance { get; private set; } = null!;
         public static ConfigEntry<float> OutputVolume { get; private set; } = null!;
+        public static ConfigEntry<bool> EnableOcclusion { get; private set; } = null!;
 
         // Bot Interaction
         public static ConfigEntry<bool> EnableBotInteraction { get; private set; } = null!;
@@ -278,6 +279,8 @@ namespace TRL_SpeakFromTarkov
                     new AcceptableValueRange<int>(0, 10)));
             OpusFEC = Config.Bind("Network & 3D Audio", "Forward Error Correction (FEC)", false,
                 new ConfigDescription("Enables redundancy for lossy networks to reconstruct lost audio packets. Default: false"));
+            EnableOcclusion = Config.Bind("Network & 3D Audio", "Physical Wall Occlusion", true,
+                new ConfigDescription("Muffles and attenuates voice audio when blocked by walls, doors or terrain. Default: true"));
 
             // Debug (Unified Section)
             EnableEcho = Config.Bind("Debug", "Local Echo Loopback", false, "If enabled, plays back your own voice locally for microphone testing. Default: false");

@@ -49,6 +49,16 @@ namespace TRL_SpeakFromTarkov.Audio
         private float smoothedDistance = 30f;
         private float _lastReanchorTry = 0f;
 
+        // Oclusão Física Zero-GC
+        private float _lastOcclusionCheckTime = 0f;
+        private bool _isOccluded = false;
+        private float _targetOcclusionFactor = 1.0f;
+        private float _targetOcclusionAirDamping = 1.0f;
+        private float _smoothedOcclusionFactor = 1.0f;
+        private float _smoothedOcclusionAirDamping = 1.0f;
+        private static readonly RaycastHit[] _occlusionHits = new RaycastHit[1];
+        private static int _occlusionLayerMask = -1;
+
         private float[] streamBuffer = null!;
         private volatile int streamWritePos = 0;
         private volatile int streamReadPos  = 0;
@@ -241,6 +251,55 @@ namespace TRL_SpeakFromTarkov.Audio
                         }
                     }
                 }
+
+                // ── OCLUSÃO FÍSICA POR GEOMETRIA & PORTAS (200ms = 5Hz Zero-GC) ──
+                if (Time.time - _lastOcclusionCheckTime >= 0.20f)
+                {
+                    _lastOcclusionCheckTime = Time.time;
+                    bool occlusionEnabled = VoIPPlugin.EnableOcclusion == null || VoIPPlugin.EnableOcclusion.Value;
+
+                    if (occlusionEnabled && currentSpatialBlend > 0f && !isEmergency2DMode)
+                    {
+                        if (_occlusionLayerMask == -1)
+                        {
+                            try
+                            {
+                                _occlusionLayerMask = LayerMaskClass.HighPolyWithTerrainMask | LayerMaskClass.DoorLayer | LayerMaskClass.InteractiveLayer;
+                            }
+                            catch
+                            {
+                                _occlusionLayerMask = LayerMask.GetMask("HighPolyWithRaycast", "Terrain", "LowPoly", "Interactive", "Doors", "Default");
+                            }
+                        }
+
+                        Vector3 targetHeadPos = transform.position;
+                        Vector3 listenerPos = Vector3.zero;
+                        if (Camera.main != null)
+                        {
+                            listenerPos = Camera.main.transform.position;
+                        }
+                        else if (Singleton<GameWorld>.Instantiated && Singleton<GameWorld>.Instance.MainPlayer != null)
+                        {
+                            listenerPos = Singleton<GameWorld>.Instance.MainPlayer.Position + Vector3.up * 1.6f;
+                        }
+
+                        if (listenerPos != Vector3.zero && Vector3.Distance(listenerPos, targetHeadPos) > 1.2f)
+                        {
+                            _isOccluded = Physics.Linecast(listenerPos, targetHeadPos, out RaycastHit hit, _occlusionLayerMask, QueryTriggerInteraction.Ignore);
+                        }
+                        else
+                        {
+                            _isOccluded = false;
+                        }
+                    }
+                    else
+                    {
+                        _isOccluded = false;
+                    }
+
+                    _targetOcclusionFactor = _isOccluded ? 0.50f : 1.0f;
+                    _targetOcclusionAirDamping = _isOccluded ? 0.25f : 1.0f;
+                }
             }
             catch (Exception ex)
             {
@@ -333,6 +392,13 @@ namespace TRL_SpeakFromTarkov.Audio
                     }
                 }
             }
+
+            // ── INTERPOLAÇÃO DA OCLUSÃO FÍSICA POR PAREDES & PORTAS ──
+            _smoothedOcclusionFactor = Mathf.Lerp(_smoothedOcclusionFactor, _targetOcclusionFactor, 0.05f);
+            _smoothedOcclusionAirDamping = Mathf.Lerp(_smoothedOcclusionAirDamping, _targetOcclusionAirDamping, 0.05f);
+
+            distanceAttenuation *= _smoothedOcclusionFactor;
+            airDampingAlpha *= _smoothedOcclusionAirDamping;
 
             float volumeMult = audioSource != null ? audioSource.volume : 1.0f;
             if (float.IsNaN(distanceAttenuation) || float.IsInfinity(distanceAttenuation)) distanceAttenuation = 1.0f;
