@@ -140,5 +140,24 @@ namespace TRL_SpeakFromTarkov
                 return true;
             }
         }
+
+        internal class FikaVoipControllerUpdatePatch : ModulePatch
+        {
+            protected override MethodBase GetTargetMethod()
+            {
+                var type = AccessTools.TypeByName("Fika.Core.Networking.VOIP.FikaVOIPController");
+                return AccessTools.Method(type, "Update");
+            }
+
+            [PatchPrefix]
+            static bool Prefix()
+            {
+                if (VoIPPlugin.EnableMod != null && VoIPPlugin.EnableMod.Value)
+                {
+                    return false; // Silencia o tick do VOIP do FIKA, evitando NRE em MicrophoneFailState
+                }
+                return true;
+            }
+        }
     }
 }

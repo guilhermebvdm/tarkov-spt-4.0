@@ -329,6 +329,7 @@ namespace TRL_SpeakFromTarkov
             new GameSessionPatcher.FikaVoipReceivePatch().Enable();
             new GameSessionPatcher.FikaClientInitializeVoipPatch().Enable();
             new GameSessionPatcher.FikaServerInitializeVoipPatch().Enable();
+            new GameSessionPatcher.FikaVoipControllerUpdatePatch().Enable();
 
             GameSessionPatcher.Init();
             SceneManager.sceneLoaded += OnSceneLoaded;
