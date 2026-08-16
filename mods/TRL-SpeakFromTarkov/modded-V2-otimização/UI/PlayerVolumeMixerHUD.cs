@@ -6,6 +6,7 @@ using BepInEx;
 using Comfort.Common;
 using EFT;
 using UnityEngine;
+using Fika.Core.Networking;
 using TRL_SpeakFromTarkov.Audio;
 using TRL_SpeakFromTarkov.Network;
 
@@ -444,11 +445,54 @@ namespace TRL_SpeakFromTarkov.UI
                 myProfileId = Singleton<GameWorld>.Instance.MainPlayer.ProfileId;
             }
 
+            // 1. Tenta obter diretamente da lista de HumanPlayers do FIKA se disponível
+            if (Singleton<IFikaNetworkManager>.Instantiated &&
+                Singleton<IFikaNetworkManager>.Instance.CoopHandler != null &&
+                Singleton<IFikaNetworkManager>.Instance.CoopHandler.HumanPlayers != null)
+            {
+                foreach (var p in Singleton<IFikaNetworkManager>.Instance.CoopHandler.HumanPlayers)
+                {
+                    if (p == null) continue;
+                    string pId = p.ProfileId;
+                    if (string.IsNullOrEmpty(pId) && p.Profile != null) pId = p.Profile.Id;
+                    if (string.IsNullOrEmpty(pId) || pId == myProfileId) continue;
+
+                    string nick = p.Profile != null && !string.IsNullOrEmpty(p.Profile.Nickname) ? p.Profile.Nickname : pId;
+                    _playerNicknames[pId] = nick;
+
+                    float vol = _playerVolumes.TryGetValue(pId, out float v) ? v : 1.0f;
+                    bool muted = _mutedPlayers.Contains(pId);
+
+                    result.Add(new PlayerVolumeData
+                    {
+                        ProfileId = pId,
+                        Nickname = nick,
+                        Volume = vol,
+                        IsMuted = muted
+                    });
+                }
+                return result;
+            }
+
+            // 2. Fallback pelo GameWorld filtrando estritamente jogadores humanos (não bots)
             if (Singleton<GameWorld>.Instantiated && Singleton<GameWorld>.Instance.AllAlivePlayersList != null)
             {
                 foreach (var p in Singleton<GameWorld>.Instance.AllAlivePlayersList)
                 {
                     if (p == null) continue;
+
+                    // Filtros estritos contra Bots / IA
+                    if (p.IsAI) continue;
+                    if (p.AIData != null && (p.AIData.IsAI || p.AIData.BotOwner != null)) continue;
+                    if (p is Fika.Core.Main.Players.FikaPlayer fp && (fp.IsAI || fp.IsObservedAI)) continue;
+                    if (p.Profile?.Info?.Settings != null &&
+                        (int)p.Profile.Info.Settings.Role != 0 &&
+                        p.Profile.Info.Settings.Role != WildSpawnType.pmcBEAR &&
+                        p.Profile.Info.Settings.Role != WildSpawnType.pmcUSEC)
+                    {
+                        continue;
+                    }
+
                     string pId = p.ProfileId;
                     if (string.IsNullOrEmpty(pId) && p.Profile != null) pId = p.Profile.Id;
                     if (string.IsNullOrEmpty(pId) || pId == myProfileId) continue;
