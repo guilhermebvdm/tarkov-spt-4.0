@@ -47,7 +47,6 @@ namespace TRL_SpeakFromTarkov.UI
         private Texture2D? _btnSuccessTex;
 
         private Vector2 _scrollPos = Vector2.zero;
-        private Behaviour? _playerOwnerBehaviour;
 
         void Awake()
         {
@@ -215,25 +214,6 @@ namespace TRL_SpeakFromTarkov.UI
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
             SetGameInputBlocked(true);
-
-            try
-            {
-                var mainPlayer = Singleton<GameWorld>.Instance?.MainPlayer;
-                if (mainPlayer != null)
-                {
-                    var behaviours = mainPlayer.GetComponents<Behaviour>();
-                    foreach (var b in behaviours)
-                    {
-                        if (b != null && b.GetType().Name.Contains("PlayerOwner"))
-                        {
-                            _playerOwnerBehaviour = b;
-                            b.enabled = false;
-                            break;
-                        }
-                    }
-                }
-            }
-            catch { }
         }
 
         public void Close()
@@ -242,43 +222,16 @@ namespace TRL_SpeakFromTarkov.UI
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
             SetGameInputBlocked(false);
-
-            try
-            {
-                if (_playerOwnerBehaviour != null)
-                {
-                    _playerOwnerBehaviour.enabled = true;
-                    _playerOwnerBehaviour = null;
-                }
-            }
-            catch { }
         }
 
         private static void SetGameInputBlocked(bool blocked)
         {
             try
             {
-                var gpoType = Type.GetType("EFT.GamePlayerOwner, Assembly-CSharp");
-                if (gpoType != null)
+                if (EFT.GamePlayerOwner.MyPlayer != null)
                 {
-                    var flags = System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static;
-                    gpoType.GetMethod("SetIgnoreInput", flags)?.Invoke(null, new object[] { blocked });
-                    gpoType.GetMethod("SetIgnoreInputInNPCDialog", flags)?.Invoke(null, new object[] { blocked });
-                    gpoType.GetMethod("SetIgnoreInputWithKeepResetLook", flags)?.Invoke(null, new object[] { blocked });
-
-                    var cmdType = Type.GetType("EFT.InputSystem.ECommand, Assembly-CSharp");
-                    if (cmdType != null)
-                    {
-                        string[] cmdNames = new[] { "Escape", "ToggleInventory", "ToggleShooting", "EndShooting", "Jump", "PressThrowGrenade", "ThrowGrenade", "ToggleProne", "ToggleDuck", "ReloadWeapon" };
-                        var cmdList = Array.CreateInstance(cmdType, cmdNames.Length);
-                        for (int i = 0; i < cmdNames.Length; i++)
-                        {
-                            cmdList.SetValue(Enum.Parse(cmdType, cmdNames[i]), i);
-                        }
-
-                        string methodName = blocked ? "AddIgnoreInputCommands" : "RemoveIgnoreInputCommands";
-                        gpoType.GetMethod(methodName, flags)?.Invoke(null, new object[] { cmdList });
-                    }
+                    EFT.GamePlayerOwner.IgnoreInputWithKeepResetLook = blocked;
+                    EFT.GamePlayerOwner.IgnoreInputInNPCDialog = blocked;
                 }
             }
             catch { }
@@ -286,9 +239,18 @@ namespace TRL_SpeakFromTarkov.UI
 
         void Update()
         {
-            if (IsOpen && Input.GetKeyDown(KeyCode.Escape))
+            if (IsOpen)
             {
-                Close();
+                if (Cursor.lockState != CursorLockMode.None)
+                {
+                    Cursor.lockState = CursorLockMode.None;
+                    Cursor.visible = true;
+                }
+
+                if (Input.GetKeyDown(KeyCode.Escape))
+                {
+                    Close();
+                }
             }
         }
 

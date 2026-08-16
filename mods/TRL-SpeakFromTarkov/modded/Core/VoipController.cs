@@ -387,33 +387,16 @@ namespace TRL_SpeakFromTarkov.Core
             processor.IsPTTActive = IsShortcutHeld(VoIPPlugin.PushToTalkKey.Value);
         }
         
-        private bool IsShortcutEmpty(KeyboardShortcut shortcut)
-        {
-            return shortcut.MainKey == KeyCode.None;
-        }
-
         private bool IsShortcutHeld(KeyboardShortcut shortcut)
         {
-            if (IsShortcutEmpty(shortcut)) return false;
-            if (!Input.GetKey(shortcut.MainKey)) return false;
-
-            foreach (var mod in shortcut.Modifiers)
-            {
-                if (!Input.GetKey(mod)) return false;
-            }
-            return true;
+            if (shortcut.MainKey == KeyCode.None) return false;
+            return shortcut.IsPressed();
         }
 
         private bool IsShortcutDown(KeyboardShortcut shortcut)
         {
-            if (IsShortcutEmpty(shortcut)) return false;
-            if (!Input.GetKeyDown(shortcut.MainKey)) return false;
-
-            foreach (var mod in shortcut.Modifiers)
-            {
-                if (!Input.GetKey(mod)) return false;
-            }
-            return true;
+            if (shortcut.MainKey == KeyCode.None) return false;
+            return shortcut.IsDown();
         }
 
         public void SetGameStateChannel(bool inRaid) 
