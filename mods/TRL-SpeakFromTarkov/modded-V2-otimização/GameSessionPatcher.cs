@@ -71,7 +71,7 @@ namespace TRL_SpeakFromTarkov
             }
         }
 
-        // --- Patches para silenciar o Fika VOIP sem quebrar o Dissonance base ---
+        // --- Patches para silenciar o Fika VOIP e evitar travamento no carregamento da raid ---
 
         internal class FikaVoipSendPatch : ModulePatch
         {
@@ -103,37 +103,42 @@ namespace TRL_SpeakFromTarkov
             }
         }
 
-        internal class FikaCommsNetworkUpdatePatch : ModulePatch
+        internal class FikaClientInitializeVoipPatch : ModulePatch
         {
             protected override MethodBase GetTargetMethod()
             {
-                return AccessTools.Method(typeof(Fika.Core.Networking.VOIP.FikaCommsNetwork), "Update");
+                return AccessTools.Method(typeof(Fika.Core.Networking.FikaClient), "InitializeVOIP");
             }
 
             [PatchPrefix]
-            static bool Prefix()
+            static bool Prefix(ref System.Threading.Tasks.Task __result)
             {
-                if (VoIPPlugin.EnableMod != null && VoIPPlugin.EnableMod.Value) return false;
+                if (VoIPPlugin.EnableMod != null && VoIPPlugin.EnableMod.Value)
+                {
+                    __result = System.Threading.Tasks.Task.CompletedTask;
+                    return false; // Ignora o carregamento lento do Dissonance Scene e o loop de espera do VOIPClient
+                }
                 return true;
             }
         }
 
-        internal class FikaCommsNetworkCreateClientPatch : ModulePatch
+        internal class FikaServerInitializeVoipPatch : ModulePatch
         {
             protected override MethodBase GetTargetMethod()
             {
-                return AccessTools.Method(typeof(Fika.Core.Networking.VOIP.FikaCommsNetwork), "CreateClient");
+                return AccessTools.Method(typeof(Fika.Core.Networking.FikaServer), "InitializeVOIP");
             }
 
             [PatchPrefix]
-            static bool Prefix()
+            static bool Prefix(ref System.Threading.Tasks.Task __result)
             {
-                if (VoIPPlugin.EnableMod != null && VoIPPlugin.EnableMod.Value) return false;
+                if (VoIPPlugin.EnableMod != null && VoIPPlugin.EnableMod.Value)
+                {
+                    __result = System.Threading.Tasks.Task.CompletedTask;
+                    return false; // Ignora o carregamento lento do Dissonance Scene e o loop de espera do VOIPServer
+                }
                 return true;
             }
         }
-
-        // --- Patches para detectar o momento seguro de inicialização no menu ---
-
     }
 }

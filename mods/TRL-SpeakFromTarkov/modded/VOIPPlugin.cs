@@ -327,8 +327,8 @@ namespace TRL_SpeakFromTarkov
             Log.LogInfo("[SFT] Forçando a desativação do Fika VOIP Client nativo via ModulePatch...");
             new GameSessionPatcher.FikaVoipSendPatch().Enable();
             new GameSessionPatcher.FikaVoipReceivePatch().Enable();
-            new GameSessionPatcher.FikaCommsNetworkUpdatePatch().Enable();
-            new GameSessionPatcher.FikaCommsNetworkCreateClientPatch().Enable();
+            new GameSessionPatcher.FikaClientInitializeVoipPatch().Enable();
+            new GameSessionPatcher.FikaServerInitializeVoipPatch().Enable();
 
             GameSessionPatcher.Init();
             SceneManager.sceneLoaded += OnSceneLoaded;
