@@ -385,6 +385,34 @@ namespace TRL_SpeakFromTarkov.Network
                 var mainPlayer = gameWorld.MainPlayer;
                 if (profileId == mainPlayer.ProfileId || (mainPlayer.Profile != null && profileId == mainPlayer.Profile.Id))
                     return;
+
+                // ── 1. FILTRO VIVO / MORTO (ISOLAÇÃO DE FANTASMAS) ──
+                bool isLocalAlive = mainPlayer.HealthController != null && mainPlayer.HealthController.IsAlive;
+                Player senderPlayer = gameWorld.GetAlivePlayerByProfileID(profileId);
+                if (senderPlayer == null && gameWorld.AllAlivePlayersList != null)
+                {
+                    senderPlayer = gameWorld.AllAlivePlayersList.FirstOrDefault(p => p != null && (p.ProfileId == profileId || (p.Profile != null && p.Profile.Id == profileId)));
+                }
+
+                bool isSenderAlive = senderPlayer != null && senderPlayer.HealthController != null && senderPlayer.HealthController.IsAlive;
+
+                // No Canal 0 (Proximidade 3D), jogadores vivos NUNCA escutam fantasmas/jogadores mortos
+                if (channel == 0 && isLocalAlive && !isSenderAlive)
+                {
+                    return;
+                }
+
+                // ── 2. SPATIAL CULLING ZERO-ALLOC (sqrMagnitude) ──
+                if (channel == 0 && senderPlayer != null)
+                {
+                    float maxHearing = VoIPPlugin.MaxHearingDistance != null ? VoIPPlugin.MaxHearingDistance.Value : 60f;
+                    float maxCullDistance = maxHearing * 1.10f; // Margem de 10% de tolerância
+                    float sqrDist = (mainPlayer.Position - senderPlayer.Position).sqrMagnitude;
+                    if (sqrDist > maxCullDistance * maxCullDistance)
+                    {
+                        return; // Descarta antes de alocar/acessar RemoteSpeaker ou decodificar Opus!
+                    }
+                }
             }
 
             if (Core.VoipController.Instance != null && channel != Core.VoipController.Instance.CurrentChannel)
