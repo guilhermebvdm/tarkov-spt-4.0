@@ -134,6 +134,8 @@ namespace TRL_SpeakFromTarkov.Audio
             ForceBotResponsesInRadius(player, soundPos, power, trigger);
         }
 
+        private static int _botOcclusionMask = -1;
+
         private void ForceBotResponsesInRadius(Player player, Vector3 soundPos, float power, EPhraseTrigger trigger)
         {
             try
@@ -143,9 +145,25 @@ namespace TRL_SpeakFromTarkov.Audio
                 var botOwners = Singleton<IBotGame>.Instance.BotsController.Bots.BotOwners;
                 if (botOwners == null) return;
 
+                if (_botOcclusionMask == -1)
+                {
+                    try
+                    {
+                        _botOcclusionMask = LayerMaskClass.HighPolyWithTerrainMask | LayerMaskClass.DoorLayer | LayerMaskClass.InteractiveLayer;
+                    }
+                    catch
+                    {
+                        _botOcclusionMask = LayerMask.GetMask("HighPolyWithRaycast", "Terrain", "LowPoly", "Interactive", "Doors", "Default");
+                    }
+                }
+
                 EPhraseTrigger responsePhrase = trigger == EPhraseTrigger.OnMutter 
                     ? EPhraseTrigger.OnMutter 
                     : (trigger == EPhraseTrigger.NoisePhrase ? EPhraseTrigger.Greetings : EPhraseTrigger.OnFight);
+
+                float sqrPower = power * power;
+                float occludedPowerMult = trigger == EPhraseTrigger.OnMutter ? 0f : (trigger == EPhraseTrigger.NoisePhrase ? 0.50f : 0.65f);
+                float sqrOccludedPower = (power * occludedPowerMult) * (power * occludedPowerMult);
 
                 int countResponding = 0;
                 foreach (BotOwner bot in botOwners)
@@ -155,9 +173,19 @@ namespace TRL_SpeakFromTarkov.Audio
                     // Ignora se o perfil do bot for o próprio jogador
                     if (bot.ProfileId == player.ProfileId) continue;
 
-                    float dist = Vector3.Distance(soundPos, bot.Position);
-                    if (dist <= power)
+                    Vector3 botHeadPos = bot.Position + Vector3.up * 1.5f;
+                    float sqrDist = (soundPos - bot.Position).sqrMagnitude;
+
+                    if (sqrDist <= sqrPower)
                     {
+                        // Checagem de oclusão por paredes/portas (Zero-Alloc):
+                        bool isOccluded = Physics.Linecast(soundPos, botHeadPos, out RaycastHit hit, _botOcclusionMask, QueryTriggerInteraction.Ignore);
+                        if (isOccluded)
+                        {
+                            if (trigger == EPhraseTrigger.OnMutter) continue; // Sussurro não atravessa paredes de concreto
+                            if (sqrDist > sqrOccludedPower) continue; // Voz abafada tem alcance reduzido através de paredes
+                        }
+
                         try
                         {
                             bot.BotTalk.Say(responsePhrase, sayImmediately: true);
