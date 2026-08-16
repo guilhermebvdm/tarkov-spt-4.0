@@ -70,6 +70,7 @@ namespace TRL_SpeakFromTarkov
         public static ConfigEntry<KeyboardShortcut> PushToTalkKey { get; private set; } = null!;
         public static ConfigEntry<KeyboardShortcut> ToggleModeKey { get; private set; } = null!;
         public static ConfigEntry<KeyboardShortcut> MuteKey { get; private set; } = null!;
+        public static ConfigEntry<KeyboardShortcut> PlayerMixerKey { get; private set; } = null!;
         public static ConfigEntry<bool> EnableInRaidVoipHUD { get; private set; } = null!;
         public static ConfigEntry<TRL_SpeakFromTarkov.UI.HudVisibilityMode> HudVisibility { get; private set; } = null!;
         public static ConfigEntry<float> ShiftStancePanelX { get; private set; } = null!;
@@ -203,6 +204,7 @@ namespace TRL_SpeakFromTarkov
             PushToTalkKey = Config.Bind("Shortcuts & Controls", "Push To Talk Key", new KeyboardShortcut(KeyCode.V), "PTT shortcut key (e.g. V)");
             ToggleModeKey = Config.Bind("Shortcuts & Controls", "Toggle Mode Key", new KeyboardShortcut(KeyCode.P), "Toggle transmission mode shortcut key");
             MuteKey = Config.Bind("Shortcuts & Controls", "Mute Key", new KeyboardShortcut(KeyCode.M, KeyCode.LeftControl), "Mute microphone shortcut key");
+            PlayerMixerKey = Config.Bind("Shortcuts & Controls", "In-Raid Player Mixer Key", new KeyboardShortcut(KeyCode.P, KeyCode.LeftAlt), "Shortcut key to open the in-raid Player Volume Mixer modal (Default: Alt + P).");
 
             // UI / HUD Settings
             EnableInRaidVoipHUD = Config.Bind("UI / HUD Settings", "In-Raid VOIP HUD", true, "Displays thin vertical VOIP bar in-raid positioned to the left of the stance panel (BattleStancePanel).");

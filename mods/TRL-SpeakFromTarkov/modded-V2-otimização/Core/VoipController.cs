@@ -22,6 +22,7 @@ namespace TRL_SpeakFromTarkov.Core
         private VoipHUD hud = null!;
         public InRaidVoipHUD inRaidHud { get; private set; } = null!;
         public VoiceCalibrationHUD calibrationHud { get; private set; } = null!;
+        public PlayerVolumeMixerHUD playerMixerHud { get; private set; } = null!;
         private ConcurrentQueue<Action> mainThreadActions = new ConcurrentQueue<Action>();
         
         public byte CurrentChannel { get; private set; } = 1;
@@ -80,6 +81,8 @@ namespace TRL_SpeakFromTarkov.Core
             calibrationHud.Initialize();
             calibrationHud.Processor = processor;
             
+            playerMixerHud = gameObject.AddComponent<PlayerVolumeMixerHUD>();
+
             menuHud = gameObject.AddComponent<MenuVoipHUD>();
             
             // Wiring Events
@@ -370,6 +373,14 @@ namespace TRL_SpeakFromTarkov.Core
                 if (calibrationHud != null)
                 {
                     calibrationHud.ToggleWizard();
+                }
+            }
+
+            if (VoIPPlugin.PlayerMixerKey != null && IsShortcutDown(VoIPPlugin.PlayerMixerKey.Value))
+            {
+                if (playerMixerHud != null)
+                {
+                    playerMixerHud.Toggle();
                 }
             }
 

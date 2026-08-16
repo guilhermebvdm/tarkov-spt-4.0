@@ -462,6 +462,11 @@ namespace TRL_SpeakFromTarkov.Network
             var speaker = go.AddComponent<RemoteSpeaker>();
             speaker.TargetProfileId = profileId;
             speaker.Initialize(sampleRate, frameSize);
+            
+            // Aplica volume individual salvo para este jogador (Mixer)
+            float savedVol = UI.PlayerVolumeMixerHUD.GetPlayerEffectiveVolume(profileId);
+            speaker.SetVolume(savedVol);
+
             return speaker;
         }
 
