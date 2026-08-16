@@ -168,15 +168,29 @@ namespace TRL_SpeakFromTarkov.Audio
             // 2. Processa em blocos de 480 enquanto houver dados
             while (_inputCount >= RNNOISE_FRAME)
             {
+                float blockRmsSum = 0f;
                 for (int i = 0; i < RNNOISE_FRAME; i++)
                 {
-                    _rnInBuf[i] = _inputQueue[_inputRead] * PCM_SCALE;
+                    float sample = _inputQueue[_inputRead];
                     _inputRead = (_inputRead + 1) % _inputQueue.Length;
+                    _rnInBuf[i] = sample * PCM_SCALE;
+                    blockRmsSum += sample * sample;
                 }
                 _inputCount -= RNNOISE_FRAME;
 
-                float vad = rnnoise_process_frame(_rnState, _rnOutBuf, _rnInBuf);
-                LastVadProbability = vad;
+                float blockRms = Mathf.Sqrt(blockRmsSum / RNNOISE_FRAME);
+
+                // RMS Pre-Check: Se o bloco for silêncio (< 0.0003f / -70dB), pula o processamento pesado da Rede Neural
+                if (blockRms < 0.0003f)
+                {
+                    Array.Clear(_rnOutBuf, 0, RNNOISE_FRAME);
+                    LastVadProbability = 0f;
+                }
+                else
+                {
+                    float vad = rnnoise_process_frame(_rnState, _rnOutBuf, _rnInBuf);
+                    LastVadProbability = vad;
+                }
 
                 // RNNoise JÁ remove o ruído atenuando-o na saída.
                 // Não faremos "hard gate" com a probabilidade do VAD, pois isso corta a voz em sons fracos (f, s) causando o efeito "robotizado".
