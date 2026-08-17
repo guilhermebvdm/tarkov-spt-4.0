@@ -75,6 +75,9 @@ namespace Manimal.LoadAmmoAnim.Patches
         // the live source ammo stack.
         public AmmoItemClass CurrentAmmo;
 
+        // true if the current magazine is in BanAnimation.json (suppresses 3D animation)
+        public bool IsAnimationBanned;
+
         public bool IsLoading => LoadingCount > 0;
     }
 
@@ -179,7 +182,8 @@ namespace Manimal.LoadAmmoAnim.Patches
             if (player == null) yield break;
 
             var session = LoadAmmoAnimState.TryGet(player);
-            if (session == null || !session.IsLoading) yield break;
+            if (session == null || !session.IsLoading || session.IsAnimationBanned || BanAnimationStore.IsBanned(session.CurrentMagTemplateId, session.CurrentMag))
+                yield break;
 
             var bundleItem = CreateBundleItem();
             if (bundleItem == null)
@@ -421,7 +425,7 @@ namespace Manimal.LoadAmmoAnim.Patches
         // only the local Class1204 path does, to avoid re-broadcast loops.
         internal static void StartBundleAnim(Player player, string magTemplateId, string ammoTemplateId, float loadOneAmmoSpeed)
         {
-            if (player == null) return;
+            if (player == null || BanAnimationStore.IsBanned(magTemplateId)) return;
             var session = LoadAmmoAnimState.Get(player);
             // already running for this player (eg. duplicate packet) — ignore.
             if (session.IsOurAnimation) return;
@@ -552,6 +556,17 @@ namespace Manimal.LoadAmmoAnim.Patches
                     // across the swap so the next mag flows in seamlessly.
                     if (nextMagAlreadyLoading)
                     {
+                        // If the next chained magazine is banned from animation, finish and restore hands
+                        if (BanAnimationStore.IsBanned(session.CurrentMagTemplateId, session.CurrentMag))
+                        {
+                            session.IsOurAnimation = false;
+                            LoadAmmoAnimState.ForceResetLoading(player);
+                            LoadAmmoAnimEvents.RaiseStopped(player, true);
+                            if (player != null)
+                                player.StartCoroutine(PlayPutawayThenRestore(player, controller));
+                            break;
+                        }
+
                         controller.PlayPutAway();
 
                         float deadline = Time.unscaledTime + PutAwayMaxWaitSeconds;
@@ -635,6 +650,16 @@ namespace Manimal.LoadAmmoAnim.Patches
                 session.CurrentAmmoTemplateId = ammo.TemplateId;
             }
 
+            // Check if this magazine is banned from running the 3D loading animation (e.g. revolver cylinder)
+            if (BanAnimationStore.IsBanned(session.CurrentMagTemplateId, session.CurrentMag))
+            {
+                session.IsAnimationBanned = true;
+                Plugin.LogSource?.LogInfo($"[LoadAmmoAnim] Magazine '{mag?.Template?.Name ?? session.CurrentMagTemplateId}' is in BanAnimation.json. Skipping 3D animation.");
+                return;
+            }
+
+            session.IsAnimationBanned = false;
+
             // Apply loading speed multiplier to BOTH our session and the actual Class1204 instance.
             // LoadOneAmmoSpeed is seconds-per-bullet: dividing by multiplier makes it faster (mult > 1),
             // multiplying makes it slower (mult < 1). Updating Float_0 and Float_1 inside Class1204
@@ -678,7 +703,7 @@ namespace Manimal.LoadAmmoAnim.Patches
             var player = Singleton<GameWorld>.Instance?.MainPlayer;
             if (player == null) return true;
             var session = LoadAmmoAnimState.TryGet(player);
-            if (session == null) return true;
+            if (session == null || session.IsAnimationBanned) return true;
 
             if (session.DrawPhasePending)
             {

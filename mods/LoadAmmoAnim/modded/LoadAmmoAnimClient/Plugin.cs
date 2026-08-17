@@ -65,8 +65,10 @@ namespace Manimal.LoadAmmoAnim
 
             InitConfiguration();
 
-            // Initialize persistent offset store (offsets.json next to this DLL).
-            OffsetFileStore.Initialize(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
+            // Initialize persistent offset store (offsets.json) and banned magazine store (BanAnimation.json) next to this DLL.
+            string pluginDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            OffsetFileStore.Initialize(pluginDir);
+            BanAnimationStore.Initialize(pluginDir);
 
             // Class1204 hooks — detect mag-loading sessions + extend the first-bullet
             // delay to fit the bundle's draw clip. driver-side, unrelated to controller dispatch.

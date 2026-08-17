@@ -5,7 +5,7 @@
     csproj Version, release zip filename) refreshes on next build.
   -->
   <PropertyGroup>
-    <ModVersion>1.8.9</ModVersion>
+    <ModVersion>1.9.0</ModVersion>
     <ModGuid>com.manimal.loadammoanim</ModGuid>
     <!-- custom item parent id. matches [CustomParent] on LoadAmmoBundleItem and the
          "parentId" field in hidden_anim_STANAGS.jsonc. random 24-hex, distinct from

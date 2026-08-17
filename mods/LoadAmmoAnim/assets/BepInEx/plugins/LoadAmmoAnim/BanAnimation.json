@@ -1,0 +1,26 @@
+{
+  "60dc519adf4c47305f6d410d": {
+    "name": "mag_mc255_ckib_mc255_cylinder_std_12g_5",
+    "comment": "MTs-255-12 12ga 5-round cylinder"
+  },
+  "619f54a1d25cbd424731fb99": {
+    "name": "mag_rhino_chiappa_rhino_cylinder_9x33r_6",
+    "comment": "Chiappa Rhino .357 6-round cylinder"
+  },
+  "61a4cda622af7f4f6a3ce617": {
+    "name": "mag_rhino_chiappa_rhino_speedloader_9x33R_6",
+    "comment": "Chiappa Rhino .357 6-round speedloader"
+  },
+  "624c3074dbbd335e8e6becf3": {
+    "name": "mag_rhino_chiappa_rhino_cylinder_9x19",
+    "comment": "Chiappa Rhino 9x19 6-round cylinder"
+  },
+  "627bce33f21bc425b06ab967": {
+    "name": "mag_msgl_milkor_cylinder_mag_std_40x46_6",
+    "comment": "Milkor M32A1 MSGL 40x46mm 6-round cylinder"
+  },
+  "633ec6ee025b096d320a3b15": {
+    "name": "mag_rsh12_kbp_rsh12_cylinder_127x55_5",
+    "comment": "RSh-12 12.7x55 5-round cylinder"
+  }
+}
