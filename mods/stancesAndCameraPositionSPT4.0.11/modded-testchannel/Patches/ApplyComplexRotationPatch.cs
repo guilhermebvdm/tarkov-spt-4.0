@@ -32,7 +32,6 @@ namespace CameraRotationMod.Patches
         public static Quaternion CurrentRotation = Quaternion.identity;
         public static Vector3 CurrentPosition = Vector3.zero;
         public static Vector3 CurrentEuler = Vector3.zero;
-        public static bool LogNextFrame = false;
         private static Vector3 _rotVelocity;
         private static Vector3 _posVelocity;
 
@@ -384,16 +383,6 @@ namespace CameraRotationMod.Patches
             // Apply directly to WeaponRootAnim, ensuring the position offset is oriented correctly in the weapon's local space
             Vector3 orientedPositionOffset = weapRotation * CurrentPosition;
             __instance.HandsContainer.WeaponRootAnim.SetPositionAndRotation(weaponPosition + orientedPositionOffset, weapRotation * CurrentRotation);
-            
-            if (LogNextFrame)
-            {
-                Plugin.Logger.LogInfo($"[Spy-Complex] ApplyComplexRotation: isAiming={isAiming}, isInStance={isInStance}");
-                Plugin.Logger.LogInfo($"[Spy-Complex] ApplyComplexRotation: targetEuler={targetEuler}, CurrentEuler={CurrentEuler}, rotVelocity={_rotVelocity}");
-                Plugin.Logger.LogInfo($"[Spy-Complex] ApplyComplexRotation: targetPosition={targetPosition}, CurrentPosition={CurrentPosition}, posVelocity={_posVelocity}");
-                Plugin.Logger.LogInfo($"[Spy-Complex] ApplyComplexRotation: speedMult={speedMult}, stiffness={stiffness}, damping={damping}, dt={dt}");
-                LogNextFrame = false;
-            }
-
         }
     }
 }

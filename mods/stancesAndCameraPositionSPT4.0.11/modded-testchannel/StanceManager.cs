@@ -50,7 +50,6 @@ namespace CameraRotationMod
             if (CurrentStance != to)
             {
                 Plugin.Logger.LogInfo($"[Stances] User changed stance from {CurrentStance} to {to}");
-                CameraRotationMod.Patches.ApplyComplexRotationPatch.LogNextFrame = true;
             }
             CurrentStance = to;
         }

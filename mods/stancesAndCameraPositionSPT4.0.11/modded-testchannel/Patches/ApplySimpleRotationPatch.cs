@@ -18,7 +18,6 @@ namespace CameraRotationMod.Patches
         public static Quaternion CurrentRotation = Quaternion.identity;
         public static Vector3 CurrentPosition = Vector3.zero;
         public static Vector3 CurrentEuler = Vector3.zero;
-        public static bool LogNextFrame = false;
         private static Vector3 _rotVelocity;
         private static Vector3 _posVelocity;
 
@@ -126,22 +125,15 @@ namespace CameraRotationMod.Patches
         [PatchPostfix]
         private static void Postfix(EFT.Animations.ProceduralWeaponAnimation __instance, float dt)
         {
-            if (LogNextFrame)
-            {
-                Plugin.Logger.LogInfo($"[Spy-Top] Postfix reached! Checking early returns...");
-            }
-
             Player.FirearmController firearmController = (Player.FirearmController)_firearmControllerField.GetValue(__instance);
             if (firearmController == null)
             {
-                if (LogNextFrame) Plugin.Logger.LogInfo($"[Spy-EarlyReturn] firearmController == null");
                 return;
             }
 
             Player player = Traverse.Create(firearmController).Field<Player>("_player").Value;
             if (player == null || !player.IsYourPlayer)
             {
-                if (LogNextFrame) Plugin.Logger.LogInfo($"[Spy-EarlyReturn] Not local player");
                 return;
             }
 
@@ -203,16 +195,6 @@ namespace CameraRotationMod.Patches
             // Apply directly to WeaponRootAnim, ensuring the position offset is oriented correctly in the weapon's local space
             Vector3 orientedPositionOffset = weapRotation * CurrentPosition;
             __instance.HandsContainer.WeaponRootAnim.SetPositionAndRotation(weaponPosition + orientedPositionOffset, weapRotation * CurrentRotation);
-            
-            if (LogNextFrame)
-            {
-                Plugin.Logger.LogInfo($"[Spy] ApplySimpleRotation: isAiming={isAiming}, isInStance={isInStance}");
-                Plugin.Logger.LogInfo($"[Spy] ApplySimpleRotation: targetEuler={targetEuler}, CurrentEuler={CurrentEuler}, rotVelocity={_rotVelocity}");
-                Plugin.Logger.LogInfo($"[Spy] ApplySimpleRotation: targetPosition={targetPosition}, CurrentPosition={CurrentPosition}, posVelocity={_posVelocity}");
-                Plugin.Logger.LogInfo($"[Spy] ApplySimpleRotation: speedMult={speedMult}, stiffness={stiffness}, damping={damping}, dt={dt}");
-                LogNextFrame = false;
-            }
-
         }
     }
 }

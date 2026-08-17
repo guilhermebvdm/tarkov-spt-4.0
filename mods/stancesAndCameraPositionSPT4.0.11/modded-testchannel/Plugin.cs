@@ -20,7 +20,7 @@ public enum ScrollMode
     Linear,
 }
 
-[BepInPlugin("com.trl.stancesandmobility", "TRL-StancesAndMobility", "2.17.0")]
+[BepInPlugin("com.trl.stancesandmobility", "TRL-StancesAndMobility", "2.17.1")]
 public class Plugin : BaseUnityPlugin
 {
     public static Plugin Instance { get; private set; }
