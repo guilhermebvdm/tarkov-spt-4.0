@@ -21,6 +21,8 @@ namespace TRL_SpeakFromTarkov.Audio
         private int lastUnderrunCheckCount = -1;
         public string TargetProfileId { get; set; } = null!;
         private float lpfState = 0f;
+        // Ganho de volume do mixer do HUD (0.0 = mudo, 1.0 = normal, 2.0 = dobro de amplitude)
+        private float _volumeGain = 1.0f;
 
         public int GetRecentUnderruns()
         {
@@ -134,10 +136,14 @@ namespace TRL_SpeakFromTarkov.Audio
 
         public void SetVolume(float volume)
         {
+            // Armazena o ganho bruto — pode ser > 1.0 para amplificação.
+            // O audioSource.volume permanece em 1.0 e o ganho extra é aplicado
+            // diretamente no OnAudioFilterRead via _volumeGain.
+            _volumeGain = Mathf.Clamp(volume, 0.0f, 4.0f);
             if (audioSource != null)
             {
-                float normVolume = volume > 1.0f ? volume / 100.0f : volume;
-                audioSource.volume = Mathf.Clamp01(normVolume);
+                // Mantém o AudioSource no nível máximo; o atenuador é o _volumeGain.
+                audioSource.volume = _volumeGain > 0f ? 1.0f : 0.0f;
             }
         }
 
@@ -400,7 +406,8 @@ namespace TRL_SpeakFromTarkov.Audio
             distanceAttenuation *= _smoothedOcclusionFactor;
             airDampingAlpha *= _smoothedOcclusionAirDamping;
 
-            float volumeMult = audioSource != null ? audioSource.volume : 1.0f;
+            // _volumeGain: 0.0 = mudo, 1.0 = normal, 2.0 = +6dB (dobro de amplitude)
+            float volumeMult = _volumeGain;
             if (float.IsNaN(distanceAttenuation) || float.IsInfinity(distanceAttenuation)) distanceAttenuation = 1.0f;
             if (float.IsNaN(volumeMult) || float.IsInfinity(volumeMult)) volumeMult = 1.0f;
 
