@@ -90,7 +90,9 @@ namespace Manimal.LoadAmmoAnim.CustomEFTData
                 if (!string.IsNullOrEmpty(name))
                 {
                     if (name.IndexOf("cylinder", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                        name.IndexOf("speedloader", StringComparison.OrdinalIgnoreCase) >= 0)
+                        name.IndexOf("speedloader", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                        name.IndexOf("ks23", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                        name.IndexOf("ks_23", StringComparison.OrdinalIgnoreCase) >= 0)
                     {
                         return true;
                     }
@@ -146,6 +148,16 @@ namespace Manimal.LoadAmmoAnim.CustomEFTData
             {
                 var defaults = new Dictionary<string, BanEntry>(StringComparer.OrdinalIgnoreCase)
                 {
+                    ["6a82c653a2f1c403c8978aa7"] = new BanEntry
+                    {
+                        Name = "mag_ks23_toz_ks23_std_23x75_3_cap",
+                        Comment = "KS-23M 3-round 23x75mm magazine tube cap"
+                    },
+                    ["5f647d9f8499b57dc40ddb93"] = new BanEntry
+                    {
+                        Name = "mag_ks23_toz_ks23_std_23x75_3",
+                        Comment = "KS-23M 3-round 23x75mm magazine tube"
+                    },
                     ["60dc519adf4c47305f6d410d"] = new BanEntry
                     {
                         Name = "mag_mc255_ckib_mc255_cylinder_std_12g_5",
