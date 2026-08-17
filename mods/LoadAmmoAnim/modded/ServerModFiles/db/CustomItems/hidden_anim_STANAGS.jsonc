@@ -1,0 +1,33 @@
+{
+  // virtual item used by the client to drive the mag-loading animation. cloned
+  // from PortableRangeFinder. parentId matches Directory.Build.props/ModBundleItemParentId.
+  "69d69c70ed183ba9c882f7f7": {
+    "itemTplToClone": "5b80242286f77429445e0b47",
+    "parentId": "8a3f72c1b9d5e60a4fe83b21",
+    "handbookParentId": "5b47574386f77428ca22b338",
+    "overrideProperties": {
+      "Weight": 0,
+      "ExaminedByDefault": true,
+      "QuestItem": true,
+      "CanSellOnRagfair": false,
+      "UsePrefab": {
+        "path": "manimal/stanags_container.bundle",
+        "rcid": ""
+      },
+      "CanRequireOnRagfair": false,
+      "Unlootable": true,
+      "InsuranceDisabled": true
+    },
+    "locales": {
+      "en": {
+        "name": "[LoadAmmoAnim] Animation Bundle",
+        "shortName": "AnimBundle",
+        "description": "An internal placeholder item used by LoadAmmoAnim for magazine loading animations. Do not remove."
+      }
+    },
+    "fleaPriceRoubles": 0,
+    "handbookPriceRoubles": 0,
+    "addtoBots": false,
+    "addtoTraders": false
+  }
+}

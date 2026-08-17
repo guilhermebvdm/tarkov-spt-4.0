@@ -1,0 +1,14 @@
+{
+  // _id matches Directory.Build.props/ModBundleItemParentId and the [CustomParent]
+  // attribute on LoadAmmoBundleItem. _name matches the client item class name.
+  // _parent points to the SpecItem node, same lineage as PortableRangeFinder.
+  "8a3f72c1b9d5e60a4fe83b21": {
+    "_id": "8a3f72c1b9d5e60a4fe83b21",
+    "_name": "LoadAmmoBundleItem",
+    "_parent": "5447e0e74bdc2d3c308b4567",
+    "_type": "Node",
+    "_props": {},
+    "addToContainerFilters": false,
+    "containers": []
+  }
+}
