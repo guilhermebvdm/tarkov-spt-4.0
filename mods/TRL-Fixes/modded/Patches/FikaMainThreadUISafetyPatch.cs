@@ -8,12 +8,15 @@ namespace TRLFixes.Patches
 {
     /// <summary>
     /// Garante a execução segura do alerta de UI do Fika chamado fora da Main Thread (ShowFikaMessage).
-    /// O Fika loga o erro e retorna um GClass3835 vazio — este patch absorve qualquer exceção residual nesse path.
-    /// Alvo: o overload de extensão em PreloaderUI (Fika.Core.UI.FikaUIGlobals), que contém o check de thread
-    /// e o log de erro "[ShowFikaMessage]: You are trying to show error screen from non-main thread!".
+    /// O Fika loga o erro e retorna um objeto vazio ao ser chamado fora da Main Thread.
+    /// Este patch intercepta no Prefix: se estiver fora da Main Thread, despacha a execução para
+    /// a Main Thread via Diz.Utils.AsyncWorker.RunOnMainThread e retorna um objeto vazio,
+    /// suprimindo o log de erro e garantindo que o alerta de erro/mensagem seja exibido na UI.
     /// </summary>
     public class FikaMainThreadUISafetyPatch : ModulePatch
     {
+        private static MethodInfo _cachedTargetMethod;
+
         protected override MethodBase GetTargetMethod()
         {
             var targetType = AccessTools.TypeByName("Fika.Core.UI.FikaUIGlobals");
@@ -43,7 +46,34 @@ namespace TRLFixes.Patches
             {
                 Plugin.Log?.LogWarning("[TRL-Fixes] ShowFikaMessage(PreloaderUI, ...) não encontrado — o overload mudou no Fika.");
             }
+            _cachedTargetMethod = method;
             return method;
+        }
+
+        [PatchPrefix]
+        private static bool Prefix(object preloaderUI, string header, string message, object buttonType, float waitingTime, Action acceptCallback, Action endTimeCallback, ref object __result)
+        {
+            if (!Diz.Utils.AsyncWorker.CheckIsMainThread())
+            {
+                Diz.Utils.AsyncWorker.RunInMainTread(() =>
+                {
+                    try
+                    {
+                        _cachedTargetMethod?.Invoke(null, new object[] { preloaderUI, header, message, buttonType, waitingTime, acceptCallback, endTimeCallback });
+                    }
+                    catch (Exception ex)
+                    {
+                        Plugin.Log?.LogWarning($"[TRL-Fixes] Falha ao despachar ShowFikaMessage para Main Thread: {ex.Message}");
+                    }
+                });
+
+                if (_cachedTargetMethod != null && _cachedTargetMethod.ReturnType != typeof(void))
+                {
+                    __result = Activator.CreateInstance(_cachedTargetMethod.ReturnType);
+                }
+                return false; // Ignora o método original na thread secundária (evita o LogError e garante exibição)
+            }
+            return true;
         }
 
         [PatchFinalizer]
