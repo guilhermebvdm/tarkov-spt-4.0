@@ -1,0 +1,124 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1373807894529468111
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8714383887059144503}
+  - component: {fileID: 7958449438663261318}
+  - component: {fileID: 5704662489829213034}
+  m_Layer: 22
+  m_Name: ladder
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8714383887059144503
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1373807894529468111}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.5000003, y: -0.49999964, z: -0.49999985, w: 0.50000024}
+  m_LocalPosition: {x: -0.025, y: 0, z: 0.254}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4387719315849736636}
+  m_LocalEulerAnglesHint: {x: 180, y: 90, z: 90}
+--- !u!65 &7958449438663261318
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1373807894529468111}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.36363927, y: 0.94413984, z: 0.3}
+  m_Center: {x: 0, y: 0.47206992, z: 0.2}
+--- !u!114 &5704662489829213034
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1373807894529468111}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 457fbb3846e80854a83c3a3634efe07a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  <RungCount>k__BackingField: 4
+  <RungSpacing>k__BackingField: 0.21446131
+  <Width>k__BackingField: 0.3359344
+--- !u!1 &5702535749371158292
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4387719315849736636}
+  - component: {fileID: 3418258232950505029}
+  m_Layer: 0
+  m_Name: Stepladder_03
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4387719315849736636
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5702535749371158292}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.41302055, y: -0.52031124, z: -0.570421, w: 0.4830219}
+  m_LocalPosition: {x: 104.33682, y: 1.31, z: -89.37904}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 8714383887059144503}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 58.901707, y: 76.86431, z: 147.75446}
+--- !u!205 &3418258232950505029
+LODGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5702535749371158292}
+  serializedVersion: 2
+  m_LocalReferencePoint: {x: -0.005898595, y: 0.000000014901161, z: 0.8804678}
+  m_Size: 2
+  m_FadeMode: 1
+  m_AnimateCrossFading: 0
+  m_LastLODIsBillboard: 0
+  m_LODs:
+  - screenRelativeHeight: 0.03
+    fadeTransitionWidth: 0.1
+    renderers:
+    - renderer: {fileID: 0}
+    - renderer: {fileID: 0}
+  m_Enabled: 1

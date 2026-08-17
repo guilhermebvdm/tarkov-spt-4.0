@@ -1,0 +1,19 @@
+{
+    "name": "tarkin.ladders.shared.editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:8cdee8166a4c893468ba45bca6009d62"
+    ],
+    "includePlatforms": [
+        "Editor",
+        "Switch"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

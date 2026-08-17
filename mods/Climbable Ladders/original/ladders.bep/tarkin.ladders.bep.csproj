@@ -1,0 +1,104 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <AssemblyName>$(MSBuildProjectName)</AssemblyName>
+    <Version>1.0.2</Version>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
+    <DefineConstants>$(DefineConstants);SPT_4_0</DefineConstants>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="BepInEx.PluginInfoProps" Version="2.1.0" />
+    <PackageReference Include="Microsoft.Unity.Analyzers" Version="1.23.0" PrivateAssets="all" />
+    <PackageReference Include="UnityEngine.Modules" Version="2022.3.43" IncludeAssets="compile" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\ladders.shared\tarkin.ladders.shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="$(SPTPath)\BepInEx\core\0Harmony.dll">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="$(SPTPath)\BepInEx\core\BepInEx.dll">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="$(SPTPath)\BepInEx\plugins\spt\spt-reflection.dll">
+      <Private>False</Private>
+    </Reference>
+    
+    <Reference Include="$(SPTPath)\EscapeFromTarkov_Data\Managed\Assembly-CSharp.dll">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="$(SPTPath)\EscapeFromTarkov_Data\Managed\Comfort.dll">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="$(SPTPath)\EscapeFromTarkov_Data\Managed\Sirenix.Serialization.dll">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="$(SPTPath)\EscapeFromTarkov_Data\Managed\AnimationSystem.Types.dll">
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+
+  <Target Name="CopyFilesAfterBuild" AfterTargets="Build">
+    <PropertyGroup>
+      <ScriptsDir>$(SPTPath)\BepInEx\scripts\tarkin-ladders\</ScriptsDir>
+      <PluginsDir>$(SPTPath)\BepInEx\plugins\tarkin-ladders\</PluginsDir>
+      
+      <BepDestination Condition="'$(Configuration)' == 'Debug'">$(ScriptsDir)</BepDestination>
+      <BepDestination Condition="'$(Configuration)' == 'Release'">$(PluginsDir)</BepDestination>
+    </PropertyGroup>
+
+    <ItemGroup Condition="'$(Configuration)' == 'Debug'">
+      <ObsoleteFiles Include="$(PluginsDir)tarkin.ladders.bep.dll" />
+      <ObsoleteFiles Include="$(PluginsDir)tarkin.ladders.bep.pdb" />
+      <ObsoleteFiles Include="$(PluginsDir)tarkin.ladders.fika.dll" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(Configuration)' == 'Release'">
+      <ObsoleteFiles Include="$(ScriptsDir)tarkin.ladders.bep.dll" />
+      <ObsoleteFiles Include="$(ScriptsDir)tarkin.ladders.bep.pdb" />
+    </ItemGroup>
+
+    <Delete Files="@(ObsoleteFiles)" />
+
+    <ItemGroup>
+      <CoreFiles Include="$(OutputPath)\tarkin.ladders.shared.dll" />
+      <BepFiles Include="$(OutputPath)\tarkin.ladders.bep.dll" />
+      <BepFiles Include="$(OutputPath)\tarkin.ladders.bep.pdb" Condition="'$(Configuration)' == 'Debug'" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(FilesToCopy)" DestinationFolder="$(ScriptsDir)" Condition="'@(FilesToCopy)' != ''" />
+    <Copy SourceFiles="@(CoreFiles)" DestinationFolder="$(PluginsDir)" />
+    <Copy SourceFiles="@(BepFiles)" DestinationFolder="$(BepDestination)" />
+  </Target>
+
+  <!-- release zipping -->
+  <Target Name="PackageZip" AfterTargets="CopyFilesAfterBuild" Condition="'$(Configuration)' == 'Release'">
+    <PropertyGroup>
+      <ZipStagingDir>$(IntermediateOutputPath)ZipStaging\</ZipStagingDir>
+      <ZipPluginDir>$(ZipStagingDir)BepInEx\plugins\tarkin-ladders\</ZipPluginDir>
+      <ZipFileName>tarkin-ladders-v$(Version).zip</ZipFileName>
+      <ZipOutputPath>$(OutputPath)$(ZipFileName)</ZipOutputPath>
+    </PropertyGroup>
+
+    <RemoveDir Directories="$(ZipStagingDir)" />
+
+    <!-- grabs everything from BepDestination folder, except folders starting with a dot prefix -->
+    <ItemGroup>
+      <FilesToZip Include="$(BepDestination)**\*.*" 
+                  Exclude="$(BepDestination)**\.*\**\*.*;$(BepDestination)tarkin.ladders.fika.dll" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(FilesToZip)" DestinationFolder="$(ZipPluginDir)%(RecursiveDir)" />
+
+    <ZipDirectory SourceDirectory="$(ZipStagingDir)" DestinationFile="$(ZipOutputPath)" Overwrite="true" />
+
+    <RemoveDir Directories="$(ZipStagingDir)" />
+    <Message Importance="High" Text="Successfully packaged release: $(ZipOutputPath)" />
+  </Target>
+</Project>
