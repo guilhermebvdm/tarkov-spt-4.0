@@ -76,7 +76,33 @@ namespace Manimal.LoadAmmoAnim.CustomEFTData
                 finally { _lock.ExitReadLock(); }
             }
 
-            // Checagem heurística defensiva nativa para tambores de revólver não mapeados
+            // Checagem de instância de item e template
+            if (mag != null)
+            {
+                if (!string.IsNullOrEmpty(mag.Id))
+                {
+                    _lock.EnterReadLock();
+                    try
+                    {
+                        if (_cache.ContainsKey(mag.Id))
+                            return true;
+                    }
+                    finally { _lock.ExitReadLock(); }
+                }
+
+                if (!string.IsNullOrEmpty(mag.TemplateId))
+                {
+                    _lock.EnterReadLock();
+                    try
+                    {
+                        if (_cache.ContainsKey(mag.TemplateId))
+                            return true;
+                    }
+                    finally { _lock.ExitReadLock(); }
+                }
+            }
+
+            // Checagem heurística defensiva nativa para tambores de revólver e tubos não mapeados
             if (mag != null && mag.Template != null)
             {
                 string parentId = mag.Template.ParentId;
@@ -148,6 +174,16 @@ namespace Manimal.LoadAmmoAnim.CustomEFTData
             {
                 var defaults = new Dictionary<string, BanEntry>(StringComparer.OrdinalIgnoreCase)
                 {
+                    ["6a82e3cd643ea82634edaca4"] = new BanEntry
+                    {
+                        Name = "mag_msgl_milkor_cylinder_mag_std_40x46_6_item",
+                        Comment = "Milkor M32A1 MSGL 40x46mm 6-round cylinder item instance"
+                    },
+                    ["627bce33f21bc425b06ab967"] = new BanEntry
+                    {
+                        Name = "mag_msgl_milkor_cylinder_mag_std_40x46_6",
+                        Comment = "Milkor M32A1 MSGL 40x46mm 6-round cylinder"
+                    },
                     ["6a82c653a2f1c403c8978aa7"] = new BanEntry
                     {
                         Name = "mag_ks23_toz_ks23_std_23x75_3_cap",
