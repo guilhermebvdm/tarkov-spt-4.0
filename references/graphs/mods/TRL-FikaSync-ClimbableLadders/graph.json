@@ -1,0 +1,2551 @@
+{
+  "directed": false,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {
+      "label": "LadderNetworkHandler",
+      "file_type": "code",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/LadderNetworkHandler.cs",
+      "source_location": "L20",
+      "metadata": {
+        "namespace": "TRL.FikaSync.ClimbableLadders.Networking",
+        "scope_chain": [
+          "s472"
+        ]
+      },
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "id": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler",
+      "community": 0,
+      "community_name": "LadderNetworkHandler",
+      "norm_label": "laddernetworkhandler"
+    },
+    {
+      "label": "ObservedPlayerLadderController",
+      "file_type": "code",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Controllers/ObservedPlayerLadderController.cs",
+      "source_location": "L13",
+      "metadata": {
+        "namespace": "TRL.FikaSync.ClimbableLadders.Controllers",
+        "scope_chain": [
+          "s157"
+        ]
+      },
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "id": "controllers_observedplayerladdercontroller_trl_fikasync_climbableladders_controllers_observedplayerladdercontroller",
+      "community": 1,
+      "community_name": "ObservedPlayerLadderController",
+      "norm_label": "observedplayerladdercontroller"
+    },
+    {
+      "label": "EStateType",
+      "file_type": "code",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/Packets/LadderStatePacket.cs",
+      "source_location": "L7",
+      "metadata": {
+        "is_nested_type": true,
+        "namespace": "TRL.FikaSync.ClimbableLadders.Networking.Packets",
+        "scope_chain": [
+          "s46"
+        ]
+      },
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "id": "networking_packets_ladderstatepacket_trl_fikasync_climbableladders_networking_packets_estatetype",
+      "community": 3,
+      "community_name": "LadderStatePacket",
+      "norm_label": "estatetype"
+    },
+    {
+      "label": "LadderStatePacket",
+      "file_type": "code",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/Packets/LadderStatePacket.cs",
+      "source_location": "L5",
+      "metadata": {
+        "namespace": "TRL.FikaSync.ClimbableLadders.Networking.Packets",
+        "scope_chain": [
+          "s46"
+        ]
+      },
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "id": "networking_packets_ladderstatepacket_trl_fikasync_climbableladders_networking_packets_ladderstatepacket",
+      "community": 3,
+      "community_name": "LadderStatePacket",
+      "norm_label": "ladderstatepacket"
+    },
+    {
+      "label": "MainPlayerLadderTracker",
+      "file_type": "code",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/MainPlayerLadderTracker.cs",
+      "source_location": "L12",
+      "metadata": {
+        "namespace": "TRL.FikaSync.ClimbableLadders.Networking",
+        "scope_chain": [
+          "s235"
+        ]
+      },
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "id": "networking_mainplayerladdertracker_trl_fikasync_climbableladders_networking_mainplayerladdertracker",
+      "community": 4,
+      "community_name": "MainPlayerLadderTracker",
+      "norm_label": "mainplayerladdertracker"
+    },
+    {
+      "label": "BarAnglePacket",
+      "file_type": "code",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/Packets/BarAnglePacket.cs",
+      "source_location": "L5",
+      "metadata": {
+        "namespace": "TRL.FikaSync.ClimbableLadders.Networking.Packets",
+        "scope_chain": [
+          "s46"
+        ]
+      },
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "id": "networking_packets_baranglepacket_trl_fikasync_climbableladders_networking_packets_baranglepacket",
+      "community": 5,
+      "community_name": "BarAnglePacket",
+      "norm_label": "baranglepacket"
+    },
+    {
+      "label": "Plugin",
+      "file_type": "code",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Plugin.cs",
+      "source_location": "L9",
+      "metadata": {
+        "namespace": "TRL.FikaSync.ClimbableLadders",
+        "scope_chain": [
+          "s155"
+        ]
+      },
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "id": "plugin_trl_fikasync_climbableladders_plugin",
+      "community": 6,
+      "community_name": "Plugin",
+      "norm_label": "plugin"
+    },
+    {
+      "label": ".Dispose()",
+      "file_type": "code",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/LadderNetworkHandler.cs",
+      "source_location": "L195",
+      "metadata": {
+        "namespace": "TRL.FikaSync.ClimbableLadders.Networking",
+        "scope_chain": [
+          "s472"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler_dispose",
+      "community": 0,
+      "community_name": "LadderNetworkHandler",
+      "norm_label": ".dispose()"
+    },
+    {
+      "label": ".GetPacketProcessor()",
+      "file_type": "code",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/LadderNetworkHandler.cs",
+      "source_location": "L186",
+      "metadata": {
+        "namespace": "TRL.FikaSync.ClimbableLadders.Networking",
+        "scope_chain": [
+          "s472"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler_getpacketprocessor",
+      "community": 0,
+      "community_name": "LadderNetworkHandler",
+      "norm_label": ".getpacketprocessor()"
+    },
+    {
+      "label": ".OnBarAnglePacketReceived()",
+      "file_type": "code",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/LadderNetworkHandler.cs",
+      "source_location": "L157",
+      "metadata": {
+        "namespace": "TRL.FikaSync.ClimbableLadders.Networking",
+        "scope_chain": [
+          "s472"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler_onbaranglepacketreceived",
+      "community": 0,
+      "community_name": "LadderNetworkHandler",
+      "norm_label": ".onbaranglepacketreceived()"
+    },
+    {
+      "label": ".OnFikaNetworkCreated()",
+      "file_type": "code",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/LadderNetworkHandler.cs",
+      "source_location": "L36",
+      "metadata": {
+        "namespace": "TRL.FikaSync.ClimbableLadders.Networking",
+        "scope_chain": [
+          "s472"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler_onfikanetworkcreated",
+      "community": 0,
+      "community_name": "LadderNetworkHandler",
+      "norm_label": ".onfikanetworkcreated()"
+    },
+    {
+      "label": ".OnLadderStatePacketReceived()",
+      "file_type": "code",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/LadderNetworkHandler.cs",
+      "source_location": "L113",
+      "metadata": {
+        "namespace": "TRL.FikaSync.ClimbableLadders.Networking",
+        "scope_chain": [
+          "s472"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler_onladderstatepacketreceived",
+      "community": 0,
+      "community_name": "LadderNetworkHandler",
+      "norm_label": ".onladderstatepacketreceived()"
+    },
+    {
+      "label": ".OnPlayerLadderControllerSpawned()",
+      "file_type": "code",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/LadderNetworkHandler.cs",
+      "source_location": "L51",
+      "metadata": {
+        "namespace": "TRL.FikaSync.ClimbableLadders.Networking",
+        "scope_chain": [
+          "s472"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler_onplayerladdercontrollerspawned",
+      "community": 0,
+      "community_name": "LadderNetworkHandler",
+      "norm_label": ".onplayerladdercontrollerspawned()"
+    },
+    {
+      "label": ".RegisterPackets()",
+      "file_type": "code",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/LadderNetworkHandler.cs",
+      "source_location": "L44",
+      "metadata": {
+        "namespace": "TRL.FikaSync.ClimbableLadders.Networking",
+        "scope_chain": [
+          "s472"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler_registerpackets",
+      "community": 0,
+      "community_name": "LadderNetworkHandler",
+      "norm_label": ".registerpackets()"
+    },
+    {
+      "label": ".ResolvePlayerByNetId()",
+      "file_type": "code",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/LadderNetworkHandler.cs",
+      "source_location": "L71",
+      "metadata": {
+        "namespace": "TRL.FikaSync.ClimbableLadders.Networking",
+        "scope_chain": [
+          "s472"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler_resolveplayerbynetid",
+      "community": 0,
+      "community_name": "LadderNetworkHandler",
+      "norm_label": ".resolveplayerbynetid()"
+    },
+    {
+      "label": ".UnregisterPackets()",
+      "file_type": "code",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/LadderNetworkHandler.cs",
+      "source_location": "L176",
+      "metadata": {
+        "namespace": "TRL.FikaSync.ClimbableLadders.Networking",
+        "scope_chain": [
+          "s472"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler_unregisterpackets",
+      "community": 0,
+      "community_name": "LadderNetworkHandler",
+      "norm_label": ".unregisterpackets()"
+    },
+    {
+      "label": ".Init()",
+      "file_type": "code",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Controllers/ObservedPlayerLadderController.cs",
+      "source_location": "L25",
+      "metadata": {
+        "namespace": "TRL.FikaSync.ClimbableLadders.Controllers",
+        "scope_chain": [
+          "s157"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "controllers_observedplayerladdercontroller_trl_fikasync_climbableladders_controllers_observedplayerladdercontroller_init",
+      "community": 1,
+      "community_name": "ObservedPlayerLadderController",
+      "norm_label": ".init()"
+    },
+    {
+      "label": ".LateUpdate()",
+      "file_type": "code",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Controllers/ObservedPlayerLadderController.cs",
+      "source_location": "L50",
+      "metadata": {
+        "namespace": "TRL.FikaSync.ClimbableLadders.Controllers",
+        "scope_chain": [
+          "s157"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "controllers_observedplayerladdercontroller_trl_fikasync_climbableladders_controllers_observedplayerladdercontroller_lateupdate",
+      "community": 1,
+      "community_name": "ObservedPlayerLadderController",
+      "norm_label": ".lateupdate()"
+    },
+    {
+      "label": ".OnDestroy()",
+      "file_type": "code",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Controllers/ObservedPlayerLadderController.cs",
+      "source_location": "L65",
+      "metadata": {
+        "namespace": "TRL.FikaSync.ClimbableLadders.Controllers",
+        "scope_chain": [
+          "s157"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "controllers_observedplayerladdercontroller_trl_fikasync_climbableladders_controllers_observedplayerladdercontroller_ondestroy",
+      "community": 1,
+      "community_name": "ObservedPlayerLadderController",
+      "norm_label": ".ondestroy()"
+    },
+    {
+      "label": ".Player_OnPlayerDead()",
+      "file_type": "code",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Controllers/ObservedPlayerLadderController.cs",
+      "source_location": "L40",
+      "metadata": {
+        "namespace": "TRL.FikaSync.ClimbableLadders.Controllers",
+        "scope_chain": [
+          "s157"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "controllers_observedplayerladdercontroller_trl_fikasync_climbableladders_controllers_observedplayerladdercontroller_player_onplayerdead",
+      "community": 1,
+      "community_name": "ObservedPlayerLadderController",
+      "norm_label": ".player_onplayerdead()"
+    },
+    {
+      "label": ".ReceiveBarAngle()",
+      "file_type": "code",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Controllers/ObservedPlayerLadderController.cs",
+      "source_location": "L45",
+      "metadata": {
+        "namespace": "TRL.FikaSync.ClimbableLadders.Controllers",
+        "scope_chain": [
+          "s157"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "controllers_observedplayerladdercontroller_trl_fikasync_climbableladders_controllers_observedplayerladdercontroller_receivebarangle",
+      "community": 1,
+      "community_name": "ObservedPlayerLadderController",
+      "norm_label": ".receivebarangle()"
+    },
+    {
+      "label": ".Deserialize()",
+      "file_type": "code",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/Packets/LadderStatePacket.cs",
+      "source_location": "L24",
+      "metadata": {
+        "namespace": "TRL.FikaSync.ClimbableLadders.Networking.Packets",
+        "scope_chain": [
+          "s46"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "networking_packets_ladderstatepacket_trl_fikasync_climbableladders_networking_packets_ladderstatepacket_deserialize",
+      "community": 3,
+      "community_name": "LadderStatePacket",
+      "norm_label": ".deserialize()"
+    },
+    {
+      "label": ".Serialize()",
+      "file_type": "code",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/Packets/LadderStatePacket.cs",
+      "source_location": "L17",
+      "metadata": {
+        "namespace": "TRL.FikaSync.ClimbableLadders.Networking.Packets",
+        "scope_chain": [
+          "s46"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "networking_packets_ladderstatepacket_trl_fikasync_climbableladders_networking_packets_ladderstatepacket_serialize",
+      "community": 3,
+      "community_name": "LadderStatePacket",
+      "norm_label": ".serialize()"
+    },
+    {
+      "label": ".OnTrackerDisposed()",
+      "file_type": "code",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/LadderNetworkHandler.cs",
+      "source_location": "L63",
+      "metadata": {
+        "namespace": "TRL.FikaSync.ClimbableLadders.Networking",
+        "scope_chain": [
+          "s472"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler_ontrackerdisposed",
+      "community": 4,
+      "community_name": "MainPlayerLadderTracker",
+      "norm_label": ".ontrackerdisposed()"
+    },
+    {
+      "label": ".Controller_OnBarAngleChanged()",
+      "file_type": "code",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/MainPlayerLadderTracker.cs",
+      "source_location": "L74",
+      "metadata": {
+        "namespace": "TRL.FikaSync.ClimbableLadders.Networking",
+        "scope_chain": [
+          "s235"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "networking_mainplayerladdertracker_trl_fikasync_climbableladders_networking_mainplayerladdertracker_controller_onbaranglechanged",
+      "community": 4,
+      "community_name": "MainPlayerLadderTracker",
+      "norm_label": ".controller_onbaranglechanged()"
+    },
+    {
+      "label": ".Controller_OnProceduralBodyCreate()",
+      "file_type": "code",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/MainPlayerLadderTracker.cs",
+      "source_location": "L40",
+      "metadata": {
+        "namespace": "TRL.FikaSync.ClimbableLadders.Networking",
+        "scope_chain": [
+          "s235"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "networking_mainplayerladdertracker_trl_fikasync_climbableladders_networking_mainplayerladdertracker_controller_onproceduralbodycreate",
+      "community": 4,
+      "community_name": "MainPlayerLadderTracker",
+      "norm_label": ".controller_onproceduralbodycreate()"
+    },
+    {
+      "label": ".Controller_OnProceduralBodyDestroy()",
+      "file_type": "code",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/MainPlayerLadderTracker.cs",
+      "source_location": "L56",
+      "metadata": {
+        "namespace": "TRL.FikaSync.ClimbableLadders.Networking",
+        "scope_chain": [
+          "s235"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "networking_mainplayerladdertracker_trl_fikasync_climbableladders_networking_mainplayerladdertracker_controller_onproceduralbodydestroy",
+      "community": 4,
+      "community_name": "MainPlayerLadderTracker",
+      "norm_label": ".controller_onproceduralbodydestroy()"
+    },
+    {
+      "label": ".Dispose()",
+      "file_type": "code",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/MainPlayerLadderTracker.cs",
+      "source_location": "L93",
+      "metadata": {
+        "namespace": "TRL.FikaSync.ClimbableLadders.Networking",
+        "scope_chain": [
+          "s235"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "networking_mainplayerladdertracker_trl_fikasync_climbableladders_networking_mainplayerladdertracker_dispose",
+      "community": 4,
+      "community_name": "MainPlayerLadderTracker",
+      "norm_label": ".dispose()"
+    },
+    {
+      "label": ".GetPlayerNetId()",
+      "file_type": "code",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/MainPlayerLadderTracker.cs",
+      "source_location": "L30",
+      "metadata": {
+        "namespace": "TRL.FikaSync.ClimbableLadders.Networking",
+        "scope_chain": [
+          "s235"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "networking_mainplayerladdertracker_trl_fikasync_climbableladders_networking_mainplayerladdertracker_getplayernetid",
+      "community": 4,
+      "community_name": "MainPlayerLadderTracker",
+      "norm_label": ".getplayernetid()"
+    },
+    {
+      "label": ".Deserialize()",
+      "file_type": "code",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/Packets/BarAnglePacket.cs",
+      "source_location": "L16",
+      "metadata": {
+        "namespace": "TRL.FikaSync.ClimbableLadders.Networking.Packets",
+        "scope_chain": [
+          "s46"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "networking_packets_baranglepacket_trl_fikasync_climbableladders_networking_packets_baranglepacket_deserialize",
+      "community": 5,
+      "community_name": "BarAnglePacket",
+      "norm_label": ".deserialize()"
+    },
+    {
+      "label": ".Serialize()",
+      "file_type": "code",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/Packets/BarAnglePacket.cs",
+      "source_location": "L10",
+      "metadata": {
+        "namespace": "TRL.FikaSync.ClimbableLadders.Networking.Packets",
+        "scope_chain": [
+          "s46"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "networking_packets_baranglepacket_trl_fikasync_climbableladders_networking_packets_baranglepacket_serialize",
+      "community": 5,
+      "community_name": "BarAnglePacket",
+      "norm_label": ".serialize()"
+    },
+    {
+      "label": ".Awake()",
+      "file_type": "code",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Plugin.cs",
+      "source_location": "L18",
+      "metadata": {
+        "namespace": "TRL.FikaSync.ClimbableLadders",
+        "scope_chain": [
+          "s155"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "plugin_trl_fikasync_climbableladders_plugin_awake",
+      "community": 6,
+      "community_name": "Plugin",
+      "norm_label": ".awake()"
+    },
+    {
+      "label": ".FindObjectsByTypeAndDestroy()",
+      "file_type": "code",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Plugin.cs",
+      "source_location": "L37",
+      "metadata": {
+        "namespace": "TRL.FikaSync.ClimbableLadders",
+        "scope_chain": [
+          "s155"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "plugin_trl_fikasync_climbableladders_plugin_findobjectsbytypeanddestroy",
+      "community": 6,
+      "community_name": "Plugin",
+      "norm_label": ".findobjectsbytypeanddestroy()"
+    },
+    {
+      "label": ".OnDestroy()",
+      "file_type": "code",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Plugin.cs",
+      "source_location": "L27",
+      "metadata": {
+        "namespace": "TRL.FikaSync.ClimbableLadders",
+        "scope_chain": [
+          "s155"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "plugin_trl_fikasync_climbableladders_plugin_ondestroy",
+      "community": 6,
+      "community_name": "Plugin",
+      "norm_label": ".ondestroy()"
+    },
+    {
+      "label": "FikaNetworkManagerCreatedEvent",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "fikanetworkmanagercreatedevent",
+      "community": 0,
+      "community_name": "LadderNetworkHandler",
+      "norm_label": "fikanetworkmanagercreatedevent"
+    },
+    {
+      "label": "IFikaNetworkManager",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "ifikanetworkmanager",
+      "community": 0,
+      "community_name": "LadderNetworkHandler",
+      "norm_label": "ifikanetworkmanager"
+    },
+    {
+      "label": "List",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "list",
+      "community": 0,
+      "community_name": "LadderNetworkHandler",
+      "norm_label": "list"
+    },
+    {
+      "label": "NetPacketProcessor",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "netpacketprocessor",
+      "community": 0,
+      "community_name": "LadderNetworkHandler",
+      "norm_label": "netpacketprocessor"
+    },
+    {
+      "label": "Player",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "networking_laddernetworkhandler_cs_player",
+      "community": 0,
+      "community_name": "LadderNetworkHandler",
+      "norm_label": "player"
+    },
+    {
+      "label": "PlayerLadderController",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "networking_laddernetworkhandler_cs_playerladdercontroller",
+      "community": 0,
+      "community_name": "LadderNetworkHandler",
+      "norm_label": "playerladdercontroller"
+    },
+    {
+      "label": "float",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "controllers_observedplayerladdercontroller_cs_float",
+      "community": 1,
+      "community_name": "ObservedPlayerLadderController",
+      "norm_label": "float"
+    },
+    {
+      "label": "Player",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "controllers_observedplayerladdercontroller_cs_player",
+      "community": 1,
+      "community_name": "ObservedPlayerLadderController",
+      "norm_label": "player"
+    },
+    {
+      "label": "DamageInfo",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "damageinfo",
+      "community": 1,
+      "community_name": "ObservedPlayerLadderController",
+      "norm_label": "damageinfo"
+    },
+    {
+      "label": "EBodyPart",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "ebodypart",
+      "community": 1,
+      "community_name": "ObservedPlayerLadderController",
+      "norm_label": "ebodypart"
+    },
+    {
+      "label": "IPlayer",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "iplayer",
+      "community": 1,
+      "community_name": "ObservedPlayerLadderController",
+      "norm_label": "iplayer"
+    },
+    {
+      "label": "Ladder",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "ladder",
+      "community": 1,
+      "community_name": "ObservedPlayerLadderController",
+      "norm_label": "ladder"
+    },
+    {
+      "label": "MonoBehaviour",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "monobehaviour",
+      "community": 1,
+      "community_name": "ObservedPlayerLadderController",
+      "norm_label": "monobehaviour"
+    },
+    {
+      "label": "ProceduralLadderBody",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "proceduralladderbody",
+      "community": 1,
+      "community_name": "ObservedPlayerLadderController",
+      "norm_label": "proceduralladderbody"
+    },
+    {
+      "label": "ObservedPlayerLadderController.cs",
+      "file_type": "code",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Controllers/ObservedPlayerLadderController.cs",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "controllers_observedplayerladdercontroller",
+      "community": 2,
+      "community_name": "LadderNetworkHandler.cs",
+      "norm_label": "observedplayerladdercontroller.cs"
+    },
+    {
+      "label": "TRL.FikaSync.ClimbableLadders",
+      "file_type": "code",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Plugin.cs",
+      "source_location": "L7",
+      "type": "namespace",
+      "metadata": {
+        "kind": "csharp_namespace",
+        "namespace": "TRL.FikaSync.ClimbableLadders"
+      },
+      "_origin": "ast",
+      "id": "csharp_namespace:3b5185c43920b722",
+      "community": 2,
+      "community_name": "LadderNetworkHandler.cs",
+      "norm_label": "trl.fikasync.climbableladders"
+    },
+    {
+      "label": "TRL.FikaSync.ClimbableLadders.Controllers",
+      "file_type": "code",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Controllers/ObservedPlayerLadderController.cs",
+      "source_location": "L11",
+      "type": "namespace",
+      "metadata": {
+        "kind": "csharp_namespace",
+        "namespace": "TRL.FikaSync.ClimbableLadders.Controllers"
+      },
+      "_origin": "ast",
+      "id": "csharp_namespace:6a0f892274ccb6fc",
+      "community": 2,
+      "community_name": "LadderNetworkHandler.cs",
+      "norm_label": "trl.fikasync.climbableladders.controllers"
+    },
+    {
+      "label": "TRL.FikaSync.ClimbableLadders.Networking.Packets",
+      "file_type": "code",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/Packets/BarAnglePacket.cs",
+      "source_location": "L3",
+      "type": "namespace",
+      "metadata": {
+        "kind": "csharp_namespace",
+        "namespace": "TRL.FikaSync.ClimbableLadders.Networking.Packets"
+      },
+      "_origin": "ast",
+      "id": "csharp_namespace:b14ccdc41c31183c",
+      "community": 2,
+      "community_name": "LadderNetworkHandler.cs",
+      "norm_label": "trl.fikasync.climbableladders.networking.packets"
+    },
+    {
+      "label": "TRL.FikaSync.ClimbableLadders.Networking",
+      "file_type": "code",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/LadderNetworkHandler.cs",
+      "source_location": "L18",
+      "type": "namespace",
+      "metadata": {
+        "kind": "csharp_namespace",
+        "namespace": "TRL.FikaSync.ClimbableLadders.Networking"
+      },
+      "_origin": "ast",
+      "id": "csharp_namespace:c9f677ae584b22aa",
+      "community": 2,
+      "community_name": "LadderNetworkHandler.cs",
+      "norm_label": "trl.fikasync.climbableladders.networking"
+    },
+    {
+      "label": "tarkin.ladders.bep.csproj",
+      "file_type": "code",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/../../Climbable Ladders/modded/ladders.bep/tarkin.ladders.bep.csproj",
+      "source_location": null,
+      "_origin": "ast",
+      "id": "ext_climbable_ladders_modded_ladders_bep_tarkin_ladders_bep_csproj",
+      "community": 2,
+      "community_name": "LadderNetworkHandler.cs",
+      "norm_label": "tarkin.ladders.bep.csproj"
+    },
+    {
+      "label": "tarkin.ladders.shared.csproj",
+      "file_type": "code",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/../../Climbable Ladders/modded/ladders.shared/tarkin.ladders.shared.csproj",
+      "source_location": null,
+      "_origin": "ast",
+      "id": "ext_climbable_ladders_modded_ladders_shared_tarkin_ladders_shared_csproj",
+      "community": 2,
+      "community_name": "LadderNetworkHandler.cs",
+      "norm_label": "tarkin.ladders.shared.csproj"
+    },
+    {
+      "label": "LadderNetworkHandler.cs",
+      "file_type": "code",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/LadderNetworkHandler.cs",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "networking_laddernetworkhandler",
+      "community": 2,
+      "community_name": "LadderNetworkHandler.cs",
+      "norm_label": "laddernetworkhandler.cs"
+    },
+    {
+      "label": "MainPlayerLadderTracker.cs",
+      "file_type": "code",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/MainPlayerLadderTracker.cs",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "networking_mainplayerladdertracker",
+      "community": 2,
+      "community_name": "LadderNetworkHandler.cs",
+      "norm_label": "mainplayerladdertracker.cs"
+    },
+    {
+      "label": "BarAnglePacket.cs",
+      "file_type": "code",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/Packets/BarAnglePacket.cs",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "networking_packets_baranglepacket",
+      "community": 2,
+      "community_name": "LadderNetworkHandler.cs",
+      "norm_label": "baranglepacket.cs"
+    },
+    {
+      "label": "LadderStatePacket.cs",
+      "file_type": "code",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/Packets/LadderStatePacket.cs",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "networking_packets_ladderstatepacket",
+      "community": 2,
+      "community_name": "LadderNetworkHandler.cs",
+      "norm_label": "ladderstatepacket.cs"
+    },
+    {
+      "label": "Microsoft.Unity.Analyzers (1.23.0)",
+      "file_type": "code",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/TRL-FikaSync-ClimbableLadders.csproj",
+      "source_location": null,
+      "_origin": "ast",
+      "id": "nuget_microsoft_unity_analyzers",
+      "community": 2,
+      "community_name": "LadderNetworkHandler.cs",
+      "norm_label": "microsoft.unity.analyzers (1.23.0)"
+    },
+    {
+      "label": "UnityEngine.Modules (2022.3.43)",
+      "file_type": "code",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/TRL-FikaSync-ClimbableLadders.csproj",
+      "source_location": null,
+      "_origin": "ast",
+      "id": "nuget_unityengine_modules",
+      "community": 2,
+      "community_name": "LadderNetworkHandler.cs",
+      "norm_label": "unityengine.modules (2022.3.43)"
+    },
+    {
+      "label": "Plugin.cs",
+      "file_type": "code",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Plugin.cs",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "plugin",
+      "community": 2,
+      "community_name": "LadderNetworkHandler.cs",
+      "norm_label": "plugin.cs"
+    },
+    {
+      "label": "TRL-FikaSync-ClimbableLadders.csproj",
+      "file_type": "code",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/TRL-FikaSync-ClimbableLadders.csproj",
+      "source_location": null,
+      "_origin": "ast",
+      "id": "trl_fikasync_climbableladders",
+      "community": 2,
+      "community_name": "LadderNetworkHandler.cs",
+      "norm_label": "trl-fikasync-climbableladders.csproj"
+    },
+    {
+      "label": "netstandard2.1",
+      "file_type": "concept",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/TRL-FikaSync-ClimbableLadders.csproj",
+      "source_location": null,
+      "_origin": "ast",
+      "id": "framework_netstandard2_1",
+      "community": 2,
+      "community_name": "LadderNetworkHandler.cs",
+      "norm_label": "netstandard2.1"
+    },
+    {
+      "label": "Microsoft.NET.Sdk",
+      "file_type": "concept",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/TRL-FikaSync-ClimbableLadders.csproj",
+      "source_location": null,
+      "_origin": "ast",
+      "id": "sdk_microsoft_net_sdk",
+      "community": 2,
+      "community_name": "LadderNetworkHandler.cs",
+      "norm_label": "microsoft.net.sdk"
+    },
+    {
+      "label": "EStateType",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "estatetype",
+      "community": 3,
+      "community_name": "LadderStatePacket",
+      "norm_label": "estatetype"
+    },
+    {
+      "label": "int",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "networking_packets_ladderstatepacket_cs_int",
+      "community": 3,
+      "community_name": "LadderStatePacket",
+      "norm_label": "int"
+    },
+    {
+      "label": "NetDataReader",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "networking_packets_ladderstatepacket_cs_netdatareader",
+      "community": 3,
+      "community_name": "LadderStatePacket",
+      "norm_label": "netdatareader"
+    },
+    {
+      "label": "NetDataWriter",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "networking_packets_ladderstatepacket_cs_netdatawriter",
+      "community": 3,
+      "community_name": "LadderStatePacket",
+      "norm_label": "netdatawriter"
+    },
+    {
+      "label": "string",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "string",
+      "community": 3,
+      "community_name": "LadderStatePacket",
+      "norm_label": "string"
+    },
+    {
+      "label": "Action",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "action",
+      "community": 4,
+      "community_name": "MainPlayerLadderTracker",
+      "norm_label": "action"
+    },
+    {
+      "label": "bool",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "bool",
+      "community": 4,
+      "community_name": "MainPlayerLadderTracker",
+      "norm_label": "bool"
+    },
+    {
+      "label": "IDisposable",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "idisposable",
+      "community": 4,
+      "community_name": "MainPlayerLadderTracker",
+      "norm_label": "idisposable"
+    },
+    {
+      "label": "float",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "networking_mainplayerladdertracker_cs_float",
+      "community": 4,
+      "community_name": "MainPlayerLadderTracker",
+      "norm_label": "float"
+    },
+    {
+      "label": "PlayerLadderController",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "networking_mainplayerladdertracker_cs_playerladdercontroller",
+      "community": 4,
+      "community_name": "MainPlayerLadderTracker",
+      "norm_label": "playerladdercontroller"
+    },
+    {
+      "label": "INetSerializable",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "inetserializable",
+      "community": 5,
+      "community_name": "BarAnglePacket",
+      "norm_label": "inetserializable"
+    },
+    {
+      "label": "float",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "networking_packets_baranglepacket_cs_float",
+      "community": 5,
+      "community_name": "BarAnglePacket",
+      "norm_label": "float"
+    },
+    {
+      "label": "int",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "networking_packets_baranglepacket_cs_int",
+      "community": 5,
+      "community_name": "BarAnglePacket",
+      "norm_label": "int"
+    },
+    {
+      "label": "NetDataReader",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "networking_packets_baranglepacket_cs_netdatareader",
+      "community": 5,
+      "community_name": "BarAnglePacket",
+      "norm_label": "netdatareader"
+    },
+    {
+      "label": "NetDataWriter",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "networking_packets_baranglepacket_cs_netdatawriter",
+      "community": 5,
+      "community_name": "BarAnglePacket",
+      "norm_label": "netdatawriter"
+    },
+    {
+      "label": "BaseUnityPlugin",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "baseunityplugin",
+      "community": 6,
+      "community_name": "Plugin",
+      "norm_label": "baseunityplugin"
+    },
+    {
+      "label": "ManualLogSource",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "manuallogsource",
+      "community": 6,
+      "community_name": "Plugin",
+      "norm_label": "manuallogsource"
+    }
+  ],
+  "links": [
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/LadderNetworkHandler.cs",
+      "source_location": "L212",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler_dispose",
+      "target": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler_unregisterpackets",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/LadderNetworkHandler.cs",
+      "source_location": "L161",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler_onbaranglepacketreceived",
+      "target": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler_resolveplayerbynetid",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/LadderNetworkHandler.cs",
+      "source_location": "L40",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler_onfikanetworkcreated",
+      "target": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler_registerpackets",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/LadderNetworkHandler.cs",
+      "source_location": "L117",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler_onladderstatepacketreceived",
+      "target": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler_resolveplayerbynetid",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/LadderNetworkHandler.cs",
+      "source_location": "L178",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler_unregisterpackets",
+      "target": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler_getpacketprocessor",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/MainPlayerLadderTracker.cs",
+      "source_location": "L84",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "networking_mainplayerladdertracker_trl_fikasync_climbableladders_networking_mainplayerladdertracker_controller_onbaranglechanged",
+      "target": "networking_mainplayerladdertracker_trl_fikasync_climbableladders_networking_mainplayerladdertracker_getplayernetid",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/MainPlayerLadderTracker.cs",
+      "source_location": "L47",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "networking_mainplayerladdertracker_trl_fikasync_climbableladders_networking_mainplayerladdertracker_controller_onproceduralbodycreate",
+      "target": "networking_mainplayerladdertracker_trl_fikasync_climbableladders_networking_mainplayerladdertracker_getplayernetid",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/MainPlayerLadderTracker.cs",
+      "source_location": "L63",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "networking_mainplayerladdertracker_trl_fikasync_climbableladders_networking_mainplayerladdertracker_controller_onproceduralbodydestroy",
+      "target": "networking_mainplayerladdertracker_trl_fikasync_climbableladders_networking_mainplayerladdertracker_getplayernetid",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/MainPlayerLadderTracker.cs",
+      "source_location": "L71",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "networking_mainplayerladdertracker_trl_fikasync_climbableladders_networking_mainplayerladdertracker_controller_onproceduralbodydestroy",
+      "target": "networking_mainplayerladdertracker_trl_fikasync_climbableladders_networking_mainplayerladdertracker_dispose",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/MainPlayerLadderTracker.cs",
+      "source_location": "L15",
+      "weight": 1.0,
+      "context": "field",
+      "metadata": {
+        "ref_token": "Action"
+      },
+      "_origin": "ast",
+      "source": "networking_mainplayerladdertracker_trl_fikasync_climbableladders_networking_mainplayerladdertracker",
+      "target": "action",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/Packets/LadderStatePacket.cs",
+      "source_location": "L15",
+      "weight": 1.0,
+      "context": "field",
+      "metadata": {
+        "ref_token": "EStateType"
+      },
+      "_origin": "ast",
+      "source": "networking_packets_ladderstatepacket_trl_fikasync_climbableladders_networking_packets_ladderstatepacket",
+      "target": "estatetype",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Plugin.cs",
+      "source_location": "L16",
+      "weight": 1.0,
+      "context": "field",
+      "metadata": {
+        "ref_token": "LadderNetworkHandler"
+      },
+      "_origin": "ast",
+      "source": "plugin_trl_fikasync_climbableladders_plugin",
+      "target": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/LadderNetworkHandler.cs",
+      "source_location": "L22",
+      "weight": 1.0,
+      "context": "field",
+      "metadata": {
+        "ref_token": "List"
+      },
+      "_origin": "ast",
+      "source": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler",
+      "target": "list",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Plugin.cs",
+      "source_location": "L14",
+      "weight": 1.0,
+      "context": "field",
+      "metadata": {
+        "ref_token": "ManualLogSource"
+      },
+      "_origin": "ast",
+      "source": "plugin_trl_fikasync_climbableladders_plugin",
+      "target": "manuallogsource",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Controllers/ObservedPlayerLadderController.cs",
+      "source_location": "L16",
+      "weight": 1.0,
+      "context": "field",
+      "metadata": {
+        "ref_token": "Player"
+      },
+      "_origin": "ast",
+      "source": "controllers_observedplayerladdercontroller_trl_fikasync_climbableladders_controllers_observedplayerladdercontroller",
+      "target": "controllers_observedplayerladdercontroller_cs_player",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/MainPlayerLadderTracker.cs",
+      "source_location": "L14",
+      "weight": 1.0,
+      "context": "field",
+      "metadata": {
+        "ref_token": "PlayerLadderController"
+      },
+      "_origin": "ast",
+      "source": "networking_mainplayerladdertracker_trl_fikasync_climbableladders_networking_mainplayerladdertracker",
+      "target": "networking_mainplayerladdertracker_cs_playerladdercontroller",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Controllers/ObservedPlayerLadderController.cs",
+      "source_location": "L17",
+      "weight": 1.0,
+      "context": "field",
+      "metadata": {
+        "ref_token": "ProceduralLadderBody"
+      },
+      "_origin": "ast",
+      "source": "controllers_observedplayerladdercontroller_trl_fikasync_climbableladders_controllers_observedplayerladdercontroller",
+      "target": "proceduralladderbody",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/MainPlayerLadderTracker.cs",
+      "source_location": "L18",
+      "weight": 1.0,
+      "context": "field",
+      "metadata": {
+        "ref_token": "bool"
+      },
+      "_origin": "ast",
+      "source": "networking_mainplayerladdertracker_trl_fikasync_climbableladders_networking_mainplayerladdertracker",
+      "target": "bool",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Controllers/ObservedPlayerLadderController.cs",
+      "source_location": "L23",
+      "weight": 1.0,
+      "context": "field",
+      "metadata": {
+        "ref_token": "float"
+      },
+      "_origin": "ast",
+      "source": "controllers_observedplayerladdercontroller_trl_fikasync_climbableladders_controllers_observedplayerladdercontroller",
+      "target": "controllers_observedplayerladdercontroller_cs_float",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/MainPlayerLadderTracker.cs",
+      "source_location": "L17",
+      "weight": 1.0,
+      "context": "field",
+      "metadata": {
+        "ref_token": "float"
+      },
+      "_origin": "ast",
+      "source": "networking_mainplayerladdertracker_trl_fikasync_climbableladders_networking_mainplayerladdertracker",
+      "target": "networking_mainplayerladdertracker_cs_float",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/Packets/BarAnglePacket.cs",
+      "source_location": "L8",
+      "weight": 1.0,
+      "context": "field",
+      "metadata": {
+        "ref_token": "float"
+      },
+      "_origin": "ast",
+      "source": "networking_packets_baranglepacket_trl_fikasync_climbableladders_networking_packets_baranglepacket",
+      "target": "networking_packets_baranglepacket_cs_float",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/Packets/BarAnglePacket.cs",
+      "source_location": "L7",
+      "weight": 1.0,
+      "context": "field",
+      "metadata": {
+        "ref_token": "int"
+      },
+      "_origin": "ast",
+      "source": "networking_packets_baranglepacket_trl_fikasync_climbableladders_networking_packets_baranglepacket",
+      "target": "networking_packets_baranglepacket_cs_int",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/Packets/LadderStatePacket.cs",
+      "source_location": "L13",
+      "weight": 1.0,
+      "context": "field",
+      "metadata": {
+        "ref_token": "int"
+      },
+      "_origin": "ast",
+      "source": "networking_packets_ladderstatepacket_trl_fikasync_climbableladders_networking_packets_ladderstatepacket",
+      "target": "networking_packets_ladderstatepacket_cs_int",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/Packets/LadderStatePacket.cs",
+      "source_location": "L14",
+      "weight": 1.0,
+      "context": "field",
+      "metadata": {
+        "ref_token": "string"
+      },
+      "_origin": "ast",
+      "source": "networking_packets_ladderstatepacket_trl_fikasync_climbableladders_networking_packets_ladderstatepacket",
+      "target": "string",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/LadderNetworkHandler.cs",
+      "source_location": "L14",
+      "weight": 1.0,
+      "metadata": {
+        "using_kind": "namespace",
+        "target_fqn": "TRL.FikaSync.ClimbableLadders.Controllers",
+        "scope_kind": "file"
+      },
+      "_origin": "ast",
+      "source": "networking_laddernetworkhandler",
+      "target": "csharp_namespace:6a0f892274ccb6fc",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Plugin.cs",
+      "source_location": "L3",
+      "weight": 1.0,
+      "metadata": {
+        "using_kind": "namespace",
+        "target_fqn": "TRL.FikaSync.ClimbableLadders.Controllers",
+        "scope_kind": "file"
+      },
+      "_origin": "ast",
+      "source": "plugin",
+      "target": "csharp_namespace:6a0f892274ccb6fc",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Plugin.cs",
+      "source_location": "L4",
+      "weight": 1.0,
+      "metadata": {
+        "using_kind": "namespace",
+        "target_fqn": "TRL.FikaSync.ClimbableLadders.Networking",
+        "scope_kind": "file"
+      },
+      "_origin": "ast",
+      "source": "plugin",
+      "target": "csharp_namespace:c9f677ae584b22aa",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/LadderNetworkHandler.cs",
+      "source_location": "L15",
+      "weight": 1.0,
+      "metadata": {
+        "using_kind": "namespace",
+        "target_fqn": "TRL.FikaSync.ClimbableLadders.Networking.Packets",
+        "scope_kind": "file"
+      },
+      "_origin": "ast",
+      "source": "networking_laddernetworkhandler",
+      "target": "csharp_namespace:b14ccdc41c31183c",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/MainPlayerLadderTracker.cs",
+      "source_location": "L7",
+      "weight": 1.0,
+      "metadata": {
+        "using_kind": "namespace",
+        "target_fqn": "TRL.FikaSync.ClimbableLadders.Networking.Packets",
+        "scope_kind": "file"
+      },
+      "_origin": "ast",
+      "source": "networking_mainplayerladdertracker",
+      "target": "csharp_namespace:b14ccdc41c31183c",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Controllers/ObservedPlayerLadderController.cs",
+      "source_location": "L3",
+      "weight": 1.0,
+      "metadata": {
+        "using_kind": "namespace",
+        "target_fqn": "tarkin.ladders.bep",
+        "scope_kind": "file"
+      },
+      "_origin": "ast",
+      "source": "controllers_observedplayerladdercontroller",
+      "target": "ext_climbable_ladders_modded_ladders_bep_tarkin_ladders_bep_csproj",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/LadderNetworkHandler.cs",
+      "source_location": "L12",
+      "weight": 1.0,
+      "metadata": {
+        "using_kind": "namespace",
+        "target_fqn": "tarkin.ladders.bep",
+        "scope_kind": "file"
+      },
+      "_origin": "ast",
+      "source": "networking_laddernetworkhandler",
+      "target": "ext_climbable_ladders_modded_ladders_bep_tarkin_ladders_bep_csproj",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/MainPlayerLadderTracker.cs",
+      "source_location": "L6",
+      "weight": 1.0,
+      "metadata": {
+        "using_kind": "namespace",
+        "target_fqn": "tarkin.ladders.bep",
+        "scope_kind": "file"
+      },
+      "_origin": "ast",
+      "source": "networking_mainplayerladdertracker",
+      "target": "ext_climbable_ladders_modded_ladders_bep_tarkin_ladders_bep_csproj",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Controllers/ObservedPlayerLadderController.cs",
+      "source_location": "L4",
+      "weight": 1.0,
+      "metadata": {
+        "using_kind": "namespace",
+        "target_fqn": "tarkin.ladders.shared",
+        "scope_kind": "file"
+      },
+      "_origin": "ast",
+      "source": "controllers_observedplayerladdercontroller",
+      "target": "ext_climbable_ladders_modded_ladders_shared_tarkin_ladders_shared_csproj",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/LadderNetworkHandler.cs",
+      "source_location": "L13",
+      "weight": 1.0,
+      "metadata": {
+        "using_kind": "namespace",
+        "target_fqn": "tarkin.ladders.shared",
+        "scope_kind": "file"
+      },
+      "_origin": "ast",
+      "source": "networking_laddernetworkhandler",
+      "target": "ext_climbable_ladders_modded_ladders_shared_tarkin_ladders_shared_csproj",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/LadderNetworkHandler.cs",
+      "source_location": "L157",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "metadata": {
+        "ref_token": "BarAnglePacket"
+      },
+      "_origin": "ast",
+      "source": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler_onbaranglepacketreceived",
+      "target": "networking_packets_baranglepacket_trl_fikasync_climbableladders_networking_packets_baranglepacket",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Controllers/ObservedPlayerLadderController.cs",
+      "source_location": "L40",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "metadata": {
+        "ref_token": "DamageInfo"
+      },
+      "_origin": "ast",
+      "source": "controllers_observedplayerladdercontroller_trl_fikasync_climbableladders_controllers_observedplayerladdercontroller_player_onplayerdead",
+      "target": "damageinfo",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Controllers/ObservedPlayerLadderController.cs",
+      "source_location": "L40",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "metadata": {
+        "ref_token": "EBodyPart"
+      },
+      "_origin": "ast",
+      "source": "controllers_observedplayerladdercontroller_trl_fikasync_climbableladders_controllers_observedplayerladdercontroller_player_onplayerdead",
+      "target": "ebodypart",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/LadderNetworkHandler.cs",
+      "source_location": "L36",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "metadata": {
+        "ref_token": "FikaNetworkManagerCreatedEvent"
+      },
+      "_origin": "ast",
+      "source": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler_onfikanetworkcreated",
+      "target": "fikanetworkmanagercreatedevent",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/LadderNetworkHandler.cs",
+      "source_location": "L186",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "metadata": {
+        "ref_token": "IFikaNetworkManager"
+      },
+      "_origin": "ast",
+      "source": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler_getpacketprocessor",
+      "target": "ifikanetworkmanager",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/LadderNetworkHandler.cs",
+      "source_location": "L44",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "metadata": {
+        "ref_token": "IFikaNetworkManager"
+      },
+      "_origin": "ast",
+      "source": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler_registerpackets",
+      "target": "ifikanetworkmanager",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/LadderNetworkHandler.cs",
+      "source_location": "L176",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "metadata": {
+        "ref_token": "IFikaNetworkManager"
+      },
+      "_origin": "ast",
+      "source": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler_unregisterpackets",
+      "target": "ifikanetworkmanager",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Controllers/ObservedPlayerLadderController.cs",
+      "source_location": "L40",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "metadata": {
+        "ref_token": "IPlayer"
+      },
+      "_origin": "ast",
+      "source": "controllers_observedplayerladdercontroller_trl_fikasync_climbableladders_controllers_observedplayerladdercontroller_player_onplayerdead",
+      "target": "iplayer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Controllers/ObservedPlayerLadderController.cs",
+      "source_location": "L25",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "metadata": {
+        "ref_token": "Ladder"
+      },
+      "_origin": "ast",
+      "source": "controllers_observedplayerladdercontroller_trl_fikasync_climbableladders_controllers_observedplayerladdercontroller_init",
+      "target": "ladder",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/LadderNetworkHandler.cs",
+      "source_location": "L113",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "metadata": {
+        "ref_token": "LadderStatePacket"
+      },
+      "_origin": "ast",
+      "source": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler_onladderstatepacketreceived",
+      "target": "networking_packets_ladderstatepacket_trl_fikasync_climbableladders_networking_packets_ladderstatepacket",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/LadderNetworkHandler.cs",
+      "source_location": "L63",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "metadata": {
+        "ref_token": "MainPlayerLadderTracker"
+      },
+      "_origin": "ast",
+      "source": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler_ontrackerdisposed",
+      "target": "networking_mainplayerladdertracker_trl_fikasync_climbableladders_networking_mainplayerladdertracker",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/Packets/BarAnglePacket.cs",
+      "source_location": "L16",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "metadata": {
+        "ref_token": "NetDataReader"
+      },
+      "_origin": "ast",
+      "source": "networking_packets_baranglepacket_trl_fikasync_climbableladders_networking_packets_baranglepacket_deserialize",
+      "target": "networking_packets_baranglepacket_cs_netdatareader",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/Packets/LadderStatePacket.cs",
+      "source_location": "L24",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "metadata": {
+        "ref_token": "NetDataReader"
+      },
+      "_origin": "ast",
+      "source": "networking_packets_ladderstatepacket_trl_fikasync_climbableladders_networking_packets_ladderstatepacket_deserialize",
+      "target": "networking_packets_ladderstatepacket_cs_netdatareader",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/Packets/BarAnglePacket.cs",
+      "source_location": "L10",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "metadata": {
+        "ref_token": "NetDataWriter"
+      },
+      "_origin": "ast",
+      "source": "networking_packets_baranglepacket_trl_fikasync_climbableladders_networking_packets_baranglepacket_serialize",
+      "target": "networking_packets_baranglepacket_cs_netdatawriter",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/Packets/LadderStatePacket.cs",
+      "source_location": "L17",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "metadata": {
+        "ref_token": "NetDataWriter"
+      },
+      "_origin": "ast",
+      "source": "networking_packets_ladderstatepacket_trl_fikasync_climbableladders_networking_packets_ladderstatepacket_serialize",
+      "target": "networking_packets_ladderstatepacket_cs_netdatawriter",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Controllers/ObservedPlayerLadderController.cs",
+      "source_location": "L40",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "metadata": {
+        "ref_token": "Player"
+      },
+      "_origin": "ast",
+      "source": "controllers_observedplayerladdercontroller_trl_fikasync_climbableladders_controllers_observedplayerladdercontroller_player_onplayerdead",
+      "target": "controllers_observedplayerladdercontroller_cs_player",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/LadderNetworkHandler.cs",
+      "source_location": "L51",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "metadata": {
+        "ref_token": "PlayerLadderController"
+      },
+      "_origin": "ast",
+      "source": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler_onplayerladdercontrollerspawned",
+      "target": "networking_laddernetworkhandler_cs_playerladdercontroller",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/LadderNetworkHandler.cs",
+      "source_location": "L186",
+      "weight": 1.0,
+      "context": "return_type",
+      "metadata": {
+        "ref_token": "NetPacketProcessor"
+      },
+      "_origin": "ast",
+      "source": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler_getpacketprocessor",
+      "target": "netpacketprocessor",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/LadderNetworkHandler.cs",
+      "source_location": "L71",
+      "weight": 1.0,
+      "context": "return_type",
+      "metadata": {
+        "ref_token": "Player"
+      },
+      "_origin": "ast",
+      "source": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler_resolveplayerbynetid",
+      "target": "networking_laddernetworkhandler_cs_player",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Plugin.cs",
+      "source_location": "L9",
+      "weight": 1.0,
+      "metadata": {
+        "ref_token": "BaseUnityPlugin"
+      },
+      "_origin": "ast",
+      "source": "plugin_trl_fikasync_climbableladders_plugin",
+      "target": "baseunityplugin",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/LadderNetworkHandler.cs",
+      "source_location": "L20",
+      "weight": 1.0,
+      "metadata": {
+        "ref_token": "IDisposable"
+      },
+      "_origin": "ast",
+      "source": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler",
+      "target": "idisposable",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/MainPlayerLadderTracker.cs",
+      "source_location": "L12",
+      "weight": 1.0,
+      "metadata": {
+        "ref_token": "IDisposable"
+      },
+      "_origin": "ast",
+      "source": "networking_mainplayerladdertracker_trl_fikasync_climbableladders_networking_mainplayerladdertracker",
+      "target": "idisposable",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/Packets/BarAnglePacket.cs",
+      "source_location": "L5",
+      "weight": 1.0,
+      "metadata": {
+        "ref_token": "INetSerializable"
+      },
+      "_origin": "ast",
+      "source": "networking_packets_baranglepacket_trl_fikasync_climbableladders_networking_packets_baranglepacket",
+      "target": "inetserializable",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/Packets/LadderStatePacket.cs",
+      "source_location": "L5",
+      "weight": 1.0,
+      "metadata": {
+        "ref_token": "INetSerializable"
+      },
+      "_origin": "ast",
+      "source": "networking_packets_ladderstatepacket_trl_fikasync_climbableladders_networking_packets_ladderstatepacket",
+      "target": "inetserializable",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Controllers/ObservedPlayerLadderController.cs",
+      "source_location": "L13",
+      "weight": 1.0,
+      "metadata": {
+        "ref_token": "MonoBehaviour"
+      },
+      "_origin": "ast",
+      "source": "controllers_observedplayerladdercontroller_trl_fikasync_climbableladders_controllers_observedplayerladdercontroller",
+      "target": "monobehaviour",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Controllers/ObservedPlayerLadderController.cs",
+      "source_location": "L11",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "controllers_observedplayerladdercontroller",
+      "target": "csharp_namespace:6a0f892274ccb6fc",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Controllers/ObservedPlayerLadderController.cs",
+      "source_location": "L13",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "controllers_observedplayerladdercontroller",
+      "target": "controllers_observedplayerladdercontroller_trl_fikasync_climbableladders_controllers_observedplayerladdercontroller",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/LadderNetworkHandler.cs",
+      "source_location": "L18",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "networking_laddernetworkhandler",
+      "target": "csharp_namespace:c9f677ae584b22aa",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/LadderNetworkHandler.cs",
+      "source_location": "L20",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "networking_laddernetworkhandler",
+      "target": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/MainPlayerLadderTracker.cs",
+      "source_location": "L10",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "networking_mainplayerladdertracker",
+      "target": "csharp_namespace:c9f677ae584b22aa",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/MainPlayerLadderTracker.cs",
+      "source_location": "L12",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "networking_mainplayerladdertracker",
+      "target": "networking_mainplayerladdertracker_trl_fikasync_climbableladders_networking_mainplayerladdertracker",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/Packets/BarAnglePacket.cs",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "networking_packets_baranglepacket",
+      "target": "csharp_namespace:b14ccdc41c31183c",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/Packets/BarAnglePacket.cs",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "networking_packets_baranglepacket",
+      "target": "networking_packets_baranglepacket_trl_fikasync_climbableladders_networking_packets_baranglepacket",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/Packets/LadderStatePacket.cs",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "networking_packets_ladderstatepacket",
+      "target": "csharp_namespace:b14ccdc41c31183c",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/Packets/LadderStatePacket.cs",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "networking_packets_ladderstatepacket",
+      "target": "networking_packets_ladderstatepacket_trl_fikasync_climbableladders_networking_packets_ladderstatepacket",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/Packets/LadderStatePacket.cs",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "networking_packets_ladderstatepacket_trl_fikasync_climbableladders_networking_packets_ladderstatepacket",
+      "target": "networking_packets_ladderstatepacket_trl_fikasync_climbableladders_networking_packets_estatetype",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Plugin.cs",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "plugin",
+      "target": "csharp_namespace:3b5185c43920b722",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Plugin.cs",
+      "source_location": "L9",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "plugin",
+      "target": "plugin_trl_fikasync_climbableladders_plugin",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/TRL-FikaSync-ClimbableLadders.csproj",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "trl_fikasync_climbableladders",
+      "target": "ext_climbable_ladders_modded_ladders_bep_tarkin_ladders_bep_csproj",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/TRL-FikaSync-ClimbableLadders.csproj",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "trl_fikasync_climbableladders",
+      "target": "ext_climbable_ladders_modded_ladders_shared_tarkin_ladders_shared_csproj",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/TRL-FikaSync-ClimbableLadders.csproj",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "trl_fikasync_climbableladders",
+      "target": "nuget_microsoft_unity_analyzers",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/TRL-FikaSync-ClimbableLadders.csproj",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "trl_fikasync_climbableladders",
+      "target": "nuget_unityengine_modules",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Controllers/ObservedPlayerLadderController.cs",
+      "source_location": "L25",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "controllers_observedplayerladdercontroller_trl_fikasync_climbableladders_controllers_observedplayerladdercontroller",
+      "target": "controllers_observedplayerladdercontroller_trl_fikasync_climbableladders_controllers_observedplayerladdercontroller_init",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Controllers/ObservedPlayerLadderController.cs",
+      "source_location": "L40",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "controllers_observedplayerladdercontroller_trl_fikasync_climbableladders_controllers_observedplayerladdercontroller",
+      "target": "controllers_observedplayerladdercontroller_trl_fikasync_climbableladders_controllers_observedplayerladdercontroller_player_onplayerdead",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Controllers/ObservedPlayerLadderController.cs",
+      "source_location": "L45",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "controllers_observedplayerladdercontroller_trl_fikasync_climbableladders_controllers_observedplayerladdercontroller",
+      "target": "controllers_observedplayerladdercontroller_trl_fikasync_climbableladders_controllers_observedplayerladdercontroller_receivebarangle",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Controllers/ObservedPlayerLadderController.cs",
+      "source_location": "L50",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "controllers_observedplayerladdercontroller_trl_fikasync_climbableladders_controllers_observedplayerladdercontroller",
+      "target": "controllers_observedplayerladdercontroller_trl_fikasync_climbableladders_controllers_observedplayerladdercontroller_lateupdate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Controllers/ObservedPlayerLadderController.cs",
+      "source_location": "L65",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "controllers_observedplayerladdercontroller_trl_fikasync_climbableladders_controllers_observedplayerladdercontroller",
+      "target": "controllers_observedplayerladdercontroller_trl_fikasync_climbableladders_controllers_observedplayerladdercontroller_ondestroy",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/LadderNetworkHandler.cs",
+      "source_location": "L113",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler",
+      "target": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler_onladderstatepacketreceived",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/LadderNetworkHandler.cs",
+      "source_location": "L157",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler",
+      "target": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler_onbaranglepacketreceived",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/LadderNetworkHandler.cs",
+      "source_location": "L176",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler",
+      "target": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler_unregisterpackets",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/LadderNetworkHandler.cs",
+      "source_location": "L186",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler",
+      "target": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler_getpacketprocessor",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/LadderNetworkHandler.cs",
+      "source_location": "L195",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler",
+      "target": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler_dispose",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/LadderNetworkHandler.cs",
+      "source_location": "L36",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler",
+      "target": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler_onfikanetworkcreated",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/LadderNetworkHandler.cs",
+      "source_location": "L44",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler",
+      "target": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler_registerpackets",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/LadderNetworkHandler.cs",
+      "source_location": "L51",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler",
+      "target": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler_onplayerladdercontrollerspawned",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/LadderNetworkHandler.cs",
+      "source_location": "L63",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler",
+      "target": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler_ontrackerdisposed",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/LadderNetworkHandler.cs",
+      "source_location": "L71",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler",
+      "target": "networking_laddernetworkhandler_trl_fikasync_climbableladders_networking_laddernetworkhandler_resolveplayerbynetid",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/MainPlayerLadderTracker.cs",
+      "source_location": "L30",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "networking_mainplayerladdertracker_trl_fikasync_climbableladders_networking_mainplayerladdertracker",
+      "target": "networking_mainplayerladdertracker_trl_fikasync_climbableladders_networking_mainplayerladdertracker_getplayernetid",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/MainPlayerLadderTracker.cs",
+      "source_location": "L40",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "networking_mainplayerladdertracker_trl_fikasync_climbableladders_networking_mainplayerladdertracker",
+      "target": "networking_mainplayerladdertracker_trl_fikasync_climbableladders_networking_mainplayerladdertracker_controller_onproceduralbodycreate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/MainPlayerLadderTracker.cs",
+      "source_location": "L56",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "networking_mainplayerladdertracker_trl_fikasync_climbableladders_networking_mainplayerladdertracker",
+      "target": "networking_mainplayerladdertracker_trl_fikasync_climbableladders_networking_mainplayerladdertracker_controller_onproceduralbodydestroy",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/MainPlayerLadderTracker.cs",
+      "source_location": "L74",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "networking_mainplayerladdertracker_trl_fikasync_climbableladders_networking_mainplayerladdertracker",
+      "target": "networking_mainplayerladdertracker_trl_fikasync_climbableladders_networking_mainplayerladdertracker_controller_onbaranglechanged",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/MainPlayerLadderTracker.cs",
+      "source_location": "L93",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "networking_mainplayerladdertracker_trl_fikasync_climbableladders_networking_mainplayerladdertracker",
+      "target": "networking_mainplayerladdertracker_trl_fikasync_climbableladders_networking_mainplayerladdertracker_dispose",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/Packets/BarAnglePacket.cs",
+      "source_location": "L10",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "networking_packets_baranglepacket_trl_fikasync_climbableladders_networking_packets_baranglepacket",
+      "target": "networking_packets_baranglepacket_trl_fikasync_climbableladders_networking_packets_baranglepacket_serialize",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/Packets/BarAnglePacket.cs",
+      "source_location": "L16",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "networking_packets_baranglepacket_trl_fikasync_climbableladders_networking_packets_baranglepacket",
+      "target": "networking_packets_baranglepacket_trl_fikasync_climbableladders_networking_packets_baranglepacket_deserialize",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/Packets/LadderStatePacket.cs",
+      "source_location": "L17",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "networking_packets_ladderstatepacket_trl_fikasync_climbableladders_networking_packets_ladderstatepacket",
+      "target": "networking_packets_ladderstatepacket_trl_fikasync_climbableladders_networking_packets_ladderstatepacket_serialize",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Networking/Packets/LadderStatePacket.cs",
+      "source_location": "L24",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "networking_packets_ladderstatepacket_trl_fikasync_climbableladders_networking_packets_ladderstatepacket",
+      "target": "networking_packets_ladderstatepacket_trl_fikasync_climbableladders_networking_packets_ladderstatepacket_deserialize",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Plugin.cs",
+      "source_location": "L18",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "plugin_trl_fikasync_climbableladders_plugin",
+      "target": "plugin_trl_fikasync_climbableladders_plugin_awake",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Plugin.cs",
+      "source_location": "L27",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "plugin_trl_fikasync_climbableladders_plugin",
+      "target": "plugin_trl_fikasync_climbableladders_plugin_ondestroy",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/Plugin.cs",
+      "source_location": "L37",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "plugin_trl_fikasync_climbableladders_plugin",
+      "target": "plugin_trl_fikasync_climbableladders_plugin_findobjectsbytypeanddestroy",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/TRL-FikaSync-ClimbableLadders.csproj",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "trl_fikasync_climbableladders",
+      "target": "framework_netstandard2_1",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-FikaSync-ClimbableLadders/modded/TRL-FikaSync-ClimbableLadders.csproj",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "trl_fikasync_climbableladders",
+      "target": "sdk_microsoft_net_sdk",
+      "confidence_score": 1.0
+    }
+  ],
+  "hyperedges": [],
+  "built_at_commit": "63aababb86f689be761af3311bcb4bdf30abf83f"
+}
