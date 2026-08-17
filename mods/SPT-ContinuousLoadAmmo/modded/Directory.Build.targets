@@ -1,0 +1,19 @@
+<Project>
+  <PropertyGroup>
+    <!-- Paths -->
+    <SPTPath Condition=" '$(SPTPath)' == '' ">E:\Tarkov Red Line\</SPTPath>
+  </PropertyGroup>
+
+  <Target Name="CopyOutput" AfterTargets="Build">
+    <!-- Release Package in mod workspace -->
+    <Copy
+      SourceFiles="@(OutputDLL)"
+      DestinationFolder="$(MSBuildProjectDirectory)\Dist\$(Authors)-$(RootNamespace)\$(DestDir)"
+      Condition="'$(Configuration)' == 'Release' AND @(OutputDLL.Count) != 0" />
+    <ZipDirectory
+      SourceDirectory="$(MSBuildProjectDirectory)\Dist\$(Authors)-$(RootNamespace)"
+      DestinationFile="$(MSBuildProjectDirectory)\Dist\$(Authors)-$(RootNamespace)-$(Version).zip"
+      Overwrite="true"
+      Condition="'$(Configuration)' == 'Release'" />
+  </Target>
+</Project>
