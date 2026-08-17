@@ -6,21 +6,20 @@ Memória cronológica de sessões de trabalho (timestamps em GMT-3). Cada entrad
 
 ---
 
-## Estado Atual (Snapshot ao Fim da Sessão — 2026-08-12)
+## Estado Atual (Snapshot ao Fim da Sessão — 2026-08-16)
 
-**Mod C# Client (v3.2.8) + C# Server (v3.2.8) compilados com sucesso (0 erros).**
+**Mod C# Client (v3.2.9) + C# Server (v3.2.9) compilados com sucesso (0 erros).**
 
 - **Identity**: `TRL-DynamicSpawn` (Client BepInEx DLL: `TRL-DynamicSpawn.dll`, Server C# DLL: `TRL-DynamicSpawn-Server.dll` com Web UI). Compatível com SPT 4.0.13 e EFT 0.16.9.
+- **Correção de Vazamento de Rogues e Raiders a 0% (`v3.2.9`)**:
+  - Adicionadas travas estritas no `DynamicSpawnManager.cs` (`RandomRogueGroup` e `RandomRaiderGroup`).
+  - O mod agora valida `GetBossChanceForMap > 0`, `Enable == true` e `!DisableBosses` antes de gerar qualquer grupo aleatório de Rogues (`exUsec`) ou Raiders (`pmcBot`).
+  - Se o mapa estiver configurado com 0% para o bot na aba BOTS, nenhum grupo aleatório vazará naquele mapa.
 - **Nível de Log de Falha na Criação de Perfil (`DynamicSpawnManager.cs`)**:
   - Rebaixada a mensagem quando o gerador assíncrono do SPT não retorna um perfil no frame de `LogError` para `LogWarning` (`Bot profile creation skipped... Member safely skipped`), indicando com clareza que o integrante foi pulado com segurança sem afetar a raid.
   - Adicionada retentativa suave de `0.1s` antes do fallback de dificuldade, reduzindo a frequência de mensagens no console.
 - **Agressividade Total do Zryachiy Não-Nativo (`v3.2.8`)**:
   - Implementado `ZryachiyAggressivenessPatch.cs` (patcheando `ZyriachyBossLogicClass.IsEnemyNow` e `Activate`).
-  - Quando Zryachiy spawna em mapas diferentes do Lighthouse (ex: Woods, Customs, Factory, Ground Zero, Shoreline), o mod ignora sua passividade nativa de negociador e força **100% de agressividade imediata** contra todos os jogadores/PMCs na partida.
-- **Regra Especial de SnipeZone para Zryachiy (`v3.2.7`)**:
-  - Quando Zryachiy for configurado para spawnar em mapas que não sejam Lighthouse sem `bossZone` específica definida pelo usuário, o `GetZoneFromConfig` busca dinamicamente qualquer `BotZone` marcada com `SnipeZone == true` no mapa (ex: "Pedra do Sniper" em Woods).
-- **Preenchimento Padrão dos BossZones (`config.default.json`)**:
-  - Padrão de fábrica atualizado a partir do arquivo de referência (`Novo padrão para usar no default/config.json`) com todos os `bossZone` oficiais marcados por padrão (ex: `ZoneCarShowroom` para Kaban em Streets, `ZoneMeteoStation,ZoneGasStation` para Goons em Shoreline).
 
 ---
 
@@ -33,16 +32,13 @@ Memória cronológica de sessões de trabalho (timestamps em GMT-3). Cada entrad
 
 ## Histórico de Sessões
 
-### 2026-08-12 — Agressividade Zryachiy (v3.2.8), SnipeZone (v3.2.7), Ground Zero (v3.2.6), Trio Goons (v3.2.5), Restrição Cultistas (v3.2.4)
+### 2026-08-16 — Correção de Vazamento de Rogues/Raiders (v3.2.9)
 
-- **Agressividade Total do Zryachiy Não-Nativo (`v3.2.8`)**:
-  - Criado `ZryachiyAggressivenessPatch.cs` forçando agressividade imediata contra alvos em mapas não-Lighthouse.
-- **Regra Especial de SnipeZone para Zryachiy (`v3.2.7`)**:
-  - Implemetada consulta de `BotZone.SnipeZone` no `GetZoneFromConfig` para Zryachiy fora de Lighthouse.
-- **Preenchimento dos BossZones Padrão (`v3.2.7`)**:
-  - `config.default.json` atualizado com todas as zonas Vanilla oficiais selecionadas por padrão.
+- **Correção de Vazamento de Rogues e Raiders a 0% (`v3.2.9`)**:
+  - Trava estrita adicionada em `DynamicSpawnManager.cs` exigindo `GetBossChanceForMap > 0`, `Enable == true` e `!DisableBosses` para grupos aleatórios.
 - **Validação de Build**:
   - `TRL-DynamicSpawn-Client.csproj` e `TRL-DynamicSpawn-Server.csproj` compilados com **0 Erros**.
+
 
 
 

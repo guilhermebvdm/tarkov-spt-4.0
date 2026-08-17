@@ -626,20 +626,25 @@ namespace TRLDynamicSpawn.Components
             // ======================================
             if (availableSlots > 0)
             {
-                if (isFirstWave && eliteConfig != null && eliteConfig.RandomRaiderGroup && UnityEngine.Random.Range(1, 101) <= eliteConfig.RandomRaiderGroupChance)
+                if (isFirstWave && eliteConfig != null && !eliteConfig.DisableBosses)
                 {
-                    int raiderSlots = Mathf.Min(availableSlots, UnityEngine.Random.Range(2, 5));
-                    Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] RANDOM RAIDER GROUP INVASION! Spawning {raiderSlots} Raiders.");
-                    GenerateAndEnqueueGroups(WildSpawnType.pmcBot, BotDifficulty.normal, raiderSlots, eliteConfig.Raiders);
-                    availableSlots -= raiderSlots;
-                }
+                    int raiderMapChance = GetBossChanceForMap(eliteConfig.Raiders?.SpawnChance, mapName);
+                    if (eliteConfig.RandomRaiderGroup && (eliteConfig.Raiders?.Enable ?? true) && raiderMapChance > 0 && UnityEngine.Random.Range(1, 101) <= eliteConfig.RandomRaiderGroupChance)
+                    {
+                        int raiderSlots = Mathf.Min(availableSlots, UnityEngine.Random.Range(2, 5));
+                        Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] RANDOM RAIDER GROUP INVASION! Spawning {raiderSlots} Raiders on {mapName}.");
+                        GenerateAndEnqueueGroups(WildSpawnType.pmcBot, BotDifficulty.normal, raiderSlots, eliteConfig.Raiders);
+                        availableSlots -= raiderSlots;
+                    }
 
-                if (isFirstWave && eliteConfig != null && eliteConfig.RandomRogueGroup && availableSlots > 0 && UnityEngine.Random.Range(1, 101) <= eliteConfig.RandomRogueGroupChance)
-                {
-                    int rogueSlots = Mathf.Min(availableSlots, UnityEngine.Random.Range(2, 5));
-                    Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] RANDOM ROGUE GROUP INVASION! Spawning {rogueSlots} Rogues.");
-                    GenerateAndEnqueueGroups(WildSpawnType.exUsec, BotDifficulty.normal, rogueSlots, eliteConfig.Rogues);
-                    availableSlots -= rogueSlots;
+                    int rogueMapChance = GetBossChanceForMap(eliteConfig.Rogues?.SpawnChance, mapName);
+                    if (eliteConfig.RandomRogueGroup && (eliteConfig.Rogues?.Enable ?? true) && rogueMapChance > 0 && availableSlots > 0 && UnityEngine.Random.Range(1, 101) <= eliteConfig.RandomRogueGroupChance)
+                    {
+                        int rogueSlots = Mathf.Min(availableSlots, UnityEngine.Random.Range(2, 5));
+                        Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] RANDOM ROGUE GROUP INVASION! Spawning {rogueSlots} Rogues on {mapName}.");
+                        GenerateAndEnqueueGroups(WildSpawnType.exUsec, BotDifficulty.normal, rogueSlots, eliteConfig.Rogues);
+                        availableSlots -= rogueSlots;
+                    }
                 }
 
                 float pmcRatio = 0.5f;
