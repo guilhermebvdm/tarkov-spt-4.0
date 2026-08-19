@@ -1,0 +1,17 @@
+Weapon position (hands)
+Pos X lateral move arma para os lados horizonalmente (parece correto)
+Pos Y vertical move arma para os lados verticalmente (parece correto)
+Pos Z profundidade move arma para frente e pra trás (parece correto)
+
+
+Weapon Rotation (Hands)
+Rot X está movendo a frente da arma (boca do cano) para cima e para baixo
+Rot Y está inclinando a arma valor positovo: sentido horário.  valor negativo: anti-horário. com ela parada na mesma posição (gira no proprio eixo)
+Weapon Rotation (Hands)
+Rot Z está movendo a frente da arma (boca do cano) para os lados (lateralmente/horizontalmente.
+O Weapon Rotation é como se a arma girasse com seu ponto central pra trás da coronha, por isso a frente da arma (boca do cano) move mais que a coronha.
+
+Head Rotation (Camera)
+Rot X move a direção que a câmera aponta (para cima e para baixo) valor positivo olha/aponta pra baixo, valor negativo/aponta olha pra cima.
+Rot Y move a direção que a câmera aponta (para esquerda e direita) valor positivo olha/aponta pra esquerda, valor negativo/aponta olha pra direita.
+Rot Z gira a câmera sendo valor positivo gira pra direita, valor negativo gira pra esquerda.
