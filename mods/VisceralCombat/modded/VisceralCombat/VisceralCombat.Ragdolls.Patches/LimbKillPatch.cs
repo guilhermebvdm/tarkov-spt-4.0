@@ -234,6 +234,7 @@ public class LimbKillPatch : ModulePatch
 				Transform[] dummyLimbs;
 				VisceralCombat.Combined.Patches.KillPatch.DismemberLimb(player, shot.Direction, dismemberPart.Value, boneName, capAsset, extraAssets, out dummyLimbs);
 				VisceralCombat.Dismemberment.Classes.LivingDismembermentController.Attach(player, dismemberPart.Value);
+				VisceralCombat.Combined.Classes.VisceralNetworkUtils.SendLivingDismemberment(player, dismemberPart.Value, shot.Direction, boneName, capAsset, extraAssets);
 			}
 			return;
 		}

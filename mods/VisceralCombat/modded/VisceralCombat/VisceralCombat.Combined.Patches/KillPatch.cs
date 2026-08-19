@@ -201,13 +201,19 @@ public class KillPatch : ModulePatch
 		}
 	}
 
-	internal static void DismemberLimb(Player player, Vector3 Direction, EBodyPart bodyPartType, string bone, string capAssetName, string[] assetNames, out Transform[] affectedLimbs)
+	internal static void DismemberLimb(Player player, Vector3 Direction, EBodyPart bodyPartType, string bone, string capAssetName, string[] assetNames, out Transform[] affectedLimbs, bool isFromNetwork = false)
 	{
 		affectedLimbs = null;
 		if (player == null || RagdollHelperClass.IsPlayerDowned(player))
 		{
 			return;
 		}
+
+		if (!isFromNetwork)
+		{
+			VisceralCombat.Combined.Classes.VisceralNetworkUtils.SendDismemberment(player, Direction, bodyPartType, bone, capAssetName, assetNames);
+		}
+
 		bool isDeadPlayer = (player == null || player.HealthController == null || !player.HealthController.IsAlive);
 		if (isDeadPlayer && player != null && player.BodyAnimatorCommon != null)
 		{
@@ -226,29 +232,6 @@ public class KillPatch : ModulePatch
 			if (val.localScale == RagdollHelperClass.limbSize)
 			{
 				continue;
-			}
-
-			// Only send Fika network packets if player is a FikaPlayer (Coop)
-			if ((FikaBackendUtils.IsServer || FikaBackendUtils.IsHeadless) && FikaBackendUtils.IsClient)
-			{
-				Transform[] array2 = affectedLimbs;
-				foreach (Transform val2 in array2)
-				{
-					limbNames = HarmonyLib.CollectionExtensions.AddItem<string>(limbNames, val2.name).ToArray();
-				}
-				if (player is FikaPlayer fikaPlayer && fikaPlayer != null && Singleton<FikaServer>.Instantiated && Singleton<FikaServer>.Instance != null)
-				{
-					DismembermentPacket dismembermentPacket = default(DismembermentPacket);
-					dismembermentPacket.playerID = fikaPlayer.NetId;
-					dismembermentPacket.Direction = Direction;
-					dismembermentPacket.bodyPartType = bodyPartType;
-					dismembermentPacket.bone = bone;
-					dismembermentPacket.capAssetName = capAssetName;
-					dismembermentPacket.assetNames = assetNames;
-					DismembermentPacket dismembermentPacket2 = dismembermentPacket;
-					QuickLogger.Log(ELogType.Log, string.Format("Dismemberment Packet Sent: {0}, {1}, {2}, {3}, {4}, {5}", dismembermentPacket2.playerID, dismembermentPacket2.Direction, dismembermentPacket2.bodyPartType, dismembermentPacket2.bone, dismembermentPacket2.capAssetName, string.Join(",", dismembermentPacket2.assetNames)));
-					Singleton<FikaServer>.Instance.SendData<DismembermentPacket>(ref dismembermentPacket2, (DeliveryMethod)0, false);
-				}
 			}
 
 			Transform[] allBranchTransforms = val.GetComponentsInChildren<Transform>(true);
@@ -433,13 +416,18 @@ public class KillPatch : ModulePatch
 		}
 	}
 
-	public static void DeathSetup(Player p, EBodyPart eBodyPart, int Chance)
+	public static void DeathSetup(Player p, EBodyPart eBodyPart, int Chance, bool isFromNetwork = false)
 	{
 		try
 		{
 			if ((Object)(object)p == (Object)null || (Object)(object)((Component)p).gameObject == (Object)null || RagdollHelperClass.IsPlayerDowned(p))
 			{
 				return;
+			}
+
+			if (!isFromNetwork)
+			{
+				VisceralCombat.Combined.Classes.VisceralNetworkUtils.SendRagdollSync(p, eBodyPart, Chance);
 			}
 
 			if (VisceralEntry.Instance != null && !VisceralEntry.Instance.dismemberedPlayers.Contains(p))

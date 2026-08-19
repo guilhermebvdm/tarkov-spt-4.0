@@ -300,13 +300,17 @@ public class VisceralEntry : BaseUnityPlugin
 	{
 		if (FikaBackendUtils.IsClient)
 		{
-			@event.Manager.RegisterPacket<DismembermentPacket>((Action<DismembermentPacket>)OnDismembermentPacket);
-			@event.Manager.RegisterPacket<RagdollSyncPacket>((Action<RagdollSyncPacket>)OnRagdollSyncPacket);
+			@event.Manager.RegisterPacket<DismembermentPacket>((Action<DismembermentPacket>)OnDismembermentPacketClient);
+			@event.Manager.RegisterPacket<RagdollSyncPacket>((Action<RagdollSyncPacket>)OnRagdollSyncPacketClient);
+			@event.Manager.RegisterPacket<LivingDismembermentPacket>((Action<LivingDismembermentPacket>)OnLivingDismembermentPacketClient);
 			// Client-side: receive handshake ping from host and reply with ACK
 			@event.Manager.RegisterPacket<VisceralHandshakePacket>((Action<VisceralHandshakePacket>)OnVisceralHandshakePacketClient);
 		}
 		if (FikaBackendUtils.IsServer || FikaBackendUtils.IsHeadless)
 		{
+			@event.Manager.RegisterPacket<DismembermentPacket>((Action<DismembermentPacket>)OnDismembermentPacketServer);
+			@event.Manager.RegisterPacket<RagdollSyncPacket>((Action<RagdollSyncPacket>)OnRagdollSyncPacketServer);
+			@event.Manager.RegisterPacket<LivingDismembermentPacket>((Action<LivingDismembermentPacket>)OnLivingDismembermentPacketServer);
 			// Host-side: receive ACK responses from clients
 			@event.Manager.RegisterPacket<VisceralHandshakePacket>((Action<VisceralHandshakePacket>)OnVisceralHandshakePacketServer);
 		}
@@ -382,24 +386,60 @@ public class VisceralEntry : BaseUnityPlugin
 			QuickLogger.Log(ELogType.Log, $"[VisceralCombat] Only {acks}/{_expectedHumanCount} players confirmed mod — LivingDismemberment DISABLED.");
 	}
 
-	private void OnDismembermentPacket(DismembermentPacket packet)
+	private void OnDismembermentPacketClient(DismembermentPacket packet)
 	{
-		Transform[] affectedLimbs = null;
-		QuickLogger.Log(ELogType.Log, $"Dismemberment Packet Received: {packet.playerID}, {packet.Direction}, {packet.bodyPartType}, {packet.bone}, {packet.capAssetName}, {packet.assetNames}");
-		Player targetPlayer = (Player)(object)Singleton<FikaClient>.Instance.CoopHandler.Players[packet.playerID];
+		Player targetPlayer = RagdollHelperClass.FindPlayerByNetId(packet.playerID);
 		if (targetPlayer != null && !RagdollHelperClass.IsPlayerDowned(targetPlayer))
 		{
-			KillPatch.DismemberLimb(targetPlayer, packet.Direction, packet.bodyPartType, packet.bone, packet.capAssetName, packet.assetNames, out affectedLimbs);
+			Transform[] affectedLimbs = null;
+			KillPatch.DismemberLimb(targetPlayer, packet.Direction, packet.bodyPartType, packet.bone, packet.capAssetName, packet.assetNames, out affectedLimbs, isFromNetwork: true);
 		}
 	}
 
-	private void OnRagdollSyncPacket(RagdollSyncPacket packet)
+	private void OnLivingDismembermentPacketClient(LivingDismembermentPacket packet)
 	{
-		QuickLogger.Log(ELogType.Log, $"Ragdoll Packet Received: {packet.PlayerID}, {packet.BodyPart}, {packet.RandomChance}");
-		Player targetPlayer = (Player)(object)Singleton<FikaClient>.Instance.CoopHandler.Players[packet.PlayerID];
+		Player targetPlayer = RagdollHelperClass.FindPlayerByNetId(packet.PlayerID);
 		if (targetPlayer != null && !RagdollHelperClass.IsPlayerDowned(targetPlayer))
 		{
-			KillPatch.DeathSetup(targetPlayer, packet.BodyPart, packet.RandomChance);
+			Transform[] affectedLimbs = null;
+			KillPatch.DismemberLimb(targetPlayer, packet.Direction, packet.Leg, packet.Bone, packet.CapAssetName, packet.AssetNames, out affectedLimbs, isFromNetwork: true);
+			LivingDismembermentController.Attach(targetPlayer, packet.Leg);
+		}
+	}
+
+	private void OnRagdollSyncPacketClient(RagdollSyncPacket packet)
+	{
+		Player targetPlayer = RagdollHelperClass.FindPlayerByNetId(packet.PlayerID);
+		if (targetPlayer != null && !RagdollHelperClass.IsPlayerDowned(targetPlayer))
+		{
+			KillPatch.DeathSetup(targetPlayer, packet.BodyPart, packet.RandomChance, isFromNetwork: true);
+		}
+	}
+
+	private void OnDismembermentPacketServer(DismembermentPacket packet)
+	{
+		OnDismembermentPacketClient(packet);
+		if (Singleton<FikaServer>.Instantiated && Singleton<FikaServer>.Instance != null)
+		{
+			Singleton<FikaServer>.Instance.SendData<DismembermentPacket>(ref packet, DeliveryMethod.ReliableOrdered, false);
+		}
+	}
+
+	private void OnLivingDismembermentPacketServer(LivingDismembermentPacket packet)
+	{
+		OnLivingDismembermentPacketClient(packet);
+		if (Singleton<FikaServer>.Instantiated && Singleton<FikaServer>.Instance != null)
+		{
+			Singleton<FikaServer>.Instance.SendData<LivingDismembermentPacket>(ref packet, DeliveryMethod.ReliableOrdered, false);
+		}
+	}
+
+	private void OnRagdollSyncPacketServer(RagdollSyncPacket packet)
+	{
+		OnRagdollSyncPacketClient(packet);
+		if (Singleton<FikaServer>.Instantiated && Singleton<FikaServer>.Instance != null)
+		{
+			Singleton<FikaServer>.Instance.SendData<RagdollSyncPacket>(ref packet, DeliveryMethod.ReliableOrdered, false);
 		}
 	}
 

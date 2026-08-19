@@ -77,6 +77,28 @@ public static class RagdollHelperClass
 	}
 
 	/// <summary>
+	/// Finds any Player (human player or AI bot) in the active raid matching the given netId (player.Id).
+	/// Valid across both Host and Client in FIKA coop sessions.
+	/// </summary>
+	public static Player FindPlayerByNetId(int netId)
+	{
+		if (!Singleton<GameWorld>.Instantiated || Singleton<GameWorld>.Instance == null) return null;
+
+		var allPlayers = Singleton<GameWorld>.Instance.AllPlayersEverExisted;
+		if (allPlayers != null)
+		{
+			foreach (var iPlayer in allPlayers)
+			{
+				if (iPlayer is Player p && p.Id == netId)
+				{
+					return p;
+				}
+			}
+		}
+		return null;
+	}
+
+	/// <summary>
 	/// Zeroes the muscle weight of muscles belonging to a dismembered limb so that
 	/// PuppetMaster does not attempt to animate a bone scaled to 0.001f during agony,
 	/// which would cause the "giant bot" physics explosion.
