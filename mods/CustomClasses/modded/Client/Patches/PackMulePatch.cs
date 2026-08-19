@@ -73,14 +73,21 @@ internal class PackMulePatch : ModulePatch
                 return;
             }
 
-            var target = 1f + bonus.Value;
             if (bonus.Value >= 0f)
             {
-                if (__result < target) __result = target;   // PISO (Pack Mule: garante o +bônus, não soma)
+                var floor = 1f + bonus.Value;
+                if (__result < floor) __result = floor;   // PISO (Pack Mule: garante o +bônus, não soma com Strength)
             }
             else
             {
-                if (__result > target) __result = target;   // TETO (079 Light Frame: reduz o limite de carga)
+                // 079 Light Frame — CORRIGIDO: −X% RELATIVO ao limite (MULTIPLICA), NÃO teto absoluto. O modifier
+                // vanilla é 1 + StrengthBuffLiftWeightInc (≥ 1.0, até 1.30 no Strength elite); o teto absoluto anterior
+                // (=1+bonus=0.9) SUBSTITUÍA o modifier inteiro, apagando TODO o bônus de Strength → como o limite de
+                // overweight é linear no modifier (BasePhysicalClass.UpdateWeightLimits: base×modifier+offset), o limite
+                // despencava −25%..−31% (pior quanto maior a Strength) em vez de −10%, e a bigorna acendia bem antes do
+                // esperado (report in-game). Multiplicar dá −10% REAL p/ qualquer Strength (ex.: Str40 1.24→1.116) e é
+                // ordem-independente. (ref: reference_spt_init_before_mainplayer — OnWeightLimitsUpdated re-aplica no raid-start)
+                __result *= 1f + bonus.Value;   // bonus −0.1 → ×0.9
             }
         }
         catch (Exception ex)
