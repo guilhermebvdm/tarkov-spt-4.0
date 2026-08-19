@@ -15,7 +15,7 @@ public class DefaultPlayPatch : ModulePatch
 	[PatchPrefix]
 	private static bool Prefix(Player __instance)
 	{
-		if (__instance == null || __instance.HealthController == null || !__instance.HealthController.IsAlive)
+		if (__instance == null || __instance.HealthController == null || (!__instance.HealthController.IsAlive && !VisceralCombat.Ragdolls.Classes.RagdollHelperClass.IsPlayerDowned(__instance)))
 		{
 			// Suppress DefaultPlay movement audio events on dead players/bots to avoid NRE on missing BetterSource
 			return false;

@@ -81,7 +81,7 @@ public class LimbKillPatch : ModulePatch
 		if (player == null) return;
 
 		// Only process dead players OR living AI bots when VisceralCombat is present for all players
-		bool isDead = (player.HealthController == null || !player.HealthController.IsAlive);
+		bool isDead = (player.HealthController == null || !player.HealthController.IsAlive) && !RagdollHelperClass.IsPlayerDowned(player);
 		if (!isDead)
 		{
 			if (!player.IsAI || !VisceralEntry.AllPlayersHaveVisceralCombat) return;

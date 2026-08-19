@@ -56,7 +56,7 @@ public class KillPatch : ModulePatch
 	internal static void Postfix(Player __instance, DamageInfoStruct damageInfo, EBodyPart bodyPartType)
 	{
 		Dictionary<Player, int> deadPlayers = VisceralEntry.Instance.deadPlayers;
-		if (__instance.HealthController.IsAlive)
+		if (__instance.HealthController == null || __instance.HealthController.IsAlive || RagdollHelperClass.IsPlayerDowned(__instance))
 		{
 			return;
 		}
@@ -203,6 +203,11 @@ public class KillPatch : ModulePatch
 
 	internal static void DismemberLimb(Player player, Vector3 Direction, EBodyPart bodyPartType, string bone, string capAssetName, string[] assetNames, out Transform[] affectedLimbs)
 	{
+		affectedLimbs = null;
+		if (player == null || RagdollHelperClass.IsPlayerDowned(player))
+		{
+			return;
+		}
 		bool isDeadPlayer = (player == null || player.HealthController == null || !player.HealthController.IsAlive);
 		if (isDeadPlayer && player != null && player.BodyAnimatorCommon != null)
 		{
@@ -432,9 +437,8 @@ public class KillPatch : ModulePatch
 	{
 		try
 		{
-			if ((Object)(object)p == (Object)null || (Object)(object)((Component)p).gameObject == (Object)null)
+			if ((Object)(object)p == (Object)null || (Object)(object)((Component)p).gameObject == (Object)null || RagdollHelperClass.IsPlayerDowned(p))
 			{
-				QuickLogger.Log(ELogType.Error, "DeathSetup: Player or GameObject is Null!");
 				return;
 			}
 

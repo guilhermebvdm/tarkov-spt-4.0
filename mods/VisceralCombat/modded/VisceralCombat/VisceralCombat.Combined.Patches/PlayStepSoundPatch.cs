@@ -14,7 +14,7 @@ public class PlayStepSoundPatch : ModulePatch
 	[PatchPrefix]
 	private static bool Prefix(Player __instance)
 	{
-		if (__instance == null || __instance.HealthController == null || !__instance.HealthController.IsAlive)
+		if (__instance == null || __instance.HealthController == null || (!__instance.HealthController.IsAlive && !VisceralCombat.Ragdolls.Classes.RagdollHelperClass.IsPlayerDowned(__instance)))
 		{
 			// Suppress PlayStepSound on dead players/bots to prevent NRE in method_68 via FikaPlayer listener
 			return false;

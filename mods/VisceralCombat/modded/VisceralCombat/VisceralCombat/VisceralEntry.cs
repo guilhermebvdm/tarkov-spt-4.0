@@ -386,13 +386,21 @@ public class VisceralEntry : BaseUnityPlugin
 	{
 		Transform[] affectedLimbs = null;
 		QuickLogger.Log(ELogType.Log, $"Dismemberment Packet Received: {packet.playerID}, {packet.Direction}, {packet.bodyPartType}, {packet.bone}, {packet.capAssetName}, {packet.assetNames}");
-		KillPatch.DismemberLimb((Player)(object)Singleton<FikaClient>.Instance.CoopHandler.Players[packet.playerID], packet.Direction, packet.bodyPartType, packet.bone, packet.capAssetName, packet.assetNames, out affectedLimbs);
+		Player targetPlayer = (Player)(object)Singleton<FikaClient>.Instance.CoopHandler.Players[packet.playerID];
+		if (targetPlayer != null && !RagdollHelperClass.IsPlayerDowned(targetPlayer))
+		{
+			KillPatch.DismemberLimb(targetPlayer, packet.Direction, packet.bodyPartType, packet.bone, packet.capAssetName, packet.assetNames, out affectedLimbs);
+		}
 	}
 
 	private void OnRagdollSyncPacket(RagdollSyncPacket packet)
 	{
 		QuickLogger.Log(ELogType.Log, $"Ragdoll Packet Received: {packet.PlayerID}, {packet.BodyPart}, {packet.RandomChance}");
-		KillPatch.DeathSetup((Player)(object)Singleton<FikaClient>.Instance.CoopHandler.Players[packet.PlayerID], packet.BodyPart, packet.RandomChance);
+		Player targetPlayer = (Player)(object)Singleton<FikaClient>.Instance.CoopHandler.Players[packet.PlayerID];
+		if (targetPlayer != null && !RagdollHelperClass.IsPlayerDowned(targetPlayer))
+		{
+			KillPatch.DeathSetup(targetPlayer, packet.BodyPart, packet.RandomChance);
+		}
 	}
 
 	private void Start()

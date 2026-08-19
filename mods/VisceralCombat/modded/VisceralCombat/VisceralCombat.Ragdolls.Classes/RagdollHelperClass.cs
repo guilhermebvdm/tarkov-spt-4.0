@@ -30,6 +30,53 @@ public static class RagdollHelperClass
 	internal static Vector3 limbSize = new Vector3(0.1f, 0.1f, 0.1f);
 
 	/// <summary>
+	/// Checks if a player is currently in FIKA's Downed / Coma / Bleedout state.
+	/// When downed, FIKA temporarily sets IsAlive = false, but the player can be revived.
+	/// VisceralCombat must NOT apply dismemberment, bone scaling, or ragdoll death setup
+	/// while the player is downed.
+	/// </summary>
+	public static bool IsPlayerDowned(Player player)
+	{
+		if (player == null) return false;
+
+		// 1. Direct check on FikaPlayer / ObservedPlayer / ClientHealthController if Fika is loaded
+		try
+		{
+			if (player is Fika.Core.Main.Players.FikaPlayer fikaPlayer && fikaPlayer.Downed)
+			{
+				return true;
+			}
+			if (player.HealthController is Fika.Core.Main.ClientClasses.ClientHealthController clientHC && clientHC.Downed)
+			{
+				return true;
+			}
+		}
+		catch { }
+
+		// 2. Reflection fallback for any player or health controller with "Downed" property
+		try
+		{
+			System.Reflection.PropertyInfo downedProp = player.GetType().GetProperty("Downed", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
+			if (downedProp != null && downedProp.PropertyType == typeof(bool))
+			{
+				if ((bool)downedProp.GetValue(player)) return true;
+			}
+
+			if (player.HealthController != null)
+			{
+				System.Reflection.PropertyInfo hcDownedProp = player.HealthController.GetType().GetProperty("Downed", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
+				if (hcDownedProp != null && hcDownedProp.PropertyType == typeof(bool))
+				{
+					if ((bool)hcDownedProp.GetValue(player.HealthController)) return true;
+				}
+			}
+		}
+		catch { }
+
+		return false;
+	}
+
+	/// <summary>
 	/// Zeroes the muscle weight of muscles belonging to a dismembered limb so that
 	/// PuppetMaster does not attempt to animate a bone scaled to 0.001f during agony,
 	/// which would cause the "giant bot" physics explosion.
