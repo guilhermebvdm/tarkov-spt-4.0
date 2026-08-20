@@ -80,9 +80,6 @@ namespace ActionPOV.Patches
     // 3. Aplicação Pura e Direta no Osso Real da Arma (HandsContainer.WeaponRootAnim)
     public class Patch_WeaponRootAnimTransform : ModulePatch
     {
-        private static Vector3 _originalLocalPosition;
-        private static Quaternion _originalLocalRotation;
-        private static Transform _lastWeaponRootAnim;
         private static bool _wasAimingLastFrame = false;
 
         protected override MethodBase GetTargetMethod()
@@ -100,19 +97,6 @@ namespace ActionPOV.Patches
 
             Transform weaponRootAnim = __instance.HandsContainer.WeaponRootAnim;
             if (weaponRootAnim == null) return;
-
-            // Blindagem contra acúmulo infinito de transformações no WeaponRootAnim
-            if (_lastWeaponRootAnim == weaponRootAnim)
-            {
-                weaponRootAnim.localPosition = _originalLocalPosition;
-                weaponRootAnim.localRotation = _originalLocalRotation;
-            }
-            else
-            {
-                _lastWeaponRootAnim = weaponRootAnim;
-            }
-            _originalLocalPosition = weaponRootAnim.localPosition;
-            _originalLocalRotation = weaponRootAnim.localRotation;
 
             // Atualiza estado de mira sem resets destrutivos
             bool isAiming = __instance.IsAiming;
