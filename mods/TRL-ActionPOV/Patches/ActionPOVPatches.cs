@@ -114,12 +114,8 @@ namespace ActionPOV.Patches
             _originalLocalPosition = weaponRootAnim.localPosition;
             _originalLocalRotation = weaponRootAnim.localRotation;
 
-            // Detecção de Transição para ADS
+            // Atualiza estado de mira sem resets destrutivos
             bool isAiming = __instance.IsAiming;
-            if (isAiming && !_wasAimingLastFrame)
-            {
-                KineticSpringEngine.Reset();
-            }
             _wasAimingLastFrame = isAiming;
 
             // Executa a física de amortecimento, roll e sway orgânico
@@ -140,31 +136,26 @@ namespace ActionPOV.Patches
             Quaternion worldDeltaRot = camRot * camLocalRot * Quaternion.Inverse(camRot);
             Vector3 worldDeltaPos = camRot * KineticSpringEngine.CurrentWeaponPos;
 
-            // Aplicação física direta no WeaponRootAnim (Onde a arma, cano, mira e laser estão parafusados)
-            if (!isAiming)
+            // Aplicação física direta no WeaponRootAnim com Interpolação Orgânica de Pivô Hipfire <-> ADS
+            float adsBlend = KineticSpringEngine.ADSTransitionBlend;
+
+            if (adsBlend > 0.001f && __instance.CurrentScope != null && __instance.CurrentScope.Bone != null)
             {
-                // HIPFIRE: Translação e rotação livres de CQB no osso real da arma
-                weaponRootAnim.position += worldDeltaPos;
+                // ADS: PIVÔ FOCAL NO OSSO DA MIRA (mod_aim_camera) INTERPOLADO SUAVEMENTE
+                Vector3 scopeWorldPos = __instance.CurrentScope.Bone.position;
+                Vector3 armVector = weaponRootAnim.position - scopeWorldPos;
+                Vector3 rotatedArmVector = worldDeltaRot * armVector;
+                Vector3 scopeTargetPos = scopeWorldPos + rotatedArmVector + worldDeltaPos;
+
+                Vector3 hipfirePos = weaponRootAnim.position + worldDeltaPos;
+
+                weaponRootAnim.position = Vector3.Lerp(hipfirePos, scopeTargetPos, adsBlend);
                 weaponRootAnim.rotation = worldDeltaRot * weaponRootAnim.rotation;
             }
             else
             {
-                // ADS: PIVÔ FOCAL NO OSSO DA MIRA (mod_aim_camera) ORIENTADO PELA CÂMERA
-                // Gira ao redor do centro óptico da mira mantendo alça e massa perfeitamente alinhadas
-                if (__instance.CurrentScope != null && __instance.CurrentScope.Bone != null)
-                {
-                    Vector3 scopeWorldPos = __instance.CurrentScope.Bone.position;
-                    Vector3 armVector = weaponRootAnim.position - scopeWorldPos;
-                    Vector3 rotatedArmVector = worldDeltaRot * armVector;
-
-                    weaponRootAnim.position = scopeWorldPos + rotatedArmVector + worldDeltaPos;
-                    weaponRootAnim.rotation = worldDeltaRot * weaponRootAnim.rotation;
-                }
-                else
-                {
-                    weaponRootAnim.position += worldDeltaPos;
-                    weaponRootAnim.rotation = worldDeltaRot * weaponRootAnim.rotation;
-                }
+                weaponRootAnim.position += worldDeltaPos;
+                weaponRootAnim.rotation = worldDeltaRot * weaponRootAnim.rotation;
             }
 
             // Injeção de Offsets de Diagnóstico Manual (F12)
