@@ -38,6 +38,7 @@ namespace ActionPOV.Core
         
         // --- CINEMÁTICA CQB (POINT-SHOOTING / WEAPON LEAD) ---
         public static float StockSlideHorizontalMax = 0.035f;   // Deslocamento lateral máximo da coronha no ombro em metros (ex: 0.035 = 3.5cm)
+        public static float LeftStockSlideMultiplier = 0.35f;   // Multiplicador de percurso do sway ao virar para a ESQUERDA (0.35 = 35% do percurso)
         public static float StockSlideVerticalMax = 0.020f;     // Deslocamento vertical máximo da coronha no ombro em metros (ex: 0.020 = 2.0cm)
         public static float StockSmoothTimeHorizontal = 0.25f;  // Tempo de amortecimento lateral da coronha no Hipfire (segundos)
         public static float StockSmoothTimeVertical = 0.38f;    // Tempo de amortecimento vertical da coronha no Hipfire (segundos)
@@ -178,7 +179,15 @@ namespace ActionPOV.Core
                 float normYaw = TargetWeaponAngle.y / Mathf.Max(DeadzoneLimits.x, 0.001f);
                 float curveYaw = Mathf.Sign(normYaw) * Mathf.Pow(Mathf.Abs(normYaw), 1.25f);
                 float multH = InvertStockHorizontal ? 1f : -1f;
-                TargetWeaponPos.x = multH * curveYaw * StockSlideHorizontalMax;
+                float maxSlideH = StockSlideHorizontalMax;
+
+                // Atenuação de percurso para a ESQUERDA (TargetWeaponAngle.y < 0)
+                if (TargetWeaponAngle.y < 0f)
+                {
+                    maxSlideH *= Mathf.Clamp01(LeftStockSlideMultiplier);
+                }
+
+                TargetWeaponPos.x = multH * curveYaw * maxSlideH;
 
                 // Vertical (Pitch): Ao mirar para CIMA (Pitch negativo), cano sobe e coronha desce
                 float normPitch = TargetWeaponAngle.x / Mathf.Max(DeadzoneLimits.y, 0.001f);
@@ -199,7 +208,15 @@ namespace ActionPOV.Core
                 float normYawADS = TargetWeaponAngle.y / Mathf.Max(ADSDeadzoneLimits.x, 0.001f);
                 float curveYawADS = Mathf.Sign(normYawADS) * Mathf.Pow(Mathf.Abs(normYawADS), 1.15f);
                 float multHADS = InvertStockHorizontal ? 1f : -1f;
-                TargetWeaponPos.x = multHADS * curveYawADS * StockSlideHorizontalADS;
+                float maxSlideHADS = StockSlideHorizontalADS;
+
+                // Atenuação de percurso para a ESQUERDA no ADS
+                if (TargetWeaponAngle.y < 0f)
+                {
+                    maxSlideHADS *= Mathf.Clamp01(LeftStockSlideMultiplier);
+                }
+
+                TargetWeaponPos.x = multHADS * curveYawADS * maxSlideHADS;
 
                 float normPitchADS = TargetWeaponAngle.x / Mathf.Max(ADSDeadzoneLimits.y, 0.001f);
                 float curvePitchADS = Mathf.Sign(normPitchADS) * Mathf.Pow(Mathf.Abs(normPitchADS), 1.15f);
@@ -257,6 +274,25 @@ namespace ActionPOV.Core
                 Mathf.Infinity,
                 dt
             );
+
+            // Restrição Estrita de Quadrante Vertical (A coronha não passa do centro até o cano cruzar o centro)
+            // - Cano para CIMA (Pitch negativo, TargetWeaponAngle.x < 0): Coronha deve ficar em baixo (<= 0f)
+            // - Cano para BAIXO (Pitch positivo, TargetWeaponAngle.x > 0): Coronha deve ficar em cima (>= 0f)
+            float multVCur = InvertStockVertical ? -1f : 1f;
+            if (TargetWeaponAngle.x < -0.01f) // Cano apontado para CIMA
+            {
+                if (multVCur > 0)
+                    CurrentWeaponPos.y = Mathf.Min(0f, CurrentWeaponPos.y);
+                else
+                    CurrentWeaponPos.y = Mathf.Max(0f, CurrentWeaponPos.y);
+            }
+            else if (TargetWeaponAngle.x > 0.01f) // Cano apontado para BAIXO
+            {
+                if (multVCur > 0)
+                    CurrentWeaponPos.y = Mathf.Max(0f, CurrentWeaponPos.y);
+                else
+                    CurrentWeaponPos.y = Mathf.Min(0f, CurrentWeaponPos.y);
+            }
 
             float zRecoveryTime = isAiming ? (RecoilRecoveryTime * 0.75f) : RecoilRecoveryTime;
             CurrentWeaponPos.z = Mathf.SmoothDamp(

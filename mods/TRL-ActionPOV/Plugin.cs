@@ -9,7 +9,7 @@ using UnityEngine;
 #nullable disable
 namespace ActionPOV
 {
-    [BepInPlugin("com.trl.actionpov", "TRL-ActionPOV", "1.3.7")]
+    [BepInPlugin("com.trl.actionpov", "TRL-ActionPOV", "1.3.8")]
     public class Plugin : BaseUnityPlugin
     {
         public static Plugin Instance { get; private set; }
@@ -27,6 +27,7 @@ namespace ActionPOV
 
         // Cinemática CQB (Point-Shooting & Deslizamento de Coronha)
         public static ConfigEntry<float> StockSlideHorizontalMax;
+        public static ConfigEntry<float> LeftStockSlideMultiplier;
         public static ConfigEntry<float> StockSlideVerticalMax;
         public static ConfigEntry<float> StockSmoothTimeHorizontal;
         public static ConfigEntry<float> StockSmoothTimeVertical;
@@ -170,6 +171,16 @@ namespace ActionPOV
                 new ConfigDescription(
                     "Deslocamento lateral máximo da coronha no ombro (metros). Ex: 0.035 = 3.5cm.",
                     new AcceptableValueRange<float>(0.0f, 0.400f)
+                )
+            );
+
+            LeftStockSlideMultiplier = Config.Bind(
+                "3. CQB Point-Shooting (Stock Slide)",
+                "Left Sway Stock Slide Multiplier",
+                0.35f,
+                new ConfigDescription(
+                    "Multiplicador de amplitude do sway da coronha ao virar para a ESQUERDA (0.35 = 35% do percurso normal).",
+                    new AcceptableValueRange<float>(0.0f, 1.0f)
                 )
             );
 
@@ -707,6 +718,7 @@ namespace ActionPOV
             KineticSpringEngine.WalkForwardRealignSpeed = WalkForwardRealignSpeed.Value;
 
             KineticSpringEngine.StockSlideHorizontalMax = StockSlideHorizontalMax.Value;
+            KineticSpringEngine.LeftStockSlideMultiplier = LeftStockSlideMultiplier.Value;
             KineticSpringEngine.StockSlideVerticalMax = StockSlideVerticalMax.Value;
             KineticSpringEngine.StockSmoothTimeHorizontal = StockSmoothTimeHorizontal.Value;
             KineticSpringEngine.StockSmoothTimeVertical = StockSmoothTimeVertical.Value;
