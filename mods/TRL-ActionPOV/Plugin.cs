@@ -3,12 +3,13 @@ using ActionPOV.Core;
 using ActionPOV.Patches;
 using BepInEx;
 using BepInEx.Configuration;
+using EFT;
 using UnityEngine;
 
 #nullable disable
 namespace ActionPOV
 {
-    [BepInPlugin("com.trl.actionpov", "TRL-ActionPOV", "1.0.0")]
+    [BepInPlugin("com.trl.actionpov", "TRL-ActionPOV", "1.3.7")]
     public class Plugin : BaseUnityPlugin
     {
         public static Plugin Instance { get; private set; }
@@ -19,22 +20,41 @@ namespace ActionPOV
         // Física e Inércia
         public static ConfigEntry<float> CameraFollowRatio;
         public static ConfigEntry<float> WeaponWeightTime;
+        public static ConfigEntry<float> WalkForwardDelaySeconds;
+        public static ConfigEntry<float> WalkForwardRealignSpeed;
         public static ConfigEntry<float> SpringReturnSpeed;
         public static ConfigEntry<float> WeaponRollIntensity;
 
         // Cinemática CQB (Point-Shooting & Deslizamento de Coronha)
-        public static ConfigEntry<float> StockSlideMultiplier;
+        public static ConfigEntry<float> StockSlideHorizontalMax;
+        public static ConfigEntry<float> StockSlideVerticalMax;
+        public static ConfigEntry<float> StockSmoothTimeHorizontal;
+        public static ConfigEntry<float> StockSmoothTimeVertical;
         public static ConfigEntry<float> ArmCompressionMultiplier;
         public static ConfigEntry<float> CQBRollMultiplier;
         public static ConfigEntry<float> StrafeWalkMultiplier;
 
-        // Modo ADS Tático (Cheek Weld & Parallax)
+        // Modo ADS Tático (Cheek Weld, Parallax & Sight Alignment)
         public static ConfigEntry<bool> EnableADSTilt;
         public static ConfigEntry<float> ADSTiltHeadRoll;
         public static ConfigEntry<float> ADSDeadzoneHorizontal;
         public static ConfigEntry<float> ADSDeadzoneVertical;
-        public static ConfigEntry<float> ADSWeightTime;
-        public static ConfigEntry<float> ShotRecoilPunch;
+        public static ConfigEntry<float> EyeToSightDistance;
+        public static ConfigEntry<float> ADSSightAlignmentFactor;
+        public static ConfigEntry<float> StockSlideHorizontalADS;
+        public static ConfigEntry<float> StockSlideVerticalADS;
+        public static ConfigEntry<float> ADSFrontSightSmoothTime;
+        public static ConfigEntry<float> StockSmoothTimeHorizontalADS;
+        public static ConfigEntry<float> StockSmoothTimeVerticalADS;
+
+        // Coice Físico do Disparo (Weapon Kickback & Recoil Punch)
+        public static ConfigEntry<bool> EnableRecoilKick;
+        public static ConfigEntry<float> RecoilKickZ_Hipfire;
+        public static ConfigEntry<float> RecoilKickZ_ADS;
+        public static ConfigEntry<float> RecoilMuzzleRise_Hipfire;
+        public static ConfigEntry<float> RecoilMuzzleRise_ADS;
+        public static ConfigEntry<float> RecoilRecoveryTime;
+        public static ConfigEntry<float> RecoilHeadPunchIntensity;
 
         // Pivô do Ombro
         public static ConfigEntry<float> ShoulderPivotX;
@@ -53,6 +73,8 @@ namespace ActionPOV
         public static ConfigEntry<bool> InvertWeaponPitch;
         public static ConfigEntry<bool> InvertWeaponRoll;
         public static ConfigEntry<bool> InvertHeadRoll;
+        public static ConfigEntry<bool> InvertStockHorizontal;
+        public static ConfigEntry<bool> InvertStockVertical;
         public static ConfigEntry<bool> SwapWeaponPitchYaw;
 
         // Limites de Deadzone
@@ -141,13 +163,43 @@ namespace ActionPOV
             );
 
             // 3. Cinemática CQB (Point-Shooting & Deslizamento de Coronha)
-            StockSlideMultiplier = Config.Bind(
+            StockSlideHorizontalMax = Config.Bind(
                 "3. CQB Point-Shooting (Stock Slide)",
-                "Stock Slide Multiplier (m/deg)",
-                0.0035f,
+                "Stock Slide Horizontal Max (Meters)",
+                0.035f,
                 new ConfigDescription(
-                    "O quanto a coronha da arma escorrega para o lado oposto ao virar a mira (metros por grau).",
-                    new AcceptableValueRange<float>(0.0f, 0.015f)
+                    "Deslocamento lateral máximo da coronha no ombro (metros). Ex: 0.035 = 3.5cm.",
+                    new AcceptableValueRange<float>(0.0f, 0.400f)
+                )
+            );
+
+            StockSlideVerticalMax = Config.Bind(
+                "3. CQB Point-Shooting (Stock Slide)",
+                "Stock Slide Vertical Max (Meters)",
+                0.020f,
+                new ConfigDescription(
+                    "Deslocamento vertical máximo da coronha no ombro ao mirar para cima/baixo (metros).",
+                    new AcceptableValueRange<float>(0.0f, 0.300f)
+                )
+            );
+
+            StockSmoothTimeHorizontal = Config.Bind(
+                "3. CQB Point-Shooting (Stock Slide)",
+                "Stock Smooth Time Horizontal (Inertia)",
+                0.25f,
+                new ConfigDescription(
+                    "Tempo de acomodação lateral da coronha no ombro (segundos). Maior = Mais suave e pesado.",
+                    new AcceptableValueRange<float>(0.02f, 1.00f)
+                )
+            );
+
+            StockSmoothTimeVertical = Config.Bind(
+                "3. CQB Point-Shooting (Stock Slide)",
+                "Stock Smooth Time Vertical (Inertia)",
+                0.38f,
+                new ConfigDescription(
+                    "Tempo de acomodação vertical da coronha no ombro (segundos). Maior = Mais firme e pesado.",
+                    new AcceptableValueRange<float>(0.02f, 1.00f)
                 )
             );
 
@@ -164,7 +216,7 @@ namespace ActionPOV
             CQBRollMultiplier = Config.Bind(
                 "3. CQB Point-Shooting (Stock Slide)",
                 "CQB Weapon Wrist Roll",
-                0.18f,
+                0.22f,
                 new ConfigDescription(
                     "Torção natural da arma no próprio eixo (Roll no Y) ao apontar nas esquinas.",
                     new AcceptableValueRange<float>(0.0f, 0.60f)
@@ -181,6 +233,26 @@ namespace ActionPOV
                 )
             );
 
+            WalkForwardDelaySeconds = Config.Bind(
+                "3. CQB Point-Shooting (Stock Slide)",
+                "Walk Forward Delay (Seconds)",
+                1.0f,
+                new ConfigDescription(
+                    "Tempo contínuo andando para frente (W) antes de iniciar a centralização (segundos).",
+                    new AcceptableValueRange<float>(0.2f, 5.0f)
+                )
+            );
+
+            WalkForwardRealignSpeed = Config.Bind(
+                "3. CQB Point-Shooting (Stock Slide)",
+                "Walk Forward Realign Speed",
+                6.0f,
+                new ConfigDescription(
+                    "Velocidade de centralização suave da arma e da visão quando o jogador avança para frente (W).",
+                    new AcceptableValueRange<float>(1.0f, 25.0f)
+                )
+            );
+
             // 4. Modo ADS Tático (Cheek Weld, Parallax & Recoil Punch)
             EnableADSTilt = Config.Bind(
                 "4. Tactical ADS (Cheek Weld & Parallax)",
@@ -192,17 +264,17 @@ namespace ActionPOV
             ADSTiltHeadRoll = Config.Bind(
                 "4. Tactical ADS (Cheek Weld & Parallax)",
                 "ADS Head Tilt Angle (Degrees)",
-                -2.5f,
+                2.5f,
                 new ConfigDescription(
                     "Ângulo de inclinação lateral do pescoço ao mirar (graus).",
-                    new AcceptableValueRange<float>(-8.0f, 0.0f)
+                    new AcceptableValueRange<float>(-8.0f, 8.0f)
                 )
             );
 
             ADSDeadzoneHorizontal = Config.Bind(
                 "4. Tactical ADS (Cheek Weld & Parallax)",
                 "ADS Deadzone Horizontal (Degrees)",
-                2.0f,
+                2.5f,
                 new ConfigDescription(
                     "Micro-deadzone horizontal para o retículo flutuar suavemente na ótica (graus).",
                     new AcceptableValueRange<float>(0.2f, 6.0f)
@@ -212,29 +284,147 @@ namespace ActionPOV
             ADSDeadzoneVertical = Config.Bind(
                 "4. Tactical ADS (Cheek Weld & Parallax)",
                 "ADS Deadzone Vertical (Degrees)",
-                1.2f,
+                1.5f,
                 new ConfigDescription(
                     "Micro-deadzone vertical para o retículo flutuar suavemente na ótica (graus).",
                     new AcceptableValueRange<float>(0.2f, 5.0f)
                 )
             );
 
-            ADSWeightTime = Config.Bind(
+            EyeToSightDistance = Config.Bind(
                 "4. Tactical ADS (Cheek Weld & Parallax)",
-                "ADS Weapon Weight Time",
+                "Eye to Sight Distance (Meters)",
+                0.35f,
+                new ConfigDescription(
+                    "Distância focal média do olho até a alça/massa de mira (metros). Usado no cálculo de alinhamento óptico concêntrico.",
+                    new AcceptableValueRange<float>(0.15f, 0.60f)
+                )
+            );
+
+            ADSSightAlignmentFactor = Config.Bind(
+                "4. Tactical ADS (Cheek Weld & Parallax)",
+                "ADS Sight Alignment Factor",
+                0.85f,
+                new ConfigDescription(
+                    "Fator de alinhamento óptico da alça e massa no ADS: 0.0 = sem correção (livre) | 1.0 = alinhamento geométrico estrito.",
+                    new AcceptableValueRange<float>(0.0f, 1.50f)
+                )
+            );
+
+            StockSlideHorizontalADS = Config.Bind(
+                "4. Tactical ADS (Cheek Weld & Parallax)",
+                "ADS Stock Slide Horizontal Max",
+                0.010f,
+                new ConfigDescription(
+                    "Deslocamento lateral da coronha no ADS para criar parallax óptico na lente (metros).",
+                    new AcceptableValueRange<float>(0.0f, 0.150f)
+                )
+            );
+
+            StockSlideVerticalADS = Config.Bind(
+                "4. Tactical ADS (Cheek Weld & Parallax)",
+                "ADS Stock Slide Vertical Max",
+                0.006f,
+                new ConfigDescription(
+                    "Deslocamento vertical da coronha no ADS para criar parallax óptico na lente (metros).",
+                    new AcceptableValueRange<float>(0.0f, 0.100f)
+                )
+            );
+
+            ADSFrontSightSmoothTime = Config.Bind(
+                "4. Tactical ADS (Cheek Weld & Parallax)",
+                "ADS Front Sight Smooth Time (Cano)",
                 0.035f,
                 new ConfigDescription(
-                    "Tempo de resposta da mola em ADS (mais firme e responsivo para precisão).",
+                    "Tempo de resposta do cano/massa de mira no ADS (segundos). Rápido para guiar o tiro.",
                     new AcceptableValueRange<float>(0.010f, 0.10f)
                 )
             );
 
-            ShotRecoilPunch = Config.Bind(
+            StockSmoothTimeHorizontalADS = Config.Bind(
                 "4. Tactical ADS (Cheek Weld & Parallax)",
-                "Shot Recoil Punch Intensity",
+                "ADS Rear Sight Smooth Time Horizontal (Alça)",
+                0.12f,
+                new ConfigDescription(
+                    "Tempo de resposta lateral da coronha/alça de mira no ADS (segundos). Gera o atraso de catch-up.",
+                    new AcceptableValueRange<float>(0.02f, 0.50f)
+                )
+            );
+
+            StockSmoothTimeVerticalADS = Config.Bind(
+                "4. Tactical ADS (Cheek Weld & Parallax)",
+                "ADS Rear Sight Smooth Time Vertical (Alça)",
+                0.20f,
+                new ConfigDescription(
+                    "Tempo de resposta vertical da coronha/alça de mira no ADS (segundos). Gera o atraso de catch-up.",
+                    new AcceptableValueRange<float>(0.02f, 0.50f)
+                )
+            );
+
+            // 6. Coice Físico do Disparo (Weapon Kickback & Recoil Punch)
+            EnableRecoilKick = Config.Bind(
+                "6. Weapon Shot Recoil & Kickback",
+                "Enable Weapon Kickback",
+                true,
+                "Ativa o coice e impacto mecânico do disparo na arma e na visão."
+            );
+
+            RecoilKickZ_Hipfire = Config.Bind(
+                "6. Weapon Shot Recoil & Kickback",
+                "Recoil Kick Z Hipfire (Meters)",
+                0.030f,
+                new ConfigDescription(
+                    "Distância que a arma recua para trás contra o ombro/peito no Hipfire (metros).",
+                    new AcceptableValueRange<float>(0.0f, 0.100f)
+                )
+            );
+
+            RecoilKickZ_ADS = Config.Bind(
+                "6. Weapon Shot Recoil & Kickback",
+                "Recoil Kick Z ADS (Meters)",
+                0.012f,
+                new ConfigDescription(
+                    "Distância que a arma recua para trás contra o ombro no ADS (metros). Mais firme pelo apoio.",
+                    new AcceptableValueRange<float>(0.0f, 0.050f)
+                )
+            );
+
+            RecoilMuzzleRise_Hipfire = Config.Bind(
+                "6. Weapon Shot Recoil & Kickback",
+                "Recoil Muzzle Rise Hipfire (Degrees)",
+                1.8f,
+                new ConfigDescription(
+                    "Elevação angular instantânea do cano no disparo em Hipfire (graus).",
+                    new AcceptableValueRange<float>(0.0f, 8.0f)
+                )
+            );
+
+            RecoilMuzzleRise_ADS = Config.Bind(
+                "6. Weapon Shot Recoil & Kickback",
+                "Recoil Muzzle Rise ADS (Degrees)",
                 0.8f,
                 new ConfigDescription(
-                    "Intensidade da sacudida visual na cabeça/ombro a cada disparo.",
+                    "Elevação angular instantânea do cano no disparo em ADS (graus).",
+                    new AcceptableValueRange<float>(0.0f, 4.0f)
+                )
+            );
+
+            RecoilRecoveryTime = Config.Bind(
+                "6. Weapon Shot Recoil & Kickback",
+                "Recoil Recovery Time (Seconds)",
+                0.08f,
+                new ConfigDescription(
+                    "Tempo de recuperação elástica da mola após o coice do disparo (segundos).",
+                    new AcceptableValueRange<float>(0.02f, 0.30f)
+                )
+            );
+
+            RecoilHeadPunchIntensity = Config.Bind(
+                "6. Weapon Shot Recoil & Kickback",
+                "Recoil Head Punch Intensity",
+                0.8f,
+                new ConfigDescription(
+                    "Intensidade do solavanco visual na cabeça do operador a cada disparo.",
                     new AcceptableValueRange<float>(0.0f, 3.0f)
                 )
             );
@@ -248,28 +438,42 @@ namespace ActionPOV
             );
 
             InvertWeaponPitch = Config.Bind(
-                "4. Axis Inversion & Direction Mapping",
+                "5. Axis Inversion & Direction Mapping",
                 "Invert Weapon Pitch (Vertical)",
                 false,
                 "Inverte o sentido de elevação vertical da arma em relação ao mouse."
             );
 
             InvertWeaponRoll = Config.Bind(
-                "4. Axis Inversion & Direction Mapping",
+                "5. Axis Inversion & Direction Mapping",
                 "Invert Weapon Roll (Wrist Twist)",
                 false,
                 "Inverte o sentido da torção da arma ao virar o mouse."
             );
 
             InvertHeadRoll = Config.Bind(
-                "4. Axis Inversion & Direction Mapping",
+                "5. Axis Inversion & Direction Mapping",
                 "Invert Head Roll",
                 false,
                 "Inverte a inclinação lateral da cabeça ao girar a câmera."
             );
 
+            InvertStockHorizontal = Config.Bind(
+                "5. Axis Inversion & Direction Mapping",
+                "Invert Stock Horizontal Shift",
+                false,
+                "Inverte a direção do deslizamento lateral da coronha."
+            );
+
+            InvertStockVertical = Config.Bind(
+                "5. Axis Inversion & Direction Mapping",
+                "Invert Stock Vertical Shift",
+                false,
+                "Inverte a direção do deslizamento vertical da coronha."
+            );
+
             SwapWeaponPitchYaw = Config.Bind(
-                "4. Axis Inversion & Direction Mapping",
+                "5. Axis Inversion & Direction Mapping",
                 "Swap Weapon Pitch and Yaw",
                 false,
                 "Troca os eixos X e Y da arma (útil se o rig de animação do jogo estiver com eixos invertidos)."
@@ -444,21 +648,68 @@ namespace ActionPOV
                 new ConfigDescription("Gire para testar o que o eixo Z faz na cabeça do player.", new AcceptableValueRange<float>(-45f, 45f))
             );
 
+            ShowLaserSpyHUD = Config.Bind(
+                "9. Diagnostics",
+                "Show Laser Spy HUD",
+                true,
+                new ConfigDescription("Exibe HUD de telemetria em tempo real do Laser na tela (Pressione F10 para alternar).")
+            );
+
             SyncEngineConfigs();
         }
 
+        public static ConfigEntry<bool> ShowLaserSpyHUD;
+
         private void Update()
         {
+            if (Input.GetKeyDown(KeyCode.F10))
+            {
+                ShowLaserSpyHUD.Value = !ShowLaserSpyHUD.Value;
+            }
             SyncEngineConfigs();
+        }
+
+        private void OnGUI()
+        {
+            if (!EnableMod.Value || !ShowLaserSpyHUD.Value) return;
+
+            var myPlayer = GamePlayerOwner.MyPlayer;
+            if (myPlayer == null) return;
+
+            GUI.color = Color.white;
+            GUI.backgroundColor = new Color(0f, 0f, 0f, 0.88f);
+
+            GUILayout.BeginArea(new Rect(20, 130, 520, 270), GUI.skin.box);
+            GUILayout.Label("<color=#00FFAA><b>=== TRL-ActionPOV — LASER TELEMETRY SPY (F10) ===</b></color>");
+
+            string hookStatus = (LaserSpy.CallsPerSecond > 0) ? $"<color=#00FF00>ATIVO ({LaserSpy.CallsPerSecond} fps - {LaserSpy.DistinctInstancesCount} instâncias ativas)</color>" : "<color=#FF3333>INATIVO (0 fps - Laser Desligado)</color>";
+            GUILayout.Label($"<b>Status do Hook:</b> {hookStatus}");
+            GUILayout.Label($"<b>Objeto / Hierarquia:</b> <color=#00E5FF>{LaserSpy.LastHierarchyPath}</color>");
+            GUILayout.Label($"<b>Dono do Laser (isYourPlayer):</b> {(LaserSpy.IsYourPlayer ? "<color=#00FF00>SIM (Jogador Local)</color>" : "<color=#FFFF00>NÃO</color>")}");
+
+            GUILayout.Space(4);
+            GUILayout.Label($"<b>Direção Balística do Cano (WeaponDir):</b> {LaserSpy.WeaponDirection.x:F3}, {LaserSpy.WeaponDirection.y:F3}, {LaserSpy.WeaponDirection.z:F3}");
+            GUILayout.Label($"<b>Direção Nativa da Lente (Transform.fwd):</b> {LaserSpy.TransformForward.x:F3}, {LaserSpy.TransformForward.y:F3}, {LaserSpy.TransformForward.z:F3}");
+            GUILayout.Label($"<b>Desvio Angular Real:</b> <color=#FFCC00><b>{LaserSpy.DeltaAngle:F2}°</b></color>");
+
+            GUILayout.Space(4);
+            GUILayout.Label($"<b>Distância até a Parede/Alvo:</b> {LaserSpy.HitDistance:F2}m");
+            GUILayout.Label($"<b>Ponto de Impacto (Hit Point):</b> ({LaserSpy.HitPoint.x:F2}, {LaserSpy.HitPoint.y:F2}, {LaserSpy.HitPoint.z:F2})");
+
+            GUILayout.EndArea();
         }
 
         private void SyncEngineConfigs()
         {
             KineticSpringEngine.CameraFollowRatio = CameraFollowRatio.Value;
             KineticSpringEngine.WeaponWeightTime = WeaponWeightTime.Value;
-            KineticSpringEngine.SpringReturnSpeed = SpringReturnSpeed.Value;
+            KineticSpringEngine.WalkForwardDelaySeconds = WalkForwardDelaySeconds.Value;
+            KineticSpringEngine.WalkForwardRealignSpeed = WalkForwardRealignSpeed.Value;
 
-            KineticSpringEngine.StockSlideMultiplier = StockSlideMultiplier.Value;
+            KineticSpringEngine.StockSlideHorizontalMax = StockSlideHorizontalMax.Value;
+            KineticSpringEngine.StockSlideVerticalMax = StockSlideVerticalMax.Value;
+            KineticSpringEngine.StockSmoothTimeHorizontal = StockSmoothTimeHorizontal.Value;
+            KineticSpringEngine.StockSmoothTimeVertical = StockSmoothTimeVertical.Value;
             KineticSpringEngine.ArmCompressionMultiplier = ArmCompressionMultiplier.Value;
             KineticSpringEngine.CQBRollMultiplier = CQBRollMultiplier.Value;
             KineticSpringEngine.StrafeWalkMultiplier = StrafeWalkMultiplier.Value;
@@ -466,8 +717,20 @@ namespace ActionPOV
             KineticSpringEngine.EnableADSTilt = EnableADSTilt.Value;
             KineticSpringEngine.ADSTiltHeadRoll = ADSTiltHeadRoll.Value;
             KineticSpringEngine.ADSDeadzoneLimits = new Vector2(ADSDeadzoneHorizontal.Value, ADSDeadzoneVertical.Value);
-            KineticSpringEngine.ADSWeightTime = ADSWeightTime.Value;
-            KineticSpringEngine.ShotRecoilPunch = ShotRecoilPunch.Value;
+            KineticSpringEngine.EyeToSightDistance = EyeToSightDistance.Value;
+            KineticSpringEngine.ADSSightAlignmentFactor = ADSSightAlignmentFactor.Value;
+            KineticSpringEngine.StockSlideHorizontalADS = StockSlideHorizontalADS.Value;
+            KineticSpringEngine.StockSlideVerticalADS = StockSlideVerticalADS.Value;
+            KineticSpringEngine.ADSFrontSightSmoothTime = ADSFrontSightSmoothTime.Value;
+            KineticSpringEngine.StockSmoothTimeHorizontalADS = StockSmoothTimeHorizontalADS.Value;
+            KineticSpringEngine.StockSmoothTimeVerticalADS = StockSmoothTimeVerticalADS.Value;
+            KineticSpringEngine.EnableRecoilKick = EnableRecoilKick.Value;
+            KineticSpringEngine.RecoilKickZ_Hipfire = RecoilKickZ_Hipfire.Value;
+            KineticSpringEngine.RecoilKickZ_ADS = RecoilKickZ_ADS.Value;
+            KineticSpringEngine.RecoilMuzzleRise_Hipfire = RecoilMuzzleRise_Hipfire.Value;
+            KineticSpringEngine.RecoilMuzzleRise_ADS = RecoilMuzzleRise_ADS.Value;
+            KineticSpringEngine.RecoilRecoveryTime = RecoilRecoveryTime.Value;
+            KineticSpringEngine.RecoilHeadPunchIntensity = RecoilHeadPunchIntensity.Value;
 
             KineticSpringEngine.CustomShoulderPivot = new Vector3(ShoulderPivotX.Value, ShoulderPivotY.Value, ShoulderPivotZ.Value);
 
@@ -480,6 +743,8 @@ namespace ActionPOV
             KineticSpringEngine.InvertWeaponPitch = InvertWeaponPitch.Value;
             KineticSpringEngine.InvertWeaponRoll = InvertWeaponRoll.Value;
             KineticSpringEngine.InvertHeadRoll = InvertHeadRoll.Value;
+            KineticSpringEngine.InvertStockHorizontal = InvertStockHorizontal.Value;
+            KineticSpringEngine.InvertStockVertical = InvertStockVertical.Value;
             KineticSpringEngine.SwapWeaponPitchYaw = SwapWeaponPitchYaw.Value;
 
             KineticSpringEngine.DeadzoneLimits = new Vector2(DeadzoneHorizontal.Value, DeadzoneVertical.Value);
@@ -491,9 +756,10 @@ namespace ActionPOV
             {
                 new Patch_PlayerRotate().Enable();
                 new Patch_SetHeadRotation().Enable();
-                new Patch_CalculateCameraPosition().Enable();
+                new Patch_WeaponRootAnimTransform().Enable();
                 new Patch_UpdateSwayFactors().Enable();
                 new Patch_OnMakingShot().Enable();
+                new Patch_LaserBeam_FireportSync().Enable();
             }
             catch (Exception ex)
             {

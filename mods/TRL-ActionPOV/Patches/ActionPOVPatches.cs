@@ -33,7 +33,7 @@ namespace ActionPOV.Patches
             }
 
             bool isAiming = __instance.HandsController != null && __instance.HandsController.IsAiming;
-            KineticSpringEngine.ProcessMouseInput(ref deltaRotation, isAiming);
+            KineticSpringEngine.ProcessMouseInput(ref deltaRotation, isAiming, __instance);
             return true;
         }
     }
@@ -77,13 +77,13 @@ namespace ActionPOV.Patches
         }
     }
 
-    // 3. Aplicação do Pivô Esférico e Rotação das Mãos/Arma
-    public class Patch_CalculateCameraPosition : ModulePatch
+    // 3. Aplicação Pura e Direta no Osso Real da Arma (HandsContainer.WeaponRootAnim)
+    public class Patch_WeaponRootAnimTransform : ModulePatch
     {
+        private static Vector3 _originalLocalPosition;
+        private static Quaternion _originalLocalRotation;
+        private static Transform _lastWeaponRootAnim;
         private static bool _wasAimingLastFrame = false;
-        private static Transform _lastWeaponRoot = null;
-        private static Vector3 _originalLocalPosition = Vector3.zero;
-        private static Quaternion _originalLocalRotation = Quaternion.identity;
 
         protected override MethodBase GetTargetMethod()
         {
@@ -93,26 +93,26 @@ namespace ActionPOV.Patches
         [PatchPostfix]
         private static void Postfix(ProceduralWeaponAnimation __instance)
         {
-            if (!Plugin.EnableMod.Value) return;
+            if (!Plugin.EnableMod.Value || __instance == null || __instance.HandsContainer == null) return;
 
             var player = EFTBindings.GetPlayer(__instance);
-            if (player == null || !player.IsYourPlayer || __instance.HandsContainer == null) return;
+            if (player == null || !player.IsYourPlayer) return;
 
-            Transform weaponRoot = __instance.HandsContainer.WeaponRoot;
-            if (weaponRoot == null) return;
+            Transform weaponRootAnim = __instance.HandsContainer.WeaponRootAnim;
+            if (weaponRootAnim == null) return;
 
-            // Blindagem contra acúmulo infinito de transformações no WeaponRoot
-            if (_lastWeaponRoot == weaponRoot)
+            // Blindagem contra acúmulo infinito de transformações no WeaponRootAnim
+            if (_lastWeaponRootAnim == weaponRootAnim)
             {
-                weaponRoot.localPosition = _originalLocalPosition;
-                weaponRoot.localRotation = _originalLocalRotation;
+                weaponRootAnim.localPosition = _originalLocalPosition;
+                weaponRootAnim.localRotation = _originalLocalRotation;
             }
             else
             {
-                _lastWeaponRoot = weaponRoot;
+                _lastWeaponRootAnim = weaponRootAnim;
             }
-            _originalLocalPosition = weaponRoot.localPosition;
-            _originalLocalRotation = weaponRoot.localRotation;
+            _originalLocalPosition = weaponRootAnim.localPosition;
+            _originalLocalRotation = weaponRootAnim.localRotation;
 
             // Detecção de Transição para ADS
             bool isAiming = __instance.IsAiming;
@@ -125,12 +125,47 @@ namespace ActionPOV.Patches
             // Executa a física de amortecimento, roll e sway orgânico
             KineticSpringEngine.UpdatePhysics(player, Time.deltaTime);
 
-            // Calcula a translação esférica ancorada no ombro
-            KineticSpringEngine.CalculateArmOffsets(out Vector3 posOffset, out Quaternion rotOffset);
+            // Obtenção da orientação da Câmera de Visão do Jogador (Camera View Space)
+            Transform cameraTransform = __instance.HandsContainer.CameraTransform;
+            Quaternion camRot = (cameraTransform != null) ? cameraTransform.rotation : (weaponRootAnim.parent != null ? weaponRootAnim.parent.rotation : Quaternion.identity);
 
-            // Aplica os offsets finais da física
-            weaponRoot.localPosition += posOffset;
-            weaponRoot.localRotation *= rotOffset;
+            // Rotação da física expressa no espaço de visão da tela da câmera
+            Quaternion camLocalRot = Quaternion.Euler(
+                KineticSpringEngine.CurrentWeaponAngle.x, // Pitch (elevação vertical nos eixos da câmera)
+                KineticSpringEngine.CurrentWeaponAngle.y, // Yaw (giro horizontal nos eixos da câmera)
+                KineticSpringEngine.CurrentWeaponAngle.z  // Roll (torção axial nos eixos da câmera)
+            );
+
+            // Matriz delta de rotação no espaço de mundo
+            Quaternion worldDeltaRot = camRot * camLocalRot * Quaternion.Inverse(camRot);
+            Vector3 worldDeltaPos = camRot * KineticSpringEngine.CurrentWeaponPos;
+
+            // Aplicação física direta no WeaponRootAnim (Onde a arma, cano, mira e laser estão parafusados)
+            if (!isAiming)
+            {
+                // HIPFIRE: Translação e rotação livres de CQB no osso real da arma
+                weaponRootAnim.position += worldDeltaPos;
+                weaponRootAnim.rotation = worldDeltaRot * weaponRootAnim.rotation;
+            }
+            else
+            {
+                // ADS: PIVÔ FOCAL NO OSSO DA MIRA (mod_aim_camera) ORIENTADO PELA CÂMERA
+                // Gira ao redor do centro óptico da mira mantendo alça e massa perfeitamente alinhadas
+                if (__instance.CurrentScope != null && __instance.CurrentScope.Bone != null)
+                {
+                    Vector3 scopeWorldPos = __instance.CurrentScope.Bone.position;
+                    Vector3 armVector = weaponRootAnim.position - scopeWorldPos;
+                    Vector3 rotatedArmVector = worldDeltaRot * armVector;
+
+                    weaponRootAnim.position = scopeWorldPos + rotatedArmVector + worldDeltaPos;
+                    weaponRootAnim.rotation = worldDeltaRot * weaponRootAnim.rotation;
+                }
+                else
+                {
+                    weaponRootAnim.position += worldDeltaPos;
+                    weaponRootAnim.rotation = worldDeltaRot * weaponRootAnim.rotation;
+                }
+            }
 
             // Injeção de Offsets de Diagnóstico Manual (F12)
             if (Plugin.EnableDiagnosticOverrides.Value)
@@ -138,8 +173,8 @@ namespace ActionPOV.Patches
                 Vector3 manualPos = new Vector3(Plugin.DebugWeaponPosX.Value, Plugin.DebugWeaponPosY.Value, Plugin.DebugWeaponPosZ.Value);
                 Quaternion manualRot = Quaternion.Euler(Plugin.DebugWeaponRotX.Value, Plugin.DebugWeaponRotY.Value, Plugin.DebugWeaponRotZ.Value);
 
-                weaponRoot.localPosition += manualPos;
-                weaponRoot.localRotation *= manualRot;
+                weaponRootAnim.position += camRot * manualPos;
+                weaponRootAnim.rotation = (camRot * manualRot * Quaternion.Inverse(camRot)) * weaponRootAnim.rotation;
             }
         }
     }
@@ -167,7 +202,7 @@ namespace ActionPOV.Patches
         }
     }
 
-    // 5. Impacto e Recuo Visual de Disparo (Camera Punch & Weapon Kick)
+    // 5. Impacto e Recuo Visual de Disparo (Player.OnMakingShot)
     public class Patch_OnMakingShot : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
@@ -182,7 +217,188 @@ namespace ActionPOV.Patches
                 return;
 
             bool isAiming = __instance.HandsController != null && __instance.HandsController.IsAiming;
-            KineticSpringEngine.ApplyShotPunch(isAiming);
+            KineticSpringEngine.ApplyRecoilKick(isAiming);
+        }
+    }
+
+    // 6. Sistema de Spy e Telemetria em Tempo Real do Laser
+    public static class LaserSpy
+    {
+        public static bool Enabled = true;
+        public static int CallsPerSecond = 0;
+        public static int DistinctInstancesCount = 0;
+        private static int _frameCounter = 0;
+        private static float _lastTime = 0f;
+        private static readonly System.Collections.Generic.HashSet<int> _instanceIds = new System.Collections.Generic.HashSet<int>();
+
+        public static bool IsYourPlayer = false;
+        public static string LastHierarchyPath = "";
+        public static Vector3 WeaponDirection;
+        public static Vector3 FireportForward;
+        public static Vector3 TransformForward;
+        public static float DeltaAngle;
+        public static float HitDistance;
+        public static Vector3 HitPoint;
+
+        public static void RecordCall(int instanceId, string hierarchyPath, bool isOwner, Vector3 weaponDir, Vector3 fireportFwd, Vector3 transFwd, float deltaAng, float dist, Vector3 hitPt)
+        {
+            _instanceIds.Add(instanceId);
+            LastHierarchyPath = hierarchyPath;
+            IsYourPlayer = isOwner;
+            WeaponDirection = weaponDir;
+            FireportForward = fireportFwd;
+            TransformForward = transFwd;
+            DeltaAngle = deltaAng;
+            HitDistance = dist;
+            HitPoint = hitPt;
+
+            _frameCounter++;
+            if (Time.time - _lastTime >= 1.0f)
+            {
+                CallsPerSecond = _frameCounter;
+                DistinctInstancesCount = _instanceIds.Count;
+                _instanceIds.Clear();
+                _frameCounter = 0;
+                _lastTime = Time.time;
+            }
+        }
+    }
+
+    // 7. Sincronização Cirúrgica do Laser com a Balística Real do Cano (WeaponDirection / Fireport)
+    public class Patch_LaserBeam_FireportSync : ModulePatch
+    {
+        private static readonly System.Reflection.FieldInfo _isOwnerField = AccessTools.Field(typeof(LaserBeam), "bool_0");
+        private static readonly System.Reflection.FieldInfo _beamMeshField = AccessTools.Field(typeof(LaserBeam), "mesh_1");
+        private static readonly System.Reflection.FieldInfo _pointMeshField = AccessTools.Field(typeof(LaserBeam), "mesh_0");
+        private static readonly System.Reflection.FieldInfo _lightField = AccessTools.Field(typeof(LaserBeam), "light_0");
+        private static readonly System.Reflection.FieldInfo _matBlock0Field = AccessTools.Field(typeof(LaserBeam), "materialPropertyBlock_0");
+        private static readonly System.Reflection.FieldInfo _matBlock1Field = AccessTools.Field(typeof(LaserBeam), "materialPropertyBlock_1");
+
+        private static readonly int _distanceId = Shader.PropertyToID("_Distance");
+        private static readonly int _intensityId = Shader.PropertyToID("_Intensity");
+        private static readonly int _sizeId = Shader.PropertyToID("_Size");
+        private static readonly int _maxDistId = Shader.PropertyToID("_MaxDist");
+
+        protected override System.Reflection.MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(LaserBeam), nameof(LaserBeam.LateUpdate));
+        }
+
+        [PatchPrefix]
+        private static bool Prefix(LaserBeam __instance)
+        {
+            if (__instance == null || !Plugin.EnableMod.Value) return true;
+
+            // Identificação direta e precisa do dono do Laser (bool_0 setado por SetOwner(isYourPlayer))
+            bool isYourPlayer = false;
+            if (_isOwnerField != null)
+            {
+                isYourPlayer = (bool)_isOwnerField.GetValue(__instance);
+            }
+
+            var myPlayer = GamePlayerOwner.MyPlayer;
+            if (myPlayer == null) return true;
+
+            var pwa = myPlayer.ProceduralWeaponAnimation;
+            var firearmController = myPlayer.HandsController as Player.FirearmController;
+            if (firearmController == null) return true;
+
+            // Verificação precisa de Primeira Pessoa (FPS Rig) vs Terceira Pessoa (Body Rig)
+            bool isFirstPerson = false;
+            if (pwa != null && pwa.HandsContainer != null)
+            {
+                if ((pwa.HandsContainer.Weapon != null && __instance.transform.IsChildOf(pwa.HandsContainer.Weapon)) ||
+                    (pwa.HandsContainer.WeaponRootAnim != null && __instance.transform.IsChildOf(pwa.HandsContainer.WeaponRootAnim)))
+                {
+                    isFirstPerson = true;
+                    isYourPlayer = true;
+                }
+            }
+
+            // Se for laser da 3ª pessoa do jogador local enquanto ele joga em 1ª pessoa:
+            if (!isFirstPerson && isYourPlayer && myPlayer.PointOfView == EPointOfView.FirstPerson)
+            {
+                // Suprime a renderização duplicada/fantasma da 3ª pessoa na visão de 1ª pessoa
+                return false;
+            }
+
+            if (!isYourPlayer)
+                return true; // Deixa o laser de bots e outros players no fluxo vanilla
+
+            // 1. Origem real do laser: sai da lente física do acessório montado no guarda-mão
+            Vector3 startPos = __instance.transform.position;
+
+            // 2. Direção balística consolidada do tiro (mesma trajetória usada pelo CreateShot do jogo)
+            Vector3 forward = firearmController.WeaponDirection;
+            Vector3 fireportForward = forward;
+            Vector3 shotOrigin = firearmController.FireportPosition;
+
+            // Aplica os ajustes de FOV e compensação de tórax (Ribcage/HandsHierarchy) do EFT
+            firearmController.AdjustShotVectors(ref shotOrigin, ref forward);
+
+            if (forward.sqrMagnitude < 0.0001f)
+            {
+                if (pwa != null && pwa.HandsContainer != null && pwa.HandsContainer.Fireport != null)
+                    forward = -pwa.HandsContainer.Fireport.up;
+                else
+                    forward = __instance.transform.forward;
+                fireportForward = forward;
+            }
+
+            Mesh pointMesh = (Mesh)_pointMeshField?.GetValue(__instance);
+            Mesh beamMesh = (Mesh)_beamMeshField?.GetValue(__instance);
+            Light spotLight = (Light)_lightField?.GetValue(__instance);
+            MaterialPropertyBlock matBlock0 = (MaterialPropertyBlock)_matBlock0Field?.GetValue(__instance);
+            MaterialPropertyBlock matBlock1 = (MaterialPropertyBlock)_matBlock1Field?.GetValue(__instance);
+
+            if (pointMesh == null || beamMesh == null || matBlock0 == null || matBlock1 == null)
+                return true;
+
+            float hitDist = __instance.MaxDistance;
+            Vector3 hitPoint = startPos + forward * __instance.MaxDistance;
+
+            if (Physics.Raycast(startPos + forward * __instance.RayStart, forward, out var hitInfo, __instance.MaxDistance, __instance.Mask))
+            {
+                hitDist = hitInfo.distance;
+                hitPoint = hitInfo.point;
+
+                float sizeVal = Mathf.Lerp(__instance.PointSizeClose, __instance.PointSizeFar, hitInfo.distance / __instance.MaxDistance);
+                float intensityVal = (1f - hitInfo.distance / __instance.MaxDistance);
+
+                matBlock0.SetFloat(_distanceId, hitInfo.distance + __instance.RayStart);
+                matBlock0.SetFloat(_intensityId, intensityVal);
+                matBlock1.SetFloat(_intensityId, intensityVal);
+                matBlock1.SetFloat(_sizeId, sizeVal);
+                matBlock1.SetFloat(_maxDistId, __instance.MaxDistance);
+
+                if (spotLight != null)
+                {
+                    Vector3 lightPos = hitInfo.point + (hitInfo.normal - forward).normalized * __instance.SurfaceOffsetForLight;
+                    spotLight.transform.SetPositionAndRotation(lightPos, Quaternion.Lerp(Quaternion.LookRotation(hitInfo.point - lightPos, Vector3.up), Quaternion.LookRotation(forward), 0.25f));
+                    spotLight.intensity = intensityVal * __instance.LightIntensity;
+                    spotLight.spotAngle = Mathf.Lerp(__instance.AngleCloseFar.x, __instance.AngleCloseFar.y, hitInfo.distance / __instance.MaxDistance);
+                }
+
+                Vector3 normal = hitInfo.normal;
+                Graphics.DrawMesh(pointMesh, hitInfo.point, Quaternion.LookRotation(normal), __instance.PointMaterial, LayerMask.NameToLayer("Default"), null, 0, matBlock1);
+            }
+            else
+            {
+                if (spotLight != null) spotLight.intensity = 0f;
+                matBlock0.SetFloat(_distanceId, __instance.MaxDistance);
+                matBlock0.SetFloat(_intensityId, 1f);
+            }
+
+            // Desenha o feixe volumétrico a partir da origem corrigida, na direção do cano de 1ª pessoa
+            Graphics.DrawMesh(beamMesh, startPos, Quaternion.LookRotation(forward), __instance.BeamMaterial, LayerMask.NameToLayer("Default"), null, 0, matBlock0);
+
+            // Spy: reporta a posição de origem corrigida para diagnóstico
+            float deltaAngle = Vector3.Angle(forward, __instance.transform.forward);
+            string povLabel = isFirstPerson ? "[1ª PESSOA]" : "[3ª PESSOA]";
+            string hierarchyPath = (__instance.transform.parent != null) ? $"{povLabel} {__instance.transform.parent.name}/{__instance.name}" : $"{povLabel} {__instance.name}";
+            LaserSpy.RecordCall(__instance.GetInstanceID(), hierarchyPath, isYourPlayer, forward, fireportForward, __instance.transform.forward, deltaAngle, hitDist, hitPoint);
+
+            return false; // Suprime o LateUpdate original descompassado
         }
     }
 }
