@@ -137,26 +137,9 @@ namespace ActionPOV.Patches
             Vector3 worldDeltaPos = camRot * KineticSpringEngine.CurrentWeaponPos;
 
             // Aplicação física direta no WeaponRootAnim com Interpolação Orgânica de Pivô Hipfire <-> ADS
-            float adsBlend = KineticSpringEngine.ADSTransitionBlend;
-
-            if (adsBlend > 0.001f && __instance.CurrentScope != null && __instance.CurrentScope.Bone != null)
-            {
-                // ADS: PIVÔ FOCAL NO OSSO DA MIRA (mod_aim_camera) INTERPOLADO SUAVEMENTE
-                Vector3 scopeWorldPos = __instance.CurrentScope.Bone.position;
-                Vector3 armVector = weaponRootAnim.position - scopeWorldPos;
-                Vector3 rotatedArmVector = worldDeltaRot * armVector;
-                Vector3 scopeTargetPos = scopeWorldPos + rotatedArmVector + worldDeltaPos;
-
-                Vector3 hipfirePos = weaponRootAnim.position + worldDeltaPos;
-
-                weaponRootAnim.position = Vector3.Lerp(hipfirePos, scopeTargetPos, adsBlend);
-                weaponRootAnim.rotation = worldDeltaRot * weaponRootAnim.rotation;
-            }
-            else
-            {
-                weaponRootAnim.position += worldDeltaPos;
-                weaponRootAnim.rotation = worldDeltaRot * weaponRootAnim.rotation;
-            }
+            // Aplicação física linear pura no WeaponRootAnim (elimina o flick de braço de alavanca do scope)
+            weaponRootAnim.position += worldDeltaPos;
+            weaponRootAnim.rotation = worldDeltaRot * weaponRootAnim.rotation;
 
             // Injeção de Offsets de Diagnóstico Manual (F12)
             if (Plugin.EnableDiagnosticOverrides.Value)
