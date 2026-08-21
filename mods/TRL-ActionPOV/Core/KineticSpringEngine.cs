@@ -193,28 +193,35 @@ namespace ActionPOV.Core
 
             bool isAiming = player != null && player.HandsController != null && player.HandsController.IsAiming;
 
-            // 0. REALINHAMENTO CONDICIONAL NÃO-CUMULATIVO POR CAMINHADA CONTÍNUA EXCLUSIVAMENTE 100% FRENTE (W) OU TRÁS (S)
-            // Se soltar a tecla, parar ou andar na diagonal (W+A, W+D, S+A, S+D), o timer zera imediatamente no mesmo frame
+            // 0. REALINHAMENTO CONDICIONAL POR CAMINHADA CONTÍNUA OU CORRIDA (SPRINT)
             if (player != null && player.MovementContext != null)
             {
-                Vector2 inputDir = (Vector2)player.InputDirection;
-                float walkSpeed = player.Speed;
-
-                bool isPureForwardOrBackward = Mathf.Abs(inputDir.x) < 0.05f && Mathf.Abs(inputDir.y) > 0.7f;
-
-                if (isPureForwardOrBackward && walkSpeed > 0.1f)
+                if (player.MovementContext.IsSprintEnabled)
                 {
-                    _forwardWalkTimer += dt;
-                    if (_forwardWalkTimer >= WalkForwardDelaySeconds)
-                    {
-                        // Transição gradual e aveludada em direção ao centro (sem trancos bruscos)
-                        float realignSpeed = WalkForwardRealignSpeed;
-                        TargetWeaponAngle = Vector3.MoveTowards(TargetWeaponAngle, Vector3.zero, realignSpeed * dt);
-                    }
+                    _forwardWalkTimer = 0f;
+                    TargetWeaponAngle = Vector3.MoveTowards(TargetWeaponAngle, Vector3.zero, 15.0f * dt);
                 }
                 else
                 {
-                    _forwardWalkTimer = 0f; // NÃO-CUMULATIVO: zera imediatamente
+                    Vector2 inputDir = (Vector2)player.InputDirection;
+                    float walkSpeed = player.Speed;
+
+                    bool isPureForwardOrBackward = Mathf.Abs(inputDir.x) < 0.05f && Mathf.Abs(inputDir.y) > 0.7f;
+
+                    if (isPureForwardOrBackward && walkSpeed > 0.1f)
+                    {
+                        _forwardWalkTimer += dt;
+                        if (_forwardWalkTimer >= WalkForwardDelaySeconds)
+                        {
+                            // Transição gradual e aveludada em direção ao centro (sem trancos bruscos)
+                            float realignSpeed = WalkForwardRealignSpeed;
+                            TargetWeaponAngle = Vector3.MoveTowards(TargetWeaponAngle, Vector3.zero, realignSpeed * dt);
+                        }
+                    }
+                    else
+                    {
+                        _forwardWalkTimer = 0f; // NÃO-CUMULATIVO: zera imediatamente
+                    }
                 }
             }
 

@@ -24,11 +24,12 @@ namespace ActionPOV.Patches
                 return true;
 
             // Guards de Estado (Sprint, Inventário, Cura/Itens)
+            // Em vez de um Reset() abrupto que teletransporta a arma, direciona suavemente o alvo para zero
             if (__instance.MovementContext.CurrentState.Name == EPlayerState.Stationary ||
                 __instance.MovementContext.IsSprintEnabled ||
                 __instance.HandsController is Player.UsableItemController)
             {
-                KineticSpringEngine.Reset();
+                KineticSpringEngine.TargetWeaponAngle = Vector3.zero;
                 return true;
             }
 
