@@ -144,13 +144,16 @@ namespace ActionPOV.Core
             deltaRotation.x -= (consumed.x / sensitivity);
             deltaRotation.y -= (consumed.y / sensitivity);
 
-            // 5. REALINHAMENTO CONDICIONAL APÓS 1 SEGUNDO DE CAMINHADA CONTÍNUA PARA FRENTE (W)
+            // 5. REALINHAMENTO CONDICIONAL APÓS 1 SEGUNDO DE CAMINHADA CONTÍNUA EXCLUSIVAMENTE 100% FRENTE (W) OU TRÁS (S)
+            // Se andar na diagonal (W+A, W+D, S+A, S+D) ou strafe lateral puro (A, D), o timer é zerado
             if (player != null && player.MovementContext != null)
             {
                 Vector2 inputDir = (Vector2)player.InputDirection;
                 float walkSpeed = player.Speed;
+
+                bool isPureForwardOrBackward = Mathf.Abs(inputDir.x) < 0.05f && Mathf.Abs(inputDir.y) > 0.7f;
                 
-                if (inputDir.y > 0.3f && walkSpeed > 0.1f)
+                if (isPureForwardOrBackward && walkSpeed > 0.1f)
                 {
                     _forwardWalkTimer += Time.deltaTime;
                     if (_forwardWalkTimer >= WalkForwardDelaySeconds)
