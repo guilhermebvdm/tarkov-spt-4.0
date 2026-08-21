@@ -10,7 +10,7 @@
     <LangVersion>latest</LangVersion>
     <FileAlignment>512</FileAlignment>
     <RootNamespace>TRLActionPOV</RootNamespace>
-    <Version>1.4.5</Version>
+    <Version>1.4.6</Version>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>

@@ -278,57 +278,27 @@ namespace ActionPOV.Core
                 dt
             );
 
+            // Posição Vertical Orgânica da Coronha (100% Acoplada em Fase com o Ângulo Real do Cano):
+            // Como a coronha e o cano formam uma alavanca mecânica única, a posição vertical ideal
+            // é calculada diretamente a partir de CurrentWeaponAngle.x (a rotação real visível da arma).
+            // Isso garante que:
+            // 1. A coronha NUNCA cruza o centro (0) antes do cano cruzar o centro.
+            // 2. A transição pelo ponto zero é 100% C¹-contínua, sem degraus, sem hard clamps e com zero flick.
+            float curSlideMaxV = Mathf.Lerp(StockSlideVerticalMax, StockSlideVerticalADS, ADSTransitionBlend);
+            Vector2 bounds = isAiming ? ADSDeadzoneLimits : DeadzoneLimits;
+            float normPitch = CurrentWeaponAngle.x / Mathf.Max(bounds.y, 0.001f);
+            float curvePitch = Mathf.Sign(normPitch) * Mathf.Pow(Mathf.Abs(normPitch), Mathf.Lerp(1.25f, 1.15f, ADSTransitionBlend));
+            float multV = InvertStockVertical ? -1f : 1f;
+            float idealPosY = multV * curvePitch * curSlideMaxV;
+
             CurrentWeaponPos.y = Mathf.SmoothDamp(
                 CurrentWeaponPos.y,
-                posTarget.y,
+                idealPosY,
                 ref _weaponPosVelocity.y,
                 Mathf.Max(smoothV, 0.001f),
                 Mathf.Infinity,
                 dt
             );
-
-            // Restrição Orgânica de Quadrante Vertical com Dissipação de Velocidade (Zero Flick)
-            // - Cano apontado para CIMA (TargetWeaponAngle.x <= 0): Coronha deve ficar em baixo (<= 0f)
-            // - Cano apontado para BAIXO (TargetWeaponAngle.x >= 0): Coronha deve ficar em cima (>= 0f)
-            float multVCur = InvertStockVertical ? -1f : 1f;
-            if (TargetWeaponAngle.x <= 0f)
-            {
-                if (multVCur > 0)
-                {
-                    if (CurrentWeaponPos.y > 0f)
-                    {
-                        CurrentWeaponPos.y = 0f;
-                        if (_weaponPosVelocity.y > 0f) _weaponPosVelocity.y = 0f; // Dissipa a velocidade inercial reprimida
-                    }
-                }
-                else
-                {
-                    if (CurrentWeaponPos.y < 0f)
-                    {
-                        CurrentWeaponPos.y = 0f;
-                        if (_weaponPosVelocity.y < 0f) _weaponPosVelocity.y = 0f;
-                    }
-                }
-            }
-            else // TargetWeaponAngle.x > 0f
-            {
-                if (multVCur > 0)
-                {
-                    if (CurrentWeaponPos.y < 0f)
-                    {
-                        CurrentWeaponPos.y = 0f;
-                        if (_weaponPosVelocity.y < 0f) _weaponPosVelocity.y = 0f;
-                    }
-                }
-                else
-                {
-                    if (CurrentWeaponPos.y > 0f)
-                    {
-                        CurrentWeaponPos.y = 0f;
-                        if (_weaponPosVelocity.y > 0f) _weaponPosVelocity.y = 0f;
-                    }
-                }
-            }
 
             float zRecoveryTime = isAiming ? (RecoilRecoveryTime * 0.75f) : RecoilRecoveryTime;
             CurrentWeaponPos.z = Mathf.SmoothDamp(
