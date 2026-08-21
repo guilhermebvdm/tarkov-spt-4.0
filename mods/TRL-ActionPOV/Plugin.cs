@@ -9,13 +9,13 @@ using UnityEngine;
 #nullable disable
 namespace ActionPOV
 {
-    [BepInPlugin("com.trl.actionpov", "TRL-ActionPOV", "1.4.6")]
+    [BepInPlugin("com.trl.actionpov", "TRL-ActionPOV", "1.4.7")]
     public class Plugin : BaseUnityPlugin
     {
         public static Plugin Instance { get; private set; }
 
         public static ConfigEntry<bool> EnableMod;
-        public static ConfigEntry<bool> EnableCameraHeadEffects;
+        public static ConfigEntry<bool> EnableHeadMovementMotion;
         public static ConfigEntry<bool> EnableDiagnosticOverrides;
 
         // Física e Inércia
@@ -50,14 +50,17 @@ namespace ActionPOV
         public static ConfigEntry<float> StockSmoothTimeVerticalADS;
         public static ConfigEntry<float> ADSStockSnapInSpeed;
 
-        // Coice Físico do Disparo (Weapon Kickback & Recoil Punch)
+        // Coice Físico do Disparo (Weapon Kickback & Bodycam Head Punch)
         public static ConfigEntry<bool> EnableRecoilKick;
         public static ConfigEntry<float> RecoilKickZ_Hipfire;
         public static ConfigEntry<float> RecoilKickZ_ADS;
         public static ConfigEntry<float> RecoilMuzzleRise_Hipfire;
         public static ConfigEntry<float> RecoilMuzzleRise_ADS;
         public static ConfigEntry<float> RecoilRecoveryTime;
-        public static ConfigEntry<float> RecoilHeadPunchIntensity;
+        public static ConfigEntry<bool> EnableShotCameraHeadPunch;
+        public static ConfigEntry<float> ShotHeadPunchRollIntensity;
+        public static ConfigEntry<float> ShotHeadPunchPitchRise;
+        public static ConfigEntry<float> ShotHeadPunchRecoveryTime;
 
         // Pivô do Ombro
         public static ConfigEntry<float> ShoulderPivotX;
@@ -117,11 +120,11 @@ namespace ActionPOV
                 "Ativa ou desativa completamente o ActionPOV."
             );
 
-            EnableCameraHeadEffects = Config.Bind(
+            EnableHeadMovementMotion = Config.Bind(
                 "1. General",
-                "Enable Camera Head Motion Effects",
-                true,
-                "Ativa ou desativa os efeitos de movimento da cabeça/câmera (Roll, Lag, Tilt). Quando desativado, roda o código nativo original do jogo com bypass total para máxima performance de FPS."
+                "Enable Head Motion While Looking",
+                false,
+                "Ativa ou desativa o Roll contínuo e o Lag inercial na visão ao mover o mouse ou andar. Desative (padrão) para manter a visão do mouse 100% nativa e ultra-suave a 60 FPS sem Judder estroboscópico."
             );
 
             EnableDiagnosticOverrides = Config.Bind(
@@ -449,13 +452,40 @@ namespace ActionPOV
                 )
             );
 
-            RecoilHeadPunchIntensity = Config.Bind(
+            EnableShotCameraHeadPunch = Config.Bind(
                 "6. Weapon Shot Recoil & Kickback",
-                "Recoil Head Punch Intensity",
-                0.8f,
+                "Enable Shot Camera Head Punch",
+                true,
+                "Ativa o solavanco e tranco físico na câmera a cada disparo da arma (estilo Bodycam/Unrecord)."
+            );
+
+            ShotHeadPunchRollIntensity = Config.Bind(
+                "6. Weapon Shot Recoil & Kickback",
+                "Shot Head Punch Roll Intensity",
+                2.0f,
                 new ConfigDescription(
-                    "Intensidade do solavanco visual na cabeça do operador a cada disparo.",
-                    new AcceptableValueRange<float>(0.0f, 3.0f)
+                    "Intensidade da torção/sacudida lateral (Roll) na visão a cada disparo (graus).",
+                    new AcceptableValueRange<float>(0.0f, 6.0f)
+                )
+            );
+
+            ShotHeadPunchPitchRise = Config.Bind(
+                "6. Weapon Shot Recoil & Kickback",
+                "Shot Head Punch Pitch Rise",
+                1.5f,
+                new ConfigDescription(
+                    "Empinada angular da visão para cima a cada disparo (graus).",
+                    new AcceptableValueRange<float>(0.0f, 5.0f)
+                )
+            );
+
+            ShotHeadPunchRecoveryTime = Config.Bind(
+                "6. Weapon Shot Recoil & Kickback",
+                "Shot Head Punch Recovery Time (Seconds)",
+                0.07f,
+                new ConfigDescription(
+                    "Tempo de recuperação rápida do solavanco de disparo da cabeça (segundos).",
+                    new AcceptableValueRange<float>(0.02f, 0.25f)
                 )
             );
 
@@ -761,8 +791,10 @@ namespace ActionPOV
             KineticSpringEngine.RecoilKickZ_ADS = RecoilKickZ_ADS.Value;
             KineticSpringEngine.RecoilMuzzleRise_Hipfire = RecoilMuzzleRise_Hipfire.Value;
             KineticSpringEngine.RecoilMuzzleRise_ADS = RecoilMuzzleRise_ADS.Value;
-            KineticSpringEngine.RecoilRecoveryTime = RecoilRecoveryTime.Value;
-            KineticSpringEngine.RecoilHeadPunchIntensity = RecoilHeadPunchIntensity.Value;
+            KineticSpringEngine.EnableShotCameraHeadPunch = EnableShotCameraHeadPunch.Value;
+            KineticSpringEngine.ShotHeadPunchRollIntensity = ShotHeadPunchRollIntensity.Value;
+            KineticSpringEngine.ShotHeadPunchPitchRise = ShotHeadPunchPitchRise.Value;
+            KineticSpringEngine.ShotHeadPunchRecoveryTime = ShotHeadPunchRecoveryTime.Value;
 
             KineticSpringEngine.CustomShoulderPivot = new Vector3(ShoulderPivotX.Value, ShoulderPivotY.Value, ShoulderPivotZ.Value);
 

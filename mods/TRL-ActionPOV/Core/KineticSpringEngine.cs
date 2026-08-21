@@ -64,14 +64,27 @@ namespace ActionPOV.Core
         public static float StockSmoothTimeVerticalADS = 0.20f;   // Tempo de resposta vertical da coronha/alça no ADS (segundos)
         public static float ADSStockSnapInSpeed = 0.06f;          // Tempo de aceleração rápida (Ease-Out) nos primeiros instantes do ADS
 
-        // --- COICE FÍSICO DO DISPARO (WEAPON KICKBACK & RECOIL PUNCH NO EIXO Z E PITCH) ---
+        // --- COICE FÍSICO DO DISPARO (WEAPON KICKBACK & BODYCAM HEAD PUNCH) ---
         public static bool EnableRecoilKick = true;             // Ativa o coice mecânico de disparo
         public static float RecoilKickZ_Hipfire = 0.030f;       // Recuo para trás no eixo Z em Hipfire (metros, ex: 0.030 = 3.0cm)
         public static float RecoilKickZ_ADS = 0.012f;           // Recuo para trás no eixo Z em ADS (metros, ex: 0.012 = 1.2cm)
         public static float RecoilMuzzleRise_Hipfire = 1.8f;    // Empinada vertical angular do cano em Hipfire (graus)
         public static float RecoilMuzzleRise_ADS = 0.8f;        // Empinada vertical angular do cano em ADS (graus)
         public static float RecoilRecoveryTime = 0.08f;         // Tempo de recuperação da mola após o coice (segundos)
-        public static float RecoilHeadPunchIntensity = 0.8f;    // Sacudida visual na cabeça a cada disparo
+
+        public static bool EnableShotCameraHeadPunch = true;    // Ativa o tranco na câmera a cada disparo (Bodycam style)
+        public static float ShotHeadPunchRollIntensity = 2.0f;  // Força de torção (Roll) na visão a cada disparo (graus)
+        public static float ShotHeadPunchPitchRise = 1.5f;      // Empinada da visão para cima no disparo (graus)
+        public static float ShotHeadPunchRecoveryTime = 0.07f;  // Tempo de recuperação rápida do tranco na cabeça (segundos)
+
+        // Estado do tranco de disparo na cabeça
+        public static float CurrentShotHeadRoll = 0f;
+        public static float CurrentShotHeadPitch = 0f;
+        public static float CurrentShotHeadYaw = 0f;
+        private static float _shotHeadRollVel = 0f;
+        private static float _shotHeadPitchVel = 0f;
+        private static float _shotHeadYawVel = 0f;
+
         private static int _lastShotFrame = -1;
 
         public static float HeadRollIntensity = 0.025f;         // Força de inclinação lateral da cabeça
@@ -310,8 +323,8 @@ namespace ActionPOV.Core
                 dt
             );
 
-            // 3. Dinâmica e Inclinação da Cabeça/Câmera (Roll, Lag, Cheek Weld Tilt)
-            if (Plugin.EnableCameraHeadEffects.Value)
+            // 3. Dinâmica e Inclinação da Cabeça/Câmera (Roll, Lag, Cheek Weld Tilt ao olhar ao redor)
+            if (Plugin.EnableHeadMovementMotion.Value)
             {
                 // Inclinação Tática de Cabeça em ADS (Cheek Weld com sinal corrigido)
                 float targetTilt = (isAiming && EnableADSTilt) ? ADSTiltHeadRoll : 0f;
@@ -364,32 +377,54 @@ namespace ActionPOV.Core
                 _currentHeadTiltADS = 0f;
             }
 
+            // 4. Amortecimento Elástico Rápido do Tranco de Disparo na Cabeça (Bodycam Shot Punch)
+            if (EnableShotCameraHeadPunch)
+            {
+                CurrentShotHeadRoll = Mathf.SmoothDamp(CurrentShotHeadRoll, 0f, ref _shotHeadRollVel, Mathf.Max(ShotHeadPunchRecoveryTime, 0.01f), Mathf.Infinity, dt);
+                CurrentShotHeadPitch = Mathf.SmoothDamp(CurrentShotHeadPitch, 0f, ref _shotHeadPitchVel, Mathf.Max(ShotHeadPunchRecoveryTime, 0.01f), Mathf.Infinity, dt);
+                CurrentShotHeadYaw = Mathf.SmoothDamp(CurrentShotHeadYaw, 0f, ref _shotHeadYawVel, Mathf.Max(ShotHeadPunchRecoveryTime, 0.01f), Mathf.Infinity, dt);
+            }
+            else
+            {
+                CurrentShotHeadRoll = 0f;
+                CurrentShotHeadPitch = 0f;
+                CurrentShotHeadYaw = 0f;
+            }
+
             // Atenua o delta acumulado para o próximo frame
             LastFrameDelta = Vector2.Lerp(LastFrameDelta, Vector2.zero, dt * 10f);
         }
 
-        // Aplica coice físico e sacudida mecânica ao disparar a arma (Weapon Kickback & Recoil Punch)
+        // Aplica coice físico e sacudida mecânica ao disparar a arma (Weapon Kickback & Bodycam Head Punch)
         public static void ApplyRecoilKick(bool isAiming)
         {
             if (Time.frameCount == _lastShotFrame) return;
             _lastShotFrame = Time.frameCount;
 
-            if (!EnableRecoilKick) return;
-
-            float kickDepth = isAiming ? RecoilKickZ_ADS : RecoilKickZ_Hipfire;
-            float muzzleRise = isAiming ? RecoilMuzzleRise_ADS : RecoilMuzzleRise_Hipfire;
-            float headPunch = isAiming ? (RecoilHeadPunchIntensity * 0.6f) : RecoilHeadPunchIntensity;
-
-            // 1. Recuo imediato de profundidade no eixo Z (para trás contra o ombro/peito)
-            CurrentWeaponPos.z -= kickDepth;
-
-            // 2. Empinada angular instantânea do cano no Pitch (X)
-            CurrentWeaponAngle.x -= muzzleRise;
-
-            // 3. Solavanco de Head Roll aleatório na cabeça/visão
-            if (headPunch > 0.001f)
+            if (EnableRecoilKick)
             {
-                CurrentHeadRoll += UnityEngine.Random.Range(-headPunch, headPunch);
+                float kickDepth = isAiming ? RecoilKickZ_ADS : RecoilKickZ_Hipfire;
+                float muzzleRise = isAiming ? RecoilMuzzleRise_ADS : RecoilMuzzleRise_Hipfire;
+
+                // 1. Recuo imediato de profundidade no eixo Z (para trás contra o ombro/peito)
+                CurrentWeaponPos.z -= kickDepth;
+
+                // 2. Empinada angular instantânea do cano no Pitch (X)
+                CurrentWeaponAngle.x -= muzzleRise;
+            }
+
+            // 3. Solavanco e Tranco Físico na Cabeça/Câmera estilo Bodycam
+            if (EnableShotCameraHeadPunch)
+            {
+                float rollMultiplier = isAiming ? 0.6f : 1.0f;
+                float pitchMultiplier = isAiming ? 0.5f : 1.0f;
+
+                float rollKick = ShotHeadPunchRollIntensity * rollMultiplier;
+                float pitchKick = ShotHeadPunchPitchRise * pitchMultiplier;
+
+                CurrentShotHeadRoll += UnityEngine.Random.Range(-rollKick, rollKick);
+                CurrentShotHeadPitch -= pitchKick; // Soco da visão para cima
+                CurrentShotHeadYaw += UnityEngine.Random.Range(-rollKick * 0.25f, rollKick * 0.25f);
             }
         }
 

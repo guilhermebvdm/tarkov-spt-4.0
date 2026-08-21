@@ -38,7 +38,7 @@ namespace ActionPOV.Patches
         }
     }
 
-    // 2. Cinética da Visão / Roll Orgânico da Cabeça
+    // 2. Cinética da Visão / Roll Orgânico da Cabeça e Tranco de Disparo Bodycam
     public class Patch_SetHeadRotation : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
@@ -49,21 +49,41 @@ namespace ActionPOV.Patches
         [PatchPrefix]
         private static bool Prefix(ProceduralWeaponAnimation __instance, Vector3 headRot)
         {
-            if (!Plugin.EnableMod.Value || !Plugin.EnableCameraHeadEffects.Value) return true;
+            if (!Plugin.EnableMod.Value) return true;
 
             var player = EFTBindings.GetPlayer(__instance);
             if (player == null || !player.IsYourPlayer) return true;
 
             if (player.MovementContext.CurrentState.Name == EPlayerState.Stationary) return true;
 
-            // Base na rotação nativa calculada pelo PWA, injetando o Roll e Pitch/Yaw lag
-            Vector3 finalRot = headRot;
-            finalRot.x += KineticSpringEngine.CurrentHeadPitch;
-            finalRot.y += KineticSpringEngine.CurrentHeadYaw;
-            finalRot.z = KineticSpringEngine.CurrentHeadRoll;
+            bool hasMovementMotion = Plugin.EnableHeadMovementMotion.Value;
+            bool hasShotPunch = Plugin.EnableShotCameraHeadPunch.Value && (Mathf.Abs(KineticSpringEngine.CurrentShotHeadRoll) > 0.01f || Mathf.Abs(KineticSpringEngine.CurrentShotHeadPitch) > 0.01f || Mathf.Abs(KineticSpringEngine.CurrentShotHeadYaw) > 0.01f);
+            bool hasOverrides = Plugin.EnableDiagnosticOverrides.Value;
 
-            // Injeção de Offsets de Diagnóstico Manual (F12)
-            if (Plugin.EnableDiagnosticOverrides.Value)
+            // Se nenhum efeito estiver ativo ou produzindo deslocamento, executa bypass nativo total
+            if (!hasMovementMotion && !hasShotPunch && !hasOverrides)
+                return true;
+
+            Vector3 finalRot = headRot;
+
+            // 1. Movimentação contínua da visão ao virar o mouse ou andar
+            if (hasMovementMotion)
+            {
+                finalRot.x += KineticSpringEngine.CurrentHeadPitch;
+                finalRot.y += KineticSpringEngine.CurrentHeadYaw;
+                finalRot.z += KineticSpringEngine.CurrentHeadRoll;
+            }
+
+            // 2. Tranco e impacto físico violento de disparo (Bodycam Punch)
+            if (Plugin.EnableShotCameraHeadPunch.Value)
+            {
+                finalRot.x += KineticSpringEngine.CurrentShotHeadPitch;
+                finalRot.y += KineticSpringEngine.CurrentShotHeadYaw;
+                finalRot.z += KineticSpringEngine.CurrentShotHeadRoll;
+            }
+
+            // 3. Injeção de Offsets de Diagnóstico Manual (F12)
+            if (hasOverrides)
             {
                 finalRot.x += Plugin.DebugHeadRotX.Value;
                 finalRot.y += Plugin.DebugHeadRotY.Value;
@@ -73,7 +93,7 @@ namespace ActionPOV.Patches
             player.HeadRotation = finalRot;
             EFTBindings.SetHeadRotationVec(__instance, finalRot);
 
-            return false; // Assume o controle da cabeça
+            return false; // Assume o controle da cabeça durante o efeito
         }
     }
 
