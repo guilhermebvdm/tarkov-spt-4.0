@@ -9,12 +9,13 @@ using UnityEngine;
 #nullable disable
 namespace ActionPOV
 {
-    [BepInPlugin("com.trl.actionpov", "TRL-ActionPOV", "1.4.4")]
+    [BepInPlugin("com.trl.actionpov", "TRL-ActionPOV", "1.4.5")]
     public class Plugin : BaseUnityPlugin
     {
         public static Plugin Instance { get; private set; }
 
         public static ConfigEntry<bool> EnableMod;
+        public static ConfigEntry<bool> EnableCameraHeadEffects;
         public static ConfigEntry<bool> EnableDiagnosticOverrides;
 
         // Física e Inércia
@@ -114,6 +115,13 @@ namespace ActionPOV
                 "Enable Mod",
                 true,
                 "Ativa ou desativa completamente o ActionPOV."
+            );
+
+            EnableCameraHeadEffects = Config.Bind(
+                "1. General",
+                "Enable Camera Head Motion Effects",
+                true,
+                "Ativa ou desativa os efeitos de movimento da cabeça/câmera (Roll, Lag, Tilt). Quando desativado, roda o código nativo original do jogo com bypass total para máxima performance de FPS."
             );
 
             EnableDiagnosticOverrides = Config.Bind(

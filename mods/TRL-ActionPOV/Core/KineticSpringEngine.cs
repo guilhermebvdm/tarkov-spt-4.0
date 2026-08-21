@@ -145,41 +145,7 @@ namespace ActionPOV.Core
             deltaRotation.x -= (consumed.x / sensitivity);
             deltaRotation.y -= (consumed.y / sensitivity);
 
-            // 5. REALINHAMENTO CONDICIONAL APÓS 1 SEGUNDO DE CAMINHADA CONTÍNUA EXCLUSIVAMENTE 100% FRENTE (W) OU TRÁS (S)
-            // Se andar na diagonal (W+A, W+D, S+A, S+D) ou strafe lateral puro (A, D), o timer é zerado
-            if (player != null && player.MovementContext != null)
-            {
-                Vector2 inputDir = (Vector2)player.InputDirection;
-                float walkSpeed = player.Speed;
-
-                bool isPureForwardOrBackward = Mathf.Abs(inputDir.x) < 0.05f && Mathf.Abs(inputDir.y) > 0.7f;
-                
-                if (isPureForwardOrBackward && walkSpeed > 0.1f)
-                {
-                    _forwardWalkTimer += Time.deltaTime;
-                    if (_forwardWalkTimer >= WalkForwardDelaySeconds)
-                    {
-                        float forwardRealignFactor = Time.deltaTime * WalkForwardRealignSpeed;
-                        
-                        Vector2 pull = new Vector2(
-                            TargetWeaponAngle.y * forwardRealignFactor,
-                            TargetWeaponAngle.x * forwardRealignFactor
-                        );
-
-                        deltaRotation.x += pull.x;
-                        deltaRotation.y -= pull.y;
-
-                        TargetWeaponAngle.y -= pull.x;
-                        TargetWeaponAngle.x -= pull.y;
-                    }
-                }
-                else
-                {
-                    _forwardWalkTimer = 0f;
-                }
-            }
-
-            // 6. POSIÇÃO DA CORONHA COM TRANSIÇÃO ORGÂNICA ENTRE HIPFIRE E ADS
+            // 5. POSIÇÃO DA CORONHA COM TRANSIÇÃO ORGÂNICA ENTRE HIPFIRE E ADS
             float curSlideMaxH = Mathf.Lerp(StockSlideHorizontalMax, StockSlideHorizontalADS, ADSTransitionBlend);
             float curSlideMaxV = Mathf.Lerp(StockSlideVerticalMax, StockSlideVerticalADS, ADSTransitionBlend);
 
@@ -213,6 +179,31 @@ namespace ActionPOV.Core
             if (dt <= 0.0001f) return;
 
             bool isAiming = player != null && player.HandsController != null && player.HandsController.IsAiming;
+
+            // 0. REALINHAMENTO CONDICIONAL NÃO-CUMULATIVO POR CAMINHADA CONTÍNUA EXCLUSIVAMENTE 100% FRENTE (W) OU TRÁS (S)
+            // Se soltar a tecla, parar ou andar na diagonal (W+A, W+D, S+A, S+D), o timer zera imediatamente no mesmo frame
+            if (player != null && player.MovementContext != null)
+            {
+                Vector2 inputDir = (Vector2)player.InputDirection;
+                float walkSpeed = player.Speed;
+
+                bool isPureForwardOrBackward = Mathf.Abs(inputDir.x) < 0.05f && Mathf.Abs(inputDir.y) > 0.7f;
+
+                if (isPureForwardOrBackward && walkSpeed > 0.1f)
+                {
+                    _forwardWalkTimer += dt;
+                    if (_forwardWalkTimer >= WalkForwardDelaySeconds)
+                    {
+                        // Transição gradual e aveludada em direção ao centro (sem trancos bruscos)
+                        float realignSpeed = WalkForwardRealignSpeed;
+                        TargetWeaponAngle = Vector3.MoveTowards(TargetWeaponAngle, Vector3.zero, realignSpeed * dt);
+                    }
+                }
+                else
+                {
+                    _forwardWalkTimer = 0f; // NÃO-CUMULATIVO: zera imediatamente
+                }
+            }
 
             // Mede a distância/deslocamento atual da arma em relação ao centro focal
             float angleDist = CurrentWeaponAngle.magnitude; // magnitude angular em graus
@@ -349,47 +340,58 @@ namespace ActionPOV.Core
                 dt
             );
 
-            // 3. Inclinação Tática de Cabeça em ADS (Cheek Weld com sinal corrigido)
-            float targetTilt = (isAiming && EnableADSTilt) ? ADSTiltHeadRoll : 0f;
-            _currentHeadTiltADS = Mathf.SmoothDamp(_currentHeadTiltADS, targetTilt, ref _headTiltVelocity, 0.10f, Mathf.Infinity, dt);
-
-            // 4. Dinâmica da Cabeça (Head Roll Dinâmico + Tilt do ADS)
-            float degPerSecX = (LastFrameDelta.x / dt) * (InvertHeadRoll ? -1f : 1f);
-            float degPerSecY = LastFrameDelta.y / dt;
-
-            // Sentido natural de roll ao virar
-            float dynamicRoll = Mathf.Clamp(degPerSecX * HeadRollIntensity, -MaxHeadRoll, MaxHeadRoll);
-            float totalTargetRoll = dynamicRoll + _currentHeadTiltADS;
-
-            CurrentHeadRoll = Mathf.SmoothDamp(
-                CurrentHeadRoll,
-                totalTargetRoll,
-                ref _headRollVelocity,
-                Mathf.Max(HeadRecoveryTime, 0.001f),
-                Mathf.Infinity,
-                dt
-            );
-
-            // Head Pitch Lag (X)
-            if (HeadPitchDelayIntensity > 0.0001f)
+            // 3. Dinâmica e Inclinação da Cabeça/Câmera (Roll, Lag, Cheek Weld Tilt)
+            if (Plugin.EnableCameraHeadEffects.Value)
             {
-                float targetPitch = Mathf.Clamp(degPerSecY * HeadPitchDelayIntensity, -5f, 5f);
-                CurrentHeadPitch = Mathf.SmoothDamp(CurrentHeadPitch, targetPitch, ref _headPitchVelocity, 0.12f, Mathf.Infinity, dt);
+                // Inclinação Tática de Cabeça em ADS (Cheek Weld com sinal corrigido)
+                float targetTilt = (isAiming && EnableADSTilt) ? ADSTiltHeadRoll : 0f;
+                _currentHeadTiltADS = Mathf.SmoothDamp(_currentHeadTiltADS, targetTilt, ref _headTiltVelocity, 0.10f, Mathf.Infinity, dt);
+
+                // Dinâmica da Cabeça (Head Roll Dinâmico + Tilt do ADS)
+                float degPerSecX = (LastFrameDelta.x / dt) * (InvertHeadRoll ? -1f : 1f);
+                float degPerSecY = LastFrameDelta.y / dt;
+
+                // Sentido natural de roll ao virar
+                float dynamicRoll = Mathf.Clamp(degPerSecX * HeadRollIntensity, -MaxHeadRoll, MaxHeadRoll);
+                float totalTargetRoll = dynamicRoll + _currentHeadTiltADS;
+
+                CurrentHeadRoll = Mathf.SmoothDamp(
+                    CurrentHeadRoll,
+                    totalTargetRoll,
+                    ref _headRollVelocity,
+                    Mathf.Max(HeadRecoveryTime, 0.001f),
+                    Mathf.Infinity,
+                    dt
+                );
+
+                // Head Pitch Lag (X)
+                if (HeadPitchDelayIntensity > 0.0001f)
+                {
+                    float targetPitch = Mathf.Clamp(degPerSecY * HeadPitchDelayIntensity, -5f, 5f);
+                    CurrentHeadPitch = Mathf.SmoothDamp(CurrentHeadPitch, targetPitch, ref _headPitchVelocity, 0.12f, Mathf.Infinity, dt);
+                }
+                else
+                {
+                    CurrentHeadPitch = 0f;
+                }
+
+                // Head Yaw Lag (Y)
+                if (HeadYawDelayIntensity > 0.0001f)
+                {
+                    float targetYaw = Mathf.Clamp(-degPerSecX * HeadYawDelayIntensity, -5f, 5f);
+                    CurrentHeadYaw = Mathf.SmoothDamp(CurrentHeadYaw, targetYaw, ref _headYawVelocity, 0.12f, Mathf.Infinity, dt);
+                }
+                else
+                {
+                    CurrentHeadYaw = 0f;
+                }
             }
             else
             {
+                CurrentHeadRoll = 0f;
                 CurrentHeadPitch = 0f;
-            }
-
-            // Head Yaw Lag (Y)
-            if (HeadYawDelayIntensity > 0.0001f)
-            {
-                float targetYaw = Mathf.Clamp(-degPerSecX * HeadYawDelayIntensity, -5f, 5f);
-                CurrentHeadYaw = Mathf.SmoothDamp(CurrentHeadYaw, targetYaw, ref _headYawVelocity, 0.12f, Mathf.Infinity, dt);
-            }
-            else
-            {
                 CurrentHeadYaw = 0f;
+                _currentHeadTiltADS = 0f;
             }
 
             // Atenua o delta acumulado para o próximo frame

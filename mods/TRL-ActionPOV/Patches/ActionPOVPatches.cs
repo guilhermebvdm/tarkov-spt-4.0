@@ -49,7 +49,7 @@ namespace ActionPOV.Patches
         [PatchPrefix]
         private static bool Prefix(ProceduralWeaponAnimation __instance, Vector3 headRot)
         {
-            if (!Plugin.EnableMod.Value) return true;
+            if (!Plugin.EnableMod.Value || !Plugin.EnableCameraHeadEffects.Value) return true;
 
             var player = EFTBindings.GetPlayer(__instance);
             if (player == null || !player.IsYourPlayer) return true;
