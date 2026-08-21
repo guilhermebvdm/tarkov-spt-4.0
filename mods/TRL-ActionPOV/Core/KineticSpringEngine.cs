@@ -277,23 +277,47 @@ namespace ActionPOV.Core
                 dt
             );
 
-            // Restrição Estrita de Quadrante Vertical (A coronha não passa do centro até o cano cruzar o centro)
-            // - Cano para CIMA (Pitch negativo, TargetWeaponAngle.x < 0): Coronha deve ficar em baixo (<= 0f)
-            // - Cano para BAIXO (Pitch positivo, TargetWeaponAngle.x > 0): Coronha deve ficar em cima (>= 0f)
+            // Restrição Orgânica de Quadrante Vertical com Dissipação de Velocidade (Zero Flick)
+            // - Cano apontado para CIMA (TargetWeaponAngle.x <= 0): Coronha deve ficar em baixo (<= 0f)
+            // - Cano apontado para BAIXO (TargetWeaponAngle.x >= 0): Coronha deve ficar em cima (>= 0f)
             float multVCur = InvertStockVertical ? -1f : 1f;
-            if (TargetWeaponAngle.x < -0.01f) // Cano apontado para CIMA
+            if (TargetWeaponAngle.x <= 0f)
             {
                 if (multVCur > 0)
-                    CurrentWeaponPos.y = Mathf.Min(0f, CurrentWeaponPos.y);
+                {
+                    if (CurrentWeaponPos.y > 0f)
+                    {
+                        CurrentWeaponPos.y = 0f;
+                        if (_weaponPosVelocity.y > 0f) _weaponPosVelocity.y = 0f; // Dissipa a velocidade inercial reprimida
+                    }
+                }
                 else
-                    CurrentWeaponPos.y = Mathf.Max(0f, CurrentWeaponPos.y);
+                {
+                    if (CurrentWeaponPos.y < 0f)
+                    {
+                        CurrentWeaponPos.y = 0f;
+                        if (_weaponPosVelocity.y < 0f) _weaponPosVelocity.y = 0f;
+                    }
+                }
             }
-            else if (TargetWeaponAngle.x > 0.01f) // Cano apontado para BAIXO
+            else // TargetWeaponAngle.x > 0f
             {
                 if (multVCur > 0)
-                    CurrentWeaponPos.y = Mathf.Max(0f, CurrentWeaponPos.y);
+                {
+                    if (CurrentWeaponPos.y < 0f)
+                    {
+                        CurrentWeaponPos.y = 0f;
+                        if (_weaponPosVelocity.y < 0f) _weaponPosVelocity.y = 0f;
+                    }
+                }
                 else
-                    CurrentWeaponPos.y = Mathf.Min(0f, CurrentWeaponPos.y);
+                {
+                    if (CurrentWeaponPos.y > 0f)
+                    {
+                        CurrentWeaponPos.y = 0f;
+                        if (_weaponPosVelocity.y > 0f) _weaponPosVelocity.y = 0f;
+                    }
+                }
             }
 
             float zRecoveryTime = isAiming ? (RecoilRecoveryTime * 0.75f) : RecoilRecoveryTime;

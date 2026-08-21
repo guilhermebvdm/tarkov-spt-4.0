@@ -9,7 +9,7 @@ using UnityEngine;
 #nullable disable
 namespace ActionPOV
 {
-    [BepInPlugin("com.trl.actionpov", "TRL-ActionPOV", "1.4.1")]
+    [BepInPlugin("com.trl.actionpov", "TRL-ActionPOV", "1.4.2")]
     public class Plugin : BaseUnityPlugin
     {
         public static Plugin Instance { get; private set; }
