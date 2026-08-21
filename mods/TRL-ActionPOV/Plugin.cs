@@ -9,7 +9,7 @@ using UnityEngine;
 #nullable disable
 namespace ActionPOV
 {
-    [BepInPlugin("com.trl.actionpov", "TRL-ActionPOV", "1.4.3")]
+    [BepInPlugin("com.trl.actionpov", "TRL-ActionPOV", "1.4.4")]
     public class Plugin : BaseUnityPlugin
     {
         public static Plugin Instance { get; private set; }
@@ -47,6 +47,7 @@ namespace ActionPOV
         public static ConfigEntry<float> ADSFrontSightSmoothTime;
         public static ConfigEntry<float> StockSmoothTimeHorizontalADS;
         public static ConfigEntry<float> StockSmoothTimeVerticalADS;
+        public static ConfigEntry<float> ADSStockSnapInSpeed;
 
         // Coice Físico do Disparo (Weapon Kickback & Recoil Punch)
         public static ConfigEntry<bool> EnableRecoilKick;
@@ -369,6 +370,16 @@ namespace ActionPOV
                 new ConfigDescription(
                     "Tempo de resposta vertical da coronha/alça de mira no ADS (segundos). Gera o atraso de catch-up.",
                     new AcceptableValueRange<float>(0.02f, 0.50f)
+                )
+            );
+
+            ADSStockSnapInSpeed = Config.Bind(
+                "4. Tactical ADS (Cheek Weld & Parallax)",
+                "ADS Stock Snap-In Speed (Ease-Out)",
+                0.06f,
+                new ConfigDescription(
+                    "Tempo de aceleração rápida do recolhimento lateral da coronha nos primeiros instantes do ADS (segundos). Menor = puxa mais rápido para o centro, eliminando arrasto.",
+                    new AcceptableValueRange<float>(0.01f, 0.25f)
                 )
             );
 
@@ -736,6 +747,7 @@ namespace ActionPOV
             KineticSpringEngine.ADSFrontSightSmoothTime = ADSFrontSightSmoothTime.Value;
             KineticSpringEngine.StockSmoothTimeHorizontalADS = StockSmoothTimeHorizontalADS.Value;
             KineticSpringEngine.StockSmoothTimeVerticalADS = StockSmoothTimeVerticalADS.Value;
+            KineticSpringEngine.ADSStockSnapInSpeed = ADSStockSnapInSpeed.Value;
             KineticSpringEngine.EnableRecoilKick = EnableRecoilKick.Value;
             KineticSpringEngine.RecoilKickZ_Hipfire = RecoilKickZ_Hipfire.Value;
             KineticSpringEngine.RecoilKickZ_ADS = RecoilKickZ_ADS.Value;

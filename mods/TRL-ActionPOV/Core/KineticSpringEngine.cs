@@ -62,6 +62,7 @@ namespace ActionPOV.Core
         public static float ADSFrontSightSmoothTime = 0.035f;   // Tempo de resposta ágil do cano/massa de mira no ADS (segundos)
         public static float StockSmoothTimeHorizontalADS = 0.12f; // Tempo de resposta lateral da coronha/alça no ADS (segundos)
         public static float StockSmoothTimeVerticalADS = 0.20f;   // Tempo de resposta vertical da coronha/alça no ADS (segundos)
+        public static float ADSStockSnapInSpeed = 0.06f;          // Tempo de aceleração rápida (Ease-Out) nos primeiros instantes do ADS
 
         // --- COICE FÍSICO DO DISPARO (WEAPON KICKBACK & RECOIL PUNCH NO EIXO Z E PITCH) ---
         public static bool EnableRecoilKick = true;             // Ativa o coice mecânico de disparo
@@ -262,11 +263,26 @@ namespace ActionPOV.Core
             );
 
             // 2. Amortecimento Dedicado da Coronha (Separado por Eixo Horizontal e Vertical)
+            // Ease-Out Dinâmico no Recolhimento Lateral da Coronha durante o ADS:
+            // Quando isAiming é ativado e a coronha está longe do centro, os primeiros 70% do percurso
+            // usam ADSStockSnapInSpeed para tirar a coronha rapidamente da lateral da tela,
+            // assentando suavemente com smoothH nos últimos 30%.
+            float activeSmoothH = smoothH;
+            if (isAiming && ADSTransitionBlend < 0.98f)
+            {
+                float posDistX = Mathf.Abs(CurrentWeaponPos.x - posTarget.x);
+                if (posDistX > 0.003f) // Acima de 3mm de deslocamento
+                {
+                    float catchupRatio = Mathf.Clamp01(posDistX / 0.025f);
+                    activeSmoothH = Mathf.Lerp(smoothH, ADSStockSnapInSpeed, catchupRatio);
+                }
+            }
+
             CurrentWeaponPos.x = Mathf.SmoothDamp(
                 CurrentWeaponPos.x,
                 posTarget.x,
                 ref _weaponPosVelocity.x,
-                Mathf.Max(smoothH, 0.001f),
+                Mathf.Max(activeSmoothH, 0.001f),
                 Mathf.Infinity,
                 dt
             );
