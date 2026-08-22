@@ -9,7 +9,7 @@ using UnityEngine;
 #nullable disable
 namespace ActionPOV
 {
-    [BepInPlugin("com.trl.actionpov", "TRL-ActionPOV", "1.4.9")]
+    [BepInPlugin("com.trl.actionpov", "TRL-ActionPOV", "1.5.0")]
     public class Plugin : BaseUnityPlugin
     {
         public static Plugin Instance { get; private set; }
@@ -25,6 +25,9 @@ namespace ActionPOV
         public static ConfigEntry<float> WalkForwardRealignSpeed;
         public static ConfigEntry<float> SpringReturnSpeed;
         public static ConfigEntry<float> WeaponRollIntensity;
+        public static ConfigEntry<bool> EnableFastSwipeSuppression;
+        public static ConfigEntry<float> FastSwipeThreshold;
+        public static ConfigEntry<float> FastSwipeFalloff;
 
         // Cinemática CQB (Point-Shooting & Deslizamento de Coronha)
         public static ConfigEntry<float> StockSlideHorizontalMax;
@@ -172,6 +175,33 @@ namespace ActionPOV
                 new ConfigDescription(
                     "Intensidade da torção natural da arma no pulso ao virar para os lados.",
                     new AcceptableValueRange<float>(0.0f, 1.5f)
+                )
+            );
+
+            EnableFastSwipeSuppression = Config.Bind(
+                "2. Physics & Inertia",
+                "Enable Fast Swipe Suppression",
+                true,
+                "Desativa/atenua dinamicamente o Free Aim e o Sway em movimentos bruscos/rápidos (flicks), travando a arma com a câmera para resposta instantânea."
+            );
+
+            FastSwipeThreshold = Config.Bind(
+                "2. Physics & Inertia",
+                "Fast Swipe Speed Threshold (Deg/Sec)",
+                350.0f,
+                new ConfigDescription(
+                    "Limiar de velocidade angular do mouse (graus/segundo) para considerar o movimento brusco e travar o Free Aim. Menor = ativa em movimentos mais lentos.",
+                    new AcceptableValueRange<float>(50.0f, 1500.0f)
+                )
+            );
+
+            FastSwipeFalloff = Config.Bind(
+                "2. Physics & Inertia",
+                "Fast Swipe Suppression Falloff (Deg/Sec)",
+                250.0f,
+                new ConfigDescription(
+                    "Largura da curva suave de transição da supressão (graus/segundo) para evitar degraus secos.",
+                    new AcceptableValueRange<float>(50.0f, 800.0f)
                 )
             );
 
@@ -765,6 +795,9 @@ namespace ActionPOV
             KineticSpringEngine.WeaponWeightTime = WeaponWeightTime.Value;
             KineticSpringEngine.WalkForwardDelaySeconds = WalkForwardDelaySeconds.Value;
             KineticSpringEngine.WalkForwardRealignSpeed = WalkForwardRealignSpeed.Value;
+            KineticSpringEngine.EnableFastSwipeSuppression = EnableFastSwipeSuppression.Value;
+            KineticSpringEngine.FastSwipeThreshold = FastSwipeThreshold.Value;
+            KineticSpringEngine.FastSwipeFalloff = FastSwipeFalloff.Value;
 
             KineticSpringEngine.StockSlideHorizontalMax = StockSlideHorizontalMax.Value;
             KineticSpringEngine.LeftStockSlideMultiplier = LeftStockSlideMultiplier.Value;

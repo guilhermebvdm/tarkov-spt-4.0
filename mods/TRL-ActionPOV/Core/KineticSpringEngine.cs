@@ -36,6 +36,11 @@ namespace ActionPOV.Core
         public static float CameraFollowRatio = 0.25f;          // Fração do mouse entregue à câmera no hipfire (25% câmera / 75% arma)
         public static float WeaponWeightTime = 0.055f;          // Tempo de resposta da mola em Hipfire
         
+        // --- SUPRESSÃO DINÂMICA DE MOVIMENTOS BRUSCOS (FAST SWIPE / FLICK SUPPRESSION) ---
+        public static bool EnableFastSwipeSuppression = true;
+        public static float FastSwipeThreshold = 350.0f;        // Limiar de velocidade angular do mouse em graus/segundo
+        public static float FastSwipeFalloff = 250.0f;          // Largura da curva suave de transição (graus/segundo)
+
         // --- CINEMÁTICA CQB (POINT-SHOOTING / WEAPON LEAD) ---
         public static float StockSlideHorizontalMax = 0.035f;   // Deslocamento lateral máximo da coronha no ombro em metros (ex: 0.035 = 3.5cm)
         public static float LeftStockSlideMultiplier = 0.35f;   // Multiplicador de percurso do sway ao virar para a ESQUERDA (0.35 = 35% do percurso)
@@ -116,6 +121,23 @@ namespace ActionPOV.Core
             Vector2 bounds = Vector2.Lerp(DeadzoneLimits, ADSDeadzoneLimits, ADSTransitionBlend);
             float sensitivity = Mathf.Lerp(1.0f, 0.75f, ADSTransitionBlend);
 
+            // DETECÇÃO E SUPRESSÃO DINÂMICA DE MOVIMENTOS BRUSCOS (FLICK / FAST SWIPES)
+            float dt = Mathf.Max(Time.deltaTime, 0.001f);
+            float mouseAngularSpeed = deltaRotation.magnitude / dt; // graus por segundo (°/s)
+
+            float freeAimWeight = 1.0f;
+            if (EnableFastSwipeSuppression && mouseAngularSpeed > FastSwipeThreshold)
+            {
+                float swipeProgress = Mathf.Clamp01((mouseAngularSpeed - FastSwipeThreshold) / Mathf.Max(FastSwipeFalloff, 1.0f));
+                freeAimWeight = 1.0f - swipeProgress;
+
+                // Em movimentos muito rápidos/bruscos, reconduz a arma suavemente para o centro do retículo
+                if (swipeProgress > 0.1f)
+                {
+                    TargetWeaponAngle = Vector3.MoveTowards(TargetWeaponAngle, Vector3.zero, 35.0f * swipeProgress * dt);
+                }
+            }
+
             // ABERTURA GRADUAL COM CURVA DE RESISTÊNCIA NÃO-LINEAR
             float progressY = Mathf.Abs(TargetWeaponAngle.y) / Mathf.Max(bounds.x, 0.001f);
             float progressX = Mathf.Abs(TargetWeaponAngle.x) / Mathf.Max(bounds.y, 0.001f);
@@ -123,8 +145,8 @@ namespace ActionPOV.Core
             float resistanceY = Mathf.Clamp01(1.0f - (progressY * 0.35f));
             float resistanceX = Mathf.Clamp01(1.0f - (progressX * 0.35f));
 
-            float inputYaw = deltaRotation.x * sensitivity * resistanceY * (InvertWeaponYaw ? -1f : 1f);
-            float inputPitch = deltaRotation.y * sensitivity * resistanceX * (InvertWeaponPitch ? 1f : -1f);
+            float inputYaw = deltaRotation.x * sensitivity * resistanceY * freeAimWeight * (InvertWeaponYaw ? -1f : 1f);
+            float inputPitch = deltaRotation.y * sensitivity * resistanceX * freeAimWeight * (InvertWeaponPitch ? 1f : -1f);
 
             if (SwapWeaponPitchYaw)
             {
