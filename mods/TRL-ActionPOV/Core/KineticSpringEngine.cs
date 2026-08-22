@@ -125,33 +125,29 @@ namespace ActionPOV.Core
             LastFrameDelta = deltaRotation;
             float dt = Mathf.Max(Time.deltaTime, 0.001f);
 
-            if (isAiming || ADSTransitionBlend > 0.5f)
-            {
-                // NO ADS: SISTEMA CO-AXIAL DINÂMICO
-                // 1. Em repouso estático: Alvo é ZERO (100% cravado no centro da ótica e da massa)
-                TargetWeaponAngle = Vector3.MoveTowards(TargetWeaponAngle, Vector3.zero, 30.0f * dt);
-                TargetWeaponPos = Vector3.MoveTowards(TargetWeaponPos, Vector3.zero, 0.15f * dt);
+            // 1. LIMITES DE DEADZONE E SENSIBILIDADE INTERPOLADOS SUAVEMENTE ENTRE HIPFIRE E ADS
+            Vector2 bounds = Vector2.Lerp(DeadzoneLimits, ADSDeadzoneLimits, ADSTransitionBlend);
+            float sensitivity = Mathf.Lerp(1.0f, 0.75f, ADSTransitionBlend);
 
-                // 2. Em movimento de arraste: A mola inercial absorve o impulso angular do mouse
-                Vector3 mouseInertia = new Vector3(
-                    -deltaRotation.y * 0.40f * ADSDynamicInertiaIntensity * (InvertWeaponPitch ? -1f : 1f),
-                    deltaRotation.x * 0.40f * ADSDynamicInertiaIntensity * (InvertWeaponYaw ? -1f : 1f),
-                    0f
-                );
-                _targetADSInertia = mouseInertia;
-
-                // No ADS, a câmera gira com o mouse normalmente, mantendo o Frustum 100% alinhado
-                return;
-            }
-
-            // NO HIPFIRE: SISTEMA DE FREE AIM AMPLO E CQB POINT-SHOOTING
-            _targetADSInertia = Vector3.zero;
-            Vector2 bounds = DeadzoneLimits;
-            float sensitivity = 1.0f;
-
-            // DETECÇÃO E SUPRESSÃO DINÂMICA DE MOVIMENTOS BRUSCOS (FLICK / FAST SWIPES)
+            // DETECÇÃO DE VELOCIDADE ANGULAR DO MOUSE (°/s) E MOLA INERCIAL DO ADS
             float mouseAngularSpeed = deltaRotation.magnitude / dt; // graus por segundo (°/s)
 
+            if (ADSTransitionBlend > 0.1f)
+            {
+                // No ADS: A velocidade angular do mouse alimenta a mola de torção inercial (arraste dinâmico)
+                Vector3 speedInertia = new Vector3(
+                    (-deltaRotation.y / dt) * 0.025f * ADSDynamicInertiaIntensity * (InvertWeaponPitch ? -1f : 1f),
+                    (deltaRotation.x / dt) * 0.025f * ADSDynamicInertiaIntensity * (InvertWeaponYaw ? -1f : 1f),
+                    0f
+                );
+                _targetADSInertia = Vector3.ClampMagnitude(speedInertia, 4.0f);
+            }
+            else
+            {
+                _targetADSInertia = Vector3.zero;
+            }
+
+            // SUPRESSÃO DE MOVIMENTOS BRUSCOS (FLICKS)
             float freeAimWeight = 1.0f;
             if (EnableFastSwipeSuppression && mouseAngularSpeed > FastSwipeThreshold)
             {
@@ -205,10 +201,13 @@ namespace ActionPOV.Core
             deltaRotation.x -= consumed.x;
             deltaRotation.y -= consumed.y;
 
-            // POSIÇÃO DA CORONHA NO HIPFIRE
+            // POSIÇÃO DA CORONHA (SWAY) COM TRANSIÇÃO ENTRE HIPFIRE E ADS
+            float curSlideMaxH = Mathf.Lerp(StockSlideHorizontalMax, StockSlideHorizontalADS, ADSTransitionBlend);
+            float curSlideMaxV = Mathf.Lerp(StockSlideVerticalMax, StockSlideVerticalADS, ADSTransitionBlend);
+
             float normYaw = TargetWeaponAngle.y / Mathf.Max(bounds.x, 0.001f);
             float curveYaw = Mathf.Sign(normYaw) * Mathf.Pow(Mathf.Abs(normYaw), 1.25f);
-            float maxSlideH = StockSlideHorizontalMax;
+            float maxSlideH = curSlideMaxH;
 
             if (TargetWeaponAngle.y < 0)
             {
@@ -219,7 +218,7 @@ namespace ActionPOV.Core
 
             float normPitch = TargetWeaponAngle.x / Mathf.Max(bounds.y, 0.001f);
             float curvePitch = Mathf.Sign(normPitch) * Mathf.Pow(Mathf.Abs(normPitch), 1.25f);
-            TargetWeaponPos.y = curvePitch * StockSlideVerticalMax * (InvertStockVertical ? 1f : -1f);
+            TargetWeaponPos.y = curvePitch * curSlideMaxV * (InvertStockVertical ? 1f : -1f);
 
             float totalAngDist = candidate.magnitude;
             TargetWeaponPos.z = -totalAngDist * ArmCompressionMultiplier;

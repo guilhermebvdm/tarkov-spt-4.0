@@ -131,38 +131,26 @@ namespace ActionPOV.Patches
             Quaternion camRot = (cameraTransform != null) ? cameraTransform.rotation : (weaponRootAnim.parent != null ? weaponRootAnim.parent.rotation : Quaternion.identity);
             Vector3 camPos = (cameraTransform != null) ? cameraTransform.position : weaponRootAnim.position;
 
-            // Rotação da física expressa no espaço de visão da câmera
-            Quaternion camLocalRot = Quaternion.Euler(
-                KineticSpringEngine.CurrentWeaponAngle.x, // Pitch
-                KineticSpringEngine.CurrentWeaponAngle.y, // Yaw
-                KineticSpringEngine.CurrentWeaponAngle.z  // Roll
-            );
+            float blend = KineticSpringEngine.ADSTransitionBlend;
+
+            // 1. Rotação Angular Total da Física (Free Aim + Mola Inercial de Arraste no ADS)
+            Vector3 totalAngle = KineticSpringEngine.CurrentWeaponAngle + (KineticSpringEngine.ADSDynamicInertialAngle * blend);
+            Quaternion camLocalRot = Quaternion.Euler(totalAngle.x, totalAngle.y, totalAngle.z);
 
             // Matriz delta de rotação e translação no espaço de mundo
             Quaternion worldDeltaRot = camRot * camLocalRot * Quaternion.Inverse(camRot);
             Vector3 worldDeltaPos = camRot * KineticSpringEngine.CurrentWeaponPos;
 
-            float blend = KineticSpringEngine.ADSTransitionBlend;
-
-            // 1. NO HIPFIRE (blend = 0): Rotação pelo centro do WeaponRoot + Sway lateral/vertical de CQB
+            // NO HIPFIRE (blend = 0): Rotação pelo centro do WeaponRoot + Sway livre de CQB
             Vector3 hipPos = weaponRootAnim.position + worldDeltaPos;
             Quaternion hipRot = worldDeltaRot * weaponRootAnim.rotation;
 
-            // 2. NO ADS (blend = 1): Co-Axial Rígido em Repouso + Mola Dinâmica Inercial de Arrasto
-            // Em repouso: ADSDynamicInertialAngle é zero, mantendo retículo e massa 100% cravados e co-axiais.
-            // Em movimento de arraste: A mola inercial inclina suavemente a arma, gerando o micro-desalinhamento elástico de 4kg de peso.
-            Quaternion adsInertialCamRot = Quaternion.Euler(
-                KineticSpringEngine.ADSDynamicInertialAngle.x,
-                KineticSpringEngine.ADSDynamicInertialAngle.y,
-                KineticSpringEngine.ADSDynamicInertialAngle.z
-            );
-            Quaternion adsWorldInertialRot = camRot * adsInertialCamRot * Quaternion.Inverse(camRot);
-
+            // NO ADS (blend = 1): Rotação com Free Aim Óptico + Mola Dinâmica Inercial + Sway de Respiração
             Vector3 toWeapon = weaponRootAnim.position - camPos;
-            Vector3 adsPos = camPos + (adsWorldInertialRot * toWeapon);
-            Quaternion adsRot = adsWorldInertialRot * weaponRootAnim.rotation;
+            Vector3 adsPos = camPos + (worldDeltaRot * toWeapon) + (worldDeltaPos * 0.35f);
+            Quaternion adsRot = worldDeltaRot * weaponRootAnim.rotation;
 
-            // 3. Interpolação Orgânica Contínua Hipfire <-> ADS
+            // Interpolação Orgânica Contínua Hipfire <-> ADS
             weaponRootAnim.position = Vector3.Lerp(hipPos, adsPos, blend);
             weaponRootAnim.rotation = Quaternion.Slerp(hipRot, adsRot, blend);
 
@@ -200,30 +188,20 @@ namespace ActionPOV.Patches
             Quaternion camRot = (cameraTransform != null) ? cameraTransform.rotation : __instance.Player.Transform.rotation;
             Vector3 camPos = (cameraTransform != null) ? cameraTransform.position : weaponRootThird.position;
 
-            Quaternion camLocalRot = Quaternion.Euler(
-                KineticSpringEngine.CurrentWeaponAngle.x,
-                KineticSpringEngine.CurrentWeaponAngle.y,
-                KineticSpringEngine.CurrentWeaponAngle.z
-            );
+            float blend = KineticSpringEngine.ADSTransitionBlend;
+
+            Vector3 totalAngle = KineticSpringEngine.CurrentWeaponAngle + (KineticSpringEngine.ADSDynamicInertialAngle * blend);
+            Quaternion camLocalRot = Quaternion.Euler(totalAngle.x, totalAngle.y, totalAngle.z);
 
             Quaternion worldDeltaRot = camRot * camLocalRot * Quaternion.Inverse(camRot);
             Vector3 worldDeltaPos = camRot * KineticSpringEngine.CurrentWeaponPos;
 
-            float blend = KineticSpringEngine.ADSTransitionBlend;
-
             Vector3 hipPos = weaponRootThird.position + worldDeltaPos;
             Quaternion hipRot = worldDeltaRot * weaponRootThird.rotation;
 
-            Quaternion adsInertialCamRot = Quaternion.Euler(
-                KineticSpringEngine.ADSDynamicInertialAngle.x,
-                KineticSpringEngine.ADSDynamicInertialAngle.y,
-                KineticSpringEngine.ADSDynamicInertialAngle.z
-            );
-            Quaternion adsWorldInertialRot = camRot * adsInertialCamRot * Quaternion.Inverse(camRot);
-
             Vector3 toWeapon = weaponRootThird.position - camPos;
-            Vector3 adsPos = camPos + (adsWorldInertialRot * toWeapon);
-            Quaternion adsRot = adsWorldInertialRot * weaponRootThird.rotation;
+            Vector3 adsPos = camPos + (worldDeltaRot * toWeapon) + (worldDeltaPos * 0.35f);
+            Quaternion adsRot = worldDeltaRot * weaponRootThird.rotation;
 
             weaponRootThird.position = Vector3.Lerp(hipPos, adsPos, blend);
             weaponRootThird.rotation = Quaternion.Slerp(hipRot, adsRot, blend);
