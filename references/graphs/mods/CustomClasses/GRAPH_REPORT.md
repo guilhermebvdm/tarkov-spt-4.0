@@ -1,16 +1,16 @@
-# Graph Report - mods\CustomClasses\modded  (2026-08-01)
+# Graph Report - mods\CustomClasses\modded  (2026-08-22)
 
 ## Corpus Check
-- 118 files · ~116,885 words
+- 118 files · ~116,996 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1809 nodes · 2355 edges · 118 communities (107 shown, 11 thin omitted)
+- 1809 nodes · 2355 edges · 118 communities (108 shown, 10 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 2 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `8c478edc`
+- Built from commit: `f36d1f22`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -152,7 +152,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (118 total, 11 thin omitted)
+## Communities (118 total, 10 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.09
@@ -459,8 +459,8 @@ Cohesion: 0.24
 Nodes (4): AdrenalineState, Coroutine, float, IEnumerator
 
 ### Community 90 - "Community 90"
-Cohesion: 0.22
-Nodes (6): DamageInfoStruct, MethodBase, PatchPostfix, Player, ModulePatch, AdrenalineTriggerPatch
+Cohesion: 0.15
+Nodes (8): DamageInfoStruct, MethodBase, PatchPostfix, Player, ForceEffector, ModulePatch, AdrenalineTriggerPatch, AimPunchPatch
 
 ### Community 91 - "Community 91"
 Cohesion: 0.17
@@ -527,8 +527,8 @@ Cohesion: 0.11
 Nodes (14): bool, float, MethodBase, PatchPostfix, Player, EDamageType, GClass3008, GClass898 (+6 more)
 
 ### Community 111 - "Community 111"
-Cohesion: 0.13
-Nodes (9): float, Player, ProceduralWeaponAnimation, Weapon, AdsSpeedPatch, HeavyWeapon, HeavyWeaponErgoPatch, LocalHitTypePatch (+1 more)
+Cohesion: 0.19
+Nodes (6): ProceduralWeaponAnimation, Weapon, AdsSpeedPatch, HeavyWeapon, HeavyWeaponErgoPatch, ShootRecoilPatch
 
 ### Community 112 - "Community 112"
 Cohesion: 0.29
@@ -546,10 +546,14 @@ Nodes (11): bool, FirearmController, Item, MethodBase, PatchPostfix, PatchPrefix
 Cohesion: 0.22
 Nodes (6): BaseSoundPlayer, FieldInfo, MethodBase, PatchPrefix, PropertyInfo, SilentKnifePatch
 
+### Community 117 - "Community 117"
+Cohesion: 0.40
+Nodes (3): float, Player, LocalHitTypePatch
+
 ## Knowledge Gaps
 - **968 isolated node(s):** `float`, `Coroutine`, `IEnumerator`, `string`, `bool` (+963 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **11 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **10 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
