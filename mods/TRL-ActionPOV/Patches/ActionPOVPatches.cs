@@ -144,15 +144,16 @@ namespace ActionPOV.Patches
 
             float blend = KineticSpringEngine.ADSTransitionBlend;
 
-            // 1. NO HIPFIRE (blend = 0): Rotação pelo centro do WeaponRoot (Point-Shooting livre de CQB)
+            // 1. NO HIPFIRE (blend = 0): Rotação pelo centro do WeaponRoot + Sway lateral/vertical de CQB
             Vector3 hipPos = weaponRootAnim.position + worldDeltaPos;
             Quaternion hipRot = worldDeltaRot * weaponRootAnim.rotation;
 
-            // 2. NO ADS (blend = 1): Rotação Orbital ao redor do centro do Olho / Câmera (Eye-Pivot Orbit)
-            // A arma inteira gira ao redor da pupila do operador, mantendo a linha de visada Olho -> Alça -> Massa
-            // 100% concêntrica, colinear e alinhada em perspectiva, mesmo com Deadzone ampla nos cantos da tela.
+            // 2. NO ADS (blend = 1): Rotação Orbital Pura com Ancoragem no Olho (Eye-Pivot Orbit)
+            // A arma inteira gira tendo como vértice exclusivo o bico do cone de visão (camPos).
+            // A traseira da arma (alça) permanece ancorada no olho, e a ponta (massa) aponta na linha radial
+            // que sai do olho em direção à borda do campo de visão, mantendo alça e massa 100% concêntricas e colineares.
             Vector3 toWeapon = weaponRootAnim.position - camPos;
-            Vector3 adsPos = camPos + (worldDeltaRot * toWeapon) + worldDeltaPos;
+            Vector3 adsPos = camPos + (worldDeltaRot * toWeapon);
             Quaternion adsRot = worldDeltaRot * weaponRootAnim.rotation;
 
             // 3. Interpolação Orgânica Contínua Hipfire <-> ADS
@@ -208,7 +209,7 @@ namespace ActionPOV.Patches
             Quaternion hipRot = worldDeltaRot * weaponRootThird.rotation;
 
             Vector3 toWeapon = weaponRootThird.position - camPos;
-            Vector3 adsPos = camPos + (worldDeltaRot * toWeapon) + worldDeltaPos;
+            Vector3 adsPos = camPos + (worldDeltaRot * toWeapon);
             Quaternion adsRot = worldDeltaRot * weaponRootThird.rotation;
 
             weaponRootThird.position = Vector3.Lerp(hipPos, adsPos, blend);
