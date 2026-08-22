@@ -9,13 +9,14 @@ using UnityEngine;
 #nullable disable
 namespace ActionPOV
 {
-    [BepInPlugin("com.trl.actionpov", "TRL-ActionPOV", "1.5.2")]
+    [BepInPlugin("com.trl.actionpov", "TRL-ActionPOV", "1.5.3")]
     public class Plugin : BaseUnityPlugin
     {
         public static Plugin Instance { get; private set; }
 
         public static ConfigEntry<bool> EnableMod;
         public static ConfigEntry<bool> EnableHeadMovementMotion;
+        public static ConfigEntry<bool> EnableThirdPersonSync;
         public static ConfigEntry<bool> EnableDiagnosticOverrides;
 
         // Física e Inércia
@@ -128,6 +129,13 @@ namespace ActionPOV
                 "Enable Head Motion While Looking",
                 false,
                 "Ativa ou desativa o Roll contínuo e o Lag inercial na visão ao mover o mouse ou andar. Desative (padrão) para manter a visão do mouse 100% nativa e ultra-suave a 60 FPS sem Judder estroboscópico."
+            );
+
+            EnableThirdPersonSync = Config.Bind(
+                "1. General",
+                "Enable Third Person Synchronization",
+                true,
+                "Espelha o Free Aim e o Sway da arma no modelo de corpo inteiro de Terceira Pessoa (visível em câmeras livres, Fika Co-op e espelhos)."
             );
 
             EnableDiagnosticOverrides = Config.Bind(
@@ -854,6 +862,7 @@ namespace ActionPOV
                 new Patch_PlayerRotate().Enable();
                 new Patch_SetHeadRotation().Enable();
                 new Patch_WeaponRootAnimTransform().Enable();
+                new Patch_ThirdPersonWeaponRoot().Enable();
                 new Patch_UpdateSwayFactors().Enable();
                 new Patch_OnMakingShot().Enable();
                 new Patch_LaserBeam_FireportSync().Enable();

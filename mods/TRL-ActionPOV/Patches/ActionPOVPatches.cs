@@ -182,6 +182,67 @@ namespace ActionPOV.Patches
         }
     }
 
+    // 3.1 Espelhamento de Cinemática no Modelo de Terceira Pessoa (PlayerBones.ShiftWeaponRoot)
+    public class Patch_ThirdPersonWeaponRoot : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(PlayerBones), nameof(PlayerBones.ShiftWeaponRoot));
+        }
+
+        [PatchPostfix]
+        private static void Postfix(PlayerBones __instance)
+        {
+            if (!Plugin.EnableMod.Value || !Plugin.EnableThirdPersonSync.Value) return;
+            if (__instance == null || __instance.Player == null || !__instance.Player.IsYourPlayer) return;
+
+            Transform weaponRootThird = __instance.Weapon_Root_Third;
+            if (weaponRootThird == null) return;
+
+            // Orientação da Câmera de Visão do Jogador
+            Transform cameraTransform = __instance.Player.ProceduralWeaponAnimation?.HandsContainer?.CameraTransform;
+            Quaternion camRot = (cameraTransform != null) ? cameraTransform.rotation : __instance.Player.Transform.rotation;
+
+            // 1. Cinemática no Hipfire (Rotação livre angular pelo ombro + Translação de CQB)
+            Quaternion hipRot = Quaternion.Euler(
+                KineticSpringEngine.CurrentWeaponAngle.x,
+                KineticSpringEngine.CurrentWeaponAngle.y,
+                KineticSpringEngine.CurrentWeaponAngle.z
+            );
+            Vector3 hipPos = KineticSpringEngine.CurrentWeaponPos;
+
+            // 2. Cinemática no ADS (Translação no Plano da Tela + Micro-desalinhamento Inercial Dinâmico)
+            float eyeDist = Mathf.Max(KineticSpringEngine.EyeToSightDistance, 0.20f);
+            float radYaw = KineticSpringEngine.CurrentWeaponAngle.y * Mathf.Deg2Rad;
+            float radPitch = KineticSpringEngine.CurrentWeaponAngle.x * Mathf.Deg2Rad;
+            Vector3 adsPos = new Vector3(
+                Mathf.Tan(radYaw) * eyeDist,
+                -Mathf.Tan(radPitch) * eyeDist,
+                0f
+            );
+            adsPos += KineticSpringEngine.CurrentWeaponPos;
+
+            Vector3 angleLag = KineticSpringEngine.TargetWeaponAngle - KineticSpringEngine.CurrentWeaponAngle;
+            Quaternion adsInertialRot = Quaternion.Euler(
+                angleLag.x * 0.40f,
+                angleLag.y * 0.40f,
+                KineticSpringEngine.CurrentWeaponAngle.z
+            );
+
+            // 3. Interpolação suave e contínua Hipfire <-> ADS
+            float blend = KineticSpringEngine.ADSTransitionBlend;
+            Quaternion finalCamLocalRot = Quaternion.Slerp(hipRot, adsInertialRot, blend);
+            Vector3 finalCamLocalPos = Vector3.Lerp(hipPos, adsPos, blend);
+
+            // 4. Matriz delta de rotação e translação no espaço de mundo aplicada no modelo de 3ª pessoa
+            Quaternion worldDeltaRot = camRot * finalCamLocalRot * Quaternion.Inverse(camRot);
+            Vector3 worldDeltaPos = camRot * finalCamLocalPos;
+
+            weaponRootThird.position += worldDeltaPos;
+            weaponRootThird.rotation = worldDeltaRot * weaponRootThird.rotation;
+        }
+    }
+
     // 4. Atenuação do Sway Vanilla do Tarkov (Permite que a nossa mola física atue limpa)
     public class Patch_UpdateSwayFactors : ModulePatch
     {
