@@ -1,8 +1,9 @@
+using System.Collections.Generic;
 using System.Reflection;
 using EFT;
 using SPT.Reflection.Patching;
 using UnityEngine;
-using Object = UnityEngine.Object;
+using VisceralCombat.Ragdolls.Classes;
 
 namespace VisceralCombat.Ragdolls.Patches;
 
@@ -16,23 +17,34 @@ public class GrenadeDeadBodiesPatch : ModulePatch
 	[PatchPostfix]
 	private static void Postfix(IExplosiveItem grenadeItem, Vector3 grenadePosition)
 	{
-		//IL_0013: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0014: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0019: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0025: Unknown result type (might be due to invalid IL or missing references)
-		//IL_003e: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0043: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0081: Unknown result type (might be due to invalid IL or missing references)
-		float num = Random.Range(grenadeItem.MinExplosionDistance, grenadeItem.MaxExplosionDistance);
-		RaycastHit[] array = Physics.SphereCastAll(new Ray(grenadePosition, Vector3.up), num, grenadeItem.MaxExplosionDistance, LayerMasksDataAbstractClass.HitMask);
-		RaycastHit[] array2 = array;
-		for (int i = 0; i < array2.Length; i++)
+		if (grenadeItem == null || VisceralEntry.Instance == null) return;
+		float maxDist = grenadeItem.MaxExplosionDistance;
+
+		Collider[] colliders = Physics.OverlapSphere(grenadePosition, maxDist, LayerMasksDataAbstractClass.HitMask);
+		if (colliders == null || colliders.Length == 0) return;
+
+		HashSet<Transform> awakenedRoots = new HashSet<Transform>();
+		HashSet<Rigidbody> processedRigidbodies = new HashSet<Rigidbody>();
+		float forceMultiplier = grenadeItem.GetStrength * 0.5f * VisceralEntry.Instance.GrenadeExplIntensity.Value;
+
+		for (int i = 0; i < colliders.Length; i++)
 		{
-			RaycastHit val = array2[i];
-			Rigidbody component = ((Component)val.collider).GetComponent<Rigidbody>();
-			if ((Object)(object)component != (Object)null)
+			Collider col = colliders[i];
+			if (col == null) continue;
+
+			Transform root = col.transform.root;
+			if (root != null && awakenedRoots.Add(root))
 			{
-				component.AddExplosionForce(grenadeItem.GetStrength * 0.5f * VisceralEntry.Instance.GrenadeExplIntensity.Value, grenadePosition, num);
+				RagdollHelperClass.WakeCorpse(col, 3.0f);
+			}
+
+			Rigidbody rb = col.attachedRigidbody ?? col.GetComponent<Rigidbody>() ?? col.GetComponentInParent<Rigidbody>();
+			if (rb != null && !RagdollHelperClass.ParentIsDismembered(rb.transform))
+			{
+				if (processedRigidbodies.Add(rb))
+				{
+					rb.AddExplosionForce(forceMultiplier, grenadePosition, maxDist);
+				}
 			}
 		}
 	}

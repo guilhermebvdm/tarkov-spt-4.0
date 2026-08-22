@@ -29,6 +29,13 @@ public static class RagdollHelperClass
 
 	internal static Vector3 limbSize = new Vector3(0.1f, 0.1f, 0.1f);
 
+	private static readonly Dictionary<Player, float> _agonyStartTime = new Dictionary<Player, float>();
+
+	public static void ClearAgonyTimers()
+	{
+		_agonyStartTime.Clear();
+	}
+
 	/// <summary>
 	/// Checks if a player is currently in FIKA's Downed / Coma / Bleedout state.
 	/// When downed, FIKA temporarily sets IsAlive = false, but the player can be revived.
@@ -148,6 +155,11 @@ public static class RagdollHelperClass
 	{
 		VisceralCombat.Combined.Classes.DeathAudioController.HandleDeathAudio(p, eBodyPart);
 
+		if (p != null)
+		{
+			_agonyStartTime[p] = Time.time;
+		}
+
 		if ((int)eBodyPart > 0)
 		{
 			if (VisceralEntry.Instance != null && VisceralEntry.Instance.dismemberedPlayers.Contains(p))
@@ -197,7 +209,7 @@ public static class RagdollHelperClass
 				Utils.SetAnimation(overrideController, "cultist_pray", (AnimationClip)(object)((obj9 is AnimationClip) ? obj9 : null));
 				p.BodyAnimatorCommon.Play("cultist_pray", 18, 0f);
 				pm.stateSettings.killDuration = Random.Range(Anim_Neck1_Length / 2f, Anim_Neck1_Length - 1f);
-				pm.pinWeight = 0.3f;
+				pm.pinWeight = 0.02f;
 			}
 			else
 			{
@@ -205,7 +217,7 @@ public static class RagdollHelperClass
 				Utils.SetAnimation(overrideController, "cultist_pray", (AnimationClip)(object)((obj10 is AnimationClip) ? obj10 : null));
 				p.BodyAnimatorCommon.Play("cultist_pray", 18, 0f);
 				pm.stateSettings.killDuration = Random.Range(Anim_Neck2_Length / 2f, Anim_Neck2_Length - 1f);
-				pm.pinWeight = 0.3f;
+				pm.pinWeight = 0.02f;
 			}
 			pm.muscleWeight = 0.55f;
 			break;
@@ -222,7 +234,7 @@ public static class RagdollHelperClass
 					Utils.SetAnimation(overrideController, "cultist_pray", (AnimationClip)(object)((obj5 is AnimationClip) ? obj5 : null));
 					p.BodyAnimatorCommon.Play("cultist_pray", 18, 0f);
 					pm.stateSettings.killDuration = Random.Range(Anim_Neck1_Length / 2f, Anim_Neck1_Length - 1f);
-					pm.pinWeight = 0.3f;
+					pm.pinWeight = 0.02f;
 				}
 				else
 				{
@@ -230,7 +242,7 @@ public static class RagdollHelperClass
 					Utils.SetAnimation(overrideController, "cultist_pray", (AnimationClip)(object)((obj6 is AnimationClip) ? obj6 : null));
 					p.BodyAnimatorCommon.Play("cultist_pray", 18, 0f);
 					pm.stateSettings.killDuration = Random.Range(Anim_Neck2_Length / 2f, Anim_Neck2_Length - 1f);
-					pm.pinWeight = 0.3f;
+					pm.pinWeight = 0.02f;
 				}
 			}
 			else
@@ -350,9 +362,19 @@ public static class RagdollHelperClass
 	/// Disables the animator immediately (avoiding T-pose / idle pose reset),
 	/// zeroes muscle/pin weights, sets rigidbodies to physical ragdoll, and deactivates PuppetMaster.
 	/// </summary>
-	internal static void InterruptAgony(Player p, PuppetMaster pm)
+	internal static void InterruptAgony(Player p, PuppetMaster pm, bool forceInstant = false)
 	{
 		if (p == null || pm == null) return;
+		if (!forceInstant && _agonyStartTime.TryGetValue(p, out float startTime))
+		{
+			// 1.2s grace period: ignore burst-fire bullets immediately following the fatal hit
+			if (Time.time < startTime + 1.2f)
+			{
+				return;
+			}
+		}
+		_agonyStartTime.Remove(p);
+
 		if (VisceralEntry.Instance != null) VisceralEntry.Instance.dismemberedPlayers.Remove(p);
 
 		// 1. Instantly drop all animation pin and muscle spring stiffness to 0 so the body collapses under gravity
@@ -550,26 +572,182 @@ public static class RagdollHelperClass
 			}
 		}
 	}
+	private static readonly HashSet<Transform> _activeWakingCorpses = new HashSet<Transform>();
+
+	/// <summary>
+	/// Returns true if all active (non-kinematic) rigidbodies in the corpse have stopped moving
+	/// (linear and angular velocity magnitude below threshold).
+	/// </summary>
+	public static bool IsCorpseAtRest(Rigidbody[] rbs, float maxLinearSpeed = 0.08f, float maxAngularSpeed = 0.08f)
+	{
+		if (rbs == null || rbs.Length == 0) return true;
+		float maxLinSqr = maxLinearSpeed * maxLinearSpeed;
+		float maxAngSqr = maxAngularSpeed * maxAngularSpeed;
+
+		foreach (Rigidbody rb in rbs)
+		{
+			if (rb == null || rb.isKinematic) continue;
+			if (rb.velocity.sqrMagnitude > maxLinSqr || rb.angularVelocity.sqrMagnitude > maxAngSqr)
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/// <summary>
+	/// Waits until the corpse has finished any agony animation and all bone rigidbodies have
+	/// completely settled on the floor (velocity ~ 0) before putting rigidbodies into kinematic sleep (0% CPU).
+	/// </summary>
+	public static IEnumerator SleepCorpseWhenAtRest(Transform root, Rigidbody[] rbs, Player player = null, float minWait = 2.0f, float maxTimeout = 15.0f)
+	{
+		if (minWait > 0f)
+		{
+			yield return new WaitForSeconds(minWait);
+		}
+
+		float elapsed = minWait;
+		// 1. If an agony animation is active on this player, wait until it finishes
+		while (player != null && VisceralEntry.Instance != null && VisceralEntry.Instance.dismemberedPlayers.Contains(player) && elapsed < maxTimeout)
+		{
+			yield return new WaitForSeconds(0.3f);
+			elapsed += 0.3f;
+		}
+
+		// 2. Poll bone velocities until the corpse is completely stationary for 3 consecutive checks (0.6s)
+		int stillChecks = 0;
+		while (elapsed < maxTimeout)
+		{
+			yield return new WaitForSeconds(0.2f);
+			elapsed += 0.2f;
+
+			if (IsCorpseAtRest(rbs))
+			{
+				stillChecks++;
+				if (stillChecks >= 3)
+				{
+					break;
+				}
+			}
+			else
+			{
+				stillChecks = 0;
+			}
+		}
+
+		if (root != null)
+		{
+			_activeWakingCorpses.Remove(root);
+		}
+
+		// 3. Put rigidbodies to sleep in EFT physics
+		if (rbs != null)
+		{
+			foreach (Rigidbody rb in rbs)
+			{
+				if (rb == null) continue;
+				EFTPhysicsClass.GClass745.UnsupportRigidbody(rb);
+				rb.collisionDetectionMode = CollisionDetectionMode.Discrete;
+				rb.isKinematic = true;
+			}
+		}
+	}
+
+	/// <summary>
+	/// Temporarily wakes an inert corpse's rigidbodies from physics sleep upon bullet/grenade impact.
+	/// Sets isKinematic = false, re-supports the rigidbodies in EFT physics simulation, and
+	/// automatically returns the corpse to kinematic sleep after movement settles back to 0.
+	/// </summary>
+	public static Rigidbody[] WakeCorpse(Collider hitCollider, float duration = 2.0f)
+	{
+		if (hitCollider == null) return null;
+
+		Transform root = hitCollider.transform.root;
+		Rigidbody[] rbs = root != null ? root.GetComponentsInChildren<Rigidbody>(true) : null;
+
+		Player p = hitCollider.GetComponentInParent<Player>();
+		if ((rbs == null || rbs.Length == 0) && p?.PlayerBody != null)
+		{
+			rbs = ((Component)p.PlayerBody).gameObject.GetComponentsInChildren<Rigidbody>(true);
+			if (root == null) root = ((Component)p.PlayerBody).transform;
+		}
+
+		if (rbs == null || rbs.Length == 0) return null;
+
+		foreach (Rigidbody rb in rbs)
+		{
+			if (rb == null) continue;
+			if (ParentIsDismembered(rb.transform))
+			{
+				rb.isKinematic = true;
+				rb.detectCollisions = false;
+				continue;
+			}
+			// Only call SupportRigidbody if the body was actually kinematic (sleeping)
+			// This prevents duplicate entries in EFTPhysicsClass.List_0!
+			if (rb.isKinematic)
+			{
+				rb.isKinematic = false;
+				rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+				EFTPhysicsClass.GClass745.SupportRigidbody(rb, 0f);
+			}
+			rb.WakeUp();
+		}
+
+		if (root != null && _activeWakingCorpses.Add(root))
+		{
+			if (StaticManager.Instance != null)
+			{
+				((MonoBehaviour)StaticManager.Instance).StartCoroutine(SleepCorpseWhenAtRest(root, rbs, p, duration, 10.0f));
+			}
+		}
+
+		return rbs;
+	}
+
+	public static void WakeCorpseTemporarily(Player player, float duration = 2.0f)
+	{
+		if (player == null || player.PlayerBody == null) return;
+		GameObject bodyGo = ((Component)player.PlayerBody).gameObject;
+		if (bodyGo == null) return;
+
+		Transform root = ((Component)player).transform;
+		Rigidbody[] rbs = bodyGo.GetComponentsInChildren<Rigidbody>(true);
+		if (rbs == null || rbs.Length == 0) return;
+
+		foreach (Rigidbody rb in rbs)
+		{
+			if (rb == null) continue;
+			if (ParentIsDismembered(rb.transform))
+			{
+				rb.isKinematic = true;
+				rb.detectCollisions = false;
+				continue;
+			}
+			if (rb.isKinematic)
+			{
+				rb.isKinematic = false;
+				rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+				EFTPhysicsClass.GClass745.SupportRigidbody(rb, 0f);
+			}
+			rb.WakeUp();
+		}
+
+		if (root != null && _activeWakingCorpses.Add(root))
+		{
+			if (StaticManager.Instance != null)
+			{
+				((MonoBehaviour)StaticManager.Instance).StartCoroutine(SleepCorpseWhenAtRest(root, rbs, player, duration, 10.0f));
+			}
+		}
+	}
 }
 
 /// <summary>
-/// Enforces RagdollHelperClass.limbSize in Update(), OnAnimatorMove(), and LateUpdate()
-/// on dismembered bone transforms.
-/// OnAnimatorMove() runs IMMEDIATELY after Unity's Animator updates bone transforms in internal animation pass,
-/// preventing the Animator from displaying or overriding the bone scale back to 1.0 during agony.
+/// Enforces RagdollHelperClass.limbSize in LateUpdate() on dismembered bone transforms.
 /// </summary>
 public class DismemberedLimbScaler : MonoBehaviour
 {
-	private void Update()
-	{
-		transform.localScale = RagdollHelperClass.limbSize;
-	}
-
-	private void OnAnimatorMove()
-	{
-		transform.localScale = RagdollHelperClass.limbSize;
-	}
-
 	private void LateUpdate()
 	{
 		transform.localScale = RagdollHelperClass.limbSize;

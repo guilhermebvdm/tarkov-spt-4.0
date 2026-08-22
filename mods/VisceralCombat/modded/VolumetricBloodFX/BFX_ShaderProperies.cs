@@ -17,8 +17,6 @@ public class BFX_ShaderProperies : MonoBehaviour
 
 	private bool canUpdate;
 
-	private bool isFrized;
-
 	private float startTime;
 
 	private int cutoutPropertyID;

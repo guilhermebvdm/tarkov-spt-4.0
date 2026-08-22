@@ -1,11 +1,10 @@
+using System;
 using System.Reflection;
-using Comfort.Common;
 using EFT;
-using EFT.Ballistics;
 using EFT.InventoryLogic;
 using SPT.Reflection.Patching;
 using UnityEngine;
-using Object = UnityEngine.Object;
+using Random = UnityEngine.Random;
 
 namespace VisceralCombat.Ragdolls.Patches;
 
@@ -13,29 +12,35 @@ public class ShootOffHelmetPatch : ModulePatch
 {
 	protected override MethodBase GetTargetMethod()
 	{
-		return typeof(Player).GetMethod("ReceiveDamage", BindingFlags.Instance | BindingFlags.Public);
+		return typeof(Player).GetMethod("ApplyDamageInfo", BindingFlags.Instance | BindingFlags.Public, null, new Type[] { typeof(DamageInfoStruct), typeof(EBodyPart), typeof(EBodyPartColliderType), typeof(float) }, null);
 	}
 
 	[PatchPostfix]
-	private static void Postfix(Player __instance, EBodyPart part, MaterialType special)
+	private static void Postfix(Player __instance, DamageInfoStruct damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, float absorbed)
 	{
-		//IL_0026: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0028: Invalid comparison between Unknown and I4
-		//IL_002f: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0032: Invalid comparison between Unknown and I4
-		//IL_0034: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0037: Invalid comparison between Unknown and I4
-		if (!VisceralEntry.Instance.ShootHelmetOff.Value || !__instance.IsAI || (int)part != 0 || ((int)special != 34 && (int)special != 36))
+		if (VisceralEntry.Instance == null || !VisceralEntry.Instance.ShootHelmetOff.Value || !__instance.IsAI) return;
+		if (bodyPartType != EBodyPart.Head) return;
+
+		// Verify helmet / head area hit
+		if (colliderType != EBodyPartColliderType.HeadCommon &&
+		    colliderType != EBodyPartColliderType.ParietalHead &&
+		    colliderType != EBodyPartColliderType.BackHead &&
+		    colliderType != EBodyPartColliderType.Eyes &&
+		    colliderType != EBodyPartColliderType.Ears &&
+		    colliderType != EBodyPartColliderType.Jaw &&
+		    colliderType != EBodyPartColliderType.NeckFront &&
+		    colliderType != EBodyPartColliderType.NeckBack)
 		{
 			return;
 		}
+
 		float num = Random.Range(0f, 100f);
 		if (num <= VisceralEntry.Instance.HelmetShootOffChance.Value)
 		{
-			Slot slot = __instance.Inventory.Equipment.GetSlot((EquipmentSlot)11);
-			if (slot.ContainedItem != null)
+			Slot slot = __instance.Inventory?.Equipment?.GetSlot(EquipmentSlot.Headwear);
+			if (slot?.ContainedItem != null && __instance.InventoryController is TraderControllerClass controller)
 			{
-				((TraderControllerClass)__instance.InventoryController).ThrowItem(slot.ContainedItem, false, (Callback)null);
+				controller.ThrowItem(slot.ContainedItem, false, null);
 			}
 		}
 	}
