@@ -164,15 +164,25 @@ namespace ActionPOV.Core
 
             float normYaw = TargetWeaponAngle.y / Mathf.Max(bounds.x, 0.001f);
             float curveYaw = Mathf.Sign(normYaw) * Mathf.Pow(Mathf.Abs(normYaw), Mathf.Lerp(1.25f, 1.15f, ADSTransitionBlend));
-            float multH = InvertStockHorizontal ? 1f : -1f;
             float maxSlideH = curSlideMaxH;
 
-            // Atenuação de percurso para a ESQUERDA (TargetWeaponAngle.y < 0)
+            // Simetria e Alinhamento no ADS:
+            // No Hipfire, a atenuação ocorre apenas ao virar para a esquerda (TargetWeaponAngle.y < 0).
+            // No ADS (ADSTransitionBlend > 0), a atenuação se aplica uniformemente em ambos os lados,
+            // garantindo alinhamento firme, concêntrico e confortável tanto para a esquerda quanto para a direita.
+            float leftMult = Mathf.Clamp01(LeftStockSlideMultiplier);
+            float rightMult = Mathf.Lerp(1.0f, leftMult, ADSTransitionBlend);
+
             if (TargetWeaponAngle.y < 0f)
             {
-                maxSlideH *= Mathf.Clamp01(LeftStockSlideMultiplier);
+                maxSlideH *= leftMult;
+            }
+            else
+            {
+                maxSlideH *= rightMult;
             }
 
+            float multH = InvertStockHorizontal ? 1f : -1f;
             TargetWeaponPos.x = multH * curveYaw * maxSlideH;
 
             // Vertical (Pitch): Ao mirar para CIMA (Pitch negativo), cano sobe e coronha desce
