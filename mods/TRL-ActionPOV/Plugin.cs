@@ -9,7 +9,7 @@ using UnityEngine;
 #nullable disable
 namespace ActionPOV
 {
-    [BepInPlugin("com.trl.actionpov", "TRL-ActionPOV", "1.5.0")]
+    [BepInPlugin("com.trl.actionpov", "TRL-ActionPOV", "1.5.1")]
     public class Plugin : BaseUnityPlugin
     {
         public static Plugin Instance { get; private set; }
@@ -329,8 +329,8 @@ namespace ActionPOV
                 "ADS Deadzone Horizontal (Degrees)",
                 2.5f,
                 new ConfigDescription(
-                    "Micro-deadzone horizontal para o retículo flutuar suavemente na ótica (graus).",
-                    new AcceptableValueRange<float>(0.2f, 6.0f)
+                    "Deadzone horizontal para a arma se movimentar na tela durante o ADS (graus).",
+                    new AcceptableValueRange<float>(0.2f, 15.0f)
                 )
             );
 
@@ -339,8 +339,8 @@ namespace ActionPOV
                 "ADS Deadzone Vertical (Degrees)",
                 1.5f,
                 new ConfigDescription(
-                    "Micro-deadzone vertical para o retículo flutuar suavemente na ótica (graus).",
-                    new AcceptableValueRange<float>(0.2f, 5.0f)
+                    "Deadzone vertical para a arma se movimentar na tela durante o ADS (graus).",
+                    new AcceptableValueRange<float>(0.2f, 10.0f)
                 )
             );
 
@@ -357,9 +357,9 @@ namespace ActionPOV
             ADSSightAlignmentFactor = Config.Bind(
                 "4. Tactical ADS (Cheek Weld & Parallax)",
                 "ADS Sight Alignment Factor",
-                0.85f,
+                1.0f,
                 new ConfigDescription(
-                    "Fator de alinhamento óptico da alça e massa no ADS: 0.0 = sem correção (livre) | 1.0 = alinhamento geométrico estrito.",
+                    "Fator de alinhamento óptico concêntrico da alça e massa no ADS: 0.0 = livre | 1.0 = concêntrico perfeito ao olho.",
                     new AcceptableValueRange<float>(0.0f, 1.50f)
                 )
             );

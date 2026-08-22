@@ -485,23 +485,35 @@ namespace ActionPOV.Core
             }
             else
             {
-                // NO ADS: PIVÔ FOCAL NO OSSO DA MIRA (mod_aim_camera)
-                // A rotação ocorre ao redor do centro óptico da mira, mantendo alça e massa 100% concêntricas
+                // NO ADS: PIVÔ ESFÉRICO CONCÊNTRICO AO OLHO (Eye-Concentric Parallax Correction)
+                // Faz a arma orbitar o ponto focal da pupila do olho.
+                // - Em repouso/estático: Alça e massa permanecem 100% concêntricas e colineares mesmo com Deadzone ampla.
+                // - Em movimento dinâmico rápido: A inércia da coronha gera o micro-desalinhamento elástico orgânico, que fecha perfeitamente ao estabilizar.
+                Vector3 scopePos;
                 if (pwa != null && pwa.CurrentScope != null && pwa.CurrentScope.Bone != null && pwa.HandsContainer != null && pwa.HandsContainer.WeaponRoot != null)
                 {
-                    // Posição local do osso da mira em relação ao WeaponRoot
-                    Vector3 scopeLocalPos = pwa.HandsContainer.WeaponRoot.InverseTransformPoint(pwa.CurrentScope.Bone.position);
-
-                    // Translação compensatória: ΔP = P_scope - (ΔR * P_scope)
-                    positionOffset = scopeLocalPos - (rotationOffset * scopeLocalPos);
-
-                    // Adiciona a inércia amortecida da coronha
-                    positionOffset += CurrentWeaponPos;
+                    scopePos = pwa.HandsContainer.WeaponRoot.InverseTransformPoint(pwa.CurrentScope.Bone.position);
+                }
+                else if (pwa != null && pwa.HandsContainer != null && pwa.HandsContainer.WeaponRoot != null)
+                {
+                    scopePos = pwa.HandsContainer.CameraOffset;
                 }
                 else
                 {
-                    positionOffset = CurrentWeaponPos;
+                    scopePos = new Vector3(0f, 0.05f, 0.15f);
                 }
+
+                // Ponto focal da pupila do olho atrás do osso da mira
+                float eyeDist = Mathf.Max(EyeToSightDistance, 0.10f);
+                Vector3 eyeFocalPoint = scopePos;
+                eyeFocalPoint.z -= eyeDist;
+
+                // Translação orbital compensatória concêntrica ao redor do olho
+                Vector3 concentricOffset = eyeFocalPoint - (rotationOffset * eyeFocalPoint);
+
+                // Ponderação pelo fator de alinhamento configurável (F12)
+                float alignFactor = Mathf.Clamp01(ADSSightAlignmentFactor);
+                positionOffset = Vector3.Lerp(CurrentWeaponPos, concentricOffset + CurrentWeaponPos, alignFactor);
             }
         }
 
