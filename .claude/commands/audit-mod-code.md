@@ -2,18 +2,32 @@
 
 Executa uma **auditoria técnica estática profunda, rigorosa e minuciosa** de todo o código-fonte de um mod (classes, métodos, estruturas de dados, algoritmos e patches Harmony). Valida a integridade e conformidade cruzando obrigatoriamente as referências em `references/` (`eft-decompiled` / `Assembly-CSharp`, `spt-source` e `fika-*`), caça vazamentos de memória (RAM leaks / GC pressure), avalia a necessidade de rotinas rodando em `Update()`, identifica funções órfãs/código morto e emite um relatório técnico acionável com classificação de severidade, alternativas de melhor lógica e código de correção.
 
+> **Skills obrigatórias:** carregar `spt-mod-best-practices`, `csharp-mod-best-practices` e `graph-code-navigation` antes de auditar. Na Dimensão 3, carregar `spt-memory-leak-analysis`. **`spt-performance-analysis` é obrigatória no modo `--perf`** e recomendada sempre que a Dimensão 2 encontrar superfícies frequentes. Consultar `memory-curation` §14 (contexto de memória).
+
+> **Só audita — não corrige.** O command produz achados com bloco de Decisão; a correção entra pelo ciclo normal (ver "Como um achado vira correção"). O relatório serve de Fase 1 (investigação) para o [/optimize-mod-performance](optimize-mod-performance.md).
+
 ---
 
 ## Uso
 
 ```bash
-/audit-mod-code <mod-ou-caminho> [--scope <subpasta>] [--target-ref <all|eft|spt|fika>] [--strict]
+/audit-mod-code <mod-ou-caminho> [--scope <subpasta>] [--target-ref <all|eft|spt|fika>] [--strict] [--perf]
 ```
 
 - `<mod-ou-caminho>` — Nome da pasta do mod em `mods/` (ex.: `ORBIT`, `VisceralCombat`, `TRL-ActionPOV`).
-- `--scope <subpasta>` (Opcional) — Limita a auditoria a um submódulo específico (ex.: `--scope modded/Orbit/Looting`). Padrão: todo o código em `modded/` (ou `original/`).
+- `--scope <subpasta>` (Opcional) — Limita a auditoria a um submódulo específico (ex.: `--scope modded/Orbit/Looting`). Padrão: todo o código editável do mod — `modded/` quando existe, ou a raiz/`src/` em mod próprio (`.agents/conventions.md` § Estrutura Padrão de Mods). `original/` só como referência de leitura.
 - `--target-ref <all|eft|spt|fika>` (Opcional) — Foco das checagens cruzadas de referência (padrão: `all`).
 - `--strict` (Opcional) — Ativa verificação com nível máximo de rigor contra tolerâncias de GC, polling em loops e suposições de singleplayer.
+- `--perf` (Opcional) — **Modo performance** (ver seção "Modo `--perf`"): concentra a auditoria em custo de execução, aplicando a metodologia da skill `spt-performance-analysis` (modelo de custo, panorama de execução, configuração, instrumentação).
+
+---
+
+## Contexto (antes das dimensões)
+
+1. **Resolver o mod e a raiz de código** (`modded/`, ou raiz/`src/` em mod próprio). Se `mods/<mod>/` não existir, listar os mods disponíveis e parar.
+2. **Memória do mod** (`memory-curation` §14): ler o topo de `mods/<mod>/memory/sessions.md` (snapshot + pendências) + entradas sobre performance/leak/crash. Pendência 🔴 → alertar. Emitir a linha `Memória consultada: ...` no encerramento; sem arquivo, registrar "sem memória prévia".
+3. **Relatórios anteriores:** `relatorio-auditoria-codigo-*.md` e `MEMORY-LEAK-review-*.md`. Achado `✅ Aplicado`/resolvido **não volta**; achado pendente conhecido é reforçado citando o ID original (`AUD-NN-MM` / `ML-NN-MM`), sem duplicar.
+4. **Mod grande** (acima de ~2.000 linhas no escopo): delegar a varredura de cada dimensão a sub-agents **read-only** em paralelo e consolidar os achados aqui (mesmo padrão do `/prepare-mod-for-publish` fase 2).
 
 ---
 
@@ -24,7 +38,37 @@ Executa uma **auditoria técnica estática profunda, rigorosa e minuciosa** de t
    - `references/eft-decompiled/` (e `types-index.json` para conferência de tipos/métodos do EFT).
    - `references/spt-source/` (servidor SPT 4.0).
    - `references/fika-plugin/` (`Fika.Core`), `references/fika-server/`, `references/fika-headless/` (suporte multiplayer coop).
-3. Consultar [docs/technical/spt-antipatterns.md](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/docs/technical/spt-antipatterns.md) (AP-01 a AP-09).
+3. Consultar [docs/technical/spt-antipatterns.md](../../docs/technical/spt-antipatterns.md) (AP-01 a AP-09).
+
+---
+
+## Modo `--perf` (auditoria de performance)
+
+Responde à pergunta: **"o que este mod está fazendo mais vezes, por mais tempo, para mais entidades ou por mais ciclos de vida do que realmente precisa — e quando esse processamento deveria parar, ele para?"** Metodologia completa na skill `spt-performance-analysis` (obrigatória neste modo); aqui só o que muda em relação à auditoria padrão:
+
+1. **Escopo das dimensões:** aprofundar as Dimensões **2** (Update vs. reativa), **3** (GC pressure — só a parte de churn/alocação; retenção pura é território do `/analyze-memory-leak`) e **6** (threading), e **acrescentar** as superfícies da skill §2: FREQ · PATCH · ENT · LIFE · GROW · UNITY · ALLOC · LOG · IO · CFG. Dimensões 1/4/5 rodam em modo leve (só o que sustenta um achado de custo).
+2. **Panorama de execução obrigatório** (skill §5.2): antes dos achados, tabela com toda superfície periódica/frequente do mod — superfície → classe de frequência → multiplicador de entidades → gate de contexto → quem para/quando. Patch Harmony entra com a **frequência estimada do alvo** (skill §3 — grafo aponta callers, leitura prova).
+3. **Auditoria de configuração** (skill §2 CFG): mapear as chaves de `Config.Bind`/`*.json`/`*.cfg` que alimentam frequência, raio, quantidade, logging e limpeza — default atual × default proposto. É a alavanca de ganho sem mudar arquitetura.
+4. **Cada achado carrega os eixos do modelo de custo** (skill §1): classe de frequência × entidades × duração × acúmulo, com o custo unitário que ajusta a severidade — e um **nível de evidência**:
+   - **Evidência forte** — frequência, multiplicador e mecanismo comprovados por leitura/medição.
+   - **Suspeita** — padrão preocupante com eixo não provado; **entra com proposta de instrumentação** (skill §6), não com refactor.
+   - **Melhoria preventiva** — boa prática que não explica problema atual; entra **agregada e curta**. O objetivo do modo é achar os maiores ofensores primeiro, não produzir 80 sugestões cosméticas.
+5. **Seções extras no relatório:** `## Panorama de execução`, `## Configuração`, `## Instrumentação proposta` (para as Suspeitas) e `## Plano de validação` (métrica, cenário pareado e critério por achado — skill §7).
+6. **Não duplicar memória:** achado de retenção descoberto no caminho é registrado por referência ao mecanismo da `spt-memory-leak-analysis` (ou ao `ML-NN-MM` existente), mantendo aqui só o ângulo de custo de execução.
+
+---
+
+## Como um achado vira correção
+
+O relatório **não é consumível pelo `/apply-code-review`** (esse command exige artefatos de item de backlog). Caminhos válidos:
+
+| Tipo | Como corrigir |
+|---|---|
+| Código (qualquer dimensão) | Agrupar os achados aceitos num **item de backlog** (`/add-backlog-item`) e seguir o ciclo normal — um item por rodada de auditoria, não um por achado. No modo `--perf`, o [/optimize-mod-performance](optimize-mod-performance.md) automatiza essa ponte (Fase 2), com spec funcional de **não-regressão** |
+| Só configuração (CFG) | Ajuste direto + registro da mudança no próprio relatório (✅ Aplicado) e em `PROPRIEDADES.md` quando for `ConfigEntry` |
+| Opções do F12 (UX) | Pelo `/review-mod-properties`, dono desse escopo |
+
+Rastreabilidade: correção aplicada em código cita o achado no comentário inline — `// ref: AUD-NN-MM` (mesmo esquema de PA/CR em `repo-workflow-best-practices` §4).
 
 ---
 
@@ -118,7 +162,7 @@ Varre sistematicamente o código procurando padrões de retenção não liberada
 
 ### Dimensão 5: Conformidade com Antipadrões do SPT
 
-Verificação sistemática contra a base [docs/technical/spt-antipatterns.md](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/docs/technical/spt-antipatterns.md):
+Verificação sistemática contra a base [docs/technical/spt-antipatterns.md](../../docs/technical/spt-antipatterns.md):
 
 - **AP-01:** Falta de teardown entre raids.
 - **AP-02:** Acesso não defensivo a Singletons (`Singleton<GameWorld>.Instance` sem validação de nulo).
@@ -147,7 +191,7 @@ O relatório gerado deve ser salvo em:
 title: "Relatório de Auditoria Técnica de Código — NomeDoMod (Review NN)"
 date: YYYY-MM-DD
 status: 🟢 Vivo
-authors: Antigravity
+authors: {Autor}
 ---
 
 # Relatório de Auditoria Técnica de Código — NomeDoMod (Review NN)
@@ -178,8 +222,10 @@ authors: Antigravity
 
 ### AUD-NN-01 · [Título Resumido do Problema]
 - **Severidade:** 🔴 Crítico / 🟠 Alto / 🟡 Médio / 🔵 Baixo / 💡 Otimização
-- **Localização no Mod:** [Arquivo.cs:L45](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/<Mod>/modded/Caminho/Arquivo.cs#L45)
-- **Referência Cruzada:** [Assembly-CSharp/ClasseAlvo.cs:L120](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/references/eft-decompiled/Assembly-CSharp/ClasseAlvo.cs#L120)
+- **Evidência:** Forte / Suspeita / Melhoria preventiva *(obrigatório no modo `--perf`; nas Suspeitas, apontar a instrumentação proposta que fecha o eixo em aberto)*
+- **Execução** *(modo `--perf`)*: [classe de frequência × multiplicador de entidades × duração × acúmulo — os eixos da skill `spt-performance-analysis` §1. Ex.: "per-frame × N bots (~30) × raid inteira, custo cresce com a lista de cadáveres"]
+- **Localização no Mod:** [Arquivo.cs:L45](../modded/Caminho/Arquivo.cs#L45)
+- **Referência Cruzada:** [Assembly-CSharp/ClasseAlvo.cs:L120](../../../references/eft-decompiled/Assembly-CSharp/ClasseAlvo.cs#L120)
 - **Causa Raiz:** [Explicação técnica detalhada do porquê o código atual falha ou gera problema.]
 - **Impacto Técnico Real:** [Ex.: Vazamento de 80MB por raid no Fika Headless / Queda de 12 FPS por micro-travamentos de GC.]
 - **Alternativa de Melhor Lógica / Proposta de Correção:**
@@ -190,6 +236,19 @@ authors: Antigravity
 ```csharp
 // Código refatorado demonstrando a solução viável e otimizada
 ```
+
+- **Como validar** *(modo `--perf`)*: [métrica + cenário pareado + critério — skill §7. Ex.: "contador de chamadas/s antes/depois no mesmo mapa; critério: cai de ~140/s para ≤5/s e zera após despawn"]
+- **Decisão:**
+  - `[ ]` Pendente
+  - `[ ]` Aceitar sugestão
+  - `[ ]` Aceitar com modificação: _________________
+  - `[ ]` Rejeitar (deferir / aceitar como dívida): _________________
+
+<!-- Após corrigir (via ciclo de backlog ou ajuste de config): marcar a opção, trocar o título para ✅ Aplicado em YYYY-MM-DD e adicionar **Resolução:** + **Aplicação:** (arquivo.cs:linha ou chave de config) -->
+
+---
+
+> **Modo `--perf`:** o relatório ganha adicionalmente as seções `## Panorama de execução` (tabela superfície → frequência → entidades → gate → quem para/quando + frequência estimada de cada alvo Harmony), `## Configuração` (chave → default atual → default proposto → onde entra no código), `## Instrumentação proposta` (para as Suspeitas — padrões da skill §6, gated por config e marcada `// PERF-INSTR AUD-NN-MM`) e `## Plano de validação` (checklist por achado). Achados 💡 de nível "Melhoria preventiva" entram agrupados numa única subseção compacta.
 
 ---
 
