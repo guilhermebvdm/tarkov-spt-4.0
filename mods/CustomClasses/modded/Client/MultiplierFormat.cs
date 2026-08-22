@@ -80,16 +80,16 @@ internal static class MultiplierFormat
     {
         var pct = Percent(factor);
         var sign = pct >= 0 ? "+" : string.Empty;
-        // 079: o bônus pode ser NEGATIVO (Light Frame — carga reduzida, teto) além do positivo (Pack Mule, piso).
-        // Cor por sinal e "piso vs teto" — não hardcodar verde/Pack Mule.
+        // 079: o bônus pode ser NEGATIVO (Light Frame — carga REDUZIDA, relativa) além do positivo (Pack Mule, piso).
+        // Cor por sinal e "piso vs redução" — não hardcodar verde/Pack Mule. (v0.16.6: Light Frame virou multiplicativo)
         var amount = $"<color={(pct >= 0 ? GreenHex : RedHex)}>{sign}{pct}%</color>";
         if (GameLocale.IsPortuguese)
         {
             var cls = string.IsNullOrWhiteSpace(className) ? "sua Classe" : $"Classe <b>{className}</b>";
-            return $"Limite de carga {amount} pela {cls} ({(pct >= 0 ? "piso" : "teto")})";
+            return $"Limite de carga {amount} pela {cls} ({(pct >= 0 ? "piso" : "redução")})";
         }
 
         var clsEn = string.IsNullOrWhiteSpace(className) ? "your Class" : $"Class <b>{className}</b>";
-        return $"Carry limit {amount} from {clsEn} ({(pct >= 0 ? "floor" : "cap")})";
+        return $"Carry limit {amount} from {clsEn} ({(pct >= 0 ? "floor" : "reduction")})";
     }
 }

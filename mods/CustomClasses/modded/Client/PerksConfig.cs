@@ -488,7 +488,7 @@ internal static class PerksConfig
                 new AcceptableValueRange<float>(0f, 1f)));
         // 079: Overladen REMOVIDO (substituído pela Lebre, item 081). Aqui entram os 2 levers NOVOS do 079
         // (a seção no F12 vem do 1º arg SecHunter/SecRifleman, não da posição física no código).
-        // Light Frame (Caçador + Furtivo): limite de carga REDUZIDO. Valor NEGATIVO (teto, não piso — ver PackMulePatch).
+        // Light Frame (Caçador + Furtivo): limite de carga REDUZIDO. Valor NEGATIVO (redução RELATIVA — ver PackMulePatch).
         LightFrameEnabled = BindOrdered(config, 
             SecHunter, "Light Frame — Enabled", true,
             "Caçador/Furtivo: limite de carga reduzido (estrutura leve — leva menos loot). / Hunter/Stealth: reduced carry limit (light frame).");

@@ -176,7 +176,7 @@ internal static class PerksCatalog
         // Light Frame (Caçador + Furtivo): carga reduzida — live = 1 + penalidade negativa (<1 → drawback).
         ["light_frame"] = G("Light Frame", "Estrutura Leve", ESkillId.Strength, new[]
         {
-            P("Light Frame", "Estrutura Leve", "carry limit", "limite de carga", ValueFormat.Percent, 0.8f, Polarity.HigherBetter, EBuffId.StrengthBuffLiftWeightInc, live: () => 1f + (PerksConfig.LightFrameCarryPenalty?.Value ?? -0.2f)),
+            P("Light Frame", "Estrutura Leve", "carry limit", "limite de carga", ValueFormat.Percent, 0.8f, Polarity.HigherBetter, EBuffId.StrengthBuffLiftWeightInc, live: () => 1f + (PerksConfig.LightFrameCarryPenalty?.Value ?? -0.1f)),
         }),
         // Loud Looter / Saque Barulhento (Fuzileiro): loot mais alto (>1 → drawback).
         ["loud_looter"] = G("Loud Looter", "Saque Barulhento", ESkillId.SilentOps, new[]
