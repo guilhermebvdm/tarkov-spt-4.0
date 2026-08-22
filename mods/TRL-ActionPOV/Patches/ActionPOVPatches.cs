@@ -148,13 +148,19 @@ namespace ActionPOV.Patches
             Vector3 hipPos = weaponRootAnim.position + worldDeltaPos;
             Quaternion hipRot = worldDeltaRot * weaponRootAnim.rotation;
 
-            // 2. NO ADS (blend = 1): Rotação Orbital Pura com Ancoragem no Olho (Eye-Pivot Orbit)
-            // A arma inteira gira tendo como vértice exclusivo o bico do cone de visão (camPos).
-            // A traseira da arma (alça) permanece ancorada no olho, e a ponta (massa) aponta na linha radial
-            // que sai do olho em direção à borda do campo de visão, mantendo alça e massa 100% concêntricas e colineares.
+            // 2. NO ADS (blend = 1): Co-Axial Rígido em Repouso + Mola Dinâmica Inercial de Arrasto
+            // Em repouso: ADSDynamicInertialAngle é zero, mantendo retículo e massa 100% cravados e co-axiais.
+            // Em movimento de arraste: A mola inercial inclina suavemente a arma, gerando o micro-desalinhamento elástico de 4kg de peso.
+            Quaternion adsInertialCamRot = Quaternion.Euler(
+                KineticSpringEngine.ADSDynamicInertialAngle.x,
+                KineticSpringEngine.ADSDynamicInertialAngle.y,
+                KineticSpringEngine.ADSDynamicInertialAngle.z
+            );
+            Quaternion adsWorldInertialRot = camRot * adsInertialCamRot * Quaternion.Inverse(camRot);
+
             Vector3 toWeapon = weaponRootAnim.position - camPos;
-            Vector3 adsPos = camPos + (worldDeltaRot * toWeapon);
-            Quaternion adsRot = worldDeltaRot * weaponRootAnim.rotation;
+            Vector3 adsPos = camPos + (adsWorldInertialRot * toWeapon);
+            Quaternion adsRot = adsWorldInertialRot * weaponRootAnim.rotation;
 
             // 3. Interpolação Orgânica Contínua Hipfire <-> ADS
             weaponRootAnim.position = Vector3.Lerp(hipPos, adsPos, blend);
@@ -208,9 +214,16 @@ namespace ActionPOV.Patches
             Vector3 hipPos = weaponRootThird.position + worldDeltaPos;
             Quaternion hipRot = worldDeltaRot * weaponRootThird.rotation;
 
+            Quaternion adsInertialCamRot = Quaternion.Euler(
+                KineticSpringEngine.ADSDynamicInertialAngle.x,
+                KineticSpringEngine.ADSDynamicInertialAngle.y,
+                KineticSpringEngine.ADSDynamicInertialAngle.z
+            );
+            Quaternion adsWorldInertialRot = camRot * adsInertialCamRot * Quaternion.Inverse(camRot);
+
             Vector3 toWeapon = weaponRootThird.position - camPos;
-            Vector3 adsPos = camPos + (worldDeltaRot * toWeapon);
-            Quaternion adsRot = worldDeltaRot * weaponRootThird.rotation;
+            Vector3 adsPos = camPos + (adsWorldInertialRot * toWeapon);
+            Quaternion adsRot = adsWorldInertialRot * weaponRootThird.rotation;
 
             weaponRootThird.position = Vector3.Lerp(hipPos, adsPos, blend);
             weaponRootThird.rotation = Quaternion.Slerp(hipRot, adsRot, blend);

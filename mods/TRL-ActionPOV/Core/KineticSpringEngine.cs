@@ -69,6 +69,13 @@ namespace ActionPOV.Core
         public static float StockSmoothTimeVerticalADS = 0.20f;   // Tempo de resposta vertical da coronha/alça no ADS (segundos)
         public static float ADSStockSnapInSpeed = 0.06f;          // Tempo de aceleração rápida (Ease-Out) nos primeiros instantes do ADS
 
+        // --- MOLA DINÂMICA DE INÉRCIA NO ADS (CO-AXIAL ESTÁTICO + DESALINHAMENTO EM MOVIMENTO) ---
+        public static float ADSDynamicInertiaIntensity = 1.0f;  // Intensidade do micro-desalinhamento inercial ao arrastar a mira
+        public static float ADSDynamicInertiaSmoothTime = 0.055f; // Tempo de resposta da mola inercial
+        public static Vector3 ADSDynamicInertialAngle = Vector3.zero;
+        private static Vector3 _targetADSInertia = Vector3.zero;
+        private static Vector3 _adsDynamicInertialAngleVel = Vector3.zero;
+
         // --- COICE FÍSICO DO DISPARO (WEAPON KICKBACK & BODYCAM HEAD PUNCH) ---
         public static bool EnableRecoilKick = true;             // Ativa o coice mecânico de disparo
         public static float RecoilKickZ_Hipfire = 0.030f;       // Recuo para trás no eixo Z em Hipfire (metros, ex: 0.030 = 3.0cm)
@@ -116,13 +123,33 @@ namespace ActionPOV.Core
         public static void ProcessMouseInput(ref Vector2 deltaRotation, bool isAiming, EFT.Player player)
         {
             LastFrameDelta = deltaRotation;
-            
-            // 1. LIMITES DE DEADZONE E SENSIBILIDADE INTERPOLADOS SUAVEMENTE
-            Vector2 bounds = Vector2.Lerp(DeadzoneLimits, ADSDeadzoneLimits, ADSTransitionBlend);
-            float sensitivity = Mathf.Lerp(1.0f, 0.75f, ADSTransitionBlend);
+            float dt = Mathf.Max(Time.deltaTime, 0.001f);
+
+            if (isAiming || ADSTransitionBlend > 0.5f)
+            {
+                // NO ADS: SISTEMA CO-AXIAL DINÂMICO
+                // 1. Em repouso estático: Alvo é ZERO (100% cravado no centro da ótica e da massa)
+                TargetWeaponAngle = Vector3.MoveTowards(TargetWeaponAngle, Vector3.zero, 30.0f * dt);
+                TargetWeaponPos = Vector3.MoveTowards(TargetWeaponPos, Vector3.zero, 0.15f * dt);
+
+                // 2. Em movimento de arraste: A mola inercial absorve o impulso angular do mouse
+                Vector3 mouseInertia = new Vector3(
+                    -deltaRotation.y * 0.40f * ADSDynamicInertiaIntensity * (InvertWeaponPitch ? -1f : 1f),
+                    deltaRotation.x * 0.40f * ADSDynamicInertiaIntensity * (InvertWeaponYaw ? -1f : 1f),
+                    0f
+                );
+                _targetADSInertia = mouseInertia;
+
+                // No ADS, a câmera gira com o mouse normalmente, mantendo o Frustum 100% alinhado
+                return;
+            }
+
+            // NO HIPFIRE: SISTEMA DE FREE AIM AMPLO E CQB POINT-SHOOTING
+            _targetADSInertia = Vector3.zero;
+            Vector2 bounds = DeadzoneLimits;
+            float sensitivity = 1.0f;
 
             // DETECÇÃO E SUPRESSÃO DINÂMICA DE MOVIMENTOS BRUSCOS (FLICK / FAST SWIPES)
-            float dt = Mathf.Max(Time.deltaTime, 0.001f);
             float mouseAngularSpeed = deltaRotation.magnitude / dt; // graus por segundo (°/s)
 
             float freeAimWeight = 1.0f;
@@ -131,7 +158,6 @@ namespace ActionPOV.Core
                 float swipeProgress = Mathf.Clamp01((mouseAngularSpeed - FastSwipeThreshold) / Mathf.Max(FastSwipeFalloff, 1.0f));
                 freeAimWeight = 1.0f - swipeProgress;
 
-                // Em movimentos muito rápidos/bruscos, reconduz a arma suavemente para o centro do retículo
                 if (swipeProgress > 0.1f)
                 {
                     TargetWeaponAngle = Vector3.MoveTowards(TargetWeaponAngle, Vector3.zero, 35.0f * swipeProgress * dt);
@@ -155,19 +181,19 @@ namespace ActionPOV.Core
                 inputPitch = temp;
             }
 
-            // 2. Acumula a intenção do mouse na Deadzone da arma (X = Pitch, Y = Yaw)
+            // Acumula a intenção do mouse na Deadzone da arma (X = Pitch, Y = Yaw)
             Vector2 candidate = new Vector2(
                 TargetWeaponAngle.y + inputYaw,
                 TargetWeaponAngle.x - inputPitch
             );
 
-            // 3. Aplica o Clamp estrito da caixa de Deadzone dinâmica
+            // Aplica o Clamp estrito da caixa de Deadzone dinâmica
             Vector2 clamped = new Vector2(
                 Mathf.Clamp(candidate.x, -bounds.x, bounds.x),
                 Mathf.Clamp(candidate.y, -bounds.y, bounds.y)
             );
 
-            // 4. Absorção da Deadzone: O que couber na deadzone é consumido; o excesso gira a câmera
+            // Absorção da Deadzone: O que couber na deadzone é consumido; o excesso gira a câmera
             Vector2 consumed = new Vector2(
                 clamped.x - TargetWeaponAngle.y,
                 -(clamped.y - TargetWeaponAngle.x)
@@ -176,47 +202,29 @@ namespace ActionPOV.Core
             TargetWeaponAngle.y = clamped.x; // Yaw (Horizontal)
             TargetWeaponAngle.x = clamped.y; // Pitch (Vertical)
 
-            // Subtrai da rotação da câmera (se estiver na deadzone, a câmera fica imóvel)
-            deltaRotation.x -= (consumed.x / sensitivity);
-            deltaRotation.y -= (consumed.y / sensitivity);
+            deltaRotation.x -= consumed.x;
+            deltaRotation.y -= consumed.y;
 
-            // 5. POSIÇÃO DA CORONHA COM TRANSIÇÃO ORGÂNICA ENTRE HIPFIRE E ADS
-            float curSlideMaxH = Mathf.Lerp(StockSlideHorizontalMax, StockSlideHorizontalADS, ADSTransitionBlend);
-            float curSlideMaxV = Mathf.Lerp(StockSlideVerticalMax, StockSlideVerticalADS, ADSTransitionBlend);
-
+            // POSIÇÃO DA CORONHA NO HIPFIRE
             float normYaw = TargetWeaponAngle.y / Mathf.Max(bounds.x, 0.001f);
-            float curveYaw = Mathf.Sign(normYaw) * Mathf.Pow(Mathf.Abs(normYaw), Mathf.Lerp(1.25f, 1.15f, ADSTransitionBlend));
-            float maxSlideH = curSlideMaxH;
+            float curveYaw = Mathf.Sign(normYaw) * Mathf.Pow(Mathf.Abs(normYaw), 1.25f);
+            float maxSlideH = StockSlideHorizontalMax;
 
-            // Simetria e Alinhamento no ADS:
-            // No Hipfire, a atenuação ocorre apenas ao virar para a esquerda (TargetWeaponAngle.y < 0).
-            // No ADS (ADSTransitionBlend > 0), a atenuação se aplica uniformemente em ambos os lados,
-            // garantindo alinhamento firme, concêntrico e confortável tanto para a esquerda quanto para a direita.
-            float leftMult = Mathf.Clamp01(LeftStockSlideMultiplier);
-            float rightMult = Mathf.Lerp(1.0f, leftMult, ADSTransitionBlend);
-
-            if (TargetWeaponAngle.y < 0f)
+            if (TargetWeaponAngle.y < 0)
             {
-                maxSlideH *= leftMult;
-            }
-            else
-            {
-                maxSlideH *= rightMult;
+                maxSlideH *= LeftStockSlideMultiplier;
             }
 
-            float multH = InvertStockHorizontal ? 1f : -1f;
-            TargetWeaponPos.x = multH * curveYaw * maxSlideH;
+            TargetWeaponPos.x = curveYaw * maxSlideH * (InvertStockHorizontal ? -1f : 1f);
 
-            // Vertical (Pitch): Ao mirar para CIMA (Pitch negativo), cano sobe e coronha desce
             float normPitch = TargetWeaponAngle.x / Mathf.Max(bounds.y, 0.001f);
-            float curvePitch = Mathf.Sign(normPitch) * Mathf.Pow(Mathf.Abs(normPitch), Mathf.Lerp(1.25f, 1.15f, ADSTransitionBlend));
-            float multV = InvertStockVertical ? -1f : 1f;
-            TargetWeaponPos.y = multV * curvePitch * curSlideMaxV;
+            float curvePitch = Mathf.Sign(normPitch) * Mathf.Pow(Mathf.Abs(normPitch), 1.25f);
+            TargetWeaponPos.y = curvePitch * StockSlideVerticalMax * (InvertStockVertical ? 1f : -1f);
 
-            // Profundidade (Z) e Torção (Roll) suaves
-            TargetWeaponPos.z = Mathf.Lerp(-Mathf.Abs(curveYaw) * ArmCompressionMultiplier, 0f, ADSTransitionBlend);
-            float rollMult = InvertWeaponRoll ? -CQBRollMultiplier : CQBRollMultiplier;
-            TargetWeaponAngle.z = Mathf.Lerp(-TargetWeaponAngle.y * rollMult, 0f, ADSTransitionBlend);
+            float totalAngDist = candidate.magnitude;
+            TargetWeaponPos.z = -totalAngDist * ArmCompressionMultiplier;
+
+            TargetWeaponAngle.z = -TargetWeaponAngle.y * CQBRollMultiplier * (InvertWeaponRoll ? -1f : 1f);
         }
 
         public static void UpdatePhysics(EFT.Player player, float dt)
@@ -429,6 +437,17 @@ namespace ActionPOV.Core
                 CurrentShotHeadPitch = 0f;
                 CurrentShotHeadYaw = 0f;
             }
+
+            // 5. Mola Dinâmica Inercial de Arrasto no ADS (dissipa para zero ao parar o mouse)
+            ADSDynamicInertialAngle = Vector3.SmoothDamp(
+                ADSDynamicInertialAngle,
+                _targetADSInertia,
+                ref _adsDynamicInertialAngleVel,
+                Mathf.Max(ADSDynamicInertiaSmoothTime, 0.001f),
+                Mathf.Infinity,
+                dt
+            );
+            _targetADSInertia = Vector3.MoveTowards(_targetADSInertia, Vector3.zero, 35.0f * dt);
 
             // Atenua o delta acumulado para o próximo frame
             LastFrameDelta = Vector2.Lerp(LastFrameDelta, Vector2.zero, dt * 10f);

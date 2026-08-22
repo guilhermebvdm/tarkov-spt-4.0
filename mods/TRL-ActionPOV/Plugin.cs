@@ -9,7 +9,7 @@ using UnityEngine;
 #nullable disable
 namespace ActionPOV
 {
-    [BepInPlugin("com.trl.actionpov", "TRL-ActionPOV", "1.5.6")]
+    [BepInPlugin("com.trl.actionpov", "TRL-ActionPOV", "1.5.7")]
     public class Plugin : BaseUnityPlugin
     {
         public static Plugin Instance { get; private set; }
@@ -53,6 +53,8 @@ namespace ActionPOV
         public static ConfigEntry<float> StockSmoothTimeHorizontalADS;
         public static ConfigEntry<float> StockSmoothTimeVerticalADS;
         public static ConfigEntry<float> ADSStockSnapInSpeed;
+        public static ConfigEntry<float> ADSDynamicInertiaIntensity;
+        public static ConfigEntry<float> ADSDynamicInertiaSmoothTime;
 
         // Coice Físico do Disparo (Weapon Kickback & Bodycam Head Punch)
         public static ConfigEntry<bool> EnableRecoilKick;
@@ -429,6 +431,26 @@ namespace ActionPOV
                 new ConfigDescription(
                     "Tempo de aceleração rápida do recolhimento lateral da coronha nos primeiros instantes do ADS (segundos). Menor = puxa mais rápido para o centro, eliminando arrasto.",
                     new AcceptableValueRange<float>(0.01f, 0.25f)
+                )
+            );
+
+            ADSDynamicInertiaIntensity = Config.Bind(
+                "4. Tactical ADS (Cheek Weld & Parallax)",
+                "ADS Dynamic Inertia Intensity",
+                1.0f,
+                new ConfigDescription(
+                    "Intensidade do micro-desalinhamento inercial dinâmico ao arrastar a mira no ADS (0.0 = rígido estrito, 1.0 = inércia orgânica de 4kg). Ao parar, alinha 100% no centro.",
+                    new AcceptableValueRange<float>(0.0f, 2.5f)
+                )
+            );
+
+            ADSDynamicInertiaSmoothTime = Config.Bind(
+                "4. Tactical ADS (Cheek Weld & Parallax)",
+                "ADS Dynamic Inertia SmoothTime",
+                0.055f,
+                new ConfigDescription(
+                    "Tempo de resposta da mola inercial no ADS em segundos (menor = fecha mais rápido ao parar).",
+                    new AcceptableValueRange<float>(0.010f, 0.200f)
                 )
             );
 
@@ -827,6 +849,8 @@ namespace ActionPOV
             KineticSpringEngine.StockSmoothTimeHorizontalADS = StockSmoothTimeHorizontalADS.Value;
             KineticSpringEngine.StockSmoothTimeVerticalADS = StockSmoothTimeVerticalADS.Value;
             KineticSpringEngine.ADSStockSnapInSpeed = ADSStockSnapInSpeed.Value;
+            KineticSpringEngine.ADSDynamicInertiaIntensity = ADSDynamicInertiaIntensity.Value;
+            KineticSpringEngine.ADSDynamicInertiaSmoothTime = ADSDynamicInertiaSmoothTime.Value;
             KineticSpringEngine.EnableRecoilKick = EnableRecoilKick.Value;
             KineticSpringEngine.RecoilKickZ_Hipfire = RecoilKickZ_Hipfire.Value;
             KineticSpringEngine.RecoilKickZ_ADS = RecoilKickZ_ADS.Value;
