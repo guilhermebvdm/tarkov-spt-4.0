@@ -9,7 +9,7 @@ using UnityEngine;
 #nullable disable
 namespace ActionPOV
 {
-    [BepInPlugin("com.trl.actionpov", "TRL-ActionPOV", "1.5.5")]
+    [BepInPlugin("com.trl.actionpov", "TRL-ActionPOV", "1.5.6")]
     public class Plugin : BaseUnityPlugin
     {
         public static Plugin Instance { get; private set; }
@@ -335,20 +335,20 @@ namespace ActionPOV
             ADSDeadzoneHorizontal = Config.Bind(
                 "4. Tactical ADS (Cheek Weld & Parallax)",
                 "ADS Deadzone Horizontal (Degrees)",
-                2.5f,
+                2.0f,
                 new ConfigDescription(
-                    "Deadzone horizontal para a arma se movimentar na tela durante o ADS (graus).",
-                    new AcceptableValueRange<float>(0.2f, 15.0f)
+                    "Micro-deadzone horizontal para flutuação orgânica dentro do limite óptico (Eye Box) da luneta e alça/massa (graus).",
+                    new AcceptableValueRange<float>(0.2f, 3.5f)
                 )
             );
 
             ADSDeadzoneVertical = Config.Bind(
                 "4. Tactical ADS (Cheek Weld & Parallax)",
                 "ADS Deadzone Vertical (Degrees)",
-                1.5f,
+                1.2f,
                 new ConfigDescription(
-                    "Deadzone vertical para a arma se movimentar na tela durante o ADS (graus).",
-                    new AcceptableValueRange<float>(0.2f, 10.0f)
+                    "Micro-deadzone vertical para flutuação orgânica dentro do limite óptico (Eye Box) da luneta e alça/massa (graus).",
+                    new AcceptableValueRange<float>(0.2f, 2.5f)
                 )
             );
 
