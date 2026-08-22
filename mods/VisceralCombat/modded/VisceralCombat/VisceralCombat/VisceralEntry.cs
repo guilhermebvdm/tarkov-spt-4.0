@@ -1,9 +1,11 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using BepInEx;
 using BepInEx.Configuration;
+using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
 using EFT.UI;
@@ -11,6 +13,7 @@ using Fika.Core.Main.Utils;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking;
+using Fika.Core.Networking.LiteNetLib;
 using Newtonsoft.Json;
 using SPT.Reflection.Patching;
 using UnityEngine;
@@ -25,9 +28,10 @@ using VisceralCombat.Ragdolls.Patches;
 
 namespace VisceralCombat;
 
-[BepInPlugin("com.servph.VisceralCombat", "Visceral Combat", "3.7.0")]
-[BepInDependency(/*Could not decode attribute arguments.*/)]
-[BepInDependency(/*Could not decode attribute arguments.*/)]
+[BepInPlugin("com.servph.VisceralCombat", "Visceral Combat", "3.8.2")]
+/// <remarks>
+/// GUID used for FIKA mod-presence checks. Must match BepInPlugin first arg.
+/// </remarks>
 public class VisceralEntry : BaseUnityPlugin
 {
 	public List<string> SoundsList = new List<string> { "ThroatGargle1", "ThroatGargle2", "ThroatGargle3", "ThroatGargle4" };
@@ -40,7 +44,7 @@ public class VisceralEntry : BaseUnityPlugin
 
 	public EffectContainer effectContainer = null;
 
-	private string filePath = "./BepInEx/plugins/ssh/VD_Calibers.json";
+	private string filePath = "";
 
 	public float lerpTest = 1f;
 
@@ -71,6 +75,18 @@ public class VisceralEntry : BaseUnityPlugin
 	public CollisionDetectionMode collisionDetectionMode_0;
 
 	public static VisceralEntry Instance { get; private set; }
+	public static ManualLogSource LogSource { get; private set; }
+
+	/// <summary>
+	/// True only when ALL human players in the current FIKA raid have VisceralCombat.
+	/// Always true in solo SPT (no FIKA). Feature-gating flag for living-leg dismemberment.
+	/// </summary>
+	public static bool AllPlayersHaveVisceralCombat { get; private set; } = false;
+
+	// Handshake internals
+	private readonly HashSet<int> _handshakeAcks = new();
+	private int _expectedHumanCount = 0;
+	private const string VisceralGuid = "com.servph.VisceralCombat";
 
 	public AssetBundle goreBundle { get; set; }
 
@@ -101,6 +117,14 @@ public class VisceralEntry : BaseUnityPlugin
 	public ConfigEntry<bool> ArterySpray { get; set; }
 
 	public ConfigEntry<bool> UseOldBloodDecal { get; set; }
+
+	public ConfigEntry<bool> EnableImpactBloodCloud { get; set; }
+
+	public ConfigEntry<int> ImpactBloodCloudParticleCount { get; set; }
+
+	public ConfigEntry<float> ImpactBloodCloudScale { get; set; }
+
+	public ConfigEntry<bool> EnableArmorSparks { get; set; }
 
 	public ConfigEntry<bool> BodyCollision { get; set; }
 
@@ -142,33 +166,15 @@ public class VisceralEntry : BaseUnityPlugin
 
 	public ConfigEntry<int> RagdollSleepTime { get; set; }
 
-	public ConfigEntry<float> timer { get; set; }
-
-	public ConfigEntry<float> x { get; set; }
-
-	public ConfigEntry<float> y { get; set; }
-
-	public ConfigEntry<float> z { get; set; }
-
 	public GameObject ragdollAnimMaster { get; set; }
 
 	public ConfigEntry<bool> NeverDeleteShells { get; set; }
 
 	public void Awake()
 	{
-		//IL_0046: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0050: Expected O, but got Unknown
-		//IL_0094: Unknown result type (might be due to invalid IL or missing references)
-		//IL_009e: Expected O, but got Unknown
-		//IL_0148: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0152: Expected O, but got Unknown
-		//IL_019a: Unknown result type (might be due to invalid IL or missing references)
-		//IL_01a4: Expected O, but got Unknown
-		//IL_01ec: Unknown result type (might be due to invalid IL or missing references)
-		//IL_01f6: Expected O, but got Unknown
-		//IL_023e: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0248: Expected O, but got Unknown
 		Instance = this;
+		LogSource = Logger;
+
 		EnableDismemberment = ((BaseUnityPlugin)this).Config.Bind<bool>("Dismemberment", "Dismemberment Enabled", true, new ConfigDescription("Disables literally EVERYTHING for dismemberment.", (AcceptableValueBase)null, new object[1]
 		{
 			new ConfigurationManagerAttributes
@@ -220,17 +226,43 @@ public class VisceralEntry : BaseUnityPlugin
 				Order = 3
 			}
 		}));
+
+		string cloudCat = "Blood | Impact Cloud";
+		EnableImpactBloodCloud = ((BaseUnityPlugin)this).Config.Bind<bool>(cloudCat, "Enable Impact Blood Cloud", true, "Ativa/desativa a nuvem vermelha instantanea de impacto de bala (vanilla).");
+		ImpactBloodCloudParticleCount = ((BaseUnityPlugin)this).Config.Bind<int>(cloudCat, "Blood Cloud Particle Count", 10, new ConfigDescription("Quantidade de particulas na nuvem de sangue de impacto.", new AcceptableValueRange<int>(0, 50)));
+		ImpactBloodCloudScale = ((BaseUnityPlugin)this).Config.Bind<float>(cloudCat, "Blood Cloud Scale", 1.0f, new ConfigDescription("Escala/tamanho da nuvem de sangue de impacto.", new AcceptableValueRange<float>(0.1f, 5.0f)));
+		EnableArmorSparks = ((BaseUnityPlugin)this).Config.Bind<bool>(cloudCat, "Enable Armor Plate Metal Sparks", true, "Substitui o sangue por faiscas metalicas ao acertar placas de colete e capacetes.");
+
+		EventHandler cloudSettingChanged = (sender, args) =>
+		{
+			VisceralCombat.Ragdolls.Classes.RagdollHelperClass.ApplyBloodCloudSettings();
+		};
+		EnableImpactBloodCloud.SettingChanged += cloudSettingChanged;
+		ImpactBloodCloudParticleCount.SettingChanged += cloudSettingChanged;
+		ImpactBloodCloudScale.SettingChanged += cloudSettingChanged;
+
 		((ModulePatch)new VisceralCombat.Dismemberment.Patches.GameStartedPatch()).Enable();
 		((ModulePatch)new KillPatch()).Enable();
 		((ModulePatch)new BleedPatch()).Enable();
-		ConsoleScreen.Processor.RegisterCommand("UpdateCalibers", (Action)delegate
+		((ModulePatch)new VisceralCombat.Dismemberment.Patches.ProneLockPatch()).Enable();
+		((ModulePatch)new VisceralCombat.Dismemberment.Patches.ProneMoverDoPronePatch()).Enable();
+		((ModulePatch)new VisceralCombat.Combined.Patches.PlaySoundBankPatch()).Enable();
+		((ModulePatch)new VisceralCombat.Combined.Patches.PlayStepSoundPatch()).Enable();
+		((ModulePatch)new VisceralCombat.Combined.Patches.DefaultPlayPatch()).Enable();
+
+		try
 		{
-			ParseDismembermentJson();
-		}, (string)null);
-		ConsoleScreen.Processor.RegisterCommand("LayerCheck", (Action)delegate
-		{
-			LayerMaskRun();
-		}, (string)null);
+			ConsoleScreen.Processor.RegisterCommand("UpdateCalibers", (Action)delegate
+			{
+				ParseDismembermentJson();
+			}, (string)null);
+			ConsoleScreen.Processor.RegisterCommand("LayerCheck", (Action)delegate
+			{
+				LayerMaskRun();
+			}, (string)null);
+		}
+		catch { }
+
 		FikaEventDispatcher.SubscribeEvent<FikaNetworkManagerCreatedEvent>((Action<FikaNetworkManagerCreatedEvent>)onFikaNetworkManagerCreatedEvent);
 		ShotIntensity = ((BaseUnityPlugin)this).Config.Bind<float>("Ragdolls | Ragdoll Phsyical Properties", "Bullet Intensity", 85f, "How much force is applied to a shot. This is also dependent on caliber. Default is 85");
 		GrenadeExplIntensity = ((BaseUnityPlugin)this).Config.Bind<float>("Ragdolls | Ragdoll Phsyical Properties", "Grenade Intensity", 190f, "How much force is applied to a grenade explosion. This is also dependent on caliber. Default is 190");
@@ -256,70 +288,197 @@ public class VisceralEntry : BaseUnityPlugin
 		((ModulePatch)new LimbKillPatch()).Enable();
 		((ModulePatch)new CreateBSGRagdollPatch()).Enable();
 		((ModulePatch)new RagdollClassPatch()).Enable();
-		NeverDeleteShells = ((BaseUnityPlugin)this).Config.Bind<bool>("Combat | Visuals", "Infinite Shell Casing Lifetime", false, "Turns off Used Shell Casing Deletion");
-		((ModulePatch)new ShellCasingPatch()).Enable();
 		ItemForce = ((BaseUnityPlugin)this).Config.Bind<bool>("Physics | Item Physical Properties", "Item Physics", false, "If you are getting too much lag turn this off. But most capable PC's should run this fine. (Besides on SoT)");
 		objectIntensity = ((BaseUnityPlugin)this).Config.Bind<float>("Physics | Item Physical Properties", "Item Force Intensity", 0.3f, "Multiplier that determines the amount of force applied to physics objects.");
+		headForceIntensity = ((BaseUnityPlugin)this).Config.Bind<float>("Ragdolls | Ragdoll Physical Properties", "Head Impulse Intensity", 1.0f, "Multiplier for head shot force.");
+		TorsoForceIntensity = ((BaseUnityPlugin)this).Config.Bind<float>("Ragdolls | Ragdoll Physical Properties", "Torso Impulse Intensity", 1.0f, "Multiplier for torso shot force.");
+		ArmsForceIntensity = ((BaseUnityPlugin)this).Config.Bind<float>("Ragdolls | Ragdoll Physical Properties", "Arms Impulse Intensity", 1.0f, "Multiplier for arms shot force.");
+		LegsForceIntensity = ((BaseUnityPlugin)this).Config.Bind<float>("Ragdolls | Ragdoll Physical Properties", "Legs Impulse Intensity", 1.0f, "Multiplier for legs shot force.");
 	}
 
 	private void onFikaNetworkManagerCreatedEvent(FikaNetworkManagerCreatedEvent @event)
 	{
 		if (FikaBackendUtils.IsClient)
 		{
-			@event.Manager.RegisterPacket<DismembermentPacket>((Action<DismembermentPacket>)OnDismembermentPacket);
-			@event.Manager.RegisterPacket<RagdollSyncPacket>((Action<RagdollSyncPacket>)OnRagdollSyncPacket);
+			@event.Manager.RegisterPacket<DismembermentPacket>((Action<DismembermentPacket>)OnDismembermentPacketClient);
+			@event.Manager.RegisterPacket<RagdollSyncPacket>((Action<RagdollSyncPacket>)OnRagdollSyncPacketClient);
+			@event.Manager.RegisterPacket<LivingDismembermentPacket>((Action<LivingDismembermentPacket>)OnLivingDismembermentPacketClient);
+			// Client-side: receive handshake ping from host and reply with ACK
+			@event.Manager.RegisterPacket<VisceralHandshakePacket>((Action<VisceralHandshakePacket>)OnVisceralHandshakePacketClient);
+		}
+		if (FikaBackendUtils.IsServer || FikaBackendUtils.IsHeadless)
+		{
+			@event.Manager.RegisterPacket<DismembermentPacket>((Action<DismembermentPacket>)OnDismembermentPacketServer);
+			@event.Manager.RegisterPacket<RagdollSyncPacket>((Action<RagdollSyncPacket>)OnRagdollSyncPacketServer);
+			@event.Manager.RegisterPacket<LivingDismembermentPacket>((Action<LivingDismembermentPacket>)OnLivingDismembermentPacketServer);
+			// Host-side: receive ACK responses from clients
+			@event.Manager.RegisterPacket<VisceralHandshakePacket>((Action<VisceralHandshakePacket>)OnVisceralHandshakePacketServer);
 		}
 	}
 
-	private void OnDismembermentPacket(DismembermentPacket packet)
+	/// <summary>Called on clients when the host broadcasts a handshake ping.</summary>
+	private void OnVisceralHandshakePacketClient(VisceralHandshakePacket packet)
 	{
-		//IL_0022: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0031: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0082: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0089: Unknown result type (might be due to invalid IL or missing references)
-		Transform[] affectedLimbs = null;
-		QuickLogger.Log(ELogType.Log, $"Dismemberment Packet Received: {packet.playerID}, {packet.Direction}, {packet.bodyPartType}, {packet.bone}, {packet.capAssetName}, {packet.assetNames}");
-		KillPatch.DismemberLimb((Player)(object)Singleton<FikaClient>.Instance.CoopHandler.Players[packet.playerID], packet.Direction, packet.bodyPartType, packet.bone, packet.capAssetName, packet.assetNames, out affectedLimbs);
+		if (!packet.IsRequest) return; // ignore stray ACKs
+		// Reply ACK to host: we have the mod
+		if (!Singleton<FikaClient>.Instantiated || Singleton<FikaClient>.Instance == null) return;
+		var myPlayer = Singleton<FikaClient>.Instance.CoopHandler?.MyPlayer;
+		if (myPlayer == null) return;
+
+		VisceralHandshakePacket ack = new()
+		{
+			IsRequest = false,
+			ResponderNetId = myPlayer.NetId
+		};
+		Singleton<FikaClient>.Instance.SendData<VisceralHandshakePacket>(ref ack, (DeliveryMethod)0, false);
 	}
 
-	private void OnRagdollSyncPacket(RagdollSyncPacket packet)
+	/// <summary>Called on the host when a client sends an ACK.</summary>
+	private void OnVisceralHandshakePacketServer(VisceralHandshakePacket packet)
 	{
-		//IL_0015: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0053: Unknown result type (might be due to invalid IL or missing references)
-		QuickLogger.Log(ELogType.Log, $"Ragdoll Packet Received: {packet.PlayerID}, {packet.BodyPart}, {packet.RandomChance}");
-		KillPatch.DeathSetup((Player)(object)Singleton<FikaClient>.Instance.CoopHandler.Players[packet.PlayerID], packet.BodyPart, packet.RandomChance);
+		if (packet.IsRequest) return; // ignore stray pings
+		_handshakeAcks.Add(packet.ResponderNetId);
+	}
+
+	/// <summary>
+	/// Called by GameStartedPatch to begin the handshake.
+	/// In solo SPT (no FIKA server running) the flag is enabled immediately.
+	/// In FIKA, the host broadcasts a ping and waits up to 5 seconds for all ACKs.
+	/// </summary>
+	public void StartVisceralHandshake()
+	{
+		_handshakeAcks.Clear();
+		AllPlayersHaveVisceralCombat = false;
+
+		bool fikaServerUp = Singleton<FikaServer>.Instantiated && Singleton<FikaServer>.Instance != null;
+		if (!fikaServerUp)
+		{
+			// Solo SPT: always enable
+			AllPlayersHaveVisceralCombat = true;
+			QuickLogger.Log(ELogType.Log, "[VisceralCombat] Solo raid — LivingDismemberment enabled.");
+			return;
+		}
+
+		// FIKA raid: host sends ping to all clients
+		// Use CoopHandler.AmountOfHumans from the FIKA server
+		var serverCoopHandler = Singleton<FikaServer>.Instance.CoopHandler;
+		_expectedHumanCount = serverCoopHandler != null ? serverCoopHandler.AmountOfHumans - 1 : 0; // -1 for host (host counts as confirmed)
+
+		VisceralHandshakePacket ping = new() { IsRequest = true, ResponderNetId = 0 };
+		Singleton<FikaServer>.Instance.SendData<VisceralHandshakePacket>(ref ping, (DeliveryMethod)0, false);
+		QuickLogger.Log(ELogType.Log, $"[VisceralCombat] FIKA handshake sent — expecting {_expectedHumanCount} client ACKs.");
+
+		// Wait up to 5 seconds then evaluate
+		StartCoroutine(EvaluateHandshakeAfterDelay(5f));
+	}
+
+	private IEnumerator EvaluateHandshakeAfterDelay(float delay)
+	{
+		yield return new WaitForSeconds(delay);
+
+		int acks = _handshakeAcks.Count;
+		bool allConfirmed = acks >= _expectedHumanCount;
+		AllPlayersHaveVisceralCombat = allConfirmed;
+
+		if (allConfirmed)
+			QuickLogger.Log(ELogType.Log, $"[VisceralCombat] All {acks}/{_expectedHumanCount} players confirmed mod — LivingDismemberment ENABLED.");
+		else
+			QuickLogger.Log(ELogType.Log, $"[VisceralCombat] Only {acks}/{_expectedHumanCount} players confirmed mod — LivingDismemberment DISABLED.");
+	}
+
+	private void OnDismembermentPacketClient(DismembermentPacket packet)
+	{
+		Player targetPlayer = RagdollHelperClass.FindPlayerByNetId(packet.playerID);
+		if (targetPlayer != null && !RagdollHelperClass.IsPlayerDowned(targetPlayer))
+		{
+			Transform[] affectedLimbs = null;
+			KillPatch.DismemberLimb(targetPlayer, packet.Direction, packet.bodyPartType, packet.bone, packet.capAssetName, packet.assetNames, out affectedLimbs, isFromNetwork: true);
+		}
+	}
+
+	private void OnLivingDismembermentPacketClient(LivingDismembermentPacket packet)
+	{
+		Player targetPlayer = RagdollHelperClass.FindPlayerByNetId(packet.PlayerID);
+		if (targetPlayer != null && !RagdollHelperClass.IsPlayerDowned(targetPlayer))
+		{
+			Transform[] affectedLimbs = null;
+			KillPatch.DismemberLimb(targetPlayer, packet.Direction, packet.Leg, packet.Bone, packet.CapAssetName, packet.AssetNames, out affectedLimbs, isFromNetwork: true);
+			LivingDismembermentController.Attach(targetPlayer, packet.Leg);
+		}
+	}
+
+	private void OnRagdollSyncPacketClient(RagdollSyncPacket packet)
+	{
+		Player targetPlayer = RagdollHelperClass.FindPlayerByNetId(packet.PlayerID);
+		if (targetPlayer != null && !RagdollHelperClass.IsPlayerDowned(targetPlayer))
+		{
+			KillPatch.DeathSetup(targetPlayer, packet.BodyPart, packet.RandomChance, isFromNetwork: true);
+		}
+	}
+
+	private void OnDismembermentPacketServer(DismembermentPacket packet)
+	{
+		OnDismembermentPacketClient(packet);
+		if (Singleton<FikaServer>.Instantiated && Singleton<FikaServer>.Instance != null)
+		{
+			Singleton<FikaServer>.Instance.SendData<DismembermentPacket>(ref packet, DeliveryMethod.ReliableOrdered, false);
+		}
+	}
+
+	private void OnLivingDismembermentPacketServer(LivingDismembermentPacket packet)
+	{
+		OnLivingDismembermentPacketClient(packet);
+		if (Singleton<FikaServer>.Instantiated && Singleton<FikaServer>.Instance != null)
+		{
+			Singleton<FikaServer>.Instance.SendData<LivingDismembermentPacket>(ref packet, DeliveryMethod.ReliableOrdered, false);
+		}
+	}
+
+	private void OnRagdollSyncPacketServer(RagdollSyncPacket packet)
+	{
+		OnRagdollSyncPacketClient(packet);
+		if (Singleton<FikaServer>.Instantiated && Singleton<FikaServer>.Instance != null)
+		{
+			Singleton<FikaServer>.Instance.SendData<RagdollSyncPacket>(ref packet, DeliveryMethod.ReliableOrdered, false);
+		}
 	}
 
 	private void Start()
 	{
-		if (File.Exists(filePath))
+		string pluginRoot = BepInEx.Paths.PluginPath;
+		string moddedPath1 = Path.Combine(pluginRoot, "VisceralCombat", "ssh", "VD_Calibers.json");
+		string moddedPath2 = Path.Combine(pluginRoot, "VisceralCombat", "VD_Calibers.json");
+		string legacyPath  = Path.Combine(pluginRoot, "ssh", "VD_Calibers.json");
+
+		if (File.Exists(moddedPath1))      filePath = moddedPath1;
+		else if (File.Exists(moddedPath2)) filePath = moddedPath2;
+		else if (File.Exists(legacyPath))  filePath = legacyPath;
+
+		if (!string.IsNullOrEmpty(filePath) && File.Exists(filePath))
 		{
 			ParseDismembermentJson();
-			return;
+			QuickLogger.Log(ELogType.Log, $"[VisceralCombat] Loaded {KillPatch.calibers.Count} dismember calibers from: {filePath}");
 		}
-		Application.OpenURL("https://www.youtube.com/watch?v=FTv14Bib2z4");
-		Application.Quit();
+		else
+		{
+			QuickLogger.Log(ELogType.Error, $"[VisceralCombat] VD_Calibers.json NOT FOUND!");
+		}
 	}
 
 	internal LayerMask LayerMaskConstructor(string[] layers)
 	{
-		//IL_0029: Unknown result type (might be due to invalid IL or missing references)
-		//IL_002e: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0032: Unknown result type (might be due to invalid IL or missing references)
 		int num = 0;
 		foreach (string text in layers)
 		{
 			num |= 1 << LayerMask.NameToLayer(text);
 		}
-		return LayerMask.op_Implicit(num);
+		return (LayerMask)num;
 	}
 
 	internal void LayerMaskRun()
 	{
-		//IL_0021: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0026: Unknown result type (might be due to invalid IL or missing references)
 		LayerMask val = LayerMaskConstructor(WorldLayers.Concat(DeadBodyLayers.Concat(HitColliderLayers)).ToArray());
-		QuickLogger.Log(ELogType.Log, ((object)(LayerMask)(ref val)/*cast due to .constrained prefix*/).ToString());
+		QuickLogger.Log(ELogType.Log, val.ToString());
 	}
 
 	public void ParseDismembermentJson()
@@ -367,44 +526,5 @@ public class VisceralEntry : BaseUnityPlugin
 		{
 			QuickLogger.Log(ELogType.Log, "Calibers Found & Added.");
 		}
-	}
-
-	private void LayerMaskOutput()
-	{
-		List<LayerCollisionData> list = new List<LayerCollisionData>();
-		for (int i = 0; i < 32; i++)
-		{
-			string text = LayerMask.LayerToName(i);
-			if (string.IsNullOrEmpty(text))
-			{
-				text = $"Layer_{i}";
-			}
-			LayerCollisionData layerCollisionData = new LayerCollisionData();
-			layerCollisionData.layerName = text;
-			layerCollisionData.collidesWith = new List<string>();
-			for (int j = 0; j < 32; j++)
-			{
-				if (i != j)
-				{
-					string text2 = LayerMask.LayerToName(j);
-					if (string.IsNullOrEmpty(text2))
-					{
-						text2 = $"{j}";
-					}
-					if (!Physics.GetIgnoreLayerCollision(i, j))
-					{
-						layerCollisionData.collidesWith.Add(text2);
-					}
-				}
-			}
-			list.Add(layerCollisionData);
-		}
-		string contents = JsonConvert.SerializeObject((object)new
-		{
-			layers = list
-		}, (Formatting)1);
-		string text3 = Path.Combine(Application.dataPath, "LayerCollisionData.json");
-		File.WriteAllText(text3, contents);
-		Debug.Log((object)("Layer collision data saved to: " + text3));
 	}
 }

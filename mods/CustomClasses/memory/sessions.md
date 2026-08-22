@@ -40,6 +40,24 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados). Ca
 
 ## Sessões
 
+### 2026-08-02 — Correção da Exceção KeyNotFoundException no MedrosoPatch (082 / ScavengerTremor)
+
+- **Diagnóstico de Log (Sessão 2 — 2026-08-03)**:
+  - Raid de teste revelou novo spam: `[Error :CustomClasses] (082) medroso trigger falhou: Invalid generic arguments`.
+  - Causa raiz: `typeof(ActiveHealthController).GetMethod("AddEffect")` lançava `AmbiguousMatchException` porque a classe pai `GClass3009` também possui um método `AddEffect(T effect)` não-genérico. O erro era interceptado pelo `catch` como `"Invalid generic arguments"`.
+- **Correção Adicional em `MedrosoPatch.cs`** (2026-08-03):
+  - Substituído `.GetMethod("AddEffect")` por `.GetMethods(BindingFlags.Public | BindingFlags.Instance).FirstOrDefault(m => m.IsGenericMethodDefinition && m.GetParameters().Length == 6)` para selecionar explicitamente o overload genérico com 6 parâmetros.
+  - Declarado `_addTremorMethod` como `MethodInfo?` (nullable) e ajustado o array de invocação para `object?[]` com tipos float? explícitos.
+  - Adicionado `using System.Linq` no topo do arquivo.
+- **Code Review (CR-01)** — Achados registrados (sem bloqueadores):
+  - 🟠 CR-01-02: Cooldown atualizado mesmo quando `_addTremorMethod` é null — Tremor silenciosamente não aplicado.
+  - 🟡 CR-01-01: `_addTremorMethod` deveria ser `static readonly` com init estático.
+  - 🟡 CR-01-04: (TRL-Fixes) Fallback do DynamicMapsSafetyPatch retorna comportamento ineficaz.
+- **Validação de Build**:
+  - Compilado `CustomClasses.Client.csproj` com **0 Erros**, 1 warning pré-existente em `ClassMovementPatches.cs:95` (CS8602 — não relacionado a esta sessão).
+
+---
+
 ### 2026-06-07 — Planejamento + scaffold
 
 - Adicionados ao repo (sessões anteriores deste chat) os mods de referência `SkillDistribution` (+ lib `ZGFueDkxCommonLibrary`) e `Skills-Extended` via `/add-mod-repo-for-modding`.

@@ -37,7 +37,22 @@ public record TRLConfig : IRequestData
     };
 
     [JsonPropertyName("mapTimers")] 
-    public Dictionary<string, WaveTimerConfig> MapTimers { get; set; } = new();
+    public Dictionary<string, WaveTimerConfig> MapTimers { get; set; } = new()
+    {
+        { "bigmap", new WaveTimerConfig() },
+        { "factory4_day", new WaveTimerConfig() },
+        { "factory4_night", new WaveTimerConfig() },
+        { "interchange", new WaveTimerConfig() },
+        { "laboratory", new WaveTimerConfig() },
+        { "lighthouse", new WaveTimerConfig() },
+        { "rezervbase", new WaveTimerConfig() },
+        { "shoreline", new WaveTimerConfig() },
+        { "tarkovstreets", new WaveTimerConfig() },
+        { "sandbox", new WaveTimerConfig() },
+        { "sandbox_high", new WaveTimerConfig() },
+        { "woods", new WaveTimerConfig() },
+        { "labyrinth", new WaveTimerConfig() }
+    };
 
     [JsonPropertyName("eliteConfig")] 
     public EliteConfig EliteConfig { get; set; } = new();
@@ -46,7 +61,22 @@ public record TRLConfig : IRequestData
     public CustomSpawnsConfig CustomSpawnsConfig { get; set; } = new();
 
     [JsonPropertyName("mapConfigs")]
-    public Dictionary<string, MapSettings> MapConfigs { get; set; } = new();
+    public Dictionary<string, MapSettings> MapConfigs { get; set; } = new()
+    {
+        { "bigmap", new MapSettings() },
+        { "factory4_day", new MapSettings() },
+        { "factory4_night", new MapSettings() },
+        { "interchange", new MapSettings() },
+        { "laboratory", new MapSettings() },
+        { "lighthouse", new MapSettings() },
+        { "rezervbase", new MapSettings() },
+        { "shoreline", new MapSettings() },
+        { "tarkovstreets", new MapSettings() },
+        { "sandbox", new MapSettings() },
+        { "sandbox_high", new MapSettings() },
+        { "woods", new MapSettings() },
+        { "labyrinth", new MapSettings() }
+    };
 }
 
 public record CustomSpawnsConfig

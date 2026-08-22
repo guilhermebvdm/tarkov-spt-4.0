@@ -12,55 +12,93 @@ namespace TRL_SpeakFromTarkov
     [BepInDependency("com.fika.core", BepInDependency.DependencyFlags.HardDependency)]
     public class VoIPPlugin : BaseUnityPlugin
     {
-        internal static ManualLogSource Log;
+        internal static ManualLogSource Log = null!;
 
-        public static ConfigEntry<string> MicrophoneDevice { get; private set; }
-        public static string[] MicrophoneNames { get; private set; }
+        public static ConfigEntry<string> MicrophoneDevice { get; private set; } = null!;
+        public static string[] MicrophoneNames { get; private set; } = null!;
         public static System.Collections.Generic.Dictionary<string, string> MicRealNames = new System.Collections.Generic.Dictionary<string, string>();
-        public static ConfigEntry<bool> EnableMod { get; private set; }
-        public static ConfigEntry<TRL_SpeakFromTarkov.Audio.VoipProcessor.VoipMode> TransmissionMode { get; private set; }
-        public static ConfigEntry<float> VADThreshold { get; private set; }
-        public static ConfigEntry<bool> EnableEcho { get; private set; }
-        public static ConfigEntry<float> EchoDelay { get; private set; }
-        public static ConfigEntry<float> EchoVolume { get; private set; }
-        public static ConfigEntry<float> MicGain { get; private set; }
-        public static ConfigEntry<int> SampleRate { get; private set; }
-        public static ConfigEntry<float> NetworkJitterBufferMs { get; private set; }
+        public static ConfigEntry<bool> EnableMod { get; private set; } = null!;
+        public static ConfigEntry<string> TransmissionMode { get; private set; } = null!;
+        public static readonly string[] TransmissionModeOptions = new string[]
+        {
+            "VAD (Voice Activity Detection)",
+            "PTT (Push-to-Talk)",
+            "Open (Always On)"
+        };
+
+        public static TRL_SpeakFromTarkov.Audio.VoipProcessor.VoipMode ParseVoipMode(string modeStr)
+        {
+            if (string.IsNullOrEmpty(modeStr)) return TRL_SpeakFromTarkov.Audio.VoipProcessor.VoipMode.VAD;
+            if (modeStr.StartsWith("PTT", StringComparison.OrdinalIgnoreCase)) return TRL_SpeakFromTarkov.Audio.VoipProcessor.VoipMode.PTT;
+            if (modeStr.StartsWith("Open", StringComparison.OrdinalIgnoreCase)) return TRL_SpeakFromTarkov.Audio.VoipProcessor.VoipMode.Open;
+            return TRL_SpeakFromTarkov.Audio.VoipProcessor.VoipMode.VAD;
+        }
+
+        public static string GetVoipModeString(TRL_SpeakFromTarkov.Audio.VoipProcessor.VoipMode mode)
+        {
+            switch (mode)
+            {
+                case TRL_SpeakFromTarkov.Audio.VoipProcessor.VoipMode.PTT: return TransmissionModeOptions[1];
+                case TRL_SpeakFromTarkov.Audio.VoipProcessor.VoipMode.Open: return TransmissionModeOptions[2];
+                default: return TransmissionModeOptions[0];
+            }
+        }
+        public static ConfigEntry<float> VADThreshold { get; private set; } = null!;
+        public static ConfigEntry<bool> EnableEcho { get; private set; } = null!;
+        public static ConfigEntry<float> EchoDelay { get; private set; } = null!;
+        public static ConfigEntry<float> EchoVolume { get; private set; } = null!;
+        public static ConfigEntry<float> MicGain { get; private set; } = null!;
+        public static ConfigEntry<int> SampleRate { get; private set; } = null!;
+        public static ConfigEntry<float> NetworkJitterBufferMs { get; private set; } = null!;
         
         // Studio Quality configs
-        public static ConfigEntry<int> OpusBitrate { get; private set; }
-        public static ConfigEntry<int> OpusComplexity { get; private set; }
-        public static ConfigEntry<bool> OpusFEC { get; private set; }
-        public static ConfigEntry<bool> EnableAGC { get; private set; }
-        public static ConfigEntry<bool> EnableLimiter { get; private set; }
-        public static ConfigEntry<float> LPFCutoff { get; private set; }
-        public static ConfigEntry<float> MaxHearingDistance { get; private set; }
-        public static ConfigEntry<float> OutputVolume { get; private set; }
+        public static ConfigEntry<int> OpusBitrate { get; private set; } = null!;
+        public static ConfigEntry<int> OpusComplexity { get; private set; } = null!;
+        public static ConfigEntry<bool> OpusFEC { get; private set; } = null!;
+        public static ConfigEntry<bool> EnableAGC { get; private set; } = null!;
+        public static ConfigEntry<bool> EnableLimiter { get; private set; } = null!;
+        public static ConfigEntry<float> LPFCutoff { get; private set; } = null!;
+        public static ConfigEntry<float> MaxHearingDistance { get; private set; } = null!;
+        public static ConfigEntry<float> OutputVolume { get; private set; } = null!;
+        public static ConfigEntry<bool> EnableOcclusion { get; private set; } = null!;
 
         // Bot Interaction
-        public static ConfigEntry<bool> EnableBotInteraction { get; private set; }
-        public static ConfigEntry<float> BotVoiceDebugVolume { get; private set; }
+        public static ConfigEntry<bool> EnableBotInteraction { get; private set; } = null!;
+        public static ConfigEntry<float> BotVoiceDebugVolume { get; private set; } = null!;
 
         // CONFIGURAÇÃO IDEAL: KeyboardShortcut
-        public static ConfigEntry<KeyboardShortcut> PushToTalkKey { get; private set; }
-        public static ConfigEntry<KeyboardShortcut> ToggleModeKey { get; private set; }
-        public static ConfigEntry<KeyboardShortcut> MuteKey { get; private set; }
-        public static ConfigEntry<KeyboardShortcut> DebugToggleKey { get; private set; }
-        public static ConfigEntry<bool> EnableDebugLogs { get; private set; }
+        public static ConfigEntry<KeyboardShortcut> PushToTalkKey { get; private set; } = null!;
+        public static ConfigEntry<KeyboardShortcut> ToggleModeKey { get; private set; } = null!;
+        public static ConfigEntry<KeyboardShortcut> MuteKey { get; private set; } = null!;
+        public static ConfigEntry<KeyboardShortcut> PlayerMixerKey { get; private set; } = null!;
+        public static ConfigEntry<bool> EnableInRaidVoipHUD { get; private set; } = null!;
+        public static ConfigEntry<TRL_SpeakFromTarkov.UI.HudVisibilityMode> HudVisibility { get; private set; } = null!;
+        public static ConfigEntry<float> ShiftStancePanelX { get; private set; } = null!;
+        public static ConfigEntry<float> InRaidHUDOffsetX { get; private set; } = null!;
+        public static ConfigEntry<float> InRaidHUDOffsetY { get; private set; } = null!;
+        public static ConfigEntry<bool> EnableDebugVoipHUD { get; private set; } = null!;
+
+        // Calibração de Voz Personalizada (Wizard)
+        public static ConfigEntry<float> WhisperThreshold { get; private set; } = null!;
+        public static ConfigEntry<float> NormalThreshold { get; private set; } = null!;
+        public static ConfigEntry<float> LoudThreshold { get; private set; } = null!;
+        public static ConfigEntry<KeyboardShortcut> OpenCalibrationKey { get; private set; } = null!;
+
+        public static ConfigEntry<bool> EnableDebugLogs { get; private set; } = null!;
         public static bool IsAudioDebugActive { get; set; } = false;
 
-        public static ConfigEntry<float> VADDecayTime { get; private set; }
-        public static ConfigEntry<float> MaxAudioLevel { get; private set; }
+        public static ConfigEntry<float> VADDecayTime { get; private set; } = null!;
+        public static ConfigEntry<float> MaxAudioLevel { get; private set; } = null!;
 
         // Filtros de áudio
-        public static ConfigEntry<float> HPFCutoff          { get; private set; }
-        public static ConfigEntry<float> NoiseGateThreshold { get; private set; }
-        public static ConfigEntry<float> NoiseGateHoldMs    { get; private set; }
+        public static ConfigEntry<float> HPFCutoff          { get; private set; } = null!;
+        public static ConfigEntry<float> NoiseGateThreshold { get; private set; } = null!;
+        public static ConfigEntry<float> NoiseGateHoldMs    { get; private set; } = null!;
 
-        public static ConfigEntry<bool> UseRNNoise          { get; private set; }
-        public static ConfigEntry<float> RNNoiseVADThreshold { get; private set; }
-        public static ConfigEntry<float> RNNoiseGateHoldMs    { get; private set; }
-        public static ConfigEntry<int> RNNoiseLatency       { get; private set; }
+        public static ConfigEntry<bool> UseRNNoise          { get; private set; } = null!;
+        public static ConfigEntry<float> RNNoiseVADThreshold { get; private set; } = null!;
+        public static ConfigEntry<float> RNNoiseGateHoldMs    { get; private set; } = null!;
+        public static ConfigEntry<int> RNNoiseLatency       { get; private set; } = null!;
 
         public static int FrameSize => (int)Math.Round(SampleRate.Value * 0.040);
 
@@ -127,8 +165,7 @@ namespace TRL_SpeakFromTarkov
             }
 
             var micList = new AcceptableValueList<string>(MicrophoneNames);
-
-            MicrophoneDevice = Config.Bind("VOIP", "Microfone", MicrophoneNames[0], new ConfigDescription("Selecione o microfone.", micList));
+            MicrophoneDevice = Config.Bind("General", "Microphone Device", MicrophoneNames[0], new ConfigDescription("Select the active microphone device.", micList));
             MicrophoneDevice.SettingChanged += (sender, args) =>
             {
                 if (TRL_SpeakFromTarkov.Core.VoipController.Instance != null)
@@ -137,7 +174,7 @@ namespace TRL_SpeakFromTarkov
                 }
             };
 
-            EnableMod = Config.Bind("Geral", "Habilitar Mod de Voz", true, "Se desativado, desliga totalmente a captação e reprodução de voz (como se o mod não estivesse instalado).");
+            EnableMod = Config.Bind("General", "Voice Mod", true, "If disabled, completely turns off voice capture and playback (as if the mod was not installed).");
             EnableMod.SettingChanged += (sender, args) =>
             {
                 if (TRL_SpeakFromTarkov.Core.VoipController.Instance != null)
@@ -146,83 +183,115 @@ namespace TRL_SpeakFromTarkov
                 }
             };
             
-            TransmissionMode = Config.Bind("VOIP", "Modo de Transmissao", TRL_SpeakFromTarkov.Audio.VoipProcessor.VoipMode.VAD, "Selecione o modo de voz: VAD (Ativação por Voz), PTT (Push To Talk) ou Open (Sempre Aberto).");
+            var modeList = new AcceptableValueList<string>(TransmissionModeOptions);
+            TransmissionMode = Config.Bind("General", "Transmission Mode", TransmissionModeOptions[0],
+                new ConfigDescription("Select voice transmission mode: VAD (Voice Activity Detection), PTT (Push-to-Talk) or Open (Always On).", modeList));
             TransmissionMode.SettingChanged += (sender, args) =>
             {
                 if (TRL_SpeakFromTarkov.Core.VoipController.Instance != null && TRL_SpeakFromTarkov.Core.VoipController.Instance.processor != null)
                 {
-                    TRL_SpeakFromTarkov.Core.VoipController.Instance.processor.CurrentMode = TransmissionMode.Value;
+                    TRL_SpeakFromTarkov.Core.VoipController.Instance.processor.CurrentMode = ParseVoipMode(TransmissionMode.Value);
                 }
             };
-            VADThreshold = Config.Bind("VOIP", "Limiar VAD", 0.005f, "Sensibilidade para voz em VAD.");
-            EnableEcho = Config.Bind("VOIP", "Habilitar Retorno de Eco", true, "Se ativado, reproduz sua própria voz no alto-falante local para teste de áudio.");
-            EchoDelay = Config.Bind("VOIP", "Delay do Eco", 0.0f, "Atraso do eco em segundos (0.0 = retorno instantâneo em tempo real).");
-            EchoVolume = Config.Bind("VOIP", "Volume do Eco", 1.0f, "Volume do retorno do eco (0.0 a 1.0 ou 0 a 100%).");
-            MicGain = Config.Bind("VOIP", "Ganho do Microfone", 1.0f,
-                new ConfigDescription("Aumenta a captação bruta ANTES dos filtros e do gate. Padrão: 1.0"));
-            OutputVolume = Config.Bind("VOIP", "Volume de Saída", 1.0f,
-                new ConfigDescription("Aumenta ou abaixa o volume FINAL que seus amigos vão ouvir (não afeta os filtros). Padrão: 1.0",
+            MicGain = Config.Bind("General", "Microphone Gain", 1.0f,
+                new ConfigDescription("Boosts raw audio input BEFORE filters and noise gate. Default: 1.0"));
+            OutputVolume = Config.Bind("General", "Output Volume", 1.0f,
+                new ConfigDescription("Adjusts final output volume heard by peers (does not affect filters). Default: 1.0",
                     new AcceptableValueRange<float>(0.1f, 5.0f)));
-            SampleRate = Config.Bind("VOIP", "SampleRate", 48000);
+            SampleRate = Config.Bind("General", "Sample Rate", 48000);
 
-            // KeyboardShortcut: clica → aperta combinação
-            PushToTalkKey = Config.Bind("VOIP", "PushToTalk", new KeyboardShortcut(KeyCode.V), "PTT (ex: V)");
-            ToggleModeKey = Config.Bind("VOIP", "Toggle Mode", new KeyboardShortcut(KeyCode.P), "Alternar modo");
-            MuteKey = Config.Bind("VOIP", "Mute", new KeyboardShortcut(KeyCode.M, KeyCode.LeftControl), "Mutar");
-            DebugToggleKey = Config.Bind("Diagnostico", "Teclar Debug Audio (Profiler)", new KeyboardShortcut(KeyCode.F9), "Pressione para iniciar/parar o profiler de áudio no console.");
-            EnableDebugLogs = Config.Bind("Diagnostico", "Habilitar Logs de Debug", false, "Se ativado, imprime mensagens detalhadas de enfileiramento no console. Padrão: false");
+            // Shortcuts & Controls
+            PushToTalkKey = Config.Bind("Shortcuts & Controls", "Push To Talk Key", new KeyboardShortcut(KeyCode.V), "PTT shortcut key (e.g. V)");
+            ToggleModeKey = Config.Bind("Shortcuts & Controls", "Toggle Mode Key", new KeyboardShortcut(KeyCode.P), "Toggle transmission mode shortcut key");
+            MuteKey = Config.Bind("Shortcuts & Controls", "Mute Key", new KeyboardShortcut(KeyCode.M, KeyCode.LeftControl), "Mute microphone shortcut key");
+            PlayerMixerKey = Config.Bind("Shortcuts & Controls", "In-Raid Player Mixer Key", new KeyboardShortcut(KeyCode.P, KeyCode.LeftAlt), "Shortcut key to open the in-raid Player Volume Mixer modal (Default: Alt + P).");
 
-            VADDecayTime = Config.Bind("VOIP", "VAD Decay Time", 0.7f);
-            MaxAudioLevel = Config.Bind("VOIP", "Max Audio Level", 0.015f);
+            // UI / HUD Settings
+            EnableInRaidVoipHUD = Config.Bind("UI / HUD Settings", "In-Raid VOIP HUD", true, "Displays thin vertical VOIP bar in-raid positioned to the left of the stance panel (BattleStancePanel).");
+            HudVisibility = Config.Bind("UI / HUD Settings", "HUD Visibility", TRL_SpeakFromTarkov.UI.HudVisibilityMode.VoiceActivity,
+                "Controls when the in-raid VOIP bar is displayed:\n• Hidden: Never visible\n• AlwaysVisible: Constantly visible during raid\n• SyncHUD: Synchronizes 1:1 with vanilla game HUD autohide\n• VoiceActivity: Automatically appears when voice is captured (RNNoise/VAD).");
+            ShiftStancePanelX = Config.Bind("UI / HUD Settings", "Vanilla Stance Panel Offset X (Pixels)", 15f,
+                new ConfigDescription("Shifts original EFT stance panel (stamina/pose) to the right on X axis to make room on screen edge. Default: 15px",
+                    new AcceptableValueRange<float>(-50f, 150f)));
+            InRaidHUDOffsetX = Config.Bind("UI / HUD Settings", "In-Raid HUD Offset X (Pixels)", 0f,
+                new ConfigDescription("Horizontal offset for in-raid VOIP bar (X). Positive = Right, Negative = Left.",
+                    new AcceptableValueRange<float>(-300f, 300f)));
+            InRaidHUDOffsetY = Config.Bind("UI / HUD Settings", "In-Raid HUD Offset Y (Pixels)", 0f,
+                new ConfigDescription("Vertical offset for in-raid VOIP bar (Y). Positive = Down, Negative = Up.",
+                    new AcceptableValueRange<float>(-300f, 300f)));
 
-            HPFCutoff          = Config.Bind("Filtros", "HPF Cutoff (Hz)", 80f,
-                new ConfigDescription("Frequência de corte do filtro passa-alta. Remove ruído de baixa frequência (teclado, mesa). Padrão: 80Hz",
-                    new AcceptableValueRange<float>(20f, 500f)));
-            LPFCutoff          = Config.Bind("Filtros", "LPF Cutoff (Hz)", 8000f,
-                new ConfigDescription("Frequência de corte do filtro passa-baixa. Remove estática e sons extremamente agudos. Padrão: 8000Hz",
-                    new AcceptableValueRange<float>(3000f, 20000f)));
-            EnableAGC          = Config.Bind("Filtros", "Habilitar AGC (Controle Automático de Ganho)", true,
-                new ConfigDescription("Aumenta a voz se você sussurrar e abaixa se gritar, normalizando o volume de forma suave."));
-            EnableLimiter      = Config.Bind("Filtros", "Habilitar Limiter (Protetor de Ouvido)", true,
-                new ConfigDescription("Impede que a voz estoure, esmagando gritos extremamente altos para proteger a audição alheia."));
-            NoiseGateThreshold = Config.Bind("Filtros", "Noise Gate Threshold", 0.008f,
-                new ConfigDescription("RMS mínimo para abrir o gate de ruído. Abaixo disso o áudio é silenciado. Padrão: 0.008",
-                    new AcceptableValueRange<float>(0.001f, 0.1f)));
-            NoiseGateHoldMs    = Config.Bind("Filtros", "Noise Gate Hold (ms)", 150f,
-                new ConfigDescription("Tempo em ms que o gate fica aberto após silêncio (evita cortar no meio da fala). Padrão: 150ms",
-                    new AcceptableValueRange<float>(50f, 500f)));
+            // Voice Calibration Wizard (English Interface & Manual F12 Sliders)
+            OpenCalibrationKey = Config.Bind("Voice Calibration", "Open Calibration Wizard Shortcut", new KeyboardShortcut(KeyCode.F8), "Shortcut key to open the interactive Voice Calibration Wizard.");
+            WhisperThreshold = Config.Bind("Voice Calibration", "Whisper Threshold (Notch 1)", 0.015f,
+                new ConfigDescription("Calibrated RMS sensitivity threshold for Whisper (Level 1). Can be fine-tuned manually.",
+                    new AcceptableValueRange<float>(0.001f, 0.300f)));
+            NormalThreshold = Config.Bind("Voice Calibration", "Normal Voice Threshold (Notch 2)", 0.060f,
+                new ConfigDescription("Calibrated RMS sensitivity threshold for Normal Voice (Level 2). Can be fine-tuned manually.",
+                    new AcceptableValueRange<float>(0.002f, 0.400f)));
+            LoudThreshold = Config.Bind("Voice Calibration", "Loud Voice Threshold (Max Ceiling)", 0.180f,
+                new ConfigDescription("Calibrated RMS sensitivity threshold for Loud Voice / Shouting (Level 3). Can be fine-tuned manually.",
+                    new AcceptableValueRange<float>(0.005f, 0.500f)));
 
-            UseRNNoise         = Config.Bind("Filtros (RNNoise)", "Habilitar RNNoise", true,
-                new ConfigDescription("Ativa o filtro de supressão de ruídos neural RNNoise. Se desativado, usa o filtro clássico (HPF+Gate)."));
-            RNNoiseVADThreshold = Config.Bind("Filtros (RNNoise)", "Limiar VAD RNNoise", 0.35f,
-                new ConfigDescription("Sensibilidade da detecção de voz do RNNoise. Valores maiores exigem fala mais clara para passar o som.",
+            // Audio Filters & DSP
+            UseRNNoise         = Config.Bind("Audio Filters & DSP", "RNNoise Suppressor", true,
+                new ConfigDescription("Enables RNNoise neural network noise suppression. If disabled, uses classic filters (HPF+Gate). Default: true"));
+            RNNoiseVADThreshold = Config.Bind("Audio Filters & DSP", "RNNoise VAD Threshold", 0.35f,
+                new ConfigDescription("RNNoise voice detection probability threshold. Higher values require clearer speech.",
                     new AcceptableValueRange<float>(0.0f, 1.0f)));
-            RNNoiseGateHoldMs  = Config.Bind("Filtros (RNNoise)", "Hold Time RNNoise (ms)", 150f,
-                new ConfigDescription("Tempo que o canal permanece aberto após o término da fala com RNNoise.",
+            RNNoiseGateHoldMs  = Config.Bind("Audio Filters & DSP", "RNNoise Hold Time (ms)", 150f,
+                new ConfigDescription("Time channel stays open after speech stops with RNNoise.",
                     new AcceptableValueRange<float>(50f, 500f)));
-            RNNoiseLatency     = Config.Bind("Filtros (RNNoise)", "Latencia RNNoise (amostras)", 960,
-                new ConfigDescription("Tamanho da latência inicial da fila em amostras (960 = 20ms alinhado).",
+            RNNoiseLatency     = Config.Bind("Audio Filters & DSP", "RNNoise Queue Latency (Samples)", 960,
+                new ConfigDescription("Initial queue latency size in samples (960 = 20ms aligned).",
                     new AcceptableValueRange<int>(1, 4096)));
-                    
-            NetworkJitterBufferMs = Config.Bind("Rede", "Jitter Buffer Inicial (ms)", 150f,
-                new ConfigDescription("Tempo de áudio guardado antes de tocar (Network Jitter Buffer). Se a voz picotar ou der mal contato na raid, AUMENTE este valor (ex: 200, 300). Padrão: 150ms",
-                    new AcceptableValueRange<float>(50f, 1000f)));
-            MaxHearingDistance = Config.Bind("Rede", "Distância Máxima do VOIP (Metros)", 30f,
-                new ConfigDescription("Distância máxima (em metros) onde a voz ainda pode ser ouvida pelos outros jogadores num volume normal. Padrão: 30m",
-                    new AcceptableValueRange<float>(5f, 200f)));
-            OpusBitrate = Config.Bind("Rede (Opus)", "Bitrate (kbps)", 24000,
-                new ConfigDescription("Qualidade do áudio (taxa de compressão). 12000 = Básico, 24000 = Padrão/Discord, 64000 = Áudio Cristalino. Padrão: 24000",
-                    new AcceptableValueRange<int>(8000, 64000)));
-            OpusComplexity = Config.Bind("Rede (Opus)", "Complexidade", 5,
-                new ConfigDescription("Uso de CPU do codificador. 0 = Leve (pior qualidade), 10 = Pesado (melhor qualidade). Padrão: 5",
-                    new AcceptableValueRange<int>(0, 10)));
-            OpusFEC = Config.Bind("Rede (Opus)", "Correção de Erros (FEC)", true,
-                new ConfigDescription("Se ativado, envia redundância. Em internets ruins, reconstrói partes perdidas da voz magicamente."));
+            VADThreshold       = Config.Bind("Audio Filters & DSP", "VAD Sensitivity Threshold", 0.005f, "Sensitivity threshold for VAD voice activation.");
+            VADDecayTime       = Config.Bind("Audio Filters & DSP", "VAD Decay Time (s)", 0.7f);
+            MaxAudioLevel      = Config.Bind("Audio Filters & DSP", "Max Audio Level Ceiling", 0.015f);
+            EnableAGC          = Config.Bind("Audio Filters & DSP", "AGC (Automatic Gain Control)", false,
+                new ConfigDescription("Normalizes voice volume smoothly, boosting whispers and limiting shouts. Default: false"));
+            EnableLimiter      = Config.Bind("Audio Filters & DSP", "Audio Limiter", true,
+                new ConfigDescription("Prevents audio clipping and protects listeners' ears from extreme shouting. Default: true"));
+            HPFCutoff          = Config.Bind("Audio Filters & DSP", "HPF Cutoff (Hz)", 80f,
+                new ConfigDescription("High-pass filter cutoff frequency. Removes low-frequency rumble (keyboard, desk clicks). Default: 80Hz",
+                    new AcceptableValueRange<float>(20f, 500f)));
+            LPFCutoff          = Config.Bind("Audio Filters & DSP", "LPF Cutoff (Hz)", 8000f,
+                new ConfigDescription("Low-pass filter cutoff frequency. Removes harsh static and high-pitched noise. Default: 8000Hz",
+                    new AcceptableValueRange<float>(3000f, 20000f)));
+            NoiseGateThreshold = Config.Bind("Audio Filters & DSP", "Noise Gate Threshold", 0.008f,
+                new ConfigDescription("Minimum RMS sensitivity to open noise gate. Default: 0.008",
+                    new AcceptableValueRange<float>(0.001f, 0.1f)));
+            NoiseGateHoldMs    = Config.Bind("Audio Filters & DSP", "Noise Gate Hold (ms)", 150f,
+                new ConfigDescription("Time in ms noise gate stays open after speech stops. Default: 150ms",
+                    new AcceptableValueRange<float>(50f, 500f)));
 
-            EnableBotInteraction = Config.Bind("Interacao IA (Bots)", "Habilitar Reatividade dos Bots", true,
-                new ConfigDescription("Se ativado, os bots escutam a sua voz no mundo 3D e reagem/respondem verbalmente."));
-            BotVoiceDebugVolume = Config.Bind("Interacao IA (Bots)", "Volume de Debug da Fala (EPhraseTrigger)", 0.5f,
-                new ConfigDescription("Volume local da fala do personagem durante o teste de debug (0.5 = 50%, 0.0 = Silencioso). Padrão: 0.5 (50%)",
+            // Network & 3D Audio
+            EnableBotInteraction = Config.Bind("Network & 3D Audio", "Bot Reactivity", true,
+                new ConfigDescription("If enabled, AI bots listen to player voice in 3D world and react/respond verbally. Default: true"));
+            MaxHearingDistance = Config.Bind("Network & 3D Audio", "Max VOIP Hearing Distance (Meters)", 30f,
+                new ConfigDescription("Maximum distance in meters where voice can be heard in 3D world. Default: 30m",
+                    new AcceptableValueRange<float>(5f, 200f)));
+            NetworkJitterBufferMs = Config.Bind("Network & 3D Audio", "Initial Jitter Buffer (ms)", 150f,
+                new ConfigDescription("Buffered audio time before playback. Increase if audio stutters (e.g. 200, 300). Default: 150ms",
+                    new AcceptableValueRange<float>(50f, 1000f)));
+            OpusBitrate = Config.Bind("Network & 3D Audio", "Opus Bitrate (kbps)", 24000,
+                new ConfigDescription("Audio quality and compression rate. 12000 = Basic, 24000 = Standard/Discord, 64000 = Crystal Clear. Default: 24000",
+                    new AcceptableValueRange<int>(8000, 64000)));
+            OpusComplexity = Config.Bind("Network & 3D Audio", "Encoder Complexity", 5,
+                new ConfigDescription("Encoder CPU usage (0 = Lowest, 10 = Best Quality). Default: 5",
+                    new AcceptableValueRange<int>(0, 10)));
+            OpusFEC = Config.Bind("Network & 3D Audio", "Forward Error Correction (FEC)", false,
+                new ConfigDescription("Enables redundancy for lossy networks to reconstruct lost audio packets. Default: false"));
+            EnableOcclusion = Config.Bind("Network & 3D Audio", "Physical Wall Occlusion", true,
+                new ConfigDescription("Muffles and attenuates voice audio when blocked by walls, doors or terrain. Default: true"));
+
+            // Debug (Unified Section)
+            EnableEcho = Config.Bind("Debug", "Local Echo Loopback", false, "If enabled, plays back your own voice locally for microphone testing. Default: false");
+            EchoDelay = Config.Bind("Debug", "Echo Delay (s)", 0.0f, "Echo loopback delay in seconds (0.0 = instant real-time feedback).");
+            EchoVolume = Config.Bind("Debug", "Echo Volume", 1.0f, "Volume level of local echo loopback (0.0 to 1.0).");
+            EnableDebugVoipHUD = Config.Bind("Debug", "Profiler / Debug HUD", false, "Displays extended diagnostic panel at the top of the screen. Default: false");
+            EnableDebugLogs = Config.Bind("Debug", "Debug Logs", false, "If enabled, prints detailed packet enqueue logs to console. Default: false");
+            BotVoiceDebugVolume = Config.Bind("Debug", "Bot Speech Debug Volume", 0.0f,
+                new ConfigDescription("Local debug phrase playback volume (0.5 = 50%, 0.0 = Muted). Default: 0.0",
                     new AcceptableValueRange<float>(0.0f, 1.0f)));
 
             RNNoiseLatency.SettingChanged += (sender, args) =>
@@ -237,9 +306,34 @@ namespace TRL_SpeakFromTarkov
 
             this.gameObject.AddComponent<TRL_SpeakFromTarkov.Core.VoipController>();
 
+            // Desativa o recurso Allow VOIP no BepInEx Config do FIKA para evitar logs de erro inofensivos do Dissonance
+            try
+            {
+                if (BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue("com.fika.core", out var fikaPlugin) && fikaPlugin != null && fikaPlugin.Instance != null)
+                {
+                    var allowVoipEntry = fikaPlugin.Instance.Config["Network", "Allow VOIP"] as ConfigEntry<bool>;
+                    if (allowVoipEntry != null && allowVoipEntry.Value)
+                    {
+                        allowVoipEntry.Value = false;
+                        Log.LogInfo("[SFT] Configuração 'Allow VOIP' do FIKA ajustada para FALSE automaticamente para desativar o VOIP nativo do FIKA.");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.LogWarning($"[SFT] Não foi possível ajustar 'Allow VOIP' no FIKA: {ex.Message}");
+            }
+
             Log.LogInfo("[SFT] Forçando a desativação do Fika VOIP Client nativo via ModulePatch...");
             new GameSessionPatcher.FikaVoipSendPatch().Enable();
             new GameSessionPatcher.FikaVoipReceivePatch().Enable();
+            new GameSessionPatcher.FikaClientInitializeVoipPatch().Enable();
+            new GameSessionPatcher.FikaServerInitializeVoipPatch().Enable();
+            new GameSessionPatcher.FikaVoipControllerUpdatePatch().Enable();
+            new GameSessionPatcher.FikaFixVoipAudioDevicePatch().Enable();
+            new GameSessionPatcher.FikaObservedPlayerInitVoipPatch().Enable();
+            new GameSessionPatcher.FikaPlayerInitVoipPatch().Enable();
+            new GameSessionPatcher.BoundSlotViewRefreshSelectViewPatch().Enable();
 
             GameSessionPatcher.Init();
             SceneManager.sceneLoaded += OnSceneLoaded;
@@ -274,7 +368,7 @@ namespace TRL_SpeakFromTarkov
             string display = MicrophoneDevice.Value;
             if (display != null && MicRealNames.TryGetValue(display, out string realName))
                 return realName;
-            return display;
+            return display ?? string.Empty;
         }
 
         /// <summary>

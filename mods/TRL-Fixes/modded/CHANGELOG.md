@@ -2,9 +2,24 @@
 
 Versões mais recentes primeiro.
 
+## v1.3.0 (2026-08-16)
+
+### Correções de Compatibilidade Fika e Sincronização de Inventário
+- **`FikaProceedEmptyHandsSafetyPatch`**: Intercepta `FikaServer.OnProceedRequestPacketReceived` para transições de mãos vazias (`EProceedType.EmptyHands`). Resolve a rejeição indevida do servidor ao buscar itens com `MongoID` vazio, eliminando o erro `[HandleCallbackResponse]: Could not execute callback with id XX on the server` que ocorria durante recargas contínuas fora do inventário (ex.: `SPT-ContinuousLoadAmmo` / `LoadAmmoAnim`).
+- **`FikaRefreshSlotViewsSafetyPatch`**: Corrige a colisão de chaves em `ObservedPlayer.RefreshSlotViews`. Substitui a indexação vulnerável por dicionário de `slot.FullId` por uma estrutura de pares chave-valor segura, eliminando o log de `CRITICAL ERROR DICTIONARY: mod_tactical` ao sincronizar armas com múltiplos slots/trilhos táticos.
+
 ---
 
-## v1.1.0 (2026-08-01)
+## v1.2.4 (2026-08-12)
+
+### Correções de Montagem de Armas e Gerenciador de Armas
+- **`BotMountWeaponFixPatch`**: Correções para montagem de bots em armas estacionárias e sincronização no Fika.
+- **`BotWeaponManagerSafetyPatch`**: Validações nulas defensivas no gerenciador de armas dos bots.
+- **`FikaMainThreadUISafetyPatch`**: Execução segura de mensagens de UI do Fika despachadas para a Main Thread.
+
+---
+
+
 
 ### Nova correção — trava de controles ao pegar item do chão
 

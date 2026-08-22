@@ -49,15 +49,10 @@ namespace TRLDynamicSpawn.Components
 
         private IEnumerator DespawnLoop()
         {
-            // Fetch Config
-            string json = RequestHandler.GetJson("/trldynamicspawn/getConfig");
-            if (!string.IsNullOrEmpty(json))
-            {
-                _serverConfig = JsonConvert.DeserializeObject<TRLConfig>(json);
-            }
-
             while (true)
             {
+                _serverConfig = ServerConfigProvider.Config;
+
                 // Config can be null if not loaded yet
                 if (_serverConfig == null || !TRLDynamicSpawn.Helpers.Settings.masterDespawnToggle.Value)
                 {
@@ -438,8 +433,11 @@ namespace TRLDynamicSpawn.Components
 
             Dictionary<ISpawnPoint, BotZone> pointToZoneMap = new Dictionary<ISpawnPoint, BotZone>();
 
+            WildSpawnType botRole = bot.Profile?.Info?.Settings?.Role ?? WildSpawnType.assault;
+            bool isSniperBot = SpawnPointHelper.IsSniperRole(botRole);
+
             // Prioriza BotZones diferentes da última zona teleportada (_lastTeleportZone)
-            var availableZones = allZones.Where(z => !z.SnipeZone && z.SpawnPoints != null && z.SpawnPoints.Length > 0).ToList();
+            var availableZones = allZones.Where(z => z != null && z.SpawnPoints != null && z.SpawnPoints.Length > 0 && (isSniperBot ? SpawnPointHelper.IsSniperZone(z) : !SpawnPointHelper.IsSniperZone(z))).ToList();
             var nonRecentZones = availableZones.Where(z => z != _lastTeleportZone).ToList();
             if (nonRecentZones.Count > 0)
             {
@@ -451,6 +449,10 @@ namespace TRLDynamicSpawn.Components
                 foreach (var sp in z.SpawnPoints)
                 {
                     if (sp == null) continue;
+
+                    bool isSniperPoint = SpawnPointHelper.IsSniperSpawnPoint(sp, z);
+                    if (!isSniperBot && isSniperPoint) continue;
+                    if (isSniperBot && !isSniperPoint) continue;
 
                     bool tooCloseToRecent = false;
                     foreach (var recentPos in _lastTeleportPositions)

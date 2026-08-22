@@ -4,6 +4,8 @@ using System.Reflection;
 using EFT;
 using SPT.Reflection.Patching;
 using UnityEngine;
+using Random = UnityEngine.Random;
+using Object = UnityEngine.Object;
 using VisceralCombat.Ragdolls.Classes;
 
 namespace VisceralCombat.Ragdolls.Patches;
@@ -12,7 +14,7 @@ public class CreateCorpsePatch : ModulePatch
 {
 	private static string[] TargetBones = new string[6] { "thigh", "calf", "foot", "spine3", "forearm", "head" };
 
-	private static List<string> shitColliders = new List<string>
+	private static readonly HashSet<string> shitColliders = new HashSet<string>
 	{
 		"PelvisBack", "SpineLowerChest", "RightSideChestDown", "LeftSideChestDown", "Plate_Granit_SSAPI_side_left_high", "Plate_Granit_SSAPI_side_right_high", "Plate_Granit_SSAPI_side_left_low", "Plate_Granit_SSAPI_side_right_low", "Plate_Korund_side_left_high", "Plate_Korund_side_left_low",
 		"Plate_Korund_side_right_high", "Plate_Korund_side_right_low", "Plate_Korund_chest", "Plate_Granit_SAPI_chest", "Plate_Granit_SAPI_back", "Plate_6B13_back", "SpineTopChest", "LeftSideChestTop", "RightSideChestTop", "NeckForward",

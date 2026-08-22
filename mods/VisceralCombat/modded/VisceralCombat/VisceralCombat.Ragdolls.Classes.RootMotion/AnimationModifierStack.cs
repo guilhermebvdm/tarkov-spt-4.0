@@ -1,5 +1,7 @@
 using System;
 using UnityEngine;
+using Random = UnityEngine.Random;
+using Object = UnityEngine.Object;
 
 namespace VisceralCombat.Ragdolls.Classes.RootMotion;
 
@@ -56,7 +58,7 @@ public class AnimationModifierStack : MonoBehaviour
 			return;
 		}
 		AnimatorStateInfo currentAnimatorStateInfo = animator.GetCurrentAnimatorStateInfo(0);
-		float normalizedTime = ((AnimatorStateInfo)(ref currentAnimatorStateInfo)).normalizedTime;
+		float normalizedTime = currentAnimatorStateInfo.normalizedTime;
 		AnimationModifier[] array = modifiers;
 		foreach (AnimationModifier animationModifier in array)
 		{

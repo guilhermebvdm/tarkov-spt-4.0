@@ -4,13 +4,21 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using EFT;
+using EFT.AssetsManager;
+using System.Linq;
 using SPT.Reflection.Patching;
 using UnityEngine;
+using Random = UnityEngine.Random;
+using Object = UnityEngine.Object;
 
 namespace VisceralCombat.Ragdolls.Patches;
 
 public class RagdollClassPatch : ModulePatch
 {
+	private static readonly MethodInfo _supportRigidbodyMethod = typeof(Player).Assembly.GetTypes()
+		.FirstOrDefault(t => t.GetMethod("SupportRigidbody") != null)?.GetMethod("SupportRigidbody");
+
 	[CompilerGenerated]
 	private sealed class _003CRagdollSleepHandler_003Ed__2 : IEnumerator<object>, IEnumerator, IDisposable
 	{
@@ -193,13 +201,13 @@ public class RagdollClassPatch : ModulePatch
 		for (int j = 0; j < rigidbodySpawner_.Length; j++)
 		{
 			Rigidbody val4 = rigidbodySpawner_[j].Create();
-			Vector3 normalized = ((Vector3)(ref __instance.Vector3_0)).normalized;
-			__instance.Vector3_0 = (((Vector3)(ref normalized)).Equals(Vector3.up) ? normalized : Vector3.ClampMagnitude(__instance.Vector3_0, 2f));
+			Vector3 normalized = __instance.Vector3_0.normalized;
+			__instance.Vector3_0 = (normalized.Equals(Vector3.up) ? normalized : Vector3.ClampMagnitude(__instance.Vector3_0, 2f));
 			val4.isKinematic = false;
 			val4.maxDepenetrationVelocity = __instance.Float_0;
 			val4.velocity = __instance.Vector3_0;
 			val4.collisionDetectionMode = __instance.CollisionDetectionMode_0;
-			GClass745.SupportRigidbody(val4, 0f, (GClass833)null);
+			_supportRigidbodyMethod?.Invoke(null, new object[] { val4, 0f, null });
 		}
 		__instance.Bool_2 = false;
 		if (__instance.Bool_1)

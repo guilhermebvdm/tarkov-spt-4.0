@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using UnityEngine;
+using Random = UnityEngine.Random;
+using Object = UnityEngine.Object;
 
 namespace VisceralCombat.Ragdolls.Classes.RootMotion.Dynamics;
 
@@ -230,7 +232,7 @@ public class BehaviourFall : BehaviourBase
 		//IL_0002: Unknown result type (might be due to invalid IL or missing references)
 		//IL_00aa: Unknown result type (might be due to invalid IL or missing references)
 		//IL_00af: Unknown result type (might be due to invalid IL or missing references)
-		if (LayerMask.op_Implicit(raycastLayers) == -1)
+		if (raycastLayers == -1)
 		{
 		}
 		float blendTarget = GetBlendTarget(GetGroundHeight());
@@ -240,7 +242,7 @@ public class BehaviourFall : BehaviourBase
 		if (!endTriggered && canEnd && timer >= minTime && !puppetMaster.isBlending)
 		{
 			Vector3 velocity = puppetMaster.muscles[0].rigidbody.velocity;
-			if (((Vector3)(ref velocity)).magnitude < maxEndVelocity)
+			if (velocity.magnitude < maxEndVelocity)
 			{
 				endTriggered = true;
 				onEnd.Trigger(puppetMaster);
@@ -286,7 +288,7 @@ public class BehaviourFall : BehaviourBase
 			return 1f;
 		}
 		Vector3 val = V3Tools.ExtractVertical(puppetMaster.muscles[0].rigidbody.velocity, puppetMaster.targetRoot.up, 1f);
-		float num = ((Vector3)(ref val)).magnitude;
+		float num = val.magnitude;
 		if (Vector3.Dot(val, puppetMaster.targetRoot.up) < 0f)
 		{
 			num = 0f - num;
@@ -305,10 +307,9 @@ public class BehaviourFall : BehaviourBase
 		//IL_002b: Unknown result type (might be due to invalid IL or missing references)
 		//IL_0030: Unknown result type (might be due to invalid IL or missing references)
 		//IL_003d: Unknown result type (might be due to invalid IL or missing references)
-		RaycastHit val = default(RaycastHit);
-		if (Physics.Raycast(puppetMaster.muscles[0].rigidbody.position, -puppetMaster.targetRoot.up, ref val, 100f, LayerMask.op_Implicit(raycastLayers)))
+		if (Physics.Raycast(puppetMaster.muscles[0].rigidbody.position, -puppetMaster.targetRoot.up, out RaycastHit val, 100f, raycastLayers))
 		{
-			return ((RaycastHit)(ref val)).distance;
+			return val.distance;
 		}
 		return float.PositiveInfinity;
 	}

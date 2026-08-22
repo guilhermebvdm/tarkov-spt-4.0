@@ -1,5 +1,7 @@
 using System;
 using UnityEngine;
+using Random = UnityEngine.Random;
+using Object = UnityEngine.Object;
 
 namespace VisceralCombat.Ragdolls.Classes.RootMotion.Dynamics;
 
@@ -348,7 +350,7 @@ public class BehaviourPuppet : BehaviourBase
 		for (int i = 0; i < array.Length; i++)
 		{
 			CollisionResistanceMultiplier collisionResistanceMultiplier = array[i];
-			if (LayerMask.op_Implicit(collisionResistanceMultiplier.layers) == 0)
+			if (collisionResistanceMultiplier.layers == 0)
 			{
 			}
 		}
@@ -501,7 +503,7 @@ public class BehaviourPuppet : BehaviourBase
 			if (unpinnedTimer >= getUpDelay && canGetUp && !getupDisabled)
 			{
 				Vector3 val = puppetMaster.muscles[0].rigidbody.velocity - platformVelocity;
-				if (((Vector3)(ref val)).sqrMagnitude < maxGetUpVelocity * maxGetUpVelocity)
+				if (val.sqrMagnitude < maxGetUpVelocity * maxGetUpVelocity)
 				{
 					SetState(State.GetUp);
 					return;
@@ -537,7 +539,7 @@ public class BehaviourPuppet : BehaviourBase
 				{
 					num = Mathf.Lerp(getUpKnockOutDistanceMlp, num, muscle4.state.pinWeightMlp);
 				}
-				float num2 = (unpinnedMuscleKnockout ? ((Vector3)(ref muscle4.positionOffset)).sqrMagnitude : (((Vector3)(ref muscle4.positionOffset)).sqrMagnitude * muscle4.props.pinWeight * puppetMaster.pinWeight));
+				float num2 = (unpinnedMuscleKnockout ? muscle4.positionOffset.sqrMagnitude : (muscle4.positionOffset.sqrMagnitude * muscle4.props.pinWeight * puppetMaster.pinWeight));
 				if (puppetMaster.pinWeight < 1f)
 				{
 					hasCollidedSinceGetUp = true;
@@ -955,7 +957,7 @@ public class BehaviourPuppet : BehaviourBase
 		//IL_000c: Unknown result type (might be due to invalid IL or missing references)
 		//IL_0054: Unknown result type (might be due to invalid IL or missing references)
 		Vector3 impulse = m.collision.impulse;
-		float sqrMagnitude = ((Vector3)(ref impulse)).sqrMagnitude;
+		float sqrMagnitude = impulse.sqrMagnitude;
 		sqrMagnitude /= puppetMaster.muscles[m.muscleIndex].rigidbody.mass;
 		sqrMagnitude *= 0.3f;
 		CollisionResistanceMultiplier[] array = collisionResistanceMultipliers;
@@ -1003,7 +1005,7 @@ public class BehaviourPuppet : BehaviourBase
 			{
 				Weight weight = collisionResistance;
 				Vector3 targetVelocity = puppetMaster.muscles[muscleIndex].targetVelocity;
-				num2 = weight.GetValue(((Vector3)(ref targetVelocity)).magnitude);
+				num2 = weight.GetValue(targetVelocity.magnitude);
 			}
 			else
 			{

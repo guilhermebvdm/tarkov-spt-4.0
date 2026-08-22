@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using UnityEngine;
+using Random = UnityEngine.Random;
+using Object = UnityEngine.Object;
 
 namespace VisceralCombat.Ragdolls.Classes.RootMotion.Dynamics;
 
@@ -2806,9 +2808,9 @@ public class PuppetMaster : MonoBehaviour
 		}
 		m.SetKinematic(to: false);
 		JointDrive slerpDrive = default(JointDrive);
-		((JointDrive)(ref slerpDrive)).positionSpring = 0f;
-		((JointDrive)(ref slerpDrive)).maximumForce = 0f;
-		((JointDrive)(ref slerpDrive)).positionDamper = 0f;
+		slerpDrive.positionSpring = 0f;
+		slerpDrive.maximumForce = 0f;
+		slerpDrive.positionDamper = 0f;
 		m.joint.slerpDrive = slerpDrive;
 		if (!deactivate)
 		{
@@ -3005,8 +3007,8 @@ public class PuppetMaster : MonoBehaviour
 		//IL_0030: Unknown result type (might be due to invalid IL or missing references)
 		joint.targetRotation = Quaternion.identity;
 		JointDrive slerpDrive = default(JointDrive);
-		((JointDrive)(ref slerpDrive)).positionSpring = 0f;
-		((JointDrive)(ref slerpDrive)).positionDamper = 0f;
+		slerpDrive.positionSpring = 0f;
+		slerpDrive.positionDamper = 0f;
 		joint.slerpDrive = slerpDrive;
 	}
 
@@ -3754,11 +3756,11 @@ public class PuppetMaster : MonoBehaviour
 			for (int k = 0; k < sphereColliders.Length; k++)
 			{
 				ClothSphereColliderPair val3 = sphereColliders[k];
-				if ((Object)(object)((ClothSphereColliderPair)(ref val3)).first != (Object)null && (Object)(object)((Component)((ClothSphereColliderPair)(ref val3)).first).gameObject == (Object)(object)((Component)collider).gameObject)
+				if ((Object)(object)val3.first != (Object)null && (Object)(object)((Component)val3.first).gameObject == (Object)(object)((Component)collider).gameObject)
 				{
 					return true;
 				}
-				if ((Object)(object)((ClothSphereColliderPair)(ref val3)).second != (Object)null && (Object)(object)((Component)((ClothSphereColliderPair)(ref val3)).second).gameObject == (Object)(object)((Component)collider).gameObject)
+				if ((Object)(object)val3.second != (Object)null && (Object)(object)((Component)val3.second).gameObject == (Object)(object)((Component)collider).gameObject)
 				{
 					return true;
 				}
@@ -4062,7 +4064,7 @@ public class PuppetMaster : MonoBehaviour
 		foreach (Muscle muscle in array)
 		{
 			Vector3 velocity = muscle.rigidbody.velocity;
-			if (((Vector3)(ref velocity)).sqrMagnitude > stateSettings.maxFreezeSqrVelocity)
+			if (velocity.sqrMagnitude > stateSettings.maxFreezeSqrVelocity)
 			{
 				return false;
 			}

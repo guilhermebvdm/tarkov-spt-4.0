@@ -56,8 +56,6 @@ public class BakerHumanoidQT
 
 	public BakerHumanoidQT(Transform transform, AvatarIKGoal goal, string name)
 	{
-		//IL_0010: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0011: Unknown result type (might be due to invalid IL or missing references)
 		this.transform = transform;
 		this.goal = goal;
 		Qx = name + "Q.x";
@@ -72,26 +70,16 @@ public class BakerHumanoidQT
 
 	public Quaternion EvaluateRotation(float time)
 	{
-		//IL_0038: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0039: Unknown result type (might be due to invalid IL or missing references)
-		//IL_003c: Unknown result type (might be due to invalid IL or missing references)
-		Quaternion result = default(Quaternion);
-		((Quaternion)(ref result))._002Ector(rotX.Evaluate(time), rotY.Evaluate(time), rotZ.Evaluate(time), rotW.Evaluate(time));
-		return result;
+		return new Quaternion(rotX.Evaluate(time), rotY.Evaluate(time), rotZ.Evaluate(time), rotW.Evaluate(time));
 	}
 
 	public Vector3 EvaluatePosition(float time)
 	{
-		//IL_0025: Unknown result type (might be due to invalid IL or missing references)
-		//IL_002a: Unknown result type (might be due to invalid IL or missing references)
-		//IL_002d: Unknown result type (might be due to invalid IL or missing references)
 		return new Vector3(posX.Evaluate(time), posY.Evaluate(time), posZ.Evaluate(time));
 	}
 
 	public TQ Evaluate(float time)
 	{
-		//IL_0003: Unknown result type (might be due to invalid IL or missing references)
-		//IL_000a: Unknown result type (might be due to invalid IL or missing references)
 		return new TQ(EvaluatePosition(time), EvaluateRotation(time));
 	}
 
@@ -101,22 +89,6 @@ public class BakerHumanoidQT
 
 	public void Reset()
 	{
-		//IL_0002: Unknown result type (might be due to invalid IL or missing references)
-		//IL_000c: Expected O, but got Unknown
-		//IL_000d: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0017: Expected O, but got Unknown
-		//IL_0018: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0022: Expected O, but got Unknown
-		//IL_0023: Unknown result type (might be due to invalid IL or missing references)
-		//IL_002d: Expected O, but got Unknown
-		//IL_002e: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0038: Expected O, but got Unknown
-		//IL_0039: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0043: Expected O, but got Unknown
-		//IL_0044: Unknown result type (might be due to invalid IL or missing references)
-		//IL_004e: Expected O, but got Unknown
-		//IL_004f: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0054: Unknown result type (might be due to invalid IL or missing references)
 		rotX = new AnimationCurve();
 		rotY = new AnimationCurve();
 		rotZ = new AnimationCurve();
@@ -130,43 +102,9 @@ public class BakerHumanoidQT
 
 	public void SetIKKeyframes(float time, Avatar avatar, Transform root, float humanScale, Vector3 bodyPosition, Quaternion bodyRotation)
 	{
-		//IL_0007: Unknown result type (might be due to invalid IL or missing references)
-		//IL_000c: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0013: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0018: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0055: Unknown result type (might be due to invalid IL or missing references)
-		//IL_005a: Unknown result type (might be due to invalid IL or missing references)
-		//IL_005c: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0063: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0064: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0071: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0076: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0032: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0033: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0038: Unknown result type (might be due to invalid IL or missing references)
-		//IL_003f: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0044: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0049: Unknown result type (might be due to invalid IL or missing references)
-		//IL_004a: Unknown result type (might be due to invalid IL or missing references)
-		//IL_004f: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0096: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0097: Unknown result type (might be due to invalid IL or missing references)
-		//IL_00aa: Unknown result type (might be due to invalid IL or missing references)
-		//IL_00bd: Unknown result type (might be due to invalid IL or missing references)
-		//IL_00d0: Unknown result type (might be due to invalid IL or missing references)
-		//IL_00e3: Unknown result type (might be due to invalid IL or missing references)
-		//IL_00f0: Unknown result type (might be due to invalid IL or missing references)
-		//IL_00f5: Unknown result type (might be due to invalid IL or missing references)
-		//IL_00fe: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0112: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0126: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0084: Unknown result type (might be due to invalid IL or missing references)
-		//IL_008a: Unknown result type (might be due to invalid IL or missing references)
-		//IL_008f: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0094: Unknown result type (might be due to invalid IL or missing references)
 		Vector3 val = transform.position;
 		Quaternion val2 = transform.rotation;
-		if ((Object)(object)root.parent != (Object)null)
+		if (root.parent != null)
 		{
 			val = root.parent.InverseTransformPoint(val);
 			val2 = Quaternion.Inverse(root.parent.rotation) * val2;
@@ -191,13 +129,6 @@ public class BakerHumanoidQT
 
 	public void SetKeyframes(float time, Vector3 pos, Quaternion rot)
 	{
-		//IL_0008: Unknown result type (might be due to invalid IL or missing references)
-		//IL_001b: Unknown result type (might be due to invalid IL or missing references)
-		//IL_002e: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0041: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0054: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0067: Unknown result type (might be due to invalid IL or missing references)
-		//IL_007a: Unknown result type (might be due to invalid IL or missing references)
 		rotX.AddKey(time, rot.x);
 		rotY.AddKey(time, rot.y);
 		rotZ.AddKey(time, rot.z);
@@ -236,8 +167,11 @@ public class BakerHumanoidQT
 	private void MoveLastKeyframe(float time, AnimationCurve curve)
 	{
 		Keyframe[] keys = curve.keys;
-		((Keyframe)(ref keys[^1])).time = time;
-		curve.keys = keys;
+		if (keys.Length > 0)
+		{
+			keys[keys.Length - 1].time = time;
+			curve.keys = keys;
+		}
 	}
 
 	public void MultiplyLength(AnimationCurve curve, float mlp)
@@ -245,8 +179,7 @@ public class BakerHumanoidQT
 		Keyframe[] keys = curve.keys;
 		for (int i = 0; i < keys.Length; i++)
 		{
-			ref Keyframe reference = ref keys[i];
-			((Keyframe)(ref reference)).time = ((Keyframe)(ref reference)).time * mlp;
+			keys[i].time *= mlp;
 		}
 		curve.keys = keys;
 	}

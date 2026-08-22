@@ -9,8 +9,8 @@ namespace TRL_SpeakFromTarkov.Audio
 {
     public class RemoteSpeaker : MonoBehaviour
     {
-        private OpusDecoder decoder;
-        private AudioSource audioSource;
+        private OpusDecoder decoder = null!;
+        private AudioSource audioSource = null!;
         public float CurrentOutputLevel { get; private set; }
         public bool IsPlaying => audioSource != null && audioSource.isPlaying;
         public int PacketsEnqueued => packetsEnqueuedCount;
@@ -19,6 +19,7 @@ namespace TRL_SpeakFromTarkov.Audio
         public int BufferAvailable => (streamBuffer != null && streamBuffer.Length > 0) ? (streamWritePos - streamReadPos + streamBuffer.Length) % streamBuffer.Length : 0;
         public int UnderrunCount { get; private set; }
         private int lastUnderrunCheckCount = -1;
+        public string TargetProfileId { get; set; } = null!;
         private float lpfState = 0f;
 
         public int GetRecentUnderruns()
@@ -42,12 +43,23 @@ namespace TRL_SpeakFromTarkov.Audio
 
         private int sampleRate;
         private int frameSize;
-        private float[] opusDecodeBuffer;
+        private float[] opusDecodeBuffer = null!;
 
         private float currentDistanceTarget = 30f;
         private float smoothedDistance = 30f;
+        private float _lastReanchorTry = 0f;
 
-        private float[] streamBuffer;
+        // Oclusão Física Zero-GC
+        private float _lastOcclusionCheckTime = 0f;
+        private bool _isOccluded = false;
+        private float _targetOcclusionFactor = 1.0f;
+        private float _targetOcclusionAirDamping = 1.0f;
+        private float _smoothedOcclusionFactor = 1.0f;
+        private float _smoothedOcclusionAirDamping = 1.0f;
+        private static readonly RaycastHit[] _occlusionHits = new RaycastHit[1];
+        private static int _occlusionLayerMask = -1;
+
+        private float[] streamBuffer = null!;
         private volatile int streamWritePos = 0;
         private volatile int streamReadPos  = 0;
 
@@ -131,7 +143,8 @@ namespace TRL_SpeakFromTarkov.Audio
 
         public void EnqueuePacket(byte[] opusData, float voiceLevel = 0f)
         {
-            packetQueue.Enqueue(opusData);
+            if (opusData == null || opusData.Length <= 2) return;
+
             packetsEnqueuedCount++;
             if (VoIPPlugin.EnableDebugLogs != null && VoIPPlugin.EnableDebugLogs.Value && packetsEnqueuedCount % 50 == 1)
             {
@@ -143,9 +156,34 @@ namespace TRL_SpeakFromTarkov.Audio
                 maxBase = VoIPPlugin.MaxHearingDistance.Value;
                 
             // Mapeia VoiceLevel (0 a 1) para um multiplicador de distância.
-            // Whisper (~0.01) -> 0.33x (10m). Normal (~0.1) -> 1.0x (30m). Grito (>0.3) -> 2.0x (60m).
-            float distanceMultiplier = Mathf.Clamp((voiceLevel * 10f), 0.33f, 2.0f);
+            // Whisper (~0.01) -> 0.65x (20m). Normal (~0.1) -> 1.0x (30m). Grito (>0.3) -> 2.0x (60m).
+            float distanceMultiplier = Mathf.Clamp((voiceLevel * 10f), 0.65f, 2.0f);
             currentDistanceTarget = maxBase * distanceMultiplier;
+
+            // Decodificação Off-Thread imediata no callback de recepção da rede
+            if (decoder != null && opusDecodeBuffer != null && streamBuffer != null)
+            {
+                try
+                {
+#pragma warning disable CS0618
+                    int len = decoder.Decode(opusData, 0, opusData.Length, opusDecodeBuffer, 0, frameSize, false);
+#pragma warning restore CS0618
+
+                    if (len > 0)
+                    {
+                        int currentWritePos = streamWritePos;
+                        for (int i = 0; i < len; i++)
+                        {
+                            streamBuffer[(currentWritePos + i) % streamBuffer.Length] = opusDecodeBuffer[i];
+                        }
+                        streamWritePos = (currentWritePos + len) % streamBuffer.Length;
+                    }
+                }
+                catch (Exception decEx)
+                {
+                    VoIPPlugin.Log.LogWarning($"[SFT] Ignorando frame Opus corrompido/inválido ({opusData.Length} bytes): {decEx.Message}");
+                }
+            }
         }
 
         private bool isEmergency2DMode = false;
@@ -189,26 +227,78 @@ namespace TRL_SpeakFromTarkov.Audio
                     }
                 }
 
-                if (decoder == null || opusDecodeBuffer == null || streamBuffer == null) return;
-                
-                while (packetQueue.TryDequeue(out byte[] opusData))
+                // Re-ancoragem Dinâmica: Se o alto-falante ainda não está preso à cabeça do jogador remoto (ficou em 0,0,0)
+                if (transform.parent == null && !string.IsNullOrEmpty(TargetProfileId) && Singleton<GameWorld>.Instantiated)
                 {
-#pragma warning disable CS0618
-                    int len = decoder.Decode(opusData, 0, opusData.Length, opusDecodeBuffer, 0, frameSize, false);
-#pragma warning restore CS0618
-
-                    if (len <= 0)
+                    if (Time.time - _lastReanchorTry >= 2.0f)
                     {
-                        VoIPPlugin.Log.LogWarning($"[SFT-DEBUG] Opus Decode retornou {len} amostras!");
+                        _lastReanchorTry = Time.time;
+                        var gameWorld = Singleton<GameWorld>.Instance;
+                        Player player = gameWorld.GetAlivePlayerByProfileID(TargetProfileId);
+                        if (player == null && gameWorld.AllAlivePlayersList != null)
+                        {
+                            player = System.Linq.Enumerable.FirstOrDefault(gameWorld.AllAlivePlayersList, p => p != null && (p.ProfileId == TargetProfileId || (p.Profile != null && p.Profile.Id == TargetProfileId)));
+                        }
+
+                        if (player != null)
+                        {
+                            Transform targetBone = player.PlayerBones != null && player.PlayerBones.Head != null
+                                ? player.PlayerBones.Head.Original
+                                : player.Transform.Original;
+                            transform.SetParent(targetBone, false);
+                            transform.localPosition = targetBone == player.Transform.Original ? Vector3.up * 1.6f : Vector3.zero;
+                            VoIPPlugin.Log.LogInfo($"[SFT-3D] RemoteSpeaker de {TargetProfileId} re-ancorado com sucesso ao boneco {(player.Profile != null ? player.Profile.Nickname : player.ProfileId)}!");
+                        }
+                    }
+                }
+
+                // ── OCLUSÃO FÍSICA POR GEOMETRIA & PORTAS (200ms = 5Hz Zero-GC) ──
+                if (Time.time - _lastOcclusionCheckTime >= 0.20f)
+                {
+                    _lastOcclusionCheckTime = Time.time;
+                    bool occlusionEnabled = VoIPPlugin.EnableOcclusion == null || VoIPPlugin.EnableOcclusion.Value;
+
+                    if (occlusionEnabled && currentSpatialBlend > 0f && !isEmergency2DMode)
+                    {
+                        if (_occlusionLayerMask == -1)
+                        {
+                            try
+                            {
+                                _occlusionLayerMask = LayerMaskClass.HighPolyWithTerrainMask | LayerMaskClass.DoorLayer | LayerMaskClass.InteractiveLayer;
+                            }
+                            catch
+                            {
+                                _occlusionLayerMask = LayerMask.GetMask("HighPolyWithRaycast", "Terrain", "LowPoly", "Interactive", "Doors", "Default");
+                            }
+                        }
+
+                        Vector3 targetHeadPos = transform.position;
+                        Vector3 listenerPos = Vector3.zero;
+                        if (Camera.main != null)
+                        {
+                            listenerPos = Camera.main.transform.position;
+                        }
+                        else if (Singleton<GameWorld>.Instantiated && Singleton<GameWorld>.Instance.MainPlayer != null)
+                        {
+                            listenerPos = Singleton<GameWorld>.Instance.MainPlayer.Position + Vector3.up * 1.6f;
+                        }
+
+                        if (listenerPos != Vector3.zero && Vector3.Distance(listenerPos, targetHeadPos) > 1.2f)
+                        {
+                            _isOccluded = Physics.Linecast(listenerPos, targetHeadPos, out RaycastHit hit, _occlusionLayerMask, QueryTriggerInteraction.Ignore);
+                        }
+                        else
+                        {
+                            _isOccluded = false;
+                        }
+                    }
+                    else
+                    {
+                        _isOccluded = false;
                     }
 
-                    int currentWritePos = streamWritePos;
-                    for (int i = 0; i < len; i++)
-                    {
-                        streamBuffer[(currentWritePos + i) % streamBuffer.Length] = opusDecodeBuffer[i];
-                    }
-                    
-                    streamWritePos = (currentWritePos + len) % streamBuffer.Length;
+                    _targetOcclusionFactor = _isOccluded ? 0.50f : 1.0f;
+                    _targetOcclusionAirDamping = _isOccluded ? 0.25f : 1.0f;
                 }
             }
             catch (Exception ex)
@@ -292,16 +382,23 @@ namespace TRL_SpeakFromTarkov.Audio
                     }
                     else
                     {
-                        // 1. Curva Acústica de Decibéis Físicos (-6dB por dobra de distância em escala humana):
-                        // 1.5m -> 100% | 5m -> ~70% | 12m -> ~40% | 20m -> ~12% | 30m -> 0%
+                        // 1. Curva Acústica Suave (-3dB por dobra de distância em escala humana):
+                        // 1.5m -> 100% | 5m -> ~85% | 10m -> ~68% | 20m -> ~38% | 30m -> 0%
                         float normD = (dist - minD) / (maxD - minD);
-                        distanceAttenuation = Mathf.Pow(1.0f - normD, 2.2f);
+                        distanceAttenuation = Mathf.Pow(1.0f - normD, 1.2f);
 
-                        // 2. Absorção Atmosférica do Ar (O ar absorve agudos mais rápido que graves com a distância):
-                        airDampingAlpha = Mathf.Lerp(1.0f, 0.25f, normD);
+                        // 2. Absorção Atmosférica do Ar Nítida (preserva o brilho e agudos a média distância):
+                        airDampingAlpha = Mathf.Lerp(1.0f, 0.60f, normD);
                     }
                 }
             }
+
+            // ── INTERPOLAÇÃO DA OCLUSÃO FÍSICA POR PAREDES & PORTAS ──
+            _smoothedOcclusionFactor = Mathf.Lerp(_smoothedOcclusionFactor, _targetOcclusionFactor, 0.05f);
+            _smoothedOcclusionAirDamping = Mathf.Lerp(_smoothedOcclusionAirDamping, _targetOcclusionAirDamping, 0.05f);
+
+            distanceAttenuation *= _smoothedOcclusionFactor;
+            airDampingAlpha *= _smoothedOcclusionAirDamping;
 
             float volumeMult = audioSource != null ? audioSource.volume : 1.0f;
             if (float.IsNaN(distanceAttenuation) || float.IsInfinity(distanceAttenuation)) distanceAttenuation = 1.0f;
@@ -388,7 +485,7 @@ namespace TRL_SpeakFromTarkov.Audio
 
         void OnDestroy()
         {
-            decoder = null;
+            decoder = null!;
         }
     }
 }

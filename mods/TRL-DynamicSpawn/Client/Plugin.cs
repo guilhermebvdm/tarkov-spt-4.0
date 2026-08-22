@@ -9,7 +9,7 @@ using TRLDynamicSpawn.Patches;
 namespace TRLDynamicSpawn
 {
     [
-        BepInPlugin("TRLDynamicSpawn.settings", "TRLDynamicSpawn", "3.1.7"),
+        BepInPlugin("TRLDynamicSpawn.settings", "TRLDynamicSpawn", "3.2.9"),
         BepInDependency("com.fika.core", BepInDependency.DependencyFlags.SoftDependency)
     ]
     public class Plugin : BaseUnityPlugin
@@ -38,6 +38,8 @@ namespace TRLDynamicSpawn
             new DynamicSpawnManagerPatch().Enable();
             new TryToSpawnInZoneAndDelayPatch().Enable();
             new ChooseProfilePatch().Enable();
+            new ZryachiyAggressivenessPatch().Enable();
+            new ZryachiyActivatePatch().Enable();
 
             // Enable Despawn Manager & Map Overlay Components
             TRLDynamicSpawn.Components.BotDespawnManager.Enable();

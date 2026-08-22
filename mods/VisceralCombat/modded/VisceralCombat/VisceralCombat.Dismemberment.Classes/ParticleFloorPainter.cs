@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Systems.Effects;
 using Comfort.Common;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace VisceralCombat.Dismemberment.Classes;
 
@@ -11,26 +12,44 @@ public class ParticleFloorPainter : MonoBehaviour
 
 	public List<ParticleCollisionEvent> collisionEvents;
 
+	private static readonly List<ParticleCollisionEvent> SharedCollisionEvents = new List<ParticleCollisionEvent>();
+	private static int _playerLayer = -1;
+	private static int _hitColliderLayer = -1;
+	private static int _deadbodyLayer = -1;
+
+	// Cooldown to limit blood decal generation to ~1x per 0.5s per particle system
+	private float _nextAllowedEmitTime;
+	public float CooldownSeconds = 0.5f;
+
 	private void Start()
 	{
-		ps = ((Component)this).GetComponent<ParticleSystem>();
+		ps = GetComponent<ParticleSystem>();
+		if (_playerLayer < 0)
+		{
+			_playerLayer = LayerMask.NameToLayer("Player");
+			_hitColliderLayer = LayerMask.NameToLayer("HitCollider");
+			_deadbodyLayer = LayerMask.NameToLayer("Deadbody");
+		}
 	}
 
 	private void OnParticleCollision(GameObject collidedObject)
 	{
-		//IL_0021: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0026: Unknown result type (might be due to invalid IL or missing references)
-		//IL_007f: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0086: Unknown result type (might be due to invalid IL or missing references)
-		List<ParticleCollisionEvent> list = new List<ParticleCollisionEvent>();
-		ParticlePhysicsExtensions.GetCollisionEvents(ps, collidedObject, list);
-		foreach (ParticleCollisionEvent item in list)
+		if (collidedObject == null || Singleton<Effects>.Instance == null) return;
+		if (Time.time < _nextAllowedEmitTime) return; // Limit decal creation rate
+
+		int layer = collidedObject.layer;
+		if (layer == _playerLayer || layer == _hitColliderLayer || layer == _deadbodyLayer) return;
+
+		SharedCollisionEvents.Clear();
+		ParticlePhysicsExtensions.GetCollisionEvents(ps, collidedObject, SharedCollisionEvents);
+		if (SharedCollisionEvents.Count > 0)
 		{
-			ParticleCollisionEvent current = item;
-			if (collidedObject.gameObject.layer != LayerMask.NameToLayer("Player") && collidedObject.gameObject.layer != LayerMask.NameToLayer("HitCollider") && collidedObject.gameObject.layer != LayerMask.NameToLayer("Deadbody"))
-			{
-				Singleton<Effects>.Instance.EmitBleeding(((ParticleCollisionEvent)(ref current)).intersection, ((ParticleCollisionEvent)(ref current)).normal);
-			}
+			ParticleCollisionEvent ev = SharedCollisionEvents[0];
+			Vector3 normal = ev.normal;
+			if (normal.sqrMagnitude < 0.001f) normal = Vector3.up;
+
+			_nextAllowedEmitTime = Time.time + CooldownSeconds;
+			Singleton<Effects>.Instance.EmitBleeding(ev.intersection, normal);
 		}
 	}
 }

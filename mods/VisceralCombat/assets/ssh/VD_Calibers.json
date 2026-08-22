@@ -15,7 +15,21 @@
         "Caliber556x45NATO": 0.1,
         "Caliber9x39": 0.1,
         "Caliber127x33": 0.0,
-        "Caliber68x51": 0.7
+        "Caliber68x51": 0.7,
+        "Caliber9x19PARA": 0.0,
+        "9x19PARA": 0.0,
+        "Caliber9x18PM": 0.0,
+        "9x18PM": 0.0,
+        "Caliber1143x23ACP": 0.0,
+        "1143x23ACP": 0.0,
+        "Caliber762x25TT": 0.0,
+        "762x25TT": 0.0,
+        "Caliber9x21": 0.0,
+        "9x21": 0.0,
+        "Caliber46x30": 0.0,
+        "46x30": 0.0,
+        "Caliber57x28": 0.0,
+        "57x28": 0.0
       }
     },
     {
@@ -80,4 +94,3 @@
       ]
     }
   ]
-  

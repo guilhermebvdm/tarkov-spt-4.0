@@ -1,5 +1,7 @@
 using System;
 using UnityEngine;
+using Random = UnityEngine.Random;
+using Object = UnityEngine.Object;
 
 namespace VisceralCombat.Ragdolls.Classes.RootMotion;
 
@@ -28,7 +30,7 @@ public static class QuaTools
 		//IL_0011: Unknown result type (might be due to invalid IL or missing references)
 		//IL_0016: Unknown result type (might be due to invalid IL or missing references)
 		//IL_0017: Unknown result type (might be due to invalid IL or missing references)
-		forward = ((Vector3)(ref forward)).normalized;
+		forward = forward.normalized;
 		Vector3 val = Quaternion.Inverse(space) * forward;
 		return (0f - Mathf.Asin(val.y)) * 57.29578f;
 	}
@@ -245,7 +247,7 @@ public static class QuaTools
 		Quaternion val = Quaternion.FromToRotation(fromDirection, toDirection);
 		float num = 0f;
 		Vector3 zero = Vector3.zero;
-		((Quaternion)(ref val)).ToAngleAxis(ref num, ref zero);
+		val.ToAngleAxis(out num, out zero);
 		float num2 = Vector3.Dot(zero, axis);
 		if (num2 < 0f)
 		{

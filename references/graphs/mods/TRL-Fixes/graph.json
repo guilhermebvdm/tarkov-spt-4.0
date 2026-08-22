@@ -4,304 +4,1456 @@
   "graph": {},
   "nodes": [
     {
-      "label": "FixFikaReviveRagdollPatch.cs",
+      "label": "BotMountWeaponFixPatch",
       "file_type": "code",
-      "source_file": "Patches/FixFikaReviveRagdollPatch.cs",
-      "source_location": "L1",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L18",
+      "metadata": {
+        "namespace": "TRLFixes.Patches",
+        "scope_chain": [
+          "s157"
+        ]
+      },
+      "_callable": true,
+      "_callable_class": true,
       "_origin": "ast",
-      "id": "patches_fixfikareviveragdollpatch",
+      "id": "patches_botmountweaponfixpatch_trlfixes_patches_botmountweaponfixpatch",
       "community": 0,
-      "norm_label": "fixfikareviveragdollpatch.cs"
+      "community_name": "ModulePatch",
+      "norm_label": "botmountweaponfixpatch"
     },
     {
-      "label": "TRLFixes.Patches",
+      "label": "BotStationaryWeaponDataMethod4Patch",
       "file_type": "code",
-      "source_file": "Patches/FixFikaReviveRagdollPatch.cs",
-      "source_location": "L8",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L74",
+      "metadata": {
+        "namespace": "TRLFixes.Patches",
+        "scope_chain": [
+          "s157"
+        ]
+      },
+      "_callable": true,
+      "_callable_class": true,
       "_origin": "ast",
-      "id": "patches_fixfikareviveragdollpatch_trlfixes_patches",
+      "id": "patches_botmountweaponfixpatch_trlfixes_patches_botstationaryweapondatamethod4patch",
       "community": 0,
-      "norm_label": "trlfixes.patches"
+      "community_name": "ModulePatch",
+      "norm_label": "botstationaryweapondatamethod4patch"
+    },
+    {
+      "label": "FikaPlayerOperateStationaryWeaponPatch",
+      "file_type": "code",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L103",
+      "metadata": {
+        "namespace": "TRLFixes.Patches",
+        "scope_chain": [
+          "s157"
+        ]
+      },
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "id": "patches_botmountweaponfixpatch_trlfixes_patches_fikaplayeroperatestationaryweaponpatch",
+      "community": 0,
+      "community_name": "ModulePatch",
+      "norm_label": "fikaplayeroperatestationaryweaponpatch"
+    },
+    {
+      "label": "GClass81ShallUseNowPatch",
+      "file_type": "code",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L48",
+      "metadata": {
+        "namespace": "TRLFixes.Patches",
+        "scope_chain": [
+          "s157"
+        ]
+      },
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "id": "patches_botmountweaponfixpatch_trlfixes_patches_gclass81shallusenowpatch",
+      "community": 0,
+      "community_name": "ModulePatch",
+      "norm_label": "gclass81shallusenowpatch"
+    },
+    {
+      "label": "PlayerOperateStationaryWeaponPatch",
+      "file_type": "code",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L141",
+      "metadata": {
+        "namespace": "TRLFixes.Patches",
+        "scope_chain": [
+          "s157"
+        ]
+      },
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "id": "patches_botmountweaponfixpatch_trlfixes_patches_playeroperatestationaryweaponpatch",
+      "community": 0,
+      "community_name": "ModulePatch",
+      "norm_label": "playeroperatestationaryweaponpatch"
+    },
+    {
+      "label": "BotWeaponManagerSafetyPatch",
+      "file_type": "code",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotWeaponManagerSafetyPatch.cs",
+      "source_location": "L14",
+      "metadata": {
+        "namespace": "TRLFixes.Patches",
+        "scope_chain": [
+          "s63"
+        ]
+      },
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "id": "patches_botweaponmanagersafetypatch_trlfixes_patches_botweaponmanagersafetypatch",
+      "community": 1,
+      "community_name": "BotWeaponManagerSafetyPatch",
+      "norm_label": "botweaponmanagersafetypatch"
+    },
+    {
+      "label": "FlashbangRadiusPatch",
+      "file_type": "code",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FlashbangRadiusPatch.cs",
+      "source_location": "L10",
+      "metadata": {
+        "namespace": "TRLFixes.Patches",
+        "scope_chain": [
+          "s131"
+        ]
+      },
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "id": "patches_flashbangradiuspatch_trlfixes_patches_flashbangradiuspatch",
+      "community": 10,
+      "community_name": "FlashbangRadiusPatch",
+      "norm_label": "flashbangradiuspatch"
     },
     {
       "label": "FixFikaReviveRagdollPatch",
       "file_type": "code",
-      "source_file": "Patches/FixFikaReviveRagdollPatch.cs",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FixFikaReviveRagdollPatch.cs",
       "source_location": "L10",
+      "metadata": {
+        "namespace": "TRLFixes.Patches",
+        "scope_chain": [
+          "s113"
+        ]
+      },
+      "_callable": true,
+      "_callable_class": true,
       "_origin": "ast",
-      "id": "patches_fixfikareviveragdollpatch_fixfikareviveragdollpatch",
-      "community": 0,
+      "id": "patches_fixfikareviveragdollpatch_trlfixes_patches_fixfikareviveragdollpatch",
+      "community": 2,
+      "community_name": "TRLFixes.Patches",
       "norm_label": "fixfikareviveragdollpatch"
     },
     {
-      "label": "FieldInfo",
+      "label": "FlashbangBotPatch",
       "file_type": "code",
-      "source_file": "Patches/FixFikaReviveRagdollPatch.cs",
-      "source_location": "L12",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FlashbangBotPatch.cs",
+      "source_location": "L9",
+      "metadata": {
+        "namespace": "TRLFixes.Patches",
+        "scope_chain": [
+          "s88"
+        ]
+      },
+      "_callable": true,
+      "_callable_class": true,
       "_origin": "ast",
-      "id": "fieldinfo",
+      "id": "patches_flashbangbotpatch_trlfixes_patches_flashbangbotpatch",
+      "community": 2,
+      "community_name": "TRLFixes.Patches",
+      "norm_label": "flashbangbotpatch"
+    },
+    {
+      "label": "FikaMainThreadUISafetyPatch",
+      "file_type": "code",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FikaMainThreadUISafetyPatch.cs",
+      "source_location": "L16",
+      "metadata": {
+        "namespace": "TRLFixes.Patches",
+        "scope_chain": [
+          "s108"
+        ]
+      },
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "id": "patches_fikamainthreaduisafetypatch_trlfixes_patches_fikamainthreaduisafetypatch",
+      "community": 3,
+      "community_name": "FikaMainThreadUISafetyPatch",
+      "norm_label": "fikamainthreaduisafetypatch"
+    },
+    {
+      "label": "PickupAimingSafetyPatch",
+      "file_type": "code",
+      "source_file": "mods/TRL-Fixes/modded/Patches/PickupAimingSafetyPatch.cs",
+      "source_location": "L29",
+      "metadata": {
+        "namespace": "TRLFixes.Patches",
+        "scope_chain": [
+          "s68"
+        ]
+      },
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "id": "patches_pickupaimingsafetypatch_trlfixes_patches_pickupaimingsafetypatch",
+      "community": 4,
+      "community_name": "PickupAimingSafetyPatch",
+      "norm_label": "pickupaimingsafetypatch"
+    },
+    {
+      "label": "FikaRefreshSlotViewsSafetyPatch",
+      "file_type": "code",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FikaRefreshSlotViewsSafetyPatch.cs",
+      "source_location": "L21",
+      "metadata": {
+        "namespace": "TRLFixes.Patches",
+        "scope_chain": [
+          "s155"
+        ]
+      },
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "id": "patches_fikarefreshslotviewssafetypatch_trlfixes_patches_fikarefreshslotviewssafetypatch",
+      "community": 5,
+      "community_name": "FikaRefreshSlotViewsSafetyPatch",
+      "norm_label": "fikarefreshslotviewssafetypatch"
+    },
+    {
+      "label": "DynamicMapsSafetyPatch",
+      "file_type": "code",
+      "source_file": "mods/TRL-Fixes/modded/Patches/DynamicMapsSafetyPatch.cs",
+      "source_location": "L18",
+      "metadata": {
+        "namespace": "TRLFixes.Patches",
+        "scope_chain": [
+          "s89"
+        ]
+      },
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "id": "patches_dynamicmapssafetypatch_trlfixes_patches_dynamicmapssafetypatch",
+      "community": 6,
+      "community_name": "DynamicMapsSafetyPatch",
+      "norm_label": "dynamicmapssafetypatch"
+    },
+    {
+      "label": "FikaProceedEmptyHandsSafetyPatch",
+      "file_type": "code",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FikaProceedEmptyHandsSafetyPatch.cs",
+      "source_location": "L18",
+      "metadata": {
+        "namespace": "TRLFixes.Patches",
+        "scope_chain": [
+          "s77"
+        ]
+      },
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "id": "patches_fikaproceedemptyhandssafetypatch_trlfixes_patches_fikaproceedemptyhandssafetypatch",
+      "community": 7,
+      "community_name": "FikaProceedEmptyHandsSafetyPatch",
+      "norm_label": "fikaproceedemptyhandssafetypatch"
+    },
+    {
+      "label": "Plugin",
+      "file_type": "code",
+      "source_file": "mods/TRL-Fixes/modded/Plugin.cs",
+      "source_location": "L12",
+      "metadata": {
+        "namespace": "TRLFixes",
+        "scope_chain": [
+          "s33"
+        ]
+      },
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "id": "plugin_trlfixes_plugin",
+      "community": 8,
+      "community_name": "Plugin",
+      "norm_label": "plugin"
+    },
+    {
+      "label": ".GetTargetMethod()",
+      "file_type": "code",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L20",
+      "metadata": {
+        "namespace": "TRLFixes.Patches",
+        "scope_chain": [
+          "s157"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "patches_botmountweaponfixpatch_trlfixes_patches_botmountweaponfixpatch_gettargetmethod",
       "community": 0,
-      "norm_label": "fieldinfo"
+      "community_name": "ModulePatch",
+      "norm_label": ".gettargetmethod()"
+    },
+    {
+      "label": ".PatchPostfix()",
+      "file_type": "code",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L25",
+      "metadata": {
+        "namespace": "TRLFixes.Patches",
+        "scope_chain": [
+          "s157"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "patches_botmountweaponfixpatch_trlfixes_patches_botmountweaponfixpatch_patchpostfix",
+      "community": 0,
+      "community_name": "ModulePatch",
+      "norm_label": ".patchpostfix()"
+    },
+    {
+      "label": ".GetTargetMethod()",
+      "file_type": "code",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L76",
+      "metadata": {
+        "namespace": "TRLFixes.Patches",
+        "scope_chain": [
+          "s157"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "patches_botmountweaponfixpatch_trlfixes_patches_botstationaryweapondatamethod4patch_gettargetmethod",
+      "community": 0,
+      "community_name": "ModulePatch",
+      "norm_label": ".gettargetmethod()"
+    },
+    {
+      "label": ".GetTargetMethod()",
+      "file_type": "code",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L105",
+      "metadata": {
+        "namespace": "TRLFixes.Patches",
+        "scope_chain": [
+          "s157"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "patches_botmountweaponfixpatch_trlfixes_patches_fikaplayeroperatestationaryweaponpatch_gettargetmethod",
+      "community": 0,
+      "community_name": "ModulePatch",
+      "norm_label": ".gettargetmethod()"
+    },
+    {
+      "label": ".GetTargetMethod()",
+      "file_type": "code",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L50",
+      "metadata": {
+        "namespace": "TRLFixes.Patches",
+        "scope_chain": [
+          "s157"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "patches_botmountweaponfixpatch_trlfixes_patches_gclass81shallusenowpatch_gettargetmethod",
+      "community": 0,
+      "community_name": "ModulePatch",
+      "norm_label": ".gettargetmethod()"
+    },
+    {
+      "label": ".GetTargetMethod()",
+      "file_type": "code",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L143",
+      "metadata": {
+        "namespace": "TRLFixes.Patches",
+        "scope_chain": [
+          "s157"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "patches_botmountweaponfixpatch_trlfixes_patches_playeroperatestationaryweaponpatch_gettargetmethod",
+      "community": 0,
+      "community_name": "ModulePatch",
+      "norm_label": ".gettargetmethod()"
     },
     {
       "label": ".Enable()",
       "file_type": "code",
-      "source_file": "Patches/FixFikaReviveRagdollPatch.cs",
-      "source_location": "L15",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotWeaponManagerSafetyPatch.cs",
+      "source_location": "L20",
+      "metadata": {
+        "namespace": "TRLFixes.Patches",
+        "scope_chain": [
+          "s63"
+        ]
+      },
+      "_callable": true,
       "_origin": "ast",
-      "id": "patches_fixfikareviveragdollpatch_fixfikareviveragdollpatch_enable",
-      "community": 0,
+      "id": "patches_botweaponmanagersafetypatch_trlfixes_patches_botweaponmanagersafetypatch_enable",
+      "community": 1,
+      "community_name": "BotWeaponManagerSafetyPatch",
+      "norm_label": ".enable()"
+    },
+    {
+      "label": ".FinalizerOnWeaponTaken()",
+      "file_type": "code",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotWeaponManagerSafetyPatch.cs",
+      "source_location": "L97",
+      "metadata": {
+        "namespace": "TRLFixes.Patches",
+        "scope_chain": [
+          "s63"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "patches_botweaponmanagersafetypatch_trlfixes_patches_botweaponmanagersafetypatch_finalizeronweapontaken",
+      "community": 1,
+      "community_name": "BotWeaponManagerSafetyPatch",
+      "norm_label": ".finalizeronweapontaken()"
+    },
+    {
+      "label": ".FinalizerUpdateHandsController()",
+      "file_type": "code",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotWeaponManagerSafetyPatch.cs",
+      "source_location": "L72",
+      "metadata": {
+        "namespace": "TRLFixes.Patches",
+        "scope_chain": [
+          "s63"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "patches_botweaponmanagersafetypatch_trlfixes_patches_botweaponmanagersafetypatch_finalizerupdatehandscontroller",
+      "community": 1,
+      "community_name": "BotWeaponManagerSafetyPatch",
+      "norm_label": ".finalizerupdatehandscontroller()"
+    },
+    {
+      "label": ".LogThrottled()",
+      "file_type": "code",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotWeaponManagerSafetyPatch.cs",
+      "source_location": "L107",
+      "metadata": {
+        "namespace": "TRLFixes.Patches",
+        "scope_chain": [
+          "s63"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "patches_botweaponmanagersafetypatch_trlfixes_patches_botweaponmanagersafetypatch_logthrottled",
+      "community": 1,
+      "community_name": "BotWeaponManagerSafetyPatch",
+      "norm_label": ".logthrottled()"
+    },
+    {
+      "label": ".PrefixOnWeaponTaken()",
+      "file_type": "code",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotWeaponManagerSafetyPatch.cs",
+      "source_location": "L86",
+      "metadata": {
+        "namespace": "TRLFixes.Patches",
+        "scope_chain": [
+          "s63"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "patches_botweaponmanagersafetypatch_trlfixes_patches_botweaponmanagersafetypatch_prefixonweapontaken",
+      "community": 1,
+      "community_name": "BotWeaponManagerSafetyPatch",
+      "norm_label": ".prefixonweapontaken()"
+    },
+    {
+      "label": ".PrefixUpdateHandsController()",
+      "file_type": "code",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotWeaponManagerSafetyPatch.cs",
+      "source_location": "L50",
+      "metadata": {
+        "namespace": "TRLFixes.Patches",
+        "scope_chain": [
+          "s63"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "patches_botweaponmanagersafetypatch_trlfixes_patches_botweaponmanagersafetypatch_prefixupdatehandscontroller",
+      "community": 1,
+      "community_name": "BotWeaponManagerSafetyPatch",
+      "norm_label": ".prefixupdatehandscontroller()"
+    },
+    {
+      "label": ".Enable()",
+      "file_type": "code",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FlashbangRadiusPatch.cs",
+      "source_location": "L12",
+      "metadata": {
+        "namespace": "TRLFixes.Patches",
+        "scope_chain": [
+          "s131"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "patches_flashbangradiuspatch_trlfixes_patches_flashbangradiuspatch_enable",
+      "community": 10,
+      "community_name": "FlashbangRadiusPatch",
       "norm_label": ".enable()"
     },
     {
       "label": ".Postfix()",
       "file_type": "code",
-      "source_file": "Patches/FixFikaReviveRagdollPatch.cs",
-      "source_location": "L51",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FlashbangRadiusPatch.cs",
+      "source_location": "L30",
+      "metadata": {
+        "namespace": "TRLFixes.Patches",
+        "scope_chain": [
+          "s131"
+        ]
+      },
+      "_callable": true,
       "_origin": "ast",
-      "id": "patches_fixfikareviveragdollpatch_fixfikareviveragdollpatch_postfix",
-      "community": 0,
+      "id": "patches_flashbangradiuspatch_trlfixes_patches_flashbangradiuspatch_postfix",
+      "community": 10,
+      "community_name": "FlashbangRadiusPatch",
       "norm_label": ".postfix()"
-    },
-    {
-      "label": "FlashbangBotPatch.cs",
-      "file_type": "code",
-      "source_file": "Patches/FlashbangBotPatch.cs",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "patches_flashbangbotpatch",
-      "community": 4,
-      "norm_label": "flashbangbotpatch.cs"
-    },
-    {
-      "label": "TRLFixes.Patches",
-      "file_type": "code",
-      "source_file": "Patches/FlashbangBotPatch.cs",
-      "source_location": "L7",
-      "_origin": "ast",
-      "id": "patches_flashbangbotpatch_trlfixes_patches",
-      "community": 4,
-      "norm_label": "trlfixes.patches"
-    },
-    {
-      "label": "FlashbangBotPatch",
-      "file_type": "code",
-      "source_file": "Patches/FlashbangBotPatch.cs",
-      "source_location": "L9",
-      "_origin": "ast",
-      "id": "patches_flashbangbotpatch_flashbangbotpatch",
-      "community": 4,
-      "norm_label": "flashbangbotpatch"
     },
     {
       "label": ".Enable()",
       "file_type": "code",
-      "source_file": "Patches/FlashbangBotPatch.cs",
-      "source_location": "L11",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FixFikaReviveRagdollPatch.cs",
+      "source_location": "L15",
+      "metadata": {
+        "namespace": "TRLFixes.Patches",
+        "scope_chain": [
+          "s113"
+        ]
+      },
+      "_callable": true,
       "_origin": "ast",
-      "id": "patches_flashbangbotpatch_flashbangbotpatch_enable",
-      "community": 4,
+      "id": "patches_fixfikareviveragdollpatch_trlfixes_patches_fixfikareviveragdollpatch_enable",
+      "community": 2,
+      "community_name": "TRLFixes.Patches",
+      "norm_label": ".enable()"
+    },
+    {
+      "label": ".Postfix()",
+      "file_type": "code",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FixFikaReviveRagdollPatch.cs",
+      "source_location": "L51",
+      "metadata": {
+        "namespace": "TRLFixes.Patches",
+        "scope_chain": [
+          "s113"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "patches_fixfikareviveragdollpatch_trlfixes_patches_fixfikareviveragdollpatch_postfix",
+      "community": 2,
+      "community_name": "TRLFixes.Patches",
+      "norm_label": ".postfix()"
+    },
+    {
+      "label": ".Enable()",
+      "file_type": "code",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FlashbangBotPatch.cs",
+      "source_location": "L11",
+      "metadata": {
+        "namespace": "TRLFixes.Patches",
+        "scope_chain": [
+          "s88"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "patches_flashbangbotpatch_trlfixes_patches_flashbangbotpatch_enable",
+      "community": 2,
+      "community_name": "TRLFixes.Patches",
       "norm_label": ".enable()"
     },
     {
       "label": ".Prefix()",
       "file_type": "code",
-      "source_file": "Patches/FlashbangBotPatch.cs",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FlashbangBotPatch.cs",
       "source_location": "L34",
+      "metadata": {
+        "namespace": "TRLFixes.Patches",
+        "scope_chain": [
+          "s88"
+        ]
+      },
+      "_callable": true,
       "_origin": "ast",
-      "id": "patches_flashbangbotpatch_flashbangbotpatch_prefix",
-      "community": 4,
+      "id": "patches_flashbangbotpatch_trlfixes_patches_flashbangbotpatch_prefix",
+      "community": 2,
+      "community_name": "TRLFixes.Patches",
       "norm_label": ".prefix()"
     },
     {
-      "label": "FlashbangRadiusPatch.cs",
+      "label": ".Finalizer()",
       "file_type": "code",
-      "source_file": "Patches/FlashbangRadiusPatch.cs",
-      "source_location": "L1",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FikaMainThreadUISafetyPatch.cs",
+      "source_location": "L79",
+      "metadata": {
+        "namespace": "TRLFixes.Patches",
+        "scope_chain": [
+          "s108"
+        ]
+      },
+      "_callable": true,
       "_origin": "ast",
-      "id": "patches_flashbangradiuspatch",
-      "community": 1,
-      "norm_label": "flashbangradiuspatch.cs"
+      "id": "patches_fikamainthreaduisafetypatch_trlfixes_patches_fikamainthreaduisafetypatch_finalizer",
+      "community": 3,
+      "community_name": "FikaMainThreadUISafetyPatch",
+      "norm_label": ".finalizer()"
     },
     {
-      "label": "TRLFixes.Patches",
+      "label": ".GetTargetMethod()",
       "file_type": "code",
-      "source_file": "Patches/FlashbangRadiusPatch.cs",
-      "source_location": "L8",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FikaMainThreadUISafetyPatch.cs",
+      "source_location": "L20",
+      "metadata": {
+        "namespace": "TRLFixes.Patches",
+        "scope_chain": [
+          "s108"
+        ]
+      },
+      "_callable": true,
       "_origin": "ast",
-      "id": "patches_flashbangradiuspatch_trlfixes_patches",
-      "community": 1,
-      "norm_label": "trlfixes.patches"
+      "id": "patches_fikamainthreaduisafetypatch_trlfixes_patches_fikamainthreaduisafetypatch_gettargetmethod",
+      "community": 3,
+      "community_name": "FikaMainThreadUISafetyPatch",
+      "norm_label": ".gettargetmethod()"
     },
     {
-      "label": "FlashbangRadiusPatch",
+      "label": ".Prefix()",
       "file_type": "code",
-      "source_file": "Patches/FlashbangRadiusPatch.cs",
-      "source_location": "L10",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FikaMainThreadUISafetyPatch.cs",
+      "source_location": "L53",
+      "metadata": {
+        "namespace": "TRLFixes.Patches",
+        "scope_chain": [
+          "s108"
+        ]
+      },
+      "_callable": true,
       "_origin": "ast",
-      "id": "patches_flashbangradiuspatch_flashbangradiuspatch",
-      "community": 1,
-      "norm_label": "flashbangradiuspatch"
+      "id": "patches_fikamainthreaduisafetypatch_trlfixes_patches_fikamainthreaduisafetypatch_prefix",
+      "community": 3,
+      "community_name": "FikaMainThreadUISafetyPatch",
+      "norm_label": ".prefix()"
     },
     {
       "label": ".Enable()",
       "file_type": "code",
-      "source_file": "Patches/FlashbangRadiusPatch.cs",
-      "source_location": "L12",
-      "_origin": "ast",
-      "id": "patches_flashbangradiuspatch_flashbangradiuspatch_enable",
-      "community": 1,
-      "norm_label": ".enable()"
-    },
-    {
-      "label": ".Postfix()",
-      "file_type": "code",
-      "source_file": "Patches/FlashbangRadiusPatch.cs",
-      "source_location": "L30",
-      "_origin": "ast",
-      "id": "patches_flashbangradiuspatch_flashbangradiuspatch_postfix",
-      "community": 1,
-      "norm_label": ".postfix()"
-    },
-    {
-      "label": "IExplosiveItem",
-      "file_type": "code",
-      "source_file": "Patches/FlashbangRadiusPatch.cs",
-      "source_location": "L30",
-      "_origin": "ast",
-      "id": "iexplosiveitem",
-      "community": 1,
-      "norm_label": "iexplosiveitem"
-    },
-    {
-      "label": "Vector3",
-      "file_type": "code",
-      "source_file": "Patches/FlashbangRadiusPatch.cs",
-      "source_location": "L30",
-      "_origin": "ast",
-      "id": "vector3",
-      "community": 1,
-      "norm_label": "vector3"
-    },
-    {
-      "label": "PickupAimingSafetyPatch.cs",
-      "file_type": "code",
-      "source_file": "Patches/PickupAimingSafetyPatch.cs",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "patches_pickupaimingsafetypatch",
-      "community": 3,
-      "norm_label": "pickupaimingsafetypatch.cs"
-    },
-    {
-      "label": "TRLFixes.Patches",
-      "file_type": "code",
-      "source_file": "Patches/PickupAimingSafetyPatch.cs",
-      "source_location": "L6",
-      "_origin": "ast",
-      "id": "patches_pickupaimingsafetypatch_trlfixes_patches",
-      "community": 3,
-      "norm_label": "trlfixes.patches"
-    },
-    {
-      "label": "PickupAimingSafetyPatch",
-      "file_type": "code",
-      "source_file": "Patches/PickupAimingSafetyPatch.cs",
-      "source_location": "L29",
-      "_origin": "ast",
-      "id": "patches_pickupaimingsafetypatch_pickupaimingsafetypatch",
-      "community": 3,
-      "norm_label": "pickupaimingsafetypatch"
-    },
-    {
-      "label": "float",
-      "file_type": "code",
-      "source_file": "Patches/PickupAimingSafetyPatch.cs",
-      "source_location": "L31",
-      "_origin": "ast",
-      "id": "float",
-      "community": 3,
-      "norm_label": "float"
-    },
-    {
-      "label": "bool",
-      "file_type": "code",
-      "source_file": "Patches/PickupAimingSafetyPatch.cs",
-      "source_location": "L33",
-      "_origin": "ast",
-      "id": "bool",
-      "community": 3,
-      "norm_label": "bool"
-    },
-    {
-      "label": "int",
-      "file_type": "code",
-      "source_file": "Patches/PickupAimingSafetyPatch.cs",
-      "source_location": "L34",
-      "_origin": "ast",
-      "id": "int",
-      "community": 3,
-      "norm_label": "int"
-    },
-    {
-      "label": ".Enable()",
-      "file_type": "code",
-      "source_file": "Patches/PickupAimingSafetyPatch.cs",
+      "source_file": "mods/TRL-Fixes/modded/Patches/PickupAimingSafetyPatch.cs",
       "source_location": "L37",
+      "metadata": {
+        "namespace": "TRLFixes.Patches",
+        "scope_chain": [
+          "s68"
+        ]
+      },
+      "_callable": true,
       "_origin": "ast",
-      "id": "patches_pickupaimingsafetypatch_pickupaimingsafetypatch_enable",
-      "community": 3,
+      "id": "patches_pickupaimingsafetypatch_trlfixes_patches_pickupaimingsafetypatch_enable",
+      "community": 4,
+      "community_name": "PickupAimingSafetyPatch",
       "norm_label": ".enable()"
     },
     {
       "label": ".Finalizer()",
       "file_type": "code",
-      "source_file": "Patches/PickupAimingSafetyPatch.cs",
+      "source_file": "mods/TRL-Fixes/modded/Patches/PickupAimingSafetyPatch.cs",
       "source_location": "L60",
+      "metadata": {
+        "namespace": "TRLFixes.Patches",
+        "scope_chain": [
+          "s68"
+        ]
+      },
+      "_callable": true,
       "_origin": "ast",
-      "id": "patches_pickupaimingsafetypatch_pickupaimingsafetypatch_finalizer",
-      "community": 3,
+      "id": "patches_pickupaimingsafetypatch_trlfixes_patches_pickupaimingsafetypatch_finalizer",
+      "community": 4,
+      "community_name": "PickupAimingSafetyPatch",
       "norm_label": ".finalizer()"
+    },
+    {
+      "label": ".Enable()",
+      "file_type": "code",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FikaRefreshSlotViewsSafetyPatch.cs",
+      "source_location": "L28",
+      "metadata": {
+        "namespace": "TRLFixes.Patches",
+        "scope_chain": [
+          "s155"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "patches_fikarefreshslotviewssafetypatch_trlfixes_patches_fikarefreshslotviewssafetypatch_enable",
+      "community": 5,
+      "community_name": "FikaRefreshSlotViewsSafetyPatch",
+      "norm_label": ".enable()"
+    },
+    {
+      "label": ".Prefix()",
+      "file_type": "code",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FikaRefreshSlotViewsSafetyPatch.cs",
+      "source_location": "L67",
+      "metadata": {
+        "namespace": "TRLFixes.Patches",
+        "scope_chain": [
+          "s155"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "patches_fikarefreshslotviewssafetypatch_trlfixes_patches_fikarefreshslotviewssafetypatch_prefix",
+      "community": 5,
+      "community_name": "FikaRefreshSlotViewsSafetyPatch",
+      "norm_label": ".prefix()"
+    },
+    {
+      "label": ".Finalizer()",
+      "file_type": "code",
+      "source_file": "mods/TRL-Fixes/modded/Patches/DynamicMapsSafetyPatch.cs",
+      "source_location": "L46",
+      "metadata": {
+        "namespace": "TRLFixes.Patches",
+        "scope_chain": [
+          "s89"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "patches_dynamicmapssafetypatch_trlfixes_patches_dynamicmapssafetypatch_finalizer",
+      "community": 6,
+      "community_name": "DynamicMapsSafetyPatch",
+      "norm_label": ".finalizer()"
+    },
+    {
+      "label": ".GetTargetMethod()",
+      "file_type": "code",
+      "source_file": "mods/TRL-Fixes/modded/Patches/DynamicMapsSafetyPatch.cs",
+      "source_location": "L20",
+      "metadata": {
+        "namespace": "TRLFixes.Patches",
+        "scope_chain": [
+          "s89"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "patches_dynamicmapssafetypatch_trlfixes_patches_dynamicmapssafetypatch_gettargetmethod",
+      "community": 6,
+      "community_name": "DynamicMapsSafetyPatch",
+      "norm_label": ".gettargetmethod()"
+    },
+    {
+      "label": ".Enable()",
+      "file_type": "code",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FikaProceedEmptyHandsSafetyPatch.cs",
+      "source_location": "L36",
+      "metadata": {
+        "namespace": "TRLFixes.Patches",
+        "scope_chain": [
+          "s77"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "patches_fikaproceedemptyhandssafetypatch_trlfixes_patches_fikaproceedemptyhandssafetypatch_enable",
+      "community": 7,
+      "community_name": "FikaProceedEmptyHandsSafetyPatch",
+      "norm_label": ".enable()"
+    },
+    {
+      "label": ".Prefix()",
+      "file_type": "code",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FikaProceedEmptyHandsSafetyPatch.cs",
+      "source_location": "L99",
+      "metadata": {
+        "namespace": "TRLFixes.Patches",
+        "scope_chain": [
+          "s77"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "patches_fikaproceedemptyhandssafetypatch_trlfixes_patches_fikaproceedemptyhandssafetypatch_prefix",
+      "community": 7,
+      "community_name": "FikaProceedEmptyHandsSafetyPatch",
+      "norm_label": ".prefix()"
+    },
+    {
+      "label": ".Awake()",
+      "file_type": "code",
+      "source_file": "mods/TRL-Fixes/modded/Plugin.cs",
+      "source_location": "L18",
+      "metadata": {
+        "namespace": "TRLFixes",
+        "scope_chain": [
+          "s33"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "plugin_trlfixes_plugin_awake",
+      "community": 8,
+      "community_name": "Plugin",
+      "norm_label": ".awake()"
+    },
+    {
+      "label": ".PatchPrefix()",
+      "file_type": "code",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L81",
+      "metadata": {
+        "namespace": "TRLFixes.Patches",
+        "scope_chain": [
+          "s157"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "patches_botmountweaponfixpatch_trlfixes_patches_botstationaryweapondatamethod4patch_patchprefix",
+      "community": 9,
+      "community_name": ".PatchPrefix",
+      "norm_label": ".patchprefix()"
+    },
+    {
+      "label": ".PatchPrefix()",
+      "file_type": "code",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L115",
+      "metadata": {
+        "namespace": "TRLFixes.Patches",
+        "scope_chain": [
+          "s157"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "patches_botmountweaponfixpatch_trlfixes_patches_fikaplayeroperatestationaryweaponpatch_patchprefix",
+      "community": 9,
+      "community_name": ".PatchPrefix",
+      "norm_label": ".patchprefix()"
+    },
+    {
+      "label": ".PatchPrefix()",
+      "file_type": "code",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L55",
+      "metadata": {
+        "namespace": "TRLFixes.Patches",
+        "scope_chain": [
+          "s157"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "patches_botmountweaponfixpatch_trlfixes_patches_gclass81shallusenowpatch_patchprefix",
+      "community": 9,
+      "community_name": ".PatchPrefix",
+      "norm_label": ".patchprefix()"
+    },
+    {
+      "label": ".PatchPrefix()",
+      "file_type": "code",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L148",
+      "metadata": {
+        "namespace": "TRLFixes.Patches",
+        "scope_chain": [
+          "s157"
+        ]
+      },
+      "_callable": true,
+      "_origin": "ast",
+      "id": "patches_botmountweaponfixpatch_trlfixes_patches_playeroperatestationaryweaponpatch_patchprefix",
+      "community": 9,
+      "community_name": ".PatchPrefix",
+      "norm_label": ".patchprefix()"
+    },
+    {
+      "label": "ExUsecBrainClass",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "exusecbrainclass",
+      "community": 0,
+      "community_name": "ModulePatch",
+      "norm_label": "exusecbrainclass"
+    },
+    {
+      "label": "ModulePatch",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "modulepatch",
+      "community": 0,
+      "community_name": "ModulePatch",
+      "norm_label": "modulepatch"
+    },
+    {
+      "label": "BotMountWeaponFixPatch.cs",
+      "file_type": "code",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "patches_botmountweaponfixpatch",
+      "community": 0,
+      "community_name": "ModulePatch",
+      "norm_label": "botmountweaponfixpatch.cs"
+    },
+    {
+      "label": "MethodBase",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "patches_botmountweaponfixpatch_cs_methodbase",
+      "community": 0,
+      "community_name": "ModulePatch",
+      "norm_label": "methodbase"
+    },
+    {
+      "label": "PatchPostfix",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "patchpostfix",
+      "community": 0,
+      "community_name": "ModulePatch",
+      "norm_label": "patchpostfix"
+    },
+    {
+      "label": "BotWeaponManager",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "botweaponmanager",
+      "community": 1,
+      "community_name": "BotWeaponManagerSafetyPatch",
+      "norm_label": "botweaponmanager"
+    },
+    {
+      "label": "BotWeaponSelector",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "botweaponselector",
+      "community": 1,
+      "community_name": "BotWeaponManagerSafetyPatch",
+      "norm_label": "botweaponselector"
+    },
+    {
+      "label": "IHandsController",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "ihandscontroller",
+      "community": 1,
+      "community_name": "BotWeaponManagerSafetyPatch",
+      "norm_label": "ihandscontroller"
+    },
+    {
+      "label": "BotWeaponManagerSafetyPatch.cs",
+      "file_type": "code",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotWeaponManagerSafetyPatch.cs",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "patches_botweaponmanagersafetypatch",
+      "community": 1,
+      "community_name": "BotWeaponManagerSafetyPatch",
+      "norm_label": "botweaponmanagersafetypatch.cs"
     },
     {
       "label": "Exception",
       "file_type": "code",
-      "source_file": "Patches/PickupAimingSafetyPatch.cs",
-      "source_location": "L60",
+      "source_file": "",
+      "source_location": "",
       "_origin": "ast",
-      "id": "exception",
-      "community": 3,
+      "id": "patches_botweaponmanagersafetypatch_cs_exception",
+      "community": 1,
+      "community_name": "BotWeaponManagerSafetyPatch",
       "norm_label": "exception"
     },
     {
-      "label": "Plugin.cs",
+      "label": "float",
       "file_type": "code",
-      "source_file": "Plugin.cs",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "patches_botweaponmanagersafetypatch_cs_float",
+      "community": 1,
+      "community_name": "BotWeaponManagerSafetyPatch",
+      "norm_label": "float"
+    },
+    {
+      "label": "int",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "patches_botweaponmanagersafetypatch_cs_int",
+      "community": 1,
+      "community_name": "BotWeaponManagerSafetyPatch",
+      "norm_label": "int"
+    },
+    {
+      "label": "IExplosiveItem",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "iexplosiveitem",
+      "community": 10,
+      "community_name": "FlashbangRadiusPatch",
+      "norm_label": "iexplosiveitem"
+    },
+    {
+      "label": "FlashbangRadiusPatch.cs",
+      "file_type": "code",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FlashbangRadiusPatch.cs",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "plugin",
-      "community": 2,
-      "norm_label": "plugin.cs"
+      "id": "patches_flashbangradiuspatch",
+      "community": 10,
+      "community_name": "FlashbangRadiusPatch",
+      "norm_label": "flashbangradiuspatch.cs"
     },
     {
-      "label": "TRLFixes",
+      "label": "Vector3",
       "file_type": "code",
-      "source_file": "Plugin.cs",
-      "source_location": "L4",
+      "source_file": "",
+      "source_location": "",
       "_origin": "ast",
-      "id": "plugin_trlfixes",
-      "community": 2,
-      "norm_label": "trlfixes"
+      "id": "vector3",
+      "community": 10,
+      "community_name": "FlashbangRadiusPatch",
+      "norm_label": "vector3"
     },
     {
-      "label": "Plugin",
+      "label": "TRLFixes.csproj",
       "file_type": "code",
-      "source_file": "Plugin.cs",
-      "source_location": "L12",
+      "source_file": "mods/TRL-Fixes/modded/TRLFixes.csproj",
+      "source_location": null,
       "_origin": "ast",
-      "id": "plugin_plugin",
+      "id": "trlfixes",
+      "community": 11,
+      "community_name": "TRLFixes.csproj",
+      "norm_label": "trlfixes.csproj"
+    },
+    {
+      "label": "net472",
+      "file_type": "concept",
+      "source_file": "mods/TRL-Fixes/modded/TRLFixes.csproj",
+      "source_location": null,
+      "_origin": "ast",
+      "id": "framework_net472",
+      "community": 11,
+      "community_name": "TRLFixes.csproj",
+      "norm_label": "net472"
+    },
+    {
+      "label": "Microsoft.NET.Sdk",
+      "file_type": "concept",
+      "source_file": "mods/TRL-Fixes/modded/TRLFixes.csproj",
+      "source_location": null,
+      "_origin": "ast",
+      "id": "sdk_microsoft_net_sdk",
+      "community": 11,
+      "community_name": "TRLFixes.csproj",
+      "norm_label": "microsoft.net.sdk"
+    },
+    {
+      "label": "TRLFixes.Patches",
+      "file_type": "code",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L9",
+      "type": "namespace",
+      "metadata": {
+        "kind": "csharp_namespace",
+        "namespace": "TRLFixes.Patches"
+      },
+      "_origin": "ast",
+      "id": "csharp_namespace:0aafd919695d2a5b",
       "community": 2,
-      "norm_label": "plugin"
+      "community_name": "TRLFixes.Patches",
+      "norm_label": "trlfixes.patches"
+    },
+    {
+      "label": "FikaProceedEmptyHandsSafetyPatch.cs",
+      "file_type": "code",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FikaProceedEmptyHandsSafetyPatch.cs",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "patches_fikaproceedemptyhandssafetypatch",
+      "community": 2,
+      "community_name": "TRLFixes.Patches",
+      "norm_label": "fikaproceedemptyhandssafetypatch.cs"
+    },
+    {
+      "label": "FixFikaReviveRagdollPatch.cs",
+      "file_type": "code",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FixFikaReviveRagdollPatch.cs",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "patches_fixfikareviveragdollpatch",
+      "community": 2,
+      "community_name": "TRLFixes.Patches",
+      "norm_label": "fixfikareviveragdollpatch.cs"
+    },
+    {
+      "label": "FieldInfo",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "patches_fixfikareviveragdollpatch_cs_fieldinfo",
+      "community": 2,
+      "community_name": "TRLFixes.Patches",
+      "norm_label": "fieldinfo"
+    },
+    {
+      "label": "FlashbangBotPatch.cs",
+      "file_type": "code",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FlashbangBotPatch.cs",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "patches_flashbangbotpatch",
+      "community": 2,
+      "community_name": "TRLFixes.Patches",
+      "norm_label": "flashbangbotpatch.cs"
+    },
+    {
+      "label": "Action",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "action",
+      "community": 3,
+      "community_name": "FikaMainThreadUISafetyPatch",
+      "norm_label": "action"
+    },
+    {
+      "label": "FikaMainThreadUISafetyPatch.cs",
+      "file_type": "code",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FikaMainThreadUISafetyPatch.cs",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "patches_fikamainthreaduisafetypatch",
+      "community": 3,
+      "community_name": "FikaMainThreadUISafetyPatch",
+      "norm_label": "fikamainthreaduisafetypatch.cs"
+    },
+    {
+      "label": "Exception",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "patches_fikamainthreaduisafetypatch_cs_exception",
+      "community": 3,
+      "community_name": "FikaMainThreadUISafetyPatch",
+      "norm_label": "exception"
+    },
+    {
+      "label": "MethodBase",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "patches_fikamainthreaduisafetypatch_cs_methodbase",
+      "community": 3,
+      "community_name": "FikaMainThreadUISafetyPatch",
+      "norm_label": "methodbase"
+    },
+    {
+      "label": "MethodInfo",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "patches_fikamainthreaduisafetypatch_cs_methodinfo",
+      "community": 3,
+      "community_name": "FikaMainThreadUISafetyPatch",
+      "norm_label": "methodinfo"
+    },
+    {
+      "label": "PatchFinalizer",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "patches_fikamainthreaduisafetypatch_cs_patchfinalizer",
+      "community": 3,
+      "community_name": "FikaMainThreadUISafetyPatch",
+      "norm_label": "patchfinalizer"
+    },
+    {
+      "label": "PatchPrefix",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "patches_fikamainthreaduisafetypatch_cs_patchprefix",
+      "community": 3,
+      "community_name": "FikaMainThreadUISafetyPatch",
+      "norm_label": "patchprefix"
+    },
+    {
+      "label": "bool",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "bool",
+      "community": 4,
+      "community_name": "PickupAimingSafetyPatch",
+      "norm_label": "bool"
+    },
+    {
+      "label": "PickupAimingSafetyPatch.cs",
+      "file_type": "code",
+      "source_file": "mods/TRL-Fixes/modded/Patches/PickupAimingSafetyPatch.cs",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "patches_pickupaimingsafetypatch",
+      "community": 4,
+      "community_name": "PickupAimingSafetyPatch",
+      "norm_label": "pickupaimingsafetypatch.cs"
+    },
+    {
+      "label": "Exception",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "patches_pickupaimingsafetypatch_cs_exception",
+      "community": 4,
+      "community_name": "PickupAimingSafetyPatch",
+      "norm_label": "exception"
+    },
+    {
+      "label": "float",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "patches_pickupaimingsafetypatch_cs_float",
+      "community": 4,
+      "community_name": "PickupAimingSafetyPatch",
+      "norm_label": "float"
+    },
+    {
+      "label": "int",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "patches_pickupaimingsafetypatch_cs_int",
+      "community": 4,
+      "community_name": "PickupAimingSafetyPatch",
+      "norm_label": "int"
+    },
+    {
+      "label": "ConstructorInfo",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "constructorinfo",
+      "community": 5,
+      "community_name": "FikaRefreshSlotViewsSafetyPatch",
+      "norm_label": "constructorinfo"
+    },
+    {
+      "label": "FikaRefreshSlotViewsSafetyPatch.cs",
+      "file_type": "code",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FikaRefreshSlotViewsSafetyPatch.cs",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "patches_fikarefreshslotviewssafetypatch",
+      "community": 5,
+      "community_name": "FikaRefreshSlotViewsSafetyPatch",
+      "norm_label": "fikarefreshslotviewssafetypatch.cs"
+    },
+    {
+      "label": "FieldInfo",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "patches_fikarefreshslotviewssafetypatch_cs_fieldinfo",
+      "community": 5,
+      "community_name": "FikaRefreshSlotViewsSafetyPatch",
+      "norm_label": "fieldinfo"
+    },
+    {
+      "label": "Player",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "patches_fikarefreshslotviewssafetypatch_cs_player",
+      "community": 5,
+      "community_name": "FikaRefreshSlotViewsSafetyPatch",
+      "norm_label": "player"
+    },
+    {
+      "label": "Type",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "patches_fikarefreshslotviewssafetypatch_cs_type",
+      "community": 5,
+      "community_name": "FikaRefreshSlotViewsSafetyPatch",
+      "norm_label": "type"
+    },
+    {
+      "label": "DynamicMapsSafetyPatch.cs",
+      "file_type": "code",
+      "source_file": "mods/TRL-Fixes/modded/Patches/DynamicMapsSafetyPatch.cs",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "patches_dynamicmapssafetypatch",
+      "community": 6,
+      "community_name": "DynamicMapsSafetyPatch",
+      "norm_label": "dynamicmapssafetypatch.cs"
+    },
+    {
+      "label": "Exception",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "patches_dynamicmapssafetypatch_cs_exception",
+      "community": 6,
+      "community_name": "DynamicMapsSafetyPatch",
+      "norm_label": "exception"
+    },
+    {
+      "label": "MethodBase",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "patches_dynamicmapssafetypatch_cs_methodbase",
+      "community": 6,
+      "community_name": "DynamicMapsSafetyPatch",
+      "norm_label": "methodbase"
+    },
+    {
+      "label": "PatchFinalizer",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "patches_dynamicmapssafetypatch_cs_patchfinalizer",
+      "community": 6,
+      "community_name": "DynamicMapsSafetyPatch",
+      "norm_label": "patchfinalizer"
+    },
+    {
+      "label": "byte",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "byte",
+      "community": 7,
+      "community_name": "FikaProceedEmptyHandsSafetyPatch",
+      "norm_label": "byte"
+    },
+    {
+      "label": "FieldInfo",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "patches_fikaproceedemptyhandssafetypatch_cs_fieldinfo",
+      "community": 7,
+      "community_name": "FikaProceedEmptyHandsSafetyPatch",
+      "norm_label": "fieldinfo"
+    },
+    {
+      "label": "int",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "patches_fikaproceedemptyhandssafetypatch_cs_int",
+      "community": 7,
+      "community_name": "FikaProceedEmptyHandsSafetyPatch",
+      "norm_label": "int"
+    },
+    {
+      "label": "MethodInfo",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "patches_fikaproceedemptyhandssafetypatch_cs_methodinfo",
+      "community": 7,
+      "community_name": "FikaProceedEmptyHandsSafetyPatch",
+      "norm_label": "methodinfo"
+    },
+    {
+      "label": "Type",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "patches_fikaproceedemptyhandssafetypatch_cs_type",
+      "community": 7,
+      "community_name": "FikaProceedEmptyHandsSafetyPatch",
+      "norm_label": "type"
+    },
+    {
+      "label": "PropertyInfo",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "propertyinfo",
+      "community": 7,
+      "community_name": "FikaProceedEmptyHandsSafetyPatch",
+      "norm_label": "propertyinfo"
     },
     {
       "label": "BaseUnityPlugin",
@@ -310,347 +1462,1790 @@
       "source_location": "",
       "_origin": "ast",
       "id": "baseunityplugin",
-      "community": 2,
+      "community": 8,
+      "community_name": "Plugin",
       "norm_label": "baseunityplugin"
     },
     {
-      "label": ".Awake()",
+      "label": "TRLFixes",
       "file_type": "code",
-      "source_file": "Plugin.cs",
-      "source_location": "L16",
+      "source_file": "mods/TRL-Fixes/modded/Plugin.cs",
+      "source_location": "L4",
+      "type": "namespace",
+      "metadata": {
+        "kind": "csharp_namespace",
+        "namespace": "TRLFixes"
+      },
       "_origin": "ast",
-      "id": "plugin_plugin_awake",
-      "community": 2,
-      "norm_label": ".awake()"
+      "id": "csharp_namespace:dbadf8cf36b7407f",
+      "community": 8,
+      "community_name": "Plugin",
+      "norm_label": "trlfixes"
     },
     {
-      "label": "TRLFixes.csproj",
+      "label": "ManualLogSource",
       "file_type": "code",
-      "source_file": "TRLFixes.csproj",
-      "source_location": null,
+      "source_file": "",
+      "source_location": "",
       "_origin": "ast",
-      "id": "trlfixes",
-      "community": 6,
-      "norm_label": "trlfixes.csproj"
+      "id": "manuallogsource",
+      "community": 8,
+      "community_name": "Plugin",
+      "norm_label": "manuallogsource"
     },
     {
-      "label": "net472",
-      "file_type": "concept",
-      "source_file": "TRLFixes.csproj",
-      "source_location": null,
+      "label": "Plugin.cs",
+      "file_type": "code",
+      "source_file": "mods/TRL-Fixes/modded/Plugin.cs",
+      "source_location": "L1",
       "_origin": "ast",
-      "id": "framework_net472",
-      "community": 6,
-      "norm_label": "net472"
+      "id": "plugin",
+      "community": 8,
+      "community_name": "Plugin",
+      "norm_label": "plugin.cs"
     },
     {
-      "label": "Microsoft.NET.Sdk",
-      "file_type": "concept",
-      "source_file": "TRLFixes.csproj",
-      "source_location": null,
+      "label": "BotStationaryWeaponData",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
       "_origin": "ast",
-      "id": "sdk_microsoft_net_sdk",
-      "community": 6,
-      "norm_label": "microsoft.net.sdk"
+      "id": "botstationaryweapondata",
+      "community": 9,
+      "community_name": ".PatchPrefix",
+      "norm_label": "botstationaryweapondata"
+    },
+    {
+      "label": "EStationaryCommand",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "estationarycommand",
+      "community": 9,
+      "community_name": ".PatchPrefix",
+      "norm_label": "estationarycommand"
+    },
+    {
+      "label": "FirearmController",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "firearmcontroller",
+      "community": 9,
+      "community_name": ".PatchPrefix",
+      "norm_label": "firearmcontroller"
+    },
+    {
+      "label": "GClass81",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "gclass81",
+      "community": 9,
+      "community_name": ".PatchPrefix",
+      "norm_label": "gclass81"
+    },
+    {
+      "label": "PatchPrefix",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "patches_botmountweaponfixpatch_cs_patchprefix",
+      "community": 9,
+      "community_name": ".PatchPrefix",
+      "norm_label": "patchprefix"
+    },
+    {
+      "label": "Player",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "patches_botmountweaponfixpatch_cs_player",
+      "community": 9,
+      "community_name": ".PatchPrefix",
+      "norm_label": "player"
+    },
+    {
+      "label": "StationaryWeapon",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "stationaryweapon",
+      "community": 9,
+      "community_name": ".PatchPrefix",
+      "norm_label": "stationaryweapon"
     }
   ],
   "links": [
     {
-      "relation": "contains",
+      "relation": "references",
       "confidence": "EXTRACTED",
-      "source_file": "Patches/FixFikaReviveRagdollPatch.cs",
-      "source_location": "L10",
+      "source_file": "mods/TRL-Fixes/modded/Patches/DynamicMapsSafetyPatch.cs",
+      "source_location": "L46",
       "weight": 1.0,
-      "source": "patches_fixfikareviveragdollpatch",
-      "target": "patches_fixfikareviveragdollpatch_fixfikareviveragdollpatch",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "Patches/FixFikaReviveRagdollPatch.cs",
-      "source_location": "L8",
-      "weight": 1.0,
-      "source": "patches_fixfikareviveragdollpatch",
-      "target": "patches_fixfikareviveragdollpatch_trlfixes_patches",
+      "context": "attribute",
+      "metadata": {
+        "ref_token": "PatchFinalizer"
+      },
+      "_origin": "ast",
+      "source": "patches_dynamicmapssafetypatch_trlfixes_patches_dynamicmapssafetypatch_finalizer",
+      "target": "patches_dynamicmapssafetypatch_cs_patchfinalizer",
       "confidence_score": 1.0
     },
     {
       "relation": "references",
       "confidence": "EXTRACTED",
-      "source_file": "Patches/FixFikaReviveRagdollPatch.cs",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FikaMainThreadUISafetyPatch.cs",
+      "source_location": "L79",
+      "weight": 1.0,
+      "context": "attribute",
+      "metadata": {
+        "ref_token": "PatchFinalizer"
+      },
+      "_origin": "ast",
+      "source": "patches_fikamainthreaduisafetypatch_trlfixes_patches_fikamainthreaduisafetypatch_finalizer",
+      "target": "patches_fikamainthreaduisafetypatch_cs_patchfinalizer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L25",
+      "weight": 1.0,
+      "context": "attribute",
+      "metadata": {
+        "ref_token": "PatchPostfix"
+      },
+      "_origin": "ast",
+      "source": "patches_botmountweaponfixpatch_trlfixes_patches_botmountweaponfixpatch_patchpostfix",
+      "target": "patchpostfix",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L81",
+      "weight": 1.0,
+      "context": "attribute",
+      "metadata": {
+        "ref_token": "PatchPrefix"
+      },
+      "_origin": "ast",
+      "source": "patches_botmountweaponfixpatch_trlfixes_patches_botstationaryweapondatamethod4patch_patchprefix",
+      "target": "patches_botmountweaponfixpatch_cs_patchprefix",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L115",
+      "weight": 1.0,
+      "context": "attribute",
+      "metadata": {
+        "ref_token": "PatchPrefix"
+      },
+      "_origin": "ast",
+      "source": "patches_botmountweaponfixpatch_trlfixes_patches_fikaplayeroperatestationaryweaponpatch_patchprefix",
+      "target": "patches_botmountweaponfixpatch_cs_patchprefix",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L55",
+      "weight": 1.0,
+      "context": "attribute",
+      "metadata": {
+        "ref_token": "PatchPrefix"
+      },
+      "_origin": "ast",
+      "source": "patches_botmountweaponfixpatch_trlfixes_patches_gclass81shallusenowpatch_patchprefix",
+      "target": "patches_botmountweaponfixpatch_cs_patchprefix",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L148",
+      "weight": 1.0,
+      "context": "attribute",
+      "metadata": {
+        "ref_token": "PatchPrefix"
+      },
+      "_origin": "ast",
+      "source": "patches_botmountweaponfixpatch_trlfixes_patches_playeroperatestationaryweaponpatch_patchprefix",
+      "target": "patches_botmountweaponfixpatch_cs_patchprefix",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FikaMainThreadUISafetyPatch.cs",
+      "source_location": "L53",
+      "weight": 1.0,
+      "context": "attribute",
+      "metadata": {
+        "ref_token": "PatchPrefix"
+      },
+      "_origin": "ast",
+      "source": "patches_fikamainthreaduisafetypatch_trlfixes_patches_fikamainthreaduisafetypatch_prefix",
+      "target": "patches_fikamainthreaduisafetypatch_cs_patchprefix",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotWeaponManagerSafetyPatch.cs",
+      "source_location": "L101",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_botweaponmanagersafetypatch_trlfixes_patches_botweaponmanagersafetypatch_finalizeronweapontaken",
+      "target": "patches_botweaponmanagersafetypatch_trlfixes_patches_botweaponmanagersafetypatch_logthrottled",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotWeaponManagerSafetyPatch.cs",
+      "source_location": "L79",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_botweaponmanagersafetypatch_trlfixes_patches_botweaponmanagersafetypatch_finalizerupdatehandscontroller",
+      "target": "patches_botweaponmanagersafetypatch_trlfixes_patches_botweaponmanagersafetypatch_logthrottled",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotWeaponManagerSafetyPatch.cs",
+      "source_location": "L90",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_botweaponmanagersafetypatch_trlfixes_patches_botweaponmanagersafetypatch_prefixonweapontaken",
+      "target": "patches_botweaponmanagersafetypatch_trlfixes_patches_botweaponmanagersafetypatch_logthrottled",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotWeaponManagerSafetyPatch.cs",
+      "source_location": "L56",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_botweaponmanagersafetypatch_trlfixes_patches_botweaponmanagersafetypatch_prefixupdatehandscontroller",
+      "target": "patches_botweaponmanagersafetypatch_trlfixes_patches_botweaponmanagersafetypatch_logthrottled",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Plugin.cs",
+      "source_location": "L16",
+      "weight": 1.0,
+      "context": "field",
+      "metadata": {
+        "ref_token": "ManualLogSource",
+        "qualified": true,
+        "ref_qualifier": "BepInEx.Logging"
+      },
+      "_origin": "ast",
+      "source": "plugin_trlfixes_plugin",
+      "target": "manuallogsource",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FikaRefreshSlotViewsSafetyPatch.cs",
+      "source_location": "L25",
+      "weight": 1.0,
+      "context": "field",
+      "metadata": {
+        "ref_token": "ConstructorInfo"
+      },
+      "_origin": "ast",
+      "source": "patches_fikarefreshslotviewssafetypatch_trlfixes_patches_fikarefreshslotviewssafetypatch",
+      "target": "constructorinfo",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FikaProceedEmptyHandsSafetyPatch.cs",
+      "source_location": "L34",
+      "weight": 1.0,
+      "context": "field",
+      "metadata": {
+        "ref_token": "FieldInfo"
+      },
+      "_origin": "ast",
+      "source": "patches_fikaproceedemptyhandssafetypatch_trlfixes_patches_fikaproceedemptyhandssafetypatch",
+      "target": "patches_fikaproceedemptyhandssafetypatch_cs_fieldinfo",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FikaRefreshSlotViewsSafetyPatch.cs",
+      "source_location": "L26",
+      "weight": 1.0,
+      "context": "field",
+      "metadata": {
+        "ref_token": "FieldInfo"
+      },
+      "_origin": "ast",
+      "source": "patches_fikarefreshslotviewssafetypatch_trlfixes_patches_fikarefreshslotviewssafetypatch",
+      "target": "patches_fikarefreshslotviewssafetypatch_cs_fieldinfo",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FixFikaReviveRagdollPatch.cs",
       "source_location": "L13",
       "weight": 1.0,
       "context": "field",
-      "source": "patches_fixfikareviveragdollpatch_fixfikareviveragdollpatch",
-      "target": "fieldinfo",
+      "metadata": {
+        "ref_token": "FieldInfo"
+      },
+      "_origin": "ast",
+      "source": "patches_fixfikareviveragdollpatch_trlfixes_patches_fixfikareviveragdollpatch",
+      "target": "patches_fixfikareviveragdollpatch_cs_fieldinfo",
       "confidence_score": 1.0
-    },
-    {
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "Patches/FixFikaReviveRagdollPatch.cs",
-      "source_location": "L15",
-      "weight": 1.0,
-      "source": "patches_fixfikareviveragdollpatch_fixfikareviveragdollpatch",
-      "target": "patches_fixfikareviveragdollpatch_fixfikareviveragdollpatch_enable",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "Patches/FixFikaReviveRagdollPatch.cs",
-      "source_location": "L51",
-      "weight": 1.0,
-      "source": "patches_fixfikareviveragdollpatch_fixfikareviveragdollpatch",
-      "target": "patches_fixfikareviveragdollpatch_fixfikareviveragdollpatch_postfix",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "Patches/FlashbangBotPatch.cs",
-      "source_location": "L9",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "patches_flashbangbotpatch",
-      "target": "patches_flashbangbotpatch_flashbangbotpatch"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "Patches/FlashbangBotPatch.cs",
-      "source_location": "L7",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "patches_flashbangbotpatch",
-      "target": "patches_flashbangbotpatch_trlfixes_patches"
-    },
-    {
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "Patches/FlashbangBotPatch.cs",
-      "source_location": "L11",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "patches_flashbangbotpatch_flashbangbotpatch",
-      "target": "patches_flashbangbotpatch_flashbangbotpatch_enable"
-    },
-    {
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "Patches/FlashbangBotPatch.cs",
-      "source_location": "L34",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "patches_flashbangbotpatch_flashbangbotpatch",
-      "target": "patches_flashbangbotpatch_flashbangbotpatch_prefix"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "Patches/FlashbangRadiusPatch.cs",
-      "source_location": "L10",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "patches_flashbangradiuspatch",
-      "target": "patches_flashbangradiuspatch_flashbangradiuspatch"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "Patches/FlashbangRadiusPatch.cs",
-      "source_location": "L8",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "patches_flashbangradiuspatch",
-      "target": "patches_flashbangradiuspatch_trlfixes_patches"
-    },
-    {
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "Patches/FlashbangRadiusPatch.cs",
-      "source_location": "L12",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "patches_flashbangradiuspatch_flashbangradiuspatch",
-      "target": "patches_flashbangradiuspatch_flashbangradiuspatch_enable"
-    },
-    {
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "Patches/FlashbangRadiusPatch.cs",
-      "source_location": "L30",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "patches_flashbangradiuspatch_flashbangradiuspatch",
-      "target": "patches_flashbangradiuspatch_flashbangradiuspatch_postfix"
     },
     {
       "relation": "references",
       "confidence": "EXTRACTED",
-      "source_file": "Patches/FlashbangRadiusPatch.cs",
-      "source_location": "L30",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FikaMainThreadUISafetyPatch.cs",
+      "source_location": "L18",
       "weight": 1.0,
-      "context": "parameter_type",
-      "confidence_score": 1.0,
-      "source": "patches_flashbangradiuspatch_flashbangradiuspatch_postfix",
-      "target": "iexplosiveitem"
+      "context": "field",
+      "metadata": {
+        "ref_token": "MethodInfo"
+      },
+      "_origin": "ast",
+      "source": "patches_fikamainthreaduisafetypatch_trlfixes_patches_fikamainthreaduisafetypatch",
+      "target": "patches_fikamainthreaduisafetypatch_cs_methodinfo",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
       "confidence": "EXTRACTED",
-      "source_file": "Patches/FlashbangRadiusPatch.cs",
-      "source_location": "L30",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FikaProceedEmptyHandsSafetyPatch.cs",
+      "source_location": "L27",
       "weight": 1.0,
-      "context": "parameter_type",
-      "confidence_score": 1.0,
-      "source": "patches_flashbangradiuspatch_flashbangradiuspatch_postfix",
-      "target": "vector3"
+      "context": "field",
+      "metadata": {
+        "ref_token": "MethodInfo"
+      },
+      "_origin": "ast",
+      "source": "patches_fikaproceedemptyhandssafetypatch_trlfixes_patches_fikaproceedemptyhandssafetypatch",
+      "target": "patches_fikaproceedemptyhandssafetypatch_cs_methodinfo",
+      "confidence_score": 1.0
     },
     {
-      "relation": "contains",
+      "relation": "references",
       "confidence": "EXTRACTED",
-      "source_file": "Patches/PickupAimingSafetyPatch.cs",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FikaProceedEmptyHandsSafetyPatch.cs",
       "source_location": "L29",
       "weight": 1.0,
-      "source": "patches_pickupaimingsafetypatch",
-      "target": "patches_pickupaimingsafetypatch_pickupaimingsafetypatch",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "Patches/PickupAimingSafetyPatch.cs",
-      "source_location": "L6",
-      "weight": 1.0,
-      "source": "patches_pickupaimingsafetypatch",
-      "target": "patches_pickupaimingsafetypatch_trlfixes_patches",
+      "context": "field",
+      "metadata": {
+        "ref_token": "PropertyInfo"
+      },
+      "_origin": "ast",
+      "source": "patches_fikaproceedemptyhandssafetypatch_trlfixes_patches_fikaproceedemptyhandssafetypatch",
+      "target": "propertyinfo",
       "confidence_score": 1.0
     },
     {
       "relation": "references",
       "confidence": "EXTRACTED",
-      "source_file": "Patches/PickupAimingSafetyPatch.cs",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FikaProceedEmptyHandsSafetyPatch.cs",
+      "source_location": "L26",
+      "weight": 1.0,
+      "context": "field",
+      "metadata": {
+        "ref_token": "Type"
+      },
+      "_origin": "ast",
+      "source": "patches_fikaproceedemptyhandssafetypatch_trlfixes_patches_fikaproceedemptyhandssafetypatch",
+      "target": "patches_fikaproceedemptyhandssafetypatch_cs_type",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FikaRefreshSlotViewsSafetyPatch.cs",
+      "source_location": "L24",
+      "weight": 1.0,
+      "context": "field",
+      "metadata": {
+        "ref_token": "Type"
+      },
+      "_origin": "ast",
+      "source": "patches_fikarefreshslotviewssafetypatch_trlfixes_patches_fikarefreshslotviewssafetypatch",
+      "target": "patches_fikarefreshslotviewssafetypatch_cs_type",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/PickupAimingSafetyPatch.cs",
       "source_location": "L33",
       "weight": 1.0,
       "context": "field",
-      "source": "patches_pickupaimingsafetypatch_pickupaimingsafetypatch",
+      "metadata": {
+        "ref_token": "bool"
+      },
+      "_origin": "ast",
+      "source": "patches_pickupaimingsafetypatch_trlfixes_patches_pickupaimingsafetypatch",
       "target": "bool",
       "confidence_score": 1.0
     },
     {
       "relation": "references",
       "confidence": "EXTRACTED",
-      "source_file": "Patches/PickupAimingSafetyPatch.cs",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FikaProceedEmptyHandsSafetyPatch.cs",
+      "source_location": "L20",
+      "weight": 1.0,
+      "context": "field",
+      "metadata": {
+        "ref_token": "byte"
+      },
+      "_origin": "ast",
+      "source": "patches_fikaproceedemptyhandssafetypatch_trlfixes_patches_fikaproceedemptyhandssafetypatch",
+      "target": "byte",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotWeaponManagerSafetyPatch.cs",
+      "source_location": "L17",
+      "weight": 1.0,
+      "context": "field",
+      "metadata": {
+        "ref_token": "float"
+      },
+      "_origin": "ast",
+      "source": "patches_botweaponmanagersafetypatch_trlfixes_patches_botweaponmanagersafetypatch",
+      "target": "patches_botweaponmanagersafetypatch_cs_float",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/PickupAimingSafetyPatch.cs",
       "source_location": "L35",
       "weight": 1.0,
       "context": "field",
-      "source": "patches_pickupaimingsafetypatch_pickupaimingsafetypatch",
-      "target": "float",
+      "metadata": {
+        "ref_token": "float"
+      },
+      "_origin": "ast",
+      "source": "patches_pickupaimingsafetypatch_trlfixes_patches_pickupaimingsafetypatch",
+      "target": "patches_pickupaimingsafetypatch_cs_float",
       "confidence_score": 1.0
     },
     {
       "relation": "references",
       "confidence": "EXTRACTED",
-      "source_file": "Patches/PickupAimingSafetyPatch.cs",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotWeaponManagerSafetyPatch.cs",
+      "source_location": "L18",
+      "weight": 1.0,
+      "context": "field",
+      "metadata": {
+        "ref_token": "int"
+      },
+      "_origin": "ast",
+      "source": "patches_botweaponmanagersafetypatch_trlfixes_patches_botweaponmanagersafetypatch",
+      "target": "patches_botweaponmanagersafetypatch_cs_int",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FikaProceedEmptyHandsSafetyPatch.cs",
+      "source_location": "L21",
+      "weight": 1.0,
+      "context": "field",
+      "metadata": {
+        "ref_token": "int"
+      },
+      "_origin": "ast",
+      "source": "patches_fikaproceedemptyhandssafetypatch_trlfixes_patches_fikaproceedemptyhandssafetypatch",
+      "target": "patches_fikaproceedemptyhandssafetypatch_cs_int",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/PickupAimingSafetyPatch.cs",
       "source_location": "L34",
       "weight": 1.0,
       "context": "field",
-      "source": "patches_pickupaimingsafetypatch_pickupaimingsafetypatch",
-      "target": "int",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "Patches/PickupAimingSafetyPatch.cs",
-      "source_location": "L37",
-      "weight": 1.0,
-      "source": "patches_pickupaimingsafetypatch_pickupaimingsafetypatch",
-      "target": "patches_pickupaimingsafetypatch_pickupaimingsafetypatch_enable",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "Patches/PickupAimingSafetyPatch.cs",
-      "source_location": "L60",
-      "weight": 1.0,
-      "source": "patches_pickupaimingsafetypatch_pickupaimingsafetypatch",
-      "target": "patches_pickupaimingsafetypatch_pickupaimingsafetypatch_finalizer",
+      "metadata": {
+        "ref_token": "int"
+      },
+      "_origin": "ast",
+      "source": "patches_pickupaimingsafetypatch_trlfixes_patches_pickupaimingsafetypatch",
+      "target": "patches_pickupaimingsafetypatch_cs_int",
       "confidence_score": 1.0
     },
     {
       "relation": "references",
       "confidence": "EXTRACTED",
-      "source_file": "Patches/PickupAimingSafetyPatch.cs",
-      "source_location": "L60",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L115",
       "weight": 1.0,
-      "context": "return_type",
-      "source": "patches_pickupaimingsafetypatch_pickupaimingsafetypatch_finalizer",
-      "target": "exception",
+      "context": "parameter_type",
+      "metadata": {
+        "ref_token": "Player",
+        "qualified": true,
+        "ref_qualifier": "EFT"
+      },
+      "_origin": "ast",
+      "source": "patches_botmountweaponfixpatch_trlfixes_patches_fikaplayeroperatestationaryweaponpatch_patchprefix",
+      "target": "patches_botmountweaponfixpatch_cs_player",
       "confidence_score": 1.0
     },
     {
-      "relation": "contains",
+      "relation": "references",
       "confidence": "EXTRACTED",
-      "source_file": "Plugin.cs",
-      "source_location": "L13",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L148",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "plugin",
-      "target": "plugin_plugin"
+      "context": "parameter_type",
+      "metadata": {
+        "ref_token": "Player",
+        "qualified": true,
+        "ref_qualifier": "EFT"
+      },
+      "_origin": "ast",
+      "source": "patches_botmountweaponfixpatch_trlfixes_patches_playeroperatestationaryweaponpatch_patchprefix",
+      "target": "patches_botmountweaponfixpatch_cs_player",
+      "confidence_score": 1.0
     },
     {
-      "relation": "contains",
+      "relation": "references",
       "confidence": "EXTRACTED",
-      "source_file": "Plugin.cs",
-      "source_location": "L5",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L81",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "plugin",
-      "target": "plugin_trlfixes"
+      "context": "parameter_type",
+      "metadata": {
+        "ref_token": "FirearmController",
+        "qualified": true,
+        "ref_qualifier": "Player"
+      },
+      "_origin": "ast",
+      "source": "patches_botmountweaponfixpatch_trlfixes_patches_botstationaryweapondatamethod4patch_patchprefix",
+      "target": "firearmcontroller",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L115",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "metadata": {
+        "ref_token": "EStationaryCommand",
+        "qualified": true,
+        "ref_qualifier": "StationaryPacketStruct"
+      },
+      "_origin": "ast",
+      "source": "patches_botmountweaponfixpatch_trlfixes_patches_fikaplayeroperatestationaryweaponpatch_patchprefix",
+      "target": "estationarycommand",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L148",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "metadata": {
+        "ref_token": "EStationaryCommand",
+        "qualified": true,
+        "ref_qualifier": "StationaryPacketStruct"
+      },
+      "_origin": "ast",
+      "source": "patches_botmountweaponfixpatch_trlfixes_patches_playeroperatestationaryweaponpatch_patchprefix",
+      "target": "estationarycommand",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FikaMainThreadUISafetyPatch.cs",
+      "source_location": "L53",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "metadata": {
+        "ref_token": "Action"
+      },
+      "_origin": "ast",
+      "source": "patches_fikamainthreaduisafetypatch_trlfixes_patches_fikamainthreaduisafetypatch_prefix",
+      "target": "action",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L81",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "metadata": {
+        "ref_token": "BotStationaryWeaponData"
+      },
+      "_origin": "ast",
+      "source": "patches_botmountweaponfixpatch_trlfixes_patches_botstationaryweapondatamethod4patch_patchprefix",
+      "target": "botstationaryweapondata",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotWeaponManagerSafetyPatch.cs",
+      "source_location": "L50",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "metadata": {
+        "ref_token": "BotWeaponManager"
+      },
+      "_origin": "ast",
+      "source": "patches_botweaponmanagersafetypatch_trlfixes_patches_botweaponmanagersafetypatch_prefixupdatehandscontroller",
+      "target": "botweaponmanager",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotWeaponManagerSafetyPatch.cs",
+      "source_location": "L86",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "metadata": {
+        "ref_token": "BotWeaponSelector"
+      },
+      "_origin": "ast",
+      "source": "patches_botweaponmanagersafetypatch_trlfixes_patches_botweaponmanagersafetypatch_prefixonweapontaken",
+      "target": "botweaponselector",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L25",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "metadata": {
+        "ref_token": "ExUsecBrainClass"
+      },
+      "_origin": "ast",
+      "source": "patches_botmountweaponfixpatch_trlfixes_patches_botmountweaponfixpatch_patchpostfix",
+      "target": "exusecbrainclass",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L55",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "metadata": {
+        "ref_token": "GClass81"
+      },
+      "_origin": "ast",
+      "source": "patches_botmountweaponfixpatch_trlfixes_patches_gclass81shallusenowpatch_patchprefix",
+      "target": "gclass81",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FlashbangRadiusPatch.cs",
+      "source_location": "L30",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "metadata": {
+        "ref_token": "IExplosiveItem"
+      },
+      "_origin": "ast",
+      "source": "patches_flashbangradiuspatch_trlfixes_patches_flashbangradiuspatch_postfix",
+      "target": "iexplosiveitem",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotWeaponManagerSafetyPatch.cs",
+      "source_location": "L50",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "metadata": {
+        "ref_token": "IHandsController"
+      },
+      "_origin": "ast",
+      "source": "patches_botweaponmanagersafetypatch_trlfixes_patches_botweaponmanagersafetypatch_prefixupdatehandscontroller",
+      "target": "ihandscontroller",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FikaRefreshSlotViewsSafetyPatch.cs",
+      "source_location": "L67",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "metadata": {
+        "ref_token": "Player"
+      },
+      "_origin": "ast",
+      "source": "patches_fikarefreshslotviewssafetypatch_trlfixes_patches_fikarefreshslotviewssafetypatch_prefix",
+      "target": "patches_fikarefreshslotviewssafetypatch_cs_player",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L115",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "metadata": {
+        "ref_token": "StationaryWeapon"
+      },
+      "_origin": "ast",
+      "source": "patches_botmountweaponfixpatch_trlfixes_patches_fikaplayeroperatestationaryweaponpatch_patchprefix",
+      "target": "stationaryweapon",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L148",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "metadata": {
+        "ref_token": "StationaryWeapon"
+      },
+      "_origin": "ast",
+      "source": "patches_botmountweaponfixpatch_trlfixes_patches_playeroperatestationaryweaponpatch_patchprefix",
+      "target": "stationaryweapon",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FlashbangRadiusPatch.cs",
+      "source_location": "L30",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "metadata": {
+        "ref_token": "Vector3"
+      },
+      "_origin": "ast",
+      "source": "patches_flashbangradiuspatch_trlfixes_patches_flashbangradiuspatch_postfix",
+      "target": "vector3",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotWeaponManagerSafetyPatch.cs",
+      "source_location": "L97",
+      "weight": 1.0,
+      "context": "return_type",
+      "metadata": {
+        "ref_token": "Exception"
+      },
+      "_origin": "ast",
+      "source": "patches_botweaponmanagersafetypatch_trlfixes_patches_botweaponmanagersafetypatch_finalizeronweapontaken",
+      "target": "patches_botweaponmanagersafetypatch_cs_exception",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotWeaponManagerSafetyPatch.cs",
+      "source_location": "L72",
+      "weight": 1.0,
+      "context": "return_type",
+      "metadata": {
+        "ref_token": "Exception"
+      },
+      "_origin": "ast",
+      "source": "patches_botweaponmanagersafetypatch_trlfixes_patches_botweaponmanagersafetypatch_finalizerupdatehandscontroller",
+      "target": "patches_botweaponmanagersafetypatch_cs_exception",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/DynamicMapsSafetyPatch.cs",
+      "source_location": "L46",
+      "weight": 1.0,
+      "context": "return_type",
+      "metadata": {
+        "ref_token": "Exception"
+      },
+      "_origin": "ast",
+      "source": "patches_dynamicmapssafetypatch_trlfixes_patches_dynamicmapssafetypatch_finalizer",
+      "target": "patches_dynamicmapssafetypatch_cs_exception",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FikaMainThreadUISafetyPatch.cs",
+      "source_location": "L79",
+      "weight": 1.0,
+      "context": "return_type",
+      "metadata": {
+        "ref_token": "Exception"
+      },
+      "_origin": "ast",
+      "source": "patches_fikamainthreaduisafetypatch_trlfixes_patches_fikamainthreaduisafetypatch_finalizer",
+      "target": "patches_fikamainthreaduisafetypatch_cs_exception",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/PickupAimingSafetyPatch.cs",
+      "source_location": "L60",
+      "weight": 1.0,
+      "context": "return_type",
+      "metadata": {
+        "ref_token": "Exception"
+      },
+      "_origin": "ast",
+      "source": "patches_pickupaimingsafetypatch_trlfixes_patches_pickupaimingsafetypatch_finalizer",
+      "target": "patches_pickupaimingsafetypatch_cs_exception",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L20",
+      "weight": 1.0,
+      "context": "return_type",
+      "metadata": {
+        "ref_token": "MethodBase"
+      },
+      "_origin": "ast",
+      "source": "patches_botmountweaponfixpatch_trlfixes_patches_botmountweaponfixpatch_gettargetmethod",
+      "target": "patches_botmountweaponfixpatch_cs_methodbase",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L76",
+      "weight": 1.0,
+      "context": "return_type",
+      "metadata": {
+        "ref_token": "MethodBase"
+      },
+      "_origin": "ast",
+      "source": "patches_botmountweaponfixpatch_trlfixes_patches_botstationaryweapondatamethod4patch_gettargetmethod",
+      "target": "patches_botmountweaponfixpatch_cs_methodbase",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L105",
+      "weight": 1.0,
+      "context": "return_type",
+      "metadata": {
+        "ref_token": "MethodBase"
+      },
+      "_origin": "ast",
+      "source": "patches_botmountweaponfixpatch_trlfixes_patches_fikaplayeroperatestationaryweaponpatch_gettargetmethod",
+      "target": "patches_botmountweaponfixpatch_cs_methodbase",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L50",
+      "weight": 1.0,
+      "context": "return_type",
+      "metadata": {
+        "ref_token": "MethodBase"
+      },
+      "_origin": "ast",
+      "source": "patches_botmountweaponfixpatch_trlfixes_patches_gclass81shallusenowpatch_gettargetmethod",
+      "target": "patches_botmountweaponfixpatch_cs_methodbase",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L143",
+      "weight": 1.0,
+      "context": "return_type",
+      "metadata": {
+        "ref_token": "MethodBase"
+      },
+      "_origin": "ast",
+      "source": "patches_botmountweaponfixpatch_trlfixes_patches_playeroperatestationaryweaponpatch_gettargetmethod",
+      "target": "patches_botmountweaponfixpatch_cs_methodbase",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/DynamicMapsSafetyPatch.cs",
+      "source_location": "L20",
+      "weight": 1.0,
+      "context": "return_type",
+      "metadata": {
+        "ref_token": "MethodBase"
+      },
+      "_origin": "ast",
+      "source": "patches_dynamicmapssafetypatch_trlfixes_patches_dynamicmapssafetypatch_gettargetmethod",
+      "target": "patches_dynamicmapssafetypatch_cs_methodbase",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FikaMainThreadUISafetyPatch.cs",
+      "source_location": "L20",
+      "weight": 1.0,
+      "context": "return_type",
+      "metadata": {
+        "ref_token": "MethodBase"
+      },
+      "_origin": "ast",
+      "source": "patches_fikamainthreaduisafetypatch_trlfixes_patches_fikamainthreaduisafetypatch_gettargetmethod",
+      "target": "patches_fikamainthreaduisafetypatch_cs_methodbase",
+      "confidence_score": 1.0
     },
     {
       "relation": "inherits",
       "confidence": "EXTRACTED",
-      "source_file": "Plugin.cs",
-      "source_location": "L13",
+      "source_file": "mods/TRL-Fixes/modded/Plugin.cs",
+      "source_location": "L12",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "plugin_plugin",
-      "target": "baseunityplugin"
+      "metadata": {
+        "ref_token": "BaseUnityPlugin"
+      },
+      "_origin": "ast",
+      "source": "plugin_trlfixes_plugin",
+      "target": "baseunityplugin",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L18",
+      "weight": 1.0,
+      "metadata": {
+        "ref_token": "ModulePatch"
+      },
+      "_origin": "ast",
+      "source": "patches_botmountweaponfixpatch_trlfixes_patches_botmountweaponfixpatch",
+      "target": "modulepatch",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L74",
+      "weight": 1.0,
+      "metadata": {
+        "ref_token": "ModulePatch"
+      },
+      "_origin": "ast",
+      "source": "patches_botmountweaponfixpatch_trlfixes_patches_botstationaryweapondatamethod4patch",
+      "target": "modulepatch",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L103",
+      "weight": 1.0,
+      "metadata": {
+        "ref_token": "ModulePatch"
+      },
+      "_origin": "ast",
+      "source": "patches_botmountweaponfixpatch_trlfixes_patches_fikaplayeroperatestationaryweaponpatch",
+      "target": "modulepatch",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L48",
+      "weight": 1.0,
+      "metadata": {
+        "ref_token": "ModulePatch"
+      },
+      "_origin": "ast",
+      "source": "patches_botmountweaponfixpatch_trlfixes_patches_gclass81shallusenowpatch",
+      "target": "modulepatch",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L141",
+      "weight": 1.0,
+      "metadata": {
+        "ref_token": "ModulePatch"
+      },
+      "_origin": "ast",
+      "source": "patches_botmountweaponfixpatch_trlfixes_patches_playeroperatestationaryweaponpatch",
+      "target": "modulepatch",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/DynamicMapsSafetyPatch.cs",
+      "source_location": "L18",
+      "weight": 1.0,
+      "metadata": {
+        "ref_token": "ModulePatch"
+      },
+      "_origin": "ast",
+      "source": "patches_dynamicmapssafetypatch_trlfixes_patches_dynamicmapssafetypatch",
+      "target": "modulepatch",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FikaMainThreadUISafetyPatch.cs",
+      "source_location": "L16",
+      "weight": 1.0,
+      "metadata": {
+        "ref_token": "ModulePatch"
+      },
+      "_origin": "ast",
+      "source": "patches_fikamainthreaduisafetypatch_trlfixes_patches_fikamainthreaduisafetypatch",
+      "target": "modulepatch",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L103",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_botmountweaponfixpatch",
+      "target": "patches_botmountweaponfixpatch_trlfixes_patches_fikaplayeroperatestationaryweaponpatch",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L141",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_botmountweaponfixpatch",
+      "target": "patches_botmountweaponfixpatch_trlfixes_patches_playeroperatestationaryweaponpatch",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L18",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_botmountweaponfixpatch",
+      "target": "patches_botmountweaponfixpatch_trlfixes_patches_botmountweaponfixpatch",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L48",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_botmountweaponfixpatch",
+      "target": "patches_botmountweaponfixpatch_trlfixes_patches_gclass81shallusenowpatch",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L74",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_botmountweaponfixpatch",
+      "target": "patches_botmountweaponfixpatch_trlfixes_patches_botstationaryweapondatamethod4patch",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L9",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_botmountweaponfixpatch",
+      "target": "csharp_namespace:0aafd919695d2a5b",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotWeaponManagerSafetyPatch.cs",
+      "source_location": "L14",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_botweaponmanagersafetypatch",
+      "target": "patches_botweaponmanagersafetypatch_trlfixes_patches_botweaponmanagersafetypatch",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotWeaponManagerSafetyPatch.cs",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_botweaponmanagersafetypatch",
+      "target": "csharp_namespace:0aafd919695d2a5b",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/DynamicMapsSafetyPatch.cs",
+      "source_location": "L18",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_dynamicmapssafetypatch",
+      "target": "patches_dynamicmapssafetypatch_trlfixes_patches_dynamicmapssafetypatch",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/DynamicMapsSafetyPatch.cs",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_dynamicmapssafetypatch",
+      "target": "csharp_namespace:0aafd919695d2a5b",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FikaMainThreadUISafetyPatch.cs",
+      "source_location": "L16",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_fikamainthreaduisafetypatch",
+      "target": "patches_fikamainthreaduisafetypatch_trlfixes_patches_fikamainthreaduisafetypatch",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FikaMainThreadUISafetyPatch.cs",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_fikamainthreaduisafetypatch",
+      "target": "csharp_namespace:0aafd919695d2a5b",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FikaProceedEmptyHandsSafetyPatch.cs",
+      "source_location": "L18",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_fikaproceedemptyhandssafetypatch",
+      "target": "patches_fikaproceedemptyhandssafetypatch_trlfixes_patches_fikaproceedemptyhandssafetypatch",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FikaProceedEmptyHandsSafetyPatch.cs",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_fikaproceedemptyhandssafetypatch",
+      "target": "csharp_namespace:0aafd919695d2a5b",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FikaRefreshSlotViewsSafetyPatch.cs",
+      "source_location": "L21",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_fikarefreshslotviewssafetypatch",
+      "target": "patches_fikarefreshslotviewssafetypatch_trlfixes_patches_fikarefreshslotviewssafetypatch",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FikaRefreshSlotViewsSafetyPatch.cs",
+      "source_location": "L9",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_fikarefreshslotviewssafetypatch",
+      "target": "csharp_namespace:0aafd919695d2a5b",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FixFikaReviveRagdollPatch.cs",
+      "source_location": "L10",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_fixfikareviveragdollpatch",
+      "target": "patches_fixfikareviveragdollpatch_trlfixes_patches_fixfikareviveragdollpatch",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FixFikaReviveRagdollPatch.cs",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_fixfikareviveragdollpatch",
+      "target": "csharp_namespace:0aafd919695d2a5b",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FlashbangBotPatch.cs",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_flashbangbotpatch",
+      "target": "csharp_namespace:0aafd919695d2a5b",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FlashbangBotPatch.cs",
+      "source_location": "L9",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_flashbangbotpatch",
+      "target": "patches_flashbangbotpatch_trlfixes_patches_flashbangbotpatch",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FlashbangRadiusPatch.cs",
+      "source_location": "L10",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_flashbangradiuspatch",
+      "target": "patches_flashbangradiuspatch_trlfixes_patches_flashbangradiuspatch",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FlashbangRadiusPatch.cs",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_flashbangradiuspatch",
+      "target": "csharp_namespace:0aafd919695d2a5b",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/PickupAimingSafetyPatch.cs",
+      "source_location": "L29",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_pickupaimingsafetypatch",
+      "target": "patches_pickupaimingsafetypatch_trlfixes_patches_pickupaimingsafetypatch",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/PickupAimingSafetyPatch.cs",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_pickupaimingsafetypatch",
+      "target": "csharp_namespace:0aafd919695d2a5b",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Plugin.cs",
+      "source_location": "L12",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "plugin",
+      "target": "plugin_trlfixes_plugin",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Plugin.cs",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "plugin",
+      "target": "csharp_namespace:dbadf8cf36b7407f",
+      "confidence_score": 1.0
     },
     {
       "relation": "method",
       "confidence": "EXTRACTED",
-      "source_file": "Plugin.cs",
-      "source_location": "L22",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L20",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "plugin_plugin",
-      "target": "plugin_plugin_awake"
+      "_origin": "ast",
+      "source": "patches_botmountweaponfixpatch_trlfixes_patches_botmountweaponfixpatch",
+      "target": "patches_botmountweaponfixpatch_trlfixes_patches_botmountweaponfixpatch_gettargetmethod",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L25",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_botmountweaponfixpatch_trlfixes_patches_botmountweaponfixpatch",
+      "target": "patches_botmountweaponfixpatch_trlfixes_patches_botmountweaponfixpatch_patchpostfix",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L76",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_botmountweaponfixpatch_trlfixes_patches_botstationaryweapondatamethod4patch",
+      "target": "patches_botmountweaponfixpatch_trlfixes_patches_botstationaryweapondatamethod4patch_gettargetmethod",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L81",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_botmountweaponfixpatch_trlfixes_patches_botstationaryweapondatamethod4patch",
+      "target": "patches_botmountweaponfixpatch_trlfixes_patches_botstationaryweapondatamethod4patch_patchprefix",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L105",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_botmountweaponfixpatch_trlfixes_patches_fikaplayeroperatestationaryweaponpatch",
+      "target": "patches_botmountweaponfixpatch_trlfixes_patches_fikaplayeroperatestationaryweaponpatch_gettargetmethod",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L115",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_botmountweaponfixpatch_trlfixes_patches_fikaplayeroperatestationaryweaponpatch",
+      "target": "patches_botmountweaponfixpatch_trlfixes_patches_fikaplayeroperatestationaryweaponpatch_patchprefix",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L50",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_botmountweaponfixpatch_trlfixes_patches_gclass81shallusenowpatch",
+      "target": "patches_botmountweaponfixpatch_trlfixes_patches_gclass81shallusenowpatch_gettargetmethod",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L55",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_botmountweaponfixpatch_trlfixes_patches_gclass81shallusenowpatch",
+      "target": "patches_botmountweaponfixpatch_trlfixes_patches_gclass81shallusenowpatch_patchprefix",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L143",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_botmountweaponfixpatch_trlfixes_patches_playeroperatestationaryweaponpatch",
+      "target": "patches_botmountweaponfixpatch_trlfixes_patches_playeroperatestationaryweaponpatch_gettargetmethod",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs",
+      "source_location": "L148",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_botmountweaponfixpatch_trlfixes_patches_playeroperatestationaryweaponpatch",
+      "target": "patches_botmountweaponfixpatch_trlfixes_patches_playeroperatestationaryweaponpatch_patchprefix",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotWeaponManagerSafetyPatch.cs",
+      "source_location": "L107",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_botweaponmanagersafetypatch_trlfixes_patches_botweaponmanagersafetypatch",
+      "target": "patches_botweaponmanagersafetypatch_trlfixes_patches_botweaponmanagersafetypatch_logthrottled",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotWeaponManagerSafetyPatch.cs",
+      "source_location": "L20",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_botweaponmanagersafetypatch_trlfixes_patches_botweaponmanagersafetypatch",
+      "target": "patches_botweaponmanagersafetypatch_trlfixes_patches_botweaponmanagersafetypatch_enable",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotWeaponManagerSafetyPatch.cs",
+      "source_location": "L50",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_botweaponmanagersafetypatch_trlfixes_patches_botweaponmanagersafetypatch",
+      "target": "patches_botweaponmanagersafetypatch_trlfixes_patches_botweaponmanagersafetypatch_prefixupdatehandscontroller",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotWeaponManagerSafetyPatch.cs",
+      "source_location": "L72",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_botweaponmanagersafetypatch_trlfixes_patches_botweaponmanagersafetypatch",
+      "target": "patches_botweaponmanagersafetypatch_trlfixes_patches_botweaponmanagersafetypatch_finalizerupdatehandscontroller",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotWeaponManagerSafetyPatch.cs",
+      "source_location": "L86",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_botweaponmanagersafetypatch_trlfixes_patches_botweaponmanagersafetypatch",
+      "target": "patches_botweaponmanagersafetypatch_trlfixes_patches_botweaponmanagersafetypatch_prefixonweapontaken",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/BotWeaponManagerSafetyPatch.cs",
+      "source_location": "L97",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_botweaponmanagersafetypatch_trlfixes_patches_botweaponmanagersafetypatch",
+      "target": "patches_botweaponmanagersafetypatch_trlfixes_patches_botweaponmanagersafetypatch_finalizeronweapontaken",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/DynamicMapsSafetyPatch.cs",
+      "source_location": "L20",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_dynamicmapssafetypatch_trlfixes_patches_dynamicmapssafetypatch",
+      "target": "patches_dynamicmapssafetypatch_trlfixes_patches_dynamicmapssafetypatch_gettargetmethod",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/DynamicMapsSafetyPatch.cs",
+      "source_location": "L46",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_dynamicmapssafetypatch_trlfixes_patches_dynamicmapssafetypatch",
+      "target": "patches_dynamicmapssafetypatch_trlfixes_patches_dynamicmapssafetypatch_finalizer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FikaMainThreadUISafetyPatch.cs",
+      "source_location": "L20",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_fikamainthreaduisafetypatch_trlfixes_patches_fikamainthreaduisafetypatch",
+      "target": "patches_fikamainthreaduisafetypatch_trlfixes_patches_fikamainthreaduisafetypatch_gettargetmethod",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FikaMainThreadUISafetyPatch.cs",
+      "source_location": "L53",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_fikamainthreaduisafetypatch_trlfixes_patches_fikamainthreaduisafetypatch",
+      "target": "patches_fikamainthreaduisafetypatch_trlfixes_patches_fikamainthreaduisafetypatch_prefix",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FikaMainThreadUISafetyPatch.cs",
+      "source_location": "L79",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_fikamainthreaduisafetypatch_trlfixes_patches_fikamainthreaduisafetypatch",
+      "target": "patches_fikamainthreaduisafetypatch_trlfixes_patches_fikamainthreaduisafetypatch_finalizer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FikaProceedEmptyHandsSafetyPatch.cs",
+      "source_location": "L36",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_fikaproceedemptyhandssafetypatch_trlfixes_patches_fikaproceedemptyhandssafetypatch",
+      "target": "patches_fikaproceedemptyhandssafetypatch_trlfixes_patches_fikaproceedemptyhandssafetypatch_enable",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FikaProceedEmptyHandsSafetyPatch.cs",
+      "source_location": "L99",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_fikaproceedemptyhandssafetypatch_trlfixes_patches_fikaproceedemptyhandssafetypatch",
+      "target": "patches_fikaproceedemptyhandssafetypatch_trlfixes_patches_fikaproceedemptyhandssafetypatch_prefix",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FikaRefreshSlotViewsSafetyPatch.cs",
+      "source_location": "L28",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_fikarefreshslotviewssafetypatch_trlfixes_patches_fikarefreshslotviewssafetypatch",
+      "target": "patches_fikarefreshslotviewssafetypatch_trlfixes_patches_fikarefreshslotviewssafetypatch_enable",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FikaRefreshSlotViewsSafetyPatch.cs",
+      "source_location": "L67",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_fikarefreshslotviewssafetypatch_trlfixes_patches_fikarefreshslotviewssafetypatch",
+      "target": "patches_fikarefreshslotviewssafetypatch_trlfixes_patches_fikarefreshslotviewssafetypatch_prefix",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FixFikaReviveRagdollPatch.cs",
+      "source_location": "L15",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_fixfikareviveragdollpatch_trlfixes_patches_fixfikareviveragdollpatch",
+      "target": "patches_fixfikareviveragdollpatch_trlfixes_patches_fixfikareviveragdollpatch_enable",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FixFikaReviveRagdollPatch.cs",
+      "source_location": "L51",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_fixfikareviveragdollpatch_trlfixes_patches_fixfikareviveragdollpatch",
+      "target": "patches_fixfikareviveragdollpatch_trlfixes_patches_fixfikareviveragdollpatch_postfix",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FlashbangBotPatch.cs",
+      "source_location": "L11",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_flashbangbotpatch_trlfixes_patches_flashbangbotpatch",
+      "target": "patches_flashbangbotpatch_trlfixes_patches_flashbangbotpatch_enable",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FlashbangBotPatch.cs",
+      "source_location": "L34",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_flashbangbotpatch_trlfixes_patches_flashbangbotpatch",
+      "target": "patches_flashbangbotpatch_trlfixes_patches_flashbangbotpatch_prefix",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FlashbangRadiusPatch.cs",
+      "source_location": "L12",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_flashbangradiuspatch_trlfixes_patches_flashbangradiuspatch",
+      "target": "patches_flashbangradiuspatch_trlfixes_patches_flashbangradiuspatch_enable",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/FlashbangRadiusPatch.cs",
+      "source_location": "L30",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_flashbangradiuspatch_trlfixes_patches_flashbangradiuspatch",
+      "target": "patches_flashbangradiuspatch_trlfixes_patches_flashbangradiuspatch_postfix",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/PickupAimingSafetyPatch.cs",
+      "source_location": "L37",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_pickupaimingsafetypatch_trlfixes_patches_pickupaimingsafetypatch",
+      "target": "patches_pickupaimingsafetypatch_trlfixes_patches_pickupaimingsafetypatch_enable",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Patches/PickupAimingSafetyPatch.cs",
+      "source_location": "L60",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "patches_pickupaimingsafetypatch_trlfixes_patches_pickupaimingsafetypatch",
+      "target": "patches_pickupaimingsafetypatch_trlfixes_patches_pickupaimingsafetypatch_finalizer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mods/TRL-Fixes/modded/Plugin.cs",
+      "source_location": "L18",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "plugin_trlfixes_plugin",
+      "target": "plugin_trlfixes_plugin_awake",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
       "confidence": "EXTRACTED",
-      "source_file": "TRLFixes.csproj",
+      "source_file": "mods/TRL-Fixes/modded/TRLFixes.csproj",
       "weight": 1.0,
-      "confidence_score": 1.0,
+      "_origin": "ast",
       "source": "trlfixes",
-      "target": "framework_net472"
+      "target": "framework_net472",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
       "confidence": "EXTRACTED",
-      "source_file": "TRLFixes.csproj",
+      "source_file": "mods/TRL-Fixes/modded/TRLFixes.csproj",
       "weight": 1.0,
-      "confidence_score": 1.0,
+      "_origin": "ast",
       "source": "trlfixes",
-      "target": "sdk_microsoft_net_sdk"
+      "target": "sdk_microsoft_net_sdk",
+      "confidence_score": 1.0
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "8981b11e347a39f2f93e0ce2a66f5b81f24dc17c"
+  "built_at_commit": "623d3a4bc398c6c6efc5dfd1d970f440aac8d739"
 }

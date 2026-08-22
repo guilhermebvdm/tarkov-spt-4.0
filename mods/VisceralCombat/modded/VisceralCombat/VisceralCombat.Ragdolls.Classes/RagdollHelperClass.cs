@@ -1,103 +1,18 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
+using Comfort.Common;
 using EFT;
 using Nexus.BundleLoader;
 using UnityEngine;
+using Random = UnityEngine.Random;
+using Object = UnityEngine.Object;
 using VisceralCombat.Ragdolls.Classes.RootMotion.Dynamics;
 
 namespace VisceralCombat.Ragdolls.Classes;
 
 public static class RagdollHelperClass
 {
-	[CompilerGenerated]
-	private sealed class _003CLerpMappingWeight_003Ed__9 : IEnumerator<object>, IEnumerator, IDisposable
-	{
-		private int _003C_003E1__state;
-
-		private object _003C_003E2__current;
-
-		public PuppetMaster pm;
-
-		public float startValue;
-
-		public float endValue;
-
-		public float duration;
-
-		private float _003CelapsedTime_003E5__1;
-
-		object IEnumerator<object>.Current
-		{
-			[DebuggerHidden]
-			get
-			{
-				return _003C_003E2__current;
-			}
-		}
-
-		object IEnumerator.Current
-		{
-			[DebuggerHidden]
-			get
-			{
-				return _003C_003E2__current;
-			}
-		}
-
-		[DebuggerHidden]
-		public _003CLerpMappingWeight_003Ed__9(int _003C_003E1__state)
-		{
-			this._003C_003E1__state = _003C_003E1__state;
-		}
-
-		[DebuggerHidden]
-		void IDisposable.Dispose()
-		{
-			_003C_003E1__state = -2;
-		}
-
-		private bool MoveNext()
-		{
-			switch (_003C_003E1__state)
-			{
-			default:
-				return false;
-			case 0:
-				_003C_003E1__state = -1;
-				_003CelapsedTime_003E5__1 = 0f;
-				break;
-			case 1:
-				_003C_003E1__state = -1;
-				break;
-			}
-			if (_003CelapsedTime_003E5__1 < duration)
-			{
-				pm.mappingWeight = Mathf.Lerp(startValue, endValue, _003CelapsedTime_003E5__1 / duration);
-				_003CelapsedTime_003E5__1 += Time.deltaTime;
-				_003C_003E2__current = null;
-				_003C_003E1__state = 1;
-				return true;
-			}
-			pm.mappingWeight = endValue;
-			return false;
-		}
-
-		bool IEnumerator.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			return this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		void IEnumerator.Reset()
-		{
-			throw new NotSupportedException();
-		}
-	}
-
 	internal static Dictionary<string, float> limb_chances = new Dictionary<string, float>();
 
 	internal static List<Transform> limbsToCheck = new List<Transform>();
@@ -112,21 +27,147 @@ public static class RagdollHelperClass
 
 	private static float Anim_Stomach2_Length = 7f;
 
-	internal static Vector3 limbSize = new Vector3(0.001f, 0.001f, 0.001f);
+	internal static Vector3 limbSize = new Vector3(0.1f, 0.1f, 0.1f);
+
+	/// <summary>
+	/// Checks if a player is currently in FIKA's Downed / Coma / Bleedout state.
+	/// When downed, FIKA temporarily sets IsAlive = false, but the player can be revived.
+	/// VisceralCombat must NOT apply dismemberment, bone scaling, or ragdoll death setup
+	/// while the player is downed.
+	/// </summary>
+	public static bool IsPlayerDowned(Player player)
+	{
+		if (player == null) return false;
+
+		// 1. Direct check on FikaPlayer / ObservedPlayer / ClientHealthController if Fika is loaded
+		try
+		{
+			if (player is Fika.Core.Main.Players.FikaPlayer fikaPlayer && fikaPlayer.Downed)
+			{
+				return true;
+			}
+			if (player.HealthController is Fika.Core.Main.ClientClasses.ClientHealthController clientHC && clientHC.Downed)
+			{
+				return true;
+			}
+		}
+		catch { }
+
+		// 2. Reflection fallback for any player or health controller with "Downed" property
+		try
+		{
+			System.Reflection.PropertyInfo downedProp = player.GetType().GetProperty("Downed", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
+			if (downedProp != null && downedProp.PropertyType == typeof(bool))
+			{
+				if ((bool)downedProp.GetValue(player)) return true;
+			}
+
+			if (player.HealthController != null)
+			{
+				System.Reflection.PropertyInfo hcDownedProp = player.HealthController.GetType().GetProperty("Downed", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
+				if (hcDownedProp != null && hcDownedProp.PropertyType == typeof(bool))
+				{
+					if ((bool)hcDownedProp.GetValue(player.HealthController)) return true;
+				}
+			}
+		}
+		catch { }
+
+		return false;
+	}
+
+	/// <summary>
+	/// Finds any Player (human player or AI bot) in the active raid matching the given netId (player.Id).
+	/// Valid across both Host and Client in FIKA coop sessions.
+	/// </summary>
+	public static Player FindPlayerByNetId(int netId)
+	{
+		if (!Singleton<GameWorld>.Instantiated || Singleton<GameWorld>.Instance == null) return null;
+
+		var allPlayers = Singleton<GameWorld>.Instance.AllPlayersEverExisted;
+		if (allPlayers != null)
+		{
+			foreach (var iPlayer in allPlayers)
+			{
+				if (iPlayer is Player p && p.Id == netId)
+				{
+					return p;
+				}
+			}
+		}
+		return null;
+	}
+
+	/// <summary>
+	/// Zeroes the muscle weight of muscles belonging to a dismembered limb so that
+	/// PuppetMaster does not attempt to animate a bone scaled to 0.001f during agony,
+	/// which would cause the "giant bot" physics explosion.
+	/// Keywords are lower-case substrings matched against muscle.name (same pattern
+	/// already used in PlayDeathAnimation case 0 and LimbKillPatch).
+	/// </summary>
+	internal static void DisableDismemberedMuscles(PuppetMaster pm, EBodyPart dismemberedPart)
+	{
+		if (pm?.muscles == null) return;
+
+		string[] muscleKeywords = dismemberedPart switch
+		{
+			(EBodyPart)3 => new[] { "humanlupperarm", "humanlforearm", "humanlpalm", "humanlhand", "humanldigit", "lupperarm", "lforearm", "lpalm", "lhand" }, // LeftArm
+			(EBodyPart)4 => new[] { "humanrupperarm", "humanrforearm", "humanrpalm", "humanrhand", "humanrdigit", "rupperarm", "rforearm", "rpalm", "rhand" }, // RightArm
+			(EBodyPart)5 => new[] { "humanlthigh", "humanlleg", "humanlcalf", "humanlfoot", "humanltoe", "lthigh", "lleg", "lcalf", "lfoot" },                // LeftLeg
+			(EBodyPart)6 => new[] { "humanrthigh", "humanrleg", "humanrcalf", "humanrfoot", "humanrtoe", "rthigh", "rleg", "rcalf", "rfoot" },                // RightLeg
+			_ => Array.Empty<string>()
+		};
+
+		if (muscleKeywords.Length == 0) return;
+
+		foreach (Muscle muscle in pm.muscles)
+		{
+			if (muscle == null) continue;
+			string mNameLow = muscle.name?.ToLower() ?? "";
+			string tNameLow = muscle.target?.name?.ToLower() ?? "";
+
+			foreach (string kw in muscleKeywords)
+			{
+				if ((mNameLow.Length > 0 && mNameLow.Contains(kw)) || (tNameLow.Length > 0 && tNameLow.Contains(kw)))
+				{
+					muscle.state.isDisconnected = true;
+					muscle.props.muscleWeight = 0f;
+					muscle.props.pinWeight    = 0f;
+					muscle.props.mappingWeight = 0f;
+					muscle.state.muscleWeightMlp = 0f;
+					muscle.state.pinWeightMlp    = 0f;
+					muscle.state.mappingWeightMlp = 0f;
+					QuickLogger.Log(ELogType.Log, $"DisableDismemberedMuscles: zeroed muscle '{muscle.name}' (target: {muscle.target?.name}) for {dismemberedPart}");
+					break;
+				}
+			}
+		}
+	}
 
 	internal static void PlayDeathAnimation(Player p, PuppetMaster pm, EBodyPart eBodyPart)
 	{
-		//IL_0015: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0017: Invalid comparison between Unknown and I4
-		//IL_0077: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0078: Unknown result type (might be due to invalid IL or missing references)
-		//IL_007a: Unknown result type (might be due to invalid IL or missing references)
-		//IL_007c: Unknown result type (might be due to invalid IL or missing references)
-		//IL_007e: Unknown result type (might be due to invalid IL or missing references)
-		//IL_00a1: Expected I4, but got Unknown
+		VisceralCombat.Combined.Classes.DeathAudioController.HandleDeathAudio(p, eBodyPart);
+
 		if ((int)eBodyPart > 0)
 		{
-			((MonoBehaviour)p).StartCoroutine(Utils.LerpLayerWeight(p, 18, 0f, 1f, VisceralEntry.Instance.AnimSwapDuration.Value));
+			if (VisceralEntry.Instance != null && VisceralEntry.Instance.dismemberedPlayers.Contains(p))
+			{
+				if (p.BodyAnimatorCommon != null)
+				{
+					p.BodyAnimatorCommon.SetLayerWeight(18, 1f);
+				}
+			}
+			else
+			{
+				((MonoBehaviour)p).StartCoroutine(Utils.LerpLayerWeight(p, 18, 0f, 1f, VisceralEntry.Instance.AnimSwapDuration.Value));
+			}
+		}
+		else
+		{
+			if (p.BodyAnimatorCommon != null)
+			{
+				p.BodyAnimatorCommon.enabled = false;
+			}
 		}
 		RuntimeAnimatorController runtimeAnimatorController = p.BodyAnimatorCommon.runtimeAnimatorController;
 		AnimatorOverrideController overrideController = (AnimatorOverrideController)(object)((runtimeAnimatorController is AnimatorOverrideController) ? runtimeAnimatorController : null);
@@ -253,7 +294,7 @@ public static class RagdollHelperClass
 			Utils.SetAnimation(overrideController, "cultist_pray", (AnimationClip)(object)((obj2 is AnimationClip) ? obj2 : null));
 			p.BodyAnimatorCommon.Play("cultist_pray", 18, 0f);
 			p.BodyAnimatorCommon.speed = Random.Range(0.2f, 1f);
-			pm.stateSettings.killDuration = Random.Range(4f, Anim_Stomach2_Length - 17f);
+			pm.stateSettings.killDuration = Random.Range(2.5f, 5f);
 			break;
 		}
 		case 4:
@@ -262,43 +303,128 @@ public static class RagdollHelperClass
 			Utils.SetAnimation(overrideController, "cultist_pray", (AnimationClip)(object)((obj is AnimationClip) ? obj : null));
 			p.BodyAnimatorCommon.Play("cultist_pray", 18, 0f);
 			p.BodyAnimatorCommon.speed = Random.Range(0.2f, 1f);
-			pm.stateSettings.killDuration = Random.Range(4f, Anim_Stomach2_Length - 17f);
+			pm.stateSettings.killDuration = Random.Range(2.5f, 5f);
 			break;
 		}
 		default:
-			QuickLogger.Log(ELogType.Warn, "Body part not detected.");
-			p.BodyAnimatorCommon.enabled = false;
 			break;
 		}
-		GClass855.WaitSeconds((MonoBehaviour)(object)StaticManager.Instance, 17f, (Action)delegate
+
+		float totalDuration = Mathf.Max(3f, pm.stateSettings.killDuration + 1f);
+		if (p != null)
 		{
-			DisableLiveActiveRagdoll(p, pm);
+			DismemberedLimbScaler[] scalers = p.GetComponentsInChildren<DismemberedLimbScaler>(true);
+			foreach (DismemberedLimbScaler scaler in scalers)
+			{
+				if (scaler != null) scaler.transform.localScale = limbSize;
+			}
+		}
+
+		GClass855.WaitSeconds((MonoBehaviour)(object)StaticManager.Instance, totalDuration, (Action)delegate
+		{
+			if (Singleton<GameWorld>.Instantiated)
+			{
+				DisableLiveActiveRagdoll(p, pm);
+			}
 		});
 	}
 
-	[IteratorStateMachine(typeof(_003CLerpMappingWeight_003Ed__9))]
 	internal static IEnumerator LerpMappingWeight(PuppetMaster pm, float startValue, float endValue, float duration)
 	{
-		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
-		return new _003CLerpMappingWeight_003Ed__9(0)
+		float elapsedTime = 0f;
+		while (elapsedTime < duration)
 		{
-			pm = pm,
-			startValue = startValue,
-			endValue = endValue,
-			duration = duration
-		};
+			if (pm == null || ((Component)pm).gameObject == null || !((Component)pm).gameObject.activeInHierarchy) yield break;
+			pm.mappingWeight = Mathf.Lerp(startValue, endValue, elapsedTime / duration);
+			elapsedTime += Time.deltaTime;
+			yield return null;
+		}
+		if (pm != null && ((Component)pm).gameObject != null && ((Component)pm).gameObject.activeInHierarchy)
+		{
+			pm.mappingWeight = endValue;
+		}
+	}
+
+	/// <summary>
+	/// Immediately interrupts an active agony animation when a bot is shot.
+	/// Disables the animator immediately (avoiding T-pose / idle pose reset),
+	/// zeroes muscle/pin weights, sets rigidbodies to physical ragdoll, and deactivates PuppetMaster.
+	/// </summary>
+	internal static void InterruptAgony(Player p, PuppetMaster pm)
+	{
+		if (p == null || pm == null) return;
+		if (VisceralEntry.Instance != null) VisceralEntry.Instance.dismemberedPlayers.Remove(p);
+
+		// 1. Instantly drop all animation pin and muscle spring stiffness to 0 so the body collapses under gravity
+		pm.stateSettings.killDuration = 0f;
+		pm.pinWeight = 0f;
+		pm.muscleWeight = 0f;
+		pm.muscleSpring = 0f;
+		pm.mappingWeight = 1f; // KEEP mappingWeight = 1 so PuppetMaster continuously maps ragdoll physics onto PlayerBody
+		pm.state = PuppetMaster.State.Dead;
+
+		// 2. Disable animator component completely so Layer 0 never evaluates scale 1.0f keyframes on bones
+		if (p.BodyAnimatorCommon != null)
+		{
+			p.BodyAnimatorCommon.enabled = false;
+		}
+
+		DismemberedLimbScaler[] scalers = p.GetComponentsInChildren<DismemberedLimbScaler>(true);
+		foreach (DismemberedLimbScaler scaler in scalers)
+		{
+			if (scaler != null) scaler.transform.localScale = limbSize;
+		}
+
+		// 3. Release non-dismembered rigidbodies to physical ragdoll while disconnecting dismembered muscles
+		Muscle[] muscles = pm.muscles;
+		if (muscles != null)
+		{
+			foreach (Muscle m in muscles)
+			{
+				if (m == null) continue;
+
+				bool isDismembered = (m.rigidbody != null && ParentIsDismembered(m.rigidbody.transform))
+				                     || (m.target != null && ParentIsDismembered(m.target))
+				                     || (m.joint != null && ParentIsDismembered(m.joint.transform));
+
+				if (isDismembered)
+				{
+					m.state.isDisconnected = true;
+					m.props.muscleWeight = 0f;
+					m.props.pinWeight = 0f;
+					m.props.mappingWeight = 0f;
+					m.state.muscleWeightMlp = 0f;
+					m.state.pinWeightMlp = 0f;
+					m.state.mappingWeightMlp = 0f;
+					if (m.rigidbody != null)
+					{
+						m.rigidbody.isKinematic = true;
+						m.rigidbody.detectCollisions = false;
+					}
+				}
+				else
+				{
+					if (m.rigidbody != null)
+					{
+						m.rigidbody.isKinematic = false;
+						m.rigidbody.detectCollisions = true;
+					}
+				}
+			}
+		}
+
+		GClass855.WaitSeconds((MonoBehaviour)(object)StaticManager.Instance, 3f, (Action)delegate
+		{
+			if ((UnityEngine.Object)pm != null && pm.gameObject != null && Singleton<GameWorld>.Instantiated)
+			{
+				pm.gameObject.SetActive(false);
+			}
+		});
 	}
 
 	internal static bool ShouldRagdoll(EBodyPart bodyPartType)
 	{
-		//IL_0017: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0018: Unknown result type (might be due to invalid IL or missing references)
-		//IL_001a: Unknown result type (might be due to invalid IL or missing references)
-		//IL_001c: Unknown result type (might be due to invalid IL or missing references)
-		//IL_001e: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0041: Expected I4, but got Unknown
 		float num = Random.Range(0f, 1f);
-		float num2 = 0f;
 		if ((int)bodyPartType switch
 		{
 			0 => limb_chances.TryGetValue("Head", out var value) ? value : 0f, 
@@ -316,18 +442,136 @@ public static class RagdollHelperClass
 		return false;
 	}
 
+	internal static bool ParentIsDismembered(Transform t)
+	{
+		Transform curr = t;
+		while (curr != null)
+		{
+			if (curr.localScale == limbSize) return true;
+			if (curr.GetComponent<DismemberedLimbScaler>() != null) return true;
+			curr = curr.parent;
+		}
+		return false;
+	}
+
 	internal static void DisableLiveActiveRagdoll(Player p, PuppetMaster pm)
 	{
-		Rigidbody[] componentsInChildren = ((Component)p.PlayerBody).gameObject.GetComponentsInChildren<Rigidbody>();
-		Rigidbody[] array = componentsInChildren;
-		foreach (Rigidbody rb in array)
+		if (VisceralEntry.Instance != null && p != null) VisceralEntry.Instance.dismemberedPlayers.Remove(p);
+
+		if (p != null && p.BodyAnimatorCommon != null)
 		{
-			rb.isKinematic = true;
-			GClass855.WaitSeconds((MonoBehaviour)(object)StaticManager.Instance, 0.06f, (Action)delegate
+			((MonoBehaviour)p).StartCoroutine(Utils.LerpLayerWeight(p, 18, 1f, 0f, 1f));
+		}
+
+		if (pm != null && ((Component)pm).gameObject != null)
+		{
+			((MonoBehaviour)p).StartCoroutine(LerpMappingWeight(pm, pm.mappingWeight, 0f, 1f));
+
+			GClass855.WaitSeconds((MonoBehaviour)(object)StaticManager.Instance, 1.2f, (Action)delegate
 			{
-				rb.isKinematic = false;
+				if (pm != null && ((Component)pm).gameObject != null && Singleton<GameWorld>.Instantiated)
+				{
+					if (p?.PlayerBody != null && ((Component)p.PlayerBody).gameObject != null)
+					{
+						Rigidbody[] componentsInChildren = ((Component)p.PlayerBody).gameObject.GetComponentsInChildren<Rigidbody>();
+						foreach (Rigidbody rb in componentsInChildren)
+						{
+							if (rb == null) continue;
+							if (ParentIsDismembered(rb.transform))
+							{
+								rb.isKinematic = true;
+								rb.detectCollisions = false;
+								continue;
+							}
+							rb.isKinematic = true;
+							GClass855.WaitSeconds((MonoBehaviour)(object)StaticManager.Instance, 0.06f, (Action)delegate
+							{
+								if (rb != null && Singleton<GameWorld>.Instantiated && !ParentIsDismembered(rb.transform))
+								{
+									rb.isKinematic = false;
+								}
+							});
+						}
+					}
+					((Component)pm).gameObject.SetActive(false);
+				}
 			});
 		}
-		((Component)pm).gameObject.SetActive(false);
+	}
+
+	/// <summary>
+	/// Configures a blood particle system to display realistic dark coagulated blood
+	/// and removes white glow / emission overdraw.
+	/// Scope: only the particle prefab subtree (ps.gameObject), never the character root.
+	/// Two shader paths handled:
+	///   - "Particles/VD 3D Blood Shader V14" (custom mod shader): _TintColor + _Color
+	///   - "Legacy Shaders/Particles/Alpha Blended Premultiply" (Unity built-in): low-alpha _Color kills white premultiply glow
+	/// </summary>
+	public static void ApplyDarkCoagulatedBloodFx(ParticleSystem ps)
+	{
+		// Restored to original mod behavior: materials and shaders are preserved untouched
+	}
+
+	public static void ApplyBloodCloudSettings()
+	{
+		if (VisceralEntry.Instance == null || !Comfort.Common.Singleton<Systems.Effects.Effects>.Instantiated) return;
+
+		bool enabled = VisceralEntry.Instance.EnableImpactBloodCloud != null ? VisceralEntry.Instance.EnableImpactBloodCloud.Value : true;
+		int particleCount = VisceralEntry.Instance.ImpactBloodCloudParticleCount != null ? VisceralEntry.Instance.ImpactBloodCloudParticleCount.Value : 10;
+		float scaleMult = VisceralEntry.Instance.ImpactBloodCloudScale != null ? VisceralEntry.Instance.ImpactBloodCloudScale.Value : 1.0f;
+
+		var effectsManager = Comfort.Common.Singleton<Systems.Effects.Effects>.Instance;
+		if (effectsManager == null || effectsManager.EffectsArray == null) return;
+
+		foreach (var effect in effectsManager.EffectsArray)
+		{
+			if (effect == null || effect.MaterialTypes == null) continue;
+			if (System.Array.IndexOf(effect.MaterialTypes, EFT.Ballistics.MaterialType.Body) >= 0)
+			{
+				if (effect.Particles != null)
+				{
+					foreach (var ps in effect.Particles)
+					{
+						if (ps == null) continue;
+						if (!enabled)
+						{
+							ps.MinCount = 0;
+							ps.RandomCountRange = 0;
+						}
+						else
+						{
+							ps.MinCount = particleCount;
+							ps.RandomCountRange = particleCount / 2;
+							ps.UseRandomScale = true;
+							ps.RandomScale = new Vector3(scaleMult, scaleMult, scaleMult);
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+/// <summary>
+/// Enforces RagdollHelperClass.limbSize in Update(), OnAnimatorMove(), and LateUpdate()
+/// on dismembered bone transforms.
+/// OnAnimatorMove() runs IMMEDIATELY after Unity's Animator updates bone transforms in internal animation pass,
+/// preventing the Animator from displaying or overriding the bone scale back to 1.0 during agony.
+/// </summary>
+public class DismemberedLimbScaler : MonoBehaviour
+{
+	private void Update()
+	{
+		transform.localScale = RagdollHelperClass.limbSize;
+	}
+
+	private void OnAnimatorMove()
+	{
+		transform.localScale = RagdollHelperClass.limbSize;
+	}
+
+	private void LateUpdate()
+	{
+		transform.localScale = RagdollHelperClass.limbSize;
 	}
 }

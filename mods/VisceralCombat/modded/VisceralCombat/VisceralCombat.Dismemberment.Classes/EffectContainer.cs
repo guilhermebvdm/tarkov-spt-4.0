@@ -1,7 +1,9 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Nexus.BundleLoader;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace VisceralCombat.Dismemberment.Classes;
 
@@ -31,21 +33,22 @@ public class EffectContainer : MonoBehaviour
 
 	public void Start()
 	{
-		//IL_0080: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0087: Expected O, but got Unknown
 		AssetBundle assetBundle = BundleLoaderPlugin.Instance.GetAssetBundle("blood_3dfx");
 		AssetBundle assetBundle2 = BundleLoaderPlugin.Instance.GetAssetBundle("bloodfx");
 		AssetBundle assetBundle3 = BundleLoaderPlugin.Instance.GetAssetBundle("bloodsfx");
 		AssetBundle assetBundle4 = BundleLoaderPlugin.Instance.GetAssetBundle("gorecaps");
 		AssetBundle assetBundle5 = BundleLoaderPlugin.Instance.GetAssetBundle("active_ragdoll_base");
-		GameObject[] array = assetBundle.LoadAllAssets<GameObject>();
-		GameObject[] array2 = assetBundle2.LoadAllAssets<GameObject>();
-		GameObject[] source = assetBundle3.LoadAllAssets<GameObject>();
-		GameObject[] source2 = assetBundle4.LoadAllAssets<GameObject>();
-		GameObject[] array3 = assetBundle5.LoadAllAssets<GameObject>();
+
+		GameObject[] array = (assetBundle != null) ? assetBundle.LoadAllAssets<GameObject>() : Array.Empty<GameObject>();
+		GameObject[] array2 = (assetBundle2 != null) ? assetBundle2.LoadAllAssets<GameObject>() : Array.Empty<GameObject>();
+		GameObject[] source = (assetBundle3 != null) ? assetBundle3.LoadAllAssets<GameObject>() : Array.Empty<GameObject>();
+		GameObject[] source2 = (assetBundle4 != null) ? assetBundle4.LoadAllAssets<GameObject>() : Array.Empty<GameObject>();
+		GameObject[] array3 = (assetBundle5 != null) ? assetBundle5.LoadAllAssets<GameObject>() : Array.Empty<GameObject>();
+
 		GameObject val = new GameObject("Visceral Combat Effects Container");
 		val.transform.parent = ((Component)this).transform;
 		val.gameObject.SetActive(false);
+
 		blood3dFxEffects = array.Where((GameObject prefab) => (Object)(object)prefab != (Object)null).ToList();
 		if (array.Length > 17 && (Object)(object)array[17] != (Object)null)
 		{
@@ -72,8 +75,7 @@ public class EffectContainer : MonoBehaviour
 			select prefab).ToList();
 		if (array3.Length != 0 && (Object)(object)array3[0] != (Object)null)
 		{
-			GameObject val2 = Object.Instantiate<GameObject>(array3[0]);
-			activeRagdollBase = Object.Instantiate<GameObject>(val2, val.transform);
+			activeRagdollBase = Object.Instantiate<GameObject>(array3[0], val.transform);
 		}
 		bloodSFX = (from prefab in source.Take(3)
 			where (Object)(object)prefab != (Object)null
@@ -83,5 +85,6 @@ public class EffectContainer : MonoBehaviour
 			brainParticles = Object.Instantiate<GameObject>(array2[18], val.transform);
 		}
 		goreCaps = source2.Where((GameObject prefab) => (Object)(object)prefab != (Object)null).ToList();
+		QuickLogger.Log(ELogType.Log, $"EffectContainer initialized: {goreCaps.Count} gorecaps loaded, {blood3dFxEffects.Count} 3D FX loaded.");
 	}
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Reflection;
 using Comfort.Common;
 using EFT;
@@ -71,7 +72,8 @@ internal static class Medroso
             }
 
             var dur = PerksConfig.MedrosoDuration?.Value ?? 6f;
-            hc.AddEffect<ScavengerTremor>(EBodyPart.Head, 0.1f, dur, 1.5f);   // ref: ActiveHealthController.cs:3514
+            hc.AddEffect<ScavengerTremor>(EBodyPart.Head, 0.1f, dur, 1.5f, null, null);
+
             // CR#7 (082): o AddEffect NÃO deduplica efeitos que implementam GInterface331 (cria nova instância).
             // O cooldown é a única trava — então nunca pode ser MENOR que a duração, senão o Tremor EMPILHA.
             _cooldownUntil = Time.time + Mathf.Max(PerksConfig.MedrosoCooldown?.Value ?? 8f, dur);

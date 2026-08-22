@@ -58,6 +58,20 @@ retroativamente (gravada em 02/08, trabalho de 26-27/07): a narrativa completa d
 - **[P-7.2] (aberta 2026-07-11) 🟢 Dívida técnica** (herda a antiga P-5.3): unificar a interpolação em `SpringMath.SpringDamp`, eliminar a reflection que roda a cada frame, `try/catch` nos ~19 patches restantes (só os 6 do Manual Chambering têm), auditar o reset de estado estático entre raids. Adiada porque mexe em código de câmera **já validado** — risco > valor até surgir bug real.
 - **[P-7.3] (aberta 2026-07-11) 🟢 Dívida da revisão do F12** (achados adiados do `PROPRIEDADES-review-01.md`): reordenar as seções (**MP-01-03** — os binds de uma mesma seção estão espalhados pelo `Awake`, ex.: Stance 2 em L766 **e** L1184; reordenar arriscaria quebrar um arquivo de 1700 linhas já validado), rever onde ficam as opções de velocidade (**MP-01-08**) e se a seção da Stance 0 se justifica (**MP-01-10**).
 
+## 2026-08-02 (GMT-3) — Sessão 15: Isolamento no Canal 3 FIKA, Cópia modded-testchannel e Guard de Mãos
+
+- **Análise Forense de Log (`LogOutput.log`)**:
+  - Investigado desync no FIKA coop e erros de transição de mãos ao trocar posturas/recarregar ("R").
+- **Cópia de Testes**:
+  - Criada a cópia `mods/stancesAndCameraPositionSPT4.0.11/modded-testchannel/` mantendo `modded/` original preservado.
+- **Implementações na cópia `modded-testchannel/`**:
+  - **`HandsStateGuard.cs`**: Criado guard `CanChangeStance(player)` para validar se `player.HandsController.Item` não é consumo/medicina e se o inventário está destravado antes de trocar de postura.
+  - **Canal 3 Isolado no FIKA** (`Networking/FikaSyncManager.cs`): Atualizado o envio de pacotes `SendStance` para usar `DeliveryMethod.ReliableUnordered` (Canal 3 desvinculado do inventário no Channel 0) e configurada a constante do Magic Header `TRLS` (`0x534C5254`).
+- **Validação de Build**:
+  - Compilado `CameraRotationMod.csproj` em `modded-testchannel/` com **0 Erros** (`TRL-StancesAndMobility.dll`).
+
+---
+
 ## 2026-05-09 ~16:00 (GMT-3) — Sessão 1: item 002 backlog (criação + reviews)
 
 Tarefas executadas neste dia (em ordem):

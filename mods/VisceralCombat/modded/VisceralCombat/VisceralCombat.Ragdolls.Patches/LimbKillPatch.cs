@@ -1,172 +1,24 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using EFT;
 using EFT.Ballistics;
-using EFT.HealthSystem;
 using EFT.InventoryLogic;
 using SPT.Reflection.Patching;
 using UnityEngine;
-using VisceralCombat.Dismemberment.Classes;
+using Object = UnityEngine.Object;
 using VisceralCombat.Ragdolls.Classes.RootMotion.Dynamics;
+using VisceralCombat.Ragdolls.Classes;
 
 namespace VisceralCombat.Ragdolls.Patches;
 
 public class LimbKillPatch : ModulePatch
 {
-	[CompilerGenerated]
-	private sealed class _003CWatchShot_003Ed__2 : IEnumerator<object>, IEnumerator, IDisposable
+	private static readonly System.Collections.Generic.HashSet<long> _evaluatedLivingVolleys = new System.Collections.Generic.HashSet<long>();
+
+	public static void ClearLivingVolleys()
 	{
-		private int _003C_003E1__state;
-
-		private object _003C_003E2__current;
-
-		public EftBulletClass shot;
-
-		private Collider _003ChitCollider_003E5__1;
-
-		private AmmoItemClass _003CbulletClass_003E5__2;
-
-		private Rigidbody _003Crb_003E5__3;
-
-		private GameObject _003CrootGO_003E5__4;
-
-		private PuppetMaster _003Cpm_003E5__5;
-
-		private GameObject _003CplayerRoot_003E5__6;
-
-		private Player _003Cplayer_003E5__7;
-
-		private string _003CrbName_003E5__8;
-
-		private Muscle[] _003C_003Es__9;
-
-		private int _003C_003Es__10;
-
-		private Muscle _003Cmuscle_003E5__11;
-
-		object IEnumerator<object>.Current
-		{
-			[DebuggerHidden]
-			get
-			{
-				return _003C_003E2__current;
-			}
-		}
-
-		object IEnumerator.Current
-		{
-			[DebuggerHidden]
-			get
-			{
-				return _003C_003E2__current;
-			}
-		}
-
-		[DebuggerHidden]
-		public _003CWatchShot_003Ed__2(int _003C_003E1__state)
-		{
-			this._003C_003E1__state = _003C_003E1__state;
-		}
-
-		[DebuggerHidden]
-		void IDisposable.Dispose()
-		{
-			_003ChitCollider_003E5__1 = null;
-			_003CbulletClass_003E5__2 = null;
-			_003Crb_003E5__3 = null;
-			_003CrootGO_003E5__4 = null;
-			_003Cpm_003E5__5 = null;
-			_003CplayerRoot_003E5__6 = null;
-			_003Cplayer_003E5__7 = null;
-			_003CrbName_003E5__8 = null;
-			_003C_003Es__9 = null;
-			_003Cmuscle_003E5__11 = null;
-			_003C_003E1__state = -2;
-		}
-
-		private bool MoveNext()
-		{
-			switch (_003C_003E1__state)
-			{
-			default:
-				return false;
-			case 0:
-				_003C_003E1__state = -1;
-				break;
-			case 1:
-				_003C_003E1__state = -1;
-				break;
-			}
-			if (!shot.IsShotFinished)
-			{
-				_003C_003E2__current = null;
-				_003C_003E1__state = 1;
-				return true;
-			}
-			_003ChitCollider_003E5__1 = shot.HitCollider;
-			if ((Object)(object)_003ChitCollider_003E5__1 == (Object)null)
-			{
-				return false;
-			}
-			Item ammo = shot.Ammo;
-			_003CbulletClass_003E5__2 = (AmmoItemClass)(object)((ammo is AmmoItemClass) ? ammo : null);
-			if (_003CbulletClass_003E5__2 == null)
-			{
-				return false;
-			}
-			_003Crb_003E5__3 = _003ChitCollider_003E5__1.attachedRigidbody;
-			if ((Object)(object)_003Crb_003E5__3 == (Object)null)
-			{
-				return false;
-			}
-			_003CrootGO_003E5__4 = Utils.GetRootGameObject(((Component)_003Crb_003E5__3).gameObject);
-			_003Cpm_003E5__5 = _003CrootGO_003E5__4.GetComponentInChildren<PuppetMaster>();
-			if ((Object)(object)_003Cpm_003E5__5 == (Object)null || !_003Cpm_003E5__5.initiated)
-			{
-				return false;
-			}
-			_003CplayerRoot_003E5__6 = Utils.GetRootGameObject(((Component)_003Cpm_003E5__5).gameObject);
-			_003Cplayer_003E5__7 = _003CplayerRoot_003E5__6.GetComponentInChildren<Player>();
-			if ((Object)(object)_003Cplayer_003E5__7 == (Object)null || ((GClass3009<GClass3008>)(object)_003Cplayer_003E5__7.ActiveHealthController).IsAlive)
-			{
-				return false;
-			}
-			_003CrbName_003E5__8 = ((Object)((Component)_003Crb_003E5__3).gameObject).name;
-			_003C_003Es__9 = _003Cpm_003E5__5.muscles;
-			for (_003C_003Es__10 = 0; _003C_003Es__10 < _003C_003Es__9.Length; _003C_003Es__10++)
-			{
-				_003Cmuscle_003E5__11 = _003C_003Es__9[_003C_003Es__10];
-				if (_003Cmuscle_003E5__11.name.Contains(_003CrbName_003E5__8))
-				{
-					if (_003CrbName_003E5__8.Contains("Head"))
-					{
-						_003Cpm_003E5__5.stateSettings.killDuration = 0f;
-						_003Cpm_003E5__5.state = PuppetMaster.State.Dead;
-					}
-					_003Cmuscle_003E5__11.props.muscleWeight *= 0.5f;
-				}
-				_003Cmuscle_003E5__11 = null;
-			}
-			_003C_003Es__9 = null;
-			return false;
-		}
-
-		bool IEnumerator.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			return this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		void IEnumerator.Reset()
-		{
-			throw new NotSupportedException();
-		}
+		_evaluatedLivingVolleys.Clear();
 	}
 
 	protected override MethodBase GetTargetMethod()
@@ -177,16 +29,233 @@ public class LimbKillPatch : ModulePatch
 	[PatchPostfix]
 	private static void Postfix(EftBulletClass shot)
 	{
+		if (shot == null) return;
 		((MonoBehaviour)StaticManager.Instance).StartCoroutine(WatchShot(shot));
 	}
 
-	[IteratorStateMachine(typeof(_003CWatchShot_003Ed__2))]
-	private static IEnumerator WatchShot(EftBulletClass shot)
+	private static System.Collections.IEnumerator WatchShot(EftBulletClass shot)
 	{
-		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
-		return new _003CWatchShot_003Ed__2(0)
+		if (shot == null) yield break;
+
+		float timeout = 3.0f;
+		while (!shot.IsShotFinished && timeout > 0f)
 		{
-			shot = shot
-		};
+			timeout -= Time.deltaTime;
+			yield return null;
+		}
+
+		if (shot != null && shot.IsShotFinished && shot.HitCollider != null)
+		{
+			ProcessLimbKill(shot);
+		}
+	}
+
+	public static void ProcessLimbKill(EftBulletClass shot)
+	{
+		if (shot == null || shot.HitCollider == null || shot.Ammo == null) return;
+
+		Collider hitCollider = shot.HitCollider;
+		Rigidbody rb = hitCollider.attachedRigidbody;
+		if (rb == null) return;
+
+		// --- 1. Resolve Player ---
+		// On live bots: BodyPartCollider is present with a direct Player reference.
+		// On dead ragdolls: colliders are physics bones ("Base HumanRThigh1" etc.) —
+		// no BodyPartCollider attached. Use hierarchy fallback.
+		BodyPartCollider bpc = hitCollider.GetComponent<BodyPartCollider>();
+		if (bpc == null) bpc = hitCollider.GetComponentInParent<BodyPartCollider>();
+
+		Player player = null;
+		if (bpc?.Player is Player bpcPlayer)
+		{
+			player = bpcPlayer;
+		}
+
+		if (player == null)
+		{
+			GameObject rootGO = VisceralCombat.Dismemberment.Classes.Utils.GetRootGameObject(rb.gameObject);
+			if (rootGO != null) player = rootGO.GetComponentInChildren<Player>(true);
+		}
+
+		if (player == null) player = rb.gameObject.GetComponentInParent<Player>();
+		if (player == null) return;
+
+		// Only process dead players OR living AI bots when VisceralCombat is present for all players
+		bool isDead = (player.HealthController == null || !player.HealthController.IsAlive) && !RagdollHelperClass.IsPlayerDowned(player);
+		if (!isDead)
+		{
+			if (!player.IsAI || !VisceralEntry.AllPlayersHaveVisceralCombat) return;
+		}
+
+		// --- 2. PuppetMaster: agony interruption ---
+		GameObject rootForPm = VisceralCombat.Dismemberment.Classes.Utils.GetRootGameObject(rb.gameObject);
+		PuppetMaster pm = rootForPm?.GetComponentInChildren<PuppetMaster>(true);
+
+		if (pm != null && pm.muscles != null)
+		{
+			string rbName = rb.gameObject.name;
+			foreach (Muscle muscle in pm.muscles)
+			{
+				if (muscle != null && muscle.name != null && muscle.name.Contains(rbName))
+				{
+					if (rbName.Contains("Head") && pm.mappingWeight > 0.05f)
+					{
+						pm.stateSettings.killDuration = 0f;
+						pm.state = PuppetMaster.State.Dead;
+					}
+					muscle.props.muscleWeight *= 0.5f;
+				}
+			}
+
+			if (pm.mappingWeight > 0.05f)
+			{
+				RagdollHelperClass.InterruptAgony(player, pm);
+			}
+		}
+
+		// --- 3. Post-mortem dismemberment ---
+		// Head and torso are intentionally excluded: "Base HumanHead" is the mesh root —
+		// scaling it to 0.001f collapses the entire body model.
+		if (VisceralEntry.Instance == null || !VisceralEntry.Instance.EnableDismemberment.Value) return;
+
+		EBodyPart? dismemberPart = null;
+		string boneName = null;
+		string capAsset = null;
+		string[] extraAssets = Array.Empty<string>();
+
+		// Strategy A: typed BodyPartColliderType (live-bot shot-detection colliders)
+		if (bpc != null)
+		{
+			switch (bpc.BodyPartColliderType)
+			{
+				case EBodyPartColliderType.LeftUpperArm:
+				case EBodyPartColliderType.LeftForearm:
+					dismemberPart = (EBodyPart)3;
+					boneName = "lforearm1";
+					capAsset = "Arm_LeftCap";
+					extraAssets = new[] { "Arm_L_1", "Arm_L_2" };
+					break;
+				case EBodyPartColliderType.RightUpperArm:
+				case EBodyPartColliderType.RightForearm:
+					dismemberPart = (EBodyPart)4;
+					boneName = "rforearm1";
+					capAsset = "Arm_RightCap";
+					extraAssets = new[] { "Arm_R_1", "Arm_R_2" };
+					break;
+				case EBodyPartColliderType.LeftThigh:
+				case EBodyPartColliderType.LeftCalf:
+					dismemberPart = (EBodyPart)5;
+					boneName = "lthigh1";
+					capAsset = "Leg_LeftCap";
+					extraAssets = new[] { "gore_leg_torn01" };
+					break;
+				case EBodyPartColliderType.RightThigh:
+				case EBodyPartColliderType.RightCalf:
+					dismemberPart = (EBodyPart)6;
+					boneName = "rthigh1";
+					capAsset = "Leg_RightCap";
+					extraAssets = new[] { "gore_leg_torn02" };
+					break;
+			}
+		}
+
+		// Strategy B: ragdoll physics bone names (dead corpses — EFT format: "Base Human[L/R][Part]")
+		// Confirmed from log capture: "Base HumanRThigh1", "Base HumanLCalf", etc.
+		if (dismemberPart == null)
+		{
+			string rbLow = rb.gameObject.name.ToLower();
+
+			if (rbLow.Contains("humanlupperarm") || rbLow.Contains("humanlforearm") ||
+			    rbLow.Contains("humanlarm") || rbLow.Contains("humanl_arm"))
+			{
+				dismemberPart = (EBodyPart)3;
+				boneName = "lforearm1";
+				capAsset = "Arm_LeftCap";
+				extraAssets = new[] { "Arm_L_1", "Arm_L_2" };
+			}
+			else if (rbLow.Contains("humanrupperarm") || rbLow.Contains("humanrforearm") ||
+			         rbLow.Contains("humanrarm") || rbLow.Contains("humanr_arm"))
+			{
+				dismemberPart = (EBodyPart)4;
+				boneName = "rforearm1";
+				capAsset = "Arm_RightCap";
+				extraAssets = new[] { "Arm_R_1", "Arm_R_2" };
+			}
+			else if (rbLow.Contains("humanlthigh") || rbLow.Contains("humanlcalf") ||
+			         rbLow.Contains("humanlleg"))
+			{
+				dismemberPart = (EBodyPart)5;
+				boneName = "lthigh1";
+				capAsset = "Leg_LeftCap";
+				extraAssets = new[] { "gore_leg_torn01" };
+			}
+			else if (rbLow.Contains("humanrthigh") || rbLow.Contains("humanrcalf") ||
+			         rbLow.Contains("humanrleg"))
+			{
+				dismemberPart = (EBodyPart)6;
+				boneName = "rthigh1";
+				capAsset = "Leg_RightCap";
+				extraAssets = new[] { "gore_leg_torn02" };
+			}
+			else if (rbLow.Contains("humanhead") || rbLow.Contains("humanskull"))
+			{
+				// Post-mortem head dismemberment using identical bone/cap parameters to KillPatch case 0.
+				dismemberPart = (EBodyPart)0;
+				boneName = "head";
+				capAsset = $"Head_{UnityEngine.Random.Range(1, 4)}";
+				extraAssets = Array.Empty<string>();
+			}
+		}
+
+		if (!dismemberPart.HasValue || boneName == null) return;
+
+		// --- Living bots/players branch ---
+		// Can ONLY lose LEGS (LeftLeg=5 or RightLeg=6). Arms and Head are strictly dead-only!
+		if (!isDead)
+		{
+			if (dismemberPart.Value != (EBodyPart)5 && dismemberPart.Value != (EBodyPart)6) return;
+
+			// If the living bot already has a LivingDismembermentController, skip further leg dismemberment
+			if (player.GetComponent<VisceralCombat.Dismemberment.Classes.LivingDismembermentController>() != null) return;
+
+			// Buckshot protection: group all pellets from the same trigger pull/shot using (player.Id + shot.FireIndex)
+			long volleyKey = ((long)player.Id << 32) | (uint)(shot.FireIndex & 0xFFFFFFFF);
+			if (_evaluatedLivingVolleys.Contains(volleyKey))
+			{
+				return;
+			}
+			_evaluatedLivingVolleys.Add(volleyKey);
+			if (_evaluatedLivingVolleys.Count > 1000) _evaluatedLivingVolleys.Clear();
+
+			// Fixed 30% chance per hit/shot (counted once per shotgun volley)
+			float livingChance = 0.30f;
+			if (UnityEngine.Random.value <= livingChance)
+			{
+				Transform[] dummyLimbs;
+				VisceralCombat.Combined.Patches.KillPatch.DismemberLimb(player, shot.Direction, dismemberPart.Value, boneName, capAsset, extraAssets, out dummyLimbs);
+				VisceralCombat.Dismemberment.Classes.LivingDismembermentController.Attach(player, dismemberPart.Value);
+				VisceralCombat.Combined.Classes.VisceralNetworkUtils.SendLivingDismemberment(player, dismemberPart.Value, shot.Direction, boneName, capAsset, extraAssets);
+			}
+			return;
+		}
+
+		// --- Dead corpses branch (uses caliber chance table) ---
+		float chance = 0.5f;
+		if (shot.Ammo is AmmoItemClass ammo && !string.IsNullOrEmpty(ammo.Caliber))
+		{
+			string calStr = ammo.Caliber;
+			string cleanCalStr = calStr.StartsWith("Caliber") ? calStr.Substring(7) : calStr;
+			if (VisceralCombat.Combined.Patches.KillPatch.calibers.TryGetValue(calStr, out float foundChance) ||
+			    VisceralCombat.Combined.Patches.KillPatch.calibers.TryGetValue(cleanCalStr, out foundChance))
+			{
+				chance = foundChance;
+			}
+		}
+
+		if (UnityEngine.Random.value <= chance)
+		{
+			Transform[] dummyLimbs;
+			VisceralCombat.Combined.Patches.KillPatch.DismemberLimb(player, shot.Direction, dismemberPart.Value, boneName, capAsset, extraAssets, out dummyLimbs);
+		}
 	}
 }

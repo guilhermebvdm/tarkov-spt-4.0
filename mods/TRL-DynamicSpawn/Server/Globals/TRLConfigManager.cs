@@ -16,6 +16,7 @@ public enum ConfigOperationResult
 public static class TRLConfigManager
 {
     private static readonly string ConfigPath = Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) ?? AppDomain.CurrentDomain.BaseDirectory, "config", "config.json");
+    private static readonly string DefaultConfigPath = Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) ?? AppDomain.CurrentDomain.BaseDirectory, "config", "config.default.json");
     private static bool _isProcessing = false;
 
     private static readonly JsonSerializerOptions JsonOpts = new JsonSerializerOptions
@@ -35,6 +36,11 @@ public static class TRLConfigManager
 
         try
         {
+            if (!File.Exists(DefaultConfigPath) && File.Exists(ConfigPath))
+            {
+                File.Copy(ConfigPath, DefaultConfigPath, overwrite: false);
+            }
+
             if (File.Exists(ConfigPath))
             {
                 var json = await File.ReadAllTextAsync(ConfigPath);
@@ -54,6 +60,45 @@ public static class TRLConfigManager
         catch (Exception ex)
         {
             Console.WriteLine($"[TRL-DynamicSpawn] Error loading config: {ex.Message}");
+            return ConfigOperationResult.Failure;
+        }
+        finally
+        {
+            _isProcessing = false;
+        }
+    }
+
+    public static async Task<ConfigOperationResult> ResetConfig()
+    {
+        if (_isProcessing) return ConfigOperationResult.ActiveProcess;
+        _isProcessing = true;
+
+        try
+        {
+            if (File.Exists(DefaultConfigPath))
+            {
+                var json = await File.ReadAllTextAsync(DefaultConfigPath);
+                var loaded = JsonSerializer.Deserialize<TRLConfig>(json, JsonOpts);
+                if (loaded != null)
+                {
+                    TRLDynamicSpawnServer.Routers.TRLRouters.CurrentConfig = loaded;
+                }
+                else
+                {
+                    TRLDynamicSpawnServer.Routers.TRLRouters.CurrentConfig = new TRLConfig();
+                }
+            }
+            else
+            {
+                TRLDynamicSpawnServer.Routers.TRLRouters.CurrentConfig = new TRLConfig();
+            }
+
+            await SaveConfigInner();
+            return ConfigOperationResult.Success;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[TRL-DynamicSpawn] Error resetting config: {ex.Message}");
             return ConfigOperationResult.Failure;
         }
         finally

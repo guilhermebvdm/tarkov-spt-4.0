@@ -1,5 +1,7 @@
 using System;
 using UnityEngine;
+using Random = UnityEngine.Random;
+using Object = UnityEngine.Object;
 
 namespace VisceralCombat.Ragdolls.Classes.RootMotion;
 
@@ -17,7 +19,7 @@ public static class V3Tools
 		//IL_0003: Unknown result type (might be due to invalid IL or missing references)
 		//IL_0008: Unknown result type (might be due to invalid IL or missing references)
 		//IL_000a: Unknown result type (might be due to invalid IL or missing references)
-		forward = ((Vector3)(ref forward)).normalized;
+		forward = forward.normalized;
 		return (0f - Mathf.Asin(forward.y)) * 57.29578f;
 	}
 
@@ -381,7 +383,7 @@ public static class V3Tools
 			return Vector3.zero;
 		}
 		float num3 = num / num2;
-		return origin + ((Vector3)(ref direction)).normalized * num3;
+		return origin + direction.normalized * num3;
 	}
 
 	public static Vector3 PointToPlane(Vector3 point, Vector3 planePosition, Vector3 planeNormal)

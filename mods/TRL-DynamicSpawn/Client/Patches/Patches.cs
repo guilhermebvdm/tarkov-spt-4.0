@@ -433,8 +433,9 @@ namespace TRLDynamicSpawn.Patches
                 return false;
             }
 
-            var elite = TRLDynamicSpawn.Components.DynamicSpawnManager.Instance?.ServerConfig?.EliteConfig;
+            var elite = ServerConfigProvider.Config?.EliteConfig;
             if (elite != null)
+
             {
                 if (elite.DisableVanillaRogues && name == "exusec")
                 {
@@ -455,16 +456,30 @@ namespace TRLDynamicSpawn.Patches
                         if (elite.LighthouseRogueZoneFilter)
                         {
                             string bossZone = wave.BossZone ?? "";
-                            bool inAllowedZone = bossZone.Contains("Zone_TreatmentContainers")
-                                             || bossZone.Contains("Zone_TreatmentRocks")
-                                             || bossZone.Contains("Zone_TreatmentBeach");
 
-                            if (!inAllowedZone)
+                            // Força 100% de chance para Zone_Blockpost garantindo a dupla de Rogues nas armas montadas da guarita frontal
+                            if (bossZone.Contains("Zone_Blockpost"))
                             {
-                                Plugin.LogSource.LogInfo($"[TRLDynamicSpawn] Rogue wave DISCARDED — zone '{bossZone}' not in Treatment area. Bot slot freed.");
+                                wave.BossChance = 100;
+                            }
+
+                            bool isForbiddenZone = bossZone.Contains("Island")
+                                                || bossZone.Contains("Chalet")
+                                                || bossZone.Contains("Village")
+                                                || bossZone.Contains("Bridge")
+                                                || bossZone.Contains("OldHouse")
+                                                || bossZone.Contains("LongRoad")
+                                                || bossZone.Contains("DestroyedHouse")
+                                                || bossZone.Contains("SniperPeak");
+
+                            if (isForbiddenZone)
+                            {
+                                Plugin.LogSource.LogInfo($"[TRLDynamicSpawn] Rogue wave DISCARDED — zone '{bossZone}' is outside Treatment area. Bot slot freed.");
                                 return false;
                             }
                         }
+
+
 
                         // Count limiter: discard if alive rogues already hit the cap
                         int maxRogues = elite.LighthouseRogueMaxCount;
@@ -521,27 +536,98 @@ namespace TRLDynamicSpawn.Patches
         {
             if (FikaHelper.IsClient()) return true;
 
-            // Bloqueio cirúrgico de Scavs comuns (assault / cursedAssault) vindos do motor nativo do jogo (vanilla/SPT)
+            WildSpawnType botRole = WildSpawnType.assault;
+            if (data != null && data.Profiles != null && data.Profiles.Count > 0 && data.Profiles[0] != null && data.Profiles[0].Info != null && data.Profiles[0].Info.Settings != null)
+            {
+                botRole = data.Profiles[0].Info.Settings.Role;
+            }
 
+            // Bloqueio cirúrgico de Scavs comuns (assault / cursedAssault) vindos do motor nativo do jogo (vanilla/SPT)
             if (!TRLDynamicSpawn.Components.DynamicSpawnManager.IsGeneratingDynamicWave)
             {
-                WildSpawnType role = WildSpawnType.assault;
-                if (data != null && data.Profiles != null && data.Profiles.Count > 0 && data.Profiles[0] != null && data.Profiles[0].Info != null && data.Profiles[0].Info.Settings != null)
-                {
-                    role = data.Profiles[0].Info.Settings.Role;
-                }
-
-                if (role == WildSpawnType.assault || role == WildSpawnType.cursedAssault)
+                if (botRole == WildSpawnType.assault || botRole == WildSpawnType.cursedAssault)
                 {
                     if (TRLDynamicSpawn.Helpers.Settings.enableDebugLogs.Value)
                     {
-                        Plugin.LogSource.LogInfo($"[TRLDynamicSpawn] Blocked Vanilla Assault Scav Spawn ({role}) from native game engine.");
+                        Plugin.LogSource.LogInfo($"[TRLDynamicSpawn] Blocked Vanilla Assault Scav Spawn ({botRole}) from native game engine.");
                     }
                     return false;
                 }
             }
 
+            // Filtro de Zona & Limitador Estrito por Bot para Rogues no Lighthouse
+            var gameWorld = Singleton<GameWorld>.Instance;
+            string mapName = (gameWorld?.LocationId ?? gameWorld?.MainPlayer?.Location ?? "").ToLower();
+
+            if (botRole == WildSpawnType.exUsec && mapName == "lighthouse")
+            {
+                var elite = ServerConfigProvider.Config?.EliteConfig;
+                if (elite != null)
+
+                {
+                    // 1. Filtro de Zona: Bloqueia QUALQUER Rogue fora da área da Unidade de Tratamento
+                    if (elite.LighthouseRogueZoneFilter)
+                    {
+                        string zoneName = botZone?.NameZone ?? "";
+                        bool isForbiddenZone = zoneName.Contains("Island")
+                                            || zoneName.Contains("Chalet")
+                                            || zoneName.Contains("Village")
+                                            || zoneName.Contains("Bridge")
+                                            || zoneName.Contains("OldHouse")
+                                            || zoneName.Contains("LongRoad")
+                                            || zoneName.Contains("DestroyedHouse")
+                                            || zoneName.Contains("SniperPeak");
+
+                        if (isForbiddenZone)
+                        {
+                            if (TRLDynamicSpawn.Helpers.Settings.enableDebugLogs.Value)
+                            {
+                                Plugin.LogSource.LogInfo($"[TRLDynamicSpawn] Rogue spawn attempt in '{zoneName}' DISCARDED (outside Treatment area). Bot slot freed.");
+                            }
+                            return false;
+                        }
+                    }
+
+
+                    // 2. Limitador Estrito por Bot: Impede que qualquer bot passe se a contagem viva já atingiu o limite
+                    int maxRogues = elite.LighthouseRogueMaxCount;
+                    if (maxRogues > 0 && gameWorld != null)
+                    {
+                        int aliveRogues = 0;
+                        var allPlayers = gameWorld.AllAlivePlayersList;
+                        if (allPlayers != null)
+                        {
+                            for (int i = 0; i < allPlayers.Count; i++)
+                            {
+                                var p = allPlayers[i];
+                                if (p != null && p.IsAI && p.HealthController != null && p.HealthController.IsAlive && p.Profile?.Info?.Settings?.Role == WildSpawnType.exUsec)
+                                {
+                                    aliveRogues++;
+                                }
+                            }
+                        }
+
+                        if (aliveRogues >= maxRogues)
+                        {
+                            if (TRLDynamicSpawn.Helpers.Settings.enableDebugLogs.Value)
+                            {
+                                Plugin.LogSource.LogInfo($"[TRLDynamicSpawn] Rogue spawn attempt DISCARDED — cap reached ({aliveRogues}/{maxRogues}). Bot slot freed.");
+                            }
+                            return false;
+                        }
+                    }
+                }
+            }
+
             if (pointsToSpawn != null && pointsToSpawn.Count > 0) return true;
+
+            // Isentar Bosses e Seguidores nativos do jogo das restrições de SafeZone e LoS do mod
+            string roleStr = botRole.ToString();
+            bool isNativeBossOrFollower = roleStr.StartsWith("boss", StringComparison.OrdinalIgnoreCase) || roleStr.StartsWith("follower", StringComparison.OrdinalIgnoreCase);
+            if (isNativeBossOrFollower)
+            {
+                return true;
+            }
 
             try
             {
@@ -549,11 +635,11 @@ namespace TRLDynamicSpawn.Patches
 
                 if (allPoints == null || allPoints.Length == 0) return true;
 
-                var gameWorld = Singleton<GameWorld>.Instance;
                 if (gameWorld == null) return true;
-                string mapName = gameWorld.MainPlayer?.Location?.ToLower() ?? "";
 
-                var mapSettings = TRLDynamicSpawn.Components.DynamicSpawnManager.Instance != null ? MapNameHelper.GetMapSettings(TRLDynamicSpawn.Components.DynamicSpawnManager.Instance.ServerConfig, mapName) : null;
+                var mapSettings = MapNameHelper.GetMapSettings(ServerConfigProvider.Config, mapName);
+
+
                 double safeDist = mapSettings != null ? mapSettings.SafeZoneDistance : (mapName.Contains("factory") || mapName.Contains("sandbox") || mapName.Contains("laboratory") ? 15.0 : 30.0);
 
                 bool enableLos = TRLDynamicSpawn.Helpers.Settings.enableLoSCulling.Value;
@@ -585,9 +671,19 @@ namespace TRLDynamicSpawn.Patches
                     maxDist = mapSettings.SpawnBubbleDistance;
                 }
 
+                bool isSniperBot = SpawnPointHelper.IsSniperRole(botRole);
+
                 foreach (var checkPoint in allPoints)
                 {
                     if (checkPoint == null) continue;
+
+                    bool isSniperPoint = SpawnPointHelper.IsSniperSpawnPoint(checkPoint, botZone);
+
+                    // Regra Estrita Bilateral de Sniper:
+                    // 1. Bots não-sniper NUNCA usam pontos de sniper.
+                    // 2. Bots sniper NUNCA usam pontos normais.
+                    if (!isSniperBot && isSniperPoint) continue;
+                    if (isSniperBot && !isSniperPoint) continue;
 
                     bool insideBubble = true;
                     bool outsideSafe = true;
@@ -609,7 +705,7 @@ namespace TRLDynamicSpawn.Patches
                             if (!closeEnough) insideBubble = false;
                         }
 
-                        float heightLimit = (mapName == "factory4_day" || mapName == "factory4_night" || mapName == "sandbox" || mapName == "sandbox_high") ? 5.0f : 15.0f;
+                        float heightLimit = (mapName.Contains("factory") || mapName.Contains("sandbox") || mapName.Contains("laboratory") || mapName.Contains("interchange") || mapName.Contains("tarkovstreets") || mapName.Contains("shoreline") || mapName.Contains("rezervbase")) ? 4.0f : 15.0f;
                         foreach (var p in players)
                         {
                             float dx = p.Position.x - checkPoint.Position.x;
@@ -646,7 +742,7 @@ namespace TRLDynamicSpawn.Patches
                                     if (isVis)
                                     {
                                         Vector3 headPos = p.MainParts.ContainsKey(BodyPartType.head) ? p.MainParts[BodyPartType.head].Position : p.Position + Vector3.up * 1.5f;
-                                        if (!Physics.Linecast(headPos, checkPoint.Position + Vector3.up * 1f, LayerMaskClass.HighPolyWithTerrainMask))
+                                        if (!Physics.Linecast(headPos, checkPoint.Position + Vector3.up * 1f, LayerMaskClass.HighPolyWithTerrainMask | LayerMaskClass.PlayerStaticCollisionsMask))
                                         {
                                             hasLoS = true;
                                             break;
@@ -756,6 +852,7 @@ namespace TRLDynamicSpawn.Patches
             return true;
         }
     }
+
 }
 
 

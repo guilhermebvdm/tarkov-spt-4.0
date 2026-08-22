@@ -1,5 +1,7 @@
 using System;
 using UnityEngine;
+using Random = UnityEngine.Random;
+using Object = UnityEngine.Object;
 
 namespace VisceralCombat.Ragdolls.Classes.RootMotion.Dynamics;
 
@@ -241,7 +243,7 @@ public class BipedRagdollCreator : RagdollCreator
 			options.chest = false;
 		}
 		Vector3 widthDirection = r.rightUpperArm.position - r.leftUpperArm.position;
-		float magnitude = ((Vector3)(ref widthDirection)).magnitude;
+		float magnitude = widthDirection.magnitude;
 		float proportionAspect = 0.6f;
 		Vector3 val = r.hips.position;
 		float num = Vector3.Distance(r.head.position, r.root.position);
@@ -271,9 +273,9 @@ public class BipedRagdollCreator : RagdollCreator
 		Vector3 val4 = val3 + (val3 - val) * 0.45f;
 		Vector3 val5 = r.head.TransformVector(AxisTools.GetAxisVectorToDirection(r.head, val4 - val3));
 		Vector3 val6 = Vector3.Project(val4 - val3, val5);
-		Vector3 normalized = ((Vector3)(ref val6)).normalized;
+		Vector3 normalized = val6.normalized;
 		val6 = val4 - val3;
-		val4 = val3 + normalized * ((Vector3)(ref val6)).magnitude;
+		val4 = val3 + normalized * val6.magnitude;
 		RagdollCreator.CreateCollider(r.head, val3, val4, options.headCollider, options.colliderLengthOverlap, Vector3.Distance(val3, val4) * 0.8f);
 		float num3 = 0.4f;
 		float num4 = Vector3.Distance(r.leftUpperArm.position, r.leftLowerArm.position) * num3;
@@ -403,9 +405,9 @@ public class BipedRagdollCreator : RagdollCreator
 		Vector3 val2 = hand.position - (lowerArm.position - hand.position) * 0.75f;
 		Vector3 position = hand.position;
 		Vector3 val3 = Vector3.Project(val2 - hand.position, val);
-		Vector3 normalized = ((Vector3)(ref val3)).normalized;
+		Vector3 normalized = val3.normalized;
 		val3 = val2 - hand.position;
-		val2 = position + normalized * ((Vector3)(ref val3)).magnitude;
+		val2 = position + normalized * val3.magnitude;
 		RagdollCreator.CreateCollider(hand, hand.position, val2, options.handColliders, options.colliderLengthOverlap, Vector3.Distance(val2, hand.position) * 0.5f);
 	}
 
@@ -550,14 +552,14 @@ public class BipedRagdollCreator : RagdollCreator
 		//IL_0320: Unknown result type (might be due to invalid IL or missing references)
 		//IL_0325: Unknown result type (might be due to invalid IL or missing references)
 		Vector3 val = upperLeg.position - foot.position;
-		float magnitude = ((Vector3)(ref val)).magnitude;
+		float magnitude = val.magnitude;
 		Vector3 val2 = foot.TransformVector(AxisTools.GetAxisVectorToPoint(foot, GetChildCentroid(foot, foot.position + root.forward) + root.forward * magnitude * 0.2f));
 		Vector3 val3 = foot.position + root.forward * magnitude * 0.25f;
 		Vector3 position = foot.position;
 		val = Vector3.Project(val3 - foot.position, val2);
-		Vector3 normalized = ((Vector3)(ref val)).normalized;
+		Vector3 normalized = val.normalized;
 		val = val3 - foot.position;
-		val3 = position + normalized * ((Vector3)(ref val)).magnitude;
+		val3 = position + normalized * val.magnitude;
 		float num = Vector3.Distance(val3, foot.position) * 0.5f;
 		Vector3 position2 = foot.position;
 		Vector3 val4 = ((Vector3.Dot(root.up, foot.position - root.position) < 0f) ? Vector3.zero : Vector3.Project(position2 - root.up * num * 0.5f - root.position, root.up));
@@ -1040,9 +1042,9 @@ public class BipedRagdollCreator : RagdollCreator
 		Quaternion localRotation = bone1.localRotation;
 		bone1.rotation = Quaternion.FromToRotation(bone1.rotation * (bone2.position - bone1.position), defaultWorldDirection) * bone1.rotation;
 		Vector3 val = bone2.position - bone1.position;
-		Vector3 normalized = ((Vector3)(ref val)).normalized;
+		Vector3 normalized = val.normalized;
 		val = bone3.position - bone2.position;
-		Vector3 normalized2 = ((Vector3)(ref val)).normalized;
+		Vector3 normalized2 = val.normalized;
 		Vector3 worldSwingAxis = -Vector3.Cross(normalized, normalized2);
 		float num = Vector3.Angle(normalized, normalized2);
 		bool flag = Mathf.Abs(Vector3.Dot(normalized, root.up)) > 0.5f;

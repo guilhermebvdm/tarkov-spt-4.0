@@ -5,9 +5,9 @@
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <!-- Manter em sincronia com a versão do [BepInPlugin] em Plugin.cs. Sem isto a DLL sai como 1.0.0.0 —
          e o Forge exige que todas as declarações de versão do mod batam exatamente. -->
-    <Version>1.1.0</Version>
-    <AssemblyVersion>1.1.0.0</AssemblyVersion>
-    <FileVersion>1.1.0.0</FileVersion>
+    <Version>1.3.0</Version>
+    <AssemblyVersion>1.3.0.0</AssemblyVersion>
+    <FileVersion>1.3.0.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,5 +18,6 @@
     <Reference Include="UnityEngine.CoreModule"><HintPath>References\UnityEngine.CoreModule.dll</HintPath></Reference>
     <Reference Include="UnityEngine.PhysicsModule"><HintPath>References\UnityEngine.PhysicsModule.dll</HintPath></Reference>
     <Reference Include="Comfort"><HintPath>References\Comfort.dll</HintPath></Reference>
+    <Reference Include="SPT.Reflection"><HintPath>References\SPT.Reflection.dll</HintPath></Reference>
   </ItemGroup>
 </Project>

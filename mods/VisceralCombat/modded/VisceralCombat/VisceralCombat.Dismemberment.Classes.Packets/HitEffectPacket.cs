@@ -1,5 +1,6 @@
 using Fika.Core.Networking.LiteNetLib.Utils;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace VisceralCombat.Dismemberment.Classes.Packets;
 

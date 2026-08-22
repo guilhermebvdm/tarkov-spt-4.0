@@ -7,6 +7,8 @@ using EFT;
 using Fika.Core.Main.Utils;
 using SPT.Reflection.Patching;
 using UnityEngine;
+using Random = UnityEngine.Random;
+using Object = UnityEngine.Object;
 using VisceralCombat.Combined.Patches;
 using VisceralCombat.Dismemberment.Classes;
 
@@ -35,8 +37,7 @@ public class GameStartedPatch : ModulePatch
 			FieldInfo field2 = typeof(TextureDecalsPainter).GetField("_bloodDecalTexture", BindingFlags.Instance | BindingFlags.NonPublic);
 			FieldInfo field3 = typeof(TextureDecalsPainter).GetField("_vestDecalTexture", BindingFlags.Instance | BindingFlags.NonPublic);
 			FieldInfo field4 = typeof(TextureDecalsPainter).GetField("_backDecalTexture", BindingFlags.Instance | BindingFlags.NonPublic);
-			Vector2 val = default(Vector2);
-			((Vector2)(ref val))._002Ector(0.25f, 0.35f);
+			Vector2 val = new Vector2(0.25f, 0.35f);
 			field.SetValue(texDecals, val);
 			object value = field2.GetValue(texDecals);
 			field3.SetValue(texDecals, value);

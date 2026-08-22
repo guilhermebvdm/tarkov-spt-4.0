@@ -28,3 +28,107 @@
 1. Leitura e análise da stacktrace do log do usuário (`LogOutput Cherno.log`).
 2. Confirmação do fluxo de estado `Busy` do `FirearmController` em decorrência de `NullReferenceException` em `OnAddAmmoInChamber`.
 3. Remoção do arquivo `Patch_PoolManagerCreateItem.cs`.
+
+---
+
+## 2026-08-02 — Sessão 3: Inclusão do DynamicMapsSafetyPatch e FikaMainThreadUISafetyPatch
+
+**Tema central:** Adição de novos patches de proteção e resiliência no `TRL-Fixes` para eliminar erros de mods de terceiros (`DynamicMaps`) e chamadas de UI fora da thread principal no `Fika.Core`.
+
+**Alterações Realizadas:**
+1. **`DynamicMapsSafetyPatch.cs`**:
+   - Refatorado para utilizar **`[PatchFinalizer]`** do Harmony em `DynamicMaps.Patches.GameWorldOnDestroyPatch`, garantindo a supressão absoluta de `NullReferenceException` lançada durante o encerramento da raid (`ModdedMapScreen.OnRaidEnd()`).
+2. **`FikaMainThreadUISafetyPatch.cs`**:
+   - Refatorado para utilizar **`[PatchFinalizer]`** do Harmony em `Fika.Core.UI.FikaUIGlobals.ShowFikaMessage`, capturando e absorvendo erros de chamadas de UI originadas fora da Main Thread do Unity.
+3. **Registro no `Plugin.cs` & `TRLFixes.csproj`**:
+   - Ativados os novos patches no `Awake()`, exposto `Plugin.Log` para os patches e adicionada a referência `SPT.Reflection.dll` no `.csproj`.
+4. **Validação de Build**:
+   - Compilado `TRLFixes.csproj` (`TRL-Fixes.dll`) com **0 Erros e 0 Warnings**.
+
+---
+
+## 2026-08-03 — Sessão 4: Correção de AmbiguousMatchException nos Patches de Segurança
+
+**Tema central:** Raid de teste revelou que ambos os patches da Sessão 3 não carregavam (`Ambiguous match in Harmony patch`), pois os alvos tinham múltiplos overloads com o mesmo nome.
+
+**Diagnóstico (Log da Raid):**
+- `[Error : TRL Fixes] TRL-Fixes: Falha ao carregar FikaMainThreadUISafetyPatch: Ambiguous match in Harmony patch for Fika.Core.UI.FikaUIGlobals:ShowFikaMessage` — dois overloads: `ShowFikaMessage(this PreloaderUI, ...)` e `ShowFikaMessage(this ErrorScreen, ...)`.
+- `DynamicMaps.UI.ModdedMapScreen.OnRaidEnd` ainda gerava `NullReferenceException` pois o `PatchFinalizer` em `GameWorldOnDestroyPatch.PatchPrefix` não captura exceções internas de chamadas feitas dentro do método patchado.
+
+**Alterações Realizadas:**
+1. **`FikaMainThreadUISafetyPatch.cs`**:
+   - Substituído `AccessTools.Method(targetType, "ShowFikaMessage")` por `GetMethods().FirstOrDefault(m => m.GetParameters()[0].ParameterType == preloaderUIType)` para selecionar explicitamente o overload com `PreloaderUI` como primeiro parâmetro.
+   - Adicionado `using System.Linq` e logs de diagnóstico para falha de resolução.
+2. **`DynamicMapsSafetyPatch.cs`**:
+   - Redirecionado alvo primário para `DynamicMaps.UI.ModdedMapScreen.OnRaidEnd` diretamente via `AccessTools.TypeByName`.
+   - Mantido fallback para `GameWorldOnDestroyPatch.PatchPrefix` com warning explícito de que o fallback é ineficaz para suprimir `OnRaidEnd`.
+3. **Validação de Build**:
+   - Compilado `TRLFixes.csproj` com **0 Erros e 0 Warnings**.
+
+**Code Review (CR-01) — Achados em TRL-Fixes:**
+- 🟡 CR-01-04: Fallback do `DynamicMapsSafetyPatch` retorna comportamento ineficaz se `ModdedMapScreen` não existir — considerar retornar `null` em vez de fallback enganoso.
+- 🟢 CR-01-05: `AccessTools.TypeByName("EFT.UI.PreloaderUI")` pode ser substituído por `typeof(PreloaderUI)` para segurança de compilação.
+
+---
+
+## 2026-08-05 — Sessão 5: Migração do Bot Mount Fix Patch de DynamicSpawn para TRL-Fixes
+
+**Tema central:** Migração e centralização do patch de armas estacionárias (`BotMountWeaponFixPatch`) de `TRL-DynamicSpawn` para `TRL-Fixes`.
+
+**Alterações Realizadas:**
+1. **`BotMountWeaponFixPatch.cs`**:
+   - Replicada a lógica do patch `StationaryWeaponPatch` de `TRL-DynamicSpawn` para `TRL-Fixes/modded/Patches/BotMountWeaponFixPatch.cs`.
+   - Intercepta `BotStationaryWeaponData.TakeStationaryWeapon()` prevenindo o travamento da IA de Rogues/Bots ao montar em metralhadoras e metralhadoras pesadas/AGS.
+2. **Ativação no `Plugin.cs`**:
+   - Ativado `BotMountWeaponFixPatch` no `Awake()` do `TRL-Fixes`.
+3. **Validação de Build**:
+   - `TRLFixes.csproj` compilado com **0 Erros e 0 Warnings**.
+
+---
+
+## 2026-08-12 — Sessão 6: BotWeaponManagerSafetyPatch (v1.2.1)
+
+**Tema central:** Adição de patch defensivo global em `BotWeaponManager.UpdateHandsController` para suprimir `NullReferenceException` ao trocar armas de bots durante interrupções assíncronas de IA.
+
+**Alterações Realizadas:**
+1. **`BotWeaponManagerSafetyPatch.cs`**:
+   - Criado patch com `HarmonyPrefix` em `BotWeaponManager.UpdateHandsController(IHandsController handsController, out bool allFine)`.
+   - Valida se `__instance`, `BotOwner_0` ou `WeaponManager` são nulos, e se `handsController is IFirearmHandsController` possui `Item == null`.
+   - Aborta o método vanilla com segurança e define `allFine = false` com log *throttled* (máx 1 log a cada 5s), evitando que eventos de animação órfãos ou bots desmaiados/despawnados provoquem exceções nulas.
+2. **`Plugin.cs` & `TRLFixes.csproj`**:
+   - Ativado o patch `BotWeaponManagerSafetyPatch` no `Awake()`.
+   - Bump de versão SemVer para `1.2.1`.
+3. **Validação de Build**:
+   - Compilado `TRLFixes.csproj` (`TRL-Fixes.dll`) com **0 Erros e 0 Warnings**.
+
+---
+
+## 2026-08-12 — Sessão 7: Resolução do Achado CR-01-01 em BotWeaponSelector.OnWeaponTaken (v1.2.2)
+
+**Tema central:** Correção do achado **CR-01-01** do code review, adicionando proteção contra `NullReferenceException` ao ler `BotOwner_0.BotState` em `BotWeaponSelector.OnWeaponTaken`.
+
+**Alterações Realizadas:**
+1. **`BotWeaponManagerSafetyPatch.cs`**:
+   - Adicionada a proteção `PrefixOnWeaponTaken` interceptando `BotWeaponSelector.OnWeaponTaken`.
+   - Valida se `__instance` ou `__instance.BotOwner_0` é nulo, abortando a execução com `return false;` antes do acesso a `BotOwner_0.BotState`.
+2. **`Plugin.cs` & `TRLFixes.csproj`**:
+   - Bump de versão SemVer para `1.2.2`.
+3. **Validação de Build**:
+   - Compilado `TRLFixes.csproj` (`TRL-Fixes.dll`) com **0 Erros e 0 Warnings**.
+
+---
+
+## 2026-08-12 — Sessão 8: Adição de Harmony Finalizers em BotWeaponManagerSafetyPatch (v1.2.3)
+
+**Tema central:** Inclusão de Harmony Finalizers em `BotWeaponManager.UpdateHandsController` e `BotWeaponSelector.OnWeaponTaken` para capturar e engolir qualquer `NullReferenceException` remanescente em trocas de armas de bots.
+
+**Alterações Realizadas:**
+1. **`BotWeaponManagerSafetyPatch.cs`**:
+   - Adicionados `FinalizerUpdateHandsController` e `FinalizerOnWeaponTaken` com o operador `[HarmonyFinalizer]`.
+   - Se ocorrer qualquer `NullReferenceException` no código vanilla (por exemplo, na arma antiga `ShootController.Item`), o Finalizer captura a exceção, zera o erro com `return null;` e garante `allFine = false`.
+2. **`Plugin.cs` & `TRLFixes.csproj`**:
+   - Bump de versão SemVer para `1.2.3`.
+3. **Validação de Build**:
+   - Compilado `TRLFixes.csproj` (`TRL-Fixes.dll`) com **0 Erros e 0 Warnings**.
+
+

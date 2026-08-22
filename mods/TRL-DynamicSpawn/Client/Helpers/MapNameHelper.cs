@@ -13,7 +13,7 @@ namespace TRLDynamicSpawn.Helpers
             if (string.IsNullOrEmpty(rawMapName)) return "";
             string lower = rawMapName.ToLower();
 
-            if (lower == "bigmap" || lower.Contains("customs")) return "customs";
+            if (lower == "bigmap" || lower.Contains("customs")) return "bigmap";
             if (lower.Contains("factory4_day") || lower == "factory") return "factory4_day";
             if (lower.Contains("factory4_night")) return "factory4_night";
             if (lower.Contains("interchange")) return "interchange";
@@ -41,10 +41,36 @@ namespace TRLDynamicSpawn.Helpers
                 return settings;
 
             // Fallback para variantes de mapa se a chave exata não for encontrada
+            if (key == "bigmap" && config.MapConfigs.TryGetValue("customs", out settings))
+                return settings;
+            if (key == "customs" && config.MapConfigs.TryGetValue("bigmap", out settings))
+                return settings;
             if (key == "factory4_night" && config.MapConfigs.TryGetValue("factory4_day", out settings))
                 return settings;
-            if (key == "sandbox_high" && config.MapConfigs.TryGetValue("sandbox", out settings))
-                return settings;
+
+            return null;
+        }
+
+        /// <summary>
+        /// Obtém com segurança a configuração WaveTimerConfig para o mapa atual vinda do TRLConfig.
+        /// </summary>
+        public static WaveTimerConfig GetWaveTimerConfig(TRLConfig config, string rawMapName)
+        {
+            if (config?.MapTimers == null) return null;
+            string key = Normalize(rawMapName);
+
+            if (config.MapTimers.TryGetValue(key, out var timerConfig))
+                return timerConfig;
+
+            if (key == "bigmap" && config.MapTimers.TryGetValue("customs", out timerConfig))
+                return timerConfig;
+            if (key == "customs" && config.MapTimers.TryGetValue("bigmap", out timerConfig))
+                return timerConfig;
+            if (key == "factory4_night" && config.MapTimers.TryGetValue("factory4_day", out timerConfig))
+                return timerConfig;
+
+            if (config.MapTimers.TryGetValue("global", out timerConfig))
+                return timerConfig;
 
             return null;
         }

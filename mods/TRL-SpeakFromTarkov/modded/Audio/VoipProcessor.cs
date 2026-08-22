@@ -8,9 +8,9 @@ namespace TRL_SpeakFromTarkov.Audio
 {
     public class VoipProcessor : MonoBehaviour
     {
-        public Action<byte[], float> OnOpusDataEncoded;
+        public Action<byte[], float> OnOpusDataEncoded = null!;
         
-        private OpusEncoder encoder;
+        private OpusEncoder encoder = null!;
         private int frameSize;
         
         // VAD e Níveis
@@ -22,7 +22,7 @@ namespace TRL_SpeakFromTarkov.Audio
         private byte[] opusBuffer = new byte[1275]; // Alocação única
         private float vadHoldTimer = 0f;
         
-        public BotVoiceBridge botVoiceBridge { get; set; }
+        public BotVoiceBridge botVoiceBridge { get; set; } = null!;
         
         public bool IsMuted { get; set; }
         public bool IsPTTActive { get; set; }
@@ -41,6 +41,7 @@ namespace TRL_SpeakFromTarkov.Audio
 #pragma warning restore CS0618
                 encoder.Bitrate = VoIPPlugin.OpusBitrate.Value;
                 encoder.Complexity = VoIPPlugin.OpusComplexity.Value;
+                encoder.UseVBR = true;
                 
                 if (VoIPPlugin.OpusFEC.Value)
                 {
@@ -53,6 +54,8 @@ namespace TRL_SpeakFromTarkov.Audio
             }
         }
         
+        public AudioFilter? CapturerFilter { get; set; }
+
         public void ProcessAudio(float[] pcmSamples)
         {
             float rms = GetRMS(pcmSamples);
@@ -72,9 +75,8 @@ namespace TRL_SpeakFromTarkov.Audio
             
             UpdateTransmittingState();
             
-            // Só transmite se estiver ativo E se o nível de áudio for perceptível (RMS > 0.003f).
-            // Isso impede o envio desnecessário de 50 pacotes mudos por segundo sobre o LiteNetLib do FIKA!
-            if (IsTransmitting && RawLevel > 0.003f)
+            // Transmite quando IsTransmitting for ativado pelas regras do modo
+            if (IsTransmitting)
             {
                 float outputVolume = VoIPPlugin.OutputVolume.Value;
                 if (outputVolume != 1.0f)
@@ -96,17 +98,21 @@ namespace TRL_SpeakFromTarkov.Audio
                 return;
             }
 
+            float vadThreshold = VoIPPlugin.VADThreshold != null ? VoIPPlugin.VADThreshold.Value : 0.004f;
+
             switch (CurrentMode)
             {
                 case VoipMode.PTT:
+                    // PTT: Liberdade total se a tecla estiver pressionada (sem restrição de RMS)
                     IsTransmitting = IsPTTActive;
                     break;
-                case VoipMode.Open:
-                    IsTransmitting = true;
-                    break;
+
                 case VoipMode.VAD:
-                    if (RawLevel > VoIPPlugin.VADThreshold.Value)
-                        vadHoldTimer = VoIPPlugin.VADDecayTime.Value;
+                    // VAD: Sincronizado 100% com a calibração do usuário
+                    if (RawLevel >= vadThreshold)
+                    {
+                        vadHoldTimer = VoIPPlugin.VADDecayTime != null ? VoIPPlugin.VADDecayTime.Value : 0.5f;
+                    }
                         
                     if (vadHoldTimer > 0f)
                     {
@@ -118,6 +124,20 @@ namespace TRL_SpeakFromTarkov.Audio
                         IsTransmitting = false;
                     }
                     break;
+
+                case VoipMode.Open:
+                    // OPEN: Filtro inteligente RNNoise se ativo no F12, ou fallback seguro para o limiar VAD
+                    var filter = CapturerFilter;
+                    if (VoIPPlugin.UseRNNoise != null && VoIPPlugin.UseRNNoise.Value && filter != null)
+                    {
+                        IsTransmitting = filter.LastVadProbability >= 0.30f || RawLevel >= vadThreshold;
+                    }
+                    else
+                    {
+                        IsTransmitting = RawLevel >= vadThreshold;
+                    }
+                    break;
+
                 default:
                     IsTransmitting = false;
                     break;
@@ -144,18 +164,9 @@ namespace TRL_SpeakFromTarkov.Audio
                 if (len > 0)
                 {
                     LastOpusBytes = len;
-                    byte[] poolBuffer = System.Buffers.ArrayPool<byte>.Shared.Rent(len);
-                    try
-                    {
-                        Array.Copy(opusBuffer, poolBuffer, len);
-                        byte[] finalData = new byte[len];
-                        Array.Copy(poolBuffer, finalData, len);
-                        OnOpusDataEncoded?.Invoke(finalData, DisplayLevel);
-                    }
-                    finally
-                    {
-                        System.Buffers.ArrayPool<byte>.Shared.Return(poolBuffer);
-                    }
+                    byte[] finalData = new byte[len];
+                    Array.Copy(opusBuffer, finalData, len);
+                    OnOpusDataEncoded?.Invoke(finalData, DisplayLevel);
                 }
             }
             catch (Exception ex)
@@ -174,7 +185,7 @@ namespace TRL_SpeakFromTarkov.Audio
         
         void OnDestroy()
         {
-            encoder = null;
+            encoder = null!;
         }
     }
 }

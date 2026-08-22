@@ -1,0 +1,89 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <RootNamespace>Manimal.LoadAmmoAnim.Fika</RootNamespace>
+    <AssemblyName>LoadAmmoAnimClientFika</AssemblyName>
+    <Nullable>disable</Nullable>
+    <Authors>Manimal</Authors>
+    <AssemblyVersion>$(ModVersion).0</AssemblyVersion>
+    <FileVersion>$(AssemblyVersion)</FileVersion>
+    <Configurations>Debug;Release</Configurations>
+    <Version>$(ModVersion)</Version>
+    <LangVersion>latest</LangVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+
+  <!--
+    Build-order dependency on the main client. ReferenceOutputAssembly=true so
+    we can call into LoadAmmoAnimDriver.StartBundleAnim etc. directly. The Private=false
+    keeps the main DLL out of our publish output so we ship only LoadAmmoAnimClientFika.dll.
+  -->
+  <ItemGroup>
+    <ProjectReference Include="..\LoadAmmoAnimClient\LoadAmmoAnimClient.csproj" Private="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Fika lives at the Fika dev install. matches D:\SPTDevFika layout. -->
+    <Reference Include="Fika.Core">
+      <HintPath>D:\SPTDevFika\BepInEx\plugins\Fika\Fika.Core.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+
+    <Reference Include="0Harmony">
+      <HintPath>D:\SPTDevFika\BepInEx\core\0Harmony.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="spt-common">
+      <HintPath>D:\SPTDevFika\BepInEx\plugins\spt\spt-common.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="spt-reflection">
+      <HintPath>D:\SPTDevFika\BepInEx\plugins\spt\spt-reflection.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>D:\SPTDevFika\EscapeFromTarkov_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="BepInEx">
+      <HintPath>D:\SPTDevFika\BepInEx\core\BepInEx.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Comfort">
+      <HintPath>D:\SPTDevFika\EscapeFromTarkov_Data\Managed\Comfort.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Comfort.Unity">
+      <HintPath>D:\SPTDevFika\EscapeFromTarkov_Data\Managed\Comfort.Unity.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>D:\SPTDevFika\EscapeFromTarkov_Data\Managed\UnityEngine.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>D:\SPTDevFika\EscapeFromTarkov_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="ItemComponent.Types">
+      <HintPath>D:\SPTDevFika\EscapeFromTarkov_Data\Managed\ItemComponent.Types.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="ItemTemplate.Types">
+      <HintPath>D:\SPTDevFika\EscapeFromTarkov_Data\Managed\ItemTemplate.Types.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <!--
+    Drop the built DLL alongside the main client DLL in the BepInEx plugins
+    folder. main client's side-loader picks it up at Awake when Fika is detected.
+  -->
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <MakeDir Directories="D:\SPTDevFika\BepInEx\plugins\LoadAmmoAnim" />
+    <Exec Command="copy &quot;$(TargetPath)&quot; &quot;D:\SPTDevFika\BepInEx\plugins\LoadAmmoAnim\$(TargetFileName)&quot;" />
+  </Target>
+
+</Project>

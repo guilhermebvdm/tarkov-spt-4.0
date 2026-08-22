@@ -1,4 +1,5 @@
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace VisceralCombat.Ragdolls.Classes.RootMotion.Dynamics;
 
@@ -149,7 +150,7 @@ public abstract class Prop : MonoBehaviour
 		((Joint)muscle).connectedBody = null;
 		muscle.targetRotation = Quaternion.identity;
 		JointDrive slerpDrive = default(JointDrive);
-		((JointDrive)(ref slerpDrive)).positionSpring = 0f;
+		slerpDrive.positionSpring = 0f;
 		muscle.slerpDrive = slerpDrive;
 		muscle.xMotion = (ConfigurableJointMotion)2;
 		muscle.yMotion = (ConfigurableJointMotion)2;

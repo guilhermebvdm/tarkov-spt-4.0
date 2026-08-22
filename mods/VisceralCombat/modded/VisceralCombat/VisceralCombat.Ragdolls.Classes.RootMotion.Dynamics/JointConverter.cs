@@ -1,4 +1,5 @@
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace VisceralCombat.Ragdolls.Classes.RootMotion.Dynamics;
 
@@ -96,12 +97,12 @@ public static class JointConverter
 		conf.angularYMotion = (ConfigurableJointMotion)2;
 		conf.angularZMotion = (ConfigurableJointMotion)2;
 		SoftJointLimit linearLimit = default(SoftJointLimit);
-		((SoftJointLimit)(ref linearLimit)).bounciness = 0f;
-		((SoftJointLimit)(ref linearLimit)).limit = src.maxDistance;
+		linearLimit.bounciness = 0f;
+		linearLimit.limit = src.maxDistance;
 		conf.linearLimit = linearLimit;
 		SoftJointLimitSpring linearLimitSpring = default(SoftJointLimitSpring);
-		((SoftJointLimitSpring)(ref linearLimitSpring)).damper = src.damper;
-		((SoftJointLimitSpring)(ref linearLimitSpring)).spring = src.spring;
+		linearLimitSpring.damper = src.damper;
+		linearLimitSpring.spring = src.spring;
 		conf.linearLimitSpring = linearLimitSpring;
 		Object.DestroyImmediate((Object)(object)src);
 	}
@@ -165,8 +166,8 @@ public static class JointConverter
 		//IL_0029: Unknown result type (might be due to invalid IL or missing references)
 		//IL_002c: Unknown result type (might be due to invalid IL or missing references)
 		SoftJointLimit result = default(SoftJointLimit);
-		((SoftJointLimit)(ref result)).limit = 0f - ((JointLimits)(ref src)).max;
-		((SoftJointLimit)(ref result)).bounciness = ((JointLimits)(ref src)).bounciness;
+		result.limit = 0f - src.max;
+		result.bounciness = src.bounciness;
 		return result;
 	}
 
@@ -177,8 +178,8 @@ public static class JointConverter
 		//IL_0029: Unknown result type (might be due to invalid IL or missing references)
 		//IL_002c: Unknown result type (might be due to invalid IL or missing references)
 		SoftJointLimit result = default(SoftJointLimit);
-		((SoftJointLimit)(ref result)).limit = 0f - ((JointLimits)(ref src)).min;
-		((SoftJointLimit)(ref result)).bounciness = ((JointLimits)(ref src)).bounciness;
+		result.limit = 0f - src.min;
+		result.bounciness = src.bounciness;
 		return result;
 	}
 
@@ -191,8 +192,8 @@ public static class JointConverter
 		//IL_003a: Unknown result type (might be due to invalid IL or missing references)
 		//IL_003d: Unknown result type (might be due to invalid IL or missing references)
 		SoftJointLimitSpring result = default(SoftJointLimitSpring);
-		((SoftJointLimitSpring)(ref result)).damper = (useSpring ? spring.damper : 0f);
-		((SoftJointLimitSpring)(ref result)).spring = (useSpring ? spring.spring : 0f);
+		result.damper = (useSpring ? spring.damper : 0f);
+		result.spring = (useSpring ? spring.spring : 0f);
 		return result;
 	}
 
@@ -203,8 +204,8 @@ public static class JointConverter
 		//IL_0028: Unknown result type (might be due to invalid IL or missing references)
 		//IL_002b: Unknown result type (might be due to invalid IL or missing references)
 		SoftJointLimit result = default(SoftJointLimit);
-		((SoftJointLimit)(ref result)).limit = ((SoftJointLimit)(ref src)).limit;
-		((SoftJointLimit)(ref result)).bounciness = ((SoftJointLimit)(ref src)).bounciness;
+		result.limit = src.limit;
+		result.bounciness = src.bounciness;
 		return result;
 	}
 
@@ -215,8 +216,8 @@ public static class JointConverter
 		//IL_0028: Unknown result type (might be due to invalid IL or missing references)
 		//IL_002b: Unknown result type (might be due to invalid IL or missing references)
 		SoftJointLimitSpring result = default(SoftJointLimitSpring);
-		((SoftJointLimitSpring)(ref result)).damper = ((SoftJointLimitSpring)(ref src)).damper;
-		((SoftJointLimitSpring)(ref result)).spring = ((SoftJointLimitSpring)(ref src)).spring;
+		result.damper = src.damper;
+		result.spring = src.spring;
 		return result;
 	}
 }

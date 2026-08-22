@@ -1,5 +1,7 @@
 using System;
 using UnityEngine;
+using Random = UnityEngine.Random;
+using Object = UnityEngine.Object;
 
 namespace VisceralCombat.Ragdolls.Classes.RootMotion.Dynamics;
 
@@ -206,7 +208,7 @@ public static class PhysXTools
 		Quaternion val = rotation * Quaternion.Inverse(lastRotation);
 		float num = 0f;
 		Vector3 zero = Vector3.zero;
-		((Quaternion)(ref val)).ToAngleAxis(ref num, ref zero);
+		val.ToAngleAxis(out num, out zero);
 		if (float.IsNaN(zero.x))
 		{
 			return Vector3.zero;
@@ -240,7 +242,7 @@ public static class PhysXTools
 		Quaternion val = Quaternion.FromToRotation(fromV, toV);
 		float num = 0f;
 		Vector3 zero = Vector3.zero;
-		((Quaternion)(ref val)).ToAngleAxis(ref num, ref zero);
+		val.ToAngleAxis(out num, out zero);
 		Vector3 val2 = num * zero * (MathF.PI / 180f);
 		return val2 / Time.fixedDeltaTime;
 	}

@@ -14,6 +14,8 @@ using Fika.Core.Networking.LiteNetLib;
 using HarmonyLib;
 using SPT.Reflection.Patching;
 using UnityEngine;
+using Random = UnityEngine.Random;
+using Object = UnityEngine.Object;
 using VisceralCombat.Dismemberment.Classes;
 using VisceralCombat.Dismemberment.Classes.Packets;
 using VisceralCombat.Ragdolls.Classes;
@@ -32,33 +34,16 @@ public class KillPatch : ModulePatch
 		return (InventoryController)((obj is InventoryController) ? obj : null);
 	};
 
-	private static Func<Player, BindableStateClass> _getItemInHands = (Player player) => typeof(Player).GetField("_itemInHands", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(player) as BindableStateClass;
-
 	private static Dictionary<EBodyPart, string> bodyparts = new Dictionary<EBodyPart, string>
 	{
-		{
-			(EBodyPart)0,
-			"base humanhead"
-		},
-		{
-			(EBodyPart)3,
-			"lforearm1"
-		},
-		{
-			(EBodyPart)4,
-			"rforearm1"
-		},
-		{
-			(EBodyPart)5,
-			"lthigh1"
-		},
-		{
-			(EBodyPart)6,
-			"rthigh1"
-		}
+		{ (EBodyPart)0, "head" },
+		{ (EBodyPart)3, "lforearm1" },
+		{ (EBodyPart)4, "rforearm1" },
+		{ (EBodyPart)5, "lthigh1" },
+		{ (EBodyPart)6, "rthigh1" }
 	};
 
-	public static string[] limbNames { get; set; }
+	public static string[] limbNames { get; set; } = Array.Empty<string>();
 
 	public int RandomNumberOutcome { get; set; }
 
@@ -70,136 +55,133 @@ public class KillPatch : ModulePatch
 	[PatchPostfix]
 	internal static void Postfix(Player __instance, DamageInfoStruct damageInfo, EBodyPart bodyPartType)
 	{
-		//IL_003a: Unknown result type (might be due to invalid IL or missing references)
-		//IL_003b: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0045: Invalid comparison between Unknown and I4
-		//IL_0047: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0048: Unknown result type (might be due to invalid IL or missing references)
-		//IL_004e: Invalid comparison between Unknown and I4
-		//IL_0050: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0051: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0058: Invalid comparison between Unknown and I4
-		//IL_0092: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0098: Unknown result type (might be due to invalid IL or missing references)
-		//IL_005a: Unknown result type (might be due to invalid IL or missing references)
-		//IL_005b: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0061: Invalid comparison between Unknown and I4
-		//IL_027a: Unknown result type (might be due to invalid IL or missing references)
-		//IL_027b: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0285: Invalid comparison between Unknown and I4
-		//IL_0063: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0064: Unknown result type (might be due to invalid IL or missing references)
-		//IL_006b: Invalid comparison between Unknown and I4
-		//IL_0287: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0288: Unknown result type (might be due to invalid IL or missing references)
-		//IL_028e: Invalid comparison between Unknown and I4
-		//IL_006d: Unknown result type (might be due to invalid IL or missing references)
-		//IL_006e: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0078: Invalid comparison between Unknown and I4
-		//IL_03a1: Unknown result type (might be due to invalid IL or missing references)
-		//IL_03b8: Unknown result type (might be due to invalid IL or missing references)
-		//IL_03b9: Unknown result type (might be due to invalid IL or missing references)
-		//IL_03bb: Unknown result type (might be due to invalid IL or missing references)
-		//IL_03bd: Unknown result type (might be due to invalid IL or missing references)
-		//IL_03bf: Unknown result type (might be due to invalid IL or missing references)
-		//IL_03e2: Expected I4, but got Unknown
-		//IL_02af: Unknown result type (might be due to invalid IL or missing references)
-		//IL_02b0: Unknown result type (might be due to invalid IL or missing references)
-		//IL_02b5: Unknown result type (might be due to invalid IL or missing references)
-		//IL_049f: Unknown result type (might be due to invalid IL or missing references)
-		//IL_04a0: Unknown result type (might be due to invalid IL or missing references)
-		//IL_04a5: Unknown result type (might be due to invalid IL or missing references)
-		//IL_03e9: Unknown result type (might be due to invalid IL or missing references)
-		//IL_03ea: Unknown result type (might be due to invalid IL or missing references)
-		//IL_03ef: Unknown result type (might be due to invalid IL or missing references)
-		//IL_041c: Unknown result type (might be due to invalid IL or missing references)
-		//IL_041d: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0422: Unknown result type (might be due to invalid IL or missing references)
-		//IL_044f: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0450: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0455: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0477: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0478: Unknown result type (might be due to invalid IL or missing references)
-		//IL_047d: Unknown result type (might be due to invalid IL or missing references)
-		//IL_02e9: Unknown result type (might be due to invalid IL or missing references)
-		//IL_02ea: Unknown result type (might be due to invalid IL or missing references)
-		//IL_02ef: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0323: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0324: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0329: Unknown result type (might be due to invalid IL or missing references)
-		//IL_01d8: Unknown result type (might be due to invalid IL or missing references)
-		//IL_01e3: Unknown result type (might be due to invalid IL or missing references)
-		//IL_01e9: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0141: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0365: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0366: Unknown result type (might be due to invalid IL or missing references)
-		//IL_036b: Unknown result type (might be due to invalid IL or missing references)
-		//IL_020f: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0156: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0161: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0167: Unknown result type (might be due to invalid IL or missing references)
-		//IL_018d: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0249: Unknown result type (might be due to invalid IL or missing references)
-		//IL_01c7: Unknown result type (might be due to invalid IL or missing references)
 		Dictionary<Player, int> deadPlayers = VisceralEntry.Instance.deadPlayers;
-		if (__instance.HealthController.IsAlive)
+		if (__instance.HealthController == null || __instance.HealthController.IsAlive || RagdollHelperClass.IsPlayerDowned(__instance))
 		{
 			return;
 		}
-		if (!deadPlayers.ContainsKey(__instance))
+		bool isFirstDeath = !deadPlayers.ContainsKey(__instance);
+		if (isFirstDeath)
 		{
 			deadPlayers.Add(__instance, 0);
 		}
+
+		AmmoTemplate currentAmmoTemplate = null;
+		string caliber = null;
+		if (!string.IsNullOrEmpty(damageInfo.SourceId) && Singleton<ItemFactoryClass>.Instantiated && Singleton<ItemFactoryClass>.Instance.ItemTemplates != null)
+		{
+			if (((Dictionary<MongoID, ItemTemplate>)(object)Singleton<ItemFactoryClass>.Instance.ItemTemplates).TryGetValue((MongoID)damageInfo.SourceId, out ItemTemplate itemTemplate) && itemTemplate != null)
+			{
+				if (itemTemplate is AmmoTemplate ammoTemplate)
+				{
+					currentAmmoTemplate = ammoTemplate;
+					caliber = ammoTemplate.Caliber;
+				}
+			}
+		}
+
+		string cleanCaliber = caliber;
+		if (!string.IsNullOrEmpty(cleanCaliber) && cleanCaliber.StartsWith("Caliber"))
+		{
+			cleanCaliber = cleanCaliber.Substring(7);
+		}
+		float dismemberChance = 0.5f; // Default to 50% if caliber cannot be checked
+		if (!string.IsNullOrEmpty(caliber) && (calibers.TryGetValue(caliber, out var chance) || (!string.IsNullOrEmpty(cleanCaliber) && calibers.TryGetValue(cleanCaliber, out chance))))
+		{
+			dismemberChance = chance;
+		}
+
+		bool isHeavyNoAgony = IsHeavyCaliberNoAgony(caliber, currentAmmoTemplate);
+
 		if ((int)damageInfo.DamageType != 2048 && (int)damageInfo.DamageType != 4 && (int)damageInfo.DamageType != 32 && (int)damageInfo.DamageType != 8 && (int)damageInfo.DamageType != 16 && (int)damageInfo.DamageType != 8192)
 		{
-			if (!((Dictionary<MongoID, ItemTemplate>)(object)Singleton<ItemFactoryClass>.Instance.ItemTemplates).TryGetValue(MongoID.op_Implicit(damageInfo.SourceId), out ItemTemplate value))
+			if (Random.value > dismemberChance)
 			{
-				return;
-			}
-			AmmoTemplate val = (AmmoTemplate)(object)((value is AmmoTemplate) ? value : null);
-			if (val == null || !calibers.ContainsKey(val.Caliber))
-			{
-				return;
-			}
-			calibers.TryGetValue(val.Caliber, out var value2);
-			if (Random.value > value2)
-			{
-				if (!VisceralEntry.Instance.UseActiveRagdolls.Value || !FikaBackendUtils.IsServer)
+				if (isHeavyNoAgony)
 				{
-					return;
-				}
-				if (!VisceralEntry.Instance.OnlyPlayersCanActiveRagdollEnemies.Value)
-				{
-					if (!damageInfo.Player.IsAI && Vector3.Distance(damageInfo.Player.iPlayer.Position, __instance.Position) <= (float)VisceralEntry.Instance.RagdollMaxDistance.Value && RagdollHelperClass.ShouldRagdoll(bodyPartType))
+					// Heavy caliber fatal kill: block agony animation so the corpse reacts pure physically to shot impulse
+					PuppetMaster pm = __instance.gameObject.GetComponentInChildren<PuppetMaster>(true);
+					if (pm != null)
 					{
-						FikaPlayer val2 = (FikaPlayer)(object)((__instance is FikaPlayer) ? __instance : null);
-						int chance = Random.Range(0, 10);
-						if (!VisceralEntry.Instance.dismemberedPlayers.Contains(__instance))
-						{
-							DeathSetup(__instance, bodyPartType, chance);
-						}
+						RagdollHelperClass.InterruptAgony(__instance, pm);
+					}
+					else if (__instance.BodyAnimatorCommon != null)
+					{
+						__instance.BodyAnimatorCommon.enabled = false;
 					}
 				}
-				else if (Vector3.Distance(damageInfo.Player.iPlayer.Position, __instance.Position) <= (float)VisceralEntry.Instance.RagdollMaxDistance.Value && RagdollHelperClass.ShouldRagdoll(bodyPartType))
+				else if (isFirstDeath && VisceralEntry.Instance.UseActiveRagdolls.Value && (FikaBackendUtils.IsServer || FikaBackendUtils.IsSinglePlayer))
 				{
-					FikaPlayer val3 = (FikaPlayer)(object)((__instance is FikaPlayer) ? __instance : null);
-					int chance2 = Random.Range(0, 10);
-					if (!VisceralEntry.Instance.dismemberedPlayers.Contains(__instance))
+					if (!VisceralEntry.Instance.OnlyPlayersCanActiveRagdollEnemies.Value || !damageInfo.Player.IsAI)
 					{
-						DeathSetup(__instance, bodyPartType, chance2);
+						if (Vector3.Distance(damageInfo.Player.iPlayer.Position, __instance.Position) <= (float)VisceralEntry.Instance.RagdollMaxDistance.Value && RagdollHelperClass.ShouldRagdoll(bodyPartType))
+						{
+							int chance2 = Random.Range(0, 10);
+							if (!VisceralEntry.Instance.dismemberedPlayers.Contains(__instance))
+							{
+								DeathSetup(__instance, bodyPartType, chance2);
+							}
+						}
 					}
 				}
 				return;
 			}
 		}
+
 		if (!VisceralEntry.Instance.EnableDismemberment.Value)
 		{
 			return;
 		}
+
 		Transform[] affectedLimbs = null;
 		string value3;
-		if ((int)damageInfo.DamageType == 2048 || (int)damageInfo.DamageType == 4)
+
+		// If hit in specific dismemberable bodypart, dismember that bodypart
+		if (bodyparts.TryGetValue(bodyPartType, out value3))
 		{
+			switch ((int)bodyPartType)
+			{
+			case 3:
+				DismemberLimb(__instance, damageInfo.Direction, bodyPartType, value3, "Arm_LeftCap", new string[2] { "Arm_L_1", "Arm_L_2" }, out affectedLimbs);
+				break;
+			case 4:
+				DismemberLimb(__instance, damageInfo.Direction, bodyPartType, value3, "Arm_RightCap", new string[2] { "Arm_R_1", "Arm_R_2" }, out affectedLimbs);
+				break;
+			case 5:
+				DismemberLimb(__instance, damageInfo.Direction, bodyPartType, value3, "Leg_LeftCap", new string[1] { "gore_leg_torn01" }, out affectedLimbs);
+				break;
+			case 6:
+				DismemberLimb(__instance, damageInfo.Direction, bodyPartType, value3, "Leg_RightCap", new string[1] { "gore_leg_torn02" }, out affectedLimbs);
+				break;
+			case 0:
+				// Head dismemberment → direct ragdoll, no agony animation.
+				DismemberLimb(__instance, damageInfo.Direction, bodyPartType, value3, $"Head_{Random.Range(1, 4)}", Array.Empty<string>(), out affectedLimbs);
+				break;
+			}
+
+			// After dismembering an arm or leg, trigger agony animation on the remaining body.
+			// Head (case 0) is intentionally excluded — agony with a 0.001f skull bone is not safe.
+			bool isLimbDismember = (int)bodyPartType == 3 || (int)bodyPartType == 4
+			                    || (int)bodyPartType == 5 || (int)bodyPartType == 6;
+			if (isLimbDismember
+			    && !isHeavyNoAgony
+			    && isFirstDeath
+			    && VisceralEntry.Instance.UseActiveRagdolls.Value
+			    && (FikaBackendUtils.IsServer || FikaBackendUtils.IsSinglePlayer)
+			    && !VisceralEntry.Instance.dismemberedPlayers.Contains(__instance)
+			    && (!VisceralEntry.Instance.OnlyPlayersCanActiveRagdollEnemies.Value || !damageInfo.Player.IsAI)
+			    && Vector3.Distance(damageInfo.Player.iPlayer.Position, __instance.Position)
+			           <= (float)VisceralEntry.Instance.RagdollMaxDistance.Value
+			    && RagdollHelperClass.ShouldRagdoll(bodyPartType))
+			{
+				int dismemberDeathChance = Random.Range(0, 10);
+				DeathSetup(__instance, bodyPartType, dismemberDeathChance);
+			}
+		}
+
+		else if ((int)damageInfo.DamageType == 2048 || (int)damageInfo.DamageType == 4)
+		{
+			// Explosions or heavy damage dismember random limbs
 			if (Random.Range(0, 3) == 0)
 			{
 				DismemberLimb(__instance, damageInfo.Direction, bodyPartType, "lthigh1", "Leg_LeftCap", new string[1] { "gore_leg_torn01" }, out affectedLimbs);
@@ -217,69 +199,33 @@ public class KillPatch : ModulePatch
 				DismemberLimb(__instance, damageInfo.Direction, bodyPartType, "rforearm1", "Arm_RightCap", new string[2] { "Arm_R_1", "Arm_R_2" }, out affectedLimbs);
 			}
 		}
-		else if (bodyparts.TryGetValue(bodyPartType, out value3))
-		{
-			switch ((int)bodyPartType)
-			{
-			case 3:
-				DismemberLimb(__instance, damageInfo.Direction, bodyPartType, value3, "Arm_LeftCap", new string[2] { "Arm_L_1", "Arm_L_2" }, out affectedLimbs);
-				break;
-			case 4:
-				DismemberLimb(__instance, damageInfo.Direction, bodyPartType, value3, "Arm_RightCap", new string[2] { "Arm_R_1", "Arm_R_2" }, out affectedLimbs);
-				break;
-			case 5:
-				DismemberLimb(__instance, damageInfo.Direction, bodyPartType, value3, "Leg_LeftCap", new string[1] { "gore_leg_torn01" }, out affectedLimbs);
-				break;
-			case 6:
-				DismemberLimb(__instance, damageInfo.Direction, bodyPartType, value3, "Leg_RightCap", new string[1] { "gore_leg_torn02" }, out affectedLimbs);
-				break;
-			case 0:
-				DismemberLimb(__instance, damageInfo.Direction, bodyPartType, value3, $"Head_{Random.Range(1, 4)}", Array.Empty<string>(), out affectedLimbs);
-				break;
-			case 1:
-			case 2:
-				break;
-			}
-		}
 	}
 
-	internal static void DismemberLimb(Player player, Vector3 Direction, EBodyPart bodyPartType, string bone, string capAssetName, string[] assetNames, out Transform[] affectedLimbs)
+	internal static void DismemberLimb(Player player, Vector3 Direction, EBodyPart bodyPartType, string bone, string capAssetName, string[] assetNames, out Transform[] affectedLimbs, bool isFromNetwork = false)
 	{
-		//IL_0051: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0056: Unknown result type (might be due to invalid IL or missing references)
-		//IL_039b: Unknown result type (might be due to invalid IL or missing references)
-		//IL_039d: Invalid comparison between Unknown and I4
-		//IL_03e6: Unknown result type (might be due to invalid IL or missing references)
-		//IL_03eb: Unknown result type (might be due to invalid IL or missing references)
-		//IL_03ef: Unknown result type (might be due to invalid IL or missing references)
-		//IL_03f4: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0404: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0406: Unknown result type (might be due to invalid IL or missing references)
-		//IL_040a: Unknown result type (might be due to invalid IL or missing references)
-		//IL_040f: Unknown result type (might be due to invalid IL or missing references)
-		//IL_045a: Unknown result type (might be due to invalid IL or missing references)
-		//IL_045c: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0466: Unknown result type (might be due to invalid IL or missing references)
-		//IL_046b: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0475: Unknown result type (might be due to invalid IL or missing references)
-		//IL_047a: Unknown result type (might be due to invalid IL or missing references)
-		//IL_047f: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0483: Unknown result type (might be due to invalid IL or missing references)
-		//IL_048e: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0498: Unknown result type (might be due to invalid IL or missing references)
-		//IL_01b8: Unknown result type (might be due to invalid IL or missing references)
-		//IL_00d7: Unknown result type (might be due to invalid IL or missing references)
-		//IL_00e0: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0130: Unknown result type (might be due to invalid IL or missing references)
-		//IL_013f: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0307: Unknown result type (might be due to invalid IL or missing references)
-		//IL_02ea: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0371: Unknown result type (might be due to invalid IL or missing references)
-		//IL_037e: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0364: Unknown result type (might be due to invalid IL or missing references)
+		affectedLimbs = null;
+		if (player == null || RagdollHelperClass.IsPlayerDowned(player))
+		{
+			return;
+		}
+
+		if (!isFromNetwork)
+		{
+			VisceralCombat.Combined.Classes.VisceralNetworkUtils.SendDismemberment(player, Direction, bodyPartType, bone, capAssetName, assetNames);
+		}
+
+		bool isDeadPlayer = (player == null || player.HealthController == null || !player.HealthController.IsAlive);
+		if (isDeadPlayer && player != null && player.BodyAnimatorCommon != null)
+		{
+			player.BodyAnimatorCommon.enabled = false;
+		}
+		string boneLower = bone.ToLower();
 		affectedLimbs = (from t in VisceralCombat.Ragdolls.Classes.Utils.EnumerateHierarchyCore(player.Transform.Original)
-			where ((Object)t).name.ToLower().Contains(bone) && !VisceralCombat.Dismemberment.Classes.Utils.ParentContains(t, "weapon_holster")
+			where ((Object)t != null) &&
+				  ((Object)t).name.ToLower().Contains(boneLower) &&
+				  !VisceralCombat.Dismemberment.Classes.Utils.ParentContains(t, "weapon_holster")
 			select t).ToArray();
+
 		Transform[] array = affectedLimbs;
 		foreach (Transform val in array)
 		{
@@ -287,104 +233,314 @@ public class KillPatch : ModulePatch
 			{
 				continue;
 			}
-			if (FikaBackendUtils.IsServer || FikaBackendUtils.IsHeadless)
+
+			Transform[] allBranchTransforms = val.GetComponentsInChildren<Transform>(true);
+			foreach (Transform tBranch in allBranchTransforms)
 			{
-				Transform[] array2 = affectedLimbs;
-				foreach (Transform val2 in array2)
+				if (tBranch != null)
 				{
-					CollectionExtensions.AddItem<string>((IEnumerable<string>)limbNames, ((Object)val2).name);
-				}
-				FikaPlayer val3 = (FikaPlayer)(object)((player is FikaPlayer) ? player : null);
-				DismembermentPacket dismembermentPacket = default(DismembermentPacket);
-				dismembermentPacket.playerID = val3.NetId;
-				dismembermentPacket.Direction = Direction;
-				dismembermentPacket.bodyPartType = bodyPartType;
-				dismembermentPacket.bone = bone;
-				dismembermentPacket.capAssetName = capAssetName;
-				dismembermentPacket.assetNames = assetNames;
-				DismembermentPacket dismembermentPacket2 = dismembermentPacket;
-				QuickLogger.Log(ELogType.Log, string.Format("Dismemberment Packet Sent: {0}, {1}, {2}, {3}, {4}, {5}", dismembermentPacket2.playerID, dismembermentPacket2.Direction, dismembermentPacket2.bodyPartType, dismembermentPacket2.bone, dismembermentPacket2.capAssetName, string.Join(",", dismembermentPacket2.assetNames)));
-				Singleton<FikaServer>.Instance.SendData<DismembermentPacket>(ref dismembermentPacket2, (DeliveryMethod)0, false);
-			}
-			if (!VisceralEntry.Instance.dismemberedPlayers.Contains(player))
-			{
-				VisceralEntry.Instance.dismemberedPlayers.Add(player);
-			}
-			val.localScale = RagdollHelperClass.limbSize;
-			GameObject val4 = VisceralEntry.Instance.effectContainer.goreCaps.FirstOrDefault((GameObject cap) => (Object)(object)cap != (Object)null && ((Object)cap).name == capAssetName);
-			if ((Object)(object)val4 == (Object)null)
-			{
-				QuickLogger.Log(ELogType.Warn, "Gore cap '" + capAssetName + "' not found in list.");
-			}
-			else
-			{
-				GameObject val5 = Object.Instantiate<GameObject>(val4);
-				Skin componentInChildren = val5.GetComponentInChildren<Skin>();
-				if ((Object)(object)componentInChildren != (Object)null)
-				{
-					componentInChildren.Init(player.PlayerBody.SkeletonRootJoint);
-					((AbstractSkin)componentInChildren).ApplySkin();
+					// Unparent any attached blood effect gameobjects so they aren't crushed by 0.0001f scale
+					List<Transform> directChildrenToReparent = new List<Transform>();
+					foreach (Transform child in tBranch)
+					{
+						if (child != null && child != tBranch && child.GetComponentInChildren<ParticleSystem>() != null)
+						{
+							directChildrenToReparent.Add(child);
+						}
+					}
+					foreach (Transform child in directChildrenToReparent)
+					{
+						if (tBranch.parent != null)
+						{
+							Vector3 worldPos = child.position;
+							Quaternion worldRot = child.rotation;
+							child.SetParent(tBranch.parent, false);
+							child.position = worldPos;
+							child.rotation = worldRot;
+							child.localScale = Vector3.one;
+						}
+					}
+
+					tBranch.localScale = RagdollHelperClass.limbSize;
+					if (tBranch.gameObject.GetComponent<DismemberedLimbScaler>() == null)
+					{
+						tBranch.gameObject.AddComponent<DismemberedLimbScaler>();
+					}
 				}
 			}
-			foreach (string assetName in assetNames)
+
+			// Permanently set all Rigidbodies under the dismembered limb to isKinematic = true to stop PhysX joint solver
+			Rigidbody[] limbRbs = val.GetComponentsInChildren<Rigidbody>(true);
+			foreach (Rigidbody rb in limbRbs)
 			{
-				GameObject val6 = VisceralEntry.Instance.effectContainer.goreCaps.FirstOrDefault((GameObject a) => (Object)(object)a != (Object)null && ((Object)a).name == assetName);
-				if ((Object)(object)val6 == (Object)null)
+				if (rb != null)
 				{
-					QuickLogger.Log(ELogType.Error, "Dismemberment: DismemberLimb | [" + assetName + "] not found in gorecaps");
-					continue;
+					rb.isKinematic = true;
+					rb.detectCollisions = false;
 				}
-				GameObject val7 = Object.Instantiate<GameObject>(val6);
-				val7.transform.position = val.position;
 			}
+
+			// Destroy PhysX Joint constraints on scaled limb transforms to prevent 1000x joint anchor scale explosion
+			Joint[] limbJoints = val.GetComponentsInChildren<Joint>(true);
+			foreach (Joint j in limbJoints)
+			{
+				if (j != null)
+				{
+					Object.Destroy(j);
+				}
+			}
+
+			// Clear any joint in the entire player body that connects to this dismembered limb
+			Joint[] allPlayerJoints = player.GetComponentsInChildren<Joint>(true);
+			foreach (Joint j in allPlayerJoints)
+			{
+				if (j != null && j.connectedBody != null && (j.connectedBody.transform == val || j.connectedBody.transform.IsChildOf(val)))
+				{
+					j.connectedBody = null;
+					Object.Destroy(j);
+				}
+			}
+
+			PuppetMaster pm = player.GetComponentInChildren<PuppetMaster>();
+			if (pm == null && player.gameObject.transform.parent != null)
+			{
+				pm = player.gameObject.transform.parent.GetComponentInChildren<PuppetMaster>();
+			}
+			if (pm != null && pm.muscles != null)
+			{
+				foreach (Muscle m in pm.muscles)
+				{
+					if (m == null) continue;
+
+					bool isTargetMatch = m.target != null && (m.target == val || m.target.IsChildOf(val));
+					bool isJointMatch  = m.joint != null && (m.joint.transform == val || m.joint.transform.IsChildOf(val));
+					bool isRbMatch     = m.rigidbody != null && (m.rigidbody.transform == val || m.rigidbody.transform.IsChildOf(val));
+					bool isNameMatch   = !string.IsNullOrEmpty(m.name) && !string.IsNullOrEmpty(val.name) &&
+					                     m.name.Equals(val.name, StringComparison.OrdinalIgnoreCase);
+
+					if (isTargetMatch || isJointMatch || isRbMatch || isNameMatch)
+					{
+						m.state.isDisconnected = true;
+						m.props.muscleWeight = 0f;
+						m.props.pinWeight = 0f;
+						m.props.mappingWeight = 0f;
+						m.state.muscleWeightMlp = 0f;
+						m.state.pinWeightMlp = 0f;
+						m.state.mappingWeightMlp = 0f;
+
+						// Also scale ragdoll rigidbody transform to 0.001f if separate from animated target transform
+						if (m.rigidbody != null && m.rigidbody.transform != null && m.rigidbody.transform != val)
+						{
+							// Reparent any attached blood particle systems on ragdoll bone before scaling
+							List<Transform> rbChildrenToReparent = new List<Transform>();
+							foreach (Transform rbChild in m.rigidbody.transform)
+							{
+								if (rbChild != null && rbChild != m.rigidbody.transform && rbChild.GetComponentInChildren<ParticleSystem>() != null)
+								{
+									rbChildrenToReparent.Add(rbChild);
+								}
+							}
+							foreach (Transform rbChild in rbChildrenToReparent)
+							{
+								if (m.rigidbody.transform.parent != null)
+								{
+									Vector3 wPos = rbChild.position;
+									Quaternion wRot = rbChild.rotation;
+									rbChild.SetParent(m.rigidbody.transform.parent, false);
+									rbChild.position = wPos;
+									rbChild.rotation = wRot;
+									rbChild.localScale = Vector3.one;
+								}
+							}
+
+							m.rigidbody.transform.localScale = RagdollHelperClass.limbSize;
+							if (m.rigidbody.transform.gameObject.GetComponent<DismemberedLimbScaler>() == null)
+							{
+								m.rigidbody.transform.gameObject.AddComponent<DismemberedLimbScaler>();
+							}
+							m.rigidbody.isKinematic = true;
+							m.rigidbody.detectCollisions = false;
+						}
+					}
+				}
+			}
+
+			if (VisceralEntry.Instance.effectContainer != null && VisceralEntry.Instance.effectContainer.goreCaps != null)
+			{
+				GameObject val4 = VisceralEntry.Instance.effectContainer.goreCaps.FirstOrDefault((GameObject cap) => (Object)(object)cap != (Object)null && ((Object)cap).name == capAssetName);
+				if ((Object)(object)val4 == (Object)null)
+				{
+					QuickLogger.Log(ELogType.Warn, "Gore cap '" + capAssetName + "' not found in list.");
+				}
+				else
+				{
+					GameObject val5 = Object.Instantiate<GameObject>(val4);
+					Skin componentInChildren = val5.GetComponentInChildren<Skin>();
+					if ((Object)(object)componentInChildren != (Object)null)
+					{
+						componentInChildren.Init(player.PlayerBody.SkeletonRootJoint);
+						((AbstractSkin)componentInChildren).ApplySkin();
+					}
+				}
+				foreach (string assetName in assetNames)
+				{
+					GameObject val6 = VisceralEntry.Instance.effectContainer.goreCaps.FirstOrDefault((GameObject a) => (Object)(object)a != (Object)null && ((Object)a).name == assetName);
+					if ((Object)(object)val6 == (Object)null)
+					{
+						QuickLogger.Log(ELogType.Error, "Dismemberment: DismemberLimb | [" + assetName + "] not found in gorecaps");
+						continue;
+					}
+					GameObject val7 = Object.Instantiate<GameObject>(val6);
+					val7.transform.position = val.position;
+				}
+			}
+
 			if ((int)bodyPartType == 0 && Random.value >= 0.5f)
 			{
-				int index = Random.Range(0, VisceralEntry.Instance.effectContainer.bloodSFX.Count);
-				GameObject val8 = Object.Instantiate<GameObject>(VisceralEntry.Instance.effectContainer.bloodSFX[index]);
-				val8.transform.position = val.position;
+				if (VisceralEntry.Instance.effectContainer != null && VisceralEntry.Instance.effectContainer.bloodSFX != null && VisceralEntry.Instance.effectContainer.bloodSFX.Count > 0)
+				{
+					int index = Random.Range(0, VisceralEntry.Instance.effectContainer.bloodSFX.Count);
+					GameObject val8 = Object.Instantiate<GameObject>(VisceralEntry.Instance.effectContainer.bloodSFX[index]);
+					val8.transform.position = val.position;
+				}
 			}
 			SpawnOldVolumetricBlood(val, Direction, 1f);
 			SpawnArterialSprays(val, Direction);
 		}
 		if (player.IsYourPlayer && (int)bodyPartType == 0)
 		{
-			GameObject val9 = GameObject.CreatePrimitive((PrimitiveType)0);
-			val9.GetComponent<SphereCollider>().radius = 0.1f;
-			Object.Destroy((Object)(object)val9.GetComponent<Renderer>());
-			Transform transform = ((Component)CameraClass.Instance.Camera).transform;
-			Vector3 position = transform.position;
-			Vector3 forward = transform.forward;
-			float num = 1f;
-			val9.transform.position = position - forward * num;
-			transform.SetParent(val9.transform, true);
-			Rigidbody val10 = val9.AddComponent<Rigidbody>();
-			val10.mass = 0.1f;
-			val10.drag = 0.5f;
-			val10.angularDrag = 0.5f;
-			Vector3 val11 = -forward * 10f + Random.insideUnitSphere * 2f;
-			val10.AddForce(val11, (ForceMode)1);
-			val10.AddTorque(Random.insideUnitSphere * 5f, (ForceMode)1);
+			if (VisceralEntry.Instance.effectContainer != null && VisceralEntry.Instance.effectContainer.blood3dFxEffects != null && VisceralEntry.Instance.effectContainer.blood3dFxEffects.Count > 0)
+			{
+				VisceralEntry.Instance.effectContainer.blood3dFxEffects[0].SetActive(true);
+			}
+		}
+	}
+
+	public static void DeathSetup(Player p, EBodyPart eBodyPart, int Chance, bool isFromNetwork = false)
+	{
+		try
+		{
+			if ((Object)(object)p == (Object)null || (Object)(object)((Component)p).gameObject == (Object)null || RagdollHelperClass.IsPlayerDowned(p))
+			{
+				return;
+			}
+
+			if (!isFromNetwork)
+			{
+				VisceralCombat.Combined.Classes.VisceralNetworkUtils.SendRagdollSync(p, eBodyPart, Chance);
+			}
+
+			if (VisceralEntry.Instance != null && !VisceralEntry.Instance.dismemberedPlayers.Contains(p))
+			{
+				VisceralEntry.Instance.dismemberedPlayers.Add(p);
+			}
+
+			if (FikaBackendUtils.IsServer && FikaBackendUtils.IsClient)
+			{
+				if (p is FikaPlayer fikaPlayer && fikaPlayer != null && Singleton<FikaServer>.Instantiated && Singleton<FikaServer>.Instance != null)
+				{
+					RagdollSyncPacket ragdollSyncPacket = default(RagdollSyncPacket);
+					ragdollSyncPacket.PlayerID = fikaPlayer.NetId;
+					ragdollSyncPacket.BodyPart = eBodyPart;
+					RagdollSyncPacket ragdollSyncPacket2 = ragdollSyncPacket;
+					QuickLogger.Log(ELogType.Log, $"Ragdoll Packet Sent: {ragdollSyncPacket2.PlayerID}, {ragdollSyncPacket2.BodyPart}, {ragdollSyncPacket2.RandomChance}");
+					Singleton<FikaServer>.Instance.SendData<RagdollSyncPacket>(ref ragdollSyncPacket2, (DeliveryMethod)0, false);
+				}
+			}
+
+			RagdollHelperClass.limbsToCheck.Clear();
+
+			PuppetMaster componentInChildren = null;
+			if (((Component)p).gameObject.transform.parent != null)
+			{
+				componentInChildren = ((Component)((Component)p).gameObject.transform.parent).GetComponentInChildren<PuppetMaster>();
+			}
+			if ((Object)(object)componentInChildren == (Object)null)
+			{
+				componentInChildren = ((Component)p).GetComponentInChildren<PuppetMaster>();
+			}
+			if ((Object)(object)componentInChildren == (Object)null)
+			{
+				componentInChildren = ((Component)p).GetComponentInParent<PuppetMaster>();
+			}
+
+			if ((Object)(object)componentInChildren == (Object)null)
+			{
+				VisceralCombat.Ragdolls.Classes.Utils.SetupPuppetMaster(p);
+				if (((Component)p).gameObject.transform.parent != null)
+				{
+					componentInChildren = ((Component)((Component)p).gameObject.transform.parent).GetComponentInChildren<PuppetMaster>();
+				}
+				if ((Object)(object)componentInChildren == (Object)null)
+				{
+					componentInChildren = ((Component)p).GetComponentInChildren<PuppetMaster>();
+				}
+			}
+
+			if ((Object)(object)componentInChildren == (Object)null)
+			{
+				QuickLogger.Log(ELogType.Warn, $"DeathSetup: Still no PuppetMaster found for '{p.Profile?.Nickname}'!");
+				return;
+			}
+
+			componentInChildren.pinWeight = 0.25f;
+			componentInChildren.stateSettings.enableAngularLimitsOnKill = true;
+			componentInChildren.stateSettings.deadMuscleWeight = 0.01f;
+			componentInChildren.muscleSpring = 175f;
+			componentInChildren.muscleDamper = 1.5f;
+			((Behaviour)componentInChildren).enabled = true;
+			// Zero muscle weights for the dismembered limb BEFORE the animator starts evaluating,
+			// so LerpLayerWeight on layer 18 never drives a 0.001f-scaled bone (which causes gigantism).
+			RagdollHelperClass.DisableDismemberedMuscles(componentInChildren, eBodyPart);
+			if (p.BodyAnimatorCommon == null)
+			{
+				QuickLogger.Log(ELogType.Error, "Player's BodyAnimatorCommon is null!");
+				return;
+			}
+			p.BodyAnimatorCommon.enabled = true;
+			AnimatorOverrideController runtimeAnimatorController = new AnimatorOverrideController(p.BodyAnimatorCommon.runtimeAnimatorController);
+			p.BodyAnimatorCommon.runtimeAnimatorController = (RuntimeAnimatorController)(object)runtimeAnimatorController;
+			RagdollHelperClass.PlayDeathAnimation(p, componentInChildren, eBodyPart);
+			if ((Object)(object)p.PlayerBones?.Pelvis?.Original == (Object)null)
+			{
+				QuickLogger.Log(ELogType.Error, "PlayerBones or Pelvis is null!");
+				return;
+			}
+			TransformHelperClass.SetLayersRecursively(((Component)((Component)p.PlayerBones.Pelvis.Original).transform).gameObject, LayerMask.NameToLayer("Deadbody"));
+			if ((Object)(object)p.PlayerBones.HolsterPrimary != (Object)null) ((Component)p.PlayerBones.HolsterPrimary).gameObject.SetActive(false);
+			if ((Object)(object)p.PlayerBones.HolsterSecondary != (Object)null) ((Component)p.PlayerBones.HolsterSecondary).gameObject.SetActive(false);
+			if ((Object)(object)p.PlayerBones.HolsterPrimaryAlternative != (Object)null) ((Component)p.PlayerBones.HolsterPrimaryAlternative).gameObject.SetActive(false);
+			if ((Object)(object)p.PlayerBones.HolsterSecondaryAlternative != (Object)null) ((Component)p.PlayerBones.HolsterSecondaryAlternative).gameObject.SetActive(false);
+			if ((Object)(object)p.PlayerBones.HolsterPistol != (Object)null) ((Component)p.PlayerBones.HolsterPistol).gameObject.SetActive(false);
+			Vector3 lookDir = p.LookDirection;
+			if (lookDir.sqrMagnitude < 0.001f) lookDir = Vector3.forward;
+			componentInChildren.Teleport(((Component)p).gameObject.transform.position, Quaternion.LookRotation(lookDir), moveToTarget: true);
+			((MonoBehaviour)p).StartCoroutine(RagdollHelperClass.LerpMappingWeight(componentInChildren, 0f, 1f, VisceralEntry.Instance.MappingWeightDuration.Value));
+			componentInChildren.state = PuppetMaster.State.Dead;
+			if ((int)eBodyPart > 0)
+			{
+				GClass855.WaitSeconds((MonoBehaviour)(object)StaticManager.Instance, 0.1f, (Action)delegate
+				{
+					if ((Object)(object)p != (Object)null && p.BodyAnimatorCommon != null)
+					{
+						p.BodyAnimatorCommon.enabled = true;
+					}
+				});
+			}
+		}
+		catch (Exception ex)
+		{
+			QuickLogger.Log(ELogType.Error, $"Error in DeathSetup: {ex.Message}");
 		}
 	}
 
 	internal static void SpawnOldVolumetricBlood(Transform target, Vector3 direction, float Scale)
 	{
-		//IL_00d4: Unknown result type (might be due to invalid IL or missing references)
-		//IL_00ff: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0116: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0117: Unknown result type (might be due to invalid IL or missing references)
-		//IL_011c: Unknown result type (might be due to invalid IL or missing references)
-		//IL_011e: Unknown result type (might be due to invalid IL or missing references)
-		//IL_012f: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0134: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0139: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0142: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0163: Unknown result type (might be due to invalid IL or missing references)
-		//IL_019d: Unknown result type (might be due to invalid IL or missing references)
-		//IL_01b9: Unknown result type (might be due to invalid IL or missing references)
-		//IL_01be: Unknown result type (might be due to invalid IL or missing references)
-		//IL_01c2: Unknown result type (might be due to invalid IL or missing references)
-		//IL_01d1: Unknown result type (might be due to invalid IL or missing references)
+		if (!VisceralEntry.Instance.EnableBloodEffects.Value)
+			return;
+		if (VisceralEntry.Instance.effectContainer == null)
+			return;
+
 		List<GameObject> bloodParticles = VisceralEntry.Instance.effectContainer.bloodParticles;
 		if (bloodParticles == null || bloodParticles.Count == 0)
 		{
@@ -403,6 +559,7 @@ public class KillPatch : ModulePatch
 		if ((Object)(object)brainParticles == (Object)null)
 		{
 			QuickLogger.Log(ELogType.Warn, "brainParticles prefab is null, aborting spawn.");
+			Object.Destroy((Object)(object)val2);
 			return;
 		}
 		GameObject brainObject = Object.Instantiate<GameObject>(brainParticles);
@@ -411,61 +568,58 @@ public class KillPatch : ModulePatch
 		float num2 = VisceralEntry.Instance.BloodSplatterSize.Value * Scale;
 		val2.transform.localScale = new Vector3(num2, num2, num2);
 		direction.y = 0f;
+		if (direction.sqrMagnitude < 0.001f) direction = Vector3.forward;
 		Quaternion val3 = Quaternion.LookRotation(direction);
 		val3 *= Quaternion.Euler(0f, 180f, 0f);
 		val2.transform.rotation = val3;
-		if (VisceralEntry.Instance.UseOldBloodDecal.Value)
+		if (component != null)
 		{
-			component.GroundHeight = target.position.y - 1.9f;
+			if (VisceralEntry.Instance.UseOldBloodDecal.Value)
+			{
+				component.GroundHeight = target.position.y - 1.9f;
+			}
+			else
+			{
+				component.GroundHeight = -9999999f;
+			}
+			component.ClampDecalSideSurface = true;
 		}
-		else
-		{
-			component.GroundHeight = -9999999f;
-		}
-		component.ClampDecalSideSurface = true;
 		brainObject.transform.position = target.position;
 		Transform transform = brainObject.transform;
 		Quaternion rotation = target.rotation;
-		transform.rotation = Quaternion.Euler(0f, ((Quaternion)(ref rotation)).eulerAngles.y, 0f);
+		transform.rotation = Quaternion.Euler(0f, rotation.eulerAngles.y, 0f);
 		GClass855.WaitSeconds((MonoBehaviour)(object)StaticManager.Instance, 5f, (Action)delegate
 		{
 			Object.Destroy((Object)(object)brainObject);
 		});
 	}
 
-	internal static void SpawnArterialSprays(Transform target, Vector3 direction)
+	private static void SpawnArterialSprays(Transform target, Vector3 direction)
 	{
-		//IL_0033: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0038: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0099: Unknown result type (might be due to invalid IL or missing references)
-		//IL_00c3: Unknown result type (might be due to invalid IL or missing references)
-		//IL_011a: Unknown result type (might be due to invalid IL or missing references)
-		//IL_011f: Unknown result type (might be due to invalid IL or missing references)
-		//IL_012c: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0131: Unknown result type (might be due to invalid IL or missing references)
+		if (!VisceralEntry.Instance.ArterySpray.Value || !VisceralEntry.Instance.EnableBloodEffects.Value)
+			return;
+		if (VisceralEntry.Instance.effectContainer == null || (Object)(object)VisceralEntry.Instance.effectContainer.limbSquirter == (Object)null)
+			return;
+
 		GameObject bloodParticleObject = Object.Instantiate<GameObject>(VisceralEntry.Instance.effectContainer.limbSquirter);
 		bloodParticleObject.AddComponent<ParticleFloorPainter>();
-		if (((Component)target).transform.localScale == Vector3.zero)
-		{
-			bloodParticleObject.transform.parent = ((Component)target).transform.parent;
-		}
-		else
-		{
-			bloodParticleObject.transform.parent = ((Component)target).transform;
-		}
-		bloodParticleObject.transform.localPosition = new Vector3(0f, 0f, 0f);
-		bloodParticleObject.transform.localRotation = new Quaternion(-0.0923f, 0.7011f, -0.0923f, -0.7011f);
+		Transform targetParent = ((Component)target).transform.parent != null ? ((Component)target).transform.parent : ((Component)target).transform;
+		bloodParticleObject.transform.SetParent(targetParent, false);
+		bloodParticleObject.transform.position = ((Component)target).transform.position;
+		bloodParticleObject.transform.rotation = Quaternion.Euler(-90f, 0f, 0f);
+		bloodParticleObject.transform.localScale = Vector3.one;
 		ParticleSystem[] componentsInChildren = bloodParticleObject.GetComponentsInChildren<ParticleSystem>();
 		float num = Random.Range(VisceralEntry.Instance.ArterySprayMin.Value, VisceralEntry.Instance.ArterySprayMax.Value);
 		ParticleSystem[] array = componentsInChildren;
 		foreach (ParticleSystem val in array)
 		{
 			val.loop = false;
-			MainModule main = val.main;
-			((MainModule)(ref main)).duration = num;
-			CollisionModule collision = val.collision;
-			((CollisionModule)(ref collision)).sendCollisionMessages = true;
+			var main = val.main;
+			main.duration = num;
+			var collision = val.collision;
+			collision.sendCollisionMessages = true;
 			((Component)val).gameObject.AddComponent<ParticleFloorPainter>();
+			RagdollHelperClass.ApplyDarkCoagulatedBloodFx(val);
 			val.Play();
 		}
 		GClass855.WaitSeconds((MonoBehaviour)(object)StaticManager.Instance, num + 1f, (Action)delegate
@@ -474,110 +628,35 @@ public class KillPatch : ModulePatch
 		});
 	}
 
-	public static void DeathSetup(Player p, EBodyPart eBodyPart, int Chance)
+	private static bool IsHeavyCaliberNoAgony(string caliber, AmmoTemplate ammo)
 	{
-		//IL_0042: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0061: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0317: Unknown result type (might be due to invalid IL or missing references)
-		//IL_031d: Expected O, but got Unknown
-		//IL_035e: Unknown result type (might be due to invalid IL or missing references)
-		//IL_052e: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0539: Unknown result type (might be due to invalid IL or missing references)
-		//IL_053e: Unknown result type (might be due to invalid IL or missing references)
-		int num = 0;
-		if (FikaBackendUtils.IsServer)
+		if (ammo != null)
 		{
-			Player obj = p;
-			FikaPlayer val = (FikaPlayer)(object)((obj is FikaPlayer) ? obj : null);
-			RagdollSyncPacket ragdollSyncPacket = default(RagdollSyncPacket);
-			ragdollSyncPacket.PlayerID = val.NetId;
-			ragdollSyncPacket.BodyPart = eBodyPart;
-			RagdollSyncPacket ragdollSyncPacket2 = ragdollSyncPacket;
-			QuickLogger.Log(ELogType.Log, $"Ragdoll Packet Sent: {ragdollSyncPacket2.PlayerID}, {ragdollSyncPacket2.BodyPart}, {ragdollSyncPacket2.RandomChance}");
-			Singleton<FikaServer>.Instance.SendData<RagdollSyncPacket>(ref ragdollSyncPacket2, (DeliveryMethod)0, false);
+			float massKg = (ammo.BulletMassGram > 0f) ? (ammo.BulletMassGram / 1000f) : 0.008f;
+			float speed = (ammo.InitialSpeed > 0f) ? ammo.InitialSpeed : 400f;
+			float rawMomentum = massKg * speed; // p = m * v in N.s
+			if (rawMomentum >= 5.0f)
+			{
+				return true;
+			}
 		}
-		ConsoleScreen.Log("START " + num++);
-		RagdollHelperClass.limbsToCheck.Clear();
-		ConsoleScreen.Log(num++.ToString());
-		if ((Object)(object)p == (Object)null)
+
+		if (string.IsNullOrEmpty(caliber)) return false;
+		string c = caliber.StartsWith("Caliber") ? caliber.Substring(7) : caliber;
+
+		if (c == "86x70" || c == "20g" || c == "23x75" || c == "40x46" || c == "127x108" || c == "12.7x99" || c == "127x55" || c == "30x29")
 		{
-			QuickLogger.Log(ELogType.Error, "Player is Null!!!!");
-			return;
+			return true;
 		}
-		if ((Object)(object)((Component)p).gameObject == (Object)null)
+
+		if (c == "12g" && ammo != null)
 		{
-			QuickLogger.Log(ELogType.Error, $"Player Gameobject Null!!!! {p.Id}");
-			return;
+			if (ammo.ProjectileCount <= 1 || ammo.BulletMassGram > 15f || (ammo.Name != null && ammo.Name.ToLower().Contains("slug")))
+			{
+				return true;
+			}
 		}
-		ConsoleScreen.Log(num++.ToString());
-		if ((Object)(object)((Component)p).gameObject.transform == (Object)null)
-		{
-			QuickLogger.Log(ELogType.Error, $"Player Gameobject's Transform is Null!!!! {p.Id}");
-			return;
-		}
-		ConsoleScreen.Log(num++.ToString());
-		PuppetMaster componentInChildren = ((Component)((Component)p).gameObject.transform.parent).GetComponentInChildren<PuppetMaster>();
-		if ((Object)(object)componentInChildren == (Object)null)
-		{
-			QuickLogger.Log(ELogType.Error, "No PuppetMaster found in player's hierarchy!");
-			return;
-		}
-		ConsoleScreen.Log(num++.ToString());
-		componentInChildren.pinWeight = 0.25f;
-		ConsoleScreen.Log(num++.ToString());
-		componentInChildren.stateSettings.enableAngularLimitsOnKill = true;
-		ConsoleScreen.Log(num++.ToString());
-		componentInChildren.stateSettings.deadMuscleWeight = 0.01f;
-		ConsoleScreen.Log(num++.ToString());
-		componentInChildren.muscleSpring = 175f;
-		ConsoleScreen.Log(num++.ToString());
-		componentInChildren.muscleDamper = 1.5f;
-		ConsoleScreen.Log(num++.ToString());
-		((Behaviour)componentInChildren).enabled = true;
-		ConsoleScreen.Log(num++.ToString());
-		if (p.BodyAnimatorCommon == null)
-		{
-			QuickLogger.Log(ELogType.Error, "Player's BodyAnimatorCommon is null!");
-			return;
-		}
-		ConsoleScreen.Log(num++.ToString());
-		p.BodyAnimatorCommon.enabled = true;
-		ConsoleScreen.Log(num++.ToString());
-		AnimatorOverrideController runtimeAnimatorController = new AnimatorOverrideController(p.BodyAnimatorCommon.runtimeAnimatorController);
-		ConsoleScreen.Log(num++.ToString());
-		p.BodyAnimatorCommon.runtimeAnimatorController = (RuntimeAnimatorController)(object)runtimeAnimatorController;
-		ConsoleScreen.Log(num++.ToString());
-		RagdollHelperClass.PlayDeathAnimation(p, componentInChildren, eBodyPart);
-		if ((Object)(object)p.PlayerBones?.Pelvis?.Original == (Object)null)
-		{
-			QuickLogger.Log(ELogType.Error, "PlayerBones or Pelvis is null!");
-			return;
-		}
-		ConsoleScreen.Log(num++.ToString());
-		TransformHelperClass.SetLayersRecursively(((Component)((Component)p.PlayerBones.Pelvis.Original).transform).gameObject, LayerMask.NameToLayer("Deadbody"));
-		ConsoleScreen.Log(num++.ToString());
-		((Component)p.PlayerBones.HolsterPrimary).gameObject.SetActive(false);
-		ConsoleScreen.Log(num++.ToString());
-		((Component)p.PlayerBones.HolsterSecondary).gameObject.SetActive(false);
-		ConsoleScreen.Log(num++.ToString());
-		((Component)p.PlayerBones.HolsterPrimaryAlternative).gameObject.SetActive(false);
-		ConsoleScreen.Log(num++.ToString());
-		((Component)p.PlayerBones.HolsterSecondaryAlternative).gameObject.SetActive(false);
-		ConsoleScreen.Log(num++.ToString());
-		((Component)p.PlayerBones.HolsterPistol).gameObject.SetActive(false);
-		ConsoleScreen.Log(num++.ToString());
-		((Component)p.PlayerBones.LeftLegHolsterPistol).gameObject.SetActive(false);
-		ConsoleScreen.Log(num++.ToString());
-		componentInChildren.Teleport(((Component)p).gameObject.transform.position, Quaternion.LookRotation(p.LookDirection), moveToTarget: true);
-		ConsoleScreen.Log(num++.ToString());
-		((MonoBehaviour)p).StartCoroutine(RagdollHelperClass.LerpMappingWeight(componentInChildren, 0f, 1f, 0.8f));
-		ConsoleScreen.Log(num++.ToString());
-		componentInChildren.state = PuppetMaster.State.Dead;
-		ConsoleScreen.Log(num++.ToString());
-		GClass855.WaitSeconds((MonoBehaviour)(object)StaticManager.Instance, 0.1f, (Action)delegate
-		{
-			p.BodyAnimatorCommon.enabled = true;
-		});
-		ConsoleScreen.Log("END " + num++);
+
+		return false;
 	}
 }

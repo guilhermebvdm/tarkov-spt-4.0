@@ -1,0 +1,11 @@
+{
+  "name": "Climbable Ladders",
+  "upstream_url": "https://github.com/bmpq/spt-ladders",
+  "upstream_sha": "d08f4bc925995a65c49d46d60efecca1a6ab7d94",
+  "upstream_branch": "main",
+  "forge_url": "",
+  "license": "Unknown",
+  "version_base": "1.0.2",
+  "spt_version": "",
+  "created_at": "2026-08-16T01:22:08Z"
+}

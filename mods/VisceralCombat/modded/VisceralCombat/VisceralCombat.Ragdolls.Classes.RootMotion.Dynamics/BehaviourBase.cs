@@ -1,5 +1,7 @@
 using System;
 using UnityEngine;
+using Random = UnityEngine.Random;
+using Object = UnityEngine.Object;
 using UnityEngine.Events;
 
 namespace VisceralCombat.Ragdolls.Classes.RootMotion.Dynamics;
@@ -557,12 +559,10 @@ public abstract class BehaviourBase : MonoBehaviour
 		//IL_006f: Unknown result type (might be due to invalid IL or missing references)
 		//IL_0082: Unknown result type (might be due to invalid IL or missing references)
 		//IL_00a9: Unknown result type (might be due to invalid IL or missing references)
-		Ray val = default(Ray);
-		((Ray)(ref val))._002Ector(puppetMaster.targetRoot.position + puppetMaster.targetRoot.up, -puppetMaster.targetRoot.up);
-		RaycastHit val2 = default(RaycastHit);
-		if (Physics.Raycast(val, ref val2, 4f, LayerMask.op_Implicit(layers)) && !float.IsNaN(((RaycastHit)(ref val2)).point.x) && !float.IsNaN(((RaycastHit)(ref val2)).point.y) && !float.IsNaN(((RaycastHit)(ref val2)).point.z))
+		Ray val = new Ray(puppetMaster.targetRoot.position + puppetMaster.targetRoot.up, -puppetMaster.targetRoot.up);
+		if (Physics.Raycast(val, out RaycastHit val2, 4f, layers) && !float.IsNaN(val2.point.x) && !float.IsNaN(val2.point.y) && !float.IsNaN(val2.point.z))
 		{
-			puppetMaster.targetRoot.position = ((RaycastHit)(ref val2)).point;
+			puppetMaster.targetRoot.position = val2.point;
 		}
 	}
 

@@ -1,0 +1,3372 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!29 &1
+OcclusionCullingSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_OcclusionBakeSettings:
+    smallestOccluder: 5
+    smallestHole: 0.25
+    backfaceThreshold: 100
+  m_SceneGUID: 00000000000000000000000000000000
+  m_OcclusionCullingData: {fileID: 0}
+--- !u!104 &2
+RenderSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 9
+  m_Fog: 0
+  m_FogColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  m_FogMode: 3
+  m_FogDensity: 0.01
+  m_LinearFogStart: 0
+  m_LinearFogEnd: 300
+  m_AmbientSkyColor: {r: 0.212, g: 0.227, b: 0.259, a: 1}
+  m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
+  m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
+  m_AmbientIntensity: 1
+  m_AmbientMode: 0
+  m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
+  m_SkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
+  m_HaloStrength: 0.5
+  m_FlareStrength: 1
+  m_FlareFadeSpeed: 3
+  m_HaloTexture: {fileID: 0}
+  m_SpotCookie: {fileID: 10001, guid: 0000000000000000e000000000000000, type: 0}
+  m_DefaultReflectionMode: 0
+  m_DefaultReflectionResolution: 128
+  m_ReflectionBounces: 1
+  m_ReflectionIntensity: 1
+  m_CustomReflection: {fileID: 0}
+  m_Sun: {fileID: 0}
+  m_UseRadianceAmbientProbe: 0
+--- !u!157 &3
+LightmapSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 12
+  m_GIWorkflowMode: 1
+  m_GISettings:
+    serializedVersion: 2
+    m_BounceScale: 1
+    m_IndirectOutputScale: 1
+    m_AlbedoBoost: 1
+    m_EnvironmentLightingMode: 0
+    m_EnableBakedLightmaps: 1
+    m_EnableRealtimeLightmaps: 0
+  m_LightmapEditorSettings:
+    serializedVersion: 12
+    m_Resolution: 2
+    m_BakeResolution: 40
+    m_AtlasSize: 1024
+    m_AO: 0
+    m_AOMaxDistance: 1
+    m_CompAOExponent: 1
+    m_CompAOExponentDirect: 0
+    m_ExtractAmbientOcclusion: 0
+    m_Padding: 2
+    m_LightmapParameters: {fileID: 0}
+    m_LightmapsBakeMode: 1
+    m_TextureCompression: 1
+    m_FinalGather: 0
+    m_FinalGatherFiltering: 1
+    m_FinalGatherRayCount: 256
+    m_ReflectionCompression: 2
+    m_MixedBakeMode: 2
+    m_BakeBackend: 1
+    m_PVRSampling: 1
+    m_PVRDirectSampleCount: 32
+    m_PVRSampleCount: 512
+    m_PVRBounces: 2
+    m_PVREnvironmentSampleCount: 256
+    m_PVREnvironmentReferencePointCount: 2048
+    m_PVRFilteringMode: 1
+    m_PVRDenoiserTypeDirect: 1
+    m_PVRDenoiserTypeIndirect: 1
+    m_PVRDenoiserTypeAO: 1
+    m_PVRFilterTypeDirect: 0
+    m_PVRFilterTypeIndirect: 0
+    m_PVRFilterTypeAO: 0
+    m_PVREnvironmentMIS: 1
+    m_PVRCulling: 1
+    m_PVRFilteringGaussRadiusDirect: 1
+    m_PVRFilteringGaussRadiusIndirect: 5
+    m_PVRFilteringGaussRadiusAO: 2
+    m_PVRFilteringAtrousPositionSigmaDirect: 0.5
+    m_PVRFilteringAtrousPositionSigmaIndirect: 2
+    m_PVRFilteringAtrousPositionSigmaAO: 1
+    m_ExportTrainingData: 0
+    m_TrainingDataDestination: TrainingData
+    m_LightProbeSampleCountMultiplier: 4
+  m_LightingDataAsset: {fileID: 0}
+  m_LightingSettings: {fileID: 0}
+--- !u!196 &4
+NavMeshSettings:
+  serializedVersion: 2
+  m_ObjectHideFlags: 0
+  m_BuildSettings:
+    serializedVersion: 3
+    agentTypeID: 0
+    agentRadius: 0.5
+    agentHeight: 2
+    agentSlope: 45
+    agentClimb: 0.4
+    ledgeDropHeight: 0
+    maxJumpAcrossDistance: 0
+    minRegionArea: 2
+    manualCellSize: 0
+    cellSize: 0.16666667
+    manualTileSize: 0
+    tileSize: 256
+    buildHeightMesh: 0
+    maxJobWorkers: 0
+    preserveTilesOutsideBounds: 0
+    debug:
+      m_Flags: 0
+  m_NavMeshData: {fileID: 0}
+--- !u!1 &12903420
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 12903422}
+  - component: {fileID: 12903421}
+  m_Layer: 0
+  m_Name: Directional Light
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!108 &12903421
+Light:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 12903420}
+  m_Enabled: 1
+  serializedVersion: 10
+  m_Type: 1
+  m_Shape: 0
+  m_Color: {r: 1, g: 0.95686275, b: 0.8392157, a: 1}
+  m_Intensity: 1
+  m_Range: 10
+  m_SpotAngle: 30
+  m_InnerSpotAngle: 21.80208
+  m_CookieSize: 10
+  m_Shadows:
+    m_Type: 2
+    m_Resolution: -1
+    m_CustomResolution: -1
+    m_Strength: 1
+    m_Bias: 0.05
+    m_NormalBias: 0.4
+    m_NearPlane: 0.2
+    m_CullingMatrixOverride:
+      e00: 1
+      e01: 0
+      e02: 0
+      e03: 0
+      e10: 0
+      e11: 1
+      e12: 0
+      e13: 0
+      e20: 0
+      e21: 0
+      e22: 1
+      e23: 0
+      e30: 0
+      e31: 0
+      e32: 0
+      e33: 1
+    m_UseCullingMatrixOverride: 0
+  m_Cookie: {fileID: 0}
+  m_DrawHalo: 0
+  m_Flare: {fileID: 0}
+  m_RenderMode: 0
+  m_CullingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_RenderingLayerMask: 1
+  m_Lightmapping: 4
+  m_LightShadowCasterMode: 0
+  m_AreaSize: {x: 1, y: 1}
+  m_BounceIntensity: 1
+  m_ColorTemperature: 6570
+  m_UseColorTemperature: 0
+  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
+  m_UseBoundingSphereOverride: 0
+  m_UseViewFrustumForShadowCasterCull: 1
+  m_ShadowRadius: 0
+  m_ShadowAngle: 0
+--- !u!4 &12903422
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 12903420}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.40821788, y: -0.23456968, z: 0.10938163, w: 0.8754261}
+  m_LocalPosition: {x: 212.29515, y: -20.067717, z: 74.57426}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1033217191}
+  m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+--- !u!1001 &17280299
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 973194752}
+    m_Modifications:
+    - target: {fileID: 1995475907516222297, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_Name
+      value: ladder_TechnicalMall_small
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -130.15698
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 11.192984
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -757.56616
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.4999999
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.49999997
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.5000001
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.50000006
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7118773015708301652, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_UsecBase_ladder_TechnicalMall_small_00000
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+--- !u!4 &17280300 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+  m_PrefabInstance: {fileID: 17280299}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &52515425
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1345030413}
+    m_Modifications:
+    - target: {fileID: 592677635834502371, guid: 72d8ca5e960078b4191973fbc9a01f41, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -43.13
+      objectReference: {fileID: 0}
+    - target: {fileID: 592677635834502371, guid: 72d8ca5e960078b4191973fbc9a01f41, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 4.588
+      objectReference: {fileID: 0}
+    - target: {fileID: 592677635834502371, guid: 72d8ca5e960078b4191973fbc9a01f41, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -450.29657
+      objectReference: {fileID: 0}
+    - target: {fileID: 592677635834502371, guid: 72d8ca5e960078b4191973fbc9a01f41, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: -0.70710677
+      objectReference: {fileID: 0}
+    - target: {fileID: 592677635834502371, guid: 72d8ca5e960078b4191973fbc9a01f41, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 592677635834502371, guid: 72d8ca5e960078b4191973fbc9a01f41, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.0000090524545
+      objectReference: {fileID: 0}
+    - target: {fileID: 592677635834502371, guid: 72d8ca5e960078b4191973fbc9a01f41, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.000008977964
+      objectReference: {fileID: 0}
+    - target: {fileID: 592677635834502371, guid: 72d8ca5e960078b4191973fbc9a01f41, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 592677635834502371, guid: 72d8ca5e960078b4191973fbc9a01f41, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 592677635834502371, guid: 72d8ca5e960078b4191973fbc9a01f41, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2478460860012160566, guid: 72d8ca5e960078b4191973fbc9a01f41, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_WaterTreatment_City_ScavTower_A_00001
+      objectReference: {fileID: 0}
+    - target: {fileID: 8095089080949896044, guid: 72d8ca5e960078b4191973fbc9a01f41, type: 3}
+      propertyPath: m_Name
+      value: City_ScavTower_A
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 72d8ca5e960078b4191973fbc9a01f41, type: 3}
+--- !u!4 &52515426 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 592677635834502371, guid: 72d8ca5e960078b4191973fbc9a01f41, type: 3}
+  m_PrefabInstance: {fileID: 52515425}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &53007477
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 170200238}
+    m_Modifications:
+    - target: {fileID: 743139490065180504, guid: 6d8664a3329e5c54bb33e74ccbf6e026, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_Railway_Vagon_tank_00002
+      objectReference: {fileID: 0}
+    - target: {fileID: 1624623147908013144, guid: 6d8664a3329e5c54bb33e74ccbf6e026, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_Railway_Vagon_tank_00003
+      objectReference: {fileID: 0}
+    - target: {fileID: 6052830715064600250, guid: 6d8664a3329e5c54bb33e74ccbf6e026, type: 3}
+      propertyPath: m_Name
+      value: Vagon_tank
+      objectReference: {fileID: 0}
+    - target: {fileID: 8260536538678665297, guid: 6d8664a3329e5c54bb33e74ccbf6e026, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -60.18821
+      objectReference: {fileID: 0}
+    - target: {fileID: 8260536538678665297, guid: 6d8664a3329e5c54bb33e74ccbf6e026, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 13.791994
+      objectReference: {fileID: 0}
+    - target: {fileID: 8260536538678665297, guid: 6d8664a3329e5c54bb33e74ccbf6e026, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -881.43066
+      objectReference: {fileID: 0}
+    - target: {fileID: 8260536538678665297, guid: 6d8664a3329e5c54bb33e74ccbf6e026, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: -0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 8260536538678665297, guid: 6d8664a3329e5c54bb33e74ccbf6e026, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 8260536538678665297, guid: 6d8664a3329e5c54bb33e74ccbf6e026, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.000000834465
+      objectReference: {fileID: 0}
+    - target: {fileID: 8260536538678665297, guid: 6d8664a3329e5c54bb33e74ccbf6e026, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.000000834465
+      objectReference: {fileID: 0}
+    - target: {fileID: 8260536538678665297, guid: 6d8664a3329e5c54bb33e74ccbf6e026, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8260536538678665297, guid: 6d8664a3329e5c54bb33e74ccbf6e026, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8260536538678665297, guid: 6d8664a3329e5c54bb33e74ccbf6e026, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 6d8664a3329e5c54bb33e74ccbf6e026, type: 3}
+--- !u!4 &53007478 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8260536538678665297, guid: 6d8664a3329e5c54bb33e74ccbf6e026, type: 3}
+  m_PrefabInstance: {fileID: 53007477}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &112499585
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 2099407093}
+    m_Modifications:
+    - target: {fileID: 2633855488429595552, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_Island_Chemical_Barrel_small_ladder_02_00001
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 450.72394
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 54.37202
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 454.8196
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.67088234
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.6324074
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.22380756
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.3160507
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7278474029204280824, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_Name
+      value: Chemical_Barrel_small_ladder_02
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+--- !u!4 &112499586 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+  m_PrefabInstance: {fileID: 112499585}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &159725269
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 918934334}
+    m_Modifications:
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -60.40448
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 26.769665
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 119.236374
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: -0.4635703
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.46357042
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.53395003
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.5339499
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7413676209968092450, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_stepladders_stepladder_01_Update_00000
+      objectReference: {fileID: 0}
+    - target: {fileID: 8106973077188150802, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_Name
+      value: stepladder_01_Update
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+--- !u!4 &159725270 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+  m_PrefabInstance: {fileID: 159725269}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &170200237
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 170200238}
+  m_Layer: 0
+  m_Name: Railway
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &170200238
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 170200237}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1902415013}
+  - {fileID: 53007478}
+  - {fileID: 740302597}
+  - {fileID: 952548247}
+  - {fileID: 822634179}
+  - {fileID: 1408211213}
+  - {fileID: 1412958556}
+  - {fileID: 727995498}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &277809246
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 918934334}
+    m_Modifications:
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -131.88861
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.6505165
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -606.67633
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: -0.61237264
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.6123726
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.3535532
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.35355312
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7413676209968092450, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_stepladders_stepladder_01_Update_00012
+      objectReference: {fileID: 0}
+    - target: {fileID: 8106973077188150802, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_Name
+      value: stepladder_01_Update
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+--- !u!4 &277809247 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+  m_PrefabInstance: {fileID: 277809246}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &279503036
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 918934334}
+    m_Modifications:
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 33.751865
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 8.201273
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -646.1829
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.6199012
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.6199012
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.34018016
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.34018016
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7413676209968092450, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_stepladders_stepladder_01_Update_00007
+      objectReference: {fileID: 0}
+    - target: {fileID: 8106973077188150802, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_Name
+      value: stepladder_01_Update
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+--- !u!4 &279503037 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+  m_PrefabInstance: {fileID: 279503036}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &300087935
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 973194752}
+    m_Modifications:
+    - target: {fileID: 1995475907516222297, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_Name
+      value: ladder_TechnicalMall_small
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -200.88603
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 11.193014
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -634.413
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.000000014901133
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.00000024003347
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.707107
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.70710665
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7118773015708301652, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_UsecBase_ladder_TechnicalMall_small_00005
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+--- !u!4 &300087936 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+  m_PrefabInstance: {fileID: 300087935}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &357140137
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1796705873}
+    m_Modifications:
+    - target: {fileID: 2266166211463994275, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -81.37036
+      objectReference: {fileID: 0}
+    - target: {fileID: 2266166211463994275, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 19.213856
+      objectReference: {fileID: 0}
+    - target: {fileID: 2266166211463994275, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -138.7371
+      objectReference: {fileID: 0}
+    - target: {fileID: 2266166211463994275, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 2266166211463994275, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 2266166211463994275, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.000000029802322
+      objectReference: {fileID: 0}
+    - target: {fileID: 2266166211463994275, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.000000029802322
+      objectReference: {fileID: 0}
+    - target: {fileID: 2266166211463994275, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2266166211463994275, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2266166211463994275, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2426942489494728255, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_SummerHotel_Horizontal_bar_00007
+      objectReference: {fileID: 0}
+    - target: {fileID: 5154834812067416900, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_SummerHotel_Horizontal_bar_00006
+      objectReference: {fileID: 0}
+    - target: {fileID: 7090446110761793016, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_Name
+      value: Horizontal_bar
+      objectReference: {fileID: 0}
+    - target: {fileID: 8422359168253623835, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_SummerHotel_Horizontal_bar_00008
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+--- !u!4 &357140138 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2266166211463994275, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+  m_PrefabInstance: {fileID: 357140137}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &378826319
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 918934334}
+    m_Modifications:
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -120.525024
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 39.8699
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 78.784004
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: -0.65328145
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.6532815
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.27059817
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.27059808
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7413676209968092450, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_stepladders_stepladder_01_Update_00001
+      objectReference: {fileID: 0}
+    - target: {fileID: 8106973077188150802, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_Name
+      value: stepladder_01_Update
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+--- !u!4 &378826320 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+  m_PrefabInstance: {fileID: 378826319}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &394850638
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1345030413}
+    m_Modifications:
+    - target: {fileID: 2633855488429595552, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_WaterTreatment_Chemical_Barrel_small_ladder_02_00002
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -111.26115
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.38758564
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -489.39838
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7493581
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.63938737
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.0024570674
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.17216365
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7278474029204280824, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_Name
+      value: Chemical_Barrel_small_ladder_02
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+--- !u!4 &394850639 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+  m_PrefabInstance: {fileID: 394850638}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &516174347
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 2099407093}
+    m_Modifications:
+    - target: {fileID: 2633855488429595552, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_Island_Chemical_Barrel_small_ladder_02_00000
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 377.14697
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 3.2631512
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 469.2115
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.35355374
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.35355374
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.6123723
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.6123723
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7278474029204280824, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_Name
+      value: Chemical_Barrel_small_ladder_02
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+--- !u!4 &516174348 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+  m_PrefabInstance: {fileID: 516174347}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &714559255
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 918934334}
+    m_Modifications:
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -168.829
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 4.635
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -476.152
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: -0.49999973
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.4999998
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.5000003
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.50000024
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7413676209968092450, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_stepladders_stepladder_01_Update_00005
+      objectReference: {fileID: 0}
+    - target: {fileID: 8106973077188150802, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_Name
+      value: stepladder_01_Update
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+--- !u!4 &714559256 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+  m_PrefabInstance: {fileID: 714559255}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &727995497
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 170200238}
+    m_Modifications:
+    - target: {fileID: 534961950166933459, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_Railway_kran_kozlovoi_closed_00004
+      objectReference: {fileID: 0}
+    - target: {fileID: 1364618003701734964, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_Name
+      value: kran_kozlovoi_closed
+      objectReference: {fileID: 0}
+    - target: {fileID: 1658814943724160758, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -9.5285015
+      objectReference: {fileID: 0}
+    - target: {fileID: 1658814943724160758, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 12.214107
+      objectReference: {fileID: 0}
+    - target: {fileID: 1658814943724160758, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -858.8893
+      objectReference: {fileID: 0}
+    - target: {fileID: 1658814943724160758, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: -0.50187135
+      objectReference: {fileID: 0}
+    - target: {fileID: 1658814943724160758, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.50187135
+      objectReference: {fileID: 0}
+    - target: {fileID: 1658814943724160758, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.49812168
+      objectReference: {fileID: 0}
+    - target: {fileID: 1658814943724160758, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.49812168
+      objectReference: {fileID: 0}
+    - target: {fileID: 1658814943724160758, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: -90
+      objectReference: {fileID: 0}
+    - target: {fileID: 1658814943724160758, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: -77.636665
+      objectReference: {fileID: 0}
+    - target: {fileID: 1658814943724160758, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2576610813943163666, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_Railway_kran_kozlovoi_closed_00005
+      objectReference: {fileID: 0}
+    - target: {fileID: 4366782327193361943, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_Railway_kran_kozlovoi_closed_00003
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+--- !u!4 &727995498 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1658814943724160758, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+  m_PrefabInstance: {fileID: 727995497}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &736260881
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 973194752}
+    m_Modifications:
+    - target: {fileID: 1995475907516222297, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_Name
+      value: ladder_TechnicalMall_small
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -198.49704
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 11.196987
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -701.827
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.49999973
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.49999967
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.50000054
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.5000001
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7118773015708301652, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_UsecBase_ladder_TechnicalMall_small_00004
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+--- !u!4 &736260882 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+  m_PrefabInstance: {fileID: 736260881}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &740302596
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 170200238}
+    m_Modifications:
+    - target: {fileID: 743139490065180504, guid: 6d8664a3329e5c54bb33e74ccbf6e026, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_Railway_Vagon_tank_00000
+      objectReference: {fileID: 0}
+    - target: {fileID: 1624623147908013144, guid: 6d8664a3329e5c54bb33e74ccbf6e026, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_Railway_Vagon_tank_00001
+      objectReference: {fileID: 0}
+    - target: {fileID: 6052830715064600250, guid: 6d8664a3329e5c54bb33e74ccbf6e026, type: 3}
+      propertyPath: m_Name
+      value: Vagon_tank
+      objectReference: {fileID: 0}
+    - target: {fileID: 8260536538678665297, guid: 6d8664a3329e5c54bb33e74ccbf6e026, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -60.197006
+      objectReference: {fileID: 0}
+    - target: {fileID: 8260536538678665297, guid: 6d8664a3329e5c54bb33e74ccbf6e026, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 13.791994
+      objectReference: {fileID: 0}
+    - target: {fileID: 8260536538678665297, guid: 6d8664a3329e5c54bb33e74ccbf6e026, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -850.6967
+      objectReference: {fileID: 0}
+    - target: {fileID: 8260536538678665297, guid: 6d8664a3329e5c54bb33e74ccbf6e026, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: -0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 8260536538678665297, guid: 6d8664a3329e5c54bb33e74ccbf6e026, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 8260536538678665297, guid: 6d8664a3329e5c54bb33e74ccbf6e026, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.000000834465
+      objectReference: {fileID: 0}
+    - target: {fileID: 8260536538678665297, guid: 6d8664a3329e5c54bb33e74ccbf6e026, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.000000834465
+      objectReference: {fileID: 0}
+    - target: {fileID: 8260536538678665297, guid: 6d8664a3329e5c54bb33e74ccbf6e026, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8260536538678665297, guid: 6d8664a3329e5c54bb33e74ccbf6e026, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8260536538678665297, guid: 6d8664a3329e5c54bb33e74ccbf6e026, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 6d8664a3329e5c54bb33e74ccbf6e026, type: 3}
+--- !u!4 &740302597 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8260536538678665297, guid: 6d8664a3329e5c54bb33e74ccbf6e026, type: 3}
+  m_PrefabInstance: {fileID: 740302596}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &822634178
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 170200238}
+    m_Modifications:
+    - target: {fileID: 534961950166933459, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_Railway_kran_kozlovoi_closed_00010
+      objectReference: {fileID: 0}
+    - target: {fileID: 1364618003701734964, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_Name
+      value: kran_kozlovoi_closed
+      objectReference: {fileID: 0}
+    - target: {fileID: 1658814943724160758, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -124.66446
+      objectReference: {fileID: 0}
+    - target: {fileID: 1658814943724160758, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 10.807393
+      objectReference: {fileID: 0}
+    - target: {fileID: 1658814943724160758, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -841.1564
+      objectReference: {fileID: 0}
+    - target: {fileID: 1658814943724160758, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7071018
+      objectReference: {fileID: 0}
+    - target: {fileID: 1658814943724160758, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.7071018
+      objectReference: {fileID: 0}
+    - target: {fileID: 1658814943724160758, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.0026542842
+      objectReference: {fileID: 0}
+    - target: {fileID: 1658814943724160758, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.0026542842
+      objectReference: {fileID: 0}
+    - target: {fileID: 1658814943724160758, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: -90
+      objectReference: {fileID: 0}
+    - target: {fileID: 1658814943724160758, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: -77.636665
+      objectReference: {fileID: 0}
+    - target: {fileID: 1658814943724160758, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2576610813943163666, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_Railway_kran_kozlovoi_closed_00011
+      objectReference: {fileID: 0}
+    - target: {fileID: 4366782327193361943, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_Railway_kran_kozlovoi_closed_00009
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+--- !u!4 &822634179 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1658814943724160758, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+  m_PrefabInstance: {fileID: 822634178}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &918934333
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 918934334}
+  m_Layer: 0
+  m_Name: stepladders
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &918934334
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 918934333}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 714559256}
+  - {fileID: 277809247}
+  - {fileID: 1649312375}
+  - {fileID: 279503037}
+  - {fileID: 1189056432}
+  - {fileID: 983106885}
+  - {fileID: 2071014572}
+  - {fileID: 2140485263}
+  - {fileID: 1246158752}
+  - {fileID: 1792376719}
+  - {fileID: 1808659891}
+  - {fileID: 378826320}
+  - {fileID: 159725270}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &952548246
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 170200238}
+    m_Modifications:
+    - target: {fileID: 743139490065180504, guid: 6d8664a3329e5c54bb33e74ccbf6e026, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_Railway_Vagon_tank_00004
+      objectReference: {fileID: 0}
+    - target: {fileID: 1624623147908013144, guid: 6d8664a3329e5c54bb33e74ccbf6e026, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_Railway_Vagon_tank_00005
+      objectReference: {fileID: 0}
+    - target: {fileID: 6052830715064600250, guid: 6d8664a3329e5c54bb33e74ccbf6e026, type: 3}
+      propertyPath: m_Name
+      value: Vagon_tank
+      objectReference: {fileID: 0}
+    - target: {fileID: 8260536538678665297, guid: 6d8664a3329e5c54bb33e74ccbf6e026, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -60.190887
+      objectReference: {fileID: 0}
+    - target: {fileID: 8260536538678665297, guid: 6d8664a3329e5c54bb33e74ccbf6e026, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 13.791994
+      objectReference: {fileID: 0}
+    - target: {fileID: 8260536538678665297, guid: 6d8664a3329e5c54bb33e74ccbf6e026, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -866.0586
+      objectReference: {fileID: 0}
+    - target: {fileID: 8260536538678665297, guid: 6d8664a3329e5c54bb33e74ccbf6e026, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: -0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 8260536538678665297, guid: 6d8664a3329e5c54bb33e74ccbf6e026, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 8260536538678665297, guid: 6d8664a3329e5c54bb33e74ccbf6e026, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.000000834465
+      objectReference: {fileID: 0}
+    - target: {fileID: 8260536538678665297, guid: 6d8664a3329e5c54bb33e74ccbf6e026, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.000000834465
+      objectReference: {fileID: 0}
+    - target: {fileID: 8260536538678665297, guid: 6d8664a3329e5c54bb33e74ccbf6e026, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8260536538678665297, guid: 6d8664a3329e5c54bb33e74ccbf6e026, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8260536538678665297, guid: 6d8664a3329e5c54bb33e74ccbf6e026, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 6d8664a3329e5c54bb33e74ccbf6e026, type: 3}
+--- !u!4 &952548247 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8260536538678665297, guid: 6d8664a3329e5c54bb33e74ccbf6e026, type: 3}
+  m_PrefabInstance: {fileID: 952548246}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &973194751
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 973194752}
+  m_Layer: 0
+  m_Name: UsecBase
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &973194752
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 973194751}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 300087936}
+  - {fileID: 736260882}
+  - {fileID: 17280300}
+  - {fileID: 1931117398}
+  - {fileID: 3656530998873080277}
+  - {fileID: 1720419893}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &983106884
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 918934334}
+    m_Modifications:
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 41.207973
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 4.9069996
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -607.91003
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: -0.68301284
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.6830128
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.18301243
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.18301235
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7413676209968092450, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_stepladders_stepladder_01_Update_00010
+      objectReference: {fileID: 0}
+    - target: {fileID: 8106973077188150802, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_Name
+      value: stepladder_01_Update
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+--- !u!4 &983106885 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+  m_PrefabInstance: {fileID: 983106884}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1033217190
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1033217191}
+  m_Layer: 0
+  m_Name: EditorOnly
+  m_TagString: EditorOnly
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1033217191
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1033217190}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -212.29515, y: 23.067717, z: -74.57426}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1650546669}
+  - {fileID: 12903422}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &1084045576
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1796705873}
+    m_Modifications:
+    - target: {fileID: 2266166211463994275, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -86
+      objectReference: {fileID: 0}
+    - target: {fileID: 2266166211463994275, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 19.213856
+      objectReference: {fileID: 0}
+    - target: {fileID: 2266166211463994275, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -138.737
+      objectReference: {fileID: 0}
+    - target: {fileID: 2266166211463994275, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.00000007967415
+      objectReference: {fileID: 0}
+    - target: {fileID: 2266166211463994275, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.00000008940697
+      objectReference: {fileID: 0}
+    - target: {fileID: 2266166211463994275, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 2266166211463994275, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 2266166211463994275, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2266166211463994275, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2266166211463994275, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2426942489494728255, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_SummerHotel_Horizontal_bar_00001
+      objectReference: {fileID: 0}
+    - target: {fileID: 5154834812067416900, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_SummerHotel_Horizontal_bar_00000
+      objectReference: {fileID: 0}
+    - target: {fileID: 7090446110761793016, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_Name
+      value: Horizontal_bar
+      objectReference: {fileID: 0}
+    - target: {fileID: 8422359168253623835, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_SummerHotel_Horizontal_bar_00002
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+--- !u!4 &1084045577 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2266166211463994275, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+  m_PrefabInstance: {fileID: 1084045576}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &1189056431
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 918934334}
+    m_Modifications:
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 55.964005
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 8.201281
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -644.595
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.6532817
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.6532817
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.2705976
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.2705976
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7413676209968092450, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_stepladders_stepladder_01_Update_00004
+      objectReference: {fileID: 0}
+    - target: {fileID: 8106973077188150802, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_Name
+      value: stepladder_01_Update
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+--- !u!4 &1189056432 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+  m_PrefabInstance: {fileID: 1189056431}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &1246158751
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 918934334}
+    m_Modifications:
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -120.36157
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 17.903263
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -16.393082
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.026374226
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.026373267
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.7066139
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.7066157
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7413676209968092450, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_stepladders_stepladder_01_Update_00003
+      objectReference: {fileID: 0}
+    - target: {fileID: 8106973077188150802, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_Name
+      value: stepladder_01_Update
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+--- !u!4 &1246158752 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+  m_PrefabInstance: {fileID: 1246158751}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &1342667680
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1796705873}
+    m_Modifications:
+    - target: {fileID: 161266111203799030, guid: 6cc554a0f65fe23489994dd8ea58304d, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_SummerHotel_Children_park_update_00000
+      objectReference: {fileID: 0}
+    - target: {fileID: 970450895014923929, guid: 6cc554a0f65fe23489994dd8ea58304d, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_SummerHotel_Children_park_update_00001
+      objectReference: {fileID: 0}
+    - target: {fileID: 4374092156318629905, guid: 6cc554a0f65fe23489994dd8ea58304d, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -96.84595
+      objectReference: {fileID: 0}
+    - target: {fileID: 4374092156318629905, guid: 6cc554a0f65fe23489994dd8ea58304d, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 18.536999
+      objectReference: {fileID: 0}
+    - target: {fileID: 4374092156318629905, guid: 6cc554a0f65fe23489994dd8ea58304d, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -123.92984
+      objectReference: {fileID: 0}
+    - target: {fileID: 4374092156318629905, guid: 6cc554a0f65fe23489994dd8ea58304d, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.008208122
+      objectReference: {fileID: 0}
+    - target: {fileID: 4374092156318629905, guid: 6cc554a0f65fe23489994dd8ea58304d, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.008208126
+      objectReference: {fileID: 0}
+    - target: {fileID: 4374092156318629905, guid: 6cc554a0f65fe23489994dd8ea58304d, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.70705914
+      objectReference: {fileID: 0}
+    - target: {fileID: 4374092156318629905, guid: 6cc554a0f65fe23489994dd8ea58304d, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.70705914
+      objectReference: {fileID: 0}
+    - target: {fileID: 4374092156318629905, guid: 6cc554a0f65fe23489994dd8ea58304d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4374092156318629905, guid: 6cc554a0f65fe23489994dd8ea58304d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4374092156318629905, guid: 6cc554a0f65fe23489994dd8ea58304d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7453030693008429287, guid: 6cc554a0f65fe23489994dd8ea58304d, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_SummerHotel_Children_park_update_00002
+      objectReference: {fileID: 0}
+    - target: {fileID: 8927980355519507308, guid: 6cc554a0f65fe23489994dd8ea58304d, type: 3}
+      propertyPath: m_Name
+      value: Children_park_update
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 6cc554a0f65fe23489994dd8ea58304d, type: 3}
+--- !u!4 &1342667681 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4374092156318629905, guid: 6cc554a0f65fe23489994dd8ea58304d, type: 3}
+  m_PrefabInstance: {fileID: 1342667680}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1345030412
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1345030413}
+  m_Layer: 0
+  m_Name: WaterTreatment
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1345030413
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1345030412}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 52515426}
+  - {fileID: 888455386473135340}
+  - {fileID: 394850639}
+  - {fileID: 1868420879}
+  - {fileID: 1462142076}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &1408211212
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 170200238}
+    m_Modifications:
+    - target: {fileID: 534961950166933459, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_Railway_kran_kozlovoi_closed_00001
+      objectReference: {fileID: 0}
+    - target: {fileID: 1364618003701734964, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_Name
+      value: kran_kozlovoi_closed
+      objectReference: {fileID: 0}
+    - target: {fileID: 1658814943724160758, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -105.752045
+      objectReference: {fileID: 0}
+    - target: {fileID: 1658814943724160758, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 10.807393
+      objectReference: {fileID: 0}
+    - target: {fileID: 1658814943724160758, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -888.3765
+      objectReference: {fileID: 0}
+    - target: {fileID: 1658814943724160758, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.002655834
+      objectReference: {fileID: 0}
+    - target: {fileID: 1658814943724160758, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.002655834
+      objectReference: {fileID: 0}
+    - target: {fileID: 1658814943724160758, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.7071018
+      objectReference: {fileID: 0}
+    - target: {fileID: 1658814943724160758, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.7071018
+      objectReference: {fileID: 0}
+    - target: {fileID: 1658814943724160758, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: -90
+      objectReference: {fileID: 0}
+    - target: {fileID: 1658814943724160758, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: -77.636665
+      objectReference: {fileID: 0}
+    - target: {fileID: 1658814943724160758, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2576610813943163666, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_Railway_kran_kozlovoi_closed_00002
+      objectReference: {fileID: 0}
+    - target: {fileID: 4366782327193361943, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_Railway_kran_kozlovoi_closed_00000
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+--- !u!4 &1408211213 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1658814943724160758, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+  m_PrefabInstance: {fileID: 1408211212}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &1412958555
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 170200238}
+    m_Modifications:
+    - target: {fileID: 534961950166933459, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_Railway_kran_kozlovoi_closed_00007
+      objectReference: {fileID: 0}
+    - target: {fileID: 1364618003701734964, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_Name
+      value: kran_kozlovoi_closed
+      objectReference: {fileID: 0}
+    - target: {fileID: 1658814943724160758, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -23.658491
+      objectReference: {fileID: 0}
+    - target: {fileID: 1658814943724160758, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 12.214105
+      objectReference: {fileID: 0}
+    - target: {fileID: 1658814943724160758, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -888.72687
+      objectReference: {fileID: 0}
+    - target: {fileID: 1658814943724160758, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.49812037
+      objectReference: {fileID: 0}
+    - target: {fileID: 1658814943724160758, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.49812037
+      objectReference: {fileID: 0}
+    - target: {fileID: 1658814943724160758, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.50187266
+      objectReference: {fileID: 0}
+    - target: {fileID: 1658814943724160758, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.50187266
+      objectReference: {fileID: 0}
+    - target: {fileID: 1658814943724160758, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: -90
+      objectReference: {fileID: 0}
+    - target: {fileID: 1658814943724160758, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: -77.636665
+      objectReference: {fileID: 0}
+    - target: {fileID: 1658814943724160758, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2576610813943163666, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_Railway_kran_kozlovoi_closed_00008
+      objectReference: {fileID: 0}
+    - target: {fileID: 4366782327193361943, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_Railway_kran_kozlovoi_closed_00006
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+--- !u!4 &1412958556 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1658814943724160758, guid: cf023e1ae8cd69f448efbfb753dcae8d, type: 3}
+  m_PrefabInstance: {fileID: 1412958555}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &1462142075
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1345030413}
+    m_Modifications:
+    - target: {fileID: 2633855488429595552, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_WaterTreatment_Chemical_Barrel_small_ladder_02_00001
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -101.937485
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.8767309
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -477.3324
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.6189594
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.49045974
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.34195685
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.5093173
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7278474029204280824, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_Name
+      value: Chemical_Barrel_small_ladder_02
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+--- !u!4 &1462142076 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+  m_PrefabInstance: {fileID: 1462142075}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &1647602925
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 2099407093}
+    m_Modifications:
+    - target: {fileID: 2633855488429595552, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_Island_Chemical_Barrel_small_ladder_02_00002
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 380.07703
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 3.2631512
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 464.12747
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.35355374
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.35355374
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.6123723
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.6123723
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7278474029204280824, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_Name
+      value: Chemical_Barrel_small_ladder_02
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+--- !u!4 &1647602926 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+  m_PrefabInstance: {fileID: 1647602925}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &1649312374
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 918934334}
+    m_Modifications:
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -177.384
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 4.906996
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -651.879
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.49999973
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.49999973
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.5000003
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.50000024
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7413676209968092450, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_stepladders_stepladder_01_Update_00009
+      objectReference: {fileID: 0}
+    - target: {fileID: 8106973077188150802, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_Name
+      value: stepladder_01_Update
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+--- !u!4 &1649312375 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+  m_PrefabInstance: {fileID: 1649312374}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1650546666
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1650546669}
+  - component: {fileID: 1650546668}
+  - component: {fileID: 1650546667}
+  m_Layer: 0
+  m_Name: Main Camera
+  m_TagString: MainCamera
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!81 &1650546667
+AudioListener:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1650546666}
+  m_Enabled: 1
+--- !u!20 &1650546668
+Camera:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1650546666}
+  m_Enabled: 1
+  serializedVersion: 2
+  m_ClearFlags: 1
+  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_projectionMatrixMode: 1
+  m_GateFitMode: 2
+  m_FOVAxisMode: 0
+  m_Iso: 200
+  m_ShutterSpeed: 0.005
+  m_Aperture: 16
+  m_FocusDistance: 10
+  m_FocalLength: 50
+  m_BladeCount: 5
+  m_Curvature: {x: 2, y: 11}
+  m_BarrelClipping: 0.25
+  m_Anamorphism: 0
+  m_SensorSize: {x: 36, y: 24}
+  m_LensShift: {x: 0, y: 0}
+  m_NormalizedViewPortRect:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 1
+    height: 1
+  near clip plane: 0.3
+  far clip plane: 1000
+  field of view: 60
+  orthographic: 0
+  orthographic size: 5
+  m_Depth: -1
+  m_CullingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_RenderingPath: -1
+  m_TargetTexture: {fileID: 0}
+  m_TargetDisplay: 0
+  m_TargetEye: 3
+  m_HDR: 1
+  m_AllowMSAA: 1
+  m_AllowDynamicResolution: 0
+  m_ForceIntoRT: 0
+  m_OcclusionCulling: 1
+  m_StereoConvergence: 10
+  m_StereoSeparation: 0.022
+--- !u!4 &1650546669
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1650546666}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 212.29515, y: -22.067717, z: 64.57426}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1033217191}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &1720419892
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 973194752}
+    m_Modifications:
+    - target: {fileID: 1995475907516222297, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_Name
+      value: ladder_TechnicalMall_small
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 57.26599
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 11.192997
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -655.937
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7118773015708301652, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_UsecBase_ladder_TechnicalMall_small_00003
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+--- !u!4 &1720419893 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+  m_PrefabInstance: {fileID: 1720419892}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &1792376718
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 918934334}
+    m_Modifications:
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -70.07892
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 10.804001
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -828.7247
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.6532812
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.65328133
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.2705986
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.2705987
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7413676209968092450, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_stepladders_stepladder_01_Update_00011
+      objectReference: {fileID: 0}
+    - target: {fileID: 8106973077188150802, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_Name
+      value: stepladder_01_Update
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+--- !u!4 &1792376719 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+  m_PrefabInstance: {fileID: 1792376718}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1796705872
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1796705873}
+  m_Layer: 0
+  m_Name: SummerHotel
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1796705873
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1796705872}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1084045577}
+  - {fileID: 357140138}
+  - {fileID: 2087944982}
+  - {fileID: 7378947023597789092}
+  - {fileID: 1342667681}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &1808659890
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 918934334}
+    m_Modifications:
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1.2000005
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 320.146
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 3.493
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 488.278
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.631551
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.6315511
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.3180304
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.3180303
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7413676209968092450, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_stepladders_stepladder_01_Update_00002
+      objectReference: {fileID: 0}
+    - target: {fileID: 8106973077188150802, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_Name
+      value: stepladder_01_Update
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+--- !u!4 &1808659891 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+  m_PrefabInstance: {fileID: 1808659890}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &1868420878
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1345030413}
+    m_Modifications:
+    - target: {fileID: 2633855488429595552, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_WaterTreatment_Chemical_Barrel_small_ladder_02_00000
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -135.923
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.0075021
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -582.142
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.70546186
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.7052157
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.049963877
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.049981322
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7278474029204280824, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+      propertyPath: m_Name
+      value: Chemical_Barrel_small_ladder_02
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+--- !u!4 &1868420879 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4414344096627567786, guid: fcc791976a6a19e41a60fcd60a5b8b13, type: 3}
+  m_PrefabInstance: {fileID: 1868420878}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &1902415012
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 170200238}
+    m_Modifications:
+    - target: {fileID: 241202453908467313, guid: 22d22bb491fdd0449bc02e2e651e84de, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_Railway_Benzovoz_00000
+      objectReference: {fileID: 0}
+    - target: {fileID: 4551569556358654378, guid: 22d22bb491fdd0449bc02e2e651e84de, type: 3}
+      propertyPath: m_Name
+      value: Benzovoz
+      objectReference: {fileID: 0}
+    - target: {fileID: 8346680448398062571, guid: 22d22bb491fdd0449bc02e2e651e84de, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -73.59363
+      objectReference: {fileID: 0}
+    - target: {fileID: 8346680448398062571, guid: 22d22bb491fdd0449bc02e2e651e84de, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 10.094709
+      objectReference: {fileID: 0}
+    - target: {fileID: 8346680448398062571, guid: 22d22bb491fdd0449bc02e2e651e84de, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -875.1433
+      objectReference: {fileID: 0}
+    - target: {fileID: 8346680448398062571, guid: 22d22bb491fdd0449bc02e2e651e84de, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.09803385
+      objectReference: {fileID: 0}
+    - target: {fileID: 8346680448398062571, guid: 22d22bb491fdd0449bc02e2e651e84de, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.09803385
+      objectReference: {fileID: 0}
+    - target: {fileID: 8346680448398062571, guid: 22d22bb491fdd0449bc02e2e651e84de, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.7002781
+      objectReference: {fileID: 0}
+    - target: {fileID: 8346680448398062571, guid: 22d22bb491fdd0449bc02e2e651e84de, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.7002781
+      objectReference: {fileID: 0}
+    - target: {fileID: 8346680448398062571, guid: 22d22bb491fdd0449bc02e2e651e84de, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8346680448398062571, guid: 22d22bb491fdd0449bc02e2e651e84de, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8346680448398062571, guid: 22d22bb491fdd0449bc02e2e651e84de, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 22d22bb491fdd0449bc02e2e651e84de, type: 3}
+--- !u!4 &1902415013 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8346680448398062571, guid: 22d22bb491fdd0449bc02e2e651e84de, type: 3}
+  m_PrefabInstance: {fileID: 1902415012}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1920189445
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1920189447}
+  - component: {fileID: 1920189446}
+  m_Layer: 0
+  m_Name: SceneObjectDisabler_Manager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1920189446
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1920189445}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 840832d6ce57e1d4fbb9d88426b7a7b1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mode: 0
+  pathsToDisable:
+  - SBG_Lighthouse_Logistics_Terminal/OO/Railway_platforms/Railway_kran 1/kran_kozlovoi_closed
+    (1)/kran_kozlovoi_closed_COLLIDER
+  - SBG_Lighthouse_Logistics_Terminal/OO/Railway_platforms/Railway_kran 2/kran_kozlovoi_closed
+    (1)/kran_kozlovoi_closed_COLLIDER
+  - SBG_Lighthouse_Logistics_Terminal/OO/Zone 6/Props/railway_kran_1 (2)/kran_kozlovoi_closed
+    (1)/kran_kozlovoi_closed_COLLIDER
+  - SBG_Lighthouse_Logistics_Terminal/OO/Zone 6/Props/railway_kran_1 (1)/kran_kozlovoi_closed
+    (1)/kran_kozlovoi_closed_COLLIDER
+  delay: 0
+--- !u!4 &1920189447
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1920189445}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &1931117397
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 973194752}
+    m_Modifications:
+    - target: {fileID: 1995475907516222297, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_Name
+      value: ladder_TechnicalMall_small
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -62.743
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 11.196983
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -755.2662
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.70710677
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.00000041723246
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.00000046193594
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7118773015708301652, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_UsecBase_ladder_TechnicalMall_small_00002
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+--- !u!4 &1931117398 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+  m_PrefabInstance: {fileID: 1931117397}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &2071014571
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 918934334}
+    m_Modifications:
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -162.60146
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 11.902531
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -201.85034
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.5000003
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.50000036
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.4999998
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.49999967
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7413676209968092450, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_stepladders_stepladder_01_Update_00006
+      objectReference: {fileID: 0}
+    - target: {fileID: 8106973077188150802, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_Name
+      value: stepladder_01_Update
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+--- !u!4 &2071014572 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+  m_PrefabInstance: {fileID: 2071014571}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &2087944981
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1796705873}
+    m_Modifications:
+    - target: {fileID: 2266166211463994275, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -86.15997
+      objectReference: {fileID: 0}
+    - target: {fileID: 2266166211463994275, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 18.443798
+      objectReference: {fileID: 0}
+    - target: {fileID: 2266166211463994275, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -123.28
+      objectReference: {fileID: 0}
+    - target: {fileID: 2266166211463994275, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.000000019839678
+      objectReference: {fileID: 0}
+    - target: {fileID: 2266166211463994275, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.000000029802322
+      objectReference: {fileID: 0}
+    - target: {fileID: 2266166211463994275, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 2266166211463994275, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 2266166211463994275, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2266166211463994275, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2266166211463994275, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2426942489494728255, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_SummerHotel_Horizontal_bar_00010
+      objectReference: {fileID: 0}
+    - target: {fileID: 5154834812067416900, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_SummerHotel_Horizontal_bar_00009
+      objectReference: {fileID: 0}
+    - target: {fileID: 7090446110761793016, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_Name
+      value: Horizontal_bar
+      objectReference: {fileID: 0}
+    - target: {fileID: 8422359168253623835, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_SummerHotel_Horizontal_bar_00011
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+--- !u!4 &2087944982 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2266166211463994275, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+  m_PrefabInstance: {fileID: 2087944981}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &2099407092
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2099407093}
+  m_Layer: 0
+  m_Name: Island
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2099407093
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2099407092}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 516174348}
+  - {fileID: 1647602926}
+  - {fileID: 112499586}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &2140485262
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 918934334}
+    m_Modifications:
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -106.106384
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 17.903645
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -8.127609
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: -0.059913836
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.059914578
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.70456296
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.70456487
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7413676209968092450, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_stepladders_stepladder_01_Update_00008
+      objectReference: {fileID: 0}
+    - target: {fileID: 8106973077188150802, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+      propertyPath: m_Name
+      value: stepladder_01_Update
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+--- !u!4 &2140485263 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5595391709919970815, guid: aba93fad38f28fa45a78019312e3d46a, type: 3}
+  m_PrefabInstance: {fileID: 2140485262}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &888455386473135339
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1345030413}
+    m_Modifications:
+    - target: {fileID: 592677635834502371, guid: 72d8ca5e960078b4191973fbc9a01f41, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -112.4563
+      objectReference: {fileID: 0}
+    - target: {fileID: 592677635834502371, guid: 72d8ca5e960078b4191973fbc9a01f41, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.732996
+      objectReference: {fileID: 0}
+    - target: {fileID: 592677635834502371, guid: 72d8ca5e960078b4191973fbc9a01f41, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -490.85858
+      objectReference: {fileID: 0}
+    - target: {fileID: 592677635834502371, guid: 72d8ca5e960078b4191973fbc9a01f41, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: -0.70105743
+      objectReference: {fileID: 0}
+    - target: {fileID: 592677635834502371, guid: 72d8ca5e960078b4191973fbc9a01f41, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.70105743
+      objectReference: {fileID: 0}
+    - target: {fileID: 592677635834502371, guid: 72d8ca5e960078b4191973fbc9a01f41, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.09229604
+      objectReference: {fileID: 0}
+    - target: {fileID: 592677635834502371, guid: 72d8ca5e960078b4191973fbc9a01f41, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.09229604
+      objectReference: {fileID: 0}
+    - target: {fileID: 592677635834502371, guid: 72d8ca5e960078b4191973fbc9a01f41, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 592677635834502371, guid: 72d8ca5e960078b4191973fbc9a01f41, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 592677635834502371, guid: 72d8ca5e960078b4191973fbc9a01f41, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2478460860012160566, guid: 72d8ca5e960078b4191973fbc9a01f41, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_WaterTreatment_City_ScavTower_A_00000
+      objectReference: {fileID: 0}
+    - target: {fileID: 8095089080949896044, guid: 72d8ca5e960078b4191973fbc9a01f41, type: 3}
+      propertyPath: m_Name
+      value: City_ScavTower_A
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 72d8ca5e960078b4191973fbc9a01f41, type: 3}
+--- !u!4 &888455386473135340 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 592677635834502371, guid: 72d8ca5e960078b4191973fbc9a01f41, type: 3}
+  m_PrefabInstance: {fileID: 888455386473135339}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &3656530998873080276
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 973194752}
+    m_Modifications:
+    - target: {fileID: 1995475907516222297, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_Name
+      value: ladder_TechnicalMall_small
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 55.055973
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 11.352005
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -588.523
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.50000024
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.50000024
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.49999985
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.49999973
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7118773015708301652, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_UsecBase_ladder_TechnicalMall_small_00001
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+--- !u!4 &3656530998873080277 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4034870035615636897, guid: b3d47a24128401d4fa8cdf32cfbdb889, type: 3}
+  m_PrefabInstance: {fileID: 3656530998873080276}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &7378947023597789091
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1796705873}
+    m_Modifications:
+    - target: {fileID: 2266166211463994275, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -81.93298
+      objectReference: {fileID: 0}
+    - target: {fileID: 2266166211463994275, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 18.443798
+      objectReference: {fileID: 0}
+    - target: {fileID: 2266166211463994275, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -121.70758
+      objectReference: {fileID: 0}
+    - target: {fileID: 2266166211463994275, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.6618675
+      objectReference: {fileID: 0}
+    - target: {fileID: 2266166211463994275, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.6618674
+      objectReference: {fileID: 0}
+    - target: {fileID: 2266166211463994275, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.2488604
+      objectReference: {fileID: 0}
+    - target: {fileID: 2266166211463994275, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.24886039
+      objectReference: {fileID: 0}
+    - target: {fileID: 2266166211463994275, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2266166211463994275, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2266166211463994275, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2426942489494728255, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_SummerHotel_Horizontal_bar_00004
+      objectReference: {fileID: 0}
+    - target: {fileID: 5154834812067416900, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_SummerHotel_Horizontal_bar_00003
+      objectReference: {fileID: 0}
+    - target: {fileID: 7090446110761793016, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_Name
+      value: Horizontal_bar
+      objectReference: {fileID: 0}
+    - target: {fileID: 8422359168253623835, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+      propertyPath: m_Name
+      value: Lighthouse_Ladders_SummerHotel_Horizontal_bar_00005
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+--- !u!4 &7378947023597789092 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2266166211463994275, guid: bc7d94c49868e6f40a44133f8df2fe92, type: 3}
+  m_PrefabInstance: {fileID: 7378947023597789091}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1660057539 &9223372036854775807
+SceneRoots:
+  m_ObjectHideFlags: 0
+  m_Roots:
+  - {fileID: 1033217191}
+  - {fileID: 1920189447}
+  - {fileID: 2099407093}
+  - {fileID: 918934334}
+  - {fileID: 1796705873}
+  - {fileID: 170200238}
+  - {fileID: 973194752}
+  - {fileID: 1345030413}

@@ -1,9 +1,6 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using EFT;
 using EFT.Ballistics;
 using EFT.Interactive;
@@ -15,157 +12,32 @@ namespace VisceralCombat.Ragdolls.Patches;
 
 public class BodiesImpulsePatch : ModulePatch
 {
-	[CompilerGenerated]
-	private sealed class _003CWatchShot_003Ed__4 : IEnumerator<object>, IEnumerator, IDisposable
-	{
-		private int _003C_003E1__state;
-
-		private object _003C_003E2__current;
-
-		public EftBulletClass shot;
-
-		private Collider _003ChitCollider_003E5__1;
-
-		private AmmoItemClass _003CbulletClass_003E5__2;
-
-		private float _003Cmodifier_003E5__3;
-
-		private Rigidbody _003Crb_003E5__4;
-
-		private float _003CboneModifier_003E5__5;
-
-		private Vector3 _003Cforce_003E5__6;
-
-		object IEnumerator<object>.Current
-		{
-			[DebuggerHidden]
-			get
-			{
-				return _003C_003E2__current;
-			}
-		}
-
-		object IEnumerator.Current
-		{
-			[DebuggerHidden]
-			get
-			{
-				return _003C_003E2__current;
-			}
-		}
-
-		[DebuggerHidden]
-		public _003CWatchShot_003Ed__4(int _003C_003E1__state)
-		{
-			this._003C_003E1__state = _003C_003E1__state;
-		}
-
-		[DebuggerHidden]
-		void IDisposable.Dispose()
-		{
-			_003ChitCollider_003E5__1 = null;
-			_003CbulletClass_003E5__2 = null;
-			_003Crb_003E5__4 = null;
-			_003C_003E1__state = -2;
-		}
-
-		private bool MoveNext()
-		{
-			//IL_0195: Unknown result type (might be due to invalid IL or missing references)
-			//IL_01b0: Unknown result type (might be due to invalid IL or missing references)
-			//IL_01b5: Unknown result type (might be due to invalid IL or missing references)
-			//IL_01c1: Unknown result type (might be due to invalid IL or missing references)
-			//IL_01cc: Unknown result type (might be due to invalid IL or missing references)
-			switch (_003C_003E1__state)
-			{
-			default:
-				return false;
-			case 0:
-				_003C_003E1__state = -1;
-				break;
-			case 1:
-				_003C_003E1__state = -1;
-				break;
-			}
-			if (!shot.IsShotFinished)
-			{
-				_003C_003E2__current = null;
-				_003C_003E1__state = 1;
-				return true;
-			}
-			_003ChitCollider_003E5__1 = shot.HitCollider;
-			if ((Object)(object)_003ChitCollider_003E5__1 == (Object)null)
-			{
-				return false;
-			}
-			Item ammo = shot.Ammo;
-			_003CbulletClass_003E5__2 = (AmmoItemClass)(object)((ammo is AmmoItemClass) ? ammo : null);
-			if (_003CbulletClass_003E5__2 == null)
-			{
-				return false;
-			}
-			if (!_dictionary.TryGetValue(_003CbulletClass_003E5__2.Caliber, out _003Cmodifier_003E5__3))
-			{
-				return false;
-			}
-			_003Crb_003E5__4 = _003ChitCollider_003E5__1.attachedRigidbody;
-			if ((Object)(object)_003Crb_003E5__4 == (Object)null)
-			{
-				return false;
-			}
-			_003Cmodifier_003E5__3 /= Mathf.Max(_003CbulletClass_003E5__2.ProjectileCount, 1);
-			if (_003CbulletClass_003E5__2.Caliber != "12g" && _bonedictionary.TryGetValue(((Object)_003ChitCollider_003E5__1).name, out _003CboneModifier_003E5__5))
-			{
-				_003Cmodifier_003E5__3 *= _003CboneModifier_003E5__5;
-			}
-			if ((Object)(object)((Component)_003Crb_003E5__4).gameObject.GetComponent<ObservedLootItem>() != (Object)null)
-			{
-				_003Cmodifier_003E5__3 *= VisceralEntry.Instance.objectIntensity.Value;
-			}
-			_003Cforce_003E5__6 = shot.Direction * (_003Cmodifier_003E5__3 * VisceralEntry.Instance.ShotIntensity.Value);
-			_003Crb_003E5__4.AddForceAtPosition(_003Cforce_003E5__6, shot.HitPoint);
-			return false;
-		}
-
-		bool IEnumerator.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			return this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		void IEnumerator.Reset()
-		{
-			throw new NotSupportedException();
-		}
-	}
-
 	private static Dictionary<string, float> _dictionary = new Dictionary<string, float>
 	{
-		{ "12g", 150f },
-		{ "762x51", 65f },
-		{ "762x39", 45f },
-		{ "9x39", 33f },
-		{ "545x39", 35f },
-		{ "9x18PM", 12f },
-		{ "762x35", 60f },
-		{ "556x45NATO", 30f },
-		{ "127x55", 100f },
-		{ "127x108", 350f },
-		{ "366TKM", 60f },
-		{ "40x46", 200f },
-		{ "26x75", 70f },
-		{ "30x29", 350f },
-		{ "762x54R", 95f },
-		{ "86x70", 800f },
-		{ "9x19PARA", 12f },
-		{ "1143x23ACP", 12f },
+		{ "Caliber12g", 150f },
+		{ "Caliber762x51", 65f },
+		{ "Caliber762x39", 45f },
+		{ "Caliber9x39", 33f },
+		{ "Caliber545x39", 35f },
+		{ "Caliber9x18PM", 12f },
+		{ "Caliber762x35", 60f },
+		{ "Caliber556x45NATO", 30f },
+		{ "Caliber127x55", 100f },
+		{ "Caliber127x108", 350f },
+		{ "Caliber366TKM", 60f },
+		{ "Caliber40x46", 200f },
+		{ "Caliber26x75", 70f },
+		{ "Caliber30x29", 350f },
+		{ "Caliber762x54R", 95f },
+		{ "Caliber86x70", 800f },
+		{ "Caliber9x19PARA", 12f },
+		{ "Caliber1143x23ACP", 12f },
 		{ "Caliber9x21", 5f },
-		{ "57x28", 40f },
-		{ "23x75", 200f },
-		{ "25x59mm", 180f },
-		{ "12.7x99", 110f },
-		{ "68x51", 40f }
+		{ "Caliber57x28", 40f },
+		{ "Caliber23x75", 200f },
+		{ "Caliber25x59mm", 180f },
+		{ "Caliber12.7x99", 110f },
+		{ "Caliber68x51", 40f }
 	};
 
 	private static Dictionary<string, float> _bonedictionary = new Dictionary<string, float>
@@ -200,16 +72,66 @@ public class BodiesImpulsePatch : ModulePatch
 	[PatchPostfix]
 	private static void Postfix(EftBulletClass shot)
 	{
+		if (shot == null) return;
 		((MonoBehaviour)StaticManager.Instance).StartCoroutine(WatchShot(shot));
 	}
 
-	[IteratorStateMachine(typeof(_003CWatchShot_003Ed__4))]
-	private static IEnumerator WatchShot(EftBulletClass shot)
+	private static System.Collections.IEnumerator WatchShot(EftBulletClass shot)
 	{
-		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
-		return new _003CWatchShot_003Ed__4(0)
+		if (shot == null) yield break;
+
+		float timeout = 3.0f;
+		while (!shot.IsShotFinished && timeout > 0f)
 		{
-			shot = shot
-		};
+			timeout -= Time.deltaTime;
+			yield return null;
+		}
+
+		if (shot != null && shot.IsShotFinished && shot.HitCollider != null)
+		{
+			ProcessImpulse(shot);
+		}
+	}
+
+	public static void ProcessImpulse(EftBulletClass shot)
+	{
+		if (shot == null || shot.HitCollider == null) return;
+
+		Collider hitCollider = shot.HitCollider;
+		Rigidbody rb = hitCollider.attachedRigidbody;
+		if (rb == null) return;
+
+		// Calculate realistic physical momentum: p = m * v (mass in kg * speed in m/s) with 0.25f scale (divided by 4 for natural ragdoll movement)
+		float massKg = (shot.BulletMassGram > 0f) ? (shot.BulletMassGram / 1000f) : 0.008f; // Default 8g fallback
+		float speed = (shot.Speed > 0f) ? shot.Speed : 400f; // Default 400 m/s fallback
+
+		float physicalImpulse = (massKg * speed) * 0.25f; // Linear momentum in N.s (scaled by 0.25)
+
+		// Check if hitting dropped loot item
+		if (rb.gameObject.GetComponent<ObservedLootItem>() != null)
+		{
+			if (VisceralEntry.Instance != null && VisceralEntry.Instance.ItemForce.Value)
+			{
+				physicalImpulse *= VisceralEntry.Instance.objectIntensity.Value;
+			}
+			else
+			{
+				return;
+			}
+		}
+
+		string hitName = hitCollider.name.ToLower();
+		float bodyPartMult = 1.0f;
+		if (VisceralEntry.Instance != null)
+		{
+			if (hitName.Contains("head")) bodyPartMult = VisceralEntry.Instance.headForceIntensity?.Value ?? 1f;
+			else if (hitName.Contains("pelvis") || hitName.Contains("spine") || hitName.Contains("rib")) bodyPartMult = VisceralEntry.Instance.TorsoForceIntensity?.Value ?? 1f;
+			else if (hitName.Contains("arm")) bodyPartMult = VisceralEntry.Instance.ArmsForceIntensity?.Value ?? 1f;
+			else if (hitName.Contains("thigh") || hitName.Contains("calf") || hitName.Contains("foot")) bodyPartMult = VisceralEntry.Instance.LegsForceIntensity?.Value ?? 1f;
+		}
+
+		float totalIntensity = (VisceralEntry.Instance != null && VisceralEntry.Instance.ShotIntensity != null) ? VisceralEntry.Instance.ShotIntensity.Value : 1f;
+		Vector3 impulse = shot.Direction * (physicalImpulse * bodyPartMult * totalIntensity);
+		rb.AddForceAtPosition(impulse, shot.HitPoint, ForceMode.Impulse);
 	}
 }

@@ -1,4 +1,5 @@
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace VisceralCombat.Ragdolls.Classes.RootMotion;
 
@@ -129,7 +130,7 @@ public class AxisTools
 		//IL_0076: Unknown result type (might be due to invalid IL or missing references)
 		//IL_007b: Unknown result type (might be due to invalid IL or missing references)
 		//IL_0081: Unknown result type (might be due to invalid IL or missing references)
-		direction = ((Vector3)(ref direction)).normalized;
+		direction = direction.normalized;
 		Vector3 result = Vector3.right;
 		float num = Mathf.Abs(Vector3.Dot(r * Vector3.right, direction));
 		float num2 = Mathf.Abs(Vector3.Dot(r * Vector3.up, direction));

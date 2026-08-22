@@ -9,12 +9,15 @@ namespace TRLFixes
     // e o log diz "FIKA nao detectado". Falha SILENCIOSA disfarçada de "FIKA não instalado", que
     // custaria uma sessão de teste inteira. Soft = ordena a carga se presente, não exige.
     // GUID confirmado: fika-plugin/Fika.Core/FikaPlugin.cs:40. Mesmo padrão de DiscordRaidMap e MOAR-Client.
-    [BepInPlugin("com.trl.fixes", "TRL Fixes", "1.1.0")]
+    [BepInPlugin("com.trl.fixes", "TRL Fixes", "1.3.0")]
     [BepInDependency("com.fika.core", BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin
     {
+        public static BepInEx.Logging.ManualLogSource Log;
+
         private void Awake()
         {
+            Log = Logger;
             Logger.LogInfo("TRL-Fixes: Carregando patches...");
 
             try
@@ -55,6 +58,70 @@ namespace TRLFixes
             catch (Exception ex)
             {
                 Logger.LogError($"TRL-Fixes: Falha ao carregar PickupAimingSafetyPatch: {ex.Message}");
+            }
+
+            try
+            {
+                new Patches.DynamicMapsSafetyPatch().Enable();
+                Logger.LogInfo("TRL-Fixes: DynamicMapsSafetyPatch ativado com sucesso.");
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"TRL-Fixes: Falha ao carregar DynamicMapsSafetyPatch: {ex.Message}");
+            }
+
+            try
+            {
+                new Patches.FikaMainThreadUISafetyPatch().Enable();
+                Logger.LogInfo("TRL-Fixes: FikaMainThreadUISafetyPatch ativado com sucesso.");
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"TRL-Fixes: Falha ao carregar FikaMainThreadUISafetyPatch: {ex.Message}");
+            }
+
+            try
+            {
+                new Patches.FikaProceedEmptyHandsSafetyPatch().Enable();
+                Logger.LogInfo("TRL-Fixes: FikaProceedEmptyHandsSafetyPatch ativado com sucesso.");
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"TRL-Fixes: Falha ao carregar FikaProceedEmptyHandsSafetyPatch: {ex.Message}");
+            }
+
+            try
+            {
+                new Patches.FikaRefreshSlotViewsSafetyPatch().Enable();
+                Logger.LogInfo("TRL-Fixes: FikaRefreshSlotViewsSafetyPatch ativado com sucesso.");
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"TRL-Fixes: Falha ao carregar FikaRefreshSlotViewsSafetyPatch: {ex.Message}");
+            }
+
+            try
+            {
+                new Patches.BotMountWeaponFixPatch().Enable();
+                new Patches.GClass81ShallUseNowPatch().Enable();
+                new Patches.BotStationaryWeaponDataMethod4Patch().Enable();
+                new Patches.FikaPlayerOperateStationaryWeaponPatch().Enable();
+                new Patches.PlayerOperateStationaryWeaponPatch().Enable();
+                Logger.LogInfo("TRL-Fixes: BotMountWeaponFixPatch ativado com sucesso.");
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"TRL-Fixes: Falha ao carregar BotMountWeaponFixPatch: {ex.Message}");
+            }
+
+            try
+            {
+                new Patches.BotWeaponManagerSafetyPatch().Enable();
+                Logger.LogInfo("TRL-Fixes: BotWeaponManagerSafetyPatch ativado com sucesso.");
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"TRL-Fixes: Falha ao carregar BotWeaponManagerSafetyPatch: {ex.Message}");
             }
         }
     }

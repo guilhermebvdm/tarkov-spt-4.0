@@ -1,4 +1,5 @@
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace VisceralCombat.Ragdolls.Classes.RootMotion.Dynamics;
 
@@ -91,7 +92,7 @@ public class PressureSensor : MonoBehaviour
 			Vector3 val = Vector3.zero;
 			for (int i = 0; i < c.contacts.Length; i++)
 			{
-				val += ((ContactPoint)(ref c.contacts[i])).point;
+				val += c.contacts[i].point;
 			}
 			val /= (float)c.contacts.Length;
 			P += val;

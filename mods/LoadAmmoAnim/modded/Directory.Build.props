@@ -1,0 +1,16 @@
+<Project>
+  <!--
+    Single source of truth for the mod version + GUID. update ModVersion here
+    and every place that uses it (BepInPlugin attribute, server ModMetadata,
+    csproj Version, release zip filename) refreshes on next build.
+  -->
+  <PropertyGroup>
+    <ModVersion>1.9.0</ModVersion>
+    <ModGuid>com.manimal.loadammoanim</ModGuid>
+    <!-- custom item parent id. matches [CustomParent] on LoadAmmoBundleItem and the
+         "parentId" field in hidden_anim_STANAGS.jsonc. random 24-hex, distinct from
+         every other mod's parent id so theres no collision. -->
+    <ModBundleItemParentId>8a3f72c1b9d5e60a4fe83b21</ModBundleItemParentId>
+    <SPTPath Condition="'$(SPTPath)' == ''">E:\Tarkov Red Line</SPTPath>
+  </PropertyGroup>
+</Project>

@@ -1,4 +1,5 @@
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 public class BFX_RenderDepth : MonoBehaviour
 {
@@ -6,23 +7,23 @@ public class BFX_RenderDepth : MonoBehaviour
 
 	private void OnEnable()
 	{
-		//IL_000a: Unknown result type (might be due to invalid IL or missing references)
-		//IL_000f: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0015: Unknown result type (might be due to invalid IL or missing references)
-		//IL_001b: Invalid comparison between Unknown and I4
-		//IL_0024: Unknown result type (might be due to invalid IL or missing references)
-		//IL_002a: Unknown result type (might be due to invalid IL or missing references)
-		Camera component = ((Component)this).GetComponent<Camera>();
-		defaultMode = component.depthTextureMode;
-		if ((int)component.renderingPath == 1)
+		Camera component = GetComponent<Camera>();
+		if (component != null)
 		{
-			component.depthTextureMode = (DepthTextureMode)(component.depthTextureMode | 1);
+			defaultMode = component.depthTextureMode;
+			if ((int)component.renderingPath == 1)
+			{
+				component.depthTextureMode = component.depthTextureMode | DepthTextureMode.Depth;
+			}
 		}
 	}
 
 	private void OnDisable()
 	{
-		//IL_0008: Unknown result type (might be due to invalid IL or missing references)
-		((Component)this).GetComponent<Camera>().depthTextureMode = defaultMode;
+		Camera component = GetComponent<Camera>();
+		if (component != null)
+		{
+			component.depthTextureMode = defaultMode;
+		}
 	}
 }
