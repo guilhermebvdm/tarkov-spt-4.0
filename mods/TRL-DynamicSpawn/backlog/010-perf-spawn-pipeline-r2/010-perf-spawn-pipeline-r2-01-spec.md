@@ -34,7 +34,7 @@ Rodada 2 do client: (1) o spawner contínuo de Scavs do jogo original deixa de *
 - [ ] **NR-1 (AUD-01-08):** quantidade, composição (PMC/Scav/pScav), zonas, bolha/safe zone/LoS e cadência das ondas **do mod** não mudam — o mod já era o único spawner efetivo de `assault` (o vanilla era recusado em 100% das tentativas).
 - [ ] **NR-2 (AUD-01-08):** snipers vanilla (`marksman`) continuam nascendo pelo spawner contínuo do jogo como hoje; a regra de sniper do mod (`SniperChance` por mapa, 1ª onda) inalterada.
 - [ ] **NR-3 (AUD-01-08):** bosses nativos, guardas, Rogues/Raiders, cultistas e Zryachiy — nada muda (outro sistema: `BossSpawnScenario`, não tocado).
-- [ ] **NR-4 (AUD-01-04):** quando o pool **tem** perfil na dificuldade pedida, a escolha é exatamente a de hoje (match exato primeiro); a lógica PMC do patch (qualquer lado USEC/BEAR) permanece.
+- [ ] **NR-4 (AUD-01-04):** quando o pool **tem** perfil na dificuldade pedida, a escolha é exatamente a de hoje (match exato primeiro); a tolerância PMC do patch (qualquer perfil USEC/BEAR por lado **ou** papel) permanece — exceto o caso declarado em AC-X5.
 - [ ] **NR-5 (AUD-01-05):** aquecimento continua atingindo o cap com o mesmo intervalo (`DelayBeforeFirstWave`) e as mesmas tentativas; a limpeza única no início do aquecimento preserva a intenção do item 006.
 - [ ] **NR-6 (AUD-01-06):** com ao menos um humano vivo (host, ou guest no Fika), ondas/cooldown/reposição por cap comportam-se como hoje.
 - [ ] **NR-7 (AUD-01-07):** com `Enable Debug Logs = true`, todas as mensagens de diagnóstico de hoje continuam disponíveis (mesmo conteúdo; nível Info em vez de Warning). Avisos **reais** (`MASTER FALLBACK`, `FAILED`, erros) continuam sem gate.
@@ -46,7 +46,7 @@ Rodada 2 do client: (1) o spawner contínuo de Scavs do jogo original deixa de *
 
 - [ ] **AC-M1 (AUD-01-08):** `Blocked Vanilla Assault Scav Spawn` = **0** (V1: 163) e `ChooseProfile` para `assault` fora das ondas do mod = 0.
 - [ ] **AC-M2 (AUD-01-08):** metrônomo de 10 s **ausente** com 0 bots vivos (V1: FPS 90→60 a cada ~10 s).
-- [ ] **AC-M3 (AUD-01-05):** `NullReferenceException` em `TrySpawnFreeInner` = **0** (baseline 44) e nenhum `Member safely skipped` causado por cancelamento.
+- [ ] **AC-M3 (AUD-01-05):** `NullReferenceException` em `TrySpawnFreeInner` ≤ **1** por raid (baseline 44; a limpeza única ainda pode cancelar um `marksman` vanilla em voo — PA-01-07) e nenhum `Member safely skipped` causado por cancelamento.
 - [ ] **AC-M4 (AUD-01-04):** `profilesInList` no fim da raid − no início ≤ **50** (baseline 337→1155); `bot/generate` ≤ 2 × bots spawnados.
 - [ ] **AC-M5 (AUD-01-07):** com `Enable Debug Logs = false`: 0 linhas `Logger`/`SPY`/`SPAWN ->`/`Available profile`/`Horde Breakdown` (V1: ~1.900).
 - [ ] **AC-M6 (AUD-01-06):** após o hook de fim de raid, nenhuma linha de onda/`bot/generate` do mod no log.
@@ -55,8 +55,10 @@ Rodada 2 do client: (1) o spawner contínuo de Scavs do jogo original deixa de *
 
 - [ ] **AC-X1 — dificuldade tolerante (AUD-01-04).** Se o pool não tem perfil na dificuldade pedida, o bot nasce com **outra dificuldade** do mesmo lado/papel (hoje: o jogo fabrica 3 novos na dificuldade certa, com custo de HTTP + memória). Só acontece no **miss**; a pré-busca por onda continua pedindo a dificuldade certa, então o caso é raro. Com SAIN ativo é irrelevante (SAIN governa a dificuldade).
 - [ ] **AC-X2 — pré-carga inicial menor (AUD-01-04).** 30/30/20 → **15/15/15** via propriedade F12 `Initial Profile Preload` (Avançado, 0–30). Trade-off: primeira onda em mapa com cap alto pode esperar um `bot/generate` a mais. O valor certo é calibrado pela medição `profilesInList` da V2.
-- [ ] **AC-X3 — onda pausa sem humano vivo (AUD-01-06).** Com todos os humanos mortos (solo: você), o mod deixa de calcular ondas até o fim da raid. Trade-off: nenhum — a raid está acabando.
-- [ ] **AC-X4 — hook `BaseLocalGame.Stop` removido (PA-01-05).** Comprovadamente inerte na V1; `GameWorld.OnDestroy` é o único hook de fim. Sem efeito perceptível.
+- [ ] **AC-X3 — onda pausa sem humano vivo (AUD-01-06).** Com todos os humanos mortos (solo: você), o mod interrompe a onda em andamento (o grupo que já estava nascendo termina — limite do Unity ao parar coroutines aninhadas) e deixa de calcular ondas até o fim da raid. Trade-off: nenhum — a raid está acabando.
+- [ ] **AC-X4 — hook `BaseLocalGame.Stop` substituído (PA-01-05 do 009 / PA-01-03).** Comprovadamente inerte na V1; entra no lugar o override concreto `LocalGame.Stop` (+ `CoopGame.Stop` quando o Fika está presente), que fecha a janela entre o fim lógico da raid e a destruição do mundo. Sem efeito perceptível; a V2 confere a fonte no log.
+- [ ] **AC-X5 — vaga PMC sem perfil USEC/BEAR no pool (AUD-01-04 / PA-01-04).** Hoje o patch pega **qualquer** perfil, até um Scav, e o faz nascer como "PMC". Depois: devolve ao jogo, que fabrica 3 perfis PMC corretos. Trade-off: um `bot/generate` a mais nesse caso raro, em troca de nunca mais nascer Scav disfarçado de PMC.
+- [ ] **AC-X6 — `ChooseProfile` com Halloween (AUD-01-08 / PA-01-02).** O evento sazonal `BotHalloweenEvent` chama o spawner direto e contorna a recusa antecipada; cai no backstop atual (recusado depois de criar perfil). AC-M1 tolera essas ocorrências quando o evento está ativo.
 
 ## Corner cases
 
@@ -86,3 +88,4 @@ Rodada 2 do client: (1) o spawner contínuo de Scavs do jogo original deixa de *
 | Data | Evento |
 |---|---|
 | 2026-08-22 | Item criado via `/optimize-mod-performance --fase 2` (perfil não-regressão; agrupa AUD-01-04/05/06/07/08 + PA-01-05 do 009) |
+| 2026-08-23 | Review técnica 01: NR-4 ajustado, AC-M3 com tolerância ≤1, AC-X3 interrompe onda em voo, AC-X4 reescrito (hook concreto), AC-X5 e AC-X6 novos |
