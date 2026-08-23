@@ -4,6 +4,7 @@
 
 | # | Título | Resumo | Pasta | Status |
 |---|---|---|---|---|
+| 009 | perf-config-cache-raid | Rodada 1 de performance (AUD-01-01/02/03): config do servidor cacheada por raid, poller de despawn só em raid e backoff em falha de fetch | [009-perf-config-cache-raid/](./009-perf-config-cache-raid/) | ⚪ |
 | 001 | portabilidade-spt-4 | Portar e corrigir a inicialização do mod TRL-DynamicSpawn para a versão SPT 4.0 | [001-portabilidade-spt-4/](./001-portabilidade-spt-4/) | 🟢 |
 | 002 | webui-nomenclaturas-e-ajustes | Ajustar nomenclaturas (Ondas, Bots) e reduzir slider de espera inicial para 0-120s no painel Web | [002-webui-nomenclaturas-e-ajustes/](./002-webui-nomenclaturas-e-ajustes/) | 🟢 |
 | 003 | labs-exclusivo-pmc | Remover spawns de SCAVs em Labs e distribuir a cota do MaxBot exclusivamente para PMCs (BEAR/USEC) | [003-labs-exclusivo-pmc/](./003-labs-exclusivo-pmc/) | 🟢 |
