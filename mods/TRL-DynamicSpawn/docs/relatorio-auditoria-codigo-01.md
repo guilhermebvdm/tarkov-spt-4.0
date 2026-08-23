@@ -151,6 +151,9 @@ Auditoria de performance do mod **TRL-DynamicSpawn v3.2.9** (client [mods/TRL-Dy
 - **Decisão:**
   - `[ ]` Pendente *(rodada 2 — coordenar com Umbigo; entra na mesma conversa de AUD-01-04/05/06)*
 
+> **Atualização 2026-08-22 23:35 — evidência promovida para Forte (medida na raid de validação V1, client v3.3.0).** O metrônomo de 10 s **persiste com `getConfig` = 1** — logo AUD-01-01 era contribuinte, não a causa. A causa é este achado, e é o próprio jogo: `NonWavesSpawnScenario.Update()` (`references/eft-decompiled/Assembly-CSharp/EFT/NonWavesSpawnScenario.cs:115-159`) roda a cada `float_2` segundos — `location.BotSpawnPeriodCheck` com **piso de 10 s** (`:32-34`, `:146-148`) — calcula `BotMax − bots vivos` (com a raid vazia = o cap inteiro, que o `SetMaxBotCountPatch` ainda eleva) e, para cada vaga que `TrySpawn` libera, chama `ActivateBotsWithoutWave` (`:153-158`) → `BotCreationDataClass.Create` → `ChooseProfile` sobre o pool (**473 perfis** nesta raid, 6 linhas `Warning` por escolha — AUD-01-07) → `BotSpawner.TryToSpawnInZoneAndDelay`, onde o prefix do mod (`Patches.cs:546-554`) barra. **Na raid medida:** 163 bloqueios de `assault` em rajadas de 3–8 a cada ~10 s + 228 `ChooseProfile` + ~1.600 linhas de perfil no console, **com 0 bots vivos e fora da onda do mod**; FPS 90→60 a cada rajada. O `LocalGame.Stop` desliga esse cenário com `nonWavesSpawnScenario_0.Stop()` (`LocalGame.cs:360`) — a API de desligar é a canônica.
+> **Correção proposta (revisada):** em vez de reflection nos campos privados do `LocalGame`, **prefix em `NonWavesSpawnScenario.Run()`** (`:98`, público) retornando `false` quando o mod governa os spawns (host/solo, `!FikaHelper.IsClient()`): `bool_1` nunca arma, `Update()` sai na primeira linha (`:117`) — custo zero por frame, sem reflection, vale para `LocalGame` e `CoopGame`. Os bosses nativos (`BossSpawnScenario`) **não** são tocados; as ondas cronometradas (`WavesSpawnScenario`, 17 bloqueios/raid) ficam para a mesma rodada. Validação: zero `Blocked Vanilla Assault Scav Spawn` no log; metrônomo de 10 s ausente; spawns do mod inalterados.
+
 ---
 
 ## Panorama de execução
@@ -186,6 +189,8 @@ Protocolo: raid Customs, mesma rota do baseline 2026-08-22, CapFrameX + curva de
 - [ ] Não-regressão: spawns/despawns/teleports funcionando como antes; painel web aplica config via `ForceRefresh` (caminho manual — toggle F12 `Server Config → Reload Server Config`)
 - [ ] Log do mod mostra, 1× por raid: `Server config fetched (raid-scoped cache)` e `Raid end hook fired (BaseLocalGame.Stop)` — se a fonte logada for `GameWorld.OnDestroy`, o patch de `Stop` não dispara (PA-01-05: remover e anotar na spec)
 
+> **Resultado parcial V1 (raid de 2026-08-22 ~23:20, client 3.3.0, log `LogOutput.log:279056-285190`):** ✅ `getConfig` = **1** (baseline 111) · ✅ `Server config fetched (raid-scoped cache)` 1× · ✅ `Raid end hook fired` 1× — **fonte `GameWorld.OnDestroy`**, ou seja, o patch em `BaseLocalGame<>.Stop` **não disparou** (PA-01-05: remover na próxima build e anotar na spec) · ❌ **metrônomo de 10 s persiste** (FPS 90→60 em rajadas com 0 bots) — causa identificada e medida em **AUD-01-08** (spawner contínuo do vanilla), não em AUD-01-01. `bot/generate` = 0 nesta raid (pool já com 473 perfis).
+>
 > **Status da rodada 1 (2026-08-22):** implementada no item [009-perf-config-cache-raid](../backlog/009-perf-config-cache-raid/) — client **v3.3.0** compilada e instalada em `BepInEx/plugins/TRL-DynamicSpawn.dll` (rollback: `TRL-DynamicSpawn.dll.bak-3.2.9`). AUD-01-01/02/03: **aplicados, aguardando validação V1** (medição in-game pendente — não fecham sem números).
 
 ## 4. Plano de Ação
