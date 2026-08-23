@@ -95,6 +95,15 @@ internal enum EClassId
 }
 
 private static EClassId _classId;                       // resolvido em Apply(), zerado em Reset()
+
+/// <summary>
+///     ref: AUD-01-02 — id da classe local, CRU. ⚠️ **PA-04-05: NÃO chama `EnsureLoaded`, ao contrário do
+///     <see cref="IsLocalClass"/> — e a diferença é DELIBERADA.** Este acessor é o que o
+///     <c>ClassIdentities.ClassIdOf</c> usa no ramo <c>IsYourPlayer</c>, e o `ClassIdOf` roda a cada passo
+///     de cada player/bot (<c>BotEventHandler.PlaySound</c>): um GET síncrono ali seria freeze no meio da
+///     raid — exatamente o que o achado 4 do code-review B14 tirou do hot path (ClassIdentities.cs:131-135).
+///     Não "uniformizar" com o IsLocalClass em nenhuma das duas direções.
+/// </summary>
 internal static EClassId LocalClassId => _classId;
 
 private static bool _warnedUnknownClass;
@@ -166,24 +175,53 @@ _classId = Parse(_classNameEn);   // ref: AUD-01-02 — id resolvido junto com o
 
 Em `Reset()`: `_classId = EClassId.None;`
 
-**PA-02-03 — `Parse` não é a única fonte de verdade; é a segunda.** A primeira já existe e a rodada **não** a migra (corretamente — é caminho frio de render): `PerksConfig.BindClassColor(config, secao, "<nome>", "<hex>")`, chamada 7× (`PerksConfig.cs:313, 365, 421, 465, 548, 633, 638`), que popula `PerksConfig.ClassColors` — o dicionário que `ClassColorOverride.Resolve(classNameEn)` consulta **por string**. As duas listas precisam concordar, e nada obriga. Divergência é silenciosa: classe nova registrada só na cor ganha cor no F12 e **nenhum perk**; registrada só no `Parse`, ganha perks e a cor do F12 **nunca se aplica**. Checagem de boot no fim de `PerksConfig.Bind(config)` (caminho frio, 1×):
+**PA-02-03 · PA-04-02 — `EClassId` é o eixo canônico de TRÊS listas paralelas.** Nenhuma delas é migrada para enum (todas são caminho frio), mas todas precisam concordar com o enum, e nada obriga:
+
+| # | Lista | Onde | Chaves | Papel | Sintoma se divergir |
+|---|---|---|---|---|---|
+| 1 | `SkillMultipliers.Parse` | §5.1 (novo) | 7 | resolve nome → id (os **gates**) | classe vira `None` → nenhum perk dispara |
+| 2 | `PerksConfig.ClassColors` | `PerksConfig.cs:313, 365, 421, 465, 548, 633, 638` (via `BindClassColor`) | 7 | cor por classe no F12, lida por `ClassColorOverride.Resolve` **por string** | cor do F12 nunca se aplica |
+| 3 | `PerksCatalog.ByClass` | `PerksCatalog.cs:243-251` | **6** | composição de perks, lida por `GroupsFor(classNameEn)` | **aba CLASS vazia** |
+
+⚠️ A diferença 7 × 7 × **6** é **correta**: o Peladão (`Naked`) tem identidade visual e **nenhum perk**, então legitimamente não tem composição. Qualquer checagem precisa codificar essa exceção — senão acusa `Naked` em todo boot.
+
+Checagem de boot no fim de `PerksConfig.Bind(config)` (caminho frio, 1×):
 
 ```csharp
 // ref: PA-02-03 — Parse e ClassColors são as duas faces da MESMA lista de classes. Sem esta checagem, uma
 // divergência não gera erro nenhum: só um comportamento pela metade que sobrevive meses.
+// ⚠️ PA-04-02 — são TRÊS listas, não duas. A terceira é PerksCatalog.ByClass (PerksCatalog.cs:243-251),
+// chaveada pelos mesmos nomes EN, que define a COMPOSIÇÃO de perks de cada classe. E as cardinalidades
+// divergem DE PROPÓSITO: Parse e ClassColors têm 7 chaves; ByClass tem 6, porque o Peladão (Naked) tem
+// identidade (cor/ícone) e NENHUM perk. Uma checagem que exigisse as três iguais acusaria Naked em todo
+// boot — e alarme que grita à toa é alarme que ninguém lê.
+//
+// Eixo canônico = o enum. Iterar a partir dele torna o laço inverso desnecessário.
+foreach (SkillMultipliers.EClassId id in Enum.GetValues(typeof(SkillMultipliers.EClassId)))
+{
+    if (id == SkillMultipliers.EClassId.None) continue;
+
+    var name = SkillMultipliers.NameOf(id)!;   // PA-03-01 — switch puro, nunca null p/ id != None
+
+    if (!ClassColors.ContainsKey(name))
+    {
+        Plugin.Log?.LogError($"[CustomClasses] (PA-04-02) EClassId.{id} sem entrada em ClassColors — a cor do F12 nunca se aplica a ela.");
+    }
+
+    // Naked é a exceção LEGÍTIMA: classe sem perks não tem composição.
+    if (id != SkillMultipliers.EClassId.Naked && PerksCatalog.GroupsFor(name) == null)
+    {
+        Plugin.Log?.LogError($"[CustomClasses] (PA-04-02) EClassId.{id} sem composição em PerksCatalog.ByClass — aba CLASS vazia p/ ela.");
+    }
+}
+
+// O sentido inverso (chave de cor que o enum não conhece) continua valendo — é o caso "criei a classe no
+// editor web e registrei só a cor".
 foreach (var key in ClassColors.Keys)
 {
     if (SkillMultipliers.Parse(key, warnUnknown: false) == SkillMultipliers.EClassId.None)   // PA-03-06
     {
         Plugin.Log?.LogError($"[CustomClasses] (PA-02-03) classe '{key}' tem cor no F12 mas não existe em EClassId — perks NÃO vão disparar p/ ela.");
-    }
-}
-
-foreach (SkillMultipliers.EClassId id in Enum.GetValues(typeof(SkillMultipliers.EClassId)))
-{
-    if (id != SkillMultipliers.EClassId.None && !ClassColors.Keys.Any(k => SkillMultipliers.Parse(k, warnUnknown: false) == id))
-    {
-        Plugin.Log?.LogError($"[CustomClasses] (PA-02-03) EClassId.{id} não tem entrada em ClassColors — a cor do F12 nunca se aplica a ela.");
     }
 }
 ```
@@ -209,7 +247,14 @@ internal static SkillMultipliers.EClassId ClassIdOf(EFT.Player? player)   // PA-
 }
 ```
 
-Em `TryFetch`, ao montar cada `Identity`: `ClassId = SkillMultipliers.Parse(p.ClassNameEn)`.
+**Os DOIS pontos que constroem uma `Identity` precisam preencher o `ClassId` (PA-04-04):**
+
+1. `TryFetch` (mapa de peers): `ClassId = SkillMultipliers.Parse(p.ClassNameEn)`.
+2. **`Local()` (`ClassIdentities.cs:144-159`)**, o fallback da identidade local: `ClassId = SkillMultipliers.LocalClassId`.
+
+⚠️ Esquecer o (2) não quebra nada **hoje** — os consumidores de `Local()` (`ChatSpecialIconPatch:52`, `PartyPlayerItemPatch:75`) leem só `NameEn`/`IconFile`/`NameColor`/`DisplayName`/`Description`. Mas deixa um objeto meio-inicializado cujo default (`None`) **significa "vanilla/desconhecido"**: o primeiro código que ler `identity.ClassId` sem saber a procedência recebe a resposta errada em silêncio, e um perk que deveria disparar não dispara. Custo de fechar agora: uma linha.
+
+> Alternativa descartada: transformar `ClassId` em propriedade derivada (`=> SkillMultipliers.Parse(NameEn, warnUnknown: false)`). Garantiria a consistência por construção, mas reintroduziria uma comparação de string **por acesso** — e o acesso é per-passo no hot path, que é exatamente o que o `AUD-01-02` existe para eliminar.
 
 > 🔴 **PA-03-01 — `ClassIdOf` é o ÚNICO resolvedor no caminho quente. `ClassNameEnOf` é REMOVIDO.**
 >
@@ -610,7 +655,28 @@ private static SkillMultipliers.EClassId _cachedGroupsFor = SkillMultipliers.ECl
 private static PerksCatalog.PerkGroup[]? _cachedGroups;   // ref: AUD-01-07d
 ```
 
-**Invalidação dos dois caches acima (PA-01-03):** `SkillMultipliers.Apply()` e `SkillMultipliers.Reset()` — os dois únicos pontos que trocam a classe/idioma-resolvido — passam a chamar `SkillPanelPatch.ClearTooltipCache()` e `PerkDiagnostics.ClearGroupCache()`. Ambos são caminhos **frios** (1× por fetch), então o custo da invalidação é irrelevante e a correção é garantida na fonte.
+**Invalidação dos dois caches acima (PA-01-03, com a forma corrigida pelo PA-04-03):** ~~`SkillMultipliers.Apply()`/`Reset()` chamam `SkillPanelPatch.ClearTooltipCache()` e `PerkDiagnostics.ClearGroupCache()`~~ — chamada direta **inverteria camadas**: o cache de dados mais baixo do mod passaria a conhecer um patch de tela de Skills e o overlay de diagnóstico, e um terceiro cache no futuro exigiria lembrar de fiar ali (esquecimento silencioso: tooltip velho, lista de perks velha).
+
+O mod **já tem o padrão certo**, criado no item 067: `PerksConfig.ClassColorsChanged` é um `event Action` que `MenuClassIdentityPatch` (`Plugin.cs:88`) e `SkillsClassTabPatch` (`:30`) assinam sem que o `PerksConfig` conheça nenhum dos dois. Espelhar:
+
+```csharp
+// modded/Client/SkillMultipliers.cs
+/// <summary>
+///     ref: PA-01-03 · PA-04-03 — disparado sempre que a classe/idioma resolvidos mudam (fim de Apply e de
+///     Reset). Quem cacheia algo derivado da classe assina isto; SkillMultipliers não conhece consumidor
+///     nenhum. Molde: PerksConfig.ClassColorsChanged (item 067).
+/// </summary>
+internal static event Action? ClassChanged;
+```
+
+Disparado (`ClassChanged?.Invoke()`) no **fim** de `Apply()` e de `Reset()`. Os consumidores assinam **uma vez no `Plugin.Awake`**:
+
+```csharp
+SkillMultipliers.ClassChanged += SkillPanelPatch.ClearTooltipCache;    // AUD-01-07c
+SkillMultipliers.ClassChanged += PerkDiagnostics.ClearGroupCache;      // AUD-01-07d
+```
+
+⚠️ **Sem `-=`, e isso está correto** — registrar na §7 para não virar achado de AP-01 num code-review futuro: assinatura **estática ↔ estática**, feita **uma vez** no `Awake`, de vida igual à do plugin. É o mesmo contrato do `ClassColorsChanged`, que também nunca desassina (`Plugin.cs:88`).
 
 ### 5.8 INSTR-2 — censo periódico (substitui o dump de raid-end, que não existe)
 
@@ -695,7 +761,13 @@ ACRESCENTAR (⚠️ NADA acusa se faltar — conferir um a um):
 
 ⚠️ Preservar a posição relativa dos `Enable()` restantes: a ordem de registro **não** define mais a ordem de execução em `Shoot` (isso agora é `[HarmonyPriority]` explícito + sequência no corpo), mas os comentários existentes no `Plugin.cs:123-124` e `:163-167` descrevem a ordem antiga e precisam ser reescritos para não mentir.
 
-**AC de fumaça (três leituras num frame provam que os cinco estão registrados):** com `Perk Diagnostics` ligado, o overlay 052 mostra (a) `Recoil str` mudando ao atirar → `ShootApplyPatch` vivo; (b) `Ergo (weapon)` refletindo o Bunker com arma pesada em mãos → `TotalErgoPatch` vivo; (c) `Malfunction%` preenchido → o resto da cadeia de arma intacta. Para `ClassDamagePatch` e `FirearmSyncPatch`: levar um tiro como Tanque de colete pesado (dano reduzido) e recarregar uma escopeta tubular (mais rápida).
+**AC de fumaça — prova que os cinco `Enable()` novos estão registrados.** Com `Perk Diagnostics` ligado, o overlay 052 mostra:
+
+- **(a) `Recoil str: a→b` com DOIS números ao atirar** → prova que **ambos** os patches de `Shoot` estão registrados: o `ShootCapturePatch` fornece o `antes` e o `ShootApplyPatch` o `depois`. ⚠️ **PA-04-06:** um traço (`-`) significa que **um dos dois** faltou — e os dois sintomas são **idênticos**, porque sem o Capture o `StrBefore` fica sempre `NaN` e o Apply sai no early-return. Conferir **os dois** no `Plugin.Awake`, não só o Apply: eles vivem no mesmo arquivo e no mesmo bloco de registro, então esquecer um é o erro mais provável de todos.
+- **(b) `Ergo (weapon)` refletindo o Bunker** com arma pesada em mãos (Tanque) → `TotalErgoPatch` vivo.
+- **(c) `Malfunction%` preenchido** → o resto da cadeia de arma intacta.
+- **(d) `ClassDamagePatch`:** levar um tiro como Tanque com colete de classe ≥ o mínimo → dano reduzido.
+- **(e) `FirearmSyncPatch`:** recarregar uma escopeta tubular como Tanque → recarga mais rápida.
 
 ## 6. Fluxo de dados
 
@@ -784,6 +856,10 @@ ACRESCENTAR (⚠️ NADA acusa se faltar — conferir um a um):
 - [ ] `PA-03-03`: `Touch()` implementada com **move-to-end** (LRU real, não FIFO); `EvictIfNeeded` remove do **início** da lista
 - [ ] `PA-03-05`: conferir os **5** `Enable()` novos um a um contra o diff da §5.9 — nenhum erro de compilação avisa se faltar
 - [ ] `PA-03-06`: `Parse(nameEn, warnUnknown = true)`; a checagem de boot chama com `warnUnknown: false`
+- [ ] `PA-04-02`: checagem de boot cobre as **três** listas (`Parse` · `ClassColors` · `PerksCatalog.ByClass`), iterando o **enum** como eixo canônico, com a exceção de `Naked` codificada
+- [ ] `PA-04-03`: invalidação por **evento** (`SkillMultipliers.ClassChanged`), não por chamada direta; assinado 1× no `Awake`, sem `-=` (registrar a razão na §7)
+- [ ] `PA-04-04`: **os dois** construtores de `Identity` preenchem `ClassId` — `TryFetch` **e** `Local()`
+- [ ] `PA-04-05`: comentário no `LocalClassId` explicando por que ele **não** chama `EnsureLoaded` (assimetria deliberada com o `IsLocalClass`)
 - [ ] `PA-02-03`: checagem bidirecional `Parse` ↔ `ClassColors` no fim de `PerksConfig.Bind`
 - [ ] `PA-02-08`: comentário anti-remoção no `EnsureLoaded()` do `IsLocalClass`; **conferir que nenhum patch passou a chamar `IsLocalClass` ANTES do seu gate de instância** durante a migração dos 42 call-sites (é onde a ordem se inverte por descuido — CR-F5)
 - [ ] `Plugin.cs`: ajustar os `Enable()` e adicionar `SyncPerfDump()` no `SettingChanged` do diagnóstico (PA-01-10)
@@ -792,9 +868,12 @@ ACRESCENTAR (⚠️ NADA acusa se faltar — conferir um a um):
 - [ ] Build client 0 erros; conferir que nenhum warning novo apareceu
 - [ ] `05-asbuild.md` com o que mudou por achado, o que ficou de fora (`AUD-01-07b`), a **lista de classes de patch removidas/criadas** (PA-02-09) e a nota do primeiro dump parcial (PA-02-05)
 
-**Gates de validação que a implementação precisa deixar preparados** (executados na Fase 4):
+**PASSO 0 — pré-condição da Fase 3 (`PA-04-01`).** ⚠️ **A parte irreversível vem antes de tudo.** O `/compile-mod` compila **e instala**; sem o passo 0a a linha de base é perdida para sempre.
 
-- [ ] `PA-01-04`: **raid de baseline na DLL ATUAL antes de instalar a nova** — percorrer a matriz de perks anotando o que funciona hoje, para distinguir regressão de defeito pré-existente (P-10.1 / P-16.1)
+- [x] **0a — backup da DLL instalada** ✅ feito em 2026-08-23: [`builds/pre-089-2026-08-23/`](../../builds/pre-089-2026-08-23/) (`CustomClasses-Client.dll`, 180.224 bytes, `AssemblyVersion 0.16.8.0`, `ProductVersion 0.16.8+dfe9bf9f…`, instalada em 2026-08-22 17:40). **Com o backup em mãos, a linha de base deixou de ser irreversível** — ver a Resolução do `PA-04-01`.
+- [ ] **0b — raid de linha de base** (gate humano): reinstalar a DLL do backup, confirmar `0.16.8` no log, e percorrer a matriz de perks das 6 classes + vanilla com `Perk Diagnostics` ligado, registrando **o que funciona hoje** na seção "Linha de base pré-089" do `05-asbuild`. Distingue regressão desta rodada de defeito pré-existente (P-10.1 / P-16.1). Pode ser executada **antes ou depois** do `/compile-mod`, graças ao 0a.
+
+**Gates de validação que a implementação precisa deixar preparados** (executados na Fase 4):
 - [ ] `PA-01-02`: teste visual do brasão numa classe **clara** (Saqueador `#c4ad45`) — o canal R do topo do gradiente passa de 251
 - [ ] `PA-01-01`: comparar `Recoil str` no overlay 052 **com o RealRecoil ativo**, não só isolado
 - [ ] `PA-01-06`: cirurgia de aliado via ICM em coop
@@ -823,6 +902,7 @@ ACRESCENTAR (⚠️ NADA acusa se faltar — conferir um a um):
 | Data | Evento |
 |---|---|
 | 2026-08-22 | Spec técnica criada (`/optimize-mod-performance` Fase 2, perfil de não-regressão) |
+| 2026-08-23 | Revisão técnica 04 aplicada — 6 pontos aceitos. **Passo 0a executado:** DLL instalada copiada para `builds/pre-089-2026-08-23/` (0.16.8, 180.224 bytes) — a linha de base deixou de ser irreversível (PA-04-01). Demais: checagem de boot cobre as **três** listas de classe, com a exceção de `Naked` codificada (PA-04-02); invalidação de cache por **evento** `ClassChanged` em vez de chamada direta, espelhando o `ClassColorsChanged` do 067 (PA-04-03); `Local()` também preenche `ClassId` (PA-04-04); assimetria `LocalClassId` × `IsLocalClass` documentada (PA-04-05); AC de fumaça passa a cobrir os **dois** patches de `Shoot` (PA-04-06). |
 | 2026-08-23 | Revisão técnica 03 aplicada — 7 pontos aceitos. Principais: `ClassIdOf` como **único** resolvedor do hot path, `ClassNameEnOf` **removido** e `NameOf(EClassId)` criado para o diagnóstico (PA-03-01 — a migração ingênua deixaria **dois** lookups por passo); `__state` capturado **incondicionalmente antes** dos branches em `SetAnimatorAndProceduralValues` (PA-03-02 — o try/catch por branch contém a exceção mas não desfaz a escrita); `Touch()` definida com move-to-end (PA-03-03); §5.9 nova com o diff exato dos `Enable()` (PA-03-05); `Parse` ganha `warnUnknown` (PA-03-06); `RecoilFloorPatch.cs` deletado com o XMLdoc do B15 migrado (PA-03-07). |
 | 2026-08-23 | Revisão técnica 02 aplicada — 9 pontos aceitos. Principais: `try/catch` **por branch** nos 4 alvos consolidados (PA-02-01 — um catch externo faria um branch que lança pular o piso B15); bump de versão em **4** arquivos, não 2, incluindo os dois que aparecem em log (PA-02-02); checagem de boot `Parse` ↔ `ClassColors` (PA-02-03); `activeInHierarchy` no cache do painel (PA-02-04); tabela de posição dos contadores (PA-02-05); evidência das prioridades registrada (PA-02-06); `RecoilBranches` com casa definida (PA-02-07); comentário anti-remoção no `EnsureLoaded` (PA-02-08); `/update-mod-graph` no gate de Fase 4 (PA-02-09). |
 | 2026-08-23 | Revisão técnica 01 aplicada — 10 pontos aceitos. Principais: `Shoot` consolida **4→2** e não 4→1, preservando `Priority.First`/`Last` contra mods externos (PA-01-01); clamp no `Quantize` (PA-01-02); `className` na chave do cache de tooltip (PA-01-03); fronteira pública do ICM declarada intocável e `EClassId` `internal` (PA-01-06); **`AUD-01-07b` dropado** (PA-01-07); bump de SemVer, extração explícita do `BuildTinted` e `PerfDumpLoop` com condição de saída (PA-01-08/09/10). |

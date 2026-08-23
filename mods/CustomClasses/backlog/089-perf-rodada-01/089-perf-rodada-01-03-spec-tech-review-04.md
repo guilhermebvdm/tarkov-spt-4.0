@@ -8,7 +8,9 @@
 
 ## Resumo
 
-> 🔴 Bloqueadores: 1 · 🟡 Importantes: 3 · 🟢 Menores: 2 · ✅ Resolvidos: 0 · Total: 6
+> 🔴 Bloqueadores: 1 · 🟡 Importantes: 3 · 🟢 Menores: 2 · **✅ Resolvidos: 6** · Total: 6
+>
+> **Todos os 6 pontos aceitos pelo usuário em 2026-08-23** e aplicados. Resolução ponto a ponto na seção [Resolução](#resolução) ao fim deste arquivo.
 
 **Memória consultada:** snapshot de 2026-08-03 · pendências que afetam: 🔴 P-10.1, 🔴 P-16.1 — e desta vez **de forma nova**: elas são a razão do `PA-01-04`, cuja execução o `PA-04-01` mostra estar agendada tarde demais.
 
@@ -18,12 +20,12 @@
 
 | ID | Categoria | Impacto | Título | Status |
 |---|---|---|---|---|
-| PA-04-01 | C — Erro de Lógica | 🔴 Bloqueador | A raid de baseline está agendada para a Fase 4, mas o `/compile-mod` **instala a DLL** no fim da Fase 3 — a oportunidade some antes da hora marcada | Pendente |
-| PA-04-02 | A — Gap | 🟡 Importante | A lista de classes tem **três** fontes de verdade, não duas: o `PA-02-03` esqueceu `PerksCatalog.ByClass` — e as três têm cardinalidades diferentes | Pendente |
-| PA-04-03 | A — Gap | 🟡 Importante | A invalidação de cache do `PA-01-03` inverte camadas: `SkillMultipliers` passa a conhecer um patch de UI e o overlay de diagnóstico | Pendente |
-| PA-04-04 | B — Edge Case | 🟡 Importante | `ClassIdentities.Local()` monta uma `Identity` **sem** preencher o `ClassId` novo — objeto meio-inicializado à espera de um consumidor | Pendente |
-| PA-04-05 | A — Gap | 🟢 Menor | A assimetria deliberada `IsLocalClass` (chama `EnsureLoaded`) × `LocalClassId` (não chama) fica sem documentação | Pendente |
-| PA-04-06 | A — Gap | 🟢 Menor | O AC de fumaça da §5.9 cobre 4 dos 5 patches novos; falta dizer que ele também prova o `ShootCapturePatch` | Pendente |
+| PA-04-01 | C — Erro de Lógica | 🔴 Bloqueador | A raid de baseline está agendada para a Fase 4, mas o `/compile-mod` **instala a DLL** no fim da Fase 3 — a oportunidade some antes da hora marcada | ✅ Resolvido 2026-08-23 |
+| PA-04-02 | A — Gap | 🟡 Importante | A lista de classes tem **três** fontes de verdade, não duas: o `PA-02-03` esqueceu `PerksCatalog.ByClass` — e as três têm cardinalidades diferentes | ✅ Resolvido 2026-08-23 |
+| PA-04-03 | A — Gap | 🟡 Importante | A invalidação de cache do `PA-01-03` inverte camadas: `SkillMultipliers` passa a conhecer um patch de UI e o overlay de diagnóstico | ✅ Resolvido 2026-08-23 |
+| PA-04-04 | B — Edge Case | 🟡 Importante | `ClassIdentities.Local()` monta uma `Identity` **sem** preencher o `ClassId` novo — objeto meio-inicializado à espera de um consumidor | ✅ Resolvido 2026-08-23 |
+| PA-04-05 | A — Gap | 🟢 Menor | A assimetria deliberada `IsLocalClass` (chama `EnsureLoaded`) × `LocalClassId` (não chama) fica sem documentação | ✅ Resolvido 2026-08-23 |
+| PA-04-06 | A — Gap | 🟢 Menor | O AC de fumaça da §5.9 cobre 4 dos 5 patches novos; falta dizer que ele também prova o `ShootCapturePatch` | ✅ Resolvido 2026-08-23 |
 
 ## Categorias
 
@@ -70,7 +72,7 @@ Se o usuário preferir não gastar uma raid antes de implementar, a alternativa 
 
 **Decisão:**
 - `[ ]` Pendente
-- `[ ]` Aceitar sugestão
+- `[x]` Aceitar sugestão
 - `[ ]` Caminho alternativo: _________________
 
 ---
@@ -115,7 +117,7 @@ Isso também **simplifica** a versão do `PA-02-03`: iterando o enum (a lista ca
 
 **Decisão:**
 - `[ ]` Pendente
-- `[ ]` Aceitar sugestão
+- `[x]` Aceitar sugestão
 - `[ ]` Caminho alternativo: _________________
 
 ---
@@ -146,7 +148,7 @@ Disparado no fim de `Apply()` e de `Reset()`. Os dois caches assinam **uma vez n
 
 **Decisão:**
 - `[ ]` Pendente
-- `[ ]` Aceitar sugestão
+- `[x]` Aceitar sugestão
 - `[ ]` Caminho alternativo: _________________
 
 ---
@@ -173,7 +175,7 @@ E acrescentar ao §8: *"conferir que **todos** os pontos que constroem `ClassIde
 
 **Decisão:**
 - `[ ]` Pendente
-- `[ ]` Aceitar sugestão
+- `[x]` Aceitar sugestão
 - `[ ]` Caminho alternativo: _________________
 
 ---
@@ -203,7 +205,7 @@ internal static EClassId LocalClassId => _classId;
 
 **Decisão:**
 - `[ ]` Pendente
-- `[ ]` Aceitar sugestão
+- `[x]` Aceitar sugestão
 - `[ ]` Caminho alternativo: _________________
 
 ---
@@ -222,5 +224,20 @@ Ele **é** coberto, mas por acidente: se o `ShootCapturePatch` faltar, `ShootRec
 
 **Decisão:**
 - `[ ]` Pendente
-- `[ ]` Aceitar sugestão
+- `[x]` Aceitar sugestão
 - `[ ]` Caminho alternativo: _________________
+
+---
+
+## Resolução
+
+Todos os 6 pontos **aceitos pelo usuário em 2026-08-23**.
+
+| ID | Resolução | Onde |
+|---|---|---|
+| **PA-04-01** | **Passo 0a EXECUTADO agora**, antes de qualquer edição de código: a DLL instalada foi copiada para [`builds/pre-089-2026-08-23/`](../../builds/pre-089-2026-08-23/) — `CustomClasses-Client.dll` (180.224 bytes, `AssemblyVersion 0.16.8.0`, `ProductVersion 0.16.8+dfe9bf9f…`, instalada em 2026-08-22 17:40) + `.pdb` + um README com o procedimento de reinstalação. **Efeito colateral que melhora o plano:** com o backup em mãos, a linha de base deixa de ser um gate **irreversível** e vira tarefa **agendável** — o passo 0b (a raid) pode ser feito antes **ou depois** do `/compile-mod`, bastando reinstalar a DLL do backup. A sugestão original mandava bloquear a Fase 3 inteira; o backup resolve o problema real (a perda irrecuperável) sem parar o trabalho. O §8 ganhou o bloco "PASSO 0" com 0a marcado ✅ e 0b como gate humano pendente. | spec-tech §8 · `builds/pre-089-2026-08-23/` |
+| **PA-04-02** | Checagem de boot reescrita para cobrir as **três** listas, iterando o **enum** como eixo canônico (o que também elimina um dos laços da versão do PA-02-03). A exceção do `Naked` — 7 · 7 · **6** chaves — está codificada e explicada no comentário, para o alarme não gritar à toa em todo boot. §5.1 ganhou a tabela das três listas com o sintoma de cada divergência. | spec-tech §5.1, §8 |
+| **PA-04-03** | Invalidação por **evento**: `internal static event Action? ClassChanged` em `SkillMultipliers`, disparado no fim de `Apply()` e `Reset()`; os dois caches assinam uma vez no `Plugin.Awake`. Espelha o `PerksConfig.ClassColorsChanged` do item 067, que é o padrão já estabelecido no mod. A ausência de `-=` está justificada por escrito (estático↔estático, vida do plugin) para não virar achado de AP-01 depois. | spec-tech §5.7, §7, §8 |
+| **PA-04-04** | `ClassIdentities.Local()` passa a preencher `ClassId = SkillMultipliers.LocalClassId`. A §5.2 agora enumera **os dois** construtores de `Identity` e explica por que o default `None` é perigoso (significa "vanilla"). A alternativa de propriedade derivada foi avaliada e descartada por escrito — reintroduziria comparação de string por acesso no hot path. | spec-tech §5.2, §8 |
+| **PA-04-05** | XMLdoc no `LocalClassId` explicando que **não** chamar `EnsureLoaded` é deliberado (o `ClassIdOf` roda por passo de cada player/bot; um GET síncrono ali é o freeze que o achado 4 do B14 removeu), com o pedido explícito de não uniformizar com o `IsLocalClass` em nenhuma direção. | spec-tech §5.1, §8 |
+| **PA-04-06** | AC de fumaça da §5.9 reescrito em lista: `Recoil str` com **dois números** prova os **dois** patches de `Shoot`, e um traço (`-`) significa que **um dos dois** faltou — com o aviso de que os sintomas são idênticos e de que esquecer um deles é o erro mais provável, já que vivem no mesmo bloco de registro. Itens (d) e (e) nomeiam os testes de `ClassDamagePatch` e `FirearmSyncPatch`. | spec-tech §5.9 |
