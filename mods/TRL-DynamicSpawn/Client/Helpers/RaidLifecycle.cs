@@ -24,11 +24,11 @@ namespace TRLDynamicSpawn.Helpers
             BotDespawnManager.StartLoop();
         }
 
-        // ref: Assembly-CSharp/EFT/BaseLocalGame-1.cs:1018 (Stop) and EFT/GameWorld.cs:2111 (OnDestroy)
-        // Only stops the poller. Does NOT invalidate the cache: after Stop the world is still alive
+        // ref: Assembly-CSharp/EFT/LocalGame.cs:357 (Stop override), fika-plugin CoopGame.cs:718 (Stop) and EFT/GameWorld.cs:2111 (OnDestroy)
+        // Only stops the poller and the spawn loops. Does NOT invalidate the cache: after Stop the world is still alive
         // (delay / extraction screen) and a reader would re-fetch during teardown. ref: PA-01-01
-        // source: which hook fired — logged once per raid (first effective call) so the V1 log proves
-        // whether the BaseLocalGame.Stop patch is alive (PA-01-05) without hideout noise. ref: CR-01-03
+        // source: which hook fired — logged once per raid (first effective call). Expected "CoopGame.Stop" with Fika,
+        // "LocalGame.Stop" in plain SPT, "GameWorld.OnDestroy" only if neither early hook fired (PA-02-03). ref: CR-01-04 (010)
         public static void OnRaidEnd(string source)
         {
             if (!_raidActive) return;                            // second hook (or hideout exit) = no-op

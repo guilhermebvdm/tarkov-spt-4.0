@@ -357,7 +357,7 @@ initialProfilePreload = config.Bind(poolSection, "Initial Profile Preload", 15,
 - [x] `_sptQueueClearedThisRaid` (campo de instância) + pausa sem humano interrompe `_activeWaveCoroutine` (`// ref: PA-01-05`, `PA-01-07`).
 - [x] `Settings.initialProfilePreload` + `PROPRIEDADES.md`.
 - [x] Grep de sanidade: nenhum `LogWarning`/`LogInfo` com prefixo `[TRLDynamicSpawn Logger]`/`[SPY]` fora de `if (Settings.enableDebugLogs.Value)`; `MASTER FALLBACK`/`FAILED`/`Error` continuam sem gate.
-- [ ] Compilar (`dotnet build` com refs temporárias, como no 009) → versão **minor** (3.3.0 → 3.4.0: propriedade F12 nova + AC-X1/X2) → deploy com rollback `.bak-3.3.0` → V2.
+- [x] Compilar (`dotnet build` com refs temporárias, como no 009) → versão **minor** (3.3.0 → 3.4.0: propriedade F12 nova + AC-X1/X2) → deploy com rollback `.bak-3.3.0` → V2. *(2026-08-23 00:41: 0 erros; instalada flat em `D:\SPT\BepInEx\plugins\TRL-DynamicSpawn.dll`)*
 
 ## 9. Conformidade com skills (auto-checklist)
 
@@ -373,7 +373,7 @@ initialProfilePreload = config.Bind(poolSection, "Initial Profile Preload", 15,
 | 6 | Semântica/defaults/faixas de cada ConfigEntry sem ambiguidade (incl. estado neutro) — AP-05 | ✅ | §3: `Initial Profile Preload` int 15, 0–30, Avançado, 0 = desliga; lido 1× por raid. |
 | 7 | Re-invocação de método patcheado tem reentry-guard/`ReversePatch` (sem recursão infinita) — AP-07 | N/A | Nenhum patch re-invoca o alvo. |
 | 8 | Flags/caches de intercept validados contra o contexto atual após troca — AP-08 | ✅ | `IsGeneratingDynamicWave` é setada/limpa em `try/finally` síncronos (sem `yield` dentro — `:1017-1033`, `:1236-1243`) e ainda assim **forçada a `false`** no `StopSpawnLoops`/pausa, antes de qualquer early-return (PA-01-06) — §5 c/e. |
-| 9 | Todo patch-point reconfirmado no `.cs` do dump; "não existe" conferido no `types-index.json` — AP-09 | ✅ | Reconfirmados 2026-08-22 (review 01 corrigiu a deriva): `EFT/BotsController.cs:536-542`, `EFT/NonWavesSpawnScenario.cs:98-162/:167`, `BotProfileDataClass.cs:16/:19/:43/:85-96`, `BotsPresets.cs:160-190`, `BotCreationDataClass.cs:46/:102-105/:116/:142-146`, `BotSpawner.cs:377` → `GClass1890.cs:17`, `EFT/LocalGame.cs:24/:139-143/:158/:187-194/:357-362`, `GClass1876.cs:51`, `BotHalloweenEvent.cs:176`, `EFT/Profile.cs:632` (`InfoClass`), `InfoClass.cs:123` + `ProfileInfoSettingsClass.cs:5-9`. `ProfileSettingsClass` **não existe** (`types-index.json`) — corrigido. |
+| 9 | Todo patch-point reconfirmado no `.cs` do dump; "não existe" conferido no `types-index.json` — AP-09 | ✅ | Reconfirmados 2026-08-22 (review 01 corrigiu a deriva): `EFT/BotsController.cs:536-542`, `EFT/NonWavesSpawnScenario.cs:98-162/:167`, `BotProfileDataClass.cs:16/:19/:43/:85-96`, `BotsPresets.cs:160-190`, `BotCreationDataClass.cs:46/:102-105/:116/:142-146`, `BotSpawner.cs:377` → `GClass1890.cs:17`, `EFT/LocalGame.cs:24/:139-143/:158/:187-194/:357-362`, `GClass1876.cs:51`, `BotHalloweenEvent.cs:176`, `EFT/Profile.cs:632` (`InfoClass`), `InfoClass.cs:123` + `ProfileInfoSettingsClass.cs:5-9`. `ProfileSettingsClass` **não existe** (`types-index.json`) — corrigido. **CR-01-01 (code review):** `GClass684.cs:113-118` (vanilla registra `assault`/`marksman` 8/dificuldade), `:129-192` (timer de reposição), `:258-263` (`AddToTargetBackup` = nível permanente, chave só se ausente) — "pedir N perfis" era recon, não fato; semântica corrigida no código/doc. |
 | 10 | Skill EFT usada como lever confirmada não-inerte — AP-10 | N/A | Item não usa skills do EFT. |
 | 11 | Pacote FIKA próprio — AP-11 | N/A | Nenhum `INetSerializable`. |
 

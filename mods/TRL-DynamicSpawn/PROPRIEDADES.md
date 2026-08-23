@@ -66,6 +66,6 @@
 
 | Propriedade | Tradução (pt-BR) | Tipo | Padrão | Faixa | Avançado | Tooltip (pt-BR) |
 |---|---|---|---|---|---|---|
-| Initial Profile Preload | Pré-carga Inicial de Perfis | `int` | `15` | `0`–`30` | sim | Quantos perfis de bot por tipo (USEC, BEAR, Scav) o mod pede ao servidor no início da raid, antes da primeira onda. Valores altos aceleram a primeira onda ao custo de memória; 0 desliga a pré-carga inicial. |
+| Initial Profile Preload | Nível de Cache de Perfis PMC | `int` | `15` | `5`–`30` | sim | Nível permanente de perfis de bot PMC (USEC e BEAR, dificuldade normal) que o jogo mantém reposto durante toda a raid. Valores altos deixam a primeira onda pronta mais cedo, ao custo de memória. Perfis de Scav são geridos pelo jogo (8 por dificuldade). |
 
-> Antes do item 010 a pré-carga era fixa (30/30/20) e cada onda pedia mais 10/10/10 — perfis não usados ficam na memória até o fim da raid (AUD-01-04). A pré-busca por onda continua automática, com a dificuldade sorteada da onda.
+> **Como funciona de verdade (CR-01-01):** o SPT mantém um "estoque-alvo" de perfis por (papel, dificuldade) e o repõe a cada ~30 s quando cai abaixo do nível. Este valor é o nível para USEC/BEAR `normal`; antes do item 010 era fixo em 30/30 (e a chamada para Scav, 20, nunca teve efeito — o jogo já registra 8 por dificuldade). As ondas registram níveis adicionais apenas para dificuldades sorteadas ainda não registradas (no máximo 2 facções × 4 dificuldades) — sem SAIN; com SAIN a dificuldade é sempre `normal`.

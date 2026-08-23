@@ -125,11 +125,13 @@ namespace TRLDynamicSpawn.Helpers
                 reloadServerConfig.Value = false;
             };
 
-            // ref: AUD-01-04 / AC-X2 — initial profile preload per type (was fixed 30/30/20). Read once per raid.
+            // ref: AUD-01-04 / AC-X2 / CR-01-01 — STANDING PMC profile cache level (USEC and BEAR, normal difficulty) that SPT keeps
+            // replenished during the whole raid (was fixed 30/30). Scav levels are vanilla's (8 per difficulty). Read once per raid.
+            // Minimum 5: with no PMC cache every PMC slot becomes a synchronous LoadBots(3) at spawn time.
             string poolSection = "Profile Pool (Advanced)";
             initialProfilePreload = config.Bind(poolSection, "Initial Profile Preload", 15,
-                new ConfigDescription("How many bot profiles per type (USEC, BEAR, Scav) the mod asks the server for at raid start, before the first wave. Higher = faster first wave, more memory; 0 disables the initial preload.",
-                    new AcceptableValueRange<int>(0, 30), new ConfigurationManagerAttributes { IsAdvanced = true }));
+                new ConfigDescription("Standing cache level of PMC bot profiles (USEC and BEAR, normal difficulty) that the game keeps replenished during the whole raid. Higher = first wave ready sooner, more memory. Scav profiles are managed by the game (8 per difficulty).",
+                    new AcceptableValueRange<int>(5, 30), new ConfigurationManagerAttributes { IsAdvanced = true }));
         }
 
         public static int GetMapCap(string mapId)

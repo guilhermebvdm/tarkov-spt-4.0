@@ -39,10 +39,19 @@
 
 > Atualizado por `/apply-code-review` a cada rodada. Cada entrada lista os achados aplicados/rejeitados/pulados naquela rodada e os arquivos tocados.
 
-(vazio inicialmente — preenchido por `/apply-code-review`)
+### 2026-08-23 — Code review 01 (revisor independente)
+
+| ID | Resultado | Arquivos |
+| --- | --- | --- |
+| CR-01-01 | ✅ Aplicado com modificação — `AddToTargetBackup` = **nível permanente** reposto pelo SPT (`GClass684.cs:258-263`): semântica corrigida no código/F12/`PROPRIEDADES.md`/01-spec; chamada no-op de Scav removida; faixa 5–30; bloco por onda mantido (chaves limitadas; só sem SAIN; Scav só `impossible`) | `DynamicSpawnManager.cs`, `Settings.cs`, `PROPRIEDADES.md`, 01-spec, 02-spec-tech |
+| CR-01-02 | ✅ Aplicado — check de humano dentro do timer do warmup; onda em voo parada em ≤1 s | `DynamicSpawnManager.cs` |
+| CR-01-03 | ✅ Aplicado — `_isSpawningWave` removido | `DynamicSpawnManager.cs` |
+| CR-01-04 | ✅ Aplicado — comentários corrigidos | `RaidLifecycle.cs`, `Patches.cs` |
+| CR-01-05 | ✅ Aplicado — exceção AC-M5 anotada; `IsHeadlessPlayer` sem alocação | 01-spec, `DynamicSpawnManager.cs` |
 
 ## Histórico
 
 | Data | Evento |
 | --- | --- |
 | 2026-08-23 | Build concluído via `/code-mod` (Fase 3 do `/optimize-mod-performance`, rodada 2) |
+| 2026-08-23 | Aplicação de 5 achados de code-review 01 via `/apply-code-review` — IDs: CR-01-01..05 |

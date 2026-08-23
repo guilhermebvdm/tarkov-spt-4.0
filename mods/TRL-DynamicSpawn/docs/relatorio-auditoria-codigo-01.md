@@ -193,6 +193,20 @@ Protocolo: raid Customs, mesma rota do baseline 2026-08-22, CapFrameX + curva de
 >
 > **Status da rodada 1 (2026-08-22):** implementada no item [009-perf-config-cache-raid](../backlog/009-perf-config-cache-raid/) — client **v3.3.0** compilada e instalada em `BepInEx/plugins/TRL-DynamicSpawn.dll` (rollback: `TRL-DynamicSpawn.dll.bak-3.2.9`). AUD-01-01/02/03: **aplicados, aguardando validação V1** (medição in-game pendente — não fecham sem números).
 
+## Plano de validação (V2 — pós-rodada 2, client v3.4.0)
+
+Protocolo: mesma raid Customs do baseline/V1, CapFrameX + curva de RAM + `LogOutput.log` + `errors.log`. **Rodar com `Enable Debug Logs = true`** (os contadores abaixo dependem das linhas gated) e uma segunda raid curta com `false` para o AC-M5.
+
+- [ ] **AUD-01-08:** `Blocked Vanilla Assault Scav Spawn` = 0 (V1: 163); `Refused vanilla continuous spawn` aparece no lugar (1 linha por vaga, só com debug); metrônomo de 10 s **ausente** com 0 bots vivos (V1: FPS 90→60)
+- [ ] **AUD-01-04:** `profilesInList` no fim − no início ≤ 50 (baseline 337→1155; V1: 473 estável sem `bot/generate`); `bot/generate` (incl. `byBackup`) ≤ 2 × bots spawnados; curva de RAM sem crescimento monotônico
+- [ ] **AUD-01-05:** `NullReferenceException` em `TrySpawnFreeInner` ≤ 1 (baseline 44); `Clearing pending/stuck` = 1 por raid; nenhum `Member safely skipped` por cancelamento
+- [ ] **AUD-01-06:** após `Raid end hook fired` nenhuma linha de onda/`SQUAD`/`bot/generate`; morrer com bots por nascer → onda interrompida em ≤ 1 s (`SQUAD MEMBER SPAWNED` para)
+- [ ] **AUD-01-07:** raid com `Enable Debug Logs = false` → 0 linhas `Logger`/`SPY`/`SPAWN ->`/`Available profile`/`Horde Breakdown` (V1: ~1.900); só as operacionais por onda (≤ 8/onda)
+- [ ] **Hooks (PA-02-03):** fonte do `Raid end hook fired` = `CoopGame.Stop` (Fika) — `GameWorld.OnDestroy` como fonte significa que o hook cedo não disparou
+- [ ] **Não-regressão:** NR-1..NR-8 da [01-spec do 010](../backlog/010-perf-spawn-pipeline-r2/010-perf-spawn-pipeline-r2-01-spec.md) (snipers vanilla seguem nascendo, bosses nativos, composição das ondas, F12 `Initial Profile Preload` visível em Avançado)
+
+> **Status da rodada 2 (2026-08-23 00:41):** implementada no item [010-perf-spawn-pipeline-r2](../backlog/010-perf-spawn-pipeline-r2/) — client **v3.4.0** compilada e instalada (rollback: `TRL-DynamicSpawn.dll.bak-3.3.0`). AUD-01-04/05/06/07/08: **aplicados, aguardando validação V2**. Achado novo da code review (CR-01-01 do 010): `AddToTargetBackup` é **nível permanente** de cache reposto pelo SPT (`GClass684.cs:258-263`), não "pedir N perfis" — a pré-carga de Scav sempre foi no-op; semântica corrigida no código e na doc.
+
 ## 4. Plano de Ação
 
 1. **Rodada 1 (aprovada):** AUD-01-01 + 02 + 03 via `/optimize-mod-performance TRL-DynamicSpawn --fase 2 --escopo Client`.

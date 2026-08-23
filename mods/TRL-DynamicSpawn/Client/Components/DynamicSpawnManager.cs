@@ -21,7 +21,6 @@ namespace TRLDynamicSpawn.Components
         public static bool IsGeneratingDynamicWave = false;
         public static bool IsWarmupActive = true;
         
-        private bool _isSpawningWave = false;
         private int _delayBeforeFirstWave = 60;
         private int _secondsBetweenWaves = 360; 
         private float _nextWaveTime = 0f;
@@ -144,16 +143,15 @@ namespace TRLDynamicSpawn.Components
                 // Pre-populate SPT Bot Creator Backup target for PMCs to resolve profile generation empty queues
                 if (_botCreator != null)
                 {
-                    // ref: AUD-01-04 / AC-X2 — initial preload is configurable (was fixed 30/30/20; profiles are never
-                    // dropped from the pool, so every unused one is memory for the whole raid). 0 disables it.
+                    // ref: AUD-01-04 / AC-X2 / CR-01-01 — AddToTargetBackup is NOT "request N profiles now": it registers a
+                    // STANDING cache level per (role, difficulty) that SPT keeps replenished for the whole raid (GClass684.cs:258-263
+                    // registers the key only if absent; a 5 s timer refills it, GClass684.cs:129-192). The level is configurable
+                    // (was fixed 30/30). assault/marksman are NOT registered here: vanilla already holds them at 8 per difficulty
+                    // (GClass684.cs:113-118) and a second call for the same key is a no-op.
                     int preload = Settings.initialProfilePreload.Value;
-                    Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Pre-populating SPT Bot Creator Backup target ({preload} per type: USEC, BEAR, Scav) + Rogues/Goons per config...");
-                    if (preload > 0)
-                    {
-                        _botCreator.AddToTargetBackup(BotDifficulty.normal, WildSpawnType.pmcUSEC, preload);
-                        _botCreator.AddToTargetBackup(BotDifficulty.normal, WildSpawnType.pmcBEAR, preload);
-                        _botCreator.AddToTargetBackup(BotDifficulty.normal, WildSpawnType.assault, preload);
-                    }
+                    Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Registering standing PMC profile cache levels (USEC/BEAR normal = {preload}; Scav levels are vanilla's 8/difficulty) + Rogues/Goons per config...");
+                    _botCreator.AddToTargetBackup(BotDifficulty.normal, WildSpawnType.pmcUSEC, preload);
+                    _botCreator.AddToTargetBackup(BotDifficulty.normal, WildSpawnType.pmcBEAR, preload);
                     if (_serverConfig?.EliteConfig?.Rogues != null && _serverConfig.EliteConfig.Rogues.Enable)
                     {
                         _botCreator.AddToTargetBackup(BotDifficulty.normal, WildSpawnType.exUsec, 10);
@@ -479,6 +477,17 @@ namespace TRLDynamicSpawn.Components
                         {
                             yield return new WaitForSeconds(1f);
 
+                            // ref: CR-01-02 / AC-X3 — reach the wave in flight within 1 s, not after warmupInterval:
+                            // stop it here and fall through (capReachedEarly stays false → warmupAttempt++ → top of the
+                            // inner while → the pause branch takes over with its 5 s re-check).
+                            if (GetAliveHumanCount() == 0)
+                            {
+                                if (_activeWaveCoroutine != null) { StopCoroutine(_activeWaveCoroutine); _activeWaveCoroutine = null; }
+                                IsGeneratingDynamicWave = false;
+                                _nextWaveTime = 0f;
+                                break;
+                            }
+
                             currentMap = GetCurrentMapName();
                             playerCap = Settings.GetMapCap(currentMap);
                             dynamicCap = GetDynamicCap(currentMap);
@@ -539,8 +548,7 @@ namespace TRLDynamicSpawn.Components
 
         private IEnumerator ProcessWave(bool isFirstWave)
         {
-            _isSpawningWave = true;
-
+            // ref: CR-01-03 — `_isSpawningWave` removed (dead field, never read); `_activeWaveCoroutine != null` is the real gate.
             string currentMap = GetCurrentMapName();
             int playerCap = Settings.GetMapCap(currentMap);
             int specialBots = GetSpecialBotsCount();
@@ -553,13 +561,12 @@ namespace TRLDynamicSpawn.Components
             if (Settings.enableDebugLogs.Value)   // ref: AUD-01-07
                 Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Calculating Wave: PlayerCap={playerCap}, SpecialBots={specialBots}, DynamicCap={dynamicCap}, Alive={aliveBots}, Available={availableSlots}");
 
-            // ref: AUD-01-04 — the fixed 10/10/10 'normal' preload per wave was removed: the slot-based prefetch below
-            // (AddToTargetBackup with the wave's sampled difficulty) already requests exactly what this wave consumes.
+            // ref: AUD-01-04 / CR-01-01 — the fixed 10/10/10 'normal' AddToTargetBackup per wave was removed: the key
+            // (role, normal) is already registered at raid start, so those calls were no-ops (GClass684.cs:260).
 
             if (availableSlots <= 0)
             {
                 Plugin.LogSource.LogInfo("[TRL-DynamicSpawn] No slots available for this wave. Skipping.");
-                _isSpawningWave = false;
                 yield break;
             }
 
@@ -801,14 +808,20 @@ namespace TRLDynamicSpawn.Components
                     Plugin.LogSource.LogInfo($"  Spawning Scavs ({scavDiff}): {scavSlots} ({normalScavSlots} Normal, {pScavSlots} pScav)");
                 }
 
-                if (_botCreator != null)
+                // ref: CR-01-01 — these calls register a STANDING cache level for (role, sampled difficulty), kept replenished
+                // by SPT for the rest of the raid; a second call for the same key is ignored (GClass684.cs:258-263). The number
+                // of keys is bounded (2 PMC roles × 4 difficulties; assault easy/normal/hard already vanilla's), so the pool
+                // stays bounded — this is what keeps the per-wave difficulty feature alive without SAIN. With SAIN the
+                // difficulty is always 'normal' (key already registered at raid start → no-op).
+                if (_botCreator != null && !isSainActive)
                 {
                     if (usecSlots > 0) _botCreator.AddToTargetBackup(pmcDiff, WildSpawnType.pmcUSEC, usecSlots);
                     if (bearSlots > 0) _botCreator.AddToTargetBackup(pmcDiff, WildSpawnType.pmcBEAR, bearSlots);
                     int totalScavSlots = normalScavSlots + pScavSlots;
-                    if (totalScavSlots > 0) _botCreator.AddToTargetBackup(scavDiff, WildSpawnType.assault, totalScavSlots);
+                    if (totalScavSlots > 0 && scavDiff == BotDifficulty.impossible)   // easy/normal/hard: vanilla key exists (no-op)
+                        _botCreator.AddToTargetBackup(scavDiff, WildSpawnType.assault, totalScavSlots);
                     if (debugLogs)
-                        Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Batch profile pre-fetching requested: {usecSlots} USEC ({pmcDiff}), {bearSlots} BEAR ({pmcDiff}), {totalScavSlots} Scavs ({scavDiff}).");
+                        Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Standing backup targets ensured for this wave: USEC/BEAR ({pmcDiff}) = {usecSlots}/{bearSlots}, Scav ({scavDiff}) = {totalScavSlots} (no-op if key already registered).");
                 }
 
                 GenerateAndEnqueueGroups(WildSpawnType.pmcUSEC, pmcDiff, usecSlots, eliteConfig?.Usec);
@@ -1007,8 +1020,6 @@ namespace TRLDynamicSpawn.Components
                     yield return null; // Just wait 1 frame to not lock main thread
                 }
             } // End foreach
-
-            _isSpawningWave = false;
         }
 
         public class SpawnGroupData
@@ -1741,9 +1752,11 @@ namespace TRLDynamicSpawn.Components
 
             if (p.Profile != null)
             {
-                string nickname = p.Profile.Nickname?.ToLower() ?? "";
-                string accountId = p.Profile.AccountId?.ToLower() ?? "";
-                if (nickname.Contains("headless") || accountId.Contains("headless"))
+                // ref: CR-01-05 — ordinal, allocation-free (called once per human per second by GetAliveHumanCount)
+                string nickname = p.Profile.Nickname;
+                string accountId = p.Profile.AccountId;
+                if ((nickname != null && nickname.IndexOf("headless", StringComparison.OrdinalIgnoreCase) >= 0) ||
+                    (accountId != null && accountId.IndexOf("headless", StringComparison.OrdinalIgnoreCase) >= 0))
                 {
                     return true;
                 }

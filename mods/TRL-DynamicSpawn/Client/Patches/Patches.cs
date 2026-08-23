@@ -852,7 +852,7 @@ namespace TRLDynamicSpawn.Patches
             Profile chosen = exact ?? relaxed;   // exact first (NR-4); relaxed only on a difficulty miss (AC-X1)
             if (chosen == null) return true;     // nothing of this Side+Role → vanilla → null → LoadBots(3)
 
-            if (withDelete) profiles2Select.Remove(chosen);   // same semantics as vanilla :91-94
+            if (withDelete) profiles2Select.Remove(chosen);   // same semantics as vanilla BotProfileDataClass.cs:93-96 (CR-01-04)
             __result = chosen;
             if (debug)
                 Plugin.LogSource.LogInfo($"[TRLDynamicSpawn Logger] CHOSEN PROFILE: '{chosen.Nickname}' (Side={chosen.Info.Side}, Role={chosen.Info.Settings?.Role}, Diff={chosen.Info.Settings?.BotDifficulty}) for {role} ({diff}){(exact == null ? " [difficulty relaxed]" : "")}");
