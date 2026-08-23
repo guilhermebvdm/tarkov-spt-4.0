@@ -169,7 +169,10 @@ Protocolo: raid Customs, mesma rota do baseline 2026-08-22, CapFrameX + curva de
 - [ ] `getConfig` no RequestHandler durante a raid = 1 (baseline: 111)
 - [ ] Metrônomo de 10 s ausente na captura (baseline: stutters >50 ms a cada 10,0 s cravados)
 - [ ] RequestHandler silencioso no menu/hideout pós-raid
-- [ ] Não-regressão: spawns/despawns/teleports funcionando como antes; painel web aplica config via `ForceRefresh` (caminho manual)
+- [ ] Não-regressão: spawns/despawns/teleports funcionando como antes; painel web aplica config via `ForceRefresh` (caminho manual — toggle F12 `Server Config → Reload Server Config`)
+- [ ] Log do mod mostra, 1× por raid: `Server config fetched (raid-scoped cache)` e `Raid end hook fired (BaseLocalGame.Stop)` — se a fonte logada for `GameWorld.OnDestroy`, o patch de `Stop` não dispara (PA-01-05: remover e anotar na spec)
+
+> **Status da rodada 1 (2026-08-22):** implementada no item [009-perf-config-cache-raid](../backlog/009-perf-config-cache-raid/) — client **v3.3.0** compilada e instalada em `BepInEx/plugins/TRL-DynamicSpawn.dll` (rollback: `TRL-DynamicSpawn.dll.bak-3.2.9`). AUD-01-01/02/03: **aplicados, aguardando validação V1** (medição in-game pendente — não fecham sem números).
 
 ## 4. Plano de Ação
 
