@@ -7,6 +7,8 @@ authors: Claude (auditoria preventiva de performance 2026-08-22)
 
 # Relatório de Auditoria Técnica de Código — CustomClasses v0.16.8 (Review 01, --perf)
 
+> ⚠️ **Revisão 01 (2026-08-22)** — este relatório passou por revisão adversarial antes de qualquer Decisão ser marcada: [relatorio-auditoria-codigo-01-review-01.md](relatorio-auditoria-codigo-01-review-01.md). Resultado: **1 achado não detectado** (`AUD-01-08`, acrescentado abaixo), 2 afirmações corrigidas, 2 achados reclassificados como fora do escopo de performance, evidência recontada e o plano de instrumentação corrigido. As anotações `⚠️ Revisão 01` ao longo do texto marcam cada ponto; o texto original foi preservado (relatórios são imutáveis).
+
 ## 1. Resumo Executivo da Auditoria
 
 Auditoria de performance do **CustomClasses v0.16.8** (client [modded/Client/](../modded/Client/) 9.444 linhas · server [modded/Server/](../modded/Server/) 6.467 linhas), commit base `8732d47c`, branch `perf-customclasses-optimize`. **Modo preventivo**: diferente das outras frentes desta rodada, aqui **não há achado prévio de investigação** — na raid-baseline de 2026-08-22 o mod emitiu apenas 9 linhas de log e não apareceu em nenhum spike. A auditoria é estática, cruzada com o decompile do EFT 0.16.9 (lido do checkout principal `tarkov-spt-4.0/references/eft-decompiled/`, ausente neste worktree) e com o `spt-source` 4.0.
@@ -14,6 +16,8 @@ Auditoria de performance do **CustomClasses v0.16.8** (client [modded/Client/](.
 **Escopo priorizado conforme o direcionamento da sessão:** superfícies **client em raid** (patches de perk, gates por jogador, hooks de som/dano/movimento). O editor web Blazor (`Server/Web`, `Server/wwwroot`) ficou de fora; do server foram auditadas apenas as rotas que o client consome no raid-start.
 
 ### Veredicto
+
+> ⚠️ **Revisão 01 — ressalva de cobertura (RV-03/RV-08).** O veredicto abaixo vale para **CPU em raid**, que é onde a varredura foi integral. A lente de **retenção/VRAM** (`spt-memory-leak-analysis`) rodou só como grep, e contra superfícies de raid — foi ali que escapou o `AUD-01-08`. Cobertura real: ~55% das 9.444 linhas do client lidas por inteiro (todos os patches de raid, hubs de estado, cache de ícones e as rotas de servidor consumidas em raid); o resto por greps direcionados da taxonomia. Recomendação: `/analyze-memory-leak CustomClasses` como frente própria.
 
 **O client não tem ofensor de performance em raid.** As duas únicas superfícies verdadeiramente por-frame do mod (`Plugin.OnGUI` e `FadeIn.Update`) estão desligadas por default ou se auto-desligam; **todos** os 33 patches Harmony têm early-return barato no topo, e o gate de identidade de instância (`ReferenceEquals(__instance, MainPlayer…)` — regra 075) está íntegro em 100% dos patches que rodam para bots/peers. Não há LINQ, alocação, `GameObject.Find` nem reflection não cacheada em nenhum caminho de raid. Isso é coerente com a baseline de 9 linhas de log.
 
@@ -25,11 +29,15 @@ Os achados abaixo são, em ordem: **um** desperdício real (mas na superfície d
 |---|:---:|---|
 | 🔴 **Crítico** | 0 | — |
 | 🟠 **Alto** | 0 | — |
-| 🟡 **Médio** | 1 | Polling de `GameObject.Find` global (até 60 frames) a cada abertura do menu, sem short-circuit quando o Menu-Overhaul está ausente |
-| 🔵 **Baixo** | 5 | Comparação de string no gate mais chamado do mod; multiplicidade de patches no mesmo alvo; reflection crua no funil de som; log de diagnóstico sem gate; type-name por disparo |
+| 🟡 **Médio** | **2** | Polling de `GameObject.Find` global (até 60 frames) a cada abertura do menu, sem short-circuit quando o Menu-Overhaul está ausente · **[Revisão 01] cache de textura tingida sem teto, alimentado pelo picker de cor do F12 (`AUD-01-08`)** |
+| 🔵 **Baixo** | 5 | Comparação de string no gate mais chamado do mod; ~~multiplicidade de patches no mesmo alvo~~ᴬ; reflection crua no funil de som; log de diagnóstico sem gate; ~~type-name por disparo~~ᴬ |
 | 💡 **Otimização** | 1 | Bloco agregado de 4 melhorias preventivas |
 
-**Nível de evidência:** Forte 6 · Suspeita 0 · Melhoria preventiva 1. Não há Suspeita porque nenhum eixo de custo ficou em aberto na leitura — o que falta medir é a **magnitude** de AUD-01-01 no setup do usuário (ver Instrumentação).
+ᴬ ⚠️ **Revisão 01 (RV-04):** `AUD-01-03` e `AUD-01-06` **não são achados de performance** pelo critério deste próprio relatório (ganho de CPU declaradamente desprezível; benefício real é manutenção/conformidade). Ficam registrados para rastreabilidade, mas **saem da recomendação de rodada** — encaminhar por `/code-review`.
+
+~~**Nível de evidência:** Forte 6 · Suspeita 0 · Melhoria preventiva 1. Não há Suspeita porque nenhum eixo de custo ficou em aberto na leitura — o que falta medir é a **magnitude** de AUD-01-01 no setup do usuário (ver Instrumentação).~~
+
+> ⚠️ **Revisão 01 (RV-05) — evidência recontada: Forte 4 · Suspeita 2 · Preventiva 1.** A declaração original confundia **mecanismo** (provado por leitura — Forte em todos) com **magnitude** (o produto real frequência × entidades no setup do usuário). `AUD-01-01` e `AUD-01-08` têm magnitude **desconhecida** e o próprio relatório propõe instrumentação para eles — pela definição da skill, isso é **Suspeita**, não Forte. Registre-se também que este relatório **não contém uma única medição**: é 100% estático.
 
 ---
 
@@ -44,6 +52,7 @@ Os achados abaixo são, em ordem: **um** desperdício real (mas na superfície d
 | `AUD-01-05` | 🔵 Baixo | `Client/Patches/SkillsClassTabPatch.cs:435-445` | LOG | Diagnósticos `[053-tabicon]`/`[053-tabtext]` em `LogInfo` sem gate de config — sobra de um fix já fechado |
 | `AUD-01-06` | 🔵 Baixo | `Client/Patches/WeaponMasteryPatches.cs:57` | Custo unitário | `p.GetType().Name.IndexOf("Hideout", …)` por disparo de underbarrel, onde `is HideoutPlayer` resolve |
 | `AUD-01-07` | 💡 Otimização | (4 pontos — ver §3) | Preventivas agregadas | Subscrição de bala sempre ativa · poll por frame da janela de Adrenalina · string de tooltip por linha no scroll · lista de perks por Repaint com diag ligado |
+| `AUD-01-08` | 🟡 Médio | `Client/UI/ClassIconCache.cs:74-137` | GROW + UNITY + ALLOC | **[Revisão 01]** `TintedCache` guarda uma textura 256×256 por **cor** e nunca libera; o picker de cor do F12 gera uma entrada por evento de mudança, em dois consumidores |
 
 ---
 
@@ -52,7 +61,8 @@ Os achados abaixo são, em ordem: **um** desperdício real (mas na superfície d
 ### AUD-01-01 · Polling de `GameObject.Find` global no menu (até 60 frames por abertura)
 
 - **Severidade:** 🟡 Médio
-- **Evidência:** Forte — mecanismo provado por leitura; a **magnitude** varia por setup (ver os dois regimes abaixo) e é o que a instrumentação fecha.
+- **Evidência:** ~~Forte~~ → ⚠️ **Revisão 01 (RV-05): Suspeita** — mecanismo provado por leitura, **magnitude não medida**. Pela definição da skill, eixo em aberto que exige instrumentação antes de virar refactor é Suspeita.
+- **O que refutaria este achado** *(Revisão 01, RV-10)*: se no setup do usuário o painel do Menu-Overhaul aparecer em 1–2 quadros, o custo real é quase zero e a correção **não paga** o ciclo de build + reinstalar + reiniciar o EFT + validar. Medir (INSTR-1) **antes** de decidir.
 - **Execução:** per-frame por até 60 frames × 1 entidade × por `MenuScreen.Show` (toda volta ao menu principal, ou seja ≥1× por raid) e por `RefreshColors` (cada evento do picker de cor no F12). Custo unitário **alto**: `GameObject.Find` percorre a hierarquia inteira da cena por nome, e a cena do menu principal é pesada.
 - **Localização no Mod:** [MenuClassIdentityPatch.cs:99-161](../modded/Client/Patches/MenuClassIdentityPatch.cs#L99-L161) (o `for` de 60 iterações em `:103-116`, o `GameObject.Find` em `:105`, os 90 frames ociosos em `:155-158`, o segundo `Find` em `:173`)
 - **Referência Cruzada:** `MenuOverhaulBridge.IsPresent` — [MenuOverhaulBridge.cs:72](../modded/Client/UI/MenuOverhaulBridge.cs#L72) — já existe, é um `Chainloader.PluginInfos.ContainsKey` (O(1)) e **não é consultado** por este patch.
@@ -111,7 +121,8 @@ private static IEnumerator ApplyToMenu(MenuScreen menu)
 - **Evidência:** Forte
 - **Execução:** per-frame × 1 entidade (o gate de instância já barrou bots antes) × raid inteira · sem acúmulo. Custo unitário **baixo mas não nulo**: `OrdinalIgnoreCase` faz dobra de caixa caractere a caractere (`"Combat Medic"` = 12 chars). Volume: `ClassMoveSpeed.Apply` avalia até 3 `IsLocalClass` por leitura de `MaxSpeed`, e `MaxSpeed` é lido 3× por `UpdateCharacterControllerSpeedLimit` (decompile `MovementContext.cs:4181` → `SetCharacterMovementSpeed` lê em `:2375` e `:2377`, mais `UpdateCovertEfficiency` em `:2368`), que roda por frame de movimento → **~9 comparações/frame** só nesse patch, mais 2/frame no `StancesArmStaminaBridge.Factor`.
 - **Localização no Mod:** [SkillMultipliers.cs:60-63](../modded/Client/SkillMultipliers.cs#L60-L63) (a comparação) · [ClassMovementPatches.cs:53-77](../modded/Client/Patches/ClassMovementPatches.cs#L53-L77) e [StancesArmStaminaBridge.cs:91-99](../modded/Client/StancesArmStaminaBridge.cs#L91-L99) (os call-sites per-frame)
-- **Referência Cruzada:** `MovementContext.MaxSpeed` — [MovementContext.cs:910](../../../references/eft-decompiled/Assembly-CSharp/EFT/MovementContext.cs#L910); origem por-frame provada em `BotMover.cs:930`/`:985` → `Player.ChangeSpeed` → `MovementState.ChangeSpeed` (`MovementState.cs:248`).
+- **Referência Cruzada:** `MovementContext.MaxSpeed` — decompile EFT 0.16.9, `EFT/MovementContext.cs:910`; origem por-frame provada em `BotMover.cs:930`/`:985` → `Player.ChangeSpeed` → `MovementState.ChangeSpeed` (`MovementState.cs:248`).
+  > ⚠️ **Revisão 01 (RV-09):** as referências ao decompile são citadas **em texto, sem link**, porque o dump é gitignored e **não existe neste worktree** (a auditoria o leu do checkout principal `tarkov-spt-4.0/`). Para gerá-lo aqui: `bash scripts/decompile-eft.sh` (exige o jogo instalado).
 - **Causa Raiz:** a classe do perfil é um dado **imutável durante a raid** (só muda em `Apply()`, no fetch), mas todo gate a re-resolve comparando strings. O mod tem 6 classes + vanilla; um id numérico resolvido uma única vez no `Apply` transformaria cada um dos 42 gates num compare de `int`.
 - **Impacto Técnico Real:** na ordem de dezenas de µs por segundo. Não é o que trava o jogo — é o item de maior **frequência** do mod e o de melhor razão ganho/risco entre os 🔵, porque a mudança é local a uma classe e mecânica.
 - **Alternativa de Melhor Lógica / Proposta de Correção:**
@@ -128,6 +139,8 @@ private static IEnumerator ApplyToMenu(MenuScreen menu)
 ---
 
 ### AUD-01-03 · Multiplicidade de patches no mesmo alvo — o gate é refeito N vezes
+
+> ⚠️ **Revisão 01 (RV-04) — FORA DO ESCOPO DE PERFORMANCE.** O texto abaixo admite que o ganho de CPU é "pequeno", que o benefício real é **estrutural** (legibilidade da ordem de composição do recuo) e que esta é a mudança de **maior risco de regressão de balance** do relatório. Ganho não medido + benefício de manutenção + maior risco da rodada não formam um achado `--perf`. **Retirado da recomendação do §4**; mantido aqui por rastreabilidade. Encaminhar por `/code-review` se quiser tratá-lo.
 
 - **Severidade:** 🔵 Baixo
 - **Evidência:** Forte
@@ -220,6 +233,8 @@ private static Func<BaseSoundPlayer, object?>? BuildEmitterAccessor()
 
 ### AUD-01-06 · `GetType().Name.IndexOf("Hideout")` por disparo de underbarrel
 
+> ⚠️ **Revisão 01 (RV-04) — FORA DO ESCOPO DE PERFORMANCE.** O próprio texto diz "desprezível em CPU" e se justifica por "desvio de padrão". Isso é conformidade, não performance. **Retirado da recomendação do §4**; mantido por rastreabilidade. Encaminhar por `/code-review`.
+
 - **Severidade:** 🔵 Baixo
 - **Evidência:** Forte
 - **Execução:** per-event (1× por disparo de GP-25/M203) × 1 entidade (gate de instância acima já barrou bots).
@@ -251,6 +266,54 @@ private static Func<BaseSoundPlayer, object?>? BuildEmitterAccessor()
 - **Decisão (bloco):**
   - `[ ]` Pendente
   - `[ ]` Aceitar sugestão (indicar quais: ____)
+  - `[ ]` Rejeitar (deferir / aceitar como dívida): _________________
+
+---
+
+### AUD-01-08 · Cache de textura tingida cresce sem teto, alimentado pelo picker de cor do F12
+
+> ⚠️ **Achado acrescentado pela Revisão 01 (RV-01)** — a auditoria original leu este arquivo, mas o examinou pela lente de CPU-em-raid e não pela de retenção/VRAM.
+
+- **Severidade:** 🟡 Médio — mesma régua do `AUD-01-01` (superfície de menu, acionada por ação específica do usuário). **Sobe para 🟠 Alto** se a medição confirmar emissão por quadro de arrasto: retenção sem teto é o que a régua do repo reserva para 🟠.
+- **Evidência:** **Suspeita** — mecanismo provado por leitura; **magnitude depende da cadência de `SettingChanged` do ConfigurationManager**, que não dá para provar estaticamente.
+- **Execução:** per-event × **2 consumidores** × **acúmulo sem teto** × vida = **a sessão inteira** (não a raid). Custo unitário **alto**.
+- **Localização no Mod:** [ClassIconCache.cs:74-137](../modded/Client/UI/ClassIconCache.cs#L74-L137) (`GetTinted`) · [ClassIconCache.cs:140-154](../modded/Client/UI/ClassIconCache.cs#L140-L154) (`Dispose` — o **único** ponto de liberação)
+- **Causa Raiz:** a chave do cache é `nome|corTopo|corBase`, e a cor vem de um `ConfigEntry<Color>` do F12 (item 067). Cada chave nova custa:
+  - `new Texture2D(256, 256, RGBA32)` → **256 KB de VRAM** (ícones confirmados 256×256 no disco);
+  - `tex.GetPixels32()` → `Color32[65536]` = **256 KB gerenciados por chamada** — acima do limiar de 85 KB, portanto **Large Object Heap**, que não é compactado e só é recolhido em coleta de geração 2;
+  - 65.536 operações de pixel + `SetPixels32` + `Apply` (upload à GPU) + `Sprite.Create`.
+
+  **Nada disso é liberado:** `DestroySprite` só roda em `Dispose()`, chamado apenas no `Plugin.OnDestroy` (fechar o jogo). Não há substituição, teto nem invalidação.
+
+  A cadeia que torna o crescimento ilimitado:
+
+```
+F12: arrasta o picker de cor de uma classe
+  → ConfigEntry<Color>.SettingChanged                (PerksConfig.cs:682)
+  → PerksConfig.ClassColorsChanged                   (PerksConfig.cs:54)
+  ├→ MenuClassIdentityPatch.RefreshColors            (Plugin.cs:88)
+  │    → StartCoroutine(ApplyToMenu) → ApplyClassIcon
+  │      → ClassIconCache.GetTinted(cor NOVA)        (ClassIdentityView.cs:134)  ← textura nova
+  └→ SkillsClassTabPatch.OnColorsChanged             (SkillsClassTabPatch.cs:30)
+       → rebuild da aba CLASS → PerksPanelView
+         → ClassIconCache.GetTinted(cor NOVA)        (PerksPanelView.cs:242)     ← outra textura nova
+```
+
+- **Impacto Técnico Real:** dois regimes.
+  - **Uso normal** (não mexe no picker): 1–2 cores por classe na sessão → um punhado de texturas. Inofensivo.
+  - **Arrastando o picker:** uma textura por evento. Se o ConfigurationManager emitir por quadro de arrasto — comportamento típico de slider —, alguns segundos produzem **dezenas de MB de VRAM presos até fechar o jogo**, o mesmo volume de lixo no LOH, e travamento visível durante o arrasto. Soma-se ao `AUD-01-01`, que **compartilha exatamente o mesmo gatilho** (cada evento também reinicia a busca de 60 quadros no menu).
+- **O que refutaria este achado:** se o ConfigurationManager emitir `SettingChanged` só ao **soltar** o controle (um evento por cor escolhida, não por quadro), o crescimento fica na casa de unidades por sessão e o achado morre como preventiva. **É a primeira coisa a medir** (INSTR-3) — responde em 10 segundos.
+- **Alternativa de Melhor Lógica / Proposta de Correção:**
+  - *Abordagem atual:* uma entrada permanente por cor distinta, sem teto.
+  - *Abordagem otimizada (recomendada = a + b):*
+    - **(a)** manter no máximo **uma variante tingida viva por ícone**: ao inserir uma chave nova do mesmo `iconFile`, destruir a anterior (`DestroySprite`). Ninguém precisa do histórico de cores.
+    - **(b)** **quantizar a cor na chave** (arredondar cada canal para múltiplos de 8) — corta a cardinalidade em ~32× sem diferença visível.
+    - *(c) alternativa descartada:* voltar ao `ClassIconGradient` (o `BaseMeshEffect` que já existe e **não aloca por cor**). É o melhor custo/benefício em tese, mas foi justamente o caminho abandonado no 06-fix-02 por falhar em `Image` criada em runtime — reintroduzi-lo reabriria um bug já fechado.
+- **Como validar:** logar `TintedCache.Count` e a VRAM estimada (`Count × 256 KB`) ao abrir e ao fechar o F12 (INSTR-3). Cenário pareado: arrastar o picker de uma classe por ~5 s, antes e depois. Critério: `Count` deixa de crescer com o arrasto (fica ≤ nº de ícones). Não-regressão: o ícone da classe mantém o gradiente correto no menu, no chat, na tela de deploy e na aba CLASS, e trocar a cor no F12 continua refletindo ao vivo.
+- **Decisão:**
+  - `[ ]` Pendente
+  - `[ ]` Aceitar sugestão
+  - `[ ]` Aceitar com modificação: _________________
   - `[ ]` Rejeitar (deferir / aceitar como dívida): _________________
 
 ---
@@ -356,10 +419,30 @@ internal static class PerfCount
 
 - Incremento: `long++` sem alocação, dentro do `if (PerkDiag.Enabled)` **antes** de qualquer formatação de string.
 - `Stopwatch` amostrado só em `ClassMoveSpeed.Apply`: `if ((_n++ & 0x3FF) == 0) { … }`.
-- **Dump agregado 1× no raid-end** (`GameWorld.OnDestroy` ou o mesmo hook do `AdrenalineState.Reset`), nunca por chamada:
-  `[perf] moveSpeed=<calls>/<passed> (avg <µs>) · stepAI=<calls>/<passed> · rolloff=<calls>/<passed> · damage=<calls>`
+- ~~**Dump agregado 1× no raid-end** (`GameWorld.OnDestroy` ou o mesmo hook do `AdrenalineState.Reset`), nunca por chamada:~~
+
+> ⚠️ **Revisão 01 (RV-06) — o ponto de despejo original não existe.** (1) `AdrenalineState.Reset` roda no raid-**START**, não no end: despejar ali reportaria os contadores da raid **anterior**, silenciosamente deslocados em uma raid. (2) **O mod não tem hook de raid-end** (nenhum patch em `GameWorld.OnDestroy` / `BaseLocalGame.Stop`), então a proposta exigia adicionar um patch novo — mais invasivo do que "instrumentação temporária" sugere.
+>
+> **Corrigido:** despejo **periódico**, sem hook novo — uma corrotina no `Plugin` que, a cada 60 s, emite uma linha **enquanto `Singleton<GameWorld>.Instantiated && PerkDiag.Enabled`, e zera os contadores**. Serve melhor ao propósito: mostra a evolução ao longo da raid (responde "o custo cresce?") em vez de um total no fim.
+
+```
+[CustomClasses][perf] t=<s> moveSpeed=<calls>/<passed> (avg <µs>) · stepAI=<calls>/<passed> · rolloff=<calls>/<passed> · damage=<calls>
+```
 
 Responde as duas perguntas que a estática não fecha: **qual o N real** de bots × frames que essas superfícies pagam numa raid do usuário, e **qual fração** passa do gate (deveria ser ~1/N).
+
+### INSTR-3 — crescimento do cache de textura (fecha AUD-01-08) · *acrescentada pela Revisão 01*
+
+```csharp
+// PERF-INSTR AUD-01-08 — temporary, remove after validation
+// em ClassIconCache.GetTinted, logo após TintedCache[key] = sprite;
+if (PerkDiag.Enabled)
+{
+    Plugin.Log?.LogInfo($"[CustomClasses][perf/AUD-01-08] tintedCache={TintedCache.Count} (~{TintedCache.Count * 256} KB VRAM) key={key}");
+}
+```
+
+Responde a única pergunta que decide o achado: **quantas entradas um arrasto do picker de cor gera?** Se for 1–2 por cor escolhida, `AUD-01-08` vira preventiva; se for dezenas por arrasto, sobe para 🟠 e justifica a rodada sozinho. Uma linha por **inserção** (não por consulta) — o cache é justamente o que impede o flood.
 
 ### Regras aplicadas
 
@@ -390,9 +473,9 @@ Cenário pareado obrigatório para todos: **mesmo mapa, mesmo ponto de spawn, co
 | Cenário | O que conferir |
 |---|---|
 | Morte / despawn de bots | Contadores de `stepAI`/`rolloff` acompanham a queda do número de bots |
-| Múltiplas ondas | 2ª onda custa como a 1ª (nenhuma coleção do mod cresce — não há GROW neste mod) |
+| Múltiplas ondas | 2ª onda custa como a 1ª. ~~(nenhuma coleção do mod cresce — não há GROW neste mod)~~ ⚠️ **Revisão 01 (RV-02): a afirmação entre parênteses é FALSA.** `ClassIconCache.TintedCache` cresce sem teto — ver `AUD-01-08`. As coleções que a auditoria de fato conferiu (`ClassIdentities.ByNickname` substituída no `Commit`, `PerkDiag.LastLog` limpa por raid, `SeenNetIds` com `Clear`, `PerksConfig.ClassColors` fixa) estão corretas; o cache de ícones nunca entrou na lista. **Nenhuma delas cresce por onda de bots**, então o critério desta linha continua válido — o que caiu foi a generalização |
 | Raid longa (>20 min) | Custo estável; `LastLog` do `PerkDiag` (dicionário de throttle de peer) não cresce além do roster |
-| raid1 → extract → raid2 | Nova raid não herda custo: `AdrenalineState.Reset`, `Medroso.ResetRaid`, `HolsterDrawSpeedPatch.BoostedDraw`, `PerkDiag.ResetPeerLog` já rodam no `OnGameStarted` — reconferir com os contadores zerados |
+| raid1 → extract → raid2 | Nova raid não herda custo: `AdrenalineState.Reset`, `Medroso.ResetRaid`, `HolsterDrawSpeedPatch.BoostedDraw`, `PerkDiag.ResetPeerLog` já rodam no `OnGameStarted` — reconferir com os contadores zerados.<br>⚠️ **Revisão 01 (RV-06):** **o mod não tem hook de raid-END nenhum** — não há patch em `GameWorld.OnDestroy` nem em `BaseLocalGame.Stop`. Todo o reset acontece no **start** da raid seguinte. É design legítimo (nada do mod roda entre raids), mas é um fato de lifecycle que condiciona qualquer instrumentação futura |
 | alt-F4 / morte / MIA | Idem (o reset é no **start** da raid seguinte, então cobre todos os caminhos de saída) |
 | Headless Fika | 2 GETs bloqueantes no raid-start; dump agregado sai no raid-end; nenhuma superfície de menu roda lá |
 
@@ -400,10 +483,27 @@ Cenário pareado obrigatório para todos: **mesmo mapa, mesmo ponto de spawn, co
 
 ## 4. Plano de Ação e Recomendações
 
-1. **Não há 🔴 nem 🟠 para priorizar.** Este é o resultado legítimo de uma auditoria preventiva sobre um código que já passou por várias rodadas de code-review com consciência de hot path (os gates de instância da regra 075 estão íntegros em 100% dos patches, e a lição do `GetLocaleDb` do item 022 está aplicada no server).
-2. **Se houver rodada de otimização**, o agrupamento natural para um único item de backlog é: **AUD-01-01** (o único com ganho perceptível) + **AUD-01-02** + **AUD-01-05** + **AUD-01-06** — todos de baixo risco e localizados. **AUD-01-03** merece decisão separada: o ganho de CPU é pequeno, mas o ganho **estrutural** em `PWA.Shoot` (eliminar o par capture/apply e o estático `StrBefore`) é real, e o risco de regressão de balance é o mais alto do conjunto.
-3. **AUD-01-04 e AUD-01-07** são dívida anotada — só entram se a rodada tiver folga.
-4. **Não regredir** o que já está certo: os gates de identidade de instância (regra 075 / auditoria 0 vazamentos para bots), a ordem `First → High → Normal → Last` do recuo, o `Prefetch()` não-destrutivo e o `_localeCache` do `CatalogService`.
+> ⚠️ **Revisão 01 (RV-07) — §4 reescrito.** A versão original abria dizendo que não havia o que priorizar e emendava propondo um item de backlog de 4 achados; um leitor apressado lê a segunda parte. Faltava também o **custo da própria rodada**. Texto original preservado no bloco riscado ao fim desta seção.
+
+**Recomendação default: NÃO abrir rodada de otimização agora.** Rodar só a mini-rodada de instrumentação e decidir com números.
+
+1. **Não há 🔴 nem 🟠.** É o resultado legítimo de uma auditoria preventiva sobre código que já passou por várias rodadas de code-review com consciência de hot path (gates da regra 075 íntegros em 100% dos patches; lição do `GetLocaleDb` do item 022 aplicada no server).
+2. **Os dois 🟡 dependem de uma medição que ainda não existe.** `AUD-01-01` e `AUD-01-08` são **Suspeita**: o mecanismo está provado, a magnitude não. Ambos são acionados pelo **mesmo gatilho** (o picker de cor do F12 / a abertura do menu) e vivem em arquivos vizinhos — se um justificar a correção, o outro entra junto de graça.
+3. **Passo seguinte recomendado — mini-rodada de instrumentação** (prevista no passo 2 da Fase 1 do command; não exige item de backlog): INSTR-1 + INSTR-3 (+ INSTR-2 se quiser o baseline de raid). **Uma build, client-only, bump de versão *patch*.**
+4. **Custo do ciclo, para a decisão ser informada:** cada correção neste mod exige compilar → bumpar SemVer → reinstalar → **reiniciar o EFT** (plugin BepInEx só recarrega no boot) → validar in-game com gate humano. Para um mod com 0 🔴 e 0 🟠, esse custo plausivelmente **supera** o ganho. A comparação é do usuário.
+5. **Se, depois de medir, a rodada se justificar**, o agrupamento é: **AUD-01-08 + AUD-01-01** (mesmo gatilho) + **AUD-01-02** + **AUD-01-05**. Todos de baixo risco e localizados.
+6. **Fora da rodada de performance:** `AUD-01-03` e `AUD-01-06` (RV-04 — não são achados de performance; encaminhar por `/code-review`); `AUD-01-04` e `AUD-01-07` (dívida anotada).
+7. **Frente separada:** `/analyze-memory-leak CustomClasses` — a lente de retenção/VRAM que este `--perf` só tangenciou (RV-03) e que produziu `AUD-01-08` quase por acidente.
+8. **Não regredir** o que já está certo: gates de identidade de instância (regra 075 / auditoria 0 vazamentos para bots), a ordem `First → High → Normal → Last` do recuo, o `Prefetch()` não-destrutivo e o `_localeCache` do `CatalogService`.
+
+<details><summary>Texto original do §4 (preservado — relatórios são imutáveis)</summary>
+
+> ~~1. **Não há 🔴 nem 🟠 para priorizar.** …~~
+> ~~2. **Se houver rodada de otimização**, o agrupamento natural para um único item de backlog é: **AUD-01-01** (o único com ganho perceptível) + **AUD-01-02** + **AUD-01-05** + **AUD-01-06** — todos de baixo risco e localizados. **AUD-01-03** merece decisão separada…~~
+> ~~3. **AUD-01-04 e AUD-01-07** são dívida anotada — só entram se a rodada tiver folga.~~
+> ~~4. **Não regredir** o que já está certo…~~
+
+</details>
 
 ### Observação fora do escopo de performance (registrada, não é achado `AUD`)
 
@@ -418,3 +518,4 @@ Cenário pareado obrigatório para todos: **mesmo mapa, mesmo ponto de spawn, co
 | Data | Autor | Alteração |
 |---|---|---|
 | 2026-08-22 | Claude | Criação — auditoria preventiva `--perf` do CustomClasses v0.16.8 (commit `8732d47c`): 7 achados (0 🔴 · 0 🟠 · 1 🟡 · 5 🔵 · 1 💡), panorama de execução, auditoria de configuração, instrumentação e plano de validação. |
+| 2026-08-22 | Claude | Anotações da **Revisão 01** ([relatorio-auditoria-codigo-01-review-01.md](relatorio-auditoria-codigo-01-review-01.md)): `AUD-01-08` acrescentado (cache de textura sem teto — achado não detectado, RV-01); afirmação "não há GROW neste mod" corrigida (RV-02); ressalva de cobertura de retenção/VRAM no §1 (RV-03/RV-08); `AUD-01-03` e `AUD-01-06` marcados fora do escopo de performance (RV-04); evidência recontada para Forte 4 · Suspeita 2 (RV-05); `INSTR-2` corrigido (não existe hook de raid-end) e `INSTR-3` acrescentada (RV-06); §4 reescrito com "não abrir rodada" como default e o custo do ciclo explicitado (RV-07); links do decompile trocados por citação em texto (RV-09); linhas "O que refutaria" acrescentadas (RV-10). Nenhum texto original removido. |
