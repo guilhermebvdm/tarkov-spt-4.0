@@ -44,6 +44,7 @@ Auditoria de performance do mod **TRL-DynamicSpawn v3.2.9** (client [mods/TRL-Dy
 | `AUD-01-05` | 🟠 Alto | `Client/Components/DynamicSpawnManager.cs:168-175, :386` | Cancelamento global / NRE | `ClearSptQueue()` → `StopBotSpawn()` a cada 1 s no warmup cancela `BotCreationDataClass` em voo → NRE vanilla |
 | `AUD-01-06` | 🟡 Médio | `Client/Components/DynamicSpawnManager.cs:339, 367-451` | Trabalho com raid vazia | `SpawnHordeLoop` continua gerando waves/`bot/generate` com 0 bots vivos; `Replace Despawned Bots` realimenta |
 | `AUD-01-07` | 🟡 Médio | `Client/Patches/Patches.cs:805-814` + `Client/Patches/BotSpawnLoggerPatch.cs:26` | Logging sem gate | Maiores emissores (6 linhas Warning por `ChooseProfile`) escapam do gate `Enable Debug Logs` |
+| `AUD-01-08` | 🟡 Médio | `Client/Patches/Patches.cs:374-378` (+ vanilla `LocalGame.cs:139-143, :187-194, :359-361`) | Trabalho barrado por tentativa | Ondas vanilla são interceptadas a **cada tentativa** (prefix em `ActivateBotsByWave`) em vez de desligadas **uma vez** na fonte (cenários de onda do `LocalGame`) — *registrado em 2026-08-22 23:16, pós-rodada 1* |
 
 ---
 
@@ -137,6 +138,19 @@ Auditoria de performance do mod **TRL-DynamicSpawn v3.2.9** (client [mods/TRL-Dy
 - **Decisão:**
   - `[x]` Aceitar com modificação: **executar somente na rodada 1.5, após a validação V1** (os logs são a observabilidade do teste da rodada 1 — decisão do usuário no plano)
 
+### AUD-01-08 · Ondas vanilla barradas por tentativa em vez de desligadas na fonte
+- **Severidade:** 🟡 Médio
+- **Evidência:** Suspeita (mecanismo confirmado no código do mod e do vanilla; **frequência das tentativas e efeito colateral de parar os cenários cedo ainda não medidos**) — *achado registrado após a rodada 1 (2026-08-22 23:16), a partir da pergunta do usuário sobre os nomes de bots no console fora da hora da onda*
+- **Execução:** por tentativa de onda vanilla, raid inteira. O jogo mantém seus próprios "roteiros" de spawn — `WavesSpawnScenario` (ondas cronometradas), `NonWavesSpawnScenario` (spawner contínuo) e `BossSpawnScenario` — criados em `LocalGame.cs:139-143` e postos a rodar em `:187-194`; cada onda disparada chama `BotsController.ActivateBotsByWave`, onde o prefix do mod a rejeita.
+- **Localização no Mod:** [Patches.cs:374-378](../Client/Patches/Patches.cs#L374-L378) (`DisableVanillaWavesPatch` → `BotsController.ActivateBotsByWave(BotWaveDataClass)`), `:407-409` (`DisableVanillaBossWavesPatch`), logs `:431/:444/:513` ("Blocked Vanilla Horde Wave" / Rogue / Raider)
+- **Referência Cruzada:** `references/eft-decompiled/Assembly-CSharp/EFT/LocalGame.cs:141` (`WavesSpawnScenario.smethod_0(..., wave => botsController_0.ActivateBotsByWave(wave), ...)`), `:139` (`NonWavesSpawnScenario`), `:359-361` (o próprio `LocalGame.Stop` para os três cenários com `.Stop()` — a API de desligar existe e é a canônica)
+- **Causa Raiz:** o mod escolheu **interceptar o efeito** (cada ativação de onda) em vez de **parar a causa** (os cenários). O vanilla continua agendando, acordando e tentando; o mod paga o prefix + log a cada tentativa e o jogo paga o agendamento. Parte dos "nomes de bots fora da hora da onda" no console vem daqui (a outra parte é AUD-01-05/06/07).
+- **Impacto Técnico Real:** trabalho zumbi do vanilla a raid inteira + linhas de log por tentativa; não é o maior ofensor do baseline (CPU por tentativa é baixo), mas é custo por construção que a rodada 2 pode zerar de graça.
+- **Proposta de Correção:** no start hook do mod (`RaidLifecycle.OnRaidStart`, já existe desde o item 009), chamar **uma vez** `wavesSpawnScenario_0.Stop()` / `nonWavesSpawnScenario_0.Stop()` do `LocalGame` (campos privados — resolver por reflection cacheada ou pela API pública se houver), mantendo `bossSpawnScenario_0` conforme a configuração de chefes nativos (o mod **quer** os bosses nativos — ver `AdjustVanillaBossWaves`). O prefix atual vira rede de segurança (continua, mas sem tráfego). **Antes de decidir:** (1) medir quantas vezes/raid o prefix dispara hoje (contador `// PERF-INSTR AUD-01-08`); (2) confirmar no dump que `Stop()` cedo não derruba o `BotSpawner`/`BotsController` de que o mod depende (`Patches.cs:378` usa o mesmo `BotsController`); (3) conferir o equivalente no `CoopGame` do Fika (`CoopGame.cs`) — o headless roda o mod.
+- **Como validar:** log da raid sem nenhuma linha `Blocked Vanilla Horde Wave` (baseline: por tentativa); spawns do mod inalterados; bosses nativos continuam nascendo conforme config.
+- **Decisão:**
+  - `[ ]` Pendente *(rodada 2 — coordenar com Umbigo; entra na mesma conversa de AUD-01-04/05/06)*
+
 ---
 
 ## Panorama de execução
@@ -178,4 +192,4 @@ Protocolo: raid Customs, mesma rota do baseline 2026-08-22, CapFrameX + curva de
 
 1. **Rodada 1 (aprovada):** AUD-01-01 + 02 + 03 via `/optimize-mod-performance TRL-DynamicSpawn --fase 2 --escopo Client`.
 2. **Validação V1** (checklist acima) → **rodada 1.5:** AUD-01-07.
-3. **Rodada 2 (pendente, com Umbigo):** decidir AUD-01-04/05/06 — os dois primeiros são os candidatos diretos ao crescimento de RAM (~2 GB/min) e às NREs do baseline.
+3. **Rodada 2 (pendente, com Umbigo):** decidir AUD-01-04/05/06 — os dois primeiros são os candidatos diretos ao crescimento de RAM (~2 GB/min) e às NREs do baseline — **+ AUD-01-08** (desligar os cenários de onda vanilla na fonte; Suspeita → medir o contador antes de decidir).
