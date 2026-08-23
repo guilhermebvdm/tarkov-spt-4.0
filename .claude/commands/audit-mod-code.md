@@ -15,19 +15,10 @@ Executa uma **auditoria técnica estática profunda, rigorosa e minuciosa** de t
 ```
 
 - `<mod-ou-caminho>` — Nome da pasta do mod em `mods/` (ex.: `ORBIT`, `VisceralCombat`, `TRL-ActionPOV`).
-- `--scope <subpasta>` (Opcional) — Limita a auditoria a um submódulo específico (ex.: `--scope modded/Orbit/Looting`). Padrão: todo o código editável do mod — `modded/` quando existe, ou a raiz/`src/` em mod próprio (`.agents/conventions.md` § Estrutura Padrão de Mods). `original/` só como referência de leitura.
+- `--scope <subpasta>` (Opcional) — Limita a auditoria a um submódulo específico (ex.: `--scope modded/Orbit/Looting`). Padrão: todo o código do mod — `modded/` quando existe, a raiz/`src/` em mod próprio (`.agents/conventions.md` § Estrutura Padrão de Mods), ou `original/` (read-only) quando o mod ainda não foi forkado para `modded/`.
 - `--target-ref <all|eft|spt|fika>` (Opcional) — Foco das checagens cruzadas de referência (padrão: `all`).
 - `--strict` (Opcional) — Ativa verificação com nível máximo de rigor contra tolerâncias de GC, polling em loops e suposições de singleplayer.
 - `--perf` (Opcional) — **Modo performance** (ver seção "Modo `--perf`"): concentra a auditoria em custo de execução, aplicando a metodologia da skill `spt-performance-analysis` (modelo de custo, panorama de execução, configuração, instrumentação).
-
----
-
-## Contexto (antes das dimensões)
-
-1. **Resolver o mod e a raiz de código** (`modded/`, ou raiz/`src/` em mod próprio). Se `mods/<mod>/` não existir, listar os mods disponíveis e parar.
-2. **Memória do mod** (`memory-curation` §14): ler o topo de `mods/<mod>/memory/sessions.md` (snapshot + pendências) + entradas sobre performance/leak/crash. Pendência 🔴 → alertar. Emitir a linha `Memória consultada: ...` no encerramento; sem arquivo, registrar "sem memória prévia".
-3. **Relatórios anteriores:** `relatorio-auditoria-codigo-*.md` e `MEMORY-LEAK-review-*.md`. Achado `✅ Aplicado`/resolvido **não volta**; achado pendente conhecido é reforçado citando o ID original (`AUD-NN-MM` / `ML-NN-MM`), sem duplicar.
-4. **Mod grande** (acima de ~2.000 linhas no escopo): delegar a varredura de cada dimensão a sub-agents **read-only** em paralelo e consolidar os achados aqui (mesmo padrão do `/prepare-mod-for-publish` fase 2).
 
 ---
 
@@ -39,6 +30,15 @@ Executa uma **auditoria técnica estática profunda, rigorosa e minuciosa** de t
    - `references/spt-source/` (servidor SPT 4.0).
    - `references/fika-plugin/` (`Fika.Core`), `references/fika-server/`, `references/fika-headless/` (suporte multiplayer coop).
 3. Consultar [docs/technical/spt-antipatterns.md](../../docs/technical/spt-antipatterns.md) (AP-01 a AP-09).
+
+---
+
+## Contexto (antes das dimensões)
+
+1. **Resolver o mod e a raiz de código** (`modded/`, raiz/`src/` em mod próprio, ou `original/` read-only). Se `mods/<mod>/` não existir, listar os mods disponíveis e parar.
+2. **Memória do mod** (`memory-curation` §14): ler o topo de `mods/<mod>/memory/sessions.md` (snapshot + pendências) + entradas sobre performance/leak/crash. Pendência 🔴 → alertar. Emitir a linha `Memória consultada: ...` no encerramento; sem arquivo, registrar "sem memória prévia".
+3. **Relatórios anteriores:** `relatorio-auditoria-codigo-*.md` e `MEMORY-LEAK-review-*.md`. Achado `✅ Aplicado`/resolvido **não volta**; achado pendente conhecido é reforçado citando o ID original (`AUD-NN-MM` / `ML-NN-MM`), sem duplicar.
+4. **Mod grande** (acima de ~2.000 linhas no escopo): delegar a varredura de cada dimensão a sub-agents **read-only** em paralelo e consolidar os achados aqui (mesmo padrão do `/prepare-mod-for-publish` fase 2).
 
 ---
 

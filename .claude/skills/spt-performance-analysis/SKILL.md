@@ -75,7 +75,7 @@ Cada mecanismo tem um código usado nos achados `AUD-NN-MM` do relatório de aud
 
 ### ENT — trabalho multiplicado por entidades
 - **Sintoma:** loop sobre a lista de players/bots/objetos do mundo em superfície frequente; operação global executada por entidade em vez de 1× compartilhada; padrão O(N²) ("para cada bot, olhar todos os outros"); processamento de entidades irrelevantes (mortas, distantes, fora do interesse do mod).
-- **Grep:** `foreach|for \(` cruzado com `AllAlivePlayers|RegisteredPlayers|Players|Bots|allObservedPlayers|GetComponentsInChildren|FindObjectsOfType` — confirmar no decompile o nome real da coleção usada.
+- **Grep:** `foreach|for \(` cruzado com `AllAlivePlayersList|RegisteredPlayers|Players|Bots|GetComponentsInChildren|FindObjectsOfType` (membros confirmados: `GameWorld.RegisteredPlayers` e `GameWorld.AllAlivePlayersList` — `EFT/GameWorld.cs:546`/`:556`) — confirmar no decompile o nome real da coleção que o mod usa.
 - **Pergunta-chave:** dá para filtrar antes de iterar (só vivos, só no raio, só os N relevantes), cachear o subconjunto e atualizá-lo por evento (spawn/morte), ou inverter o loop (1 varredura global compartilhada em vez de 1 por entidade)?
 
 ### LIFE — ciclo de vida de execução (trabalho zumbi ou duplicado)
@@ -101,7 +101,7 @@ Cada mecanismo tem um código usado nos achados `AUD-NN-MM` do relatório de aud
 - **Fix típico:** nível certo (`LogDebug` gated por config — `spt-mod-best-practices` §6), checar o gate **antes** de montar a string, rate-limit/agregação, logar só na mudança de estado.
 
 ### IO — I/O, serialização e trabalho externo em superfície frequente
-- **Sintoma:** leitura/escrita de arquivo, `JsonConvert`/serialização, reflection não cacheada (`csharp-mod-best-practices` §3), chamada HTTP/rede, releitura de config em hot path; no server: query/reconstrução repetida do que é imutável (ver `reference_spt_localedb_per_call_cost` — caso real: `GetLocaleDb()` re-materializava um dict a cada chamada, 3.8s→40ms com cache).
+- **Sintoma:** leitura/escrita de arquivo, `JsonConvert`/serialização, reflection não cacheada (`csharp-mod-best-practices` §3), chamada HTTP/rede, releitura de config em hot path; no server: query/reconstrução repetida do que é imutável — caso real neste repo: `LocaleService.GetLocaleDb()` re-materializava o dict de locales a cada chamada; cachear cortou a troca de classe do CustomClasses de ~3.8s para ~40ms (rastro do serviço em `mods/CustomClasses/backlog/022-catalog-e-custo/022-catalog-e-custo-05-asbuild.md`).
 - **Grep:** `File\.|Directory\.|StreamReader|StreamWriter|JsonConvert|JObject|Deserialize|Serialize|GetMethod\(|GetField\(|GetProperty\(|AccessTools\.` em superfícies frequentes · `HttpClient|WebRequest|UnityWebRequest` fora de fluxo one-shot.
 
 ### CFG — configuração agressiva (a alavanca sem código)

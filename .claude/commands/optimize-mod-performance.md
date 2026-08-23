@@ -14,7 +14,7 @@ Pipeline de **engenharia de performance** sobre um mod: investigação → plano
 
 - `<mod>` — nome da pasta em `mods/` (ex.: `TRL-DynamicSpawn`). Validar que existe; senão, listar os mods e parar.
 - `--fase N` — força a fase (1–4). Sem a flag, **detectar onde o processo está**:
-  - sem `relatorio-auditoria-codigo-*.md` com achados de performance pendentes → **Fase 1**;
+  - sem relatório de performance com achados pendentes → **Fase 1**. Relatório de performance = `relatorio-auditoria-codigo-*.md` que contém a seção `## Panorama de execução` (exclusiva do modo `--perf`);
   - relatório com Decisões marcadas e sem item de backlog correspondente → **Fase 2**;
   - item de backlog `perf-*` em andamento → apontar o **próximo command do ciclo** (spec-tech-review / code-mod / code-review / compile) e parar — a Fase 3 é o ciclo, não este command;
   - build entregue sem o Plano de validação executado → **Fase 4**.
@@ -30,19 +30,19 @@ Pipeline de **engenharia de performance** sobre um mod: investigação → plano
 ### Fase 1 — Investigação (read-only) · PORTÃO: decisões humanas
 
 1. Invocar **`/audit-mod-code <mod> --perf [--scope <escopo>]`** — ele produz `mods/<mod>/docs/relatorio-auditoria-codigo-NN.md` com achados `AUD-NN-MM` classificados por severidade × **nível de evidência** (Forte / Suspeita / Melhoria preventiva), Panorama de execução, Configuração, Instrumentação proposta e Plano de validação.
-2. **Suspeitas que bloqueiam a priorização** podem ser medidas antes da Fase 2 numa mini-rodada: implementar **só a instrumentação temporária** proposta (gated por config, marcada `// PERF-INSTR AUD-NN-MM` — skill §6), compilar via `/compile-mod`, medir in-game e **anotar o resultado no achado** (promovendo para Evidência forte ou descartando). Instrumentação não é otimização — não exige item de backlog, mas exige remoção/desligamento registrado na Fase 4.
+2. **Suspeitas que bloqueiam a priorização** podem ser medidas antes da Fase 2 numa mini-rodada: implementar **só a instrumentação temporária** proposta (gated por config, marcada `// PERF-INSTR AUD-NN-MM` — skill §6), compilar via `/compile-mod`, medir in-game e **anotar o resultado no achado** (promovendo para Evidência forte ou descartando). Instrumentação não é otimização — não exige item de backlog, mas exige remoção/desligamento registrado na Fase 4. Builds de instrumentação bumpam versão **patch** via `/compile-mod` (regra do repo) — aceitável; agrupe as medições numa build única quando possível.
 3. **PARAR.** Reportar o resumo e pedir que o usuário marque a **Decisão** de cada achado no relatório. Nada de código de otimização antes disso.
 
 ### Fase 2 — Plano técnico · PORTÃO: `/review-technical-spec` sem 🔴
 
 Agrupar os achados aceitos num **único item de backlog por rodada** (não um por achado — precedente do `/prepare-mod-for-publish`):
 
-1. Criar o item via **`/add-backlog-item <mod> "perf: <resumo da rodada>"`**, interrompendo o `/create-spec` genérico — a spec funcional aqui tem perfil próprio.
-2. **`01-spec.md` no perfil de não-regressão.** A diferença para uma feature nova: o contrato funcional **é o comportamento atual**. Critérios de aceite:
+1. Criar o item **seguindo os passos 1–6 do [/add-backlog-item](add-backlog-item.md)** (título/resumo, cálculo de `NNN`, linha no `mod-backlog.md`, pasta `NNN-<slug>/`) — **sem executar o passo 7** (o `/create-spec` genérico; a spec funcional aqui tem perfil próprio, abaixo). Título começando com "perf" para o slug nascer `perf-…` — é o que a detecção de fase deste command procura.
+2. **`01-spec.md` no perfil de não-regressão** — renderizada de `.agents/templates/spec.md.tmpl` (o perfil muda o conteúdo, não o esqueleto). A diferença para uma feature nova: o contrato funcional **é o comportamento atual**. Critérios de aceite:
    - **Não-regressão:** lista explícita, por achado, do comportamento observável que deve permanecer idêntico (o que o jogador vê/sente não muda) — mais os critérios padrão do repo (Fika/coop, estado entre raids).
    - **Metas medíveis:** por achado, a métrica e o alvo (ex.: "chamadas/s de X caem de ~N para ≤M", "custo zera após despawn", "tamanho da coleção estável entre ondas") — vêm do Plano de validação do relatório.
    - **Exceção declarada:** achado aceito que propõe mudança **perceptível** (ajuste de feature, default de config que muda a experiência) entra como AC de mudança explícito, com o trade-off descrito — nunca como efeito colateral silencioso.
-3. **`02-spec-tech.md` = o plano de otimização.** Para cada achado aceito, referenciando o `AUD-NN-MM`: problema · evidência (`arquivo.cs:linha` + eixos de custo) · mecanismo provável de impacto · solução proposta · risco · impacto esperado · como validar · risco de regressão funcional. Ordem de preferência de solução (conceitual, não obrigatória): **corrigir lifecycle → eliminar trabalho desnecessário → configuração → cache/reutilização → reduzir frequência → event-driven → refatoração grande** (a última só quando as anteriores não bastam).
+3. **`02-spec-tech.md` = o plano de otimização** — renderizada de `.agents/templates/technical-spec.md.tmpl`, com a §9 de conformidade preenchida como em qualquer item (o `/review-technical-spec` valida essa estrutura). Para cada achado aceito, referenciando o `AUD-NN-MM`: problema · evidência (`arquivo.cs:linha` + eixos de custo) · mecanismo provável de impacto · solução proposta · risco · impacto esperado · como validar · risco de regressão funcional. Ordem de preferência de solução (conceitual, não obrigatória): **corrigir lifecycle → eliminar trabalho desnecessário → configuração → cache/reutilização → reduzir frequência → event-driven → refatoração grande** (a última só quando as anteriores não bastam).
 4. Rodar **`/review-technical-spec`** até zerar 🔴 — **este é o checkpoint de aprovação do plano.** Achado que a review derrubar volta anotado no relatório de auditoria (sem apagar o original).
 
 ### Fase 3 — Implementação (o ciclo normal, sem atalho)
@@ -67,7 +67,7 @@ Agrupar os achados aceitos num **único item de backlog por rodada** (não um po
 
 ```text
 ✓ /optimize-mod-performance <mod> — Fase N concluída
-  Fase 1: relatório NN · achados: 🔴 N · 🟠 N · 🟡 N · 💡 N (Forte: N · Suspeita: N · Preventiva: N)
+  Fase 1: relatório NN · achados: 🔴 N · 🟠 N · 🟡 N · 🔵 N · 💡 N (Forte: N · Suspeita: N · Preventiva: N)
           → marque as Decisões no relatório e rode /optimize-mod-performance <mod> --fase 2
   Fase 2: item NNN-perf-<slug> criado · plano com N achados · review técnica: [pendente/zerada]
           → próximo: /review-technical-spec (até zerar 🔴), depois /code-mod
