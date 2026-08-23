@@ -1,0 +1,788 @@
+﻿@page "/progressivebotsystem/scav"
+@using ProgressiveBotSystem.Web.Components
+@layout MainLayout
+
+<MudMainContent>
+    <MudContainer Class="mb-20">
+        <MudExpansionPanels MultiExpansion="true">
+            <MudExpansionPanel Class="mud-expansion-panels-borders ma-3 pa-5" Text="Scav Specific Configuration" Expanded="true">
+                <MudGrid>
+
+                    <MudSwitchTTWarning
+                        Label="Scav Bot Generation"
+                        TooltipText="Grants APBS control over Scav Bots. You will have vanilla versions of these bots if disabled."
+                        WarningTooltip1="All settings on this page, and any other setting that may impact these bots are controlled by this toggle."
+                        WarningTooltip2="EXCEPTION: Normalize Health is always applied if enabled but not excluded."
+                        @bind-Value="ScavEnabled"
+                        HasPendingChanges="@(MainLayout.pendingChanges.Contains("ScavEnabled"))"
+                        IsNonDefault="@(!ScavEnabled)"
+                        OnUndo="UndoScavBots"
+                        OnDefault="DefaultScavBots" />
+
+                </MudGrid>
+            </MudExpansionPanel>
+            @if (ScavEnabled)
+            {
+                <MudExpansionPanel Class="mud-expansion-panels-borders ma-3 pa-5" Style="padding-bottom:25px" Text="Scav Specific Options" Expanded="true">
+                    <MudGrid>
+
+                        <MudSwitchTT
+                            Label="Loot"
+                            TooltipText="Allows Scav Bots to spawn with additional loot."
+                            @bind-Value="ScavLootEnabled"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("ScavLootEnabled") ||
+                                                MainLayout.pendingChanges.Contains("ScavLootBlacklist"))"
+                            IsNonDefault="@(!ScavLootEnabled || 
+                                            ScavLootBlacklist.Count > 0)"
+                            OnUndo="UndoLoot"
+                            OnDefault="DefaultLoot" />
+
+                        <LootBlacklistValues
+                            Blacklist="ScavLootBlacklist"
+                            OriginalBlacklist="ModConfig.OriginalConfig.ScavBots.LootConfig.Blacklist"
+                            ChangeKey="ScavLootBlacklist" />
+
+                        <MudDivider DividerType="DividerType.FullWidth" Class="my-3" />
+
+                        <MudSwitchTT
+                            Label="Roll Ammunition Selection Again"
+                            TooltipText="Allows Scavs to reroll their selected round from their weapons caliber, max one time per each magazine."
+                            @bind-Value="ScavWeaponAmmunitionRollEnabled"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("ScavWeaponAmmunitionRollEnabled") ||
+                                                MainLayout.pendingChanges.Contains("ScavWeaponAmmunitionRollChance"))"
+                            IsNonDefault="@(!ScavWeaponAmmunitionRollEnabled || 
+                                            ScavWeaponAmmunitionRollChance != 50)"
+                            OnUndo="UndoRollAmmunitionEnabled"
+                            OnDefault="DefaultRollAmmunitionEnabled" />
+
+                        <MudSliderChildTT
+                            Label="Roll Again Chance"
+                            TooltipText="This is the chance that Scavs will roll for a different round from the same caliber, max one time per each magazine."
+                            @bind-Value="ScavWeaponAmmunitionRollChance"
+                            Min="1"
+                            Max="100"
+                            Disabled="@(!ScavWeaponAmmunitionRollEnabled)" />
+
+                        <MudSwitchTT
+                            Label="Toploading"
+                            TooltipText="Allows Scavs to top load their extra magazines."
+                            @bind-Value="ScavWeaponToploadEnabled"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("ScavWeaponToploadEnabled") ||
+                                                MainLayout.pendingChanges.Contains("ScavWeaponToploadChance") ||
+                                                MainLayout.pendingChanges.Contains("ScavWeaponToploadPercent"))"
+                            IsNonDefault="@(ScavWeaponToploadEnabled ||
+                                            ScavWeaponToploadChance != 30 ||
+                                            ScavWeaponToploadPercent != 30)"
+                            OnUndo="UndoToploadEnabled"
+                            OnDefault="DefaultToploadEnabled" />
+
+                        <MudSliderChildTT
+                            Label="Topload Chance"
+                            TooltipText="This is the chance that Scavs will topload their extra magazines."
+                            @bind-Value="ScavWeaponToploadChance"
+                            Min="1"
+                            Max="100"
+                            Disabled="@(!ScavWeaponToploadEnabled)" />
+
+                        <MudSliderChildTT
+                            Label="Topload Percent"
+                            TooltipText="This is the percentage of their extra magazine that Scavs will topload."
+                            @bind-Value="ScavWeaponToploadPercent"
+                            Min="10"
+                            Max="50"
+                            Disabled="@(!ScavWeaponToploadEnabled)" />
+
+                        <MudSwitchTT
+                            Label="Skip Backplate When Missing Front Plate"
+                            TooltipText="Will skip backplates when the front plate is missing, if they had one it would be in the front right?"
+                            @bind-Value="SkipBackPlateIfMissingFrontPlate"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("SkipBackPlateIfMissingFrontPlate"))"
+                            IsNonDefault="@(SkipBackPlateIfMissingFrontPlate)"
+                            OnUndo="UndoSkipBackPlateIfMissingFrontPlate"
+                            OnDefault="DefaultSkipBackPlateIfMissingFrontPlate" />
+
+                        <MudSwitchTT
+                            Label="Limit Plate Class to Front Plate"
+                            TooltipText="Tries to limit the plate class of all plates to the class of the front plate, if possible."
+                            @bind-Value="LimitPlateClassToFrontPlateClass"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("LimitPlateClassToFrontPlateClass"))"
+                            IsNonDefault="@(LimitPlateClassToFrontPlateClass)"
+                            OnUndo="UndoLimitPlateClassToFrontPlateClass"
+                            OnDefault="DefaultLimitPlateClassToFrontPlateClass" />
+
+                        <MudSwitchTT
+                            Label="Resource Randomization"
+                            TooltipText="Allows random resource consumption on Food/Drink/Medical Items."
+                            @bind-Value="ScavResourceRandomizationEnabled"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("ScavResourceRandomizationEnabled") ||
+                                                MainLayout.pendingChanges.Contains("ScavMedRateMaxChance") ||
+                                                MainLayout.pendingChanges.Contains("ScavMedRateUsagePercent") ||
+                                                MainLayout.pendingChanges.Contains("ScavFoodRateMaxChance") ||
+                                                MainLayout.pendingChanges.Contains("ScavFoodRateUsagePercent"))"
+                            IsNonDefault="@(!ScavResourceRandomizationEnabled ||
+                                            ScavMedRateMaxChance != 10 ||
+                                            ScavMedRateUsagePercent != 10 ||
+                                            ScavFoodRateMaxChance != 10 ||
+                                            ScavFoodRateUsagePercent != 10)"
+                            OnUndo="UndoResourceRandomization"
+                            OnDefault="DefaultResourceRandomization" />
+
+                        <MedicalFoodValues
+                            @bind-MedMaxChance="ScavMedRateMaxChance"
+                            @bind-MedUsagePercent="ScavMedRateUsagePercent"
+                            @bind-FoodMaxChance="ScavFoodRateMaxChance"
+                            @bind-FoodUsagePercent="ScavFoodRateUsagePercent"
+                            Disabled="@(!ScavResourceRandomizationEnabled)" />
+
+                        <MudSwitchTT
+                            Label="Weapon Durability Changes"
+                            TooltipText="Allows configurable weapon durability."
+                            @bind-Value="ScavWeaponDurabilityEnabled"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("ScavWeaponDurabilityEnabled") ||
+                                               MainLayout.pendingChanges.Contains("ScavWeaponDurabilityMin") ||
+                                               MainLayout.pendingChanges.Contains("ScavWeaponDurabilityMax") ||
+                                               MainLayout.pendingChanges.Contains("ScavWeaponDurabilityMinDelta") ||
+                                               MainLayout.pendingChanges.Contains("ScavWeaponDurabilityMaxDelta") ||
+                                               MainLayout.pendingChanges.Contains("ScavWeaponDurabilityEnhancementChance"))"
+                            IsNonDefault="@(!ScavWeaponDurabilityEnabled ||
+                                          ScavWeaponDurabilityMin != 70 ||
+                                          ScavWeaponDurabilityMax != 90 ||
+                                          ScavWeaponDurabilityMinDelta != 5 ||
+                                          ScavWeaponDurabilityMaxDelta != 20 ||
+                                          ScavWeaponDurabilityEnhancementChance != 1)"
+                            OnUndo="UndoWeaponDurability"
+                            OnDefault="DefaultWeaponDurability" />
+
+                        <DurabilityValues
+                            Label="Weapon"
+                            @bind-Min="ScavWeaponDurabilityMin"
+                            @bind-Max="ScavWeaponDurabilityMax"
+                            @bind-MinDelta="ScavWeaponDurabilityMinDelta"
+                            @bind-MaxDelta="ScavWeaponDurabilityMaxDelta"
+                            MinLimitPercent="ScavWeaponDurabilityMinLimitPercent"
+                            MaxLimitPercent="ScavWeaponDurabilityMaxLimitPercent"
+                            Disabled="@(!ScavWeaponDurabilityEnabled)" />
+
+                        <MudSliderChildTT
+                            Label="Enhancement Chance"
+                            TooltipText="This is the chance that bot weapons have an enhancement applied to them."
+                            @bind-Value="ScavWeaponDurabilityEnhancementChance"
+                            Min="0"
+                            Max="100"
+                            Disabled="@(!ScavWeaponDurabilityEnabled)" />
+
+                        <MudSwitchTT
+                            Label="Armour Durability Changes"
+                            TooltipText="Allows configurable armour durability."
+                            @bind-Value="ScavArmourDurabilityEnabled"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("ScavArmourDurabilityEnabled") ||
+                                               MainLayout.pendingChanges.Contains("ScavArmourDurabilityMin") ||
+                                               MainLayout.pendingChanges.Contains("ScavArmourDurabilityMax") ||
+                                               MainLayout.pendingChanges.Contains("ScavArmourDurabilityMinDelta") ||
+                                               MainLayout.pendingChanges.Contains("ScavArmourDurabilityMaxDelta"))"
+                            IsNonDefault="@(!ScavArmourDurabilityEnabled ||
+                                          ScavArmourDurabilityMin != 70 ||
+                                          ScavArmourDurabilityMax != 90 ||
+                                          ScavArmourDurabilityMinDelta != 5 ||
+                                          ScavArmourDurabilityMaxDelta != 20)"
+                            OnUndo="UndoArmourDurability"
+                            OnDefault="DefaultArmourDurability" />
+
+                        <DurabilityValues
+                            Label="Armour"
+                            @bind-Min="ScavArmourDurabilityMin"
+                            @bind-Max="ScavArmourDurabilityMax"
+                            @bind-MinDelta="ScavArmourDurabilityMinDelta"
+                            @bind-MaxDelta="ScavArmourDurabilityMaxDelta"
+                            MinLimitPercent="ScavArmourDurabilityMinLimitPercent"
+                            MaxLimitPercent="ScavArmourDurabilityMaxLimitPercent"
+                            Disabled="@(!ScavArmourDurabilityEnabled)" />
+
+                        <MudSwitchTT
+                            Label="Add All Keys"
+                            TooltipText="Adds all keys to existing scav loot pool."
+                            Value="@ScavAddAllKeys"
+                            ValueChanged="@((v) => ScavAddAllKeys = v)"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("ScavAddAllKeys"))"
+                            IsNonDefault="@(ScavAddAllKeys)"
+                            OnUndo="UndoScavAllKeys"
+                            OnDefault="DefaultScavAllKeys" />
+
+                        <MudSwitchTT
+                            Label="Add Only Mechanical Keys"
+                            TooltipText="Adds all mechanical keys to existing scav loot pool."
+                            Value="@ScavAddMechanicalKeys"
+                            ValueChanged="@((v) => ScavAddMechanicalKeys = v)"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("ScavAddMechanicalKeys"))"
+                            IsNonDefault="@(ScavAddMechanicalKeys)"
+                            OnUndo="UndoScavMechanicalKeys"
+                            OnDefault="DefaultScavMechanicalKeys" />
+
+                        <MudSwitchTT
+                            Label="Add Only Keycards"
+                            TooltipText="Adds all keycards to existing scav loot pool."
+                            Value="@ScavAddKeycards"
+                            ValueChanged="@((v) => ScavAddKeycards = v)"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("ScavAddKeycards"))"
+                            IsNonDefault="@(ScavAddKeycards)"
+                            OnUndo="UndoScavKeyCards"
+                            OnDefault="DefaultScavKeyCards" />
+
+                        <MudSliderDoubleTT
+                            Label="Key Probability"
+                            TooltipText="Chance of key being picked for backpack loot (rolled once per item rolled to be added). 0.5 = roughly 50%"
+                            @bind-Value="ScavKeyProbability"
+                            Min="0.01"
+                            Max="0.5"
+                            Disabled="@(!ScavAddKeycards && !ScavAddMechanicalKeys && !ScavAddAllKeys)" 
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("ScavKeyProbability"))"
+                            IsNonDefault="@(Math.Abs(ScavKeyProbability - 0.15) > 0.0001)"
+                            OnUndo="UndoScavKeyProbability"
+                            OnDefault="DefaultScavKeyProbability" />
+
+                        <MudSwitchTT
+                            Label="Scav Attachment Tiering"
+                            TooltipText="Allows Scavs to use tiered attachments."
+                            @bind-Value="ScavAttachmentTieringEnabled"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("ScavAttachmentTieringEnabled"))"
+                            IsNonDefault="@(ScavAttachmentTieringEnabled)"
+                            OnUndo="UndoScavAttachmentTiering"
+                            OnDefault="DefaultScavAttachmentTiering" />
+
+                        <MudSwitchTT
+                            Label="Normalize Equipment Chance"
+                            TooltipText="Makes all equipment in the generated Scav's Tier equal chance of being selected."
+                            @bind-Value="ScavEqualEquipmentWeightsEnabled"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("ScavEqualEquipmentWeightsEnabled"))"
+                            IsNonDefault="@(ScavEqualEquipmentWeightsEnabled)"
+                            OnUndo="UndoScavEquipmentTiering"
+                            OnDefault="DefaultScavEquipmentTiering" />
+
+                    </MudGrid>
+                </MudExpansionPanel>
+
+                <MudExpansionPanel Class="mud-expansion-panels-borders ma-3 pa-5" Style="padding-bottom:25px" Text="Scav Plate Class Selection" Expanded="true">
+                    <MudGrid>
+                        @foreach (var tier in new[] {
+                            ("Tier 1 (Lv1-10)",  "Scav_PlateClass_Tier1", ModConfig.Config.GeneralConfig.PlateClasses.Scav.Tier1, ModConfig.OriginalConfig.GeneralConfig.PlateClasses.Scav.Tier1),
+                            ("Tier 2 (Lv11-20)", "Scav_PlateClass_Tier2", ModConfig.Config.GeneralConfig.PlateClasses.Scav.Tier2, ModConfig.OriginalConfig.GeneralConfig.PlateClasses.Scav.Tier2),
+                            ("Tier 3 (Lv21-30)", "Scav_PlateClass_Tier3", ModConfig.Config.GeneralConfig.PlateClasses.Scav.Tier3, ModConfig.OriginalConfig.GeneralConfig.PlateClasses.Scav.Tier3),
+                            ("Tier 4 (Lv31-40)", "Scav_PlateClass_Tier4", ModConfig.Config.GeneralConfig.PlateClasses.Scav.Tier4, ModConfig.OriginalConfig.GeneralConfig.PlateClasses.Scav.Tier4),
+                            ("Tier 5 (Lv41-50)", "Scav_PlateClass_Tier5", ModConfig.Config.GeneralConfig.PlateClasses.Scav.Tier5, ModConfig.OriginalConfig.GeneralConfig.PlateClasses.Scav.Tier5),
+                            ("Tier 6 (Lv51-60)", "Scav_PlateClass_Tier6", ModConfig.Config.GeneralConfig.PlateClasses.Scav.Tier6, ModConfig.OriginalConfig.GeneralConfig.PlateClasses.Scav.Tier6),
+                            ("Tier 7 (Lv61-79)", "Scav_PlateClass_Tier7", ModConfig.Config.GeneralConfig.PlateClasses.Scav.Tier7, ModConfig.OriginalConfig.GeneralConfig.PlateClasses.Scav.Tier7),
+                        })
+                        {
+                            var tierTooltip = $"Adjust the plate class levels for {tier.Item1}. If a plate is selected that cannot fit in the armour, APBS will upgrade the plate level by 1 until it is valid.";
+                            var scavDefaults = new Dictionary<string, double> { {"2",0}, {"3",85}, {"4",9}, {"5",5}, {"6",1} };
+
+                            <PlateClassTier
+                                TierLabel="@tier.Item1"
+                                TooltipText="@tierTooltip"
+                                ChangeKeyPrefix="@tier.Item2"
+                                FrontValues="@ToDict(tier.Item3["front_plate"])"
+                                BackValues="@ToDict(tier.Item3["back_plate"])"
+                                LeftValues="@ToDict(tier.Item3["left_side_plate"])"
+                                RightValues="@ToDict(tier.Item3["right_side_plate"])"
+                                Defaults="@scavDefaults"
+                                ValuesChanged="@((e) => HandlePlateChanged(tier.Item2, tier.Item3, tier.Item4, e))"
+                                OnUndo="@((pos) => HandlePlateUndo(tier.Item2, tier.Item3, tier.Item4, pos))"
+                                OnDefault="@((pos) => HandlePlateDefault(tier.Item2, tier.Item3, pos, scavDefaults))" />
+                        }
+                    </MudGrid>
+                </MudExpansionPanel>
+
+                <MudExpansionPanel Class="mud-expansion-panels-borders ma-3 pa-5" Style="padding-bottom:25px" Text="Nothing to see here..." Expanded="false">
+                    <MudGrid>
+
+                        <MudSwitchTT
+                            Label="Jackpot Rouble Stack"
+                            TooltipText="Gives Scavs a 0.5% chance to have a 1m (or max stack size if lower) stack of roubles."
+                            @bind-Value="ScavSecretJackpotRoublesEnabled"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("ScavSecretJackpotRoublesEnabled"))"
+                            IsNonDefault="@(!ScavSecretJackpotRoublesEnabled)"
+                            OnUndo="UndoScavSecretJackpotRoubles"
+                            OnDefault="DefaultScavSecretJackpotRoubles" />
+
+                    </MudGrid>
+                </MudExpansionPanel>
+            }
+        </MudExpansionPanels>
+    </MudContainer>
+</MudMainContent>
+
+@code {
+    #region ENABLE / DISABLE
+    private bool ScavEnabled
+    {
+        get => ModConfig.Config.ScavBots.Enable;
+        set
+        {
+            ModConfig.Config.ScavBots.Enable = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.ScavBots.Enable, nameof(ScavEnabled));
+        }
+    }
+    private void UndoScavBots() => ScavEnabled = ModConfig.OriginalConfig.ScavBots.Enable;
+    private void DefaultScavBots() => ScavEnabled = true;
+    #endregion
+    #region LOOT
+    private bool ScavLootEnabled
+    {
+        get => ModConfig.Config.ScavBots.LootConfig.Enable;
+        set
+        {
+            ModConfig.Config.ScavBots.LootConfig.Enable = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.ScavBots.LootConfig.Enable, nameof(ScavLootEnabled));
+        }
+    }
+    private List<string> ScavLootBlacklist => ModConfig.Config.ScavBots.LootConfig.Blacklist;
+    private void UndoLoot()
+    {
+        ScavLootEnabled = ModConfig.OriginalConfig.ScavBots.LootConfig.Enable;
+        ScavLootBlacklist.Clear();
+        foreach (var item in ModConfig.OriginalConfig.ScavBots.LootConfig.Blacklist)
+            ScavLootBlacklist.Add(item);
+        MainLayout.pendingChanges.Remove("ScavLootEnabled");
+        MainLayout.pendingChanges.Remove("ScavLootBlacklist");
+    }
+    private void DefaultLoot()
+    {
+        ScavLootEnabled = true;
+        ScavLootBlacklist.Clear();
+        MainLayout.pendingChanges.Add("ScavLootEnabled");
+        MainLayout.pendingChanges.Add("ScavLootBlacklist");
+    }
+    #endregion
+    #region REROLL
+    private bool ScavWeaponAmmunitionRollEnabled
+    {
+        get => ModConfig.Config.ScavBots.RerollConfig.Enable;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.ScavBots.RerollConfig.Enable, nameof(ScavWeaponAmmunitionRollEnabled));
+            ModConfig.Config.ScavBots.RerollConfig.Enable = value;
+            ModConfig.Config.ScavBots.ToploadConfig.Enable = !value;
+        }
+    }
+    private int ScavWeaponAmmunitionRollChance
+    {
+        get => ModConfig.Config.ScavBots.RerollConfig.Chance;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.ScavBots.RerollConfig.Chance, nameof(ScavWeaponAmmunitionRollChance));
+            ModConfig.Config.ScavBots.RerollConfig.Chance = value;
+        }
+    }
+    private void UndoRollAmmunitionEnabled()
+    {
+        ScavWeaponAmmunitionRollEnabled = ModConfig.OriginalConfig.ScavBots.RerollConfig.Enable;
+        ScavWeaponAmmunitionRollChance = ModConfig.OriginalConfig.ScavBots.RerollConfig.Chance;
+        ScavWeaponToploadEnabled = ModConfig.OriginalConfig.ScavBots.ToploadConfig.Enable;
+        ScavWeaponToploadChance = ModConfig.OriginalConfig.ScavBots.ToploadConfig.Chance;
+        ScavWeaponToploadPercent = ModConfig.OriginalConfig.ScavBots.ToploadConfig.Percent;
+    }
+    private void DefaultRollAmmunitionEnabled()
+    {
+        ScavWeaponAmmunitionRollEnabled = true;
+        ScavWeaponAmmunitionRollChance = 50;
+        ScavWeaponToploadEnabled = false;
+        ScavWeaponToploadChance = 30;
+        ScavWeaponToploadPercent = 30;
+    }
+    #endregion
+    #region TOPLOAD
+    private bool ScavWeaponToploadEnabled
+    {
+        get => ModConfig.Config.ScavBots.ToploadConfig.Enable;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.ScavBots.ToploadConfig.Enable, nameof(ScavWeaponToploadEnabled));
+            ModConfig.Config.ScavBots.ToploadConfig.Enable = value;
+            ModConfig.Config.ScavBots.RerollConfig.Enable = !value;
+        }
+    }
+    private int ScavWeaponToploadChance
+    {
+        get => ModConfig.Config.ScavBots.ToploadConfig.Chance;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.ScavBots.ToploadConfig.Chance, nameof(ScavWeaponToploadChance));
+            ModConfig.Config.ScavBots.ToploadConfig.Chance = value;
+        }
+    }
+    private int ScavWeaponToploadPercent
+    {
+        get => ModConfig.Config.ScavBots.ToploadConfig.Percent;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.ScavBots.ToploadConfig.Percent, nameof(ScavWeaponToploadPercent));
+            ModConfig.Config.ScavBots.ToploadConfig.Percent = value;
+        }
+    }
+    private void UndoToploadEnabled()
+    {
+        ScavWeaponAmmunitionRollEnabled = ModConfig.OriginalConfig.ScavBots.RerollConfig.Enable;
+        ScavWeaponAmmunitionRollChance = ModConfig.OriginalConfig.ScavBots.RerollConfig.Chance;
+        ScavWeaponToploadEnabled = ModConfig.OriginalConfig.ScavBots.ToploadConfig.Enable;
+        ScavWeaponToploadChance = ModConfig.OriginalConfig.ScavBots.ToploadConfig.Chance;
+        ScavWeaponToploadPercent = ModConfig.OriginalConfig.ScavBots.ToploadConfig.Percent;
+    }
+    private void DefaultToploadEnabled()
+    {
+        ScavWeaponAmmunitionRollEnabled = true;
+        ScavWeaponAmmunitionRollChance = 50;
+        ScavWeaponToploadEnabled = false;
+        ScavWeaponToploadChance = 30;
+        ScavWeaponToploadPercent = 30;
+    }
+    #endregion
+    #region PLATE CLASS SELECTION LIMITER
+    private bool SkipBackPlateIfMissingFrontPlate
+    {
+        get => ModConfig.Config.ScavBots.SkipBackPlateIfMissingFrontPlate;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.ScavBots.SkipBackPlateIfMissingFrontPlate, nameof(SkipBackPlateIfMissingFrontPlate));
+            ModConfig.Config.ScavBots.SkipBackPlateIfMissingFrontPlate = value;
+        }
+    }
+    private void UndoSkipBackPlateIfMissingFrontPlate() => SkipBackPlateIfMissingFrontPlate = ModConfig.OriginalConfig.ScavBots.SkipBackPlateIfMissingFrontPlate;
+    private void DefaultSkipBackPlateIfMissingFrontPlate() => SkipBackPlateIfMissingFrontPlate = false;
+    private bool LimitPlateClassToFrontPlateClass
+    {
+        get => ModConfig.Config.ScavBots.LimitPlateClassToFrontPlateClass;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.ScavBots.LimitPlateClassToFrontPlateClass, nameof(LimitPlateClassToFrontPlateClass));
+            ModConfig.Config.ScavBots.LimitPlateClassToFrontPlateClass = value;
+        }
+    }
+    private void UndoLimitPlateClassToFrontPlateClass() => LimitPlateClassToFrontPlateClass = ModConfig.OriginalConfig.ScavBots.LimitPlateClassToFrontPlateClass;
+    private void DefaultLimitPlateClassToFrontPlateClass() => LimitPlateClassToFrontPlateClass = false;
+    #endregion
+    #region RESOURCE RANDOMIZATION
+    private bool ScavResourceRandomizationEnabled
+    {
+        get => ModConfig.Config.ScavBots.ResourceRandomization.Enable;
+        set
+        {
+            ModConfig.Config.ScavBots.ResourceRandomization.Enable = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.ScavBots.ResourceRandomization.Enable, nameof(ScavResourceRandomizationEnabled));
+        }
+    }
+    private int ScavFoodRateMaxChance
+    {
+        get => ModConfig.Config.ScavBots.ResourceRandomization.FoodRateMaxChance;
+        set
+        {
+            ModConfig.Config.ScavBots.ResourceRandomization.FoodRateMaxChance = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.ScavBots.ResourceRandomization.FoodRateMaxChance, nameof(ScavFoodRateMaxChance));
+        }
+    }
+    private int ScavFoodRateUsagePercent
+    {
+        get => ModConfig.Config.ScavBots.ResourceRandomization.FoodRateUsagePercent;
+        set
+        {
+            ModConfig.Config.ScavBots.ResourceRandomization.FoodRateUsagePercent = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.ScavBots.ResourceRandomization.FoodRateUsagePercent, nameof(ScavFoodRateUsagePercent));
+        }
+    }
+    private int ScavMedRateMaxChance
+    {
+        get => ModConfig.Config.ScavBots.ResourceRandomization.MedRateMaxChance;
+        set
+        {
+            ModConfig.Config.ScavBots.ResourceRandomization.MedRateMaxChance = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.ScavBots.ResourceRandomization.MedRateMaxChance, nameof(ScavMedRateMaxChance));
+        }
+    }
+    private int ScavMedRateUsagePercent
+    {
+        get => ModConfig.Config.ScavBots.ResourceRandomization.MedRateUsagePercent;
+        set
+        {
+            ModConfig.Config.ScavBots.ResourceRandomization.MedRateUsagePercent = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.ScavBots.ResourceRandomization.MedRateUsagePercent, nameof(ScavMedRateUsagePercent));
+        }
+    }
+    private void UndoResourceRandomization()
+    {
+        ScavResourceRandomizationEnabled = ModConfig.OriginalConfig.ScavBots.ResourceRandomization.Enable;
+        ScavFoodRateMaxChance = ModConfig.OriginalConfig.ScavBots.ResourceRandomization.FoodRateMaxChance;
+        ScavFoodRateUsagePercent = ModConfig.OriginalConfig.ScavBots.ResourceRandomization.FoodRateUsagePercent;
+        ScavMedRateMaxChance = ModConfig.OriginalConfig.ScavBots.ResourceRandomization.MedRateMaxChance;
+        ScavMedRateUsagePercent = ModConfig.OriginalConfig.ScavBots.ResourceRandomization.MedRateUsagePercent;
+    }
+    private void DefaultResourceRandomization()
+    {
+        ScavResourceRandomizationEnabled = true;
+        ScavFoodRateMaxChance = 10;
+        ScavFoodRateUsagePercent = 10;
+        ScavMedRateMaxChance = 10;
+        ScavMedRateUsagePercent = 10;
+    }
+    #endregion
+    #region DURABILITY
+    private bool ScavWeaponDurabilityEnabled
+    {
+        get => ModConfig.Config.ScavBots.WeaponDurability.Enable;
+        set
+        {
+            ModConfig.Config.ScavBots.WeaponDurability.Enable = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.ScavBots.WeaponDurability.Enable, nameof(ScavWeaponDurabilityEnabled));
+        }
+    }
+    private int ScavWeaponDurabilityMin
+    {
+        get => ModConfig.Config.ScavBots.WeaponDurability.Min;
+        set
+        {
+            ModConfig.Config.ScavBots.WeaponDurability.Min = value;
+            ModConfig.Config.ScavBots.WeaponDurability.MinLimitPercent = value - ModConfig.Config.ScavBots.WeaponDurability.MaxDelta;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.ScavBots.WeaponDurability.Min, nameof(ScavWeaponDurabilityMin));
+        }
+    }
+    private int ScavWeaponDurabilityMax
+    {
+        get => ModConfig.Config.ScavBots.WeaponDurability.Max;
+        set
+        {
+            ModConfig.Config.ScavBots.WeaponDurability.Max = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.ScavBots.WeaponDurability.Max, nameof(ScavWeaponDurabilityMax));
+        }
+    }
+    private int ScavWeaponDurabilityMinDelta
+    {
+        get => ModConfig.Config.ScavBots.WeaponDurability.MinDelta;
+        set
+        {
+            ModConfig.Config.ScavBots.WeaponDurability.MinDelta = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.ScavBots.WeaponDurability.MinDelta, nameof(ScavWeaponDurabilityMinDelta));
+        }
+    }
+    private int ScavWeaponDurabilityMaxDelta
+    {
+        get => ModConfig.Config.ScavBots.WeaponDurability.MaxDelta;
+        set
+        {
+            ModConfig.Config.ScavBots.WeaponDurability.MaxDelta = value;
+            ModConfig.Config.ScavBots.WeaponDurability.MinLimitPercent = ModConfig.Config.ScavBots.WeaponDurability.Min - value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.ScavBots.WeaponDurability.MaxDelta, nameof(ScavWeaponDurabilityMaxDelta));
+        }
+    }
+    private int ScavWeaponDurabilityMinLimitPercent => ModConfig.Config.ScavBots.WeaponDurability.MinLimitPercent;
+    private int ScavWeaponDurabilityMaxLimitPercent => ModConfig.Config.ScavBots.WeaponDurability.Max - ModConfig.Config.ScavBots.WeaponDurability.MinDelta;
+    private int ScavWeaponDurabilityEnhancementChance
+    {
+        get => ModConfig.Config.ScavBots.WeaponDurability.EnhancementChance;
+        set
+        {
+            ModConfig.Config.ScavBots.WeaponDurability.EnhancementChance = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.ScavBots.WeaponDurability.EnhancementChance, nameof(ScavWeaponDurabilityEnhancementChance));
+        }
+    }
+    private void UndoWeaponDurability()
+    {
+        ScavWeaponDurabilityEnabled = ModConfig.OriginalConfig.ScavBots.WeaponDurability.Enable;
+        ScavWeaponDurabilityMin = ModConfig.OriginalConfig.ScavBots.WeaponDurability.Min;
+        ScavWeaponDurabilityMax = ModConfig.OriginalConfig.ScavBots.WeaponDurability.Max;
+        ScavWeaponDurabilityMinDelta = ModConfig.OriginalConfig.ScavBots.WeaponDurability.MinDelta;
+        ScavWeaponDurabilityMaxDelta = ModConfig.OriginalConfig.ScavBots.WeaponDurability.MaxDelta;
+        ScavWeaponDurabilityEnhancementChance = ModConfig.OriginalConfig.ScavBots.WeaponDurability.EnhancementChance;
+    }
+    private void DefaultWeaponDurability()
+    {
+        ScavWeaponDurabilityEnabled = true;
+        ScavWeaponDurabilityMin = 70;
+        ScavWeaponDurabilityMax = 90;
+        ScavWeaponDurabilityMinDelta = 5;
+        ScavWeaponDurabilityMaxDelta = 20;
+        ScavWeaponDurabilityEnhancementChance = 1;
+    }
+    private bool ScavArmourDurabilityEnabled
+    {
+        get => ModConfig.Config.ScavBots.ArmourDurability.Enable;
+        set
+        {
+            ModConfig.Config.ScavBots.ArmourDurability.Enable = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.ScavBots.ArmourDurability.Enable, nameof(ScavArmourDurabilityEnabled));
+        }
+    }
+    private int ScavArmourDurabilityMin
+    {
+        get => ModConfig.Config.ScavBots.ArmourDurability.Min;
+        set
+        {
+            ModConfig.Config.ScavBots.ArmourDurability.Min = value;
+            ModConfig.Config.ScavBots.ArmourDurability.MinLimitPercent = value - ModConfig.Config.ScavBots.ArmourDurability.MaxDelta;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.ScavBots.ArmourDurability.Min, nameof(ScavArmourDurabilityMin));
+        }
+    }
+    private int ScavArmourDurabilityMax
+    {
+        get => ModConfig.Config.ScavBots.ArmourDurability.Max;
+        set
+        {
+            ModConfig.Config.ScavBots.ArmourDurability.Max = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.ScavBots.ArmourDurability.Max, nameof(ScavArmourDurabilityMax));
+        }
+    }
+    private int ScavArmourDurabilityMinDelta
+    {
+        get => ModConfig.Config.ScavBots.ArmourDurability.MinDelta;
+        set
+        {
+            ModConfig.Config.ScavBots.ArmourDurability.MinDelta = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.ScavBots.ArmourDurability.MinDelta, nameof(ScavArmourDurabilityMinDelta));
+        }
+    }
+    private int ScavArmourDurabilityMaxDelta
+    {
+        get => ModConfig.Config.ScavBots.ArmourDurability.MaxDelta;
+        set
+        {
+            ModConfig.Config.ScavBots.ArmourDurability.MaxDelta = value;
+            ModConfig.Config.ScavBots.ArmourDurability.MinLimitPercent = ModConfig.Config.ScavBots.ArmourDurability.Min - value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.ScavBots.ArmourDurability.MaxDelta, nameof(ScavArmourDurabilityMaxDelta));
+        }
+    }
+    private int ScavArmourDurabilityMinLimitPercent => ModConfig.Config.ScavBots.ArmourDurability.MinLimitPercent;
+    private int ScavArmourDurabilityMaxLimitPercent => ModConfig.Config.ScavBots.ArmourDurability.Max - ModConfig.Config.ScavBots.ArmourDurability.MinDelta;
+    private void UndoArmourDurability()
+    {
+        ScavArmourDurabilityEnabled = ModConfig.OriginalConfig.ScavBots.ArmourDurability.Enable;
+        ScavArmourDurabilityMin = ModConfig.OriginalConfig.ScavBots.ArmourDurability.Min;
+        ScavArmourDurabilityMax = ModConfig.OriginalConfig.ScavBots.ArmourDurability.Max;
+        ScavArmourDurabilityMinDelta = ModConfig.OriginalConfig.ScavBots.ArmourDurability.MinDelta;
+        ScavArmourDurabilityMaxDelta = ModConfig.OriginalConfig.ScavBots.ArmourDurability.MaxDelta;
+    }
+    private void DefaultArmourDurability()
+    {
+        ScavArmourDurabilityEnabled = true;
+        ScavArmourDurabilityMin = 70;
+        ScavArmourDurabilityMax = 90;
+        ScavArmourDurabilityMinDelta = 5;
+        ScavArmourDurabilityMaxDelta = 20;
+    }
+    #endregion
+    #region KEYS
+    private bool ScavAddAllKeys
+    {
+        get => ModConfig.Config.ScavBots.KeyConfig.AddAllKeysToScavs;
+        set
+        {
+            ModConfig.Config.ScavBots.KeyConfig.AddAllKeysToScavs = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.ScavBots.KeyConfig.AddAllKeysToScavs, nameof(ScavAddAllKeys));
+        }
+    }
+    private void UndoScavAllKeys() => ScavAddAllKeys = ModConfig.OriginalConfig.ScavBots.KeyConfig.AddAllKeysToScavs;
+    private void DefaultScavAllKeys() => ScavAddAllKeys = false;
+
+    private bool ScavAddMechanicalKeys
+    {
+        get => ModConfig.Config.ScavBots.KeyConfig.AddOnlyMechanicalKeysToScavs;
+        set
+        {
+            ModConfig.Config.ScavBots.KeyConfig.AddOnlyMechanicalKeysToScavs = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.ScavBots.KeyConfig.AddOnlyMechanicalKeysToScavs, nameof(ScavAddMechanicalKeys));
+        }
+    }
+    private void UndoScavMechanicalKeys() => ScavAddMechanicalKeys = ModConfig.OriginalConfig.ScavBots.KeyConfig.AddOnlyMechanicalKeysToScavs;
+    private void DefaultScavMechanicalKeys() => ScavAddMechanicalKeys = false;
+
+    private bool ScavAddKeycards
+    {
+        get => ModConfig.Config.ScavBots.KeyConfig.AddOnlyKeyCardsToScavs;
+        set
+        {
+            ModConfig.Config.ScavBots.KeyConfig.AddOnlyKeyCardsToScavs = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.ScavBots.KeyConfig.AddOnlyKeyCardsToScavs, nameof(ScavAddKeycards));
+        }
+    }
+    private void UndoScavKeyCards() => ScavAddKeycards = ModConfig.OriginalConfig.ScavBots.KeyConfig.AddOnlyKeyCardsToScavs;
+    private void DefaultScavKeyCards() => ScavAddKeycards = false;
+
+    private double ScavKeyProbability
+    {
+        get => ModConfig.Config.ScavBots.KeyConfig.KeyProbability;
+        set
+        {
+            ModConfig.Config.ScavBots.KeyConfig.KeyProbability = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.ScavBots.KeyConfig.KeyProbability, nameof(ScavKeyProbability));
+        }
+    }
+    private void UndoScavKeyProbability() => ScavKeyProbability = ModConfig.OriginalConfig.ScavBots.KeyConfig.KeyProbability;
+    private void DefaultScavKeyProbability() => ScavKeyProbability = 0.15;
+    #endregion
+    #region OTHER
+    private bool ScavAttachmentTieringEnabled
+    {
+        get => ModConfig.Config.ScavBots.AdditionalOptions.EnableScavAttachmentTiering;
+        set
+        {
+            ModConfig.Config.ScavBots.AdditionalOptions.EnableScavAttachmentTiering = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.ScavBots.AdditionalOptions.EnableScavAttachmentTiering, nameof(ScavAttachmentTieringEnabled));
+        }
+    }
+    private void UndoScavAttachmentTiering() => ScavAttachmentTieringEnabled = ModConfig.OriginalConfig.ScavBots.AdditionalOptions.EnableScavAttachmentTiering;
+    private void DefaultScavAttachmentTiering() => ScavAttachmentTieringEnabled = false;
+
+    private bool ScavEqualEquipmentWeightsEnabled
+    {
+        get => ModConfig.Config.ScavBots.AdditionalOptions.EnableScavEqualEquipmentTiering;
+        set
+        {
+            ModConfig.Config.ScavBots.AdditionalOptions.EnableScavEqualEquipmentTiering = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.ScavBots.AdditionalOptions.EnableScavEqualEquipmentTiering, nameof(ScavEqualEquipmentWeightsEnabled));
+        }
+    }
+    private void UndoScavEquipmentTiering() => ScavEqualEquipmentWeightsEnabled = ModConfig.OriginalConfig.ScavBots.AdditionalOptions.EnableScavEqualEquipmentTiering;
+    private void DefaultScavEquipmentTiering() => ScavEqualEquipmentWeightsEnabled = false;
+    #endregion
+    #region PLATE CLASSES
+    private Dictionary<string, double> ToDict(Dictionary<string, double> source) => new(source);
+
+    private void HandlePlateChanged(string keyPrefix, Dictionary<string, Dictionary<string, double>> config, Dictionary<string, Dictionary<string, double>> original, (string position, string classNum, double value) e)
+    {
+        config[e.position][e.classNum] = e.value;
+        Utils.UpdateView(e.value, original[e.position][e.classNum], $"{keyPrefix}_{e.position}_Class{e.classNum}");
+    }
+
+    private void HandlePlateUndo(string keyPrefix, Dictionary<string, Dictionary<string, double>> config, Dictionary<string, Dictionary<string, double>> original, string position)
+    {
+        foreach (var classNum in new[] { "2", "3", "4", "5", "6" })
+        {
+            config[position][classNum] = original[position][classNum];
+            MainLayout.pendingChanges.Remove($"{keyPrefix}_{position}_Class{classNum}");
+        }
+        MainLayout.TriggerUIRefresh();
+    }
+
+    private void HandlePlateDefault(string keyPrefix, Dictionary<string, Dictionary<string, double>> config, string position, Dictionary<string, double> defaults)
+    {
+        foreach (var (classNum, value) in defaults)
+        {
+            config[position][classNum] = value;
+            Utils.UpdateView(value, value, $"{keyPrefix}_{position}_Class{classNum}");
+        }
+        MainLayout.TriggerUIRefresh();
+    }
+    #endregion
+    #region SECRETS
+    private bool ScavSecretJackpotRoublesEnabled
+    {
+        get => ModConfig.Config.ScavBots.Secrets.JackpotScavRoubleStack;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.ScavBots.Secrets.JackpotScavRoubleStack, nameof(ScavSecretJackpotRoublesEnabled));
+            ModConfig.Config.ScavBots.Secrets.JackpotScavRoubleStack = value;
+        }
+    }
+    private void UndoScavSecretJackpotRoubles() => ScavSecretJackpotRoublesEnabled = ModConfig.OriginalConfig.ScavBots.Secrets.JackpotScavRoubleStack;
+    private void DefaultScavSecretJackpotRoubles() => ScavSecretJackpotRoublesEnabled = true;
+    #endregion
+    #region CASCADING PARAMETERS
+    [CascadingParameter] public MainLayout? Layout { get; set; }
+    #endregion
+}

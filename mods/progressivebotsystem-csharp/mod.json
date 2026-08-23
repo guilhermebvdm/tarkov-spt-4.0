@@ -1,0 +1,11 @@
+{
+  "name": "progressivebotsystem-csharp",
+  "upstream_url": "https://github.com/acidphantasm/progressivebotsystem-csharp",
+  "upstream_sha": "19bfaa6c8dbbc1daedbb8575ed3980d1e22faab2",
+  "upstream_branch": "tag 2.2.1",
+  "forge_url": "",
+  "license": "see LICENSE",
+  "version_base": "2.2.1 (csproj declara 2.0.0 \u2014 desatualizado no upstream)",
+  "spt_version": "4.0.13",
+  "created_at": "2026-08-23T23:29:52Z"
+}

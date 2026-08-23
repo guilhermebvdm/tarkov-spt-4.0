@@ -1,0 +1,570 @@
+﻿@page "/progressivebotsystem/special"
+@using ProgressiveBotSystem.Web.Components
+@layout MainLayout
+
+<MudMainContent>
+    <MudContainer Class="mb-20">
+        <MudExpansionPanels MultiExpansion="true">
+            <MudExpansionPanel Class="mud-expansion-panels-borders ma-3 pa-5" Text="Special Specific Configuration" Expanded="true">
+                <MudGrid>
+
+                    <MudSwitchTTWarning
+                        Label="Special Bot Generation"
+                        TooltipText="Grants APBS control over Special Bots (Raiders, Rogues, Cultists, and Bloodhounds). You will have vanilla versions of these bots if disabled."
+                        WarningTooltip1="All settings on this page, and any other setting that may impact these bots are controlled by this toggle."
+                        WarningTooltip2="EXCEPTION: Normalize Health is always applied if enabled but not excluded."
+                        @bind-Value="SpecialEnabled"
+                        HasPendingChanges="@(MainLayout.pendingChanges.Contains("SpecialEnabled"))"
+                        IsNonDefault="@(!SpecialEnabled)"
+                        OnUndo="UndoSpecialBots"
+                        OnDefault="DefaultSpecialBots" />
+
+                </MudGrid>
+            </MudExpansionPanel>
+            @if (SpecialEnabled)
+            {
+                <MudExpansionPanel Class="mud-expansion-panels-borders ma-3 pa-5" Style="padding-bottom:25px" Text="Special Specific Options" Expanded="true">
+                    <MudGrid>
+
+                        <MudSwitchTT
+                            Label="Loot"
+                            TooltipText="Allows Special Bots to spawn with additional loot."
+                            @bind-Value="SpecialLootEnabled"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("SpecialLootEnabled") ||
+                                                MainLayout.pendingChanges.Contains("SpecialLootBlacklist"))"
+                            IsNonDefault="@(!SpecialLootEnabled || 
+                                            SpecialLootBlacklist.Count > 0)"
+                            OnUndo="UndoLoot"
+                            OnDefault="DefaultLoot" />
+
+                        <LootBlacklistValues
+                            Blacklist="SpecialLootBlacklist"
+                            OriginalBlacklist="ModConfig.OriginalConfig.SpecialBots.LootConfig.Blacklist"
+                            ChangeKey="SpecialLootBlacklist" />
+
+                        <MudDivider DividerType="DividerType.FullWidth" Class="my-3" />
+
+                        <MudSwitchTT
+                            Label="Roll Ammunition Selection Again"
+                            TooltipText="Allows Special bots to reroll their selected round from their weapons caliber, max one time per each magazine."
+                            @bind-Value="SpecialWeaponAmmunitionRollEnabled"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("SpecialWeaponAmmunitionRollEnabled") ||
+                                                MainLayout.pendingChanges.Contains("SpecialWeaponAmmunitionRollChance"))"
+                            IsNonDefault="@(!SpecialWeaponAmmunitionRollEnabled || 
+                                            SpecialWeaponAmmunitionRollChance != 50)"
+                            OnUndo="UndoRollAmmunitionEnabled"
+                            OnDefault="DefaultRollAmmunitionEnabled" />
+
+                        <MudSliderChildTT
+                            Label="Roll Again Chance"
+                            TooltipText="This is the chance that Special bots will roll for a different round from the same caliber, max one time per each magazine."
+                            @bind-Value="SpecialWeaponAmmunitionRollChance"
+                            Min="1"
+                            Max="100"
+                            Disabled="@(!SpecialWeaponAmmunitionRollEnabled)" />
+
+                        <MudSwitchTT
+                            Label="Toploading"
+                            TooltipText="Allows Special bots to top load their extra magazines."
+                            @bind-Value="SpecialWeaponToploadEnabled"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("SpecialWeaponToploadEnabled") ||
+                                                MainLayout.pendingChanges.Contains("SpecialWeaponToploadChance") ||
+                                                MainLayout.pendingChanges.Contains("SpecialWeaponToploadPercent"))"
+                            IsNonDefault="@(SpecialWeaponToploadEnabled ||
+                                            SpecialWeaponToploadChance != 30 ||
+                                            SpecialWeaponToploadPercent != 30)"
+                            OnUndo="UndoToploadEnabled"
+                            OnDefault="DefaultToploadEnabled" />
+
+                        <MudSliderChildTT
+                            Label="Topload Chance"
+                            TooltipText="This is the chance that Special bots will topload their extra magazines."
+                            @bind-Value="SpecialWeaponToploadChance"
+                            Min="1"
+                            Max="100"
+                            Disabled="@(!SpecialWeaponToploadEnabled)" />
+
+                        <MudSliderChildTT
+                            Label="Topload Percent"
+                            TooltipText="This is the percentage of their extra magazine that Special bots will topload."
+                            @bind-Value="SpecialWeaponToploadPercent"
+                            Min="10"
+                            Max="50"
+                            Disabled="@(!SpecialWeaponToploadEnabled)" />
+
+                        <MudSwitchTT
+                            Label="Skip Backplate When Missing Front Plate"
+                            TooltipText="Will skip backplates when the front plate is missing, if they had one it would be in the front right?"
+                            @bind-Value="SkipBackPlateIfMissingFrontPlate"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("SkipBackPlateIfMissingFrontPlate"))"
+                            IsNonDefault="@(SkipBackPlateIfMissingFrontPlate)"
+                            OnUndo="UndoSkipBackPlateIfMissingFrontPlate"
+                            OnDefault="DefaultSkipBackPlateIfMissingFrontPlate" />
+
+                        <MudSwitchTT
+                            Label="Limit Plate Class to Front Plate"
+                            TooltipText="Tries to limit the plate class of all plates to the class of the front plate, if possible."
+                            @bind-Value="LimitPlateClassToFrontPlateClass"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("LimitPlateClassToFrontPlateClass"))"
+                            IsNonDefault="@(LimitPlateClassToFrontPlateClass)"
+                            OnUndo="UndoLimitPlateClassToFrontPlateClass"
+                            OnDefault="DefaultLimitPlateClassToFrontPlateClass" />
+
+                        <MudSwitchTT
+                            Label="Resource Randomization"
+                            TooltipText="Allows random resource consumption on Food/Drink/Medical Items."
+                            @bind-Value="SpecialResourceRandomizationEnabled"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("SpecialResourceRandomizationEnabled") ||
+                                                MainLayout.pendingChanges.Contains("SpecialMedRateMaxChance") ||
+                                                MainLayout.pendingChanges.Contains("SpecialMedRateUsagePercent") ||
+                                                MainLayout.pendingChanges.Contains("SpecialFoodRateMaxChance") ||
+                                                MainLayout.pendingChanges.Contains("SpecialFoodRateUsagePercent"))"
+                            IsNonDefault="@(!SpecialResourceRandomizationEnabled ||
+                                            SpecialMedRateMaxChance != 15 ||
+                                            SpecialMedRateUsagePercent != 25 ||
+                                            SpecialFoodRateMaxChance != 15 ||
+                                            SpecialFoodRateUsagePercent != 25)"
+                            OnUndo="UndoResourceRandomization"
+                            OnDefault="DefaultResourceRandomization" />
+
+                        <MedicalFoodValues
+                            @bind-MedMaxChance="SpecialMedRateMaxChance"
+                            @bind-MedUsagePercent="SpecialMedRateUsagePercent"
+                            @bind-FoodMaxChance="SpecialFoodRateMaxChance"
+                            @bind-FoodUsagePercent="SpecialFoodRateUsagePercent"
+                            Disabled="@(!SpecialResourceRandomizationEnabled)" />
+
+                        <MudSwitchTT
+                            Label="Weapon Durability Changes"
+                            TooltipText="Allows configurable weapon durability."
+                            @bind-Value="SpecialWeaponDurabilityEnabled"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("SpecialWeaponDurabilityEnabled") ||
+                                               MainLayout.pendingChanges.Contains("SpecialWeaponDurabilityMin") ||
+                                               MainLayout.pendingChanges.Contains("SpecialWeaponDurabilityMax") ||
+                                               MainLayout.pendingChanges.Contains("SpecialWeaponDurabilityMinDelta") ||
+                                               MainLayout.pendingChanges.Contains("SpecialWeaponDurabilityMaxDelta") ||
+                                               MainLayout.pendingChanges.Contains("SpecialWeaponDurabilityEnhancementChance"))"
+                            IsNonDefault="@(!SpecialWeaponDurabilityEnabled ||
+                                          SpecialWeaponDurabilityMin != 90 ||
+                                          SpecialWeaponDurabilityMax != 100 ||
+                                          SpecialWeaponDurabilityMinDelta != 0 ||
+                                          SpecialWeaponDurabilityMaxDelta != 10 ||
+                                          SpecialWeaponDurabilityEnhancementChance != 0)"
+                            OnUndo="UndoWeaponDurability"
+                            OnDefault="DefaultWeaponDurability" />
+
+                        <DurabilityValues
+                            Label="Weapon"
+                            @bind-Min="SpecialWeaponDurabilityMin"
+                            @bind-Max="SpecialWeaponDurabilityMax"
+                            @bind-MinDelta="SpecialWeaponDurabilityMinDelta"
+                            @bind-MaxDelta="SpecialWeaponDurabilityMaxDelta"
+                            MinLimitPercent="SpecialWeaponDurabilityMinLimitPercent"
+                            MaxLimitPercent="SpecialWeaponDurabilityMaxLimitPercent"
+                            Disabled="@(!SpecialWeaponDurabilityEnabled)" />
+
+                        <MudSliderChildTT
+                            Label="Enhancement Chance"
+                            TooltipText="This is the chance that bot weapons have an enhancement applied to them."
+                            @bind-Value="SpecialWeaponDurabilityEnhancementChance"
+                            Min="0"
+                            Max="100"
+                            Disabled="@(!SpecialWeaponDurabilityEnabled)" />
+
+                        <MudSwitchTT
+                            Label="Armour Durability Changes"
+                            TooltipText="Allows configurable armour durability."
+                            @bind-Value="SpecialArmourDurabilityEnabled"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("SpecialArmourDurabilityEnabled") ||
+                                               MainLayout.pendingChanges.Contains("SpecialArmourDurabilityMin") ||
+                                               MainLayout.pendingChanges.Contains("SpecialArmourDurabilityMax") ||
+                                               MainLayout.pendingChanges.Contains("SpecialArmourDurabilityMinDelta") ||
+                                               MainLayout.pendingChanges.Contains("SpecialArmourDurabilityMaxDelta"))"
+                            IsNonDefault="@(!SpecialArmourDurabilityEnabled ||
+                                          SpecialArmourDurabilityMin != 90 ||
+                                          SpecialArmourDurabilityMax != 100 ||
+                                          SpecialArmourDurabilityMinDelta != 0 ||
+                                          SpecialArmourDurabilityMaxDelta != 10)"
+                            OnUndo="UndoArmourDurability"
+                            OnDefault="DefaultArmourDurability" />
+
+                        <DurabilityValues
+                            Label="Armour"
+                            @bind-Min="SpecialArmourDurabilityMin"
+                            @bind-Max="SpecialArmourDurabilityMax"
+                            @bind-MinDelta="SpecialArmourDurabilityMinDelta"
+                            @bind-MaxDelta="SpecialArmourDurabilityMaxDelta"
+                            MinLimitPercent="SpecialArmourDurabilityMinLimitPercent"
+                            MaxLimitPercent="SpecialArmourDurabilityMaxLimitPercent"
+                            Disabled="@(!SpecialArmourDurabilityEnabled)" />
+
+                    </MudGrid>
+                </MudExpansionPanel>
+            }
+        </MudExpansionPanels>
+    </MudContainer>
+</MudMainContent>
+
+@code {
+    #region ENABLE / DISABLE
+    private bool SpecialEnabled
+    {
+        get => ModConfig.Config.SpecialBots.Enable;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.SpecialBots.Enable, nameof(SpecialEnabled));
+            ModConfig.Config.SpecialBots.Enable = value;
+        }
+    }
+    private void UndoSpecialBots() => SpecialEnabled = ModConfig.OriginalConfig.SpecialBots.Enable;
+    private void DefaultSpecialBots() => SpecialEnabled = true;
+    #endregion
+    #region LOOT
+    private bool SpecialLootEnabled
+    {
+        get => ModConfig.Config.SpecialBots.LootConfig.Enable;
+        set
+        {
+            ModConfig.Config.SpecialBots.LootConfig.Enable = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.SpecialBots.LootConfig.Enable, nameof(SpecialLootEnabled));
+        }
+    }
+    private List<string> SpecialLootBlacklist => ModConfig.Config.SpecialBots.LootConfig.Blacklist;
+    private void UndoLoot()
+    {
+        SpecialLootEnabled = ModConfig.OriginalConfig.SpecialBots.LootConfig.Enable;
+        SpecialLootBlacklist.Clear();
+        foreach (var item in ModConfig.OriginalConfig.SpecialBots.LootConfig.Blacklist)
+        {
+            SpecialLootBlacklist.Add(item);
+        }
+        MainLayout.pendingChanges.Remove("SpecialLootEnabled");
+        MainLayout.pendingChanges.Remove("SpecialLootBlacklist");
+    }
+    private void DefaultLoot()
+    {
+        SpecialLootEnabled = true;
+        SpecialLootBlacklist.Clear();
+        if (!MainLayout.pendingChanges.Contains("SpecialLootEnabled")) MainLayout.pendingChanges.Add("SpecialLootEnabled");
+        if (!MainLayout.pendingChanges.Contains("SpecialLootBlacklist")) MainLayout.pendingChanges.Add("SpecialLootBlacklist");
+    }
+    #endregion
+    #region REROLL
+    private bool SpecialWeaponAmmunitionRollEnabled
+    {
+        get => ModConfig.Config.SpecialBots.RerollConfig.Enable;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.SpecialBots.RerollConfig.Enable, nameof(SpecialWeaponAmmunitionRollEnabled));
+            ModConfig.Config.SpecialBots.RerollConfig.Enable = value;
+            ModConfig.Config.SpecialBots.ToploadConfig.Enable = !value;
+        }
+    }
+    private int SpecialWeaponAmmunitionRollChance
+    {
+        get => ModConfig.Config.SpecialBots.RerollConfig.Chance;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.SpecialBots.RerollConfig.Chance, nameof(SpecialWeaponAmmunitionRollChance));
+            ModConfig.Config.SpecialBots.RerollConfig.Chance = value;
+        }
+    }
+    private void UndoRollAmmunitionEnabled()
+    {
+        SpecialWeaponAmmunitionRollEnabled = ModConfig.OriginalConfig.SpecialBots.RerollConfig.Enable;
+        SpecialWeaponAmmunitionRollChance = ModConfig.OriginalConfig.SpecialBots.RerollConfig.Chance;
+        SpecialWeaponToploadEnabled = ModConfig.OriginalConfig.SpecialBots.ToploadConfig.Enable;
+        SpecialWeaponToploadChance = ModConfig.OriginalConfig.SpecialBots.ToploadConfig.Chance;
+        SpecialWeaponToploadPercent = ModConfig.OriginalConfig.SpecialBots.ToploadConfig.Percent;
+    }
+    private void DefaultRollAmmunitionEnabled()
+    {
+        SpecialWeaponAmmunitionRollEnabled = true;
+        SpecialWeaponAmmunitionRollChance = 50;
+        SpecialWeaponToploadEnabled = false;
+        SpecialWeaponToploadChance = 30;
+        SpecialWeaponToploadPercent = 30;
+    }
+    #endregion
+    #region TOPLOAD
+    private bool SpecialWeaponToploadEnabled
+    {
+        get => ModConfig.Config.SpecialBots.ToploadConfig.Enable;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.SpecialBots.ToploadConfig.Enable, nameof(SpecialWeaponToploadEnabled));
+            ModConfig.Config.SpecialBots.ToploadConfig.Enable = value;
+            ModConfig.Config.SpecialBots.RerollConfig.Enable = !value;
+        }
+    }
+    private int SpecialWeaponToploadChance
+    {
+        get => ModConfig.Config.SpecialBots.ToploadConfig.Chance;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.SpecialBots.ToploadConfig.Chance, nameof(SpecialWeaponToploadChance));
+            ModConfig.Config.SpecialBots.ToploadConfig.Chance = value;
+        }
+    }
+    private int SpecialWeaponToploadPercent
+    {
+        get => ModConfig.Config.SpecialBots.ToploadConfig.Percent;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.SpecialBots.ToploadConfig.Percent, nameof(SpecialWeaponToploadPercent));
+            ModConfig.Config.SpecialBots.ToploadConfig.Percent = value;
+        }
+    }
+    private void UndoToploadEnabled()
+    {
+        SpecialWeaponAmmunitionRollEnabled = ModConfig.OriginalConfig.SpecialBots.RerollConfig.Enable;
+        SpecialWeaponAmmunitionRollChance = ModConfig.OriginalConfig.SpecialBots.RerollConfig.Chance;
+        SpecialWeaponToploadEnabled = ModConfig.OriginalConfig.SpecialBots.ToploadConfig.Enable;
+        SpecialWeaponToploadChance = ModConfig.OriginalConfig.SpecialBots.ToploadConfig.Chance;
+        SpecialWeaponToploadPercent = ModConfig.OriginalConfig.SpecialBots.ToploadConfig.Percent;
+    }
+    private void DefaultToploadEnabled()
+    {
+        SpecialWeaponAmmunitionRollEnabled = true;
+        SpecialWeaponAmmunitionRollChance = 50;
+        SpecialWeaponToploadEnabled = false;
+        SpecialWeaponToploadChance = 30;
+        SpecialWeaponToploadPercent = 30;
+    }
+    #endregion
+    #region PLATE CLASS SELECTION LIMITER
+    private bool SkipBackPlateIfMissingFrontPlate
+    {
+        get => ModConfig.Config.SpecialBots.SkipBackPlateIfMissingFrontPlate;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.SpecialBots.SkipBackPlateIfMissingFrontPlate, nameof(SkipBackPlateIfMissingFrontPlate));
+            ModConfig.Config.SpecialBots.SkipBackPlateIfMissingFrontPlate = value;
+        }
+    }
+    private void UndoSkipBackPlateIfMissingFrontPlate() => SkipBackPlateIfMissingFrontPlate = ModConfig.OriginalConfig.SpecialBots.SkipBackPlateIfMissingFrontPlate;
+    private void DefaultSkipBackPlateIfMissingFrontPlate() => SkipBackPlateIfMissingFrontPlate = false;
+    private bool LimitPlateClassToFrontPlateClass
+    {
+        get => ModConfig.Config.SpecialBots.LimitPlateClassToFrontPlateClass;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.SpecialBots.LimitPlateClassToFrontPlateClass, nameof(LimitPlateClassToFrontPlateClass));
+            ModConfig.Config.SpecialBots.LimitPlateClassToFrontPlateClass = value;
+        }
+    }
+    private void UndoLimitPlateClassToFrontPlateClass() => LimitPlateClassToFrontPlateClass = ModConfig.OriginalConfig.SpecialBots.LimitPlateClassToFrontPlateClass;
+    private void DefaultLimitPlateClassToFrontPlateClass() => LimitPlateClassToFrontPlateClass = false;
+    #endregion
+    #region RESOURCE RANDOMIZATION
+    private bool SpecialResourceRandomizationEnabled
+    {
+        get => ModConfig.Config.SpecialBots.ResourceRandomization.Enable;
+        set
+        {
+            ModConfig.Config.SpecialBots.ResourceRandomization.Enable = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.SpecialBots.ResourceRandomization.Enable, nameof(SpecialResourceRandomizationEnabled));
+        }
+    }
+    private int SpecialFoodRateMaxChance
+    {
+        get => ModConfig.Config.SpecialBots.ResourceRandomization.FoodRateMaxChance;
+        set
+        {
+            ModConfig.Config.SpecialBots.ResourceRandomization.FoodRateMaxChance = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.SpecialBots.ResourceRandomization.FoodRateMaxChance, nameof(SpecialFoodRateMaxChance));
+        }
+    }
+    private int SpecialFoodRateUsagePercent
+    {
+        get => ModConfig.Config.SpecialBots.ResourceRandomization.FoodRateUsagePercent;
+        set
+        {
+            ModConfig.Config.SpecialBots.ResourceRandomization.FoodRateUsagePercent = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.SpecialBots.ResourceRandomization.FoodRateUsagePercent, nameof(SpecialFoodRateUsagePercent));
+        }
+    }
+    private int SpecialMedRateMaxChance
+    {
+        get => ModConfig.Config.SpecialBots.ResourceRandomization.MedRateMaxChance;
+        set
+        {
+            ModConfig.Config.SpecialBots.ResourceRandomization.MedRateMaxChance = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.SpecialBots.ResourceRandomization.MedRateMaxChance, nameof(SpecialMedRateMaxChance));
+        }
+    }
+    private int SpecialMedRateUsagePercent
+    {
+        get => ModConfig.Config.SpecialBots.ResourceRandomization.MedRateUsagePercent;
+        set
+        {
+            ModConfig.Config.SpecialBots.ResourceRandomization.MedRateUsagePercent = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.SpecialBots.ResourceRandomization.MedRateUsagePercent, nameof(SpecialMedRateUsagePercent));
+        }
+    }
+    private void UndoResourceRandomization()
+    {
+        SpecialResourceRandomizationEnabled = ModConfig.OriginalConfig.SpecialBots.ResourceRandomization.Enable;
+        SpecialFoodRateMaxChance = ModConfig.OriginalConfig.SpecialBots.ResourceRandomization.FoodRateMaxChance;
+        SpecialFoodRateUsagePercent = ModConfig.OriginalConfig.SpecialBots.ResourceRandomization.FoodRateUsagePercent;
+        SpecialMedRateMaxChance = ModConfig.OriginalConfig.SpecialBots.ResourceRandomization.MedRateMaxChance;
+        SpecialMedRateUsagePercent = ModConfig.OriginalConfig.SpecialBots.ResourceRandomization.MedRateUsagePercent;
+    }
+    private void DefaultResourceRandomization()
+    {
+        SpecialResourceRandomizationEnabled = true;
+        SpecialFoodRateMaxChance = 15;
+        SpecialFoodRateUsagePercent = 25;
+        SpecialMedRateMaxChance = 15;
+        SpecialMedRateUsagePercent = 25;
+    }
+    #endregion
+    #region DURABILITY
+    private bool SpecialWeaponDurabilityEnabled
+    {
+        get => ModConfig.Config.SpecialBots.WeaponDurability.Enable;
+        set
+        {
+            ModConfig.Config.SpecialBots.WeaponDurability.Enable = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.SpecialBots.WeaponDurability.Enable, nameof(SpecialWeaponDurabilityEnabled));
+        }
+    }
+    private int SpecialWeaponDurabilityMin
+    {
+        get => ModConfig.Config.SpecialBots.WeaponDurability.Min;
+        set
+        {
+            ModConfig.Config.SpecialBots.WeaponDurability.Min = value;
+            ModConfig.Config.SpecialBots.WeaponDurability.MinLimitPercent = value - ModConfig.Config.SpecialBots.WeaponDurability.MaxDelta;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.SpecialBots.WeaponDurability.Min, nameof(SpecialWeaponDurabilityMin));
+        }
+    }
+    private int SpecialWeaponDurabilityMax
+    {
+        get => ModConfig.Config.SpecialBots.WeaponDurability.Max;
+        set
+        {
+            ModConfig.Config.SpecialBots.WeaponDurability.Max = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.SpecialBots.WeaponDurability.Max, nameof(SpecialWeaponDurabilityMax));
+        }
+    }
+    private int SpecialWeaponDurabilityMinDelta
+    {
+        get => ModConfig.Config.SpecialBots.WeaponDurability.MinDelta;
+        set
+        {
+            ModConfig.Config.SpecialBots.WeaponDurability.MinDelta = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.SpecialBots.WeaponDurability.MinDelta, nameof(SpecialWeaponDurabilityMinDelta));
+        }
+    }
+    private int SpecialWeaponDurabilityMaxDelta
+    {
+        get => ModConfig.Config.SpecialBots.WeaponDurability.MaxDelta;
+        set
+        {
+            ModConfig.Config.SpecialBots.WeaponDurability.MaxDelta = value;
+            ModConfig.Config.SpecialBots.WeaponDurability.MinLimitPercent = ModConfig.Config.SpecialBots.WeaponDurability.Min - value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.SpecialBots.WeaponDurability.MaxDelta, nameof(SpecialWeaponDurabilityMaxDelta));
+        }
+    }
+    private int SpecialWeaponDurabilityMinLimitPercent
+        => ModConfig.Config.SpecialBots.WeaponDurability.MinLimitPercent;
+    private int SpecialWeaponDurabilityMaxLimitPercent
+        => ModConfig.Config.SpecialBots.WeaponDurability.Max - ModConfig.Config.SpecialBots.WeaponDurability.MinDelta;
+    private int SpecialWeaponDurabilityEnhancementChance
+    {
+        get => ModConfig.Config.SpecialBots.WeaponDurability.EnhancementChance;
+        set
+        {
+            ModConfig.Config.SpecialBots.WeaponDurability.EnhancementChance = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.SpecialBots.WeaponDurability.EnhancementChance, nameof(SpecialWeaponDurabilityEnhancementChance));
+        }
+    }
+    private void UndoWeaponDurability()
+    {
+        SpecialWeaponDurabilityEnabled = ModConfig.OriginalConfig.SpecialBots.WeaponDurability.Enable;
+        SpecialWeaponDurabilityMin = ModConfig.OriginalConfig.SpecialBots.WeaponDurability.Min;
+        SpecialWeaponDurabilityMax = ModConfig.OriginalConfig.SpecialBots.WeaponDurability.Max;
+        SpecialWeaponDurabilityMinDelta = ModConfig.OriginalConfig.SpecialBots.WeaponDurability.MinDelta;
+        SpecialWeaponDurabilityMaxDelta = ModConfig.OriginalConfig.SpecialBots.WeaponDurability.MaxDelta;
+        SpecialWeaponDurabilityEnhancementChance = ModConfig.OriginalConfig.SpecialBots.WeaponDurability.EnhancementChance;
+    }
+    private void DefaultWeaponDurability()
+    {
+        SpecialWeaponDurabilityEnabled = true;
+        SpecialWeaponDurabilityMin = 90;
+        SpecialWeaponDurabilityMax = 100;
+        SpecialWeaponDurabilityMinDelta = 0;
+        SpecialWeaponDurabilityMaxDelta = 10;
+        SpecialWeaponDurabilityEnhancementChance = 0;
+    }
+    private bool SpecialArmourDurabilityEnabled
+    {
+        get => ModConfig.Config.SpecialBots.ArmourDurability.Enable;
+        set
+        {
+            ModConfig.Config.SpecialBots.ArmourDurability.Enable = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.SpecialBots.ArmourDurability.Enable, nameof(SpecialArmourDurabilityEnabled));
+        }
+    }
+    private int SpecialArmourDurabilityMin
+    {
+        get => ModConfig.Config.SpecialBots.ArmourDurability.Min;
+        set
+        {
+            ModConfig.Config.SpecialBots.ArmourDurability.Min = value;
+            ModConfig.Config.SpecialBots.ArmourDurability.MinLimitPercent = value - ModConfig.Config.SpecialBots.ArmourDurability.MaxDelta;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.SpecialBots.ArmourDurability.Min, nameof(SpecialArmourDurabilityMin));
+        }
+    }
+    private int SpecialArmourDurabilityMax
+    {
+        get => ModConfig.Config.SpecialBots.ArmourDurability.Max;
+        set
+        {
+            ModConfig.Config.SpecialBots.ArmourDurability.Max = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.SpecialBots.ArmourDurability.Max, nameof(SpecialArmourDurabilityMax));
+        }
+    }
+    private int SpecialArmourDurabilityMinDelta
+    {
+        get => ModConfig.Config.SpecialBots.ArmourDurability.MinDelta;
+        set
+        {
+            ModConfig.Config.SpecialBots.ArmourDurability.MinDelta = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.SpecialBots.ArmourDurability.MinDelta, nameof(SpecialArmourDurabilityMinDelta));
+        }
+    }
+    private int SpecialArmourDurabilityMaxDelta
+    {
+        get => ModConfig.Config.SpecialBots.ArmourDurability.MaxDelta;
+        set
+        {
+            ModConfig.Config.SpecialBots.ArmourDurability.MaxDelta = value;
+            ModConfig.Config.SpecialBots.ArmourDurability.MinLimitPercent = ModConfig.Config.SpecialBots.ArmourDurability.Min - value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.SpecialBots.ArmourDurability.MaxDelta, nameof(SpecialArmourDurabilityMaxDelta));
+        }
+    }
+    private int SpecialArmourDurabilityMinLimitPercent => ModConfig.Config.SpecialBots.ArmourDurability.MinLimitPercent;
+    private int SpecialArmourDurabilityMaxLimitPercent => ModConfig.Config.SpecialBots.ArmourDurability.Max - ModConfig.Config.SpecialBots.ArmourDurability.MinDelta;
+    private void UndoArmourDurability()
+    {
+        SpecialArmourDurabilityEnabled = ModConfig.OriginalConfig.SpecialBots.ArmourDurability.Enable;
+        SpecialArmourDurabilityMin = ModConfig.OriginalConfig.SpecialBots.ArmourDurability.Min;
+        SpecialArmourDurabilityMax = ModConfig.OriginalConfig.SpecialBots.ArmourDurability.Max;
+        SpecialArmourDurabilityMinDelta = ModConfig.OriginalConfig.SpecialBots.ArmourDurability.MinDelta;
+        SpecialArmourDurabilityMaxDelta = ModConfig.OriginalConfig.SpecialBots.ArmourDurability.MaxDelta;
+    }
+    private void DefaultArmourDurability()
+    {
+        SpecialArmourDurabilityEnabled = true;
+        SpecialArmourDurabilityMin = 90;
+        SpecialArmourDurabilityMax = 100;
+        SpecialArmourDurabilityMinDelta = 0;
+        SpecialArmourDurabilityMaxDelta = 10;
+    }
+    #endregion
+    #region CASCADING PARAMETERS
+    [CascadingParameter] public MainLayout? Layout { get; set; }
+    #endregion
+}

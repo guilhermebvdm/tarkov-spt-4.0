@@ -1,0 +1,1399 @@
+﻿@page "/progressivebotsystem/modcompatibility"
+@using ProgressiveBotSystem.Web.Components
+@layout MainLayout
+
+<MudMainContent>
+    <MudContainer Class="mb-20">
+        <MudExpansionPanels MultiExpansion="true">
+            <MudExpansionPanel Class="mud-expansion-panels-borders ma-3 pa-5" Text="Custom Item Importing" Expanded="true">
+                <MudGrid>
+
+                    <MudSwitchTT
+                        Label="Modded Weapons"
+                        TooltipText="Allows bots to use custom modded weapons."
+                        @bind-Value="ModCustomWeaponsEnabled"
+                        HasPendingChanges="@(MainLayout.pendingChanges.Contains("ModCustomWeaponsEnabled"))"
+                        IsNonDefault="@(ModCustomWeaponsEnabled)"
+                        OnUndo="UndoCustomWeapons"
+                        OnDefault="DefaultCustomWeapons" />
+
+                    <MudSwitchTTDisabledWarning
+                        Label="Dynamic Weapon Weighting"
+                        TooltipText="Automatically balances modded weapon weights against the vanilla pool. At 1.0 each modded weapon is equally likely as the average vanilla weapon, regardless of how many mods are installed."
+                        WarningTooltip1="This is completely dynamic based on the existing mod pool, so test the values and see how you like it."
+                        @bind-Value="UseDynamicWeaponWeights"
+                        Disabled="@(!ModCustomWeaponsEnabled)"
+                        HasPendingChanges="@(MainLayout.pendingChanges.Contains("UseDynamicWeaponWeights"))"
+                        IsNonDefault="@(!UseDynamicWeaponWeights)"
+                        OnUndo="UndoUseDynamicWeaponWeights"
+                        OnDefault="DefaultUseDynamicWeaponWeights" />
+                    
+                    @if (UseDynamicWeaponWeights)
+                    {
+                        <MudSliderChildUndoDefaultTTDouble
+                            Label="Pmc Weapon Multiplier"
+                            TooltipText="Controls how likely modded weapons are relative to vanilla. 1.0 = equal chance, 0.5 = half as likely, 2.0 = twice as likely."
+                            @bind-Value="DynamicPmcWeaponWeightMultiplier"
+                            Min="0.1"
+                            Max="3.0"
+                            Step="0.05"
+                            Disabled="@(!UseDynamicWeaponWeights)"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("DynamicPmcWeaponWeightMultiplier"))"
+                            IsNonDefault="@(Math.Abs(DynamicPmcWeaponWeightMultiplier - 1.0) > 0.001)"
+                            OnUndo="UndoPmcDynamicWeaponWeightMultiplier"
+                            OnDefault="DefaultPmcDynamicWeaponWeightMultiplier" />
+                        
+                        <MudSliderChildUndoDefaultTTDouble
+                            Label="Scav Weapon Multiplier"
+                            TooltipText="Controls how likely modded weapons are relative to vanilla. 1.0 = equal chance, 0.5 = half as likely, 2.0 = twice as likely."
+                            @bind-Value="DynamicScavWeaponWeightMultiplier"
+                            Min="0.1"
+                            Max="3.0"
+                            Step="0.05"
+                            Disabled="@(!UseDynamicWeaponWeights)"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("DynamicScavWeaponWeightMultiplier"))"
+                            IsNonDefault="@(Math.Abs(DynamicScavWeaponWeightMultiplier - 1.0) > 0.001)"
+                            OnUndo="UndoScavDynamicWeaponWeightMultiplier"
+                            OnDefault="DefaultScavDynamicWeaponWeightMultiplier" />
+                        
+                        <MudSliderChildUndoDefaultTTDouble
+                            Label="Guard Weapon Multiplier"
+                            TooltipText="Controls how likely modded weapons are relative to vanilla. 1.0 = equal chance, 0.5 = half as likely, 2.0 = twice as likely."
+                            @bind-Value="DynamicGuardWeaponWeightMultiplier"
+                            Min="0.1"
+                            Max="3.0"
+                            Step="0.05"
+                            Disabled="@(!UseDynamicWeaponWeights)"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("DynamicGuardWeaponWeightMultiplier"))"
+                            IsNonDefault="@(Math.Abs(DynamicGuardWeaponWeightMultiplier - 1.0) > 0.001)"
+                            OnUndo="UndoGuardDynamicWeaponWeightMultiplier"
+                            OnDefault="DefaultGuardDynamicWeaponWeightMultiplier" />
+                    }
+                    else
+                    {
+                        <MudSliderChildUndoDefaultTT
+                            Label="Pmc Weapon Weights"
+                            TooltipText="Higher number is more common. If you import a lot of custom weapons, and see them often - try a lower number."
+                            @bind-Value="ModPmcWeaponWeights"
+                            Min="1"
+                            Max="25"
+                            Disabled="@(!ModCustomWeaponsEnabled || UseDynamicWeaponWeights)"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("ModCustomWeaponsEnabled"))"
+                            IsNonDefault="@(ModPmcWeaponWeights != 8)"
+                            OnUndo="UndoPmcWeaponWeights"
+                            OnDefault="DefaultPmcWeaponWeights" />
+
+                        <MudSliderChildUndoDefaultTT
+                            Label="Scav Weapon Weights"
+                            TooltipText="Higher number is more common. If you import a lot of custom weapons, and see them often - try a lower number."
+                            @bind-Value="ModScavWeaponWeights"
+                            Min="1"
+                            Max="25"
+                            Disabled="@(!ModCustomWeaponsEnabled || UseDynamicWeaponWeights)"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("ModCustomWeaponsEnabled"))"
+                            IsNonDefault="@(ModScavWeaponWeights != 1)"
+                            OnUndo="UndoScavWeaponWeights"
+                            OnDefault="DefaultScavWeaponWeights" />
+
+                        <MudSliderChildUndoDefaultTT
+                            Label="Guard Weapon Weights"
+                            TooltipText="Higher number is more common. If you import a lot of custom weapons, and see them often - try a lower number."
+                            @bind-Value="ModFollowerWeaponWeights"
+                            Min="1"
+                            Max="25"
+                            Disabled="@(!ModCustomWeaponsEnabled || UseDynamicWeaponWeights)"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("ModFollowerWeaponWeights"))"
+                            IsNonDefault="@(ModFollowerWeaponWeights != 6)"
+                            OnUndo="UndoFollowerWeaponWeights"
+                            OnDefault="DefaultFollowerWeaponWeights" />
+                    }
+
+                    <MudSwitchTT
+                        Label="Modded Equipment"
+                        TooltipText="Allows bots to use custom modded equipment."
+                        @bind-Value="ModCustomEquipmentEnabled"
+                        HasPendingChanges="@(MainLayout.pendingChanges.Contains("ModCustomEquipmentEnabled"))"
+                        IsNonDefault="@(ModCustomEquipmentEnabled)"
+                        OnUndo="UndoCustomEquipment"
+                        OnDefault="DefaultCustomEquipment" />
+                    
+                    <MudSwitchTTDisabledWarning
+                        Label="Force Scav Equipment Weight"
+                        TooltipText="Whether or not you want to use the existing value for scav equipment weights or a force value."
+                        WarningTooltip1="If this is not enabled, scavs will get equipment at the defined slot values below."
+                        @bind-Value="ForceScavEquipmentWeight"
+                        Disabled="@(!ModCustomEquipmentEnabled)"
+                        HasPendingChanges="@(MainLayout.pendingChanges.Contains("ForceScavEquipmentWeight"))"
+                        IsNonDefault="@(!ForceScavEquipmentWeight)"
+                        OnUndo="UndoForceScavEquipmentWeights"
+                        OnDefault="DefaultForceScavEquipmentWeights" />
+                    
+                    <MudSliderChildUndoDefaultTT
+                        Label="Force Scav Equipment Weight Value"
+                        TooltipText="Sets the equipment import weight to the specified value for scavs. Most people want this at 1."
+                        @bind-Value="ForceScavEquipmentWeightValue"
+                        Min="0" 
+                        Max="25"
+                        Disabled="@(!ForceScavEquipmentWeight || !ModCustomEquipmentEnabled)"
+                        HasPendingChanges="@(MainLayout.pendingChanges.Contains("ForceScavEquipmentWeightValue"))"
+                        IsNonDefault="@(ForceScavEquipmentWeightValue != 1)"
+                        OnUndo="UndoForceScavEquipmentWeightValue"
+                        OnDefault="DefaultForceScavEquipmentWeightValue" />
+                    
+                    <MudSwitchTTDisabledWarning
+                        Label="Dynamic Equipment Weighting"
+                        TooltipText="Automatically balances modded equipment weights against the vanilla pool per slot. At 1.0 each modded item is equally likely as the average vanilla item in that slot."
+                        WarningTooltip1="This is completely dynamic based on the existing mod pool, so test the values and see how you like it."
+                        @bind-Value="UseDynamicEquipmentWeights"
+                        Disabled="@(!ModCustomEquipmentEnabled)"
+                        HasPendingChanges="@(MainLayout.pendingChanges.Contains("UseDynamicEquipmentWeights"))"
+                        IsNonDefault="@(!UseDynamicEquipmentWeights)"
+                        OnUndo="UndoUseDynamicEquipmentWeights"
+                        OnDefault="DefaultUseDynamicEquipmentWeights" />
+                    
+                    @if (UseDynamicEquipmentWeights)
+                    {
+                        <MudSliderChildUndoDefaultTTDouble
+                            Label="Headwear Multiplier"
+                            TooltipText="Controls how likely modded headwear is relative to vanilla (no armour slots). 1.0 = equal chance, 0.5 = half as likely, 2.0 = twice as likely."
+                            @bind-Value="DynamicHeadwearValue"
+                            Min="0.1" 
+                            Max="3.0" 
+                            Step="0.05"
+                            Disabled="@(!ModCustomEquipmentEnabled || !UseDynamicEquipmentWeights)"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("DynamicHeadwearValue"))"
+                            IsNonDefault="@(Math.Abs(DynamicHeadwearValue - 1.0) > 0.001)"
+                            OnUndo="UndoDynamicHeadwear"
+                            OnDefault="DefaultDynamicHeadwear" />
+                
+                        <MudSliderChildUndoDefaultTTDouble
+                            Label="Headwear (With Slots) Multiplier"
+                            TooltipText="Controls how likely modded headwear is relative to vanilla (armour slots). 1.0 = equal chance, 0.5 = half as likely, 2.0 = twice as likely."
+                            @bind-Value="DynamicHeadwearWithSlotsValue"
+                            Min="0.1" 
+                            Max="3.0" 
+                            Step="0.05"
+                            Disabled="@(!ModCustomEquipmentEnabled || !UseDynamicEquipmentWeights)"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("DynamicHeadwearWithSlotsValue"))"
+                            IsNonDefault="@(Math.Abs(DynamicHeadwearWithSlotsValue - 1.0) > 0.001)"
+                            OnUndo="UndoDynamicHeadwearWithSlots"
+                            OnDefault="DefaultDynamicHeadwearWithSlots" />
+                
+                        <MudSliderChildUndoDefaultTTDouble
+                            Label="Armour Vest Multiplier"
+                            TooltipText="Controls how likely modded armour vests are relative to vanilla. 1.0 = equal chance, 0.5 = half as likely, 2.0 = twice as likely."
+                            @bind-Value="DynamicArmourVestValue"
+                            Min="0.1" 
+                            Max="3.0" 
+                            Step="0.05"
+                            Disabled="@(!ModCustomEquipmentEnabled || !UseDynamicEquipmentWeights)"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("DynamicArmourVest"))"
+                            IsNonDefault="@(Math.Abs(DynamicArmourVestValue - 1.0) > 0.001)"
+                            OnUndo="UndoDynamicArmourVest"
+                            OnDefault="DefaultDynamicArmourVest" />
+                
+                        <MudSliderChildUndoDefaultTTDouble
+                            Label="Armoured Rig Multiplier"
+                            TooltipText="Controls how likely modded armoured rigs are relative to vanilla. 1.0 = equal chance, 0.5 = half as likely, 2.0 = twice as likely."
+                            @bind-Value="DynamicArmouredRigValue"
+                            Min="0.1" 
+                            Max="3.0" 
+                            Step="0.05"
+                            Disabled="@(!ModCustomEquipmentEnabled || !UseDynamicEquipmentWeights)"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("DynamicArmouredRigValue"))"
+                            IsNonDefault="@(Math.Abs(DynamicArmouredRigValue - 1.0) > 0.001)"
+                            OnUndo="UndoDynamicArmouredRig"
+                            OnDefault="DefaultDynamicArmouredRig" />
+                
+                        <MudSliderChildUndoDefaultTTDouble
+                            Label="Tactical Vest Multiplier"
+                            TooltipText="Controls how likely modded tactical vests are relative to vanilla (small grids). 1.0 = equal chance, 0.5 = half as likely, 2.0 = twice as likely."
+                            @bind-Value="DynamicTacticalVestValue"
+                            Min="0.1" 
+                            Max="3.0" 
+                            Step="0.05"
+                            Disabled="@(!ModCustomEquipmentEnabled || !UseDynamicEquipmentWeights)"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("DynamicTacticalVestValue"))"
+                            IsNonDefault="@(Math.Abs(DynamicTacticalVestValue - 1.0) > 0.001)"
+                            OnUndo="UndoDynamicTacticalVest"
+                            OnDefault="DefaultDynamicTacticalVest" />
+                
+                        <MudSliderChildUndoDefaultTTDouble
+                            Label="Tactical Vest (Large Grid) Multiplier"
+                            TooltipText="Controls how likely modded tactical vests are relative to vanilla (large grids). 1.0 = equal chance, 0.5 = half as likely, 2.0 = twice as likely."
+                            @bind-Value="DynamicTacticalVestLargeGridValue"
+                            Min="0.1" 
+                            Max="3.0" 
+                            Step="0.05"
+                            Disabled="@(!ModCustomEquipmentEnabled || !UseDynamicEquipmentWeights)"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("DynamicTacticalVestLargeGridValue"))"
+                            IsNonDefault="@(Math.Abs(DynamicTacticalVestLargeGridValue - 1.0) > 0.001)"
+                            OnUndo="UndoDynamicTacticalVestLargeGrid"
+                            OnDefault="DefaultDynamicTacticalVestLargeGrid" />
+                
+                        <MudSliderChildUndoDefaultTTDouble
+                            Label="Backpack Multiplier"
+                            TooltipText="Controls how likely modded backpacks are relative to vanilla. 1.0 = equal chance, 0.5 = half as likely, 2.0 = twice as likely."
+                            @bind-Value="DynamicBackpackValue"
+                            Min="0.1" 
+                            Max="3.0" 
+                            Step="0.05"
+                            Disabled="@(!ModCustomEquipmentEnabled || !UseDynamicEquipmentWeights)"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("DynamicBackpackValue"))"
+                            IsNonDefault="@(Math.Abs(DynamicBackpackValue - 1.0) > 0.001)"
+                            OnUndo="UndoDynamicBackpack"
+                            OnDefault="DefaultDynamicBackpack" />
+                
+                        <MudSliderChildUndoDefaultTTDouble
+                            Label="Face Cover Multiplier"
+                            TooltipText="Controls how likely modded unarmoured face covers are relative to vanilla. 1.0 = equal chance, 0.5 = half as likely, 2.0 = twice as likely."
+                            @bind-Value="DynamicFaceCoverValue"
+                            Min="0.1" 
+                            Max="3.0" 
+                            Step="0.05"
+                            Disabled="@(!ModCustomEquipmentEnabled || !UseDynamicEquipmentWeights)"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("DynamicFaceCoverValue"))"
+                            IsNonDefault="@(Math.Abs(DynamicFaceCoverValue - 1.0) > 0.001)"
+                            OnUndo="UndoDynamicFaceCover"
+                            OnDefault="DefaultDynamicFaceCover" />
+                
+                        <MudSliderChildUndoDefaultTTDouble
+                            Label="Face Cover (AC 0-2) Multiplier"
+                            TooltipText="Controls how likely modded face covers are relative to vanilla (class 0, 1, 2). 1.0 = equal chance, 0.5 = half as likely, 2.0 = twice as likely."
+                            @bind-Value="DynamicFaceCoverAc0Value"
+                            Min="0.1" 
+                            Max="3.0" 
+                            Step="0.05"
+                            Disabled="@(!ModCustomEquipmentEnabled || !UseDynamicEquipmentWeights)"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("DynamicFaceCoverAc0Value"))"
+                            IsNonDefault="@(Math.Abs(DynamicFaceCoverAc0Value - 1.0) > 0.001)"
+                            OnUndo="UndoDynamicFaceCoverAc0"
+                            OnDefault="DefaultDynamicFaceCoverAc0" />
+                
+                        <MudSliderChildUndoDefaultTTDouble
+                            Label="Face Cover (AC 3+) Multiplier"
+                            TooltipText="Controls how likely modded face covers are relative to vanilla (class 3+). 1.0 = equal chance, 0.5 = half as likely, 2.0 = twice as likely."
+                            @bind-Value="DynamicFaceCoverAc3Value"
+                            Min="0.1" 
+                            Max="3.0" 
+                            Step="0.05"
+                            Disabled="@(!ModCustomEquipmentEnabled || !UseDynamicEquipmentWeights)"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("DynamicFaceCoverAc3Value"))"
+                            IsNonDefault="@(Math.Abs(DynamicFaceCoverAc3Value - 1.0) > 0.001)"
+                            OnUndo="UndoDynamicFaceCoverAc3"
+                            OnDefault="DefaultDynamicFaceCoverAc3" />
+                
+                        <MudSliderChildUndoDefaultTTDouble
+                            Label="Eyewear Multiplier"
+                            TooltipText="Controls how likely modded eyewear are relative to vanilla. 1.0 = equal chance, 0.5 = half as likely, 2.0 = twice as likely."
+                            @bind-Value="DynamicEyewearValue"
+                            Min="0.1" 
+                            Max="3.0" 
+                            Step="0.05"
+                            Disabled="@(!ModCustomEquipmentEnabled || !UseDynamicEquipmentWeights)"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("DynamicEyewearValue"))"
+                            IsNonDefault="@(Math.Abs(DynamicEyewearValue - 1.0) > 0.001)"
+                            OnUndo="UndoDynamicEyewear"
+                            OnDefault="DefaultDynamicEyewear" />
+                
+                        <MudSliderChildUndoDefaultTTDouble
+                            Label="Earpiece Multiplier"
+                            TooltipText="Controls how likely modded earpieces are relative to vanilla. 1.0 = equal chance, 0.5 = half as likely, 2.0 = twice as likely."
+                            @bind-Value="DynamicEarpieceValue"
+                            Min="0.1" 
+                            Max="3.0" 
+                            Step="0.05"
+                            Disabled="@(!ModCustomEquipmentEnabled || !UseDynamicEquipmentWeights)"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("DynamicEarpieceValue"))"
+                            IsNonDefault="@(Math.Abs(DynamicEarpieceValue - 1.0) > 0.001)"
+                            OnUndo="UndoDynamicEarpiece"
+                            OnDefault="DefaultDynamicEarpiece" />
+
+                        <MudSliderChildUndoDefaultTTDouble
+                            Label="Armband Multiplier"
+                            TooltipText="Controls how likely modded armbands are relative to vanilla. 1.0 = equal chance, 0.5 = half as likely, 2.0 = twice as likely."
+                            @bind-Value="DynamicArmbandValue"
+                            Min="0.1" 
+                            Max="3.0" 
+                            Step="0.05"
+                            Disabled="@(!ModCustomEquipmentEnabled || !UseDynamicEquipmentWeights)"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("DynamicArmbandValue"))"
+                            IsNonDefault="@(Math.Abs(DynamicArmbandValue - 1.0) > 0.001)"
+                            OnUndo="UndoDynamicArmband"
+                            OnDefault="DefaultDynamicArmband" />
+                    }
+                    else
+                    {
+                        <MudSliderChildUndoDefaultTT
+                            Label="Headwear Weights"
+                            TooltipText="Higher number is more common. If you import a lot of custom equipment, and see them often - try a lower number. Probably not armoured."
+                            @bind-Value="HeadwearWeight"
+                            Min="1"
+                            Max="25"
+                            Disabled="@(!ModCustomEquipmentEnabled || UseDynamicEquipmentWeights)"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("HeadwearWeight"))"
+                            IsNonDefault="@(HeadwearWeight != 1)"
+                            OnUndo="UndoHeadwearWeight"
+                            OnDefault="DefaultHeadwearWeight" />
+                        
+                        <MudSliderChildUndoDefaultTT
+                            Label="Headwear (With Slots) Weights"
+                            TooltipText="Higher number is more common. If you import a lot of custom equipment, and see them often - try a lower number. With slots means they are probably armoured."
+                            @bind-Value="HeadwearESlotWeight"
+                            Min="1"
+                            Max="25"
+                            Disabled="@(!ModCustomEquipmentEnabled || UseDynamicEquipmentWeights)"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("HeadwearESlotWeight"))"
+                            IsNonDefault="@(HeadwearESlotWeight != 6)"
+                            OnUndo="UndoHeadwearESlotWeight"
+                            OnDefault="DefaultHeadwearESlotWeight" />
+                        
+                        <MudSliderChildUndoDefaultTT
+                            Label="Armour Vest Weights"
+                            TooltipText="Higher number is more common. If you import a lot of custom equipment, and see them often - try a lower number."
+                            @bind-Value="ArmourVestWeight"
+                            Min="1"
+                            Max="25"
+                            Disabled="@(!ModCustomEquipmentEnabled || UseDynamicEquipmentWeights)"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("ArmorVestWeight"))"
+                            IsNonDefault="@(ArmourVestWeight != 10)"
+                            OnUndo="UndoArmourVestWeight"
+                            OnDefault="DefaultArmourVestWeight" />
+            
+                        <MudSliderChildUndoDefaultTT
+                            Label="Armoured Rig Weights"
+                            TooltipText="Higher number is more common. If you import a lot of custom equipment, and see them often - try a lower number."
+                            @bind-Value="ArmouredRigWeight"
+                            Min="1"
+                            Max="25"
+                            Disabled="@(!ModCustomEquipmentEnabled || UseDynamicEquipmentWeights)"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("ArmouredRigWeight"))"
+                            IsNonDefault="@(ArmouredRigWeight != 7)"
+                            OnUndo="UndoArmouredRigWeight"
+                            OnDefault="DefaultArmouredRigWeight" />
+            
+                        <MudSliderChildUndoDefaultTT
+                            Label="Tactical Vest Weights"
+                            TooltipText="Higher number is more common. If you import a lot of custom equipment, and see them often - try a lower number. Smaller than 10 grid slots."
+                            @bind-Value="TacticalVestWeight"
+                            Min="1"
+                            Max="25"
+                            Disabled="@(!ModCustomEquipmentEnabled || UseDynamicEquipmentWeights)"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("TacticalVestWeight"))"
+                            IsNonDefault="@(TacticalVestWeight != 1)"
+                            OnUndo="UndoTacticalVestWeight"
+                            OnDefault="DefaultTacticalVestWeight" />
+            
+                        <MudSliderChildUndoDefaultTT
+                            Label="Tactical Vest (Large Grid) Weights"
+                            TooltipText="Higher number is more common. If you import a lot of custom equipment, and see them often - try a lower number. Larger than 10 grid slots."
+                            @bind-Value="TacticalVestGLengthWeight"
+                            Min="1"
+                            Max="25"
+                            Disabled="@(!ModCustomEquipmentEnabled || UseDynamicEquipmentWeights)"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("TacticalVestGLengthWeight"))"
+                            IsNonDefault="@(TacticalVestGLengthWeight != 10)"
+                            OnUndo="UndoTacticalVestGLengthWeight"
+                            OnDefault="DefaultTacticalVestGLengthWeight" />
+            
+                        <MudSliderChildUndoDefaultTT
+                            Label="Backpack Weights"
+                            TooltipText="Higher number is more common. If you import a lot of custom equipment, and see them often - try a lower number."
+                            @bind-Value="BackpackWeight"
+                            Min="1"
+                            Max="25"
+                            Disabled="@(!ModCustomEquipmentEnabled || UseDynamicEquipmentWeights)"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("BackpackWeight"))"
+                            IsNonDefault="@(BackpackWeight != 5)"
+                            OnUndo="UndoBackpackWeight"
+                            OnDefault="DefaultBackpackWeight" />
+            
+                        <MudSliderChildUndoDefaultTT
+                            Label="Face Cover Weights"
+                            TooltipText="Higher number is more common. If you import a lot of custom equipment, and see them often - try a lower number. Not armoured."
+                            @bind-Value="FaceCoverWeight"
+                            Min="1"
+                            Max="25"
+                            Disabled="@(!ModCustomEquipmentEnabled || UseDynamicEquipmentWeights)"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("FaceCoverWeight"))"
+                            IsNonDefault="@(FaceCoverWeight != 4)"
+                            OnUndo="UndoFaceCoverWeight"
+                            OnDefault="DefaultFaceCoverWeight" />
+            
+                        <MudSliderChildUndoDefaultTT
+                            Label="Face Cover (AC 0-2) Weights"
+                            TooltipText="Higher number is more common. If you import a lot of custom equipment, and see them often - try a lower number. Armour Class 0-2."
+                            @bind-Value="FaceCoverAc0Weight"
+                            Min="1"
+                            Max="25"
+                            Disabled="@(!ModCustomEquipmentEnabled || UseDynamicEquipmentWeights)"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("FaceCoverAc0Weight"))"
+                            IsNonDefault="@(FaceCoverAc0Weight != 2)"
+                            OnUndo="UndoFaceCoverAc0Weight"
+                            OnDefault="DefaultFaceCoverAc0Weight" />
+            
+                        <MudSliderChildUndoDefaultTT
+                            Label="Face Cover (AC 3+) Weights"
+                            TooltipText="Higher number is more common. If you import a lot of custom equipment, and see them often - try a lower number. Armour Class 3+."
+                            @bind-Value="FaceCoverAc3Weight"
+                            Min="1"
+                            Max="25"
+                            Disabled="@(!ModCustomEquipmentEnabled || UseDynamicEquipmentWeights)"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("FaceCoverAc3Weight"))"
+                            IsNonDefault="@(FaceCoverAc3Weight != 1)"
+                            OnUndo="UndoFaceCoverAc3Weight"
+                            OnDefault="DefaultFaceCoverAc3Weight" />
+            
+                        <MudSliderChildUndoDefaultTT
+                            Label="Eyewear Weights"
+                            TooltipText="Higher number is more common. If you import a lot of custom equipment, and see them often - try a lower number."
+                            @bind-Value="EyewearWeight"
+                            Min="1"
+                            Max="25"
+                            Disabled="@(!ModCustomEquipmentEnabled || UseDynamicEquipmentWeights)"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("EyewearWeight"))"
+                            IsNonDefault="@(EyewearWeight != 1)"
+                            OnUndo="UndoEyewearWeight"
+                            OnDefault="DefaultEyewearWeight" />
+            
+                        <MudSliderChildUndoDefaultTT
+                            Label="Earpiece Weights"
+                            TooltipText="Higher number is more common. If you import a lot of custom equipment, and see them often - try a lower number."
+                            @bind-Value="EarpieceWeight"
+                            Min="1"
+                            Max="25"
+                            Disabled="@(!ModCustomEquipmentEnabled || UseDynamicEquipmentWeights)"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("EarpieceWeight"))"
+                            IsNonDefault="@(EarpieceWeight != 5)"
+                            OnUndo="UndoEarpieceWeight"
+                            OnDefault="DefaultEarpieceWeight" />
+                        
+                        <MudSliderChildUndoDefaultTT
+                            Label="Armband Weights"
+                            TooltipText="Higher number is more common. If you import a lot of custom equipment, and see them often - try a lower number."
+                            @bind-Value="ArmBandWeight"
+                            Min="1"
+                            Max="25"
+                            Disabled="@(!ModCustomEquipmentEnabled || UseDynamicEquipmentWeights)" 
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("ArmBandWeight"))"
+                            IsNonDefault="@(ArmBandWeight != 4)"
+                            OnUndo="UndoArmBandWeight"
+                            OnDefault="DefaultArmBandWeight" />
+                    }
+
+                    <MudSwitchTTDisabledWarning
+                        Label="Modded Clothing"
+                        TooltipText="Allows bots to use custom modded clothing."
+                        WarningTooltip1="Automatically disabled if PMC Seasonal Appearance is enabled."
+                        WarningTooltip2=""
+                        @bind-Value="ModCustomClothingEnabled"
+                        Disabled="@(EnableSeasonalPmcAppearance || UseDynamicEquipmentWeights)"
+                        HasPendingChanges="@(MainLayout.pendingChanges.Contains("ModCustomClothingEnabled"))"
+                        IsNonDefault="@(ModCustomClothingEnabled)"
+                        OnUndo="UndoCustomClothing"
+                        OnDefault="DefaultCustomClothing" />
+
+                    <MudSwitchTTWarning
+                        Label="Modded Attachments"
+                        TooltipText="Allows bots to use custom modded attachments."
+                        WarningTooltip1="This puts mod attachments on vanilla weapons. Expect additional RAM usage on the server and longer import times."
+                        WarningTooltip2=""
+                        @bind-Value="ModCustomAttachmentsEnabled"
+                        HasPendingChanges="@(MainLayout.pendingChanges.Contains("ModCustomAttachmentsEnabled"))"
+                        IsNonDefault="@(ModCustomAttachmentsEnabled)"
+                        OnUndo="UndoCustomAttachments"
+                        OnDefault="DefaultCustomAttachments" />
+
+                    <MudSliderDisabledTT
+                        Label="Tier Appearance Level"
+                        TooltipText="Tier that custom weapons & equipment will start appearing on bots."
+                        @bind-Value="ModInitialTierAppearance"
+                        Min="1"
+                        Max="7"
+                        Disabled="@(!ModCustomWeaponsEnabled && !ModCustomEquipmentEnabled)"
+                        HasPendingChanges="@(MainLayout.pendingChanges.Contains("ModInitialTierAppearance"))"
+                        IsNonDefault="@(ModInitialTierAppearance != 3)"
+                        OnUndo="UndoInitialTierAppearance"
+                        OnDefault="DefaultInitialTierAppearance" />
+
+                </MudGrid>
+            </MudExpansionPanel>
+
+            <MudExpansionPanel Class="mud-expansion-panels-borders ma-3 pa-5" Text="Compatibility Options" Expanded="true">
+                <MudGrid>
+
+                    <MudSwitchTT
+                        Label="Vanilla Cursing Safeguard"
+                        TooltipText="Prevents vanilla mods being added to vanilla attachments due to custom item filters."
+                        @bind-Value="ModSafeGuardEnabled"
+                        HasPendingChanges="@(MainLayout.pendingChanges.Contains("ModSafeGuardEnabled"))"
+                        IsNonDefault="@(!ModSafeGuardEnabled)"
+                        OnUndo="UndoSafeGuard"
+                        OnDefault="DefaultSafeGuard" />
+
+                    <MudSwitchTTWarning
+                        Label="MPR45 Canted Mount Safeguard"
+                        TooltipText="Enabling this means if a modded item has a NcSTAR MPR45 in a slot, only allow the MPR45 to be in that slot."
+                        WarningTooltip1="If you disable this, all Optical Devices will still be removed - but tactical devices will be allowed (they may block vision)."
+                        WarningTooltip2=""
+                        @bind-Value="ModMprSafeGuardEnabled"
+                        HasPendingChanges="@(MainLayout.pendingChanges.Contains("ModMprSafeGuardEnabled"))"
+                        IsNonDefault="@(!ModMprSafeGuardEnabled)"
+                        OnUndo="UndoMprSafeGuard"
+                        OnDefault="DefaultMprSafeGuard" />
+
+                    <MudSwitchTTWarning
+                        Label="Unlootable Belts on PMCs"
+                        TooltipText="Makes belts on PMCs in ArmBand slot unlootable, you can still view contents."
+                        WarningTooltip1="Pack'N'Strap Only."
+                        WarningTooltip2=""
+                        @bind-Value="ModPackNStrapCompatibility"
+                        HasPendingChanges="@(MainLayout.pendingChanges.Contains("ModPackNStrapCompatibility"))"
+                        IsNonDefault="@(!ModPackNStrapCompatibility)"
+                        OnUndo="UndoPackNStrap"
+                        OnDefault="DefaultPackNStrap" />
+
+                    <MudSwitchTTWarning
+                        Label="WTT Backport Dogtags"
+                        TooltipText="Allows PMCs to spawn with WTT Backport Dogtags."
+                        WarningTooltip1="WTT Backport Only."
+                        WarningTooltip2=""
+                        @bind-Value="ModWttBackportDogtags"
+                        HasPendingChanges="@(MainLayout.pendingChanges.Contains("ModWttBackportDogtags"))"
+                        IsNonDefault="@(!ModWttBackportDogtags)"
+                        OnUndo="UndoWttBackportDogtags"
+                        OnDefault="DefaultWttBackportDogtags" />
+
+                    <MudSwitchTTWarning
+                        Label="WTT Armoury Bosses Have Variants"
+                        TooltipText="Allows Bosses to also get the weapons that WTT intends for them. If disabled, they will only go to Pmcs, scavs, and guards."
+                        WarningTooltip1="WTT Armoury Only."
+                        WarningTooltip2=""
+                        @bind-Value="ModWttArmouryBossVariantsOnBosses"
+                        HasPendingChanges="@(MainLayout.pendingChanges.Contains("ModWttArmouryBossVariantsOnBosses"))"
+                        IsNonDefault="@(!ModWttArmouryBossVariantsOnBosses)"
+                        OnUndo="UndoWttArmouryBosses"
+                        OnDefault="DefaultArmouryBosses" />
+
+                    <MudSwitchTTWarning
+                        Label="WTT Armoury Others Have Variants"
+                        TooltipText="Enabling this will also allow other bots to get those weapons. If disabled then they will only go to the bosses WTT has dictated."
+                        WarningTooltip1="WTT Armoury Only."
+                        WarningTooltip2=""
+                        @bind-Value="ModWttArmouryBossVariantsOnOthers"
+                        HasPendingChanges="@(MainLayout.pendingChanges.Contains("ModWttArmouryBossVariantsOnOthers"))"
+                        IsNonDefault="@(!ModWttArmouryBossVariantsOnOthers)"
+                        OnUndo="UndoWttArmouryOthers"
+                        OnDefault="DefaultWttArmouryOthers" />
+
+                    <MudSwitchTTWarning
+                        Label="Add Gas Masks to Bots"
+                        TooltipText="Allows bots to use gas masks - if you don't use Hazard Zones then you don't need this."
+                        WarningTooltip1="Realism Only."
+                        WarningTooltip2=""
+                        @bind-Value="ModRealismCompatibility"
+                        HasPendingChanges="@(MainLayout.pendingChanges.Contains("ModRealismCompatibility"))"
+                        IsNonDefault="@(ModRealismCompatibility)"
+                        OnUndo="UndoRealism"
+                        OnDefault="DefaultRealism" />
+
+                    <MudItem xs="1">
+                        <MudPaper Class="d-flex justify-center mud-width-full ma-1" Elevation="0">
+                            <MudTooltip Color="Color.Dark" Placement="Placement.Right" Arrow="true">
+                                <ChildContent>
+                                    <MudIconButton Icon="@Icons.Material.Filled.Warning" Size="Size.Small" />
+                                </ChildContent>
+                                <TooltipContent>
+                                    <MudText Typo="Typo.caption">If you have a mod that increases the max stack size of ammo, you may need to adjust this.</MudText><MudSpacer />
+                                    <MudText Typo="Typo.caption">If the stack size of ammo is 10x higher than normal, then set this to 10% of normal.</MudText><MudSpacer />
+                                    <MudText Typo="Typo.caption">Example: Mod changes ammo stacks to 600 - you need to set this to 2, so they get 2 stacks of 600 instead of 20 stacks of 600.</MudText><MudSpacer />
+                                    <MudText Typo="Typo.caption">Do NOT mess with this unless you need it - it may cause bots to run out of ammo.</MudText>
+                                </TooltipContent>
+                            </MudTooltip>
+                        </MudPaper>
+                    </MudItem>
+                    <MudItem xs="4">
+                        <MudPaper Class="d-flex align-center mud-width-full ma-1" Elevation="0">
+                            <MudTooltip Text="Changes the amount of ammo stacks that get added to bot secure containers." Color="Color.Dark" Placement="Placement.Right" Arrow="true">
+                                <MudText>Bot Secure Container Ammo Stack Count</MudText>
+                            </MudTooltip>
+                        </MudPaper>
+                    </MudItem>
+                    <MudItem xs="1">
+                        <MudButton Variant="Variant.Outlined" Color="Color.Inherit" Size="Size.Small">@ModAmmoStackCount</MudButton>
+                    </MudItem>
+                    <MudItem xs="5">
+                        <MudSlider @bind-Value="ModAmmoStackCount" ValueLabel="true" Min="1" Max="30" Color="Color.Tertiary" Size="Size.Medium" />
+                    </MudItem>
+                    <MudItem xs="1">
+                        @if (MainLayout.AppUndoButtonToggle && MainLayout.pendingChanges.Contains("ModAmmoStackCount"))
+                        {
+                            <MudButton @onclick="UndoAmmoStackCount" Variant="Variant.Filled" Color="Color.Inherit" Size="Size.Small">Undo</MudButton>
+                        }
+                        else if (MainLayout.AppDefaultButtonToggle && ModAmmoStackCount != 20)
+                        {
+                            <MudButton @onclick="DefaultAmmoStackCount" Variant="Variant.Filled" Color="Color.Dark" Size="Size.Small">Default</MudButton>
+                        }
+                    </MudItem>
+
+                </MudGrid>
+            </MudExpansionPanel>
+
+            <MudExpansionPanel Class="mud-expansion-panels-borders ma-3 pa-5" Text="Debug" Expanded="false">
+                <MudGrid>
+
+                    <MudSwitchTTWarning
+                        Label="Debug Logging"
+                        TooltipText="Do you really need this? Maybe...you're an early release tester?"
+                        WarningTooltip1="Enables debug logs in \user\mods\acidphantasm-progressivebotsystem\logs\debug.log"
+                        WarningTooltip2=""
+                        @bind-Value="DebugLogging"
+                        HasPendingChanges="@(MainLayout.pendingChanges.Contains("DebugLogging"))"
+                        IsNonDefault="@(DebugLogging)"
+                        OnUndo="UndoDebug"
+                        OnDefault="DefaultDebug" />
+
+                    <MudSwitchTTWarning
+                        Label="Bot Equipment Logging"
+                        TooltipText="Enable or disable Bot Equipment logging for APBS. Very miniscule performance decrease when enabled."
+                        WarningTooltip1="Enables bot equipment logs in \user\mods\acidphantasm-progressivebotsystem\logs\*_generation.log"
+                        WarningTooltip2=""
+                        @bind-Value="BotEquipmentLogging"
+                        HasPendingChanges="@(MainLayout.pendingChanges.Contains("BotEquipmentLogging"))"
+                        IsNonDefault="@(!BotEquipmentLogging)"
+                        OnUndo="UndoBotLog"
+                        OnDefault="DefaultBotLog" />
+
+                    <MudSwitchTTWarning
+                        Label="Mod Import Tuning Logging"
+                        TooltipText="Enable or disable mod import tuning for APBS. Tune your settings, save your config and read your server output."
+                        WarningTooltip1="Remember to turn this back off when you're done tuning."
+                        WarningTooltip2=""
+                        @bind-Value="ModImportTuningLog"
+                        HasPendingChanges="@(MainLayout.pendingChanges.Contains("ModImportTuningLog"))"
+                        IsNonDefault="@(ModImportTuningLog)"
+                        OnUndo="UndoModImportTuningLog"
+                        OnDefault="DefaultModImportTuningLog" />
+                    
+                    <MudSelectUndoDefaultTT
+                        Label="Mod Import Tuning Bot Type"
+                        TooltipText="Bot you want to test. Default means guards and followers."
+                        Value="@ModImportTuningBot"
+                        ValueChanged="@(x => ModImportTuningBot = x)"
+                        Items="@_modImportTuningBots"
+                        HasPendingChanges="@(MainLayout.pendingChanges.Contains(nameof(ModImportTuningBot)))"
+                        IsNonDefault="@(ModImportTuningBot != "pmc")"
+                        OnUndo="UndoModImportTuningBot"
+                        OnDefault="DefaultModImportTuningBot" />
+                    
+                    <MudSliderDisabledTT
+                        Label="Mod Import Tuning Tier"
+                        TooltipText="Tier you want to test, this is the tier used for the output logging. Minimum value is the Initial Tier configured."
+                        @bind-Value="ModImportTuningTier"
+                        Min="ModInitialTierAppearance"
+                        Max="7"
+                        Disabled="@(!ModImportTuningLog)"
+                        HasPendingChanges="@(MainLayout.pendingChanges.Contains("ModImportTuningTier"))"
+                        IsNonDefault="@(ModImportTuningTier != 3)"
+                        OnUndo="UndoModImportTuningTier"
+                        OnDefault="DefaultModImportTuningTier" />
+
+                </MudGrid>
+            </MudExpansionPanel>
+
+            <MudExpansionPanel Class="mud-expansion-panels-borders ma-3 pa-5" Style="padding-bottom:25px" Text="Nothing to see here..." Expanded="false">
+                <MudGrid>
+
+                    <MudSwitchTT
+                        Label="April Fool's Event"
+                        TooltipText="Active: April 1. It inverts the tiering."
+                        @bind-Value="EventsAprilFools"
+                        HasPendingChanges="@(MainLayout.pendingChanges.Contains("EventsAprilFools"))"
+                        IsNonDefault="@(!EventsAprilFools)"
+                        OnUndo="UndoAprilFools"
+                        OnDefault="DefaultAprilFools" />
+
+                    <MudSwitchTT
+                        Label="Halloween Event"
+                        TooltipText="Active: October 31. All bots get pumpkin heads."
+                        @bind-Value="EventsHalloween"
+                        HasPendingChanges="@(MainLayout.pendingChanges.Contains("EventsHalloween"))"
+                        IsNonDefault="@(!EventsHalloween)"
+                        OnUndo="UndoHalloween"
+                        OnDefault="DefaultHalloween" />
+
+                    <MudSwitchTT
+                        Label="Christmas Event"
+                        TooltipText="Active: December 24-25. All bots get Killa's Christmas Helmet and Armour."
+                        @bind-Value="EventsChristmas"
+                        HasPendingChanges="@(MainLayout.pendingChanges.Contains("EventsChristmas"))"
+                        IsNonDefault="@(!EventsChristmas)"
+                        OnUndo="UndoChristmas"
+                        OnDefault="DefaultChristmas" />
+
+                </MudGrid>
+            </MudExpansionPanel>
+        </MudExpansionPanels>
+    </MudContainer>
+</MudMainContent>
+
+@code {
+    #region ENABLE/DISABLE TYPES
+    private bool ModCustomWeaponsEnabled
+    {
+        get => ModConfig.Config.CompatibilityConfig.EnableModdedWeapons;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.EnableModdedWeapons, nameof(ModCustomWeaponsEnabled));
+            ModConfig.Config.CompatibilityConfig.EnableModdedWeapons = value;
+        }
+    }
+    private void UndoCustomWeapons() => ModCustomWeaponsEnabled = ModConfig.OriginalConfig.CompatibilityConfig.EnableModdedWeapons;
+    private void DefaultCustomWeapons() => ModCustomWeaponsEnabled = false;
+
+    private bool ModCustomEquipmentEnabled
+    {
+        get => ModConfig.Config.CompatibilityConfig.EnableModdedEquipment;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.EnableModdedEquipment, nameof(ModCustomEquipmentEnabled));
+            ModConfig.Config.CompatibilityConfig.EnableModdedEquipment = value;
+        }
+    }
+    private void UndoCustomEquipment() => ModCustomEquipmentEnabled = ModConfig.OriginalConfig.CompatibilityConfig.EnableModdedEquipment;
+    private void DefaultCustomEquipment() => ModCustomEquipmentEnabled = false;
+
+    private bool ModCustomClothingEnabled
+    {
+        get => ModConfig.Config.CompatibilityConfig.EnableModdedClothing;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.EnableModdedClothing, nameof(ModCustomClothingEnabled));
+            ModConfig.Config.CompatibilityConfig.EnableModdedClothing = value;
+        }
+    }
+    private void UndoCustomClothing() => ModCustomClothingEnabled = ModConfig.OriginalConfig.CompatibilityConfig.EnableModdedClothing;
+    private void DefaultCustomClothing() => ModCustomClothingEnabled = false;
+
+    private bool ModCustomAttachmentsEnabled
+    {
+        get => ModConfig.Config.CompatibilityConfig.EnableModdedAttachments;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.EnableModdedAttachments, nameof(ModCustomAttachmentsEnabled));
+            ModConfig.Config.CompatibilityConfig.EnableModdedAttachments = value;
+        }
+    }
+    private void UndoCustomAttachments() => ModCustomAttachmentsEnabled = ModConfig.OriginalConfig.CompatibilityConfig.EnableModdedAttachments;
+    private void DefaultCustomAttachments() => ModCustomAttachmentsEnabled = false;
+    #endregion
+
+    #region DYNAMIC WEIGHTS
+
+    private bool UseDynamicWeaponWeights
+    {
+        get => ModConfig.Config.CompatibilityConfig.UseDynamicWeaponWeights;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.UseDynamicWeaponWeights, nameof(UseDynamicWeaponWeights));
+            ModConfig.Config.CompatibilityConfig.UseDynamicWeaponWeights = value;
+        }
+    }
+    private void UndoUseDynamicWeaponWeights() => UseDynamicWeaponWeights = ModConfig.OriginalConfig.CompatibilityConfig.UseDynamicWeaponWeights;
+    private void DefaultUseDynamicWeaponWeights() => UseDynamicWeaponWeights = true;
+
+    private double DynamicPmcWeaponWeightMultiplier
+    {
+        get => ModConfig.Config.CompatibilityConfig.DynamicWeaponWeightMultipliers.Pmc;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.DynamicWeaponWeightMultipliers.Pmc, nameof(DynamicPmcWeaponWeightMultiplier));
+            ModConfig.Config.CompatibilityConfig.DynamicWeaponWeightMultipliers.Pmc = value;
+        }
+    }
+    private void UndoPmcDynamicWeaponWeightMultiplier() => DynamicPmcWeaponWeightMultiplier = ModConfig.OriginalConfig.CompatibilityConfig.DynamicWeaponWeightMultipliers.Pmc;
+    private void DefaultPmcDynamicWeaponWeightMultiplier() => DynamicPmcWeaponWeightMultiplier = 1.0;
+
+    private double DynamicScavWeaponWeightMultiplier
+    {
+        get => ModConfig.Config.CompatibilityConfig.DynamicWeaponWeightMultipliers.Scav;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.DynamicWeaponWeightMultipliers.Scav, nameof(DynamicScavWeaponWeightMultiplier));
+            ModConfig.Config.CompatibilityConfig.DynamicWeaponWeightMultipliers.Scav = value;
+        }
+    }
+    private void UndoScavDynamicWeaponWeightMultiplier() => DynamicScavWeaponWeightMultiplier = ModConfig.OriginalConfig.CompatibilityConfig.DynamicWeaponWeightMultipliers.Scav;
+    private void DefaultScavDynamicWeaponWeightMultiplier() => DynamicScavWeaponWeightMultiplier = 1.0;
+
+    private double DynamicGuardWeaponWeightMultiplier
+    {
+        get => ModConfig.Config.CompatibilityConfig.DynamicWeaponWeightMultipliers.Follower;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.DynamicWeaponWeightMultipliers.Follower, nameof(DynamicGuardWeaponWeightMultiplier));
+            ModConfig.Config.CompatibilityConfig.DynamicWeaponWeightMultipliers.Follower = value;
+        }
+    }
+    private void UndoGuardDynamicWeaponWeightMultiplier() => DynamicGuardWeaponWeightMultiplier = ModConfig.OriginalConfig.CompatibilityConfig.DynamicWeaponWeightMultipliers.Follower;
+    private void DefaultGuardDynamicWeaponWeightMultiplier() => DynamicGuardWeaponWeightMultiplier = 1.0;
+
+    private bool UseDynamicEquipmentWeights
+    {
+        get => ModConfig.Config.CompatibilityConfig.UseDynamicEquipmentWeights;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.UseDynamicEquipmentWeights, nameof(UseDynamicEquipmentWeights));
+            ModConfig.Config.CompatibilityConfig.UseDynamicEquipmentWeights = value;
+        }
+    }
+    private void UndoUseDynamicEquipmentWeights() => UseDynamicEquipmentWeights = ModConfig.OriginalConfig.CompatibilityConfig.UseDynamicEquipmentWeights;
+    private void DefaultUseDynamicEquipmentWeights() => UseDynamicEquipmentWeights = true;
+
+    private bool ForceScavEquipmentWeight
+    {
+        get => ModConfig.Config.CompatibilityConfig.ForceScavEquipmentWeight;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.ForceScavEquipmentWeight, nameof(ForceScavEquipmentWeight));
+            ModConfig.Config.CompatibilityConfig.ForceScavEquipmentWeight = value;
+        }
+    }
+    private void UndoForceScavEquipmentWeights() => ForceScavEquipmentWeight = ModConfig.OriginalConfig.CompatibilityConfig.ForceScavEquipmentWeight;
+    private void DefaultForceScavEquipmentWeights() => ForceScavEquipmentWeight = true;
+
+    private int ForceScavEquipmentWeightValue
+    {
+        get => ModConfig.Config.CompatibilityConfig.ForceScavEquipmentWeightValue;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.ForceScavEquipmentWeightValue, nameof(ForceScavEquipmentWeightValue));
+            ModConfig.Config.CompatibilityConfig.ForceScavEquipmentWeightValue = value;
+        }
+    }
+    private void UndoForceScavEquipmentWeightValue() => ForceScavEquipmentWeightValue = ModConfig.OriginalConfig.CompatibilityConfig.ForceScavEquipmentWeightValue;
+    private void DefaultForceScavEquipmentWeightValue() => ForceScavEquipmentWeightValue = 1;
+
+    private double DynamicHeadwearValue
+    {
+        get => ModConfig.Config.CompatibilityConfig.DynamicEquipmentWeightMultipliers.Headwear;
+        set { Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.DynamicEquipmentWeightMultipliers.Headwear, nameof(DynamicHeadwearValue)); ModConfig.Config.CompatibilityConfig.DynamicEquipmentWeightMultipliers.Headwear = value; }
+    }
+    private void UndoDynamicHeadwear() => DynamicHeadwearValue = ModConfig.OriginalConfig.CompatibilityConfig.DynamicEquipmentWeightMultipliers.Headwear;
+    private void DefaultDynamicHeadwear() => DynamicHeadwearValue = 1.0;
+
+    private double DynamicHeadwearWithSlotsValue
+    {
+        get => ModConfig.Config.CompatibilityConfig.DynamicEquipmentWeightMultipliers.HeadwearWithSlots;
+        set { Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.DynamicEquipmentWeightMultipliers.HeadwearWithSlots, nameof(DynamicHeadwearWithSlotsValue)); ModConfig.Config.CompatibilityConfig.DynamicEquipmentWeightMultipliers.HeadwearWithSlots = value; }
+    }
+    private void UndoDynamicHeadwearWithSlots() => DynamicHeadwearWithSlotsValue = ModConfig.OriginalConfig.CompatibilityConfig.DynamicEquipmentWeightMultipliers.HeadwearWithSlots;
+    private void DefaultDynamicHeadwearWithSlots() => DynamicHeadwearWithSlotsValue = 1.0;
+
+    private double DynamicArmourVestValue
+    {
+        get => ModConfig.Config.CompatibilityConfig.DynamicEquipmentWeightMultipliers.ArmorVest;
+        set { Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.DynamicEquipmentWeightMultipliers.ArmorVest, nameof(DynamicArmourVestValue)); ModConfig.Config.CompatibilityConfig.DynamicEquipmentWeightMultipliers.ArmorVest = value; }
+    }
+    private void UndoDynamicArmourVest() => DynamicArmourVestValue = ModConfig.OriginalConfig.CompatibilityConfig.DynamicEquipmentWeightMultipliers.ArmorVest;
+    private void DefaultDynamicArmourVest() => DynamicArmourVestValue = 1.0;
+
+    private double DynamicArmouredRigValue
+    {
+        get => ModConfig.Config.CompatibilityConfig.DynamicEquipmentWeightMultipliers.ArmouredRig;
+        set { Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.DynamicEquipmentWeightMultipliers.ArmouredRig, nameof(DynamicArmouredRigValue)); ModConfig.Config.CompatibilityConfig.DynamicEquipmentWeightMultipliers.ArmouredRig = value; }
+    }
+    private void UndoDynamicArmouredRig() => DynamicArmouredRigValue = ModConfig.OriginalConfig.CompatibilityConfig.DynamicEquipmentWeightMultipliers.ArmouredRig;
+    private void DefaultDynamicArmouredRig() => DynamicArmouredRigValue = 1.0;
+
+    private double DynamicTacticalVestValue
+    {
+        get => ModConfig.Config.CompatibilityConfig.DynamicEquipmentWeightMultipliers.TacticalVest;
+        set { Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.DynamicEquipmentWeightMultipliers.TacticalVest, nameof(DynamicTacticalVestValue)); ModConfig.Config.CompatibilityConfig.DynamicEquipmentWeightMultipliers.TacticalVest = value; }
+    }
+    private void UndoDynamicTacticalVest() => DynamicTacticalVestValue = ModConfig.OriginalConfig.CompatibilityConfig.DynamicEquipmentWeightMultipliers.TacticalVest;
+    private void DefaultDynamicTacticalVest() => DynamicTacticalVestValue = 1.0;
+
+    private double DynamicTacticalVestLargeGridValue
+    {
+        get => ModConfig.Config.CompatibilityConfig.DynamicEquipmentWeightMultipliers.TacticalVestLargeGrid;
+        set { Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.DynamicEquipmentWeightMultipliers.TacticalVestLargeGrid, nameof(DynamicTacticalVestLargeGridValue)); ModConfig.Config.CompatibilityConfig.DynamicEquipmentWeightMultipliers.TacticalVestLargeGrid = value; }
+    }
+    private void UndoDynamicTacticalVestLargeGrid() => DynamicTacticalVestLargeGridValue = ModConfig.OriginalConfig.CompatibilityConfig.DynamicEquipmentWeightMultipliers.TacticalVestLargeGrid;
+    private void DefaultDynamicTacticalVestLargeGrid() => DynamicTacticalVestLargeGridValue = 1.0;
+
+    private double DynamicBackpackValue
+    {
+        get => ModConfig.Config.CompatibilityConfig.DynamicEquipmentWeightMultipliers.Backpack;
+        set { Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.DynamicEquipmentWeightMultipliers.Backpack, nameof(DynamicBackpackValue)); ModConfig.Config.CompatibilityConfig.DynamicEquipmentWeightMultipliers.Backpack = value; }
+    }
+    private void UndoDynamicBackpack() => DynamicBackpackValue = ModConfig.OriginalConfig.CompatibilityConfig.DynamicEquipmentWeightMultipliers.Backpack;
+    private void DefaultDynamicBackpack() => DynamicBackpackValue = 1.0;
+
+    private double DynamicFaceCoverValue
+    {
+        get => ModConfig.Config.CompatibilityConfig.DynamicEquipmentWeightMultipliers.FaceCover;
+        set { Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.DynamicEquipmentWeightMultipliers.FaceCover, nameof(DynamicFaceCoverValue)); ModConfig.Config.CompatibilityConfig.DynamicEquipmentWeightMultipliers.FaceCover = value; }
+    }
+    private void UndoDynamicFaceCover() => DynamicFaceCoverValue = ModConfig.OriginalConfig.CompatibilityConfig.DynamicEquipmentWeightMultipliers.FaceCover;
+    private void DefaultDynamicFaceCover() => DynamicFaceCoverValue = 1.0;
+
+    private double DynamicFaceCoverAc0Value
+    {
+        get => ModConfig.Config.CompatibilityConfig.DynamicEquipmentWeightMultipliers.FaceCoverAc0;
+        set { Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.DynamicEquipmentWeightMultipliers.FaceCoverAc0, nameof(DynamicFaceCoverAc0Value)); ModConfig.Config.CompatibilityConfig.DynamicEquipmentWeightMultipliers.FaceCoverAc0 = value; }
+    }
+    private void UndoDynamicFaceCoverAc0() => DynamicFaceCoverAc0Value = ModConfig.OriginalConfig.CompatibilityConfig.DynamicEquipmentWeightMultipliers.FaceCoverAc0;
+    private void DefaultDynamicFaceCoverAc0() => DynamicFaceCoverAc0Value = 1.0;
+
+    private double DynamicFaceCoverAc3Value
+    {
+        get => ModConfig.Config.CompatibilityConfig.DynamicEquipmentWeightMultipliers.FaceCoverAc2;
+        set { Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.DynamicEquipmentWeightMultipliers.FaceCoverAc2, nameof(DynamicFaceCoverAc3Value)); ModConfig.Config.CompatibilityConfig.DynamicEquipmentWeightMultipliers.FaceCoverAc2 = value; }
+    }
+    private void UndoDynamicFaceCoverAc3() => DynamicFaceCoverAc3Value = ModConfig.OriginalConfig.CompatibilityConfig.DynamicEquipmentWeightMultipliers.FaceCoverAc2;
+    private void DefaultDynamicFaceCoverAc3() => DynamicFaceCoverAc3Value = 1.0;
+
+    private double DynamicEyewearValue
+    {
+        get => ModConfig.Config.CompatibilityConfig.DynamicEquipmentWeightMultipliers.Eyewear;
+        set { Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.DynamicEquipmentWeightMultipliers.Eyewear, nameof(DynamicEyewearValue)); ModConfig.Config.CompatibilityConfig.DynamicEquipmentWeightMultipliers.Eyewear = value; }
+    }
+    private void UndoDynamicEyewear() => DynamicEyewearValue = ModConfig.OriginalConfig.CompatibilityConfig.DynamicEquipmentWeightMultipliers.Eyewear;
+    private void DefaultDynamicEyewear() => DynamicEyewearValue = 1.0;
+
+    private double DynamicEarpieceValue
+    {
+        get => ModConfig.Config.CompatibilityConfig.DynamicEquipmentWeightMultipliers.Earpiece;
+        set { Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.DynamicEquipmentWeightMultipliers.Earpiece, nameof(DynamicEarpieceValue)); ModConfig.Config.CompatibilityConfig.DynamicEquipmentWeightMultipliers.Earpiece = value; }
+    }
+    private void UndoDynamicEarpiece() => DynamicEarpieceValue = ModConfig.OriginalConfig.CompatibilityConfig.DynamicEquipmentWeightMultipliers.Earpiece;
+    private void DefaultDynamicEarpiece() => DynamicEarpieceValue = 1.0;
+
+    private double DynamicArmbandValue
+    {
+        get => ModConfig.Config.CompatibilityConfig.DynamicEquipmentWeightMultipliers.ArmBand;
+        set { Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.DynamicEquipmentWeightMultipliers.ArmBand, nameof(DynamicArmbandValue)); ModConfig.Config.CompatibilityConfig.DynamicEquipmentWeightMultipliers.ArmBand = value; }
+    }
+    private void UndoDynamicArmband() => DynamicArmbandValue = ModConfig.OriginalConfig.CompatibilityConfig.DynamicEquipmentWeightMultipliers.ArmBand;
+    private void DefaultDynamicArmband() => DynamicArmbandValue = 1.0;
+
+    #endregion
+
+    #region WEIGHTS / APPEARANCE
+    private int ModPmcWeaponWeights
+    {
+        get => ModConfig.Config.CompatibilityConfig.PmcWeaponWeights;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.PmcWeaponWeights, nameof(ModPmcWeaponWeights));
+            ModConfig.Config.CompatibilityConfig.PmcWeaponWeights = value;
+        }
+    }
+    private void UndoPmcWeaponWeights() => ModPmcWeaponWeights = ModConfig.OriginalConfig.CompatibilityConfig.PmcWeaponWeights;
+    private void DefaultPmcWeaponWeights() => ModPmcWeaponWeights = 8;
+
+    private int ModScavWeaponWeights
+    {
+        get => ModConfig.Config.CompatibilityConfig.ScavWeaponWeights;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.ScavWeaponWeights, nameof(ModScavWeaponWeights));
+            ModConfig.Config.CompatibilityConfig.ScavWeaponWeights = value;
+        }
+    }
+    private void UndoScavWeaponWeights() => ModScavWeaponWeights = ModConfig.OriginalConfig.CompatibilityConfig.ScavWeaponWeights;
+    private void DefaultScavWeaponWeights() => ModScavWeaponWeights = 1;
+
+    private int ModFollowerWeaponWeights
+    {
+        get => ModConfig.Config.CompatibilityConfig.FollowerWeaponWeights;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.FollowerWeaponWeights, nameof(ModFollowerWeaponWeights));
+            ModConfig.Config.CompatibilityConfig.FollowerWeaponWeights = value;
+        }
+    }
+    private void UndoFollowerWeaponWeights() => ModFollowerWeaponWeights = ModConfig.OriginalConfig.CompatibilityConfig.FollowerWeaponWeights;
+    private void DefaultFollowerWeaponWeights() => ModFollowerWeaponWeights = 6;
+
+    private int ArmBandWeight
+    {
+        get => ModConfig.Config.CompatibilityConfig.ArmBandWeight;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.ArmBandWeight, nameof(ArmBandWeight));
+            ModConfig.Config.CompatibilityConfig.ArmBandWeight = value;
+        }
+    }
+    private void UndoArmBandWeight() => ModFollowerWeaponWeights = ModConfig.OriginalConfig.CompatibilityConfig.ArmBandWeight;
+    private void DefaultArmBandWeight() => ModFollowerWeaponWeights = 4;
+    
+    private int ArmourVestWeight
+    {
+        get => ModConfig.Config.CompatibilityConfig.ArmourVestWeight;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.ArmourVestWeight, nameof(ArmourVestWeight));
+            ModConfig.Config.CompatibilityConfig.ArmourVestWeight = value;
+        }
+    }
+    private void UndoArmourVestWeight() => ArmourVestWeight = ModConfig.OriginalConfig.CompatibilityConfig.ArmourVestWeight;
+    private void DefaultArmourVestWeight() => ArmourVestWeight = 10;
+
+    private int ArmouredRigWeight
+    {
+        get => ModConfig.Config.CompatibilityConfig.ArmouredRigWeight;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.ArmouredRigWeight, nameof(ArmouredRigWeight));
+            ModConfig.Config.CompatibilityConfig.ArmouredRigWeight = value;
+        }
+    }
+    private void UndoArmouredRigWeight() => ArmouredRigWeight = ModConfig.OriginalConfig.CompatibilityConfig.ArmouredRigWeight;
+    private void DefaultArmouredRigWeight() => ArmouredRigWeight = 7;
+
+    private int BackpackWeight
+    {
+        get => ModConfig.Config.CompatibilityConfig.BackpackWeight;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.BackpackWeight, nameof(BackpackWeight));
+            ModConfig.Config.CompatibilityConfig.BackpackWeight = value;
+        }
+    }
+    private void UndoBackpackWeight() => BackpackWeight = ModConfig.OriginalConfig.CompatibilityConfig.BackpackWeight;
+    private void DefaultBackpackWeight() => BackpackWeight = 5;
+
+    private int EyewearWeight
+    {
+        get => ModConfig.Config.CompatibilityConfig.EyewearWeight;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.EyewearWeight, nameof(EyewearWeight));
+            ModConfig.Config.CompatibilityConfig.EyewearWeight = value;
+        }
+    }
+    private void UndoEyewearWeight() => EyewearWeight = ModConfig.OriginalConfig.CompatibilityConfig.EyewearWeight;
+    private void DefaultEyewearWeight() => EyewearWeight = 1;
+
+    private int EarpieceWeight
+    {
+        get => ModConfig.Config.CompatibilityConfig.EarpieceWeight;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.EarpieceWeight, nameof(EarpieceWeight));
+            ModConfig.Config.CompatibilityConfig.EarpieceWeight = value;
+        }
+    }
+    private void UndoEarpieceWeight() => EarpieceWeight = ModConfig.OriginalConfig.CompatibilityConfig.EarpieceWeight;
+    private void DefaultEarpieceWeight() => EarpieceWeight = 5;
+
+    private int FaceCoverAc3Weight
+    {
+        get => ModConfig.Config.CompatibilityConfig.FaceCoverAc2Weight;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.FaceCoverAc2Weight, nameof(FaceCoverAc3Weight));
+            ModConfig.Config.CompatibilityConfig.FaceCoverAc2Weight = value;
+        }
+    }
+    private void UndoFaceCoverAc3Weight() => FaceCoverAc3Weight = ModConfig.OriginalConfig.CompatibilityConfig.FaceCoverAc2Weight;
+    private void DefaultFaceCoverAc3Weight() => FaceCoverAc3Weight = 1;
+
+    private int FaceCoverAc0Weight
+    {
+        get => ModConfig.Config.CompatibilityConfig.FaceCoverAc0Weight;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.FaceCoverAc0Weight, nameof(FaceCoverAc0Weight));
+            ModConfig.Config.CompatibilityConfig.FaceCoverAc0Weight = value;
+        }
+    }
+    private void UndoFaceCoverAc0Weight() => FaceCoverAc0Weight = ModConfig.OriginalConfig.CompatibilityConfig.FaceCoverAc0Weight;
+    private void DefaultFaceCoverAc0Weight() => FaceCoverAc0Weight = 2;
+
+    private int FaceCoverWeight
+    {
+        get => ModConfig.Config.CompatibilityConfig.FaceCoverWeight;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.FaceCoverWeight, nameof(FaceCoverWeight));
+            ModConfig.Config.CompatibilityConfig.FaceCoverWeight = value;
+        }
+    }
+    private void UndoFaceCoverWeight() => FaceCoverWeight = ModConfig.OriginalConfig.CompatibilityConfig.FaceCoverWeight;
+    private void DefaultFaceCoverWeight() => FaceCoverWeight = 4;
+
+    private int HeadwearESlotWeight
+    {
+        get => ModConfig.Config.CompatibilityConfig.HeadwearESlotWeight;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.HeadwearESlotWeight, nameof(HeadwearESlotWeight));
+            ModConfig.Config.CompatibilityConfig.HeadwearESlotWeight = value;
+        }
+    }
+    private void UndoHeadwearESlotWeight() => HeadwearESlotWeight = ModConfig.OriginalConfig.CompatibilityConfig.HeadwearESlotWeight;
+    private void DefaultHeadwearESlotWeight() => HeadwearESlotWeight = 6;
+
+    private int HeadwearWeight
+    {
+        get => ModConfig.Config.CompatibilityConfig.HeadwearWeight;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.HeadwearWeight, nameof(HeadwearWeight));
+            ModConfig.Config.CompatibilityConfig.HeadwearWeight = value;
+        }
+    }
+    private void UndoHeadwearWeight() => HeadwearWeight = ModConfig.OriginalConfig.CompatibilityConfig.HeadwearWeight;
+    private void DefaultHeadwearWeight() => HeadwearWeight = 1;
+
+    private int TacticalVestGLengthWeight
+    {
+        get => ModConfig.Config.CompatibilityConfig.TacticalVestGLengthWeight;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.TacticalVestGLengthWeight, nameof(TacticalVestGLengthWeight));
+            ModConfig.Config.CompatibilityConfig.TacticalVestGLengthWeight = value;
+        }
+    }
+    private void UndoTacticalVestGLengthWeight() => TacticalVestGLengthWeight = ModConfig.OriginalConfig.CompatibilityConfig.TacticalVestGLengthWeight;
+    private void DefaultTacticalVestGLengthWeight() => TacticalVestGLengthWeight = 10;
+
+    private int TacticalVestWeight
+    {
+        get => ModConfig.Config.CompatibilityConfig.TacticalVestWeight;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.TacticalVestWeight, nameof(TacticalVestWeight));
+            ModConfig.Config.CompatibilityConfig.TacticalVestWeight = value;
+        }
+    }
+    private void UndoTacticalVestWeight() => TacticalVestWeight = ModConfig.OriginalConfig.CompatibilityConfig.TacticalVestWeight;
+    private void DefaultTacticalVestWeight() => TacticalVestWeight = 1;
+
+    private int ModInitialTierAppearance
+    {
+        get => ModConfig.Config.CompatibilityConfig.InitalTierAppearance;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.InitalTierAppearance, nameof(ModInitialTierAppearance));
+            ModConfig.Config.CompatibilityConfig.InitalTierAppearance = value;
+        }
+    }
+    private void UndoInitialTierAppearance() => ModInitialTierAppearance = ModConfig.OriginalConfig.CompatibilityConfig.InitalTierAppearance;
+    private void DefaultInitialTierAppearance() => ModInitialTierAppearance = 3;
+    #endregion
+
+    #region COMPATIBILITY SETTINGS
+    private bool ModSafeGuardEnabled
+    {
+        get => ModConfig.Config.CompatibilityConfig.EnableSafeGuard;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.EnableSafeGuard, nameof(ModSafeGuardEnabled));
+            ModConfig.Config.CompatibilityConfig.EnableSafeGuard = value;
+        }
+    }
+    private void UndoSafeGuard() => ModSafeGuardEnabled = ModConfig.OriginalConfig.CompatibilityConfig.EnableSafeGuard;
+    private void DefaultSafeGuard() => ModSafeGuardEnabled = true;
+
+    private bool ModMprSafeGuardEnabled
+    {
+        get => ModConfig.Config.CompatibilityConfig.EnableMprSafeGuard;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.EnableMprSafeGuard, nameof(ModMprSafeGuardEnabled));
+            ModConfig.Config.CompatibilityConfig.EnableMprSafeGuard = value;
+        }
+    }
+    private void UndoMprSafeGuard() => ModMprSafeGuardEnabled = ModConfig.OriginalConfig.CompatibilityConfig.EnableMprSafeGuard;
+    private void DefaultMprSafeGuard() => ModMprSafeGuardEnabled = true;
+
+    private bool ModPackNStrapCompatibility
+    {
+        get => ModConfig.Config.CompatibilityConfig.PackNStrapUnlootablePmcArmbandBelts;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.PackNStrapUnlootablePmcArmbandBelts, nameof(ModPackNStrapCompatibility));
+            ModConfig.Config.CompatibilityConfig.PackNStrapUnlootablePmcArmbandBelts = value;
+        }
+    }
+    private void UndoPackNStrap() => ModPackNStrapCompatibility = ModConfig.OriginalConfig.CompatibilityConfig.PackNStrapUnlootablePmcArmbandBelts;
+    private void DefaultPackNStrap() => ModPackNStrapCompatibility = true;
+
+    private bool ModWttBackportDogtags
+    {
+        get => ModConfig.Config.CompatibilityConfig.WttBackPortAllowDogtags;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.WttBackPortAllowDogtags, nameof(ModWttBackportDogtags));
+            ModConfig.Config.CompatibilityConfig.WttBackPortAllowDogtags = value;
+        }
+    }
+    private void UndoWttBackportDogtags() => ModWttBackportDogtags = ModConfig.OriginalConfig.CompatibilityConfig.WttBackPortAllowDogtags;
+    private void DefaultWttBackportDogtags() => ModWttBackportDogtags = true;
+
+    private bool ModWttArmouryBossVariantsOnBosses
+    {
+        get => ModConfig.Config.CompatibilityConfig.WttArmouryAddBossVariantsToBosses;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.WttArmouryAddBossVariantsToBosses, nameof(ModWttArmouryBossVariantsOnBosses));
+            ModConfig.Config.CompatibilityConfig.WttArmouryAddBossVariantsToBosses = value;
+        }
+    }
+    private void UndoWttArmouryBosses() => ModWttArmouryBossVariantsOnBosses = ModConfig.OriginalConfig.CompatibilityConfig.WttArmouryAddBossVariantsToBosses;
+    private void DefaultArmouryBosses() => ModWttArmouryBossVariantsOnBosses = true;
+
+    private bool ModWttArmouryBossVariantsOnOthers
+    {
+        get => ModConfig.Config.CompatibilityConfig.WttArmouryAddBossVariantsToOthers;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.WttArmouryAddBossVariantsToOthers, nameof(ModWttArmouryBossVariantsOnOthers));
+            ModConfig.Config.CompatibilityConfig.WttArmouryAddBossVariantsToOthers = value;
+        }
+    }
+    private void UndoWttArmouryOthers() => ModWttArmouryBossVariantsOnOthers = ModConfig.OriginalConfig.CompatibilityConfig.WttArmouryAddBossVariantsToOthers;
+    private void DefaultWttArmouryOthers() => ModWttArmouryBossVariantsOnOthers = true;
+
+    private bool ModRealismCompatibility
+    {
+        get => ModConfig.Config.CompatibilityConfig.RealismAddGasMasksToBots;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.RealismAddGasMasksToBots, nameof(ModRealismCompatibility));
+            ModConfig.Config.CompatibilityConfig.RealismAddGasMasksToBots = value;
+        }
+    }
+    private void UndoRealism() => ModRealismCompatibility = ModConfig.OriginalConfig.CompatibilityConfig.RealismAddGasMasksToBots;
+    private void DefaultRealism() => ModRealismCompatibility = false;
+
+    private int ModAmmoStackCount
+    {
+        get => ModConfig.Config.CompatibilityConfig.GeneralSecureContainerAmmoStacks;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.GeneralSecureContainerAmmoStacks, nameof(ModAmmoStackCount));
+            ModConfig.Config.CompatibilityConfig.GeneralSecureContainerAmmoStacks = value;
+        }
+    }
+    private void UndoAmmoStackCount() => ModAmmoStackCount = ModConfig.OriginalConfig.CompatibilityConfig.GeneralSecureContainerAmmoStacks;
+    private void DefaultAmmoStackCount() => ModAmmoStackCount = 20;
+    #endregion
+
+    #region DEBUG
+    private bool DebugLogging
+    {
+        get => ModConfig.Config.Debug.EnableDebugLog;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.Debug.EnableDebugLog, nameof(DebugLogging));
+            ModConfig.Config.Debug.EnableDebugLog = value;
+        }
+    }
+    private void UndoDebug() => DebugLogging = ModConfig.OriginalConfig.Debug.EnableDebugLog;
+    private void DefaultDebug() => DebugLogging = false;
+
+    private bool BotEquipmentLogging
+    {
+        get => ModConfig.Config.Debug.EnableBotEquipmentLog;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.Debug.EnableBotEquipmentLog, nameof(BotEquipmentLogging));
+            ModConfig.Config.Debug.EnableBotEquipmentLog = value;
+        }
+    }
+    private void UndoBotLog() => BotEquipmentLogging = ModConfig.OriginalConfig.Debug.EnableBotEquipmentLog;
+    private void DefaultBotLog() => BotEquipmentLogging = false;
+
+    private bool ModImportTuningLog
+    {
+        get => ModConfig.Config.Debug.ModImportTuning.EnableModImportTuningSuccessLogs;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.Debug.ModImportTuning.EnableModImportTuningSuccessLogs, nameof(ModImportTuningLog));
+            ModConfig.Config.Debug.ModImportTuning.EnableModImportTuningSuccessLogs = value;
+        }
+    }
+    private void UndoModImportTuningLog() => ModImportTuningLog = ModConfig.OriginalConfig.Debug.ModImportTuning.EnableModImportTuningSuccessLogs;
+    private void DefaultModImportTuningLog() => ModImportTuningLog = false;
+
+    private readonly string[] _modImportTuningBots =
+    {
+        "pmc", "scav", "default",
+    };
+
+    private string ModImportTuningBot
+    {
+        get => ModConfig.Config.Debug.ModImportTuning.BotTypeToCheck;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.Debug.ModImportTuning.BotTypeToCheck, nameof(ModImportTuningBot));
+            ModConfig.Config.Debug.ModImportTuning.BotTypeToCheck = value;
+        }
+    }
+    private void UndoModImportTuningBot() => ModImportTuningBot = ModConfig.OriginalConfig.Debug.ModImportTuning.BotTypeToCheck;
+    private void DefaultModImportTuningBot() => ModImportTuningBot = "pmc";
+
+    private int ModImportTuningTier
+    {
+        get => ModConfig.Config.Debug.ModImportTuning.TierToCheck;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.Debug.ModImportTuning.TierToCheck, nameof(ModImportTuningTier));
+            ModConfig.Config.Debug.ModImportTuning.TierToCheck = value;
+        }
+    }
+    private void UndoModImportTuningTier() => ModImportTuningTier = ModConfig.OriginalConfig.Debug.ModImportTuning.TierToCheck;
+    private void DefaultModImportTuningTier() => ModImportTuningTier = 3;
+    #endregion
+
+    #region SECRETS
+    private bool EventsAprilFools
+    {
+        get => ModConfig.Config.CompatibilityConfig.Secrets.AprilFoolsEvent;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.Secrets.AprilFoolsEvent, nameof(EventsAprilFools));
+            ModConfig.Config.CompatibilityConfig.Secrets.AprilFoolsEvent = value;
+        }
+    }
+    private void UndoAprilFools() => EventsAprilFools = ModConfig.OriginalConfig.CompatibilityConfig.Secrets.AprilFoolsEvent;
+    private void DefaultAprilFools() => EventsAprilFools = true;
+
+    private bool EventsHalloween
+    {
+        get => ModConfig.Config.CompatibilityConfig.Secrets.HalloweenEvent;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.Secrets.HalloweenEvent, nameof(EventsHalloween));
+            ModConfig.Config.CompatibilityConfig.Secrets.HalloweenEvent = value;
+        }
+    }
+    private void UndoHalloween() => EventsHalloween = ModConfig.OriginalConfig.CompatibilityConfig.Secrets.HalloweenEvent;
+    private void DefaultHalloween() => EventsHalloween = true;
+
+    private bool EventsChristmas
+    {
+        get => ModConfig.Config.CompatibilityConfig.Secrets.ChristmasEvent;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.CompatibilityConfig.Secrets.ChristmasEvent, nameof(EventsChristmas));
+            ModConfig.Config.CompatibilityConfig.Secrets.ChristmasEvent = value;
+        }
+    }
+    private void UndoChristmas() => EventsChristmas = ModConfig.OriginalConfig.CompatibilityConfig.Secrets.ChristmasEvent;
+    private void DefaultChristmas() => EventsChristmas = true;
+    #endregion
+
+    #region GETTER FOR DELEGATES NOT HERE
+    private bool EnableSeasonalPmcAppearance => ModConfig.Config.PmcBots.AdditionalOptions.SeasonalPmcAppearance;
+    #endregion
+
+    #region CASCADING PARAMETERS
+    [CascadingParameter] public MainLayout? Layout { get; set; }
+    #endregion
+}
