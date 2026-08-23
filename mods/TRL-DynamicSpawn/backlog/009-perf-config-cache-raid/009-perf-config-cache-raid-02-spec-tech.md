@@ -18,7 +18,7 @@ Três achados, uma causa comum: **trabalho periódico com ciclo de vida global**
 | **AUD-01-02** | `DespawnLoop` é `while(true)` num GameObject `DontDestroyOnLoad`, e o primeiro passo do loop é o fetch ([BotDespawnManager.cs:50-54](../../Client/Components/BotDespawnManager.cs#L50-L54)) | polling HTTP + scan fora de raid, **para sempre** (menu/hideout/entre raids). Eixos: 0,2/s × 1 × **vida do processo** | lifecycle de raid: loop **começa** no start hook e **para** nos stop hooks; gate de `GameWorld` como rede de segurança | corrigir lifecycle |
 | **AUD-01-03** | `_lastFetchTime` só avança no sucesso ([ServerConfigProvider.cs:26](../../Client/Helpers/ServerConfigProvider.cs#L26)) | com a rota falhando, **toda** leitura vira HTTP — ×call sites por-frame (overlay) e por-spawn. No headless é martelo contínuo | registrar a tentativa também na falha; retry mínimo de 30 s | eliminar trabalho desnecessário |
 
-**Sem Harmony novo para o cache em si** — é refactor de helper estático. O único patch novo é o **par de hooks de fim de raid** (o mod não tem nenhum hoje — AP-01): prefix em `GameWorld.OnDestroy` + prefix em `BaseLocalGame<EftGamePlayerOwner>.Stop`, ambos chamando um `RaidLifecycle.OnRaidEnd()` idempotente. O start hook reaproveita o alvo já patcheado pelo mod (`GameWorld.OnGameStarted`, [DynamicSpawnManagerPatch.cs:16](../../Client/Patches/DynamicSpawnManagerPatch.cs#L16)) num patch **separado**, porque o existente faz `return` cedo para guest Fika e o poller de despawn precisa do start em qualquer papel (ele decide por `IsHostOrSolo()` por dentro, como hoje).
+**Sem Harmony novo para o cache em si** — é refactor de helper estático. O único patch novo é o **par de hooks de fim de raid** (o mod não tem nenhum hoje — AP-01): prefix em `BaseLocalGame<EftGamePlayerOwner>.Stop` (para o poller) + prefix em `GameWorld.OnDestroy` (para o poller se ainda não parou **e** invalida o cache — único ponto de invalidação automática, porque entre `Stop` e `OnDestroy` o mundo ainda vive e um leitor não pode disparar HTTP no teardown — PA-01-01). Ambos idempotentes. O start hook reaproveita o alvo já patcheado pelo mod (`GameWorld.OnGameStarted`, [DynamicSpawnManagerPatch.cs:16](../../Client/Patches/DynamicSpawnManagerPatch.cs#L16)) num patch **separado**, porque o existente faz `return` cedo para guest Fika e o poller de despawn precisa do start em qualquer papel (ele decide por `IsHostOrSolo()` por dentro, como hoje).
 
 **Alternativas descartadas:**
 - *Fetch assíncrono (`Task`/coroutine) mantendo o TTL:* tira o bloqueio mas mantém 111 requisições e o churn de desserialização por raid; obriga a tornar todos os consumidores tolerantes a "config chegando depois". O ganho vem da **frequência**, não do mecanismo.
@@ -51,8 +51,8 @@ Nenhum dos três alvos é hot path (per-raid — skill §1.1 🟢). Os patches t
 
 | Arquivo | Ação | Resumo |
 |---|---|---|
-| `Client/Helpers/ServerConfigProvider.cs` | MODIFICAR | Cache por raid (sem TTL), `ConfigJson` bruto cacheado, retry mínimo 30 s em falha, `ForceRefresh()` como única invalidação. `// ref: AUD-01-01`, `// ref: AUD-01-03` |
-| `Client/Helpers/RaidLifecycle.cs` | CRIAR | Estado `_raidActive` + `OnRaidStart(GameWorld)` / `OnRaidEnd()` idempotentes; orquestra provider + poller. `// ref: AUD-01-01/02` |
+| `Client/Helpers/ServerConfigProvider.cs` | MODIFICAR | Cache por raid (sem TTL), `GetConfigJson(bypassBackoff)` bruto cacheado, retry mínimo 30 s em falha, `ForceRefresh()` como única invalidação. `// ref: AUD-01-01`, `// ref: AUD-01-03` |
+| `Client/Helpers/RaidLifecycle.cs` | CRIAR | Estado `_raidActive` + `OnRaidStart(GameWorld)` / `OnRaidEnd()` (só poller) / `OnWorldDestroyed()` (poller + cache) idempotentes. `// ref: AUD-01-01/02` |
 | `Client/Patches/RaidLifecyclePatches.cs` | CRIAR | 3 `ModulePatch`: `OnGameStarted` postfix, `GameWorld.OnDestroy` prefix, `BaseLocalGame<EftGamePlayerOwner>.Stop` prefix |
 | `Client/Components/BotDespawnManager.cs` | MODIFICAR | `Start()` deixa de iniciar o loop; `StartLoop()`/`StopLoop()` estáticos idempotentes; `DespawnLoop` ganha `yield break` quando `GameWorld` some. Corpo do scan/teleporte **intocado**. `// ref: AUD-01-02` |
 | `Client/Components/DynamicSpawnManager.cs` | MODIFICAR | `FetchServerConfigAndStart` (`:67`) desserializa a **cópia privada** a partir de `ServerConfigProvider.ConfigJson` em vez de fazer o próprio `GetJson` → 1 HTTP por raid (AC-M1 = 1). Resto do método intocado. `// ref: AUD-01-01` |
@@ -86,21 +86,26 @@ namespace TRLDynamicSpawn.Helpers
         private static string _cachedJson;
         private static float _lastAttemptTime = -1000f;      // avança em sucesso E em falha
 
-        /// <summary>JSON bruto da última resposta bem-sucedida (para quem precisa de cópia própria).</summary>
-        public static string ConfigJson
+        /// <summary>
+        /// JSON bruto da última resposta bem-sucedida (para quem precisa de cópia própria).
+        /// bypassBackoff=true: consumidor one-shot (FetchServerConfigAndStart) ignora a janela de 30 s —
+        /// hit de cache continua sem HTTP. PA-01-02.
+        /// </summary>
+        public static string GetConfigJson(bool bypassBackoff)
         {
-            get { EnsureFetched(); return _cachedJson; }
+            EnsureFetched(bypassBackoff);
+            return _cachedJson;
         }
 
         public static TRLConfig Config
         {
-            get { EnsureFetched(); return _cachedConfig; }
+            get { EnsureFetched(bypassBackoff: false); return _cachedConfig; }
         }
 
-        private static void EnsureFetched()
+        private static void EnsureFetched(bool bypassBackoff)
         {
             if (_cachedConfig != null) return;                                    // hit: zero custo além do branch
-            if (Time.realtimeSinceStartup - _lastAttemptTime < FailedFetchRetrySeconds) return; // backoff
+            if (!bypassBackoff && Time.realtimeSinceStartup - _lastAttemptTime < FailedFetchRetrySeconds) return; // backoff (AUD-01-03)
             _lastAttemptTime = Time.realtimeSinceStartup;                         // registra a tentativa ANTES do I/O
 
             try
@@ -123,7 +128,7 @@ namespace TRLDynamicSpawn.Helpers
             }
         }
 
-        /// <summary>Invalida o cache. Próxima leitura de Config/ConfigJson faz 1 fetch.</summary>
+        /// <summary>Invalida o cache. Próxima leitura de Config/GetConfigJson faz 1 fetch.</summary>
         public static void ForceRefresh()
         {
             _cachedConfig = null;
@@ -156,13 +161,22 @@ namespace TRLDynamicSpawn.Helpers
             BotDespawnManager.StartLoop();
         }
 
-        // ref: Assembly-CSharp/EFT/GameWorld.cs:2111 (OnDestroy) e EFT/BaseLocalGame-1.cs:1018 (Stop)
+        // ref: Assembly-CSharp/EFT/BaseLocalGame-1.cs:1018 (Stop) e EFT/GameWorld.cs:2111 (OnDestroy)
+        // Só para o poller. NÃO invalida o cache: após Stop o mundo ainda vive (delay/tela de extração)
+        // e um leitor (overlay, spawn em voo) refaria o HTTP no teardown — PA-01-01.
         public static void OnRaidEnd()
         {
             if (!_raidActive) return;                            // segundo hook = no-op
             _raidActive = false;
             BotDespawnManager.StopLoop();
-            ServerConfigProvider.ForceRefresh();                 // próxima raid busca config nova
+        }
+
+        // ref: Assembly-CSharp/EFT/GameWorld.cs:2111 (OnDestroy) — último evento da raid; depois dele
+        // não há leitor de Config até a próxima raid (AC-M3). Único ponto de invalidação automática.
+        public static void OnWorldDestroyed()
+        {
+            OnRaidEnd();                                         // cobre o caso de Stop não ter disparado (PA-01-05)
+            ServerConfigProvider.ForceRefresh();                 // próxima raid busca config nova (idempotente)
         }
     }
 }
@@ -202,7 +216,7 @@ namespace TRLDynamicSpawn.Patches
         [PatchPrefix]
         private static void Prefix()
         {
-            try { RaidLifecycle.OnRaidEnd(); }
+            try { RaidLifecycle.OnWorldDestroyed(); }            // para o poller (se ainda não parou) + invalida o cache
             catch (Exception ex) { Plugin.LogSource?.LogError($"[TRL-DynamicSpawn] GameWorldOnDestroyPatch: {ex}"); }
         }
     }
@@ -266,8 +280,10 @@ private IEnumerator DespawnLoop()
 ```csharp
 // Client/Components/DynamicSpawnManager.cs — FetchServerConfigAndStart, só a linha do fetch (ref: AUD-01-01)
 // antes:  string json = RequestHandler.GetJson("/trldynamicspawn/getConfig");
-// depois: mesma resposta HTTP, cópia privada (os modificadores de preset abaixo mutam _serverConfig — NR-6)
-string json = ServerConfigProvider.ConfigJson;
+// depois: mesma resposta HTTP, cópia privada (os modificadores de preset abaixo mutam _serverConfig — NR-6).
+// bypassBackoff: este é o consumidor one-shot da raid — uma falha anterior de outro leitor não pode
+// negar a ÚNICA tentativa do manager (PA-01-02). Hit de cache → sem HTTP.
+string json = ServerConfigProvider.GetConfigJson(bypassBackoff: true);
 if (string.IsNullOrEmpty(json)) throw new InvalidOperationException("ServerConfig unavailable (see provider warning).");
 _serverConfig = JsonConvert.DeserializeObject<TRLConfig>(json);
 // ... resto INALTERADO (o catch existente já faz o fallback `new TRLConfig()`)
@@ -305,7 +321,7 @@ new BaseLocalGameStopPatch().Enable();
 
 [raid start]  GameWorld.OnGameStarted (GameWorld.cs:2584)
    ├─ DynamicSpawnManagerPatch (existente) → DynamicSpawnManager.Init → FetchServerConfigAndStart
-   │     └─ ServerConfigProvider.ConfigJson ──miss──► RequestHandler.GetJson ──► cache {TRLConfig, json}   ← o ÚNICO HTTP da raid
+   │     └─ ServerConfigProvider.GetConfigJson(bypassBackoff:true) ──miss──► RequestHandler.GetJson ──► cache {TRLConfig, json}   ← o ÚNICO HTTP da raid
    │        └─ cópia privada _serverConfig (presets mutam só ela)
    └─ RaidStartPatch (novo) → RaidLifecycle.OnRaidStart → BotDespawnManager.StartLoop()
 
@@ -314,10 +330,11 @@ new BaseLocalGameStopPatch().Enable();
         F12 "Reload Server Config" = true → ForceRefresh() → próxima leitura faz 1 fetch (+1 em AC-M1, manual)
         falha de fetch → _lastAttemptTime avança → próxima tentativa ≥30 s depois (AC-M4 ≤2/min)
 
-[raid end]  BaseLocalGame<EftGamePlayerOwner>.Stop (BaseLocalGame-1.cs:1018)  ─┐
-            GameWorld.OnDestroy (GameWorld.cs:2111)                            ─┴─► RaidLifecycle.OnRaidEnd (1ª chamada age, 2ª no-op)
-                                                                                     ├─ BotDespawnManager.StopLoop()
-                                                                                     └─ ServerConfigProvider.ForceRefresh()
+[raid end]  BaseLocalGame<EftGamePlayerOwner>.Stop (BaseLocalGame-1.cs:1018) ──► RaidLifecycle.OnRaidEnd → BotDespawnManager.StopLoop()
+                 (mundo ainda vivo: leitores seguem no cache — sem HTTP no teardown, PA-01-01)
+            GameWorld.OnDestroy (GameWorld.cs:2111) ──► RaidLifecycle.OnWorldDestroyed
+                                                          ├─ OnRaidEnd()  (no-op se Stop já rodou)
+                                                          └─ ServerConfigProvider.ForceRefresh()   ← única invalidação automática
 [menu/hideout]  nenhum leitor de Config → zero HTTP (AC-M3)
 ```
 
@@ -337,11 +354,11 @@ Ordem dentro de `OnGameStarted`: os dois postfixes (existente e novo) são indep
 
 ## 8. Checklist de implementação
 
-- [ ] `ServerConfigProvider`: remover TTL; `EnsureFetched()` com `_lastAttemptTime` em sucesso e falha; `ConfigJson`; `ForceRefresh()` limpa os dois. Comentários `// ref: AUD-01-01` / `// ref: AUD-01-03`.
-- [ ] `RaidLifecycle.cs` novo (idempotente, ignora hideout).
-- [ ] `RaidLifecyclePatches.cs` novo (3 patches, `try/catch`, refs `arquivo.cs:linha`).
+- [ ] `ServerConfigProvider`: remover TTL; `EnsureFetched(bool bypassBackoff)` com `_lastAttemptTime` em sucesso e falha; `GetConfigJson(bool)`; `ForceRefresh()` limpa os dois. Comentários `// ref: AUD-01-01` / `// ref: AUD-01-03`.
+- [ ] `RaidLifecycle.cs` novo (idempotente, ignora hideout): `OnRaidStart` / `OnRaidEnd` (só poller) / `OnWorldDestroyed` (poller + cache) — PA-01-01.
+- [ ] `RaidLifecyclePatches.cs` novo (3 patches, `try/catch`, refs `arquivo.cs:linha`): `Stop` → `OnRaidEnd`; `OnDestroy` → `OnWorldDestroyed`.
 - [ ] `BotDespawnManager`: `Start()` vazio, `StartLoop()`/`StopLoop()`, `yield break` no topo do loop; **nenhuma outra linha do loop muda**.
-- [ ] `DynamicSpawnManager.FetchServerConfigAndStart`: trocar o `GetJson` por `ServerConfigProvider.ConfigJson` + throw em vazio (catch existente faz o fallback).
+- [ ] `DynamicSpawnManager.FetchServerConfigAndStart`: trocar o `GetJson` por `ServerConfigProvider.GetConfigJson(bypassBackoff: true)` + throw em vazio (catch existente faz o fallback) — PA-01-02.
 - [ ] `Settings.cs`: `reloadServerConfig` + handler. `PROPRIEDADES.md`: seção `Server Config`.
 - [ ] `Plugin.cs`: registrar 3 patches; versão `3.3.0`.
 - [ ] Grep de sanidade: nenhum `RequestHandler.GetJson("/trldynamicspawn/getConfig")` fora do provider.
@@ -371,3 +388,4 @@ Ordem dentro de `OnGameStarted`: os dois postfixes (existente e novo) são indep
 | Data | Evento |
 |---|---|
 | 2026-08-22 | Spec técnica criada via `/optimize-mod-performance --fase 2` (plano de otimização AUD-01-01/02/03) |
+| 2026-08-22 | Review 01: 0 🔴 · 2 🟡 · 3 🟢. PA-01-01 (invalidação só em `OnDestroy`) e PA-01-02 (`GetConfigJson(bypassBackoff)`) aplicados; PA-01-03/04/05 pendentes de decisão |
