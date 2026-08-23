@@ -9,6 +9,8 @@ authors: Claude (auditoria preventiva de performance 2026-08-22)
 
 > ⚠️ **Revisão 01 (2026-08-22)** — este relatório passou por revisão adversarial antes de qualquer Decisão ser marcada: [relatorio-auditoria-codigo-01-review-01.md](relatorio-auditoria-codigo-01-review-01.md). Resultado: **1 achado não detectado** (`AUD-01-08`, acrescentado abaixo), 2 afirmações corrigidas, 2 achados reclassificados como fora do escopo de performance, evidência recontada e o plano de instrumentação corrigido. As anotações `⚠️ Revisão 01` ao longo do texto marcam cada ponto; o texto original foi preservado (relatórios são imutáveis).
 
+> ✅ **Decisão do usuário (2026-08-22)** — **todos os 8 achados aceitos**, incluindo os dois que a Revisão 01 marcou como fora do escopo de performance (`AUD-01-03`, `AUD-01-06`) e o bloco preventivo (`AUD-01-07`). A **mini-rodada de instrumentação foi dispensada**: os fixes e a instrumentação entram na **mesma build**. Isso é possível porque os critérios de aceite dos dois 🟡 são **absolutos**, não relativos (`TintedCache.Count` para de crescer; `finds` ≤ 20, ou 0 sem Menu-Overhaul) — não exigem um "antes" medido. Consequência assumida: não haverá número de baseline para comparar; a Fase 4 valida contra critério absoluto. Rodada: [backlog/089-perf-rodada-01/](../backlog/089-perf-rodada-01/).
+
 ## 1. Resumo Executivo da Auditoria
 
 Auditoria de performance do **CustomClasses v0.16.8** (client [modded/Client/](../modded/Client/) 9.444 linhas · server [modded/Server/](../modded/Server/) 6.467 linhas), commit base `8732d47c`, branch `perf-customclasses-optimize`. **Modo preventivo**: diferente das outras frentes desta rodada, aqui **não há achado prévio de investigação** — na raid-baseline de 2026-08-22 o mod emitiu apenas 9 linhas de log e não apareceu em nenhum spike. A auditoria é estática, cruzada com o decompile do EFT 0.16.9 (lido do checkout principal `tarkov-spt-4.0/references/eft-decompiled/`, ausente neste worktree) e com o `spt-source` 4.0.
@@ -109,7 +111,7 @@ private static IEnumerator ApplyToMenu(MenuScreen menu)
 - **Como validar:** contador `// PERF-INSTR AUD-01-01` de iterações do loop + `Stopwatch` da coroutine inteira, 1 linha por `Show`. Cenário pareado: abrir o menu principal 5× (voltando de raid) antes e depois, com e sem o Menu-Overhaul carregado. Critério: iterações do `Find` caem de ≤60 para ≤20 (regime B) e para **0** (regime A); tempo total da coroutine cai proporcionalmente. Não-regressão: ícone + linha de classe + AccentColor + glow do topo continuam corretos no menu com o MO instalado.
 - **Decisão:**
   - `[ ]` Pendente
-  - `[ ]` Aceitar sugestão
+  - `[x]` Aceitar sugestão
   - `[ ]` Aceitar com modificação: _________________
   - `[ ]` Rejeitar (deferir / aceitar como dívida): _________________
 
@@ -132,7 +134,7 @@ private static IEnumerator ApplyToMenu(MenuScreen menu)
 - **Como validar:** contador + `Stopwatch` amostrado (1 em 1024) em `ClassMoveSpeed.Apply`, mesmo mapa/rota antes e depois. Critério: custo médio por chamada cai; contagem de chamadas **não muda** (a mudança é de custo unitário, não de frequência). Não-regressão: cada perk continua ativando exatamente para a sua classe — checklist das 6 classes + vanilla, com o overlay 052 ligado.
 - **Decisão:**
   - `[ ]` Pendente
-  - `[ ]` Aceitar sugestão
+  - `[x]` Aceitar sugestão
   - `[ ]` Aceitar com modificação: _________________
   - `[ ]` Rejeitar (deferir / aceitar como dívida): _________________
 
@@ -160,7 +162,7 @@ private static IEnumerator ApplyToMenu(MenuScreen menu)
 - **Como validar:** contadores por alvo (chamadas totais × chamadas que passam do gate) antes/depois, mesma raid/mapa. Critério: contagem de execuções de gate cai de 4→1 em `ApplyDamageInfo` e de 4→1 em `Shoot`; **valores finais idênticos**. Não-regressão: `Recoil str` no overlay 052 mostra o mesmo antes→depois para Tanque+LMG+maestria e Fuzileiro na janela de Adrenalina (os dois piores casos do Anexo C do balance board).
 - **Decisão:**
   - `[ ]` Pendente
-  - `[ ]` Aceitar sugestão
+  - `[x]` Aceitar sugestão
   - `[ ]` Aceitar com modificação: _________________
   - `[ ]` Rejeitar (deferir / aceitar como dívida): _________________
 
@@ -207,7 +209,7 @@ private static Func<BaseSoundPlayer, object?>? BuildEmitterAccessor()
 - **Como validar:** `Stopwatch` amostrado (1 em 256) no Prefix, mesma raid, comparando o custo médio por chamada que passa do gate (1). Critério: custo médio cai; contagem de chamadas inalterada. Não-regressão: faca do Furtivo continua muda (sacar/golpear/acertar), som de arma de fogo intocado, granada/meds/quick-use continuam audíveis, peer Fika Furtivo continua mudo no seu cliente.
 - **Decisão:**
   - `[ ]` Pendente
-  - `[ ]` Aceitar sugestão
+  - `[x]` Aceitar sugestão
   - `[ ]` Aceitar com modificação: _________________
   - `[ ]` Rejeitar (deferir / aceitar como dívida): _________________
 
@@ -225,7 +227,7 @@ private static Func<BaseSoundPlayer, object?>? BuildEmitterAccessor()
 - **Como validar:** abrir a tela de Skills com `Perk Diagnostics` **off** e conferir que `grep '053-tab' LogOutput.log` volta vazio; com **on**, que as linhas voltam. Não-regressão: a aba CLASS renderiza igual nos dois casos.
 - **Decisão:**
   - `[ ]` Pendente
-  - `[ ]` Aceitar sugestão
+  - `[x]` Aceitar sugestão
   - `[ ]` Aceitar com modificação: _________________
   - `[ ]` Rejeitar (deferir / aceitar como dívida): _________________
 
@@ -245,7 +247,7 @@ private static Func<BaseSoundPlayer, object?>? BuildEmitterAccessor()
 - **Como validar:** disparar o GP-25 no shooting range do hideout (não deve creditar XP, mas o efeito de recuo por nível deve valer) e numa raid (deve creditar XP) — exatamente o checklist já escrito no `058-05-asbuild`. Não-regressão: comportamento idêntico nos dois contextos.
 - **Decisão:**
   - `[ ]` Pendente
-  - `[ ]` Aceitar sugestão
+  - `[x]` Aceitar sugestão
   - `[ ]` Aceitar com modificação: _________________
   - `[ ]` Rejeitar (deferir / aceitar como dívida): _________________
 
@@ -259,13 +261,13 @@ private static Func<BaseSoundPlayer, object?>? BuildEmitterAccessor()
 | # | Ponto | Situação | Sugestão |
 |---|---|---|---|
 | a | [MedrosoPatch.cs:47](../modded/Client/Patches/MedrosoPatch.cs#L47) — `GClass897.OnShoot += OnBulletFlyBy` | A subscrição é feita no `Awake` e vale para **toda bala com estampido sônico do mapa**, mesmo quando o jogador não é Saqueador. O handler já sai na 3ª verificação (ordem barato→caro está correta), então o custo é ~2 derefs de config + 1 compare de string por bala. | Assinar/desassinar no raid-start conforme a classe local, ou fundir num único `bool` estático `_medrosoArmed` calculado no `OnGameStarted` (fecha em O(1) sem tocar na subscrição). Ganha mais depois do AUD-01-02. |
-| b | [AdrenalineState.cs:67-77](../modded/Client/AdrenalineState.cs#L67-L77) — `WatchWindow` | `yield return null` a cada frame durante a janela inteira (25 s default) só para detectar o fechamento. ~1.500–3.600 retomadas de coroutine por janela, cada uma fazendo um compare de float. | `yield return new WaitForSeconds(SecondsLeft)` num loop (renovação estende `_windowEnd` → o loop re-espera o resto). Reduz de milhares para unidades de retomadas por janela, com o mesmo comportamento. |
+| b | [AdrenalineState.cs:67-77](../modded/Client/AdrenalineState.cs#L67-L77) — `WatchWindow` | `yield return null` a cada frame durante a janela inteira (25 s default) só para detectar o fechamento. ~1.500–3.600 retomadas de coroutine por janela, cada uma fazendo um compare de float. | ~~`yield return new WaitForSeconds(SecondsLeft)` num loop.~~ **❌ Rejeitado em 2026-08-23** — review técnica [PA-01-07](../backlog/089-perf-rodada-01/089-perf-rodada-01-03-spec-tech-review-01.md) do item 089. **Razão:** o ganho é de **~30–70 µs por janela** (1.500–3.600 × ~20 ns), e só para o Fuzileiro. Em troca introduzia (1) até **50 ms de atraso** na detecção do fechamento — exatamente o que o `ForceReloadResync` existe para evitar ("uma recarga iniciada logo após o fechamento poderia sair ainda acelerada"), (2) uma alocação de `WaitForSeconds` por iteração onde hoje há zero, e (3) divergência de comportamento sob `timeScale` (`WaitForSeconds` usa tempo escalado; `yield return null` não). Cai direto na proibição da `spt-performance-analysis` §8: *"micro-otimização de código frio ilegível não entra — o custo de manutenção supera o ganho inexistente"*. **Lição:** um item preventivo agregado ainda precisa passar pelo teste de dimensionamento antes de virar plano — este não passou, e só foi pego na review técnica. |
 | c | [SkillPanelPatch.cs:63-64](../modded/Client/Patches/SkillPanelPatch.cs#L63-L64) | `MultiplierFormat.TooltipText(...)` monta uma string nova a cada refresh de linha; a lista de Skills recicla `SkillPanel` durante o scroll → alocação por linha por frame de scroll. | Cachear o texto por `(ESkillId, fator)` num dicionário estático pequeno (o par muda só quando o fetch muda). |
 | d | [PerkDiagnostics.cs:129](../modded/Client/PerkDiagnostics.cs#L129) → `AppendPerkList` | Com o overlay ligado, `PerksCatalog.LocalGroups()` (LINQ + `ToArray`) roda a cada Repaint. | Cachear os grupos por classe enquanto o overlay estiver aberto. Só afeta quem liga o diag — por isso é preventiva, não achado. |
 
 - **Decisão (bloco):**
   - `[ ]` Pendente
-  - `[ ]` Aceitar sugestão (indicar quais: ____)
+  - `[x]` Aceitar sugestão (indicar quais: ____)
   - `[ ]` Rejeitar (deferir / aceitar como dívida): _________________
 
 ---
@@ -312,7 +314,7 @@ F12: arrasta o picker de cor de uma classe
 - **Como validar:** logar `TintedCache.Count` e a VRAM estimada (`Count × 256 KB`) ao abrir e ao fechar o F12 (INSTR-3). Cenário pareado: arrastar o picker de uma classe por ~5 s, antes e depois. Critério: `Count` deixa de crescer com o arrasto (fica ≤ nº de ícones). Não-regressão: o ícone da classe mantém o gradiente correto no menu, no chat, na tela de deploy e na aba CLASS, e trocar a cor no F12 continua refletindo ao vivo.
 - **Decisão:**
   - `[ ]` Pendente
-  - `[ ]` Aceitar sugestão
+  - `[x]` Aceitar sugestão
   - `[ ]` Aceitar com modificação: _________________
   - `[ ]` Rejeitar (deferir / aceitar como dívida): _________________
 
