@@ -41,6 +41,11 @@ namespace TRLDynamicSpawn
             new ZryachiyAggressivenessPatch().Enable();
             new ZryachiyActivatePatch().Enable();
 
+            // Raid lifecycle hooks (backlog 009 — ref: AUD-01-01, AUD-01-02)
+            new RaidStartPatch().Enable();
+            new GameWorldOnDestroyPatch().Enable();
+            new BaseLocalGameStopPatch().Enable();
+
             // Enable Despawn Manager & Map Overlay Components
             TRLDynamicSpawn.Components.BotDespawnManager.Enable();
             TRLDynamicSpawn.Components.TRLMapBubbleOverlay.Enable();

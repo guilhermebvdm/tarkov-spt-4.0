@@ -8,7 +8,7 @@
 
 ## Resumo
 
-> 🔴 Bloqueadores: 0 · 🟡 Importantes: 2 · 🟢 Menores: 3 · ✅ Resolvidos: 2 · Total: 5
+> 🔴 Bloqueadores: 0 · 🟡 Importantes: 2 · 🟢 Menores: 3 · ✅ Resolvidos: 5 · Total: 5
 
 **Contexto consultado:** memória do mod — snapshot de 2026-08-16 (v3.2.9); pendências P-ROADMAP-01/04 não afetam este item. Docs canônicos: `spt-antipatterns.md` (AP-01/03/05/09 aplicáveis — todos endereçados na §9). Grafo do mod ausente (`references/graphs/mods/TRL-DynamicSpawn/` não existe) — overrides auditados por grep no dump: `GameWorld.OnDestroy` (único override `ClientGameWorld.cs:219`, chama base em `:222` ✓), `BaseLocalGame<>.Stop` (`LocalGame.cs:357` → base `:362` ✓; `CoopGame.cs:718` do Fika, não verificado — a spec declara isso e usa `OnDestroy` como primário ✓), `OnGameStarted` (`:2584` ✓). Linhas citadas conferem com o dump. Sem `modded/` — fonte é `Client/`; conflitos de patch checados em `Client/Patches/` (só `DynamicSpawnManagerPatch` no mesmo alvo, postfix aditivo).
 
@@ -18,9 +18,9 @@
 |---|---|---|---|---|
 | PA-01-01 | B — Edge Case | 🟡 | `Stop` invalida o cache cedo demais — leitor entre `Stop` e `OnDestroy` refaz HTTP | ✅ Resolvido |
 | PA-01-02 | B — Edge Case | 🟡 | Backoff de 30 s pode engolir o fetch one-shot do `DynamicSpawnManager` → raid inteira com `new TRLConfig()` | ✅ Resolvido |
-| PA-01-03 | B — Edge Case | 🟢 | Guest Fika inicia o `DespawnLoop` e faz 1 HTTP sem uso | Pendente |
-| PA-01-04 | A — Gap | 🟢 | Bump `3.3.0` vs. regra do `/compile-mod`; cabeçalho de `PROPRIEDADES.md` está em v3.1.2 | Pendente |
-| PA-01-05 | C — Lógica | 🟢 | Patch em genérico fechado (`BaseLocalGame<EftGamePlayerOwner>.Stop`) precisa de confirmação in-game | Pendente |
+| PA-01-03 | B — Edge Case | 🟢 | Guest Fika inicia o `DespawnLoop` e faz 1 HTTP sem uso | ✅ Resolvido |
+| PA-01-04 | A — Gap | 🟢 | Bump `3.3.0` vs. regra do `/compile-mod`; cabeçalho de `PROPRIEDADES.md` está em v3.1.2 | ✅ Resolvido |
+| PA-01-05 | C — Lógica | 🟢 | Patch em genérico fechado (`BaseLocalGame<EftGamePlayerOwner>.Stop`) precisa de confirmação in-game | ✅ Resolvido |
 
 ## Categorias
 
@@ -72,7 +72,7 @@
 
 **Resolução:** spec §5 — `GetConfigJson(bool bypassBackoff)` no provider; manager usa `bypassBackoff: true`.
 
-### PA-01-03 · B — Edge Case · 🟢 Menor
+### PA-01-03 · B — Edge Case · 🟢 Menor — ✅ Resolvido em 2026-08-22
 
 **Guest Fika inicia o `DespawnLoop` e paga 1 HTTP por raid sem uso**
 
@@ -83,11 +83,13 @@
 **Sugestão:** em `RaidLifecycle.OnRaidStart`, `if (FikaHelper.IsClient()) return;` antes de `StartLoop()` (mesmo critério que `DynamicSpawnManagerPatch.cs:25` já usa). Registrar em §5 e na 01-spec AC "Fika/multiplayer" (guest: poller nem nasce).
 
 **Decisão:**
-- `[x]` Pendente
-- `[ ]` Aceitar sugestão
+- `[ ]` Pendente
+- `[x]` Aceitar sugestão *(usuário: "Prossiga" — aplicado no `/code-mod`)*
 - `[ ]` Caminho alternativo: _________________
 
-### PA-01-04 · A — Gap · 🟢 Menor
+**Resolução:** `RaidLifecycle.OnRaidStart` retorna cedo em guest Fika.
+
+### PA-01-04 · A — Gap · 🟢 Menor — ✅ Resolvido em 2026-08-22
 
 **Bump de versão e cabeçalho de `PROPRIEDADES.md`**
 
@@ -98,11 +100,13 @@
 **Sugestão:** em §4/§8 trocar "bump 3.2.9 → 3.3.0" por "critério de bump: **minor** (AC-X1 + propriedade F12 nova) — número definido no `/compile-mod`"; no `/code-mod`, ao adicionar a seção `Server Config`, atualizar também o cabeçalho de `PROPRIEDADES.md` para a versão corrente.
 
 **Decisão:**
-- `[x]` Pendente
-- `[ ]` Aceitar sugestão
+- `[ ]` Pendente
+- `[x]` Aceitar sugestão *(usuário: "Prossiga")*
 - `[ ]` Caminho alternativo: _________________
 
-### PA-01-05 · C — Lógica · 🟢 Menor
+**Resolução:** critério minor fica registrado; número aplicado no `/compile-mod`. Cabeçalho do `PROPRIEDADES.md` atualizado no `/code-mod`.
+
+### PA-01-05 · C — Lógica · 🟢 Menor — ✅ Resolvido em 2026-08-22
 
 **Patch em genérico fechado precisa de confirmação in-game (AP-06)**
 
@@ -113,6 +117,8 @@
 **Sugestão:** manter o patch, e na Fase 4 (validação) incluir **1 linha de log `LogInfo` no prefix de `Stop`** (`[TRL-DynamicSpawn] Raid stop hook fired (BaseLocalGame.Stop)`) — 1× por raid, custo zero — e conferir no log da V1 que ela aparece. Se não aparecer, remover o patch e anotar na §9 check 1 que `OnDestroy` é o único hook efetivo (com a evidência de `ClientGameWorld.cs:222`). Adicionar ao checklist de validação V1 do relatório.
 
 **Decisão:**
-- `[x]` Pendente
-- `[ ]` Aceitar sugestão
+- `[ ]` Pendente
+- `[x]` Aceitar sugestão *(usuário: "Prossiga")*
 - `[ ]` Caminho alternativo: _________________
+
+**Resolução:** `LogInfo` 1×/raid nos dois prefixes de fim de raid; item adicionado ao checklist V1.

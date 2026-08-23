@@ -64,7 +64,13 @@ namespace TRLDynamicSpawn.Components
 
             try 
             {
-                string json = RequestHandler.GetJson("/trldynamicspawn/getConfig");
+                // ref: AUD-01-01 — same HTTP response as ServerConfigProvider (1 fetch per raid), private copy
+                // because the preset modifiers below mutate _serverConfig (NR-6).
+                // bypassBackoff: this is the raid's one-shot consumer — an earlier failure by another reader
+                // must not deny its single attempt (PA-01-02). Cache hit → no HTTP.
+                string json = ServerConfigProvider.GetConfigJson(bypassBackoff: true);
+                if (string.IsNullOrEmpty(json))
+                    throw new InvalidOperationException("ServerConfig unavailable (see provider warning).");
                 _serverConfig = JsonConvert.DeserializeObject<TRLConfig>(json);
                 _activePreset = _serverConfig.ActivePreset;
 

@@ -354,15 +354,15 @@ Ordem dentro de `OnGameStarted`: os dois postfixes (existente e novo) são indep
 
 ## 8. Checklist de implementação
 
-- [ ] `ServerConfigProvider`: remover TTL; `EnsureFetched(bool bypassBackoff)` com `_lastAttemptTime` em sucesso e falha; `GetConfigJson(bool)`; `ForceRefresh()` limpa os dois. Comentários `// ref: AUD-01-01` / `// ref: AUD-01-03`.
-- [ ] `RaidLifecycle.cs` novo (idempotente, ignora hideout): `OnRaidStart` / `OnRaidEnd` (só poller) / `OnWorldDestroyed` (poller + cache) — PA-01-01.
-- [ ] `RaidLifecyclePatches.cs` novo (3 patches, `try/catch`, refs `arquivo.cs:linha`): `Stop` → `OnRaidEnd`; `OnDestroy` → `OnWorldDestroyed`.
-- [ ] `BotDespawnManager`: `Start()` vazio, `StartLoop()`/`StopLoop()`, `yield break` no topo do loop; **nenhuma outra linha do loop muda**.
-- [ ] `DynamicSpawnManager.FetchServerConfigAndStart`: trocar o `GetJson` por `ServerConfigProvider.GetConfigJson(bypassBackoff: true)` + throw em vazio (catch existente faz o fallback) — PA-01-02.
-- [ ] `Settings.cs`: `reloadServerConfig` + handler. `PROPRIEDADES.md`: seção `Server Config`.
-- [ ] `Plugin.cs`: registrar 3 patches; versão `3.3.0`.
-- [ ] Grep de sanidade: nenhum `RequestHandler.GetJson("/trldynamicspawn/getConfig")` fora do provider.
-- [ ] **Logs de debug existentes intocados** (conferir diff: nenhuma linha `Log*` removida/rebaixada).
+- [x] `ServerConfigProvider`: remover TTL; `EnsureFetched(bool bypassBackoff)` com `_lastAttemptTime` em sucesso e falha; `GetConfigJson(bool)`; `ForceRefresh()` limpa os dois. Comentários `// ref: AUD-01-01` / `// ref: AUD-01-03`.
+- [x] `RaidLifecycle.cs` novo (idempotente, ignora hideout e guest Fika — PA-01-03): `OnRaidStart` / `OnRaidEnd` (só poller) / `OnWorldDestroyed` (poller + cache) — PA-01-01.
+- [x] `RaidLifecyclePatches.cs` novo (3 patches, `try/catch`, refs `arquivo.cs:linha`, `LogInfo` 1×/raid nos hooks de fim — PA-01-05): `Stop` → `OnRaidEnd`; `OnDestroy` → `OnWorldDestroyed`.
+- [x] `BotDespawnManager`: `Start()` vazio, `StartLoop()`/`StopLoop()`, `yield break` no topo do loop; **nenhuma outra linha do loop muda**.
+- [x] `DynamicSpawnManager.FetchServerConfigAndStart`: trocar o `GetJson` por `ServerConfigProvider.GetConfigJson(bypassBackoff: true)` + throw em vazio (catch existente faz o fallback) — PA-01-02.
+- [x] `Settings.cs`: `reloadServerConfig` + handler. `PROPRIEDADES.md`: seção `Server Config` + cabeçalho (PA-01-04).
+- [x] `Plugin.cs`: registrar 3 patches. Versão: critério **minor**, número aplicado pelo `/compile-mod` (PA-01-04).
+- [x] Grep de sanidade: nenhum `RequestHandler.GetJson("/trldynamicspawn/getConfig")` fora do provider.
+- [x] **Logs de debug existentes intocados** (conferir diff: nenhuma linha `Log*` removida/rebaixada).
 - [ ] `/compile-mod` (client only) → deploy com rollback (`TRL-DynamicSpawn.dll` → `.bak-3.2.9`) → validação V1 (Fase 4).
 
 ## 9. Conformidade com skills (auto-checklist)

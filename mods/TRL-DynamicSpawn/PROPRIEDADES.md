@@ -1,6 +1,6 @@
 # TRL Dynamic Spawn — Propriedades (F12 / BepInEx ConfigurationManager)
 
-> **Plugin:** `TRLDynamicSpawn.settings` — TRLDynamicSpawn v3.1.2<br>
+> **Plugin:** `TRLDynamicSpawn.settings` — TRLDynamicSpawn v3.2.9 (versão corrente; o `/compile-mod` do item 009 aplica bump minor)<br>
 > **Fonte:** [Client/Helpers/Settings.cs](Client/Helpers/Settings.cs)<br>
 
 ## Host Performance Caps
@@ -53,3 +53,11 @@
 | Show Safe Zone Circle | Exibir Círculo de Zona Segura | `bool` | `true` | Exibe o círculo vermelho de Zona Segura ao redor do jogador. |
 | Show Spawn Bubble Circle | Exibir Círculo da Bolha | `bool` | `true` | Exibe o círculo ciano da Bolha de Spawn no mapa. |
 | Show LoS / FOV Cone | Exibir Cone de Visão (FOV) | `bool` | `true` | Exibe o cone amarelo do campo de visão no mapa. |
+
+## Server Config
+
+| Propriedade | Tradução (pt-BR) | Tipo | Padrão | Tooltip (pt-BR) |
+|---|---|---|---|---|
+| Reload Server Config | Recarregar Configuração do Servidor | `bool` | `false` | Marque para recarregar agora a configuração do painel web (aplica as edições feitas durante a raid). Desmarca sozinho após recarregar. |
+
+> Funciona como um **botão**: a configuração do painel web é buscada **uma vez por raid** (item 009 / AUD-01-01). Edições feitas no painel **durante** a raid só entram na próxima raid — ou imediatamente, marcando esta opção.
