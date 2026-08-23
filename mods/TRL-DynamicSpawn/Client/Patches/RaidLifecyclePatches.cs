@@ -42,8 +42,7 @@ namespace TRLDynamicSpawn.Patches
         {
             try
             {
-                Plugin.LogSource?.LogInfo("[TRL-DynamicSpawn] Raid end hook fired (GameWorld.OnDestroy)."); // 1x/raid — PA-01-05
-                RaidLifecycle.OnWorldDestroyed();   // stops the poller (if still running) + invalidates the cache
+                RaidLifecycle.OnWorldDestroyed();   // stops the poller (if still running) + invalidates the cache; logs source (CR-01-03)
             }
             catch (Exception ex) { Plugin.LogSource?.LogError($"[TRL-DynamicSpawn] GameWorldOnDestroyPatch: {ex}"); }
         }
@@ -67,8 +66,7 @@ namespace TRLDynamicSpawn.Patches
         {
             try
             {
-                Plugin.LogSource?.LogInfo("[TRL-DynamicSpawn] Raid stop hook fired (BaseLocalGame.Stop)."); // 1x/raid — PA-01-05
-                RaidLifecycle.OnRaidEnd();
+                RaidLifecycle.OnRaidEnd("BaseLocalGame.Stop");   // logs source on first effective call (CR-01-03 / PA-01-05)
             }
             catch (Exception ex) { Plugin.LogSource?.LogError($"[TRL-DynamicSpawn] BaseLocalGameStopPatch: {ex}"); }
         }

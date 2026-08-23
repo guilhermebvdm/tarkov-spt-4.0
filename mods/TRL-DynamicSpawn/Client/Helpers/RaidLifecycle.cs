@@ -18,7 +18,8 @@ namespace TRLDynamicSpawn.Helpers
             if (gameWorld == null || gameWorld.MainPlayer == null) return;
             if (gameWorld.MainPlayer is HideoutPlayer) return;   // hideout is not a raid
             if (FikaHelper.IsClient()) return;                   // guest: no spawn/despawn work at all (PA-01-03)
-            if (_raidActive) return;                             // Fika may re-enter OnGameStarted
+            // ref: CR-01-01 — always re-arm; StartLoop is idempotent (one coroutine per raid), so a stale
+            // _raidActive from a raid that ended without hooks can never block the next raid.
             _raidActive = true;
             BotDespawnManager.StartLoop();
         }
@@ -26,10 +27,13 @@ namespace TRLDynamicSpawn.Helpers
         // ref: Assembly-CSharp/EFT/BaseLocalGame-1.cs:1018 (Stop) and EFT/GameWorld.cs:2111 (OnDestroy)
         // Only stops the poller. Does NOT invalidate the cache: after Stop the world is still alive
         // (delay / extraction screen) and a reader would re-fetch during teardown. ref: PA-01-01
-        public static void OnRaidEnd()
+        // source: which hook fired — logged once per raid (first effective call) so the V1 log proves
+        // whether the BaseLocalGame.Stop patch is alive (PA-01-05) without hideout noise. ref: CR-01-03
+        public static void OnRaidEnd(string source)
         {
-            if (!_raidActive) return;                            // second hook = no-op
+            if (!_raidActive) return;                            // second hook (or hideout exit) = no-op
             _raidActive = false;
+            Plugin.LogSource?.LogInfo($"[TRL-DynamicSpawn] Raid end hook fired ({source})."); // 1x/raid
             BotDespawnManager.StopLoop();
         }
 
@@ -37,7 +41,7 @@ namespace TRLDynamicSpawn.Helpers
         // no Config reader until the next raid. Single point of automatic cache invalidation.
         public static void OnWorldDestroyed()
         {
-            OnRaidEnd();                                         // covers the case where Stop did not fire (PA-01-05)
+            OnRaidEnd("GameWorld.OnDestroy");                    // covers the case where Stop did not fire (PA-01-05)
             ServerConfigProvider.ForceRefresh();                 // next raid fetches a fresh config (idempotent)
         }
     }

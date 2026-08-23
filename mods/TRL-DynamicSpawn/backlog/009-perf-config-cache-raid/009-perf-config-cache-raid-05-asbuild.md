@@ -39,10 +39,18 @@
 
 > Atualizado por `/apply-code-review` a cada rodada. Cada entrada lista os achados aplicados/rejeitados/pulados naquela rodada e os arquivos tocados.
 
-(vazio inicialmente — preenchido por `/apply-code-review`)
+### 2026-08-22 — Code review 01
+
+| ID | Resultado | Arquivos |
+| --- | --- | --- |
+| CR-01-01 | ✅ Aplicado — `OnRaidStart` sempre re-arma (sem guard `_raidActive`); idempotência fica no `StartLoop` | `Client/Helpers/RaidLifecycle.cs` |
+| CR-01-02 | ✅ Aplicado — README ganha seção "Painel web e aplicação da configuração" | `README.md` |
+| CR-01-03 | ✅ Aplicado — log de fim de raid centralizado em `OnRaidEnd(string source)`, 1× por raid, sem ruído de hideout | `Client/Helpers/RaidLifecycle.cs`, `Client/Patches/RaidLifecyclePatches.cs` |
+| CR-01-04 | ⏭️ Deferido — código morto pré-existente (`OnGameStartPatches.cs`), rodada 1.5 | — |
 
 ## Histórico
 
 | Data | Evento |
 | --- | --- |
 | 2026-08-22 | Build concluído via `/code-mod` (Fase 3 do `/optimize-mod-performance`, rodada 1) |
+| 2026-08-22 | Aplicação de 3 achados de code-review 01 via `/apply-code-review` — IDs: CR-01-01, CR-01-02, CR-01-03 (CR-01-04 deferido) |
