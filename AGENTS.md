@@ -16,7 +16,7 @@ Repositório de mods para SPT 4.0 (Single Player Tarkov). Lido por qualquer assi
 - `.agents/workspace.md` — detalhes técnicos do workspace
 - `.agents/conventions.md` — convenções do projeto
 - `.agents/resources.md` — onde buscar informação (wiki local, APIs, DBs, deepwiki)
-- `.agents/workflows/` — workflows manuais reutilizáveis, executáveis por qualquer sessão/agente (ex.: [performance-optimization.md](.agents/workflows/performance-optimization.md) — auditoria + otimização de performance de um mod); os commands do ciclo vivem em `.claude/commands/`
+- `.agents/workflows/` — workflows manuais reutilizáveis (placeholder; atualmente vazio — o fluxo ativo vive em `.claude/commands/`)
 - `.agents/hooks/` — scripts compartilhados (validação, pre-commit, sync da wiki)
 - `design-system/` — TRL Design System: padrão visual **obrigatório** para todo editor web de mod (tokens + componentes CSS; ler `design-system/CLAUDE.md` antes de estilizar qualquer editor)
 - `docs/` — documentação técnica e arquitetural
