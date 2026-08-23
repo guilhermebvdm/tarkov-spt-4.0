@@ -8,7 +8,9 @@
 
 ## Resumo
 
-> 🔴 Bloqueadores: 1 · 🟡 Importantes: 4 · 🟢 Menores: 4 · ✅ Resolvidos: 0 · Total: 9
+> 🔴 Bloqueadores: 0 · 🟡 Importantes: 0 · 🟢 Menores: 0 · ✅ Resolvidos: 9 · Total: 9
+>
+> **2026-08-23:** os 9 pontos foram aceitos e aplicados na spec técnica e na 01-spec (edição do coordenador); verificação das resoluções em [review 02](010-perf-spawn-pipeline-r2-03-spec-tech-review-02.md).
 
 **Contexto consultado:** memória do mod — snapshot de 2026-08-16 (v3.2.9; o item 009 ainda não foi registrado na memória); pendências P-ROADMAP-01/04 não afetam este item; nenhuma pendência 🔴. Docs canônicos: `spt-antipatterns.md` (AP-01/03/05/08/09 aplicáveis). Dump do EFT **não está neste worktree** — todas as linhas foram conferidas no checkout principal (`C:\Repos\spt\tarkov-spt-4.0\references\eft-decompiled\Assembly-CSharp\`, mesma build 0.16.9) e os tipos no `references/eft-decompiled/types-index.json` deste worktree. Grafo do mod ausente (`references/graphs/mods/TRL-DynamicSpawn/` não existe) — callers/overrides auditados por grep no dump. Sem `modded/` — fonte editável é `Client/`; conflitos checados em `Client/Patches/` (nenhum outro patch em `ActivateBotsWithoutWave`; `ChooseProfilePatch` é substituição do existente). Tabela de deofuscação: `GClass1890 → OnlineBotSpawner`, `GClass1876 → EFT.NonWaveGroupScenario`, `GClass1881 → EFT.WDictionary` (`consolidated-mappings.txt:3471/4561/5392`) — a spec não rotula nenhum deles, sem conflito. Reviews anteriores: nenhuma (primeira review do item).
 
@@ -18,15 +20,15 @@
 
 | ID | Categoria | Impacto | Título | Status |
 |---|---|---|---|---|
-| PA-01-01 | C — Lógica | 🔴 | `ProfileSettingsClass` não existe no Assembly — o stub de `PmcMatches` não compila | Pendente |
-| PA-01-02 | C — Lógica | 🟡 | Auditoria de callers de `ActivateBotsWithoutWave` incompleta (AP-03): `GClass1876.cs:51` e `BotHalloweenEvent.cs:176` | Pendente |
-| PA-01-03 | B — Edge Case | 🟡 | Remover `BaseLocalGameStopPatch` sem substituto deixa a janela `Stop → OnDestroy` sem hook — patchear o override concreto `LocalGame.Stop` | Pendente |
-| PA-01-04 | A — Gap | 🟡 | Fallback PMC "qualquer perfil do pool" some em silêncio — mudança de comportamento não declarada (NR-4) | Pendente |
-| PA-01-05 | B — Edge Case | 🟡 | Pausa por "sem humano vivo" não alcança a onda em andamento (`_activeWaveCoroutine`) | Pendente |
-| PA-01-06 | B — Edge Case | 🟢 | `StopSpawnLoops`: reset das flags estáticas depois do `Instance == null` pode não rodar; justificativa do `finally` está errada | Pendente |
-| PA-01-07 | B — Edge Case | 🟢 | `ClearSptQueue` "1× por warmup" roda a cada reentrada do ESTÁGIO A, antes do check de humano, e ainda cancela `marksman` em voo (AC-M3) | Pendente |
-| PA-01-08 | C — Lógica | 🟢 | Deriva de linhas e rótulos no dump (`:157` → `:160`, `EFT/`, campos vs. propriedades, `Side` é `EPlayerSide?`) | Pendente |
-| PA-01-09 | A — Gap | 🟢 | Compatibilidade com MoreBotsAPI afirmada sem evidência; caminho `BotSpawner.ActivateBotsWithoutWave` direto não coberto pelo prefix | Pendente |
+| PA-01-01 | C — Lógica | 🔴 | `ProfileSettingsClass` não existe no Assembly — o stub de `PmcMatches` não compila | ✅ Resolvido |
+| PA-01-02 | C — Lógica | 🟡 | Auditoria de callers de `ActivateBotsWithoutWave` incompleta (AP-03): `GClass1876.cs:51` e `BotHalloweenEvent.cs:176` | ✅ Resolvido |
+| PA-01-03 | B — Edge Case | 🟡 | Remover `BaseLocalGameStopPatch` sem substituto deixa a janela `Stop → OnDestroy` sem hook — patchear o override concreto `LocalGame.Stop` | ✅ Resolvido |
+| PA-01-04 | A — Gap | 🟡 | Fallback PMC "qualquer perfil do pool" some em silêncio — mudança de comportamento não declarada (NR-4) | ✅ Resolvido |
+| PA-01-05 | B — Edge Case | 🟡 | Pausa por "sem humano vivo" não alcança a onda em andamento (`_activeWaveCoroutine`) | ✅ Resolvido |
+| PA-01-06 | B — Edge Case | 🟢 | `StopSpawnLoops`: reset das flags estáticas depois do `Instance == null` pode não rodar; justificativa do `finally` está errada | ✅ Resolvido |
+| PA-01-07 | B — Edge Case | 🟢 | `ClearSptQueue` "1× por warmup" roda a cada reentrada do ESTÁGIO A, antes do check de humano, e ainda cancela `marksman` em voo (AC-M3) | ✅ Resolvido |
+| PA-01-08 | C — Lógica | 🟢 | Deriva de linhas e rótulos no dump (`:157` → `:160`, `EFT/`, campos vs. propriedades, `Side` é `EPlayerSide?`) | ✅ Resolvido |
+| PA-01-09 | A — Gap | 🟢 | Compatibilidade com MoreBotsAPI afirmada sem evidência; caminho `BotSpawner.ActivateBotsWithoutWave` direto não coberto pelo prefix | ✅ Resolvido |
 
 ## Categorias
 
@@ -44,7 +46,7 @@
 
 ## Pontos
 
-### PA-01-01 · C — Lógica · 🔴 Bloqueador
+### PA-01-01 · C — Lógica · 🔴 Bloqueador · ✅ Resolvido em 2026-08-23
 
 **`ProfileSettingsClass` não existe no Assembly — o stub de `PmcMatches` não compila**
 
@@ -56,11 +58,13 @@
 
 **Decisão:**
 - `[ ]` Pendente
-- `[ ]` Aceitar sugestão
+- `[x]` Aceitar sugestão
 - `[ ]` Caminho alternativo: _________________
 <!-- Após resolver: marcar a opção escolhida, trocar título para ✅ Resolvido em YYYY-MM-DD e adicionar **Resolução:** ... -->
 
-### PA-01-02 · C — Lógica · 🟡 Importante
+**Resolução:** spec §5 — `PmcMatches(InfoClass info, ProfileInfoSettingsClass st, WildSpawnType requested)` com comentário citando `EFT/Profile.cs:632`, `InfoClass.cs:123`, `ProfileInfoSettingsClass.cs:5-9`; §9 check 9 registra que `ProfileSettingsClass` não existe. Conferido no dump (review 02).
+
+### PA-01-02 · C — Lógica · 🟡 Importante · ✅ Resolvido em 2026-08-23
 
 **Auditoria de callers de `ActivateBotsWithoutWave` incompleta (AP-03)**
 
@@ -75,10 +79,12 @@
 
 **Decisão:**
 - `[ ]` Pendente
-- `[ ]` Aceitar sugestão
+- `[x]` Aceitar sugestão
 - `[ ]` Caminho alternativo: _________________
 
-### PA-01-03 · B — Edge Case · 🟡 Importante
+**Resolução:** spec §2 (linha do `BotsController.cs:536`) e §9 check 3 listam `EFT/NonWavesSpawnScenario.cs:160`, `GClass1876.cs:51` (NonWaveGroupScenario) e `BotHalloweenEvent.cs:176` (contorna via `BotSpawner`, fica no backstop); 01-spec ganhou AC-X6 (tolerância de AC-M1 com Halloween ativo). Alvo mantido em `BotsController` (opção 1 da sugestão).
+
+### PA-01-03 · B — Edge Case · 🟡 Importante · ✅ Resolvido em 2026-08-23
 
 **Remover `BaseLocalGameStopPatch` sem substituto deixa a janela `Stop → OnDestroy` sem hook**
 
@@ -90,10 +96,12 @@
 
 **Decisão:**
 - `[ ]` Pendente
-- `[ ]` Aceitar sugestão
+- `[x]` Aceitar sugestão
 - `[ ]` Caminho alternativo: _________________
 
-### PA-01-04 · A — Gap · 🟡 Importante
+**Resolução:** spec §2/§5 — `BaseLocalGameStopPatch` substituído por `LocalGameStopPatch` (`typeof(LocalGame)`, `EFT/LocalGame.cs:357`) + `CoopGameStopPatch` soft (`AccessTools.TypeByName("Fika.Core.Main.GameMode.CoopGame")`, `CoopGame.cs:718`, registro condicional no `Plugin.cs`); §9 check 1 e 01-spec AC-X4 reescritos; V2 confere a fonte no log.
+
+### PA-01-04 · A — Gap · 🟡 Importante · ✅ Resolvido em 2026-08-23
 
 **Fallback PMC "qualquer perfil do pool" some em silêncio — mudança de comportamento não declarada**
 
@@ -105,10 +113,12 @@
 
 **Decisão:**
 - `[ ]` Pendente
-- `[ ]` Aceitar sugestão
+- `[x]` Aceitar sugestão
 - `[ ]` Caminho alternativo: _________________
 
-### PA-01-05 · B — Edge Case · 🟡 Importante
+**Resolução:** 01-spec — AC-X5 novo (vaga PMC sem USEC/BEAR volta ao vanilla → `LoadBots(3)`), NR-4 ajustado; spec §5 — `PmcMatches` simplificado para `info.Side == wantedSide || st.Role == requested`, comentário declara a remoção do fallback antigo (`Patches.cs:834-838`).
+
+### PA-01-05 · B — Edge Case · 🟡 Importante · ✅ Resolvido em 2026-08-23
 
 **Pausa por "sem humano vivo" não alcança a onda em andamento**
 
@@ -120,10 +130,12 @@
 
 **Decisão:**
 - `[ ]` Pendente
-- `[ ]` Aceitar sugestão
+- `[x]` Aceitar sugestão
 - `[ ]` Caminho alternativo: _________________
 
-### PA-01-06 · B — Edge Case · 🟢 Menor
+**Resolução:** spec §5 (c) — ramo de pausa faz `StopCoroutine(_activeWaveCoroutine)`, zera `_activeWaveCoroutine`, `IsGeneratingDynamicWave = false`, `_nextWaveTime = 0f`; limitação da coroutine filha documentada no stub e em AC-X3 (01-spec).
+
+### PA-01-06 · B — Edge Case · 🟢 Menor · ✅ Resolvido em 2026-08-23
 
 **`StopSpawnLoops`: reset das flags depois do `Instance == null` pode não rodar; justificativa do `finally` está errada**
 
@@ -135,10 +147,12 @@
 
 **Decisão:**
 - `[ ]` Pendente
-- `[ ]` Aceitar sugestão
+- `[x]` Aceitar sugestão
 - `[ ]` Caminho alternativo: _________________
 
-### PA-01-07 · B — Edge Case · 🟢 Menor
+**Resolução:** spec §5 (e) — flags estáticas resetadas **antes** do `if (Instance == null) return;`, comentário corrigido (fake-null do Unity; `try/finally` sem `yield`); §9 check 8 reescrito com a evidência `:1017-1033`/`:1236-1243`.
+
+### PA-01-07 · B — Edge Case · 🟢 Menor · ✅ Resolvido em 2026-08-23
 
 **`ClearSptQueue` "1× por warmup" roda a cada reentrada do ESTÁGIO A, antes do check de humano, e ainda cancela `marksman` em voo**
 
@@ -150,10 +164,12 @@
 
 **Decisão:**
 - `[ ]` Pendente
-- `[ ]` Aceitar sugestão
+- `[x]` Aceitar sugestão
 - `[ ]` Caminho alternativo: _________________
 
-### PA-01-08 · C — Lógica · 🟢 Menor
+**Resolução:** spec §1/§5 (c) — `_sptQueueClearedThisRaid` (campo de instância; o componente é recriado por raid em `DynamicSpawnManagerPatch.cs:60`), limpeza só após o check de humano vivo; 01-spec AC-M3 com tolerância ≤ 1 NRE/raid.
+
+### PA-01-08 · C — Lógica · 🟢 Menor · ✅ Resolvido em 2026-08-23
 
 **Deriva de linhas e rótulos no dump**
 
@@ -169,10 +185,12 @@
 
 **Decisão:**
 - `[ ]` Pendente
-- `[ ]` Aceitar sugestão
+- `[x]` Aceitar sugestão
 - `[ ]` Caminho alternativo: _________________
 
-### PA-01-09 · A — Gap · 🟢 Menor
+**Resolução:** spec §1/§2/§9 check 9 — citações corrigidas (`EFT/NonWavesSpawnScenario.cs:115-162`, `:160`; campos `:16/:19`, `Side` `EPlayerSide?` `:43`, sem `.Value`; `GClass1890.cs:17`; `IGetProfileData` em namespace global). Restam ocorrências antigas em comentários de stub/§6 — ver PA-02-02 (review 02).
+
+### PA-01-09 · A — Gap · 🟢 Menor · ✅ Resolvido em 2026-08-23
 
 **Compatibilidade com MoreBotsAPI afirmada sem evidência; caminho `BotSpawner` direto fora do prefix**
 
@@ -184,8 +202,10 @@
 
 **Decisão:**
 - `[ ]` Pendente
-- `[ ]` Aceitar sugestão
+- `[x]` Aceitar sugestão
 - `[ ]` Caminho alternativo: _________________
+
+**Resolução:** spec §7 — MoreBotsAPI marcado "não verificado", sem regressão por construção (backstop já recusava 100% de `assault`), check explícito na V2; `BotHalloweenEvent.cs:176` registrado como caminho que contorna o prefix.
 
 ---
 

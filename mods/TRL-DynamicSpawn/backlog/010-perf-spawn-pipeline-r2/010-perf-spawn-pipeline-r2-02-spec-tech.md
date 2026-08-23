@@ -53,7 +53,7 @@ Semântica: lido 1× em `FetchServerConfigAndStart` (`:147-149`); estado neutro 
 | `Client/Patches/BotSpawnLoggerPatch.cs` | MODIFICAR | gate antes de formatar; `LogInfo` — `// ref: AUD-01-07` |
 | `Client/Patches/RaidLifecyclePatches.cs` | MODIFICAR | `BaseLocalGameStopPatch` → `LocalGameStopPatch` + `CoopGameStopPatch` (soft) — `// ref: PA-01-05 (009)`, `PA-01-03` |
 | `Client/Helpers/RaidLifecycle.cs` | MODIFICAR | `OnRaidEnd` chama `DynamicSpawnManager.StopSpawnLoops()` — `// ref: AUD-01-06` |
-| `Client/Components/DynamicSpawnManager.cs` | MODIFICAR | `ClearSptQueue` 1×/warmup (`:392` → antes do `while`); remover pré-carga fixa `:496-498`; pré-carga inicial via config `:147-149`; `GetAliveHumanCount()` + pausa no `SpawnHordeLoop`; `StopSpawnLoops()`; gate nos `[SPY]`/`Horde Breakdown` — `// ref: AUD-01-04/05/06/07` |
+| `Client/Components/DynamicSpawnManager.cs` | MODIFICAR | `ClearSptQueue` 1×/raid (`:392` → flag `_sptQueueClearedThisRaid`, após o check de humano); remover pré-carga fixa `:496-498`; pré-carga inicial via config `:147-149`; `GetAliveHumanCount()` + pausa no `SpawnHordeLoop`; `StopSpawnLoops()`; gate nos `[SPY]`/`Horde Breakdown` — `// ref: AUD-01-04/05/06/07` |
 | `Client/Helpers/Settings.cs` | MODIFICAR | `initialProfilePreload` |
 | `Client/Plugin.cs` | MODIFICAR | registrar `ActivateBotsWithoutWavePatch`; desregistrar `BaseLocalGameStopPatch` |
 | `PROPRIEDADES.md` | MODIFICAR | seção `Profile Pool (Advanced)` |
@@ -73,7 +73,7 @@ using TRLDynamicSpawn.Helpers;
 namespace TRLDynamicSpawn.Patches
 {
     /// <summary>
-    /// Refuses the vanilla continuous scav spawner (NonWavesSpawnScenario.cs:157) at its FIRST step, before any
+    /// Refuses the vanilla continuous scav spawner (EFT/NonWavesSpawnScenario.cs:160; group variant GClass1876.cs:51) at its FIRST step, before any
     /// profile is created/chosen. Previously the refusal happened in TryToSpawnInZoneAndDelay, after
     /// BotCreationDataClass.Create + ChooseProfile had already run (the 10 s metronome measured in V1).
     /// marksman (vanilla snipers) is deliberately allowed through (NR-2).
@@ -94,7 +94,7 @@ namespace TRLDynamicSpawn.Patches
                 if (DynamicSpawnManager.IsGeneratingDynamicWave) return true;   // defensive; the mod does not use this entry
                 if (!(data is BotProfileDataClass bp)) return true;            // unknown provider: let vanilla decide
 
-                var role = bp.WildSpawnType_0;                                  // ref: BotProfileDataClass.cs (public property, already used at Patches.cs:804)
+                var role = bp.WildSpawnType_0;                                  // ref: BotProfileDataClass.cs:16 (public field, already used at Patches.cs:804)
                 if (role != WildSpawnType.assault && role != WildSpawnType.cursedAssault) return true;
 
                 if (Settings.enableDebugLogs.Value)                             // gate BEFORE formatting (AUD-01-07)
@@ -119,7 +119,7 @@ private static bool PatchPrefix(ref Profile __result, BotProfileDataClass __inst
     if (__instance == null || profiles2Select == null || profiles2Select.Count == 0) return true;
 
     var role = __instance.WildSpawnType_0;
-    var side = __instance.Side;                     // ref: BotProfileDataClass.cs:87 (Side / WildSpawnType_0 / BotDifficulty_0 usados pelo vanilla)
+    var side = __instance.Side;                     // ref: BotProfileDataClass.cs:16/:19/:43 — campos públicos; Side é EPlayerSide? (== lifted, sem .Value); vanilla compara em :87
     var diff = __instance.BotDifficulty_0;
     bool debug = Settings.enableDebugLogs.Value;
 
@@ -175,7 +175,7 @@ private static bool PatchPrefix(ref Profile __result, BotProfileDataClass __inst
 private static bool PmcMatches(InfoClass info, ProfileInfoSettingsClass st, WildSpawnType requested)
 {
     EPlayerSide wantedSide = requested == WildSpawnType.pmcUSEC ? EPlayerSide.Usec : EPlayerSide.Bear;
-    return info.Side == wantedSide || st.Role == requested;   // cobre sptUsec/sptBear (Side) e pmcUSEC/pmcBEAR (Role)
+    return info.Side == wantedSide || st.Role == requested;   // Side cobre perfis PMC gerados pelo SPT; Role cobre pmcUSEC(52)/pmcBEAR(51) — EFT/WildSpawnType.cs (0.16.9 não tem membros spt*; PA-02-01)
 }
 ```
 
@@ -301,6 +301,9 @@ public class CoopGameStopPatch : ModulePatch
     }
 }
 // Plugin.cs: new LocalGameStopPatch().Enable(); if (CoopGameStopPatch.TargetType != null) new CoopGameStopPatch().Enable();
+// O guard é OBRIGATÓRIO: ModulePatch com alvo nulo lança PatchException (SPT AbstractPatch.cs:110-113) — PA-02-03.
+// Com Fika instalado, LocalGame nunca é instanciado (TarkovApplication_LocalGameCreator_Patch.cs:192 → CoopGame.Create):
+// a V2 deve esperar a fonte "CoopGame.Stop" no log, e "LocalGame.Stop" só em SPT sem Fika.
 // (remover new BaseLocalGameStopPatch().Enable() e a classe)
 ```
 
@@ -318,7 +321,7 @@ initialProfilePreload = config.Bind(poolSection, "Initial Profile Preload", 15,
 
 ```
 [vanilla, a cada ≥10 s]  NonWavesSpawnScenario.Update (:115) → num = BotMax − vivos → TrySpawn(num)
-    → para cada vaga: botsController.ActivateBotsWithoutWave(1, BotProfileDataClass{Savage, assault|marksman, diff})  (:157)
+    → para cada vaga: botsController.ActivateBotsWithoutWave(1, BotProfileDataClass{Savage, assault|marksman, diff})  (:160; grupo: GClass1876.cs:51)
          ├─ assault/cursedAssault (host) ──► ActivateBotsWithoutWavePatch: return false   ← zero Create / ChooseProfile / log   (AUD-01-08)
          └─ marksman ──► vanilla: BotSpawner.ActivateBotsWithoutWave → Create → ChooseProfile (patch: exato→relaxado, logs gated) → TryToSpawnInZoneAndDelay (prefix antigo: passa)
 
@@ -330,7 +333,9 @@ initialProfilePreload = config.Bind(poolSection, "Initial Profile Preload", 15,
          └─ nada do Side+Role → vanilla → LoadBots(3)  (único caso de fabricar)
     → TryToSpawnInZoneAndDelay (IsGeneratingDynamicWave = true → passa)
 
-[fim de raid]  GameWorld.OnDestroy → RaidLifecycle.OnWorldDestroyed → OnRaidEnd("GameWorld.OnDestroy")
+[fim de raid]  LocalGame.Stop (solo/SPT puro) | CoopGame.Stop (Fika host/headless — NÃO chama base.Stop, CoopGame.cs:811-818; por isso o hook genérico do 009 foi inerte)
+                 → RaidLifecycle.OnRaidEnd("LocalGame.Stop" | "CoopGame.Stop")   ← fonte esperada na V2 com Fika: CoopGame.Stop (PA-02-03)
+            GameWorld.OnDestroy → RaidLifecycle.OnWorldDestroyed → OnRaidEnd("GameWorld.OnDestroy") (no-op se Stop já rodou)
     → BotDespawnManager.StopLoop() · DynamicSpawnManager.StopSpawnLoops() (coroutines + flags estáticas) · ForceRefresh()
 ```
 
@@ -346,7 +351,7 @@ initialProfilePreload = config.Bind(poolSection, "Initial Profile Preload", 15,
 
 - [ ] `SpawnGatePatches.cs` novo + registro no `Plugin.cs` (`// ref: AUD-01-08`).
 - [ ] `ChooseProfilePatch` reescrito (exato → relaxado → vanilla; sem LINQ; logs gated/Info) (`// ref: AUD-01-04`, `AUD-01-07`).
-- [ ] `DynamicSpawnManager`: pré-carga inicial via config; remover 10/10/10 de `ProcessWave`; `ClearSptQueue` 1×/warmup; `GetAliveHumanCount` + pausa; `StopSpawnLoops`; gate nos `[SPY]`/`Horde Breakdown`/`Batch profile pre-fetching`/`SQUAD …` (`// ref: AUD-01-04/05/06/07`).
+- [ ] `DynamicSpawnManager`: pré-carga inicial via config; remover 10/10/10 de `ProcessWave`; `ClearSptQueue` 1×/raid; `GetAliveHumanCount` + pausa; `StopSpawnLoops`; gate nos `[SPY]`/`Horde Breakdown`/`Batch profile pre-fetching`/`SQUAD …` (`// ref: AUD-01-04/05/06/07`).
 - [ ] `BotSpawnLoggerPatch` gated (`// ref: AUD-01-07`).
 - [ ] `RaidLifecycle.OnRaidEnd` → `StopSpawnLoops()`; `BaseLocalGameStopPatch` → `LocalGameStopPatch` + `CoopGameStopPatch` soft (registro condicional no `Plugin.cs`) (`// ref: AUD-01-06`, `PA-01-03`).
 - [ ] `_sptQueueClearedThisRaid` (campo de instância) + pausa sem humano interrompe `_activeWaveCoroutine` (`// ref: PA-01-05`, `PA-01-07`).
