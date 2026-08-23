@@ -34,6 +34,7 @@ namespace TRLDynamicSpawn.Helpers
         public static ConfigEntry<bool> showLoSCone;
 
         public static ConfigEntry<bool> reloadServerConfig;
+        public static ConfigEntry<int> initialProfilePreload;
 
         public static void Init(ConfigFile config)
         {
@@ -123,6 +124,12 @@ namespace TRLDynamicSpawn.Helpers
                 Plugin.LogSource?.LogInfo("[TRL-DynamicSpawn] Server config cache cleared by user (F12). Next read will fetch.");
                 reloadServerConfig.Value = false;
             };
+
+            // ref: AUD-01-04 / AC-X2 — initial profile preload per type (was fixed 30/30/20). Read once per raid.
+            string poolSection = "Profile Pool (Advanced)";
+            initialProfilePreload = config.Bind(poolSection, "Initial Profile Preload", 15,
+                new ConfigDescription("How many bot profiles per type (USEC, BEAR, Scav) the mod asks the server for at raid start, before the first wave. Higher = faster first wave, more memory; 0 disables the initial preload.",
+                    new AcceptableValueRange<int>(0, 30), new ConfigurationManagerAttributes { IsAdvanced = true }));
         }
 
         public static int GetMapCap(string mapId)

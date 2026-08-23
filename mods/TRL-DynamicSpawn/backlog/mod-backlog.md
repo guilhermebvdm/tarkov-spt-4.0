@@ -4,7 +4,7 @@
 
 | # | Título | Resumo | Pasta | Status |
 |---|---|---|---|---|
-| 010 | perf-spawn-pipeline-r2 | Rodada 2 de performance (AUD-01-04/05/06/07/08): spawner vanilla barrado na fonte, pool de perfis estável, fila sem cancelamento periódico, waves só com raid ativa, logs sob gate | [010-perf-spawn-pipeline-r2/](./010-perf-spawn-pipeline-r2/) | ⚪ |
+| 010 | perf-spawn-pipeline-r2 | Rodada 2 de performance (AUD-01-04/05/06/07/08): spawner vanilla barrado na fonte, pool de perfis estável, fila sem cancelamento periódico, waves só com raid ativa, logs sob gate | [010-perf-spawn-pipeline-r2/](./010-perf-spawn-pipeline-r2/) | 🟢 |
 | 009 | perf-config-cache-raid | Rodada 1 de performance (AUD-01-01/02/03): config do servidor cacheada por raid, poller de despawn só em raid e backoff em falha de fetch | [009-perf-config-cache-raid/](./009-perf-config-cache-raid/) | 🟢 |
 | 001 | portabilidade-spt-4 | Portar e corrigir a inicialização do mod TRL-DynamicSpawn para a versão SPT 4.0 | [001-portabilidade-spt-4/](./001-portabilidade-spt-4/) | 🟢 |
 | 002 | webui-nomenclaturas-e-ajustes | Ajustar nomenclaturas (Ondas, Bots) e reduzir slider de espera inicial para 0-120s no painel Web | [002-webui-nomenclaturas-e-ajustes/](./002-webui-nomenclaturas-e-ajustes/) | 🟢 |

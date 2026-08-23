@@ -35,6 +35,7 @@ namespace TRLDynamicSpawn.Helpers
             _raidActive = false;
             Plugin.LogSource?.LogInfo($"[TRL-DynamicSpawn] Raid end hook fired ({source})."); // 1x/raid
             BotDespawnManager.StopLoop();
+            DynamicSpawnManager.StopSpawnLoops();                // ref: AUD-01-06 — waves/groups stop at the first end hook
         }
 
         // ref: Assembly-CSharp/EFT/GameWorld.cs:2111 (OnDestroy) — last raid event; after it there is

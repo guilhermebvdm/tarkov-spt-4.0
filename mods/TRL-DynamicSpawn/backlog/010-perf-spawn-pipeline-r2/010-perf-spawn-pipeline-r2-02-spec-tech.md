@@ -349,14 +349,14 @@ initialProfilePreload = config.Bind(poolSection, "Initial Profile Preload", 15,
 
 ## 8. Checklist de implementação
 
-- [ ] `SpawnGatePatches.cs` novo + registro no `Plugin.cs` (`// ref: AUD-01-08`).
-- [ ] `ChooseProfilePatch` reescrito (exato → relaxado → vanilla; sem LINQ; logs gated/Info) (`// ref: AUD-01-04`, `AUD-01-07`).
-- [ ] `DynamicSpawnManager`: pré-carga inicial via config; remover 10/10/10 de `ProcessWave`; `ClearSptQueue` 1×/raid; `GetAliveHumanCount` + pausa; `StopSpawnLoops`; gate nos `[SPY]`/`Horde Breakdown`/`Batch profile pre-fetching`/`SQUAD …` (`// ref: AUD-01-04/05/06/07`).
-- [ ] `BotSpawnLoggerPatch` gated (`// ref: AUD-01-07`).
-- [ ] `RaidLifecycle.OnRaidEnd` → `StopSpawnLoops()`; `BaseLocalGameStopPatch` → `LocalGameStopPatch` + `CoopGameStopPatch` soft (registro condicional no `Plugin.cs`) (`// ref: AUD-01-06`, `PA-01-03`).
-- [ ] `_sptQueueClearedThisRaid` (campo de instância) + pausa sem humano interrompe `_activeWaveCoroutine` (`// ref: PA-01-05`, `PA-01-07`).
-- [ ] `Settings.initialProfilePreload` + `PROPRIEDADES.md`.
-- [ ] Grep de sanidade: nenhum `LogWarning`/`LogInfo` com prefixo `[TRLDynamicSpawn Logger]`/`[SPY]` fora de `if (Settings.enableDebugLogs.Value)`; `MASTER FALLBACK`/`FAILED`/`Error` continuam sem gate.
+- [x] `SpawnGatePatches.cs` novo + registro no `Plugin.cs` (`// ref: AUD-01-08`).
+- [x] `ChooseProfilePatch` reescrito (exato → relaxado → vanilla; sem LINQ; logs gated/Info) (`// ref: AUD-01-04`, `AUD-01-07`).
+- [x] `DynamicSpawnManager`: pré-carga inicial via config; remover 10/10/10 de `ProcessWave`; `ClearSptQueue` 1×/raid; `GetAliveHumanCount` + pausa; `StopSpawnLoops`; gate nos `[SPY]`/`Horde Breakdown`/`Batch profile pre-fetching`/`SQUAD …` (`// ref: AUD-01-04/05/06/07`).
+- [x] `BotSpawnLoggerPatch` gated (`// ref: AUD-01-07`).
+- [x] `RaidLifecycle.OnRaidEnd` → `StopSpawnLoops()`; `BaseLocalGameStopPatch` → `LocalGameStopPatch` + `CoopGameStopPatch` soft (registro condicional no `Plugin.cs`) (`// ref: AUD-01-06`, `PA-01-03`).
+- [x] `_sptQueueClearedThisRaid` (campo de instância) + pausa sem humano interrompe `_activeWaveCoroutine` (`// ref: PA-01-05`, `PA-01-07`).
+- [x] `Settings.initialProfilePreload` + `PROPRIEDADES.md`.
+- [x] Grep de sanidade: nenhum `LogWarning`/`LogInfo` com prefixo `[TRLDynamicSpawn Logger]`/`[SPY]` fora de `if (Settings.enableDebugLogs.Value)`; `MASTER FALLBACK`/`FAILED`/`Error` continuam sem gate.
 - [ ] Compilar (`dotnet build` com refs temporárias, como no 009) → versão **minor** (3.3.0 → 3.4.0: propriedade F12 nova + AC-X1/X2) → deploy com rollback `.bak-3.3.0` → V2.
 
 ## 9. Conformidade com skills (auto-checklist)

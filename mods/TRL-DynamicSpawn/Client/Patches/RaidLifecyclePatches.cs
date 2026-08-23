@@ -49,26 +49,46 @@ namespace TRLDynamicSpawn.Patches
     }
 
     /// <summary>
-    /// Secondary raid-end hook (Left/Killed/MIA fire Stop before the scene is torn down).
-    /// BaseLocalGame is an open generic — resolved through the closed type used by LocalGame
-    /// (LocalGame.cs:24, override :357 calls base :362) and by Fika's CoopGame (CoopGame.cs:42).
-    /// Only stops the poller; cache invalidation is left to OnDestroy (PA-01-01).
-    /// ref: Assembly-CSharp/EFT/BaseLocalGame-1.cs:1018 (public virtual void Stop(string, ExitStatus, string, float))
-    /// ref: AUD-01-02
+    /// Early raid-end hook for SPT without Fika (Left/Killed/MIA fire Stop before the scene is torn down).
+    /// The 009 patch on the closed generic BaseLocalGame&lt;EftGamePlayerOwner&gt;.Stop was inert in V1: with Fika the
+    /// game class is CoopGame, which never calls base.Stop. Patch the concrete overrides instead (PA-01-03 / 010).
+    /// Only stops the poller/spawn loops; cache invalidation is left to OnDestroy (PA-01-01).
+    /// ref: Assembly-CSharp/EFT/LocalGame.cs:357 (public override void Stop — concrete class :24, calls base :362)
+    /// ref: AUD-01-02, AUD-01-06
     /// </summary>
-    public class BaseLocalGameStopPatch : ModulePatch
+    public class LocalGameStopPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
-            => AccessTools.Method(typeof(BaseLocalGame<EftGamePlayerOwner>), nameof(BaseLocalGame<EftGamePlayerOwner>.Stop));
+            => AccessTools.Method(typeof(LocalGame), nameof(LocalGame.Stop));   // single Stop overload on LocalGame
 
         [PatchPrefix]
         private static void Prefix()
         {
-            try
-            {
-                RaidLifecycle.OnRaidEnd("BaseLocalGame.Stop");   // logs source on first effective call (CR-01-03 / PA-01-05)
-            }
-            catch (Exception ex) { Plugin.LogSource?.LogError($"[TRL-DynamicSpawn] BaseLocalGameStopPatch: {ex}"); }
+            try { RaidLifecycle.OnRaidEnd("LocalGame.Stop"); }
+            catch (Exception ex) { Plugin.LogSource?.LogError($"[TRL-DynamicSpawn] LocalGameStopPatch: {ex}"); }
+        }
+    }
+
+    /// <summary>
+    /// Same hook for Fika host/headless: CoopGame : BaseLocalGame&lt;EftGamePlayerOwner&gt; (fika-plugin CoopGame.cs:42,
+    /// sealed; override Stop :718 does NOT call base.Stop — it ends the raid through ExitManager :811-818).
+    /// With Fika installed LocalGame is never instantiated (TarkovApplication_LocalGameCreator_Patch.cs:192 → CoopGame.Create),
+    /// so in that setup this is the only early hook that fires; expected V2 log source: "CoopGame.Stop".
+    /// Soft dependency: the type is resolved by name; when Fika is absent TargetType is null and Plugin does NOT call
+    /// Enable() (ModulePatch throws PatchException on a null target — SPT AbstractPatch.cs:110-113). ref: PA-02-03
+    /// </summary>
+    public class CoopGameStopPatch : ModulePatch
+    {
+        public static readonly Type TargetType = AccessTools.TypeByName("Fika.Core.Main.GameMode.CoopGame");
+
+        protected override MethodBase GetTargetMethod()
+            => AccessTools.Method(TargetType, "Stop", new[] { typeof(string), typeof(ExitStatus), typeof(string), typeof(float) });
+
+        [PatchPrefix]
+        private static void Prefix()
+        {
+            try { RaidLifecycle.OnRaidEnd("CoopGame.Stop"); }
+            catch (Exception ex) { Plugin.LogSource?.LogError($"[TRL-DynamicSpawn] CoopGameStopPatch: {ex}"); }
         }
     }
 }

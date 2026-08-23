@@ -37,6 +37,7 @@ namespace TRLDynamicSpawn.Components
         private IBotCreator _botCreator;
         private BotsController _botsController;
         private Coroutine _activeWaveCoroutine;
+        private bool _sptQueueClearedThisRaid;   // ref: AUD-01-05 — instance field: the component is re-created per raid (DynamicSpawnManagerPatch.cs:60)
         private string _cachedFikaStatus;
         private BotZone _lastSelectedZone;
 
@@ -143,10 +144,16 @@ namespace TRLDynamicSpawn.Components
                 // Pre-populate SPT Bot Creator Backup target for PMCs to resolve profile generation empty queues
                 if (_botCreator != null)
                 {
-                    Plugin.LogSource.LogInfo("[TRL-DynamicSpawn] Pre-populating SPT Bot Creator Backup target for PMCs, Scavs and Rogues...");
-                    _botCreator.AddToTargetBackup(BotDifficulty.normal, WildSpawnType.pmcUSEC, 30);
-                    _botCreator.AddToTargetBackup(BotDifficulty.normal, WildSpawnType.pmcBEAR, 30);
-                    _botCreator.AddToTargetBackup(BotDifficulty.normal, WildSpawnType.assault, 20);
+                    // ref: AUD-01-04 / AC-X2 — initial preload is configurable (was fixed 30/30/20; profiles are never
+                    // dropped from the pool, so every unused one is memory for the whole raid). 0 disables it.
+                    int preload = Settings.initialProfilePreload.Value;
+                    Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Pre-populating SPT Bot Creator Backup target ({preload} per type: USEC, BEAR, Scav) + Rogues/Goons per config...");
+                    if (preload > 0)
+                    {
+                        _botCreator.AddToTargetBackup(BotDifficulty.normal, WildSpawnType.pmcUSEC, preload);
+                        _botCreator.AddToTargetBackup(BotDifficulty.normal, WildSpawnType.pmcBEAR, preload);
+                        _botCreator.AddToTargetBackup(BotDifficulty.normal, WildSpawnType.assault, preload);
+                    }
                     if (_serverConfig?.EliteConfig?.Rogues != null && _serverConfig.EliteConfig.Rogues.Enable)
                     {
                         _botCreator.AddToTargetBackup(BotDifficulty.normal, WildSpawnType.exUsec, 10);
@@ -227,6 +234,41 @@ namespace TRLDynamicSpawn.Components
                 }
             }
             return count;
+        }
+
+        /// <summary>
+        /// Alive human players (host + Fika guests), ignoring bots and the headless "player".
+        /// ref: AUD-01-06 — waves are only computed while someone is alive to spawn for.
+        /// ref: Assembly-CSharp/EFT/GameWorld.cs:556 (AllAlivePlayersList : List&lt;Player&gt;)
+        /// </summary>
+        public int GetAliveHumanCount()
+        {
+            if (_gameWorld == null) return 0;
+            var list = _gameWorld.AllAlivePlayersList;
+            if (list == null) return 0;
+            int n = 0;
+            for (int i = 0; i < list.Count; i++)
+            {
+                var p = list[i];
+                if (p == null || p.IsAI || IsHeadlessPlayer(p)) continue;
+                if (p.HealthController != null && p.HealthController.IsAlive) n++;
+            }
+            return n;
+        }
+
+        /// <summary>
+        /// Raid end (called by RaidLifecycle.OnRaidEnd from the first end hook that fires). Stops every spawn coroutine
+        /// of this manager and resets the static flags. ref: AUD-01-06
+        /// </summary>
+        public static void StopSpawnLoops()
+        {
+            // Static flags FIRST: called from the GameWorld.OnDestroy prefix, the manager (same GameObject) may already
+            // be destroyed (Unity fake-null) and the early return below would skip the reset. ref: PA-01-06
+            IsGeneratingDynamicWave = false;
+            IsWarmupActive = false;
+            if (Instance == null) return;
+            Instance.StopAllCoroutines();   // SpawnHordeLoop, FetchServerConfigAndStart, ProcessWave, SpawnGroupBotsCoroutine, SpawnReplacementBotCoroutine
+            Instance._activeWaveCoroutine = null;
         }
 
         // Roles controlados pelo TRL-DynamicSpawn — qualquer outro é "especial" (boss, guard, rogue, raider, etc.)
@@ -388,9 +430,28 @@ namespace TRLDynamicSpawn.Components
                     int warmupAttempt = 1;
                     while (true)
                     {
-                        // Limpa qualquer perfil preso/pendente na fila do SPT antes de iniciar a onda
-                        ClearSptQueue();
                         yield return new WaitForSeconds(1f);
+
+                        // ref: AUD-01-06 / AC-X3 — no human alive → nothing to spawn for. Stop the wave in flight
+                        // (the child SpawnGroupBotsCoroutine finishes its current group — Unity limitation) and keep
+                        // re-checking; the raid is ending anyway.
+                        if (GetAliveHumanCount() == 0)
+                        {
+                            if (_activeWaveCoroutine != null) { StopCoroutine(_activeWaveCoroutine); _activeWaveCoroutine = null; }
+                            IsGeneratingDynamicWave = false;
+                            _nextWaveTime = 0f;
+                            yield return new WaitForSeconds(5f);
+                            continue;
+                        }
+
+                        // ref: AUD-01-05 — ONE clean-up of the SPT creation queue per raid (item 006 intent preserved).
+                        // It used to run every 1 s here: BotEventHandler.StopBotSpawn() cancels EVERY BotCreationDataClass
+                        // in flight (vanilla and the mod's own) → Create returns null → 44 NRE/raid in TrySpawnFreeInner.
+                        if (!_sptQueueClearedThisRaid)
+                        {
+                            _sptQueueClearedThisRaid = true;
+                            ClearSptQueue();
+                        }
 
                         currentMap = GetCurrentMapName();
                         playerCap = Settings.GetMapCap(currentMap);
@@ -489,14 +550,11 @@ namespace TRLDynamicSpawn.Components
             int aliveBots = GetRealAliveBotsCount();
             int availableSlots = Mathf.Max(0, dynamicCap - aliveBots);
 
-            Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Calculating Wave: PlayerCap={playerCap}, SpecialBots={specialBots}, DynamicCap={dynamicCap}, Alive={aliveBots}, Available={availableSlots}");
+            if (Settings.enableDebugLogs.Value)   // ref: AUD-01-07
+                Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Calculating Wave: PlayerCap={playerCap}, SpecialBots={specialBots}, DynamicCap={dynamicCap}, Alive={aliveBots}, Available={availableSlots}");
 
-            if (_botCreator != null)
-            {
-                _botCreator.AddToTargetBackup(BotDifficulty.normal, WildSpawnType.pmcUSEC, 10);
-                _botCreator.AddToTargetBackup(BotDifficulty.normal, WildSpawnType.pmcBEAR, 10);
-                _botCreator.AddToTargetBackup(BotDifficulty.normal, WildSpawnType.assault, 10);
-            }
+            // ref: AUD-01-04 — the fixed 10/10/10 'normal' preload per wave was removed: the slot-based prefetch below
+            // (AddToTargetBackup with the wave's sampled difficulty) already requests exactly what this wave consumes.
 
             if (availableSlots <= 0)
             {
@@ -724,7 +782,8 @@ namespace TRLDynamicSpawn.Components
                 int normalScavSlots = scavSlots - pScavSlots;
 
                 bool isSainActive = IsSainInstalled();
-                if (isSainActive)
+                bool debugLogs = Settings.enableDebugLogs.Value;   // ref: AUD-01-07 — gate before formatting; Info level
+                if (isSainActive && debugLogs)
                 {
                     Plugin.LogSource.LogInfo("[TRL-DynamicSpawn][SPY] SAIN Mod detected! DynamicSpawn difficulty override disabled. SAIN controls AI difficulty.");
                 }
@@ -732,14 +791,15 @@ namespace TRLDynamicSpawn.Components
                 BotDifficulty pmcDiff = isSainActive ? BotDifficulty.normal : GetRandomDifficulty(_serverConfig?.PmcDifficulty);
                 BotDifficulty scavDiff = isSainActive ? BotDifficulty.normal : GetRandomDifficulty(_serverConfig?.ScavDifficulty);
 
-                Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn][SPY] Sampled Wave Difficulties (SAIN Active: {isSainActive}): PMC={pmcDiff}, Scav={scavDiff}");
-
-                Plugin.LogSource.LogWarning($"[TRL-DynamicSpawn] Horde Breakdown (Preset: {_activePreset}):");
-                Plugin.LogSource.LogWarning($"  PlayerCap={playerCap} | SpecialBots={specialBots} | DynamicCap={dynamicCap} | Available={availableSlots}");
-                Plugin.LogSource.LogWarning($"  Alive Bots: {aliveBotsTotal} | PMCs: {alivePMCs} ({aliveBears} BEAR, {aliveUsecs} USEC) | Normal Scavs: {aliveNormalScavs}");
-
-                Plugin.LogSource.LogWarning($"  Spawning PMCs ({pmcDiff}): {pmcSlots} ({bearSlots} BEAR, {usecSlots} USEC)");
-                Plugin.LogSource.LogWarning($"  Spawning Scavs ({scavDiff}): {scavSlots} ({normalScavSlots} Normal, {pScavSlots} pScav)");
+                if (debugLogs)
+                {
+                    Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn][SPY] Sampled Wave Difficulties (SAIN Active: {isSainActive}): PMC={pmcDiff}, Scav={scavDiff}");
+                    Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Horde Breakdown (Preset: {_activePreset}):");
+                    Plugin.LogSource.LogInfo($"  PlayerCap={playerCap} | SpecialBots={specialBots} | DynamicCap={dynamicCap} | Available={availableSlots}");
+                    Plugin.LogSource.LogInfo($"  Alive Bots: {aliveBotsTotal} | PMCs: {alivePMCs} ({aliveBears} BEAR, {aliveUsecs} USEC) | Normal Scavs: {aliveNormalScavs}");
+                    Plugin.LogSource.LogInfo($"  Spawning PMCs ({pmcDiff}): {pmcSlots} ({bearSlots} BEAR, {usecSlots} USEC)");
+                    Plugin.LogSource.LogInfo($"  Spawning Scavs ({scavDiff}): {scavSlots} ({normalScavSlots} Normal, {pScavSlots} pScav)");
+                }
 
                 if (_botCreator != null)
                 {
@@ -747,7 +807,8 @@ namespace TRLDynamicSpawn.Components
                     if (bearSlots > 0) _botCreator.AddToTargetBackup(pmcDiff, WildSpawnType.pmcBEAR, bearSlots);
                     int totalScavSlots = normalScavSlots + pScavSlots;
                     if (totalScavSlots > 0) _botCreator.AddToTargetBackup(scavDiff, WildSpawnType.assault, totalScavSlots);
-                    Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Batch profile pre-fetching requested: {usecSlots} USEC ({pmcDiff}), {bearSlots} BEAR ({pmcDiff}), {totalScavSlots} Scavs ({scavDiff}).");
+                    if (debugLogs)
+                        Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Batch profile pre-fetching requested: {usecSlots} USEC ({pmcDiff}), {bearSlots} BEAR ({pmcDiff}), {totalScavSlots} Scavs ({scavDiff}).");
                 }
 
                 GenerateAndEnqueueGroups(WildSpawnType.pmcUSEC, pmcDiff, usecSlots, eliteConfig?.Usec);
@@ -774,7 +835,8 @@ namespace TRLDynamicSpawn.Components
                 GenerateAndEnqueueGroups(WildSpawnType.assault, scavDiff, pScavSlots, eliteConfig?.Scav);
             }
 
-            Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Profiles generated. Starting smooth injection...");
+            if (Settings.enableDebugLogs.Value)   // ref: AUD-01-07
+                Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Profiles generated. Starting smooth injection...");
 
 
 
@@ -967,7 +1029,8 @@ namespace TRLDynamicSpawn.Components
             }
 
             bool isSain = IsSainInstalled();
-            Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn][SPY] SQUAD SPAWN INITIATED: Role={role}, Difficulty={diff}, GroupSize={groupSize}, Zone={zone.NameZone}, SAIN Active={isSain}");
+            if (Settings.enableDebugLogs.Value)   // ref: AUD-01-07
+                Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn][SPY] SQUAD SPAWN INITIATED: Role={role}, Difficulty={diff}, GroupSize={groupSize}, Zone={zone.NameZone}, SAIN Active={isSain}");
 
             EPlayerSide side = EPlayerSide.Savage;
             if (role == WildSpawnType.pmcUSEC) side = EPlayerSide.Usec;
@@ -1012,7 +1075,8 @@ namespace TRLDynamicSpawn.Components
 
                 if (botResult != null)
                 {
-                    Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn][SPY] SQUAD MEMBER SPAWNED ({i + 1}/{groupSize}): {role} ({diff}) in {zone.NameZone}");
+                    if (Settings.enableDebugLogs.Value)   // ref: AUD-01-07
+                        Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn][SPY] SQUAD MEMBER SPAWNED ({i + 1}/{groupSize}): {role} ({diff}) in {zone.NameZone}");
                     IsGeneratingDynamicWave = true;
                     try
                     {

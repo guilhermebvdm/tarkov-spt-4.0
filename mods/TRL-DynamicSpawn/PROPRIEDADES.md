@@ -61,3 +61,11 @@
 | Reload Server Config | Recarregar Configuração do Servidor | `bool` | `false` | Marque para recarregar agora a configuração do painel web (aplica as edições feitas durante a raid). Desmarca sozinho após recarregar. |
 
 > Funciona como um **botão**: a configuração do painel web é buscada **uma vez por raid** (item 009 / AUD-01-01). Edições feitas no painel **durante** a raid só entram na próxima raid — ou imediatamente, marcando esta opção.
+
+## Profile Pool (Advanced)
+
+| Propriedade | Tradução (pt-BR) | Tipo | Padrão | Faixa | Avançado | Tooltip (pt-BR) |
+|---|---|---|---|---|---|---|
+| Initial Profile Preload | Pré-carga Inicial de Perfis | `int` | `15` | `0`–`30` | sim | Quantos perfis de bot por tipo (USEC, BEAR, Scav) o mod pede ao servidor no início da raid, antes da primeira onda. Valores altos aceleram a primeira onda ao custo de memória; 0 desliga a pré-carga inicial. |
+
+> Antes do item 010 a pré-carga era fixa (30/30/20) e cada onda pedia mais 10/10/10 — perfis não usados ficam na memória até o fim da raid (AUD-01-04). A pré-busca por onda continua automática, com a dificuldade sorteada da onda.

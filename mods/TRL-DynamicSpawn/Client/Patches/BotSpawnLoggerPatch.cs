@@ -15,14 +15,12 @@ internal class BotSpawnLoggerPatch : ModulePatch
     [PatchPostfix]
     private static void PatchPostfix(Player player)
     {
-        if (player == null) return;
-        
-        // Se for um player humano, ignoramos
-        if (!player.IsAI) return;
-        
+        // ref: AUD-01-07 — gate BEFORE any formatting; Info instead of Warning (diagnostic, not a problem)
+        if (!TRLDynamicSpawn.Helpers.Settings.enableDebugLogs.Value) return;
+        if (player == null || !player.IsAI) return;
+
         string role = player.Profile?.Info?.Settings?.Role.ToString() ?? "UnknownRole";
         string nickname = player.Profile?.Nickname ?? "UnknownName";
-        
-        Plugin.LogSource.LogWarning($"[TRLDynamicSpawn Logger] SPAWN -> Role: {role} | Name: {nickname}");
+        Plugin.LogSource.LogInfo($"[TRLDynamicSpawn Logger] SPAWN -> Role: {role} | Name: {nickname}");
     }
 }
