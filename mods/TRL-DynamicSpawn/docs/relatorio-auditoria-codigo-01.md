@@ -99,7 +99,7 @@ Auditoria de performance do mod **TRL-DynamicSpawn v3.2.9** (client [mods/TRL-Dy
 - **Proposta de Correção:** estender o `ChooseProfilePatch` para resolver também Scav/marksman ignorando dificuldade (como já faz p/ PMC), OU normalizar a dificuldade pedida ao `AddToTargetBackup` para a mesma usada no consumo; adicionar limpeza do pool no fim de raid.
 - **Como validar:** logar `profilesInList` no início/fim (instrumentação abaixo); critério: pool estável (±50) durante a raid e curva de RAM sem crescimento monotônico.
 - **Decisão:**
-  - `[ ]` Pendente *(rodada 2 — coordenar com Umbigo)*
+  - `[x]` Aceitar sugestão *(rodada 2 — aprovado pelo usuário em 2026-08-22 23:46; inclui revisar o tamanho da pré-carga `AddToTargetBackup` como meta medível)*
 
 ### AUD-01-05 · `ClearSptQueue()` cancela spawns em voo a cada 1 s (44 NREs)
 - **Severidade:** 🟠 Alto
@@ -112,7 +112,7 @@ Auditoria de performance do mod **TRL-DynamicSpawn v3.2.9** (client [mods/TRL-Dy
 - **Proposta de Correção:** remover a chamada periódica (ou torná-la one-shot no início do warmup); se o objetivo é limpar fila travada, filtrar apenas os pedidos do próprio mod.
 - **Como validar:** errors.log da raid de validação: 0 NREs em `TrySpawnFreeInner` (baseline: 44).
 - **Decisão:**
-  - `[ ]` Pendente *(rodada 2 — coordenar com Umbigo)*
+  - `[x]` Aceitar sugestão *(rodada 2 — aprovado pelo usuário em 2026-08-22 23:46)*
 
 ### AUD-01-06 · Waves continuam com a raid vazia; replace realimenta o ciclo
 - **Severidade:** 🟡 Médio
@@ -124,7 +124,7 @@ Auditoria de performance do mod **TRL-DynamicSpawn v3.2.9** (client [mods/TRL-Dy
 - **Proposta de Correção:** condicionar novas waves a estado de raid ativo + orçamento de spawn; rever se replace deve valer para despawn por distância.
 - **Como validar:** RequestHandler: nenhuma `bot/generate` após o último bot morto (cenário "limpar o mapa e esperar 2 min").
 - **Decisão:**
-  - `[ ]` Pendente *(rodada 2 — coordenar com Umbigo)*
+  - `[x]` Aceitar sugestão *(rodada 2 — aprovado pelo usuário em 2026-08-22 23:46)*
 
 ### AUD-01-07 · Logging Warning fora do gate de debug
 - **Severidade:** 🟡 Médio
@@ -136,7 +136,7 @@ Auditoria de performance do mod **TRL-DynamicSpawn v3.2.9** (client [mods/TRL-Dy
 - **Proposta de Correção:** aplicar o gate existente a todos os emissores e rebaixar para `LogDebug`/`LogInfo`.
 - **Como validar:** raid com `Enable Debug Logs = false` → 0 linhas `ChooseProfile`/`Available profile`/`SPAWN ->` no log.
 - **Decisão:**
-  - `[x]` Aceitar com modificação: **executar somente na rodada 1.5, após a validação V1** (os logs são a observabilidade do teste da rodada 1 — decisão do usuário no plano)
+  - `[x]` Aceitar com modificação: **executar somente na rodada 1.5, após a validação V1** (os logs são a observabilidade do teste da rodada 1 — decisão do usuário no plano) — *2026-08-22 23:46: V1 parcial concluída (getConfig = 1); usuário aprovou entrar na rodada 2 junto com 04/05/06/08. Os emissores ficam **gated** por `Enable Debug Logs` (não removidos) para continuarem servindo à V2.*
 
 ### AUD-01-08 · Ondas vanilla barradas por tentativa em vez de desligadas na fonte
 - **Severidade:** 🟡 Médio
@@ -149,7 +149,7 @@ Auditoria de performance do mod **TRL-DynamicSpawn v3.2.9** (client [mods/TRL-Dy
 - **Proposta de Correção:** no start hook do mod (`RaidLifecycle.OnRaidStart`, já existe desde o item 009), chamar **uma vez** `wavesSpawnScenario_0.Stop()` / `nonWavesSpawnScenario_0.Stop()` do `LocalGame` (campos privados — resolver por reflection cacheada ou pela API pública se houver), mantendo `bossSpawnScenario_0` conforme a configuração de chefes nativos (o mod **quer** os bosses nativos — ver `AdjustVanillaBossWaves`). O prefix atual vira rede de segurança (continua, mas sem tráfego). **Antes de decidir:** (1) medir quantas vezes/raid o prefix dispara hoje (contador `// PERF-INSTR AUD-01-08`); (2) confirmar no dump que `Stop()` cedo não derruba o `BotSpawner`/`BotsController` de que o mod depende (`Patches.cs:378` usa o mesmo `BotsController`); (3) conferir o equivalente no `CoopGame` do Fika (`CoopGame.cs`) — o headless roda o mod.
 - **Como validar:** log da raid sem nenhuma linha `Blocked Vanilla Horde Wave` (baseline: por tentativa); spawns do mod inalterados; bosses nativos continuam nascendo conforme config.
 - **Decisão:**
-  - `[ ]` Pendente *(rodada 2 — coordenar com Umbigo; entra na mesma conversa de AUD-01-04/05/06)*
+  - `[x]` Aceitar sugestão (revisada na atualização abaixo: prefix em `NonWavesSpawnScenario.Run`) *(rodada 2 — aprovado pelo usuário em 2026-08-22 23:46)*
 
 > **Atualização 2026-08-22 23:35 — evidência promovida para Forte (medida na raid de validação V1, client v3.3.0).** O metrônomo de 10 s **persiste com `getConfig` = 1** — logo AUD-01-01 era contribuinte, não a causa. A causa é este achado, e é o próprio jogo: `NonWavesSpawnScenario.Update()` (`references/eft-decompiled/Assembly-CSharp/EFT/NonWavesSpawnScenario.cs:115-159`) roda a cada `float_2` segundos — `location.BotSpawnPeriodCheck` com **piso de 10 s** (`:32-34`, `:146-148`) — calcula `BotMax − bots vivos` (com a raid vazia = o cap inteiro, que o `SetMaxBotCountPatch` ainda eleva) e, para cada vaga que `TrySpawn` libera, chama `ActivateBotsWithoutWave` (`:153-158`) → `BotCreationDataClass.Create` → `ChooseProfile` sobre o pool (**473 perfis** nesta raid, 6 linhas `Warning` por escolha — AUD-01-07) → `BotSpawner.TryToSpawnInZoneAndDelay`, onde o prefix do mod (`Patches.cs:546-554`) barra. **Na raid medida:** 163 bloqueios de `assault` em rajadas de 3–8 a cada ~10 s + 228 `ChooseProfile` + ~1.600 linhas de perfil no console, **com 0 bots vivos e fora da onda do mod**; FPS 90→60 a cada rajada. O `LocalGame.Stop` desliga esse cenário com `nonWavesSpawnScenario_0.Stop()` (`LocalGame.cs:360`) — a API de desligar é a canônica.
 > **Correção proposta (revisada):** em vez de reflection nos campos privados do `LocalGame`, **prefix em `NonWavesSpawnScenario.Run()`** (`:98`, público) retornando `false` quando o mod governa os spawns (host/solo, `!FikaHelper.IsClient()`): `bool_1` nunca arma, `Update()` sai na primeira linha (`:117`) — custo zero por frame, sem reflection, vale para `LocalGame` e `CoopGame`. Os bosses nativos (`BossSpawnScenario`) **não** são tocados; as ondas cronometradas (`WavesSpawnScenario`, 17 bloqueios/raid) ficam para a mesma rodada. Validação: zero `Blocked Vanilla Assault Scav Spawn` no log; metrônomo de 10 s ausente; spawns do mod inalterados.
