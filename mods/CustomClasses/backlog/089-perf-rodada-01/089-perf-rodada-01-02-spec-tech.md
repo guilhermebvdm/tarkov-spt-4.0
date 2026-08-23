@@ -99,7 +99,10 @@ internal static EClassId LocalClassId => _classId;
 
 private static bool _warnedUnknownClass;
 
-internal static EClassId Parse(string? nameEn)
+// PA-03-06: `warnUnknown` existe para a checagem de boot (PA-02-03) não consumir o warn-once — ela já emite
+// o próprio LogError, mais específico, e o warn-once fica reservado ao caminho de runtime (fetch de peer,
+// troca de perfil), que é o cenário para o qual ele foi criado.
+internal static EClassId Parse(string? nameEn, bool warnUnknown = true)
 {
     if (string.IsNullOrEmpty(nameEn)) return EClassId.None;
 
@@ -114,7 +117,7 @@ internal static EClassId Parse(string? nameEn)
 
     // Corner case da 01-spec: edition órfã, ou classe nova criada no editor web. Degrada para None
     // (nenhum perk dispara) com 1 aviso por sessão — NUNCA casa com a classe errada.
-    if (!_warnedUnknownClass)
+    if (warnUnknown && !_warnedUnknownClass)
     {
         _warnedUnknownClass = true;
         Plugin.Log?.LogWarning($"[CustomClasses] (AUD-01-02) classe desconhecida '{nameEn}' — perks desligados p/ ela.");
@@ -122,6 +125,23 @@ internal static EClassId Parse(string? nameEn)
 
     return EClassId.None;
 }
+
+/// <summary>
+///     ref: PA-03-01 — inverso do <see cref="Parse"/>: id → nome EN. `switch` puro, sem dicionário.
+///     Existe SÓ para o diagnóstico (o <c>PerkDiag.LogPeer</c> precisa do nome legível). Chamar apenas
+///     de dentro de <c>if (PerkDiag.Enabled)</c> — nunca no caminho quente.
+/// </summary>
+internal static string? NameOf(EClassId id) => id switch
+{
+    EClassId.CombatMedic => "Combat Medic",
+    EClassId.Rifleman    => "Rifleman",
+    EClassId.Hunter      => "Hunter",
+    EClassId.Stealth     => "Stealth",
+    EClassId.Scavenger   => "Scavenger",
+    EClassId.Tank        => "Tank",
+    EClassId.Naked       => "Naked",
+    _ => null,
+};
 
 /// <summary>ref: AUD-01-02 — o gate quente. Comparação de int; sem alocação, sem string.</summary>
 public static bool IsLocalClass(EClassId id)
@@ -153,7 +173,7 @@ Em `Reset()`: `_classId = EClassId.None;`
 // divergência não gera erro nenhum: só um comportamento pela metade que sobrevive meses.
 foreach (var key in ClassColors.Keys)
 {
-    if (SkillMultipliers.Parse(key) == SkillMultipliers.EClassId.None)
+    if (SkillMultipliers.Parse(key, warnUnknown: false) == SkillMultipliers.EClassId.None)   // PA-03-06
     {
         Plugin.Log?.LogError($"[CustomClasses] (PA-02-03) classe '{key}' tem cor no F12 mas não existe em EClassId — perks NÃO vão disparar p/ ela.");
     }
@@ -161,7 +181,7 @@ foreach (var key in ClassColors.Keys)
 
 foreach (SkillMultipliers.EClassId id in Enum.GetValues(typeof(SkillMultipliers.EClassId)))
 {
-    if (id != SkillMultipliers.EClassId.None && !ClassColors.Keys.Any(k => SkillMultipliers.Parse(k) == id))
+    if (id != SkillMultipliers.EClassId.None && !ClassColors.Keys.Any(k => SkillMultipliers.Parse(k, warnUnknown: false) == id))
     {
         Plugin.Log?.LogError($"[CustomClasses] (PA-02-03) EClassId.{id} não tem entrada em ClassColors — a cor do F12 nunca se aplica a ela.");
     }
@@ -190,6 +210,41 @@ internal static SkillMultipliers.EClassId ClassIdOf(EFT.Player? player)   // PA-
 ```
 
 Em `TryFetch`, ao montar cada `Identity`: `ClassId = SkillMultipliers.Parse(p.ClassNameEn)`.
+
+> 🔴 **PA-03-01 — `ClassIdOf` é o ÚNICO resolvedor no caminho quente. `ClassNameEnOf` é REMOVIDO.**
+>
+> `AiSoundPatch` e `SoundRadiusPatch` (as duas superfícies de maior frequência do mod — per-passo × N players+bots) hoje resolvem a classe **uma vez** e usam a string em dois papéis: alimentar os helpers **e** alimentar o `PerkDiag.LogPeer`. Migrar só os helpers para `EClassId` levaria à implementação natural de **manter `ClassNameEnOf` para o log e acrescentar `ClassIdOf` para o gate** — ou seja, **dois lookups de dicionário por passo**, dobrando o custo exatamente onde o `AUD-01-02` queria baratear. Nada quebraria, nenhum teste falharia, o overlay não mudaria: um achado de performance que piora a performance, em silêncio.
+>
+> Contrato obrigatório: **o nome só é resolvido dentro do gate de diagnóstico**, e via `NameOf(EClassId)` (switch puro), nunca via dicionário.
+
+```csharp
+// ClassSoundPatches.cs → AiSoundPatch.Prefix (forma canônica; SoundRadiusPatch.Postfix é simétrico)
+var emitterId = ClassIdentities.ClassIdOf(p);          // ref: AUD-01-02 · PA-03-01 — ÚNICO lookup do hot path
+if (emitterId == SkillMultipliers.EClassId.None)
+{
+    return;   // bot, vanilla ou desconhecido
+}
+
+var p0 = power;
+power *= QuietStep.MultFor(emitterId);
+power *= LoudOperator.MultFor(emitterId);
+
+if (PerkDiag.Enabled)   // ⚠️ PA-03-01 — o NOME só existe aqui dentro. Nunca no caminho quente.
+{
+    if (p.IsYourPlayer)
+    {
+        PerkDiag.AiPowerBefore = p0;
+        PerkDiag.AiPowerAfter = power;
+    }
+    else if (power != p0)
+    {
+        PerkDiag.LogPeer("AI hear power", p.Profile?.Nickname ?? "?",
+                         SkillMultipliers.NameOf(emitterId) ?? "?", p0, power);
+    }
+}
+```
+
+**`ClassIdentities.ClassNameEnOf` é removido** (não deprecado). Com ele fora, o compilador garante que ninguém o reintroduza num hot path — a mesma lógica que fez o `PA-01-06` remover os overloads de string do `IsLocalClass`. Os quatro call-sites migram para `ClassIdOf`: `AiSoundPatch`, `SoundRadiusPatch`, `SainSoundPatch` e `SilentKnifePatch` (este último: `SkillMultipliers.IsClass(ClassNameEnOf(emitter), "Stealth")` → `ClassIdentities.ClassIdOf(emitter) == EClassId.Stealth`). `CombatMedicSurgery.Adjust` idem — e é caminho frio, mas migra junto por consistência.
 
 Os helpers de som (`QuietStep.MultFor`, `LoudOperator.MultFor`, `SilentLooter.MultFor`) passam a receber `EClassId`; `CombatMedicSurgery.Adjust` troca `string.Equals(cls, "Combat Medic", …)` por `ClassIdentities.ClassIdOf(doctor) == EClassId.CombatMedic`.
 
@@ -255,6 +310,29 @@ public static Sprite? GetTinted(string? iconFile, Color top, Color bottom)
     }
 
     return sprite;
+}
+
+/// <summary>
+///     ref: AUD-01-08 · PA-03-03 — LRU **de verdade**: usar uma variante a manda para o FIM da fila.
+///     Sem o move-to-end isto degenera em FIFO, e aí o brasão em uso (redesenhado a cada `Show`) seria
+///     evicto antes de uma variante velha e parada — exatamente o sprite que não pode morrer. É esta
+///     função que decide qual textura é destruída; por isso ela é o mecanismo, não um detalhe.
+/// </summary>
+private static void Touch(string name, string key)
+{
+    if (!VariantsByIcon.TryGetValue(name, out var keys))
+    {
+        keys = new List<string>(MaxVariantsPerIcon + 1);
+        VariantsByIcon[name] = keys;
+    }
+
+    var at = keys.IndexOf(key);   // O(n) com n <= 5 — irrelevante
+    if (at >= 0)
+    {
+        keys.RemoveAt(at);        // já existia → tira da posição atual…
+    }
+
+    keys.Add(key);                // …e recoloca no fim (mais recente). EvictIfNeeded remove do INÍCIO.
 }
 
 private static void EvictIfNeeded(string name)
@@ -473,7 +551,9 @@ internal static class BranchFailLog
 
 **O mesmo padrão vale para os outros três alvos consolidados.** Em `SetAnimatorAndProceduralValues` a consequência de um catch externo é ainda mais concreta: se o branch de Adrenalina lançar **depois** de escalar `BuffInfo.ReloadSpeed` e **antes** de gravar o `__state`, o Postfix não restaura e o campo fica sujo **pela raid inteira**. Hoje cada patch tem o seu par Prefix/Postfix e a falha é contida ao próprio par — a consolidação só é aceitável preservando isso.
 
-**Onde `RecoilBranches` mora (PA-02-07):** classe estática **única**, declarada em `ClassWeaponPatches.cs`, imediatamente acima de `ShootCapturePatch`/`ShootApplyPatch`. Os três métodos são **movidos** para lá, cada um carregando um comentário de procedência (`// ref: origem WeaponMasteryPatches.cs:118-145` etc.). Espalhá-los pelos arquivos de origem anularia o objetivo declarado do `AUD-01-03` — ter a ordem de composição legível num lugar só. `RecoilFloorPatch.cs` **permanece** no repo contendo apenas o XMLdoc histórico do B15 (o contexto de balance vale preservar onde está) com um ponteiro para o novo local; as duas classes de patch dele saem.
+**Onde `RecoilBranches` mora (PA-02-07):** classe estática **única**, declarada em `ClassWeaponPatches.cs`, imediatamente acima de `ShootCapturePatch`/`ShootApplyPatch`. Os três métodos são **movidos** para lá, cada um carregando um comentário de procedência (`// ref: origem WeaponMasteryPatches.cs:118-145` etc.). Espalhá-los pelos arquivos de origem anularia o objetivo declarado do `AUD-01-03` — ter a ordem de composição legível num lugar só.
+
+**Destino do `RecoilFloorPatch.cs` (PA-03-07):** o arquivo é **deletado**. A versão anterior desta spec mandava mantê-lo "só com o XMLdoc histórico do B15" — um `.cs` sem tipo nenhum é resíduo, não preservação: o compilador o inclui e ignora, e quem abrir vai lê-lo como refatoração incompleta. O contexto de balance do B15 (a justificativa numérica do piso, com os casos do Anexo C) **é preservado movendo o XMLdoc para cima de `RecoilBranches.ApplyFloor`** — que é onde alguém investigando o piso vai efetivamente procurar. O histórico do arquivo fica no git; o rastro da decisão, nesta spec e no `05-asbuild`.
 
 Os corpos de `ApplyMastery` / `ApplyPerks` / `ApplyFloor` são **movidos sem alteração de fórmula** dos patches atuais (`WeaponMasteryPatches.cs:118-145`, `ClassWeaponPatches.cs:26-69`, `RecoilFloorPatch.cs:70-100`), menos o gate de instância (agora feito uma vez no `ShootApplyPatch`). O `float.IsNaN` **continua** existindo — subiu para o topo do `ShootApplyPatch`, que é onde ele sempre pertenceu.
 
@@ -481,7 +561,29 @@ Os corpos de `ApplyMastery` / `ApplyPerks` / `ApplyFloor` são **movidos sem alt
 
 Mesma forma para os outros três alvos:
 - **`ApplyDamageInfo`** → `ClassDamagePatch` com **1 Prefix** (ordem: registrar hit de combate → Couraça → Execution melee) e **1 Postfix** (gatilho da Adrenalina). O Prefix mantém `ref DamageInfoStruct`; cada branch conserva o seu próprio gate específico (Couraça exige `__instance == MainPlayer`; Execution exige `damageInfo.Player.iPlayer.ProfileId == mp.ProfileId`), mas `Singleton<GameWorld>.Instance?.MainPlayer` é resolvido **uma vez** e passado adiante.
-- **`SetAnimatorAndProceduralValues`** → `FirearmSyncPatch` com **1 Prefix (out float __state)** + **1 Postfix**. O `__state` guarda o `BuffInfo.ReloadSpeed` original **uma única vez**; os branches de Adrenalina (Fuzileiro) e escopeta (Tanque) são mutuamente exclusivos e o Prefix aplica **no máximo um** deles. O Postfix restaura e, em seguida, roda o branch do reset de saque (`HolsterDrawResetPatch`).
+- **`SetAnimatorAndProceduralValues`** → `FirearmSyncPatch` com **1 Prefix (out float __state)** + **1 Postfix**. Os branches de Adrenalina (Fuzileiro) e escopeta (Tanque) são mutuamente exclusivos e o Prefix aplica **no máximo um** deles. O Postfix restaura e, em seguida, roda o branch do reset de saque (`HolsterDrawResetPatch`).
+
+  > 🔴 **PA-03-02 — o `__state` é capturado INCONDICIONALMENTE e ANTES de qualquer branch.** O `try/catch` por branch do `PA-02-01` **contém** a exceção mas **não desfaz a escrita**: um branch que lance depois de mutar `BuffInfo.ReloadSpeed` e antes de gravar o `__state` deixaria o campo escalado **pela raid inteira** (recarga permanentemente acelerada), com um único erro no log. A ordem tem de ser estrutural, não convenção:
+
+  ```csharp
+  [PatchPrefix]
+  private static void Prefix(Player.FirearmController __instance, out float __state)
+  {
+      __state = float.NaN;
+
+      var buff = __instance.BuffInfo;
+      if (buff == null) return;
+      if (!ReferenceEquals(__instance, Singleton<GameWorld>.Instance?.MainPlayer?.HandsController)) return;
+
+      // ⚠️ PA-03-02 — captura ANTES de qualquer branch, e sem depender de nenhum deles ter rodado.
+      // Nenhum branch grava __state; o Postfix restaura sempre que não for NaN (restaurar o mesmo valor
+      // é no-op inofensivo, e é mais barato que rastrear "mudei ou não").
+      __state = buff.ReloadSpeed;
+
+      try { ReloadBranches.Adrenaline(buff); }          catch (Exception ex) { BranchFailLog.Once("reload/adren", ex); }
+      try { ReloadBranches.Shotgun(__instance, buff); } catch (Exception ex) { BranchFailLog.Once("reload/shotgun", ex); }
+  }
+  ```
 - **`TotalErgonomics`** → **1 Postfix** com gate único, chamando o branch do Bunker (Tanque + arma pesada) e o da maestria.
 
 ### 5.7 Demais achados (curtos)
@@ -566,6 +668,35 @@ private IEnumerator PerfDumpLoop()   // PERF-INSTR AUD-01-02/03 — temporary, r
 
 ⚠️ Os incrementos ficam dentro de `if (PerkDiag.Enabled)`. Ligar o diagnóstico **no meio** de uma janela de 60 s produz um primeiro dump com amostra parcial: **descartar o primeiro dump, usar do segundo em diante**. Registrar no `05-asbuild` para ninguém ler o primeiro número como medição.
 
+### 5.9 Diff exato do bloco de registro no `Plugin.Awake` (PA-03-05)
+
+O risco aqui é **assimétrico**, e é por isso que esta seção existe:
+
+- **Remover** um `Enable()` de classe que deixou de existir → **erro de compilação**. O compilador protege.
+- **Esquecer de adicionar** o `Enable()` de um patch consolidado → **compila perfeitamente**, e o alvo inteiro fica sem patch. Se faltar `ShootApplyPatch().Enable()`, o jogo perde **de uma vez** maestria de recuo (058), Shaky Hands, Adrenalina-recuo, Bunker **e** o piso B15 — e o único sintoma é "o recuo parece diferente". Com a linha de base desconhecida do `PA-01-04`, ninguém consegue afirmar que é regressão.
+
+```
+REMOVER (as classes deixam de existir — o compilador acusa cada uma):
+  new ShootRecoilPatch().Enable()          new RecoilFloorCapturePatch().Enable()
+  new RecoilFloorApplyPatch().Enable()     new WeaponMasteryRecoilPatch().Enable()
+  new WeaponMasteryErgoPatch().Enable()    new HeavyWeaponErgoPatch().Enable()
+  new BulwarkPatch().Enable()              new ExecutionMeleePatch().Enable()
+  new AdrenalineTriggerPatch().Enable()    new LocalHitTypePatch().Enable()
+  new ReloadSpeedPatch().Enable()          new ShotgunReloadPatch().Enable()
+  new HolsterDrawResetPatch().Enable()
+
+ACRESCENTAR (⚠️ NADA acusa se faltar — conferir um a um):
+  new ShootCapturePatch().Enable()   // PWA.Shoot        · Priority.First (captura o str original)
+  new ShootApplyPatch().Enable()     // PWA.Shoot        · Priority.Last  (maestria → perks → piso → diag)
+  new ClassDamagePatch().Enable()    // ApplyDamageInfo  · Prefix (hit de combate → Couraça → Execution) + Postfix (Adrenalina)
+  new FirearmSyncPatch().Enable()    // SetAnimatorAndProceduralValues · Prefix (__state + Adrenalina/escopeta) + Postfix (restaura + reset de saque)
+  new TotalErgoPatch().Enable()      // TotalErgonomics  · Postfix (Bunker + maestria)
+```
+
+⚠️ Preservar a posição relativa dos `Enable()` restantes: a ordem de registro **não** define mais a ordem de execução em `Shoot` (isso agora é `[HarmonyPriority]` explícito + sequência no corpo), mas os comentários existentes no `Plugin.cs:123-124` e `:163-167` descrevem a ordem antiga e precisam ser reescritos para não mentir.
+
+**AC de fumaça (três leituras num frame provam que os cinco estão registrados):** com `Perk Diagnostics` ligado, o overlay 052 mostra (a) `Recoil str` mudando ao atirar → `ShootApplyPatch` vivo; (b) `Ergo (weapon)` refletindo o Bunker com arma pesada em mãos → `TotalErgoPatch` vivo; (c) `Malfunction%` preenchido → o resto da cadeia de arma intacta. Para `ClassDamagePatch` e `FirearmSyncPatch`: levar um tiro como Tanque de colete pesado (dano reduzido) e recarregar uma escopeta tubular (mais rápida).
+
 ## 6. Fluxo de dados
 
 ```
@@ -647,7 +778,12 @@ private IEnumerator PerfDumpLoop()   // PERF-INSTR AUD-01-02/03 — temporary, r
 - [ ] `AUD-01-03`: consolidar `ApplyDamageInfo` (4→2)
 - [ ] `AUD-01-03` · `PA-01-01`: consolidar `Shoot` **4→2** (`ShootCapturePatch` `Priority.First` + `ShootApplyPatch` `Priority.Last`), **mantendo** o estático como `ShootRecoilState.StrBefore`
 - [ ] `PA-02-01`: **nenhum alvo consolidado tem `try/catch` externo único** — cada branch é isolado, e `BranchFailLog.Once` evita flood no hot path
-- [ ] `PA-02-07`: `RecoilBranches` declarada **uma vez** em `ClassWeaponPatches.cs`, com comentários de procedência; `RecoilFloorPatch.cs` fica só com o XMLdoc do B15
+- [ ] `PA-02-07` · `PA-03-07`: `RecoilBranches` declarada **uma vez** em `ClassWeaponPatches.cs`, com comentários de procedência; o XMLdoc do B15 migra para cima de `ApplyFloor` e **`RecoilFloorPatch.cs` é deletado**
+- [ ] `PA-03-01`: `ClassIdentities.ClassNameEnOf` **removido**; `SkillMultipliers.NameOf(EClassId)` criado e chamado **só** de dentro de `if (PerkDiag.Enabled)`. Verificação: `grep -rn 'ClassNameEnOf' modded/Client/` volta **vazio**
+- [ ] `PA-03-02`: em `SetAnimatorAndProceduralValues`, o `__state` é capturado **incondicionalmente antes** dos branches; **nenhum branch grava `__state`**
+- [ ] `PA-03-03`: `Touch()` implementada com **move-to-end** (LRU real, não FIFO); `EvictIfNeeded` remove do **início** da lista
+- [ ] `PA-03-05`: conferir os **5** `Enable()` novos um a um contra o diff da §5.9 — nenhum erro de compilação avisa se faltar
+- [ ] `PA-03-06`: `Parse(nameEn, warnUnknown = true)`; a checagem de boot chama com `warnUnknown: false`
 - [ ] `PA-02-03`: checagem bidirecional `Parse` ↔ `ClassColors` no fim de `PerksConfig.Bind`
 - [ ] `PA-02-08`: comentário anti-remoção no `EnsureLoaded()` do `IsLocalClass`; **conferir que nenhum patch passou a chamar `IsLocalClass` ANTES do seu gate de instância** durante a migração dos 42 call-sites (é onde a ordem se inverte por descuido — CR-F5)
 - [ ] `Plugin.cs`: ajustar os `Enable()` e adicionar `SyncPerfDump()` no `SettingChanged` do diagnóstico (PA-01-10)
@@ -687,5 +823,6 @@ private IEnumerator PerfDumpLoop()   // PERF-INSTR AUD-01-02/03 — temporary, r
 | Data | Evento |
 |---|---|
 | 2026-08-22 | Spec técnica criada (`/optimize-mod-performance` Fase 2, perfil de não-regressão) |
+| 2026-08-23 | Revisão técnica 03 aplicada — 7 pontos aceitos. Principais: `ClassIdOf` como **único** resolvedor do hot path, `ClassNameEnOf` **removido** e `NameOf(EClassId)` criado para o diagnóstico (PA-03-01 — a migração ingênua deixaria **dois** lookups por passo); `__state` capturado **incondicionalmente antes** dos branches em `SetAnimatorAndProceduralValues` (PA-03-02 — o try/catch por branch contém a exceção mas não desfaz a escrita); `Touch()` definida com move-to-end (PA-03-03); §5.9 nova com o diff exato dos `Enable()` (PA-03-05); `Parse` ganha `warnUnknown` (PA-03-06); `RecoilFloorPatch.cs` deletado com o XMLdoc do B15 migrado (PA-03-07). |
 | 2026-08-23 | Revisão técnica 02 aplicada — 9 pontos aceitos. Principais: `try/catch` **por branch** nos 4 alvos consolidados (PA-02-01 — um catch externo faria um branch que lança pular o piso B15); bump de versão em **4** arquivos, não 2, incluindo os dois que aparecem em log (PA-02-02); checagem de boot `Parse` ↔ `ClassColors` (PA-02-03); `activeInHierarchy` no cache do painel (PA-02-04); tabela de posição dos contadores (PA-02-05); evidência das prioridades registrada (PA-02-06); `RecoilBranches` com casa definida (PA-02-07); comentário anti-remoção no `EnsureLoaded` (PA-02-08); `/update-mod-graph` no gate de Fase 4 (PA-02-09). |
 | 2026-08-23 | Revisão técnica 01 aplicada — 10 pontos aceitos. Principais: `Shoot` consolida **4→2** e não 4→1, preservando `Priority.First`/`Last` contra mods externos (PA-01-01); clamp no `Quantize` (PA-01-02); `className` na chave do cache de tooltip (PA-01-03); fronteira pública do ICM declarada intocável e `EClassId` `internal` (PA-01-06); **`AUD-01-07b` dropado** (PA-01-07); bump de SemVer, extração explícita do `BuildTinted` e `PerfDumpLoop` com condição de saída (PA-01-08/09/10). |

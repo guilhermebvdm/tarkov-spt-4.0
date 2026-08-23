@@ -8,7 +8,9 @@
 
 ## Resumo
 
-> 🔴 Bloqueadores: 2 · 🟡 Importantes: 3 · 🟢 Menores: 2 · ✅ Resolvidos: 0 · Total: 7
+> 🔴 Bloqueadores: 2 · 🟡 Importantes: 3 · 🟢 Menores: 2 · **✅ Resolvidos: 7** · Total: 7
+>
+> **Todos os 7 pontos aceitos pelo usuário em 2026-08-23** e aplicados. Resolução ponto a ponto na seção [Resolução](#resolução) ao fim deste arquivo.
 
 **Memória consultada:** snapshot de 2026-08-03 · pendências que afetam: 🔴 P-10.1, 🔴 P-16.1 (endereçadas em `PA-01-04` — não voltam).
 
@@ -18,13 +20,13 @@
 
 | ID | Categoria | Impacto | Título | Status |
 |---|---|---|---|---|
-| PA-03-01 | C — Erro de Lógica | 🔴 Bloqueador | Migrar o gate para `ClassIdOf` sem tratar o `LogPeer` deixa **dois lookups por passo** — o hot path fica pior, não melhor | Pendente |
-| PA-03-02 | C — Erro de Lógica | 🔴 Bloqueador | O `try/catch` por branch do `PA-02-01` **não** resolve o `BuffInfo.ReloadSpeed` sujo: falta capturar o `__state` antes de qualquer mutação | Pendente |
-| PA-03-03 | A — Gap | 🟡 Importante | `Touch()` — o mecanismo LRU inteiro do `AUD-01-08` — é chamado três vezes e nunca definido | Pendente |
-| PA-03-04 | C — Erro de Lógica | 🟡 Importante | O critério de aceite do `AUD-01-08` (≤1 por classe) contradiz o desenho da spec técnica (cap 4 por ícone) | Pendente |
-| PA-03-05 | A — Gap | 🟡 Importante | A lista final de `Enable()` não é enumerada — e **esquecer de registrar** um patch consolidado é silencioso (sem erro de compilação) | Pendente |
-| PA-03-06 | B — Edge Case | 🟢 Menor | A checagem de boot do `PA-02-03` consome o warn-once do `Parse`, silenciando o aviso real de classe desconhecida | Pendente |
-| PA-03-07 | A — Gap | 🟢 Menor | Manter `RecoilFloorPatch.cs` só com XMLdoc cria um arquivo sem código — decidir entre mover o doc ou assumir o arquivo-lápide | Pendente |
+| PA-03-01 | C — Erro de Lógica | 🔴 Bloqueador | Migrar o gate para `ClassIdOf` sem tratar o `LogPeer` deixa **dois lookups por passo** — o hot path fica pior, não melhor | ✅ Resolvido 2026-08-23 |
+| PA-03-02 | C — Erro de Lógica | 🔴 Bloqueador | O `try/catch` por branch do `PA-02-01` **não** resolve o `BuffInfo.ReloadSpeed` sujo: falta capturar o `__state` antes de qualquer mutação | ✅ Resolvido 2026-08-23 |
+| PA-03-03 | A — Gap | 🟡 Importante | `Touch()` — o mecanismo LRU inteiro do `AUD-01-08` — é chamado três vezes e nunca definido | ✅ Resolvido 2026-08-23 |
+| PA-03-04 | C — Erro de Lógica | 🟡 Importante | O critério de aceite do `AUD-01-08` (≤1 por classe) contradiz o desenho da spec técnica (cap 4 por ícone) | ✅ Resolvido 2026-08-23 |
+| PA-03-05 | A — Gap | 🟡 Importante | A lista final de `Enable()` não é enumerada — e **esquecer de registrar** um patch consolidado é silencioso (sem erro de compilação) | ✅ Resolvido 2026-08-23 |
+| PA-03-06 | B — Edge Case | 🟢 Menor | A checagem de boot do `PA-02-03` consome o warn-once do `Parse`, silenciando o aviso real de classe desconhecida | ✅ Resolvido 2026-08-23 |
+| PA-03-07 | A — Gap | 🟢 Menor | Manter `RecoilFloorPatch.cs` só com XMLdoc cria um arquivo sem código — decidir entre mover o doc ou assumir o arquivo-lápide | ✅ Resolvido 2026-08-23 |
 
 ## Categorias
 
@@ -89,7 +91,7 @@ Decidir também o destino de `ClassNameEnOf`: ou vira `private`/removido, ou fic
 
 **Decisão:**
 - `[ ]` Pendente
-- `[ ]` Aceitar sugestão
+- `[x]` Aceitar sugestão
 - `[ ]` Caminho alternativo: _________________
 
 ---
@@ -137,7 +139,7 @@ O Postfix restaura sempre que `__state` não for `NaN` — inclusive quando nenh
 
 **Decisão:**
 - `[ ]` Pendente
-- `[ ]` Aceitar sugestão
+- `[x]` Aceitar sugestão
 - `[ ]` Caminho alternativo: _________________
 
 ---
@@ -179,7 +181,7 @@ private static void Touch(string name, string key)
 
 **Decisão:**
 - `[ ]` Pendente
-- `[ ]` Aceitar sugestão
+- `[x]` Aceitar sugestão
 - `[ ]` Caminho alternativo: _________________
 
 ---
@@ -204,7 +206,7 @@ O critério verdadeiro é "para de crescer", não um valor absoluto; a redação
 
 **Decisão:**
 - `[ ]` Pendente
-- `[ ]` Aceitar sugestão
+- `[x]` Aceitar sugestão
 - `[ ]` Caminho alternativo: _________________
 
 ---
@@ -246,7 +248,7 @@ E acrescentar ao §8 um AC de fumaça barato: *"com `Perk Diagnostics` ligado, o
 
 **Decisão:**
 - `[ ]` Pendente
-- `[ ]` Aceitar sugestão
+- `[x]` Aceitar sugestão
 - `[ ]` Caminho alternativo: _________________
 
 ---
@@ -271,7 +273,7 @@ A checagem de boot chama `Parse(key, warnUnknown: false)` — ela já emite o pr
 
 **Decisão:**
 - `[ ]` Pendente
-- `[ ]` Aceitar sugestão
+- `[x]` Aceitar sugestão
 - `[ ]` Caminho alternativo: _________________
 
 ---
@@ -288,5 +290,21 @@ A checagem de boot chama `Parse(key, warnUnknown: false)` — ela já emite o pr
 
 **Decisão:**
 - `[ ]` Pendente
-- `[ ]` Aceitar sugestão
+- `[x]` Aceitar sugestão
 - `[ ]` Caminho alternativo: _________________
+
+---
+
+## Resolução
+
+Todos os 7 pontos **aceitos pelo usuário em 2026-08-23**. O que mudou, ponto a ponto:
+
+| ID | Resolução | Onde |
+|---|---|---|
+| **PA-03-01** | `ClassIdentities.ClassNameEnOf` **removido** (não deprecado — o compilador passa a impedir a reintrodução em hot path). `ClassIdOf` vira o único resolvedor do caminho quente; o nome só é resolvido dentro de `if (PerkDiag.Enabled)`, via `SkillMultipliers.NameOf(EClassId)` novo (switch puro, sem dicionário). Os 5 call-sites migram: `AiSoundPatch`, `SoundRadiusPatch`, `SainSoundPatch`, `SilentKnifePatch` e `CombatMedicSurgery`. Verificação de checklist: `grep -rn 'ClassNameEnOf' modded/Client/` vazio. | spec-tech §5.1, §5.2, §8 |
+| **PA-03-02** | O `__state` de `SetAnimatorAndProceduralValues` passa a ser capturado **incondicionalmente e antes de qualquer branch**; nenhum branch grava `__state`. O `try/catch` por branch (PA-02-01) continua, mas deixa de ser a única defesa — ele contém a exceção, esta ordem é o que impede o campo de ficar sujo pela raid. | spec-tech §5.6, §8 |
+| **PA-03-03** | `Touch(name, key)` definida com **move-to-end** explícito (remove da posição atual, recoloca no fim); `EvictIfNeeded` remove do início. Documentado por que FIFO seria errado: evictaria o brasão em uso antes de uma variante velha e parada. | spec-tech §5.3, §8 |
+| **PA-03-04** | AC do `AUD-01-08` corrigido: o limite é **≤ 4 por ícone** (o cap da spec técnica), típico **2** numa aba CLASS aberta, e o que reprova é **crescimento monotônico** — não um valor absoluto. A redação anterior ("≤1 por classe visível") teria reprovado um resultado correto. | 01-spec (critérios B) |
+| **PA-03-05** | §5.9 nova com o **diff exato** do bloco de registro: 13 `Enable()` a remover (o compilador acusa) e **5 a acrescentar** (nada acusa se faltar), cada um anotado com alvo e prioridade. Mais um AC de fumaça de três leituras do overlay 052 que prova num frame que os cinco estão registrados. Alerta para reescrever os comentários do `Plugin.cs:123-124` e `:163-167`, que descrevem a ordem antiga. | spec-tech §5.9, §8 |
+| **PA-03-06** | `Parse(string? nameEn, bool warnUnknown = true)`; a checagem de boot do PA-02-03 chama com `warnUnknown: false` nos dois laços, preservando o warn-once para o caminho de runtime. | spec-tech §5.1 |
+| **PA-03-07** | `RecoilFloorPatch.cs` é **deletado**; o XMLdoc histórico do B15 migra para cima de `RecoilBranches.ApplyFloor`, onde quem investiga o piso vai procurar. Decidido contra o "arquivo-lápide": um `.cs` sem tipo é resíduo, não preservação. | spec-tech §5.6, §8 |
