@@ -53,3 +53,11 @@ Após atualizar, o diff acima mostrará suas modificações + drift do upstream.
 ---
 
 _Adicionado em 2026-08-23T23:29:52Z_
+
+## Mapa de código
+
+Grafo AST do mod em [references/graphs/mods/progressivebotsystem-csharp/GRAPH_REPORT.md](../../references/graphs/mods/progressivebotsystem-csharp/GRAPH_REPORT.md). Regenerar: `bash scripts/update-graphs.sh progressivebotsystem-csharp`.
+
+## Por que este mod está vendorizado aqui
+
+Referência de leitura para o item [TRL-DynamicSpawn 011](../TRL-DynamicSpawn/backlog/011-perf-estoque-dificuldade/): auditoria confirmou (2026-08-23, tag 2.2.1) que o equipamento dos bots é selecionado por **Tier (nível do jogador) + papel**, e que a **dificuldade não influencia equipamento** (3 ocorrências de "difficulty" no código, todas em logging). Sem PROPRIEDADES.md: é server mod C# (sem `Config.Bind`/F12).
