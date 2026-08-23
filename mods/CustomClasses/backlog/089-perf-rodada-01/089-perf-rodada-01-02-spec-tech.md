@@ -36,6 +36,8 @@ Rodada de **não-regressão**: nenhum alvo Harmony novo, nenhum comportamento no
 | `EFT/Player.cs:13xxx` → `Player.FirearmController.SetAnimatorAndProceduralValues` | 2 Prefix + 2 Postfix (3 patches) | **1 Prefix + 1 Postfix** | `__state` único; elimina risco de duplo escalonamento de `BuffInfo.ReloadSpeed` |
 | `EFT/Player.cs:12062` → `Player.FirearmController.TotalErgonomics` (getter) | 2 Postfix | **1 Postfix** | Gate 1× por leitura |
 
+> ✅ **Verificado na review 02 (PA-02-06) — nenhuma outra fronteira de prioridade é movida.** `grep -rn "HarmonyPriority" modded/Client/` devolve prioridade explícita em exatamente quatro lugares: `RecoilFloorPatch.cs:41` (`First`), `RecoilFloorPatch.cs:68` (`Last`) e `WeaponMasteryPatches.cs:116` (`High`) — **todos em `PWA.Shoot`**, tratados pelo `PA-01-01` — e `ClassMedicPatches.cs:186` (`First`), que é em `ObservedMedsControllerClass.method_5`, **alvo fora desta rodada**. Logo: `ApplyDamageInfo`, `SetAnimatorAndProceduralValues` e `TotalErgonomics` **não têm prioridade explícita**, e consolidá-los não move nenhuma fronteira contra mods externos. ⚠️ Consolidar **não** é seguro por regra — foi seguro aqui porque isto foi conferido.
+
 Referências de comportamento que sustentam a consolidação (todas relidas no dump):
 - `MovementContext.cs:910` (`MaxSpeed`), `:912` (`SprintingSpeed`), `:4181`/`:2375`/`:2377`/`:2368` (as 3 leituras de `MaxSpeed` por frame de movimento) — justificam o `AUD-01-02`.
 - `BotMover.cs:930`/`:985` → `Player.ChangeSpeed` → `MovementState.cs:248` — provam que o getter roda **para bots**, o que fixa o multiplicador de entidades.
@@ -124,6 +126,10 @@ internal static EClassId Parse(string? nameEn)
 /// <summary>ref: AUD-01-02 — o gate quente. Comparação de int; sem alocação, sem string.</summary>
 public static bool IsLocalClass(EClassId id)
 {
+    // ⚠️ PA-02-08 — NÃO remover o EnsureLoaded por parecer redundante depois da migração. Ele é o fetch
+    // PREGUIÇOSO para quando nenhum Prefetch rodou (menu, hideout, 1ª raid pós-restart do server). Com o
+    // cache frio ele faz um GET HTTP SÍNCRONO — e é exatamente por isso que todo patch que roda para
+    // bots/peers coloca o gate de INSTÂNCIA ANTES deste (ref: CalmSightsPatch.cs:51-53, achado CR-F5).
     EnsureLoaded();
     return id != EClassId.None && _classId == id;
 }
@@ -139,6 +145,28 @@ _classId = Parse(_classNameEn);   // ref: AUD-01-02 — id resolvido junto com o
 ```
 
 Em `Reset()`: `_classId = EClassId.None;`
+
+**PA-02-03 — `Parse` não é a única fonte de verdade; é a segunda.** A primeira já existe e a rodada **não** a migra (corretamente — é caminho frio de render): `PerksConfig.BindClassColor(config, secao, "<nome>", "<hex>")`, chamada 7× (`PerksConfig.cs:313, 365, 421, 465, 548, 633, 638`), que popula `PerksConfig.ClassColors` — o dicionário que `ClassColorOverride.Resolve(classNameEn)` consulta **por string**. As duas listas precisam concordar, e nada obriga. Divergência é silenciosa: classe nova registrada só na cor ganha cor no F12 e **nenhum perk**; registrada só no `Parse`, ganha perks e a cor do F12 **nunca se aplica**. Checagem de boot no fim de `PerksConfig.Bind(config)` (caminho frio, 1×):
+
+```csharp
+// ref: PA-02-03 — Parse e ClassColors são as duas faces da MESMA lista de classes. Sem esta checagem, uma
+// divergência não gera erro nenhum: só um comportamento pela metade que sobrevive meses.
+foreach (var key in ClassColors.Keys)
+{
+    if (SkillMultipliers.Parse(key) == SkillMultipliers.EClassId.None)
+    {
+        Plugin.Log?.LogError($"[CustomClasses] (PA-02-03) classe '{key}' tem cor no F12 mas não existe em EClassId — perks NÃO vão disparar p/ ela.");
+    }
+}
+
+foreach (SkillMultipliers.EClassId id in Enum.GetValues(typeof(SkillMultipliers.EClassId)))
+{
+    if (id != SkillMultipliers.EClassId.None && !ClassColors.Keys.Any(k => SkillMultipliers.Parse(k) == id))
+    {
+        Plugin.Log?.LogError($"[CustomClasses] (PA-02-03) EClassId.{id} não tem entrada em ClassColors — a cor do F12 nunca se aplica a ela.");
+    }
+}
+```
 
 > ⚠️ **Sem overload de compatibilidade.** Os overloads `IsLocalClass(string)` / `IsClass(string, string)` são **removidos**, não mantidos como wrapper. Motivo: um wrapper deixaria call-sites antigos passando despercebidos e anularia o ganho. Removê-los faz o **compilador** apontar todos os 42+ call-sites — o erro de compilação é a rede de segurança, e um nome digitado errado vira erro de build em vez de perk silenciosamente morto. É a razão pela qual esta mudança é **mais segura** que o estado atual, não menos.
 
@@ -280,7 +308,10 @@ private static IEnumerator ApplyToMenu(MenuScreen menu)
     TextMeshProUGUI? nick = null;
     for (var i = 0; i < 60 && nick == null; i++)
     {
-        if (_cachedPmv == null)
+        // ⚠️ PA-02-04 — o `==` do Unity cobre o objeto DESTRUÍDO, mas não o DESATIVADO. E `GameObject.Find`
+        // só encontra ATIVOS: hoje, um painel velho desativado é ignorado automaticamente a cada frame.
+        // Com cache, ele sequestraria a identidade do painel novo (escreveríamos num painel invisível).
+        if (_cachedPmv == null || !_cachedPmv.gameObject.activeInHierarchy)
         {
             _cachedPmv = GameObject.Find("MainMenuPlayerModelView")?.transform;   // busca global — agora 1 a cada 3 frames
             finds++;
@@ -401,28 +432,48 @@ internal class ShootApplyPatch : ModulePatch
     [PatchPrefix]
     private static void Prefix(ProceduralWeaponAnimation __instance, ref float str)
     {
-        try
+        var str0 = ShootRecoilState.StrBefore;
+        if (float.IsNaN(str0)) return;   // não era a arma do player local nesta invocação
+
+        var p = Singleton<GameWorld>.Instance?.MainPlayer;
+        if (p == null) return;           // GATE ÚNICO (era resolvido 3× aqui dentro) — o ganho do AUD-01-03
+
+        // ⚠️ PA-02-01 — try/catch POR BRANCH, nunca um externo único. Consolidar o GATE não pode consolidar
+        // a FALHA: hoje são 3 patches Harmony independentes, e um que lança NÃO impede os outros de rodar.
+        // Com um catch externo, `ApplyMastery` lançando (ela toca p.Skills e skill.Level, que ficam nulos numa
+        // troca de arma) pularia o PISO B15 — e o tiro sairia sem clamp nenhum.
+        try { RecoilBranches.ApplyMastery(p, ref str); }  catch (Exception ex) { BranchFail("mastery", ex); }
+        try { RecoilBranches.ApplyPerks(p, ref str); }    catch (Exception ex) { BranchFail("perks", ex); }
+        try { RecoilBranches.ApplyFloor(str0, ref str); } catch (Exception ex) { BranchFail("floor", ex); }
+
+        if (PerkDiag.Enabled)   // baseline = str ORIGINAL (contrato do CR 2026-07-11)
         {
-            var str0 = ShootRecoilState.StrBefore;
-            if (float.IsNaN(str0)) return;   // não era a arma do player local nesta invocação
-
-            var p = Singleton<GameWorld>.Instance?.MainPlayer;
-            if (p == null) return;           // GATE ÚNICO (era resolvido 3× aqui dentro)
-
-            RecoilBranches.ApplyMastery(p, ref str);       // (1) era WeaponMasteryRecoilPatch (Priority.High)
-            RecoilBranches.ApplyPerks(p, ref str);         // (2) era ShootRecoilPatch         (Priority.Normal)
-            RecoilBranches.ApplyFloor(str0, ref str);      // (3) era RecoilFloorApplyPatch    (Priority.Last)
-
-            if (PerkDiag.Enabled)                          // (4) baseline = str ORIGINAL (contrato do CR 2026-07-11)
-            {
-                PerkDiag.RecoilBefore = str0;
-                PerkDiag.RecoilAfter = str;
-            }
+            PerkDiag.RecoilBefore = str0;
+            PerkDiag.RecoilAfter = str;
         }
-        catch (Exception ex) { Plugin.Log?.LogError($"[CustomClasses] recoil falhou: {ex.Message}"); }
+    }
+}
+
+/// <summary>
+///     ref: PA-02-01 — log de falha de branch com dedupe. Estes branches rodam em hot path (por tiro); o
+///     padrão atual (LogError a cada ocorrência, em cada patch) inunda o console quando algo quebra numa
+///     rajada. Uma linha por branch por sessão basta para diagnosticar.
+/// </summary>
+internal static class BranchFailLog
+{
+    private static readonly HashSet<string> Seen = new(StringComparer.Ordinal);
+
+    internal static void Once(string branch, Exception ex)
+    {
+        if (!Seen.Add(branch)) return;
+        Plugin.Log?.LogError($"[CustomClasses] branch '{branch}' falhou (log 1× por sessão): {ex.Message}");
     }
 }
 ```
+
+**O mesmo padrão vale para os outros três alvos consolidados.** Em `SetAnimatorAndProceduralValues` a consequência de um catch externo é ainda mais concreta: se o branch de Adrenalina lançar **depois** de escalar `BuffInfo.ReloadSpeed` e **antes** de gravar o `__state`, o Postfix não restaura e o campo fica sujo **pela raid inteira**. Hoje cada patch tem o seu par Prefix/Postfix e a falha é contida ao próprio par — a consolidação só é aceitável preservando isso.
+
+**Onde `RecoilBranches` mora (PA-02-07):** classe estática **única**, declarada em `ClassWeaponPatches.cs`, imediatamente acima de `ShootCapturePatch`/`ShootApplyPatch`. Os três métodos são **movidos** para lá, cada um carregando um comentário de procedência (`// ref: origem WeaponMasteryPatches.cs:118-145` etc.). Espalhá-los pelos arquivos de origem anularia o objetivo declarado do `AUD-01-03` — ter a ordem de composição legível num lugar só. `RecoilFloorPatch.cs` **permanece** no repo contendo apenas o XMLdoc histórico do B15 (o contexto de balance vale preservar onde está) com um ponteiro para o novo local; as duas classes de patch dele saem.
 
 Os corpos de `ApplyMastery` / `ApplyPerks` / `ApplyFloor` são **movidos sem alteração de fórmula** dos patches atuais (`WeaponMasteryPatches.cs:118-145`, `ClassWeaponPatches.cs:26-69`, `RecoilFloorPatch.cs:70-100`), menos o gate de instância (agora feito uma vez no `ShootApplyPatch`). O `float.IsNaN` **continua** existindo — subiu para o topo do `ShootApplyPatch`, que é onde ele sempre pertenceu.
 
@@ -496,7 +547,24 @@ private IEnumerator PerfDumpLoop()   // PERF-INSTR AUD-01-02/03 — temporary, r
 }
 ```
 
-`DamageGates`/`ShootGates` são o que prova a meta **4 → 1** do `AUD-01-03`: contam execuções de gate por evento.
+`DamageGates`/`ShootGates` são o que prova a meta **4 → 2** do `AUD-01-03` (corrigida pelo `PA-01-01`): contam execuções de gate por evento.
+
+**Onde incrementar cada contador (PA-02-05).** A posição não é detalhe: o critério de aceite da 01-spec cobra que *"a fração que passa do gate permanece ~1/N"*. Se `Calls` e `Passed` forem ambos incrementados **depois** do gate, a razão dá sempre 1 e o critério não mede nada.
+
+| Contador | Arquivo / método | Posição exata |
+|---|---|---|
+| `MoveSpeedCalls` | `ClassMovementPatches.cs` → `ClassMoveSpeed.Apply` | **1ª linha do `try`**, antes de resolver `MainPlayer` |
+| `MoveSpeedPassed` | idem | logo após o `ReferenceEquals(ctx, p.MovementContext)` passar |
+| `StepAiCalls` | `ClassSoundPatches.cs` → `AiSoundPatch.Prefix` | após o descarte `type != AISoundType.step` (só passo interessa à métrica) |
+| `StepAiPassed` | idem | após `emitterClass is null` (ou seja, depois do gate `IsAI`) |
+| `RolloffCalls` | `ClassSoundPatches.cs` → `SoundRadiusPatch.Postfix` | 1ª linha do `try` |
+| `RolloffPassed` | idem | após `emitterClass is null` |
+| `DamageCalls` | patch consolidado de `ApplyDamageInfo` (Prefix) | 1× por invocação, antes de qualquer gate |
+| `DamageGates` | idem + o Postfix consolidado | **1× por resolução de gate** — hoje daria 4/evento, depois 2 |
+| `ShootCalls` | `ShootCapturePatch.Prefix` | 1ª linha |
+| `ShootGates` | `ShootCapturePatch` + `ShootApplyPatch` | 1× em cada patch que resolve gate — hoje daria 4/tiro, depois 2 |
+
+⚠️ Os incrementos ficam dentro de `if (PerkDiag.Enabled)`. Ligar o diagnóstico **no meio** de uma janela de 60 s produz um primeiro dump com amostra parcial: **descartar o primeiro dump, usar do segundo em diante**. Registrar no `05-asbuild` para ninguém ler o primeiro número como medição.
 
 ## 6. Fluxo de dados
 
@@ -535,6 +603,10 @@ private IEnumerator PerfDumpLoop()   // PERF-INSTR AUD-01-02/03 — temporary, r
 | **`AUD-01-02` quebra a integração com o ICM** (assinatura pública consumida por reflexão) | Baixa — mitigada | **PA-01-06:** as 4 assinaturas (`CombatMedicSurgery.Adjust`/`SetExternalHandling`, `CombatMedicAllyPerks.AllyHealTimeMult`/`AllyMobileSurgeon`) são **intocáveis**; só o corpo muda. `EClassId` fica `internal` para não vazar. O compilador **não** protege aqui — a conferência é manual (checklist §8) e o AC de cirurgia de aliado é o teste in-game |
 | **`AUD-01-07c` serve tooltip da classe errada** após troca de perfil/idioma | Baixa — mitigada | **PA-01-03:** `className` entra na chave **e** o cache é limpo em `SkillMultipliers.Apply()`/`Reset()` |
 | **`AUD-01-08`: canal de cor estoura o byte** e inverte a cor | Baixa — mitigada | **PA-01-02:** clamp `Mathf.Min(q, 255)` depois da quantização + teste visual obrigatório numa classe clara |
+| **Consolidação funde o isolamento de FALHA: um branch que lança pula os irmãos** (o pior caso é o piso B15 não rodar) | **Era Alta — mitigada** | **PA-02-01:** `try/catch` **por branch** nos quatro alvos consolidados, nunca um externo único, + `BranchFailLog.Once` para não inundar o console num hot path. Item de checklist próprio |
+| **Bump de versão incompleto** faz o gate "confirmar a versão no log de boot" falhar sempre | Média — mitigada | **PA-02-02:** a versão vive em **4** arquivos; os dois que aparecem em log (`Plugin.cs:13` `BepInPlugin`, `CustomClassesMetadata.cs:19`) não estavam listados. Teste que pega os quatro: `grep -rn '0\.16\.8' modded/` vazio |
+| **`Parse` e `ClassColors` divergem em silêncio** (classe com cor e sem perk, ou o inverso) | Média — mitigada | **PA-02-03:** checagem de boot bidirecional no fim de `PerksConfig.Bind` |
+| **`_cachedPmv` fixa um painel desativado** e a identidade some do menu de forma intermitente | Baixa — mitigada | **PA-02-04:** `activeInHierarchy` no check do cache (`GameObject.Find` só acha ativos — hoje o caso se auto-corrige) |
 | **`AUD-01-03` em `SetAnimatorAndProceduralValues`:** duplo escalonamento de `BuffInfo.ReloadSpeed` | Baixa | O Prefix consolidado aplica **no máximo um** branch (Fuzileiro e Tanque são classes exclusivas) e salva o original **uma vez** no `__state` único. Hoje há 2 `__state` independentes — o risco existe **hoje** e a consolidação o elimina. |
 | **`AUD-01-02`: classe nova do editor web não reconhecida** | Média | `Parse` degrada para `None` com 1 aviso; nenhum perk dispara (fail-safe, nunca casa errado). Corner case explícito na 01-spec. |
 | **`AUD-01-02`: call-site esquecido** | **Nula** | Os overloads de string são **removidos** → erro de compilação em cada call-site. O compilador é a rede. |
@@ -574,11 +646,15 @@ private IEnumerator PerfDumpLoop()   // PERF-INSTR AUD-01-02/03 — temporary, r
 - [ ] `AUD-01-03`: consolidar `SetAnimatorAndProceduralValues` (3→2)
 - [ ] `AUD-01-03`: consolidar `ApplyDamageInfo` (4→2)
 - [ ] `AUD-01-03` · `PA-01-01`: consolidar `Shoot` **4→2** (`ShootCapturePatch` `Priority.First` + `ShootApplyPatch` `Priority.Last`), **mantendo** o estático como `ShootRecoilState.StrBefore`
+- [ ] `PA-02-01`: **nenhum alvo consolidado tem `try/catch` externo único** — cada branch é isolado, e `BranchFailLog.Once` evita flood no hot path
+- [ ] `PA-02-07`: `RecoilBranches` declarada **uma vez** em `ClassWeaponPatches.cs`, com comentários de procedência; `RecoilFloorPatch.cs` fica só com o XMLdoc do B15
+- [ ] `PA-02-03`: checagem bidirecional `Parse` ↔ `ClassColors` no fim de `PerksConfig.Bind`
+- [ ] `PA-02-08`: comentário anti-remoção no `EnsureLoaded()` do `IsLocalClass`; **conferir que nenhum patch passou a chamar `IsLocalClass` ANTES do seu gate de instância** durante a migração dos 42 call-sites (é onde a ordem se inverte por descuido — CR-F5)
 - [ ] `Plugin.cs`: ajustar os `Enable()` e adicionar `SyncPerfDump()` no `SettingChanged` do diagnóstico (PA-01-10)
-- [ ] INSTR-1/2/3 nos pontos previstos, todos `// PERF-INSTR` e gated
-- [ ] `PA-01-08`: bumpar `<Version>` `0.16.8` → `0.16.9` em **ambos** os csproj (client e server, em lockstep)
+- [ ] INSTR-1/2/3 nos pontos previstos, todos `// PERF-INSTR` e gated; contadores nas posições da tabela do §5.8 (PA-02-05)
+- [ ] `PA-01-08` · `PA-02-02`: bumpar `0.16.8` → `0.16.9` em **quatro** arquivos — `Client/CustomClasses.Client.csproj:9`, **`Client/Plugin.cs:13` (`BepInPlugin` — é o que sai no log do BepInEx)**, `Server/CustomClasses.Server.csproj:10` e **`Server/CustomClassesMetadata.cs:19` (é o que sai no log do SPT.Server)**. Teste que pega os quatro: `grep -rn '0\.16\.8' modded/` volta vazio
 - [ ] Build client 0 erros; conferir que nenhum warning novo apareceu
-- [ ] `05-asbuild.md` com o que mudou por achado + o que ficou de fora (`AUD-01-07b`)
+- [ ] `05-asbuild.md` com o que mudou por achado, o que ficou de fora (`AUD-01-07b`), a **lista de classes de patch removidas/criadas** (PA-02-09) e a nota do primeiro dump parcial (PA-02-05)
 
 **Gates de validação que a implementação precisa deixar preparados** (executados na Fase 4):
 
@@ -588,6 +664,7 @@ private IEnumerator PerfDumpLoop()   // PERF-INSTR AUD-01-02/03 — temporary, r
 - [ ] `PA-01-06`: cirurgia de aliado via ICM em coop
 - [ ] `PA-01-08`: confirmar no log de boot que a DLL carregada é a `0.16.9` (o launcher já reverteu build antes — `feedback_server_launcher_sync_builds`)
 - [ ] `PA-01-10`: após a validação, `grep -rn 'PERF-INSTR' modded/Client/` tem de voltar **vazio** (a corrotina inteira é um dos blocos a remover, não só as linhas de log)
+- [ ] `PA-02-09`: **`/update-mod-graph CustomClasses`** — a rodada remove ~13 classes de patch (`RecoilFloorCapturePatch`, `RecoilFloorApplyPatch`, `WeaponMasteryRecoilPatch`, `WeaponMasteryErgoPatch`, `ShootRecoilPatch`, `HeavyWeaponErgoPatch`, `BulwarkPatch`, `ExecutionMeleePatch`, `AdrenalineTriggerPatch`, `LocalHitTypePatch`, `ReloadSpeedPatch`, `ShotgunReloadPatch`, `HolsterDrawResetPatch`) e cria 4+ (`ShootCapturePatch`, `ShootApplyPatch`, `RecoilBranches`, os consolidados de `ApplyDamageInfo`/`SetAnimatorAndProceduralValues`/`TotalErgonomics`), além de trocar a assinatura de `IsLocalClass`/`IsClass` em 42 call-sites. Grafo desatualizado é pior que nenhum — a próxima sessão que perguntar "quem chama `IsLocalClass`" recebe 42 respostas que não existem mais
 
 ## 9. Conformidade com skills (auto-checklist)
 
@@ -610,4 +687,5 @@ private IEnumerator PerfDumpLoop()   // PERF-INSTR AUD-01-02/03 — temporary, r
 | Data | Evento |
 |---|---|
 | 2026-08-22 | Spec técnica criada (`/optimize-mod-performance` Fase 2, perfil de não-regressão) |
+| 2026-08-23 | Revisão técnica 02 aplicada — 9 pontos aceitos. Principais: `try/catch` **por branch** nos 4 alvos consolidados (PA-02-01 — um catch externo faria um branch que lança pular o piso B15); bump de versão em **4** arquivos, não 2, incluindo os dois que aparecem em log (PA-02-02); checagem de boot `Parse` ↔ `ClassColors` (PA-02-03); `activeInHierarchy` no cache do painel (PA-02-04); tabela de posição dos contadores (PA-02-05); evidência das prioridades registrada (PA-02-06); `RecoilBranches` com casa definida (PA-02-07); comentário anti-remoção no `EnsureLoaded` (PA-02-08); `/update-mod-graph` no gate de Fase 4 (PA-02-09). |
 | 2026-08-23 | Revisão técnica 01 aplicada — 10 pontos aceitos. Principais: `Shoot` consolida **4→2** e não 4→1, preservando `Priority.First`/`Last` contra mods externos (PA-01-01); clamp no `Quantize` (PA-01-02); `className` na chave do cache de tooltip (PA-01-03); fronteira pública do ICM declarada intocável e `EClassId` `internal` (PA-01-06); **`AUD-01-07b` dropado** (PA-01-07); bump de SemVer, extração explícita do `BuildTinted` e `PerfDumpLoop` com condição de saída (PA-01-08/09/10). |

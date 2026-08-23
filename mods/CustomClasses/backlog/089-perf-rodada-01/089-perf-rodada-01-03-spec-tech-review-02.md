@@ -8,7 +8,9 @@
 
 ## Resumo
 
-> 🔴 Bloqueadores: 2 · 🟡 Importantes: 3 · 🟢 Menores: 4 · ✅ Resolvidos: 0 · Total: 9
+> 🔴 Bloqueadores: 2 · 🟡 Importantes: 3 · 🟢 Menores: 4 · **✅ Resolvidos: 9** · Total: 9
+>
+> **Todos os 9 pontos aceitos pelo usuário em 2026-08-23** e aplicados na spec técnica / spec funcional. Resolução ponto a ponto na seção [Resolução](#resolução) ao fim deste arquivo.
 
 **Memória consultada:** snapshot de 2026-08-03 · pendências que afetam: 🔴 P-10.1, 🔴 P-16.1 (já endereçadas por `PA-01-04` — não voltam aqui).
 
@@ -18,15 +20,15 @@
 
 | ID | Categoria | Impacto | Título | Status |
 |---|---|---|---|---|
-| PA-02-01 | C — Erro de Lógica | 🔴 Bloqueador | Consolidar patches destrói o **isolamento de falha**: um branch que lança leva os irmãos junto — inclusive o piso de recuo | Pendente |
-| PA-02-02 | A — Gap | 🔴 Bloqueador | A versão vive em **4 lugares**, não 2 — e o gate de validação do `PA-01-08` lê justamente os dois que a spec não cita | Pendente |
-| PA-02-03 | A — Gap | 🟡 Importante | `Parse` cria uma **segunda** fonte de verdade para a lista de classes; a primeira (`BindClassColor`) pode divergir em silêncio | Pendente |
-| PA-02-04 | B — Edge Case | 🟡 Importante | `_cachedPmv` pode fixar um painel **inativo**: `GameObject.Find` só acha ativos, então hoje o caso se auto-corrige e com cache não | Pendente |
-| PA-02-05 | A — Gap | 🟡 Importante | INSTR-2 define os contadores mas não diz **onde** incrementar — e a razão "passou/total" do AC depende da posição exata | Pendente |
-| PA-02-06 | A — Gap | 🟢 Menor | A ausência de `[HarmonyPriority]` nos outros 3 alvos consolidados é premissa da spec, mas não está registrada como evidência | Pendente |
-| PA-02-07 | A — Gap | 🟢 Menor | `RecoilBranches` é chamado mas a spec nunca diz onde a classe mora | Pendente |
-| PA-02-08 | B — Edge Case | 🟢 Menor | `EnsureLoaded()` dentro do gate quente parece removível — sem comentário, alguém "otimiza" e reabre o CR-F5 | Pendente |
-| PA-02-09 | A — Gap | 🟢 Menor | A rodada muda o inventário de patches, mas nada manda atualizar o grafo do mod | Pendente |
+| PA-02-01 | C — Erro de Lógica | 🔴 Bloqueador | Consolidar patches destrói o **isolamento de falha**: um branch que lança leva os irmãos junto — inclusive o piso de recuo | ✅ Resolvido 2026-08-23 |
+| PA-02-02 | A — Gap | 🔴 Bloqueador | A versão vive em **4 lugares**, não 2 — e o gate de validação do `PA-01-08` lê justamente os dois que a spec não cita | ✅ Resolvido 2026-08-23 |
+| PA-02-03 | A — Gap | 🟡 Importante | `Parse` cria uma **segunda** fonte de verdade para a lista de classes; a primeira (`BindClassColor`) pode divergir em silêncio | ✅ Resolvido 2026-08-23 |
+| PA-02-04 | B — Edge Case | 🟡 Importante | `_cachedPmv` pode fixar um painel **inativo**: `GameObject.Find` só acha ativos, então hoje o caso se auto-corrige e com cache não | ✅ Resolvido 2026-08-23 |
+| PA-02-05 | A — Gap | 🟡 Importante | INSTR-2 define os contadores mas não diz **onde** incrementar — e a razão "passou/total" do AC depende da posição exata | ✅ Resolvido 2026-08-23 |
+| PA-02-06 | A — Gap | 🟢 Menor | A ausência de `[HarmonyPriority]` nos outros 3 alvos consolidados é premissa da spec, mas não está registrada como evidência | ✅ Resolvido 2026-08-23 |
+| PA-02-07 | A — Gap | 🟢 Menor | `RecoilBranches` é chamado mas a spec nunca diz onde a classe mora | ✅ Resolvido 2026-08-23 |
+| PA-02-08 | B — Edge Case | 🟢 Menor | `EnsureLoaded()` dentro do gate quente parece removível — sem comentário, alguém "otimiza" e reabre o CR-F5 | ✅ Resolvido 2026-08-23 |
+| PA-02-09 | A — Gap | 🟢 Menor | A rodada muda o inventário de patches, mas nada manda atualizar o grafo do mod | ✅ Resolvido 2026-08-23 |
 
 ## Categorias
 
@@ -95,7 +97,7 @@ Acrescentar à §7 a linha de risco e ao §8 o item de checklist *"nenhum alvo c
 
 **Decisão:**
 - `[ ]` Pendente
-- `[ ]` Aceitar sugestão
+- `[x]` Aceitar sugestão
 - `[ ]` Caminho alternativo: _________________
 
 ---
@@ -125,7 +127,7 @@ E acrescentar ao `05-asbuild` a instrução de conferir `grep -rn '0\.16\.8' mod
 
 **Decisão:**
 - `[ ]` Pendente
-- `[ ]` Aceitar sugestão
+- `[x]` Aceitar sugestão
 - `[ ]` Caminho alternativo: _________________
 
 ---
@@ -160,7 +162,7 @@ E o inverso (todo membro de `EClassId` exceto `None` tem entrada em `ClassColors
 
 **Decisão:**
 - `[ ]` Pendente
-- `[ ]` Aceitar sugestão
+- `[x]` Aceitar sugestão
 - `[ ]` Caminho alternativo: _________________
 
 ---
@@ -193,7 +195,7 @@ Acrescentar ao AC de não-regressão da 01-spec: *"entrar no inventário e volta
 
 **Decisão:**
 - `[ ]` Pendente
-- `[ ]` Aceitar sugestão
+- `[x]` Aceitar sugestão
 - `[ ]` Caminho alternativo: _________________
 
 ---
@@ -226,7 +228,7 @@ Mais a nota: *"o primeiro dump após ligar o diagnóstico é parcial — descart
 
 **Decisão:**
 - `[ ]` Pendente
-- `[ ]` Aceitar sugestão
+- `[x]` Aceitar sugestão
 - `[ ]` Caminho alternativo: _________________
 
 ---
@@ -251,7 +253,7 @@ Ou seja: **os outros três alvos não têm prioridade explícita**, e a consolid
 
 **Decisão:**
 - `[ ]` Pendente
-- `[ ]` Aceitar sugestão
+- `[x]` Aceitar sugestão
 - `[ ]` Caminho alternativo: _________________
 
 ---
@@ -268,7 +270,7 @@ Ou seja: **os outros três alvos não têm prioridade explícita**, e a consolid
 
 **Decisão:**
 - `[ ]` Pendente
-- `[ ]` Aceitar sugestão
+- `[x]` Aceitar sugestão
 - `[ ]` Caminho alternativo: _________________
 
 ---
@@ -300,7 +302,7 @@ E um item no §8: *"conferir que nenhum patch passou a chamar `IsLocalClass` **a
 
 **Decisão:**
 - `[ ]` Pendente
-- `[ ]` Aceitar sugestão
+- `[x]` Aceitar sugestão
 - `[ ]` Caminho alternativo: _________________
 
 ---
@@ -319,5 +321,23 @@ O checklist da §8 não menciona regenerar o grafo, e o `/optimize-mod-performan
 
 **Decisão:**
 - `[ ]` Pendente
-- `[ ]` Aceitar sugestão
+- `[x]` Aceitar sugestão
 - `[ ]` Caminho alternativo: _________________
+
+---
+
+## Resolução
+
+Todos os 9 pontos **aceitos pelo usuário em 2026-08-23**. O que mudou, ponto a ponto:
+
+| ID | Resolução | Onde |
+|---|---|---|
+| **PA-02-01** | `try/catch` **por branch** nos quatro alvos consolidados, nunca um externo único. Acrescentado o helper `BranchFailLog.Once(branch, ex)` (dedupe por `HashSet<string>`) para não inundar o console num hot path — o que também corrige um risco de flood que já existe hoje. Linha de risco na §7 e item próprio no §8. | spec-tech §5.6, §7, §8 |
+| **PA-02-02** | Checklist passa a nomear os **quatro** arquivos, marcando quais são observáveis: `Client/CustomClasses.Client.csproj:9`, **`Client/Plugin.cs:13`** (`BepInPlugin` — log do BepInEx), `Server/CustomClasses.Server.csproj:10` e **`Server/CustomClassesMetadata.cs:19`** (log do SPT.Server). Teste que pega os quatro de uma vez: `grep -rn '0\.16\.8' modded/` vazio. | spec-tech §8 |
+| **PA-02-03** | Checagem **bidirecional** de boot no fim de `PerksConfig.Bind` — toda chave de `ClassColors` tem de parsear para um `EClassId` != `None`, e todo membro do enum (exceto `None`) tem de ter entrada em `ClassColors`. Erro logado nos dois sentidos. A spec deixa de afirmar que `Parse` é "fonte única" e passa a dizer que são **as duas faces da mesma lista**. | spec-tech §5.1, §7, §8 |
+| **PA-02-04** | `if (_cachedPmv == null \|\| !_cachedPmv.gameObject.activeInHierarchy)` — o `==` do Unity cobre o destruído, não o desativado, e `GameObject.Find` só acha ativos. AC de transição de tela (inventário↔menu, raid→menu) acrescentado. | spec-tech §5.4, §7 · 01-spec (AC A) |
+| **PA-02-05** | Tabela explícita de posição dos 10 contadores (qual arquivo, qual método, antes ou depois de qual gate), mais a nota de que o **primeiro dump após ligar o diagnóstico é parcial e deve ser descartado**. | spec-tech §5.8, §8 |
+| **PA-02-06** | Evidência registrada na §2: `grep HarmonyPriority` devolve prioridade explícita só em `RecoilFloorPatch.cs:41/:68` e `WeaponMasteryPatches.cs:116` (todas em `PWA.Shoot`, tratadas pelo PA-01-01) e `ClassMedicPatches.cs:186` (alvo fora da rodada). Com a ressalva escrita de que **consolidar não é seguro por regra** — foi seguro aqui porque foi conferido. | spec-tech §2 |
+| **PA-02-07** | `RecoilBranches` decidida como classe estática **única** em `ClassWeaponPatches.cs`, acima dos dois patches de `Shoot`, com comentários de procedência em cada método movido. `RecoilFloorPatch.cs` permanece contendo só o XMLdoc histórico do B15 (contexto de balance) com ponteiro para o novo local. | spec-tech §5.6, §8 |
+| **PA-02-08** | Comentário anti-remoção no `EnsureLoaded()` do `IsLocalClass(EClassId)`, explicando que é o fetch preguiçoso e que é por isso que o gate de instância vem antes dele (CR-F5). Item de checklist para conferir que a migração dos 42 call-sites não inverteu essa ordem em nenhum patch. | spec-tech §5.1, §8 |
+| **PA-02-09** | `/update-mod-graph CustomClasses` acrescentado aos gates de Fase 4, com a lista nominal das ~13 classes removidas e das 4+ criadas; a mesma lista vai para o `05-asbuild`. | spec-tech §8 |
