@@ -71,7 +71,7 @@ internal class QuickHandsPatch : ModulePatch
                 return;
             }
 
-            if (SkillMultipliers.IsLocalClass("Scavenger"))
+            if (SkillMultipliers.IsLocalClass(EClassId.Scavenger))
             {
                 __result = true;   // habilita o teto de 2 buscas simultâneas (mesmo do elite vanilla)
             }

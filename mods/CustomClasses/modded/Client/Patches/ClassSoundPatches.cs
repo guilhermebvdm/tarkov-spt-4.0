@@ -17,7 +17,7 @@ namespace CustomClasses.Client;
 ///     (1 = sem efeito). Usado pelos 3 pipelines de som (rolloff do player, IA base, SAIN) — mesma forma do
 ///     <see cref="LoudOperator"/>, que é o oposto (aumenta o raio).
 ///     ✅ Coop: DESDE O B14 (2026-07-11) o host aplica o perk de som de um peer Fika contra a IA (via
-///     <see cref="ClassIdentities.ClassNameEnOf"/>) — deixou de ser host-only. Ver <see cref="AiSoundPatch"/>.
+///     <see cref="ClassIdentities.ClassIdOf"/>) — deixou de ser host-only. Ver <see cref="AiSoundPatch"/>.
 /// </summary>
 internal static class QuietStep
 {
@@ -29,16 +29,16 @@ internal static class QuietStep
     ///     antigo atalho <c>Mult()</c> (classe local) ficou sem consumidor — removido em 2026-07-11.
     ///     </para>
     /// </summary>
-    internal static float MultFor(string? classNameEn)
+    internal static float MultFor(EClassId classId)   // ref: AUD-01-02 — era string? classNameEn
     {
-        if (SkillMultipliers.IsClass(classNameEn, "Stealth"))
+        if (SkillMultipliers.IsClass(classId, EClassId.Stealth))
         {
             return PerksConfig.GhostStepEnabled?.Value == true
                 ? (PerksConfig.GhostStepSoundRadius?.Value ?? 1f)
                 : 1f;
         }
 
-        if (SkillMultipliers.IsClass(classNameEn, "Hunter"))
+        if (SkillMultipliers.IsClass(classId, EClassId.Hunter))
         {
             return PerksConfig.StalkerEnabled?.Value == true
                 ? (PerksConfig.StalkerSoundRadius?.Value ?? 1f)
@@ -56,15 +56,15 @@ internal static class QuietStep
 /// </summary>
 internal static class SilentLooter
 {
-    internal static float MultFor(string? classNameEn)
+    internal static float MultFor(EClassId classId)   // ref: AUD-01-02 — era string? classNameEn
     {
         // Scavenger: loot mais SILENCIOSO (perk). Rifleman: loot mais ALTO (079 — Saque Barulhento, drawback).
         // Resolve a classe de QUALQUER emissor (local ou peer via rota 057) → vale no pipeline coop/AI (SAIN).
-        if (SkillMultipliers.IsClass(classNameEn, "Scavenger") && PerksConfig.SilentLooterEnabled?.Value == true)
+        if (SkillMultipliers.IsClass(classId, EClassId.Scavenger) && PerksConfig.SilentLooterEnabled?.Value == true)
         {
             return PerksConfig.SilentLooterVolume?.Value ?? 1f;
         }
-        if (SkillMultipliers.IsClass(classNameEn, "Rifleman") && PerksConfig.LoudLooterEnabled?.Value == true)
+        if (SkillMultipliers.IsClass(classId, EClassId.Rifleman) && PerksConfig.LoudLooterEnabled?.Value == true)
         {
             return PerksConfig.LoudLooterVolume?.Value ?? 1f;
         }
@@ -80,16 +80,16 @@ internal static class SilentLooter
 internal static class LoudOperator
 {
     /// <summary>Multiplicador de UMA classe (por nome EN) — ver <see cref="QuietStep.MultFor"/>. Vanilla → 1.</summary>
-    internal static float MultFor(string? classNameEn)
+    internal static float MultFor(EClassId classId)   // ref: AUD-01-02 — era string? classNameEn
     {
-        if (SkillMultipliers.IsClass(classNameEn, "Rifleman"))
+        if (SkillMultipliers.IsClass(classId, EClassId.Rifleman))
         {
             return PerksConfig.LoudOperatorRiflemanEnabled?.Value == true
                 ? (PerksConfig.LoudOperatorRiflemanSoundRadius?.Value ?? 1f)
                 : 1f;
         }
 
-        if (SkillMultipliers.IsClass(classNameEn, "Tank"))
+        if (SkillMultipliers.IsClass(classId, EClassId.Tank))
         {
             return PerksConfig.LoudOperatorTankEnabled?.Value == true
                 ? (PerksConfig.LoudOperatorTankSoundRadius?.Value ?? 1f)
@@ -115,7 +115,7 @@ internal static class LoudOperator
 ///     (ObservedPlayer.cs:137) — ou seja, o <c>method_67</c> de um peer roda NO SEU CLIENTE, com a SUA audição.
 ///     O passo do peer sai por <c>Player.PlayStepSound</c> (público, SEM gate de local) → <c>method_66</c> →
 ///     <c>method_68(NestedStepSoundSource, method_67(...))</c>. Basta resolver a classe do EMISSOR
-///     (<see cref="ClassIdentities.ClassNameEnOf"/>, que já barra bots) — mesma peça do B14.
+///     (<see cref="ClassIdentities.ClassIdOf"/>, que já barra bots) — mesma peça do B14.
 ///     ⚠️ O VALOR sai do F12 de quem ouve; sem sync de config entre peers (idem B14).
 ///     </para>
 /// </summary>
@@ -164,9 +164,11 @@ internal class SoundRadiusPatch : ModulePatch
     {
         try
         {
-            // B20: classe do EMISSOR (você OU um peer Fika). Bots ficam de fora dentro do ClassNameEnOf.
-            var emitterClass = ClassIdentities.ClassNameEnOf(__instance);
-            if (emitterClass is null)
+            // B20: classe do EMISSOR (você OU um peer Fika). Bots ficam de fora dentro do ClassIdOf.
+            // ref: AUD-01-02 · PA-03-01 — ClassIdOf é o ÚNICO resolvedor deste hot path (por som de
+            // movimento de CADA player/bot). O NOME só é resolvido dentro do gate de diagnóstico, abaixo.
+            var emitterId = ClassIdentities.ClassIdOf(__instance);
+            if (emitterId == EClassId.None)
             {
                 return;   // vanilla/bot/desconhecido → não toca no som
             }
@@ -174,10 +176,10 @@ internal class SoundRadiusPatch : ModulePatch
             var r0 = __result;   // (052) baseline p/ o diagnóstico
 
             // 🔧 Ghost Step (Furtivo −30%) / Stalker (Caçador −20%): reduz o raio de audibilidade.
-            __result *= QuietStep.MultFor(emitterClass);
+            __result *= QuietStep.MultFor(emitterId);
 
             // 🔻 Loud Operator (Fuzileiro + Tanque, desdobrado por classe): aumenta o raio de audibilidade.
-            __result *= LoudOperator.MultFor(emitterClass);
+            __result *= LoudOperator.MultFor(emitterId);
 
             // Espelha no cache p/ o VOLUME não divergir do alcance (ver doc de RolloffCache). Mult == 1 (classe sem
             // perk de som) → não escreve: preserva o caminho vanilla byte a byte. Comparação EXATA de propósito
@@ -203,7 +205,9 @@ internal class SoundRadiusPatch : ModulePatch
                 {
                     // B20: única prova objetiva de que o perk de um PEER está valendo no SEU áudio (o overlay não
                     // alcança peers). Throttled; só com Diagnostics ligado no F12.
-                    PerkDiag.LogPeer("rolloff (you hear)", __instance.Profile?.Nickname ?? "?", emitterClass, r0, __result);
+                    // ref: PA-03-01 — NameOf (switch puro) só aqui dentro; nunca um 2º lookup no hot path.
+                    PerkDiag.LogPeer("rolloff (you hear)", __instance.Profile?.Nickname ?? "?",
+                                     SkillMultipliers.NameOf(emitterId) ?? "?", r0, __result);
                 }
             }
         }
@@ -236,11 +240,11 @@ internal class InteractionSoundPatch : ModulePatch
                 return;
             }
 
-            if (PerksConfig.SilentLooterEnabled?.Value == true && SkillMultipliers.IsLocalClass("Scavenger"))
+            if (PerksConfig.SilentLooterEnabled?.Value == true && SkillMultipliers.IsLocalClass(EClassId.Scavenger))
             {
                 volume *= PerksConfig.SilentLooterVolume?.Value ?? 1f;
             }
-            else if (PerksConfig.LoudLooterEnabled?.Value == true && SkillMultipliers.IsLocalClass("Rifleman"))
+            else if (PerksConfig.LoudLooterEnabled?.Value == true && SkillMultipliers.IsLocalClass(EClassId.Rifleman))
             {
                 volume *= PerksConfig.LoudLooterVolume?.Value ?? 1f;   // 079 — Saque Barulhento (loot mais alto)
             }
@@ -261,7 +265,7 @@ internal class InteractionSoundPatch : ModulePatch
 ///     <b>B14 (coop 2026-07-11) — som host-side para REMOTOS.</b> Antes gateávamos em <c>IsYourPlayer</c>, o que
 ///     tornava os perks de som um PLACEBO contra a IA para quem joga como CLIENTE Fika: os bots vivem no processo
 ///     do HOST, então é o host quem calcula o que eles ouvem — inclusive do barulho de um peer. Agora resolvemos
-///     a classe de QUEM EMITIU o som (<see cref="ClassIdentities.ClassNameEnOf"/>: local via SkillMultipliers,
+///     a classe de QUEM EMITIU o som (<see cref="ClassIdentities.ClassIdOf"/>: local via SkillMultipliers,
 ///     peer via o mapa nickname→classe da rota 057) e aplicamos o multiplicador DELA. Sem protocolo novo.
 ///     ⚠️ O VALOR sai do F12 de quem roda isto (o host) — ele é a autoridade da percepção da IA, que é dele.
 ///     Este patch cobre o canal da <b>IA</b>; o canal do <b>áudio que humanos ouvem</b> é o
@@ -287,16 +291,17 @@ internal class AiSoundPatch : ModulePatch
             }
 
             // B14: a classe do EMISSOR (não a local) — é isto que faz o perk do peer valer contra a IA no host.
-            var emitterClass = ClassIdentities.ClassNameEnOf(p);
-            if (emitterClass is null)
+            // ref: AUD-01-02 · PA-03-01 — ÚNICO lookup deste hot path (1 por passo de CADA player/bot).
+            var emitterId = ClassIdentities.ClassIdOf(p);
+            if (emitterId == EClassId.None)
             {
                 return;   // vanilla/desconhecido → sem efeito
             }
 
             var p0 = power;
 
-            power *= QuietStep.MultFor(emitterClass);
-            power *= LoudOperator.MultFor(emitterClass);
+            power *= QuietStep.MultFor(emitterId);
+            power *= LoudOperator.MultFor(emitterId);
 
             if (PerkDiag.Enabled)
             {
@@ -309,7 +314,9 @@ internal class AiSoundPatch : ModulePatch
                 {
                     // B14: prova de que o HOST está aplicando o perk de som de um PEER contra a IA — o cenário que
                     // era placebo antes e que não dá para verificar de ouvido (é a percepção do BOT que muda).
-                    PerkDiag.LogPeer("AI hear power", p.Profile?.Nickname ?? "?", emitterClass, p0, power);
+                    // ref: PA-03-01 — NameOf só dentro do gate de diagnóstico.
+                    PerkDiag.LogPeer("AI hear power", p.Profile?.Nickname ?? "?",
+                                     SkillMultipliers.NameOf(emitterId) ?? "?", p0, power);
                 }
             }
         }
@@ -372,8 +379,8 @@ internal class SainSoundPatch : ModulePatch
             // B14: o EMISSOR pode ser o player local OU um peer Fika (o SAIN roda no host, junto com os bots).
             // Getter compilado (sem reflection no hot-path).
             var emitter = gameWorld.GetAlivePlayerByProfileID(_getProfileId(__instance));   // ref: GameWorld.cs:1238
-            var emitterClass = ClassIdentities.ClassNameEnOf(emitter);
-            if (emitterClass is null)
+            var emitterId = ClassIdentities.ClassIdOf(emitter);   // ref: AUD-01-02 · PA-03-01
+            if (emitterId == EClassId.None)
             {
                 return;   // bot, vanilla ou desconhecido → sem efeito
             }
@@ -381,12 +388,12 @@ internal class SainSoundPatch : ModulePatch
             var before = __2;
             var soundType = Convert.ToInt32(__0);
 
-            __2 *= QuietStep.MultFor(emitterClass);      // reduz TODOS (Ghost Step / Stalker)
-            __2 *= LoudOperator.MultFor(emitterClass);   // aumenta TODOS
+            __2 *= QuietStep.MultFor(emitterId);      // reduz TODOS (Ghost Step / Stalker)
+            __2 *= LoudOperator.MultFor(emitterId);   // aumenta TODOS
 
             if (soundType == SainSoundTypeLooting)
             {
-                __2 *= SilentLooter.MultFor(emitterClass);   // anti-detecção: reduz só o Looting (Saqueador)
+                __2 *= SilentLooter.MultFor(emitterId);   // anti-detecção: reduz só o Looting (Saqueador)
             }
 
             if (PerkDiag.Enabled && emitter is not null && emitter.IsYourPlayer)   // o overlay só descreve o SEU player

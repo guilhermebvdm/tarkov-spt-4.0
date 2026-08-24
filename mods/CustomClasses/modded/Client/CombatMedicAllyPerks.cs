@@ -31,7 +31,7 @@ public static class CombatMedicAllyPerks
         try
         {
             // classe LOCAL (o operador é o MainPlayer). IsLocalClass lê SkillMultipliers.ClassNameEn.
-            if (!SkillMultipliers.IsLocalClass("Combat Medic"))
+            if (!SkillMultipliers.IsLocalClass(EClassId.CombatMedic))
             {
                 return 1f;
             }

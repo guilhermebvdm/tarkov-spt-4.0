@@ -16,12 +16,12 @@ internal static class PackMule
 {
     internal static float? LocalBonus()
     {
-        if (PerksConfig.PackMuleScavEnabled?.Value == true && SkillMultipliers.IsLocalClass("Scavenger"))
+        if (PerksConfig.PackMuleScavEnabled?.Value == true && SkillMultipliers.IsLocalClass(EClassId.Scavenger))
         {
             return PerksConfig.PackMuleScavCarryBonus?.Value ?? 0f;
         }
 
-        if (PerksConfig.PackMuleTankEnabled?.Value == true && SkillMultipliers.IsLocalClass("Tank"))
+        if (PerksConfig.PackMuleTankEnabled?.Value == true && SkillMultipliers.IsLocalClass(EClassId.Tank))
         {
             return PerksConfig.PackMuleTankCarryBonus?.Value ?? 0f;
         }
@@ -29,7 +29,7 @@ internal static class PackMule
         // 079 — Light Frame (Caçador + Furtivo): limite de carga REDUZIDO. Bônus NEGATIVO → o Postfix MULTIPLICA
         // o modifier (−X% RELATIVO, preserva o Strength), não teto absoluto (v0.16.6 — ver PackMulePatch.Postfix).
         if (PerksConfig.LightFrameEnabled?.Value == true
-            && (SkillMultipliers.IsLocalClass("Hunter") || SkillMultipliers.IsLocalClass("Stealth")))
+            && (SkillMultipliers.IsLocalClass(EClassId.Hunter) || SkillMultipliers.IsLocalClass(EClassId.Stealth)))
         {
             return PerksConfig.LightFrameCarryPenalty?.Value ?? -0.1f;
         }

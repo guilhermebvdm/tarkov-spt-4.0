@@ -37,20 +37,20 @@ internal class ShootRecoilPatch : ModulePatch
 
             // 🔻 Falta de habilidade / Unskilled (Médico + Saqueador — 079): +25% de recuo por falta de perícia.
             if (PerksConfig.ShakyHandsEnabled?.Value == true
-                && (SkillMultipliers.IsLocalClass("Combat Medic") || SkillMultipliers.IsLocalClass("Scavenger")))
+                && (SkillMultipliers.IsLocalClass(EClassId.CombatMedic) || SkillMultipliers.IsLocalClass(EClassId.Scavenger)))
             {
                 str *= PerksConfig.ShakyHandsRecoil?.Value ?? 1f;
             }
 
             // 🔧 Adrenaline (Fuzileiro): −30% de recuo durante a janela.
             if (PerksConfig.AdrenalineEnabled?.Value == true && AdrenalineState.IsActive
-                && SkillMultipliers.IsLocalClass("Rifleman"))
+                && SkillMultipliers.IsLocalClass(EClassId.Rifleman))
             {
                 str *= PerksConfig.AdrenalineRecoil?.Value ?? 1f;
             }
 
             // 🔧 Bunker (Tanque): −15% de recuo com arma pesada (LMG/HMG/GL/underbarrel) na mão.
-            if (PerksConfig.BunkerEnabled?.Value == true && SkillMultipliers.IsLocalClass("Tank")
+            if (PerksConfig.BunkerEnabled?.Value == true && SkillMultipliers.IsLocalClass(EClassId.Tank)
                 && HeavyWeapon.InHand(p))
             {
                 str *= PerksConfig.BunkerHeavyRecoil?.Value ?? 1f;
@@ -98,7 +98,7 @@ internal class ReloadSpeedPatch : ModulePatch
         try
         {
             if (PerksConfig.AdrenalineEnabled?.Value != true || !AdrenalineState.IsActive
-                || !SkillMultipliers.IsLocalClass("Rifleman"))
+                || !SkillMultipliers.IsLocalClass(EClassId.Rifleman))
             {
                 return;
             }
@@ -168,7 +168,7 @@ internal class AdsSpeedPatch : ModulePatch
 
             // 🔧 Adrenaline (Fuzileiro): ADS mais rápido durante a janela.
             if (PerksConfig.AdrenalineEnabled?.Value == true && AdrenalineState.IsActive
-                && SkillMultipliers.IsLocalClass("Rifleman"))
+                && SkillMultipliers.IsLocalClass(EClassId.Rifleman))
             {
                 var t = PerksConfig.AdrenalineAdsTime?.Value ?? 1f;
                 if (t > 0f && t < 1f)
@@ -178,7 +178,7 @@ internal class AdsSpeedPatch : ModulePatch
             }
 
             // 🔧 Sharpshooter (Caçador): ADS mais rápido (sempre).
-            if (PerksConfig.SharpshooterEnabled?.Value == true && SkillMultipliers.IsLocalClass("Hunter"))
+            if (PerksConfig.SharpshooterEnabled?.Value == true && SkillMultipliers.IsLocalClass(EClassId.Hunter))
             {
                 var t = PerksConfig.SharpshooterAdsTime?.Value ?? 1f;
                 if (t > 0f && t < 1f)
@@ -221,7 +221,7 @@ internal class HeavyWeaponErgoPatch : ModulePatch
                 return;   // só a arma do player local
             }
 
-            if (SkillMultipliers.IsLocalClass("Tank") && HeavyWeapon.IsHeavy(__instance.Item))
+            if (SkillMultipliers.IsLocalClass(EClassId.Tank) && HeavyWeapon.IsHeavy(__instance.Item))
             {
                 __result *= PerksConfig.BunkerHeavyErgo?.Value ?? 1f;
             }
@@ -299,11 +299,11 @@ internal class AimPunchPatch : ModulePatch
             var factor = 1f;
             // 🔻 Rattled / Abalado (Furtivo + Médico — 079): +50% tranco ao levar dano. Mesmo lever/valor p/ as 2 classes.
             if (PerksConfig.RattledEnabled?.Value == true
-                && (SkillMultipliers.IsLocalClass("Stealth") || SkillMultipliers.IsLocalClass("Combat Medic")))
+                && (SkillMultipliers.IsLocalClass(EClassId.Stealth) || SkillMultipliers.IsLocalClass(EClassId.CombatMedic)))
             {
                 factor = PerksConfig.RattledAimPunch?.Value ?? 1f;
             }
-            else if (PerksConfig.CoolUnderFireEnabled?.Value == true && SkillMultipliers.IsLocalClass("Rifleman"))
+            else if (PerksConfig.CoolUnderFireEnabled?.Value == true && SkillMultipliers.IsLocalClass(EClassId.Rifleman))
             {
                 factor = PerksConfig.CoolUnderFireFlinch?.Value ?? 1f;      // 🔧 Fuzileiro: −50% tranco
             }
@@ -363,9 +363,9 @@ internal class HolsterDrawSpeedPatch : ModulePatch
                 return;
             }
 
-            if (!(SkillMultipliers.IsLocalClass("Hunter")
-                  || SkillMultipliers.IsLocalClass("Rifleman")
-                  || SkillMultipliers.IsLocalClass("Stealth")))
+            if (!(SkillMultipliers.IsLocalClass(EClassId.Hunter)
+                  || SkillMultipliers.IsLocalClass(EClassId.Rifleman)
+                  || SkillMultipliers.IsLocalClass(EClassId.Stealth)))
             {
                 return;
             }
@@ -476,9 +476,9 @@ internal class HolsterPutAwaySpeedPatch : ModulePatch
                 return;
             }
 
-            if (!(SkillMultipliers.IsLocalClass("Hunter")
-                  || SkillMultipliers.IsLocalClass("Rifleman")
-                  || SkillMultipliers.IsLocalClass("Stealth")))
+            if (!(SkillMultipliers.IsLocalClass(EClassId.Hunter)
+                  || SkillMultipliers.IsLocalClass(EClassId.Rifleman)
+                  || SkillMultipliers.IsLocalClass(EClassId.Stealth)))
             {
                 return;
             }
@@ -577,7 +577,7 @@ internal class ShotgunReloadPatch : ModulePatch
         __state = float.NaN;
         try
         {
-            if (PerksConfig.ShotgunReloadEnabled?.Value != true || !SkillMultipliers.IsLocalClass("Tank"))
+            if (PerksConfig.ShotgunReloadEnabled?.Value != true || !SkillMultipliers.IsLocalClass(EClassId.Tank))
             {
                 return;
             }

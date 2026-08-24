@@ -57,7 +57,7 @@ internal class CalmSightsPatch : ModulePatch
                 return;
             }
 
-            if (!SkillMultipliers.IsLocalClass("Hunter"))
+            if (!SkillMultipliers.IsLocalClass(EClassId.Hunter))
             {
                 return;
             }

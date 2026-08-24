@@ -87,6 +87,14 @@ public class Plugin : BaseUnityPlugin
         PerksConfig.Bind(Config);   // item 050: F12 dos perks/drawbacks (fatia 050.0: Bulwark + Pack Mule)
         PerksConfig.ClassColorsChanged += MenuClassIdentityPatch.RefreshColors;   // 067: cor do F12 → menu ao vivo
 
+        // ref: PA-04-03 — invalidação dos caches derivados da classe por EVENTO, não por chamada direta
+        // (o SkillMultipliers não pode conhecer um patch de UI nem o overlay de diagnóstico). Molde: o
+        // ClassColorsChanged logo acima, do item 067.
+        // ⚠️ Sem `-=`, e isso está CORRETO: assinatura estática↔estática, feita 1× aqui, de vida igual à do
+        // plugin — exatamente o mesmo contrato do ClassColorsChanged. Não é achado de AP-01.
+        SkillMultipliers.ClassChanged += SkillPanelPatch.ClearTooltipCache;    // AUD-01-07c
+        SkillMultipliers.ClassChanged += PerkDiagnostics.ClearGroupCache;      // AUD-01-07d
+
         new OnTriggerPatch().Enable();
         new WorkoutBehaviourPatch().Enable();   // (a) gym
         new SkillPanelPatch().Enable();         // (010) UI — marcador ±X% + tooltip dedicado da classe

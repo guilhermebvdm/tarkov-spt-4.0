@@ -50,7 +50,7 @@ internal static class ClassMoveSpeed
             var m = 1f;
 
             // 🔻 Heavy Frame (Tanque): −10% de velocidade (andar E correr).
-            if (PerksConfig.HeavyFrameEnabled?.Value == true && SkillMultipliers.IsLocalClass("Tank"))
+            if (PerksConfig.HeavyFrameEnabled?.Value == true && SkillMultipliers.IsLocalClass(EClassId.Tank))
             {
                 m *= PerksConfig.HeavyFrameMoveSpeed?.Value ?? 1f;
             }
@@ -61,7 +61,7 @@ internal static class ClassMoveSpeed
             // 🔧 Execution (Furtivo): +10% com a MELEE na mão. No ANDAR o MaxSpeed morde; na CORRIDA o cap do
             // SpeedLimiter (ExecutionSpeedCapPatch, 074/F2) é o teto — a compensação do +1f (abaixo) garante que o
             // num2 do sprint suba o MESMO fator, senão o num2 diluído prenderia o min() ABAIXO do cap boostado.
-            if (PerksConfig.ExecutionSpeedEnabled?.Value == true && SkillMultipliers.IsLocalClass("Stealth")
+            if (PerksConfig.ExecutionSpeedEnabled?.Value == true && SkillMultipliers.IsLocalClass(EClassId.Stealth)
                 && p.HandsController is Player.KnifeController)
             {
                 m *= PerksConfig.ExecutionMoveSpeed?.Value ?? 1f;
@@ -70,7 +70,7 @@ internal static class ClassMoveSpeed
             // 🔧 Lebre (Saqueador — 081): +velocidade enquanto NÃO está pesado. Usa o overweight NATIVO do EFT
             // (BasePhysicalClass.Overweight == 0 = sem o ícone de bigorna). Lido fresco a cada getter → reativo ao
             // peso (lootou e ficou pesado → desliga sozinho). Não acumula (getter sem estado, ver doc acima).
-            if (PerksConfig.LebreEnabled?.Value == true && SkillMultipliers.IsLocalClass("Scavenger")
+            if (PerksConfig.LebreEnabled?.Value == true && SkillMultipliers.IsLocalClass(EClassId.Scavenger)
                 && p.Physical != null && p.Physical.Overweight <= 0f)
             {
                 m *= PerksConfig.LebreSpeed?.Value ?? 1f;
@@ -180,7 +180,7 @@ internal class RootedAimSlowdownPatch : ModulePatch
                 return;
             }
 
-            if (SkillMultipliers.IsLocalClass("Hunter"))
+            if (SkillMultipliers.IsLocalClass(EClassId.Hunter))
             {
                 slow *= PerksConfig.RootedAdsSpeed?.Value ?? 1f;   // 0.85 → teto de mira 15% menor
             }
@@ -230,7 +230,7 @@ internal class ExecutionSpeedCapPatch : ModulePatch
                 return;
             }
 
-            if (SkillMultipliers.IsLocalClass("Stealth") && p.HandsController is Player.KnifeController)
+            if (SkillMultipliers.IsLocalClass(EClassId.Stealth) && p.HandsController is Player.KnifeController)
             {
                 __result *= PerksConfig.ExecutionMoveSpeed?.Value ?? 1f;   // +10% no cap absoluto (m/s)
             }

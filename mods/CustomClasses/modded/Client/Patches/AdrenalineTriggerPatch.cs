@@ -24,7 +24,7 @@ internal class AdrenalineTriggerPatch : ModulePatch
     {
         try
         {
-            if (PerksConfig.AdrenalineEnabled?.Value != true || !SkillMultipliers.IsLocalClass("Rifleman"))
+            if (PerksConfig.AdrenalineEnabled?.Value != true || !SkillMultipliers.IsLocalClass(EClassId.Rifleman))
             {
                 return;
             }

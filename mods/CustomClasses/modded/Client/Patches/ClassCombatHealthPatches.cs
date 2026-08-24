@@ -44,7 +44,7 @@ internal class ExecutionMeleePatch : ModulePatch
                 return;
             }
 
-            if (SkillMultipliers.IsLocalClass("Stealth"))
+            if (SkillMultipliers.IsLocalClass(EClassId.Stealth))
             {
                 damageInfo.Damage *= PerksConfig.ExecutionMeleeDamage?.Value ?? 1f;
             }
@@ -78,11 +78,11 @@ internal static class HeavyFrameMetabolism
                 return;   // só o player local
             }
 
-            if (PerksConfig.HeavyFrameEnabled?.Value == true && SkillMultipliers.IsLocalClass("Tank"))
+            if (PerksConfig.HeavyFrameEnabled?.Value == true && SkillMultipliers.IsLocalClass(EClassId.Tank))
             {
                 value *= PerksConfig.HeavyFrameHungerThirst?.Value ?? 1f;
             }
-            else if (PerksConfig.EfficientMetabolismEnabled?.Value == true && SkillMultipliers.IsLocalClass("Combat Medic"))
+            else if (PerksConfig.EfficientMetabolismEnabled?.Value == true && SkillMultipliers.IsLocalClass(EClassId.CombatMedic))
             {
                 value *= PerksConfig.EfficientMetabolismHungerThirst?.Value ?? 1f;   // B17
             }
@@ -159,7 +159,7 @@ internal class IronLungsPatch : ModulePatch
                 _originalBase = __instance.BaseHoldBreathConsumption;
             }
 
-            var on = PerksConfig.IronLungsEnabled?.Value == true && SkillMultipliers.IsLocalClass("Hunter");
+            var on = PerksConfig.IronLungsEnabled?.Value == true && SkillMultipliers.IsLocalClass(EClassId.Hunter);
             var f = on ? (PerksConfig.IronLungsBreathDrain?.Value ?? 1f) : 1f;
             __instance.BaseHoldBreathConsumption = _originalBase * f;   // SETA (idempotente), não ×=
         }
@@ -197,7 +197,7 @@ internal class MalfunctionChancePatch : ModulePatch
                 return;   // só a arma do player local
             }
 
-            if (SkillMultipliers.IsLocalClass("Rifleman"))
+            if (SkillMultipliers.IsLocalClass(EClassId.Rifleman))
             {
                 __result *= PerksConfig.CoolUnderFireMalfChance?.Value ?? 1f;
             }

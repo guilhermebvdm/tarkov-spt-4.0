@@ -52,7 +52,7 @@ internal class BulwarkPatch : ModulePatch
                 return;
             }
 
-            if (!SkillMultipliers.IsLocalClass("Tank"))
+            if (!SkillMultipliers.IsLocalClass(EClassId.Tank))
             {
                 return;
             }

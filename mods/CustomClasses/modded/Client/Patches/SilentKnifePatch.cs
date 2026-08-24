@@ -18,7 +18,7 @@ namespace CustomClasses.Client;
 ///     <c>ObservedKnifeController : Player.KnifeController</c> sobre <c>ObservedPlayer : … : Player</c>, inicializado
 ///     com um <b>PlayerBridge</b> cujo <c>iPlayer</c> é um <c>EFT.Player</c> REAL (não o <c>ObserverBridge</c>/
 ///     <c>ObservedPlayerView</c> do observed-view base do SPT, que é morto sob Fika) — por isso o guard
-///     <c>is Player</c> basta e resolve a classe do EMISSOR (<see cref="ClassIdentities.ClassNameEnOf"/>). ⚠️ A
+///     <c>is Player</c> basta e resolve a classe do EMISSOR (<see cref="ClassIdentities.ClassIdOf"/>). ⚠️ A
 ///     cobertura de peer DEPENDE do Fika instanciar controllers de Player real; num cenário SEM Fika (observed-view
 ///     puro), a faca de um peer/bot cairia no <c>ObserverBridge</c> → <c>iPlayer</c> é <c>ObservedPlayerView</c>
 ///     (não <c>Player</c>) → o guard <c>is Player</c> falha → som AUDÍVEL. Isso é um gap de cobertura na direção
@@ -113,7 +113,8 @@ internal class SilentKnifePatch : ModulePatch
             }
 
             // (4) classe do EMISSOR (local via SkillMultipliers, peer via rota 057) — silencia só o Furtivo.
-            if (SkillMultipliers.IsClass(ClassIdentities.ClassNameEnOf(emitter), "Stealth"))
+            // ref: AUD-01-02 · PA-03-01 — comparação de int; ClassIdOf é o único resolvedor.
+            if (ClassIdentities.ClassIdOf(emitter) == EClassId.Stealth)
             {
                 return false;   // 🔇 não toca o clip (deploy/golpe/acerto)
             }
