@@ -57,6 +57,46 @@ internal static class PerkDiag
 }
 
 /// <summary>
+///     PERF-INSTR AUD-01-02/03 — temporary, remove after validation.
+///     <para>
+///     Censo das superfícies mais quentes. Responde as duas perguntas que a leitura estática não fecha:
+///     <b>qual o N real</b> (bots × frames) que essas superfícies pagam numa raid, e <b>qual fração passa
+///     do gate</b> (deve ficar ~1/N — se subir, o gate afrouxou).
+///     </para>
+///     <para>
+///     ⚠️ PA-02-05 — a POSIÇÃO de cada incremento é o que torna a razão mensurável: <c>*Calls</c> vem ANTES
+///     do gate, <c>*Passed</c> DEPOIS. Se os dois ficarem depois, a razão dá sempre 1 e o critério de aceite
+///     não mede nada. <c>*Gates</c> conta execuções de gate por evento — é o que prova a meta 4 → 2.
+///     </para>
+///     <para>Contadores primitivos, sem alocação; só incrementados sob <c>PerkDiag.Enabled</c>.</para>
+/// </summary>
+internal static class PerfCount
+{
+    internal static long MoveSpeedCalls, MoveSpeedPassed;
+    internal static long StepAiCalls, StepAiPassed;
+    internal static long RolloffCalls, RolloffPassed;
+    internal static long DamageCalls, DamageGates;
+    internal static long ShootCalls, ShootGates;
+    internal static long ErgoGates;
+
+    internal static void Reset()
+    {
+        MoveSpeedCalls = MoveSpeedPassed = 0;
+        StepAiCalls = StepAiPassed = 0;
+        RolloffCalls = RolloffPassed = 0;
+        DamageCalls = DamageGates = 0;
+        ShootCalls = ShootGates = 0;
+        ErgoGates = 0;
+    }
+
+    /// <summary>Linha agregada. ⚠️ O PRIMEIRO dump após ligar o diagnóstico é parcial — descartar (PA-02-05).</summary>
+    internal static string Dump() =>
+        $"moveSpeed={MoveSpeedCalls}/{MoveSpeedPassed} stepAI={StepAiCalls}/{StepAiPassed} "
+        + $"rolloff={RolloffCalls}/{RolloffPassed} damage={DamageCalls} (gates={DamageGates}) "
+        + $"shoot={ShootCalls} (gates={ShootGates}) ergoGates={ErgoGates}";
+}
+
+/// <summary>
 ///     Item 052 — "super espião": overlay F12 (toggle <c>Perk Diagnostics</c>) que lê AO VIVO as
 ///     propriedades afetadas pelos perks do MainPlayer. Troque o toggle de um perk no F12 e veja o número
 ///     pular — prova que o patch dispara + o gate casa + o valor muda, mesmo sem "sentir" in-game.
@@ -150,7 +190,7 @@ internal static class PerkDiagnostics
             $"{Flag(p.HandsController is Player.FirearmController fa && fa.IsAiming, "AIM")}"
             + $" / {Flag(p.HandsController is Player.KnifeController, "MELEE")}"
             + $" / {Flag(HeavyWeapon.InHand(p), "HEAVY")}"
-            + $" / {Flag(BulwarkPatch.HasHeavyArmor(p), "ARMOR")}");
+            + $" / {Flag(BulwarkArmor.HasHeavyArmor(p), "ARMOR")}");
         sb.AppendLine($"Adrenaline: <b>{AdrenalineLabel()}</b>");
         sb.AppendLine($"Recoil str (last shot): <b>{FmtBA(PerkDiag.RecoilBefore, PerkDiag.RecoilAfter, "F2")}</b>");
         sb.AppendLine($"Audio radius — you hear: <b>{FmtBA(PerkDiag.AudioBefore, PerkDiag.AudioAfter, "F1")}</b>");

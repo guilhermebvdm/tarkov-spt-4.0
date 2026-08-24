@@ -1,11 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
-using HarmonyLib;
-using SPT.Reflection.Patching;
 
 namespace CustomClasses.Client;
 
@@ -26,56 +23,14 @@ namespace CustomClasses.Client;
 ///     o <c>ApplyDamageInfo</c> roda a cada dano, então não alocamos por hit.
 ///     </para>
 /// </summary>
-internal class BulwarkPatch : ModulePatch
+internal static class BulwarkArmor
 {
     // Buffer reusado (main thread — Harmony prefix). Espelha o `_preAllocatedArmorComponents` do próprio Player.
     private static readonly List<ArmorComponent> ArmorBuffer = new();
 
-    protected override MethodBase GetTargetMethod()
-    {
-        return AccessTools.Method(typeof(Player), nameof(Player.ApplyDamageInfo));
-    }
-
-    [PatchPrefix]
-    private static void Prefix(Player __instance, ref DamageInfoStruct damageInfo)
-    {
-        try
-        {
-            if (PerksConfig.BulwarkEnabled?.Value != true)
-            {
-                return;
-            }
-
-            // Só o player local (não bots/remotos).
-            if (!ReferenceEquals(__instance, Singleton<GameWorld>.Instance?.MainPlayer))
-            {
-                return;
-            }
-
-            if (!SkillMultipliers.IsLocalClass(EClassId.Tank))
-            {
-                return;
-            }
-
-            var mult = PerksConfig.BulwarkDamageTaken?.Value ?? 1f;
-            if (mult >= 1f)
-            {
-                return;   // sem redução configurada
-            }
-
-            // B6: sem armadura pesada equipada → sem Couraça.
-            if (PerksConfig.BulwarkRequireHeavyArmor?.Value == true && !HasHeavyArmor(__instance))
-            {
-                return;
-            }
-
-            damageInfo.Damage *= mult;
-        }
-        catch (Exception ex)
-        {
-            Plugin.Log?.LogError($"[CustomClasses] Bulwark falhou: {ex.Message}");
-        }
-    }
+    // ref: AUD-01-03 — o Prefix em Player.ApplyDamageInfo virou `DamageBranches.Bulwark`
+    // (ClassCombatHealthPatches.cs), chamado pelo ClassDamagePatch consolidado. Esta classe guarda o que
+    // sobrou e continua sendo consumida: o HasHeavyArmor é lido pelo overlay 052 (PerkDiagnostics).
 
     /// <summary>
     ///     B6 — há armadura de TRONCO equipada com classe &gt;= o mínimo do F12?

@@ -101,92 +101,19 @@ internal class UnderbarrelMasteryXpPatch : ModulePatch
     }
 }
 
-/// <summary>
-///     Item 058 · Perna 2 — recuo × (1 − rec/nível·Level) pela maestria da ARMA EM MÃOS (SMG/LMG/Launcher).
-///     Mesmo alvo do <see cref="ShootRecoilPatch"/> (050) — Prefixes independentes compõem (multiplicadores
-///     comutam; coexiste com Shaky Hands/Adrenaline/Bunker). O PerkDiag captura o baseline no Prefix do 050,
-///     então o efeito de maestria aparece no `Recoil str` do overlay (052) — é o instrumento de validação.
-/// </summary>
-internal class WeaponMasteryRecoilPatch : ModulePatch
-{
-    protected override MethodBase GetTargetMethod()
-    {
-        return AccessTools.Method(typeof(ProceduralWeaponAnimation), nameof(ProceduralWeaponAnimation.Shoot));
-    }
+// ──────────────────────────────────────────────────────────────────────────────────────────────
+// ref: AUD-01-03 · PA-01-01 — WeaponMasteryRecoilPatch REMOVIDO (058, Perna 2 — recuo por nível).
+// O corpo virou `RecoilBranches.ApplyMastery` em ClassWeaponPatches.cs, chamado pelo ShootApplyPatch
+// (Priority.Last). O [HarmonyPriority(Priority.High)] que este patch tinha existia só para ordenar contra
+// os NOSSOS outros patches de Shoot — e essa ordem agora é uma sequência de statements, explícita.
+// As fronteiras que ordenam contra mods EXTERNOS (First na captura, Last na aplicação) foram preservadas.
+// ──────────────────────────────────────────────────────────────────────────────────────────────
 
-    // ref: CR-01-03 — prioridade EXPLÍCITA: este Prefix precisa rodar ANTES do ShootRecoilPatch (050) pra
-    // maestria entrar no baseline `str0` que o PerkDiag (052) captura — senão o overlay não mostra o efeito.
-    // Hoje a ordem dos Enable() no Plugin.cs já garante isso; o atributo torna a intenção à prova de refactor.
-    [HarmonyPriority(Priority.High)]
-    [PatchPrefix]
-    private static void Prefix(ProceduralWeaponAnimation __instance, ref float str)
-    {
-        try
-        {
-            if (PerksConfig.WeaponMasteryEnabled?.Value != true)
-            {
-                return;
-            }
 
-            var p = Singleton<GameWorld>.Instance?.MainPlayer;
-            if (p == null || !ReferenceEquals(__instance, p.ProceduralWeaponAnimation))
-            {
-                return;   // só a arma do player local (padrão do ShootRecoilPatch)
-            }
-
-            var skill = WeaponMastery.SkillForHeld(p.Skills, (p.HandsController as Player.FirearmController)?.Item);
-            var lvl = skill?.Level ?? 0;
-            var rec = PerksConfig.MasteryRecoilPerLevel?.Value ?? 0f;
-            if (lvl > 0 && rec > 0f)
-            {
-                str *= Mathf.Max(0.5f, 1f - rec * lvl);   // clamp: nunca corta mais que 50% via maestria
-            }
-        }
-        catch (Exception ex)
-        {
-            Plugin.Log?.LogError($"[CustomClasses] (058) mastery recoil falhou: {ex.Message}");
-        }
-    }
-}
-
-/// <summary>
-///     Item 058 · Perna 2 — ergonomia × (1 + ergo/nível·Level) pela maestria da arma em mãos. Mesmo alvo do
-///     <see cref="HeavyWeaponErgoPatch"/> (050) — Postfixes compõem; gate idêntico (controller do MainPlayer).
-/// </summary>
-internal class WeaponMasteryErgoPatch : ModulePatch
-{
-    protected override MethodBase GetTargetMethod()
-    {
-        return AccessTools.PropertyGetter(typeof(Player.FirearmController), nameof(Player.FirearmController.TotalErgonomics));
-    }
-
-    [PatchPostfix]
-    private static void Postfix(Player.FirearmController __instance, ref float __result)
-    {
-        try
-        {
-            if (PerksConfig.WeaponMasteryEnabled?.Value != true)
-            {
-                return;
-            }
-
-            var p = Singleton<GameWorld>.Instance?.MainPlayer;
-            if (p == null || !ReferenceEquals(__instance, p.HandsController))
-            {
-                return;   // só a arma do player local (padrão do HeavyWeaponErgoPatch)
-            }
-
-            var skill = WeaponMastery.SkillForHeld(p.Skills, __instance.Item);
-            var lvl = skill?.Level ?? 0;
-            var ergo = PerksConfig.MasteryErgoPerLevel?.Value ?? 0f;
-            if (lvl > 0 && ergo > 0f)
-            {
-                __result *= 1f + ergo * lvl;
-            }
-        }
-        catch (Exception ex)
-        {
-            Plugin.Log?.LogError($"[CustomClasses] (058) mastery ergo falhou: {ex.Message}");
-        }
-    }
-}
+// ──────────────────────────────────────────────────────────────────────────────────────────────
+// ref: AUD-01-03 — WeaponMasteryErgoPatch REMOVIDO (058, Perna 2 — ergo por nível de maestria).
+// O corpo virou `ErgoBranches.Mastery` em ClassWeaponPatches.cs, chamado pelo TotalErgoPatch consolidado:
+// ele e o antigo HeavyWeaponErgoPatch (050.4b, Bunker) patchavam o MESMO getter e resolviam o MESMO gate
+// duas vezes por leitura. Nenhum dos dois tinha [HarmonyPriority] (verificado — PA-02-06), então a
+// consolidação não move fronteira de ordem contra mods externos.
+// ──────────────────────────────────────────────────────────────────────────────────────────────

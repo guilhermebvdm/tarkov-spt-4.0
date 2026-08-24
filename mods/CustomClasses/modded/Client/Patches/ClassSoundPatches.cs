@@ -167,10 +167,22 @@ internal class SoundRadiusPatch : ModulePatch
             // B20: classe do EMISSOR (você OU um peer Fika). Bots ficam de fora dentro do ClassIdOf.
             // ref: AUD-01-02 · PA-03-01 — ClassIdOf é o ÚNICO resolvedor deste hot path (por som de
             // movimento de CADA player/bot). O NOME só é resolvido dentro do gate de diagnóstico, abaixo.
+            // PERF-INSTR AUD-01-02 — temporary, remove after validation (PA-02-05: Calls antes do gate)
+            if (PerkDiag.Enabled)
+            {
+                PerfCount.RolloffCalls++;
+            }
+
             var emitterId = ClassIdentities.ClassIdOf(__instance);
             if (emitterId == EClassId.None)
             {
                 return;   // vanilla/bot/desconhecido → não toca no som
+            }
+
+            // PERF-INSTR AUD-01-02 — temporary, remove after validation
+            if (PerkDiag.Enabled)
+            {
+                PerfCount.RolloffPassed++;
             }
 
             var r0 = __result;   // (052) baseline p/ o diagnóstico
@@ -292,10 +304,22 @@ internal class AiSoundPatch : ModulePatch
 
             // B14: a classe do EMISSOR (não a local) — é isto que faz o perk do peer valer contra a IA no host.
             // ref: AUD-01-02 · PA-03-01 — ÚNICO lookup deste hot path (1 por passo de CADA player/bot).
+            // PERF-INSTR AUD-01-02 — temporary, remove after validation (Calls após o descarte de não-passo)
+            if (PerkDiag.Enabled)
+            {
+                PerfCount.StepAiCalls++;
+            }
+
             var emitterId = ClassIdentities.ClassIdOf(p);
             if (emitterId == EClassId.None)
             {
                 return;   // vanilla/desconhecido → sem efeito
+            }
+
+            // PERF-INSTR AUD-01-02 — temporary, remove after validation
+            if (PerkDiag.Enabled)
+            {
+                PerfCount.StepAiPassed++;
             }
 
             var p0 = power;

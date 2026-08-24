@@ -41,10 +41,23 @@ internal static class ClassMoveSpeed
     {
         try
         {
+            // PERF-INSTR AUD-01-02 — temporary, remove after validation
+            // ⚠️ PA-02-05: Calls ANTES do gate, Passed DEPOIS — é a POSIÇÃO que torna a razão mensurável.
+            if (PerkDiag.Enabled)
+            {
+                PerfCount.MoveSpeedCalls++;
+            }
+
             var p = Singleton<GameWorld>.Instance?.MainPlayer;
             if (p == null || !ReferenceEquals(ctx, p.MovementContext))
             {
                 return;   // 075: só o player local (não bots/remotos)
+            }
+
+            // PERF-INSTR AUD-01-02 — temporary, remove after validation
+            if (PerkDiag.Enabled)
+            {
+                PerfCount.MoveSpeedPassed++;
             }
 
             var m = 1f;

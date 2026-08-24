@@ -10,7 +10,7 @@ namespace CustomClasses.Client;
 ///     Busca os fatores do server (rota /customclasses/skill-multipliers) e faz Prefix em
 ///     AbstractSkillClass.OnTrigger. UI (linha+tooltip) vem na Fatia 2.
 /// </summary>
-[BepInPlugin("customclasses.mdj.client", "CustomClasses", "0.16.8")]
+[BepInPlugin("customclasses.mdj.client", "CustomClasses", "0.16.9")]
 [BepInDependency("com.SPT.core", "4.0.0")]
 [BepInDependency("me.sol.sain", BepInDependency.DependencyFlags.SoftDependency)]   // (050.4 SAIN) carrega após o SAIN se presente
 public class Plugin : BaseUnityPlugin
@@ -95,6 +95,13 @@ public class Plugin : BaseUnityPlugin
         SkillMultipliers.ClassChanged += SkillPanelPatch.ClearTooltipCache;    // AUD-01-07c
         SkillMultipliers.ClassChanged += PerkDiagnostics.ClearGroupCache;      // AUD-01-07d
 
+        // PERF-INSTR AUD-01-02/03 — temporary, remove after validation (PA-01-10: sem while(true) no Awake)
+        if (PerksConfig.DiagnosticsEnabled != null)
+        {
+            PerksConfig.DiagnosticsEnabled.SettingChanged += (_, _) => SyncPerfDump();
+            SyncPerfDump();
+        }
+
         new OnTriggerPatch().Enable();
         new WorkoutBehaviourPatch().Enable();   // (a) gym
         new SkillPanelPatch().Enable();         // (010) UI — marcador ±X% + tooltip dedicado da classe
@@ -120,7 +127,10 @@ public class Plugin : BaseUnityPlugin
         new PartyPlayerItemPatch().Enable();                // (015/057) escala + popover no cursor — host REAL do deploy
         new PartyInfoPanelPrefetchPatch().Enable();         // (057) caches frescos por tela de deploy (classe local + mapa)
         new SkillsNavButtonPatch().Enable();                // (013) botão SKILLS no menu → abre a aba Skills
-        new BulwarkPatch().Enable();                        // (050.0/B6) 🛡️ Tanque — dano recebido ×0.85 SÓ com colete pesado
+        // AUD-01-03 — ApplyDamageInfo consolidado 4 → 1 Prefix + 1 Postfix: BulwarkPatch (Couraça) +
+        // ExecutionMeleePatch (melee) + LocalHitTypePatch (carimbo do hit) + AdrenalineTriggerPatch (gatilho)
+        // resolviam o MESMO gate 4× por evento de dano de QUALQUER entidade do mapa.
+        new ClassDamagePatch().Enable();                    // (050.0/B6 + 050.3 + 050.2) Couraça · Execution · carimbo · Adrenalina
         new PackMulePatch().Enable();                       // (050.0) 🎒🛡️ Pack Mule — +30% limite de carga (piso, stash+raid)
         new QuickHandsPatch().Enable();                     // (061) 🎒 Saqueador — revista 2 contêineres (bônus elite da Search, antecipado)
         new WeightMarkerPatch().Enable();                   // (056) marcador "▲ +X%" no peso (aba Health) — atribui ao Pack Mule
@@ -128,9 +138,9 @@ public class Plugin : BaseUnityPlugin
         new NotificationDurationPatch().Enable();           // (fix 2026-07-03) notificação de perks por 10s (Infinite + hide agendado)
         StancesArmStaminaBridge.TryAttach();                // (051) hook de stamina de braço no stances (re-try no raid-start)
         new UnderbarrelMasteryXpPatch().Enable();           // (058) XP de Underbarrel Launchers por disparo do GP-25/M203
-        new WeaponMasteryRecoilPatch().Enable();            // (058) recuo × (1 − rec/nível) — ANTES do ShootRecoilPatch (ordem intencional
-                                                            //       + HarmonyPriority.High: maestria entra no baseline do PerkDiag — CR-01-03)
-        new WeaponMasteryErgoPatch().Enable();              // (058) ergo × (1 + ergo/nível) pela maestria da arma em mãos
+        // (058) recuo/ergo por nível de maestria: os patches próprios foram CONSOLIDADOS (AUD-01-03) —
+        // viraram RecoilBranches.ApplyMastery (dentro do ShootApplyPatch) e ErgoBranches.Mastery (dentro do
+        // TotalErgoPatch). Ver o bloco de registro consolidado mais abaixo.
         // (050.1 fix 2026-07-15) A velocidade voltou aos getters SEM ESTADO (MaxSpeed/SprintingSpeed). Os patches
         // nos DRIVERS (SetCharacterMovementSpeed/SprintAcceleration) do fix de 2026-06-24 CAUSAVAM decaimento
         // geométrico da velocidade a cada frame de movimento (campos relidos+regravados) → removidos. Ver ClassMoveSpeed.
@@ -168,31 +178,35 @@ public class Plugin : BaseUnityPlugin
                 Log.LogError($"[CustomClasses] (050.4 SAIN) SainSoundPatch falhou ao aplicar: {ex.Message}");
             }
         }
-        // B15 — piso COMBINADO de recuo: os 2 patches CERCAM a cadeia (Capture = Priority.First, ANTES da
-        // maestria; Apply = Priority.Last, DEPOIS de todos os multiplicadores). A ordem real é imposta pelos
-        // [HarmonyPriority], não pela ordem destes Enable().
-        new RecoilFloorCapturePatch().Enable();             // (B15) guarda o `str` original do tiro
-        new RecoilFloorApplyPatch().Enable();               // (B15) clampa o produto maestria × perks no piso
-        new ShootRecoilPatch().Enable();                    // (050.2) 🔻 Médico — recuo ×1.25 (Shaky Hands) + Adrenaline ×0.7
+        // ─────────────────── AUD-01-03 · PA-01-01 — PWA.Shoot consolidado 4 → 2 ───────────────────
+        // Antes: RecoilFloorCapturePatch (First) + WeaponMasteryRecoilPatch (High) + ShootRecoilPatch
+        // (Normal) + RecoilFloorApplyPatch (Last) — 4 gates por tiro e uma ordem que emergia da coordenação
+        // de 3 [HarmonyPriority]. Agora: 2 patches, gate resolvido 1× em cada, ordem escrita em sequência
+        // dentro do ShootApplyPatch (maestria → perks → piso → diag).
+        //
+        // ⚠️ NÃO consolidar em 1: Priority.First/Last ordenam contra prefixos de OUTROS MODS (RealRecoil),
+        // não só contra os nossos. Num patch único Normal, a captura pegaria um `str` já multiplicado por
+        // terceiros e o piso B15 clamparia ANTES deles — em silêncio (o overlay 052 só mede a nossa cadeia).
+        new ShootCapturePatch().Enable();                   // (B15) Priority.First — guarda o `str` original
+        new ShootApplyPatch().Enable();                     // (058+050.2+B15) Priority.Last — maestria → perks → piso
         new AimPunchPatch().Enable();                       // (050.2) 🔻 Furtivo — aim-punch ×1.5 (Rattled)
         new HolsterDrawSpeedPatch().Enable();               // (080/087) 🔫 Caçador/Fuzileiro/Furtivo — saque (draw-in) do holster mais rápido
-        new HolsterDrawResetPatch().Enable();               // (087) restaura o Animator.speed global após o saque acelerado
         new HolsterPutAwaySpeedPatch().Enable();            // (088) 🔫 acelera o put-away da troca quando a arma que entra vem do holster
-        new ShotgunReloadPatch().Enable();                  // (084) 🔫 Tanque — recarga de escopeta tubular mais rápida
+        // AUD-01-03 — SetAnimatorAndProceduralValues consolidado 3 → 1 par Prefix/Postfix:
+        // ReloadSpeedPatch (085, Adrenalina) + ShotgunReloadPatch (084, escopeta) + HolsterDrawResetPatch
+        // (087, reset do saque) resolviam o MESMO gate e dois deles escalavam o MESMO BuffInfo.ReloadSpeed
+        // com __state independentes. Agora é um __state só, capturado antes dos branches (PA-03-02).
+        new FirearmSyncPatch().Enable();                    // (084+085+087) recarga Adrenalina/escopeta + reset do saque
         new MedrosoDamagePatch().Enable();                  // (082) 🔻 Saqueador — tremor ao levar tiro
         Medroso.Init();                                     // (082) hook de supressão/near-miss (GClass897.OnShoot)
-        new LocalHitTypePatch().Enable();                   // (review) captura tipo do dano local (barra aim-punch em queda)
         try
         {
-            new AdrenalineTriggerPatch().Enable();          // (050.2) 🔧 Fuzileiro — gatilho da Adrenaline (dano dado/recebido)
-            new ReloadSpeedPatch().Enable();                // (050.2) 🔧 Adrenaline — recarga mais rápida na janela
             new AdsSpeedPatch().Enable();                   // (050.2) 🔧 Adrenaline — ADS mais rápido (injeção de campo _aimingSpeed)
         }
         catch (System.Exception ex)
         {
             Log.LogError($"[CustomClasses] (050.2) Adrenaline patches falharam ao aplicar: {ex.Message}");
         }
-        new ExecutionMeleePatch().Enable();                 // (050.3) 🔧 Furtivo — dano de melee ×3.5 (B7)
         new MalfunctionChancePatch().Enable();              // (050.3) 🔧 Fuzileiro — anti-jam ×0.5 (Cool Under Fire)
         new InteractionSoundPatch().Enable();               // (050.4) 🔧 Saqueador — loot mais silencioso (Silent Looter)
         try
@@ -211,10 +225,12 @@ public class Plugin : BaseUnityPlugin
         {
             Log.LogError($"[CustomClasses] (083) SilentKnifePatch falhou ao aplicar: {ex.Message}");
         }
-        // 050.4b — Bunker recuo (branch no ShootRecoilPatch já ligado) + Sharpshooter ADS (branch no AdsSpeedPatch já ligado)
+        // 050.4b — Bunker recuo (branch no ShootApplyPatch já ligado) + Sharpshooter ADS (branch no AdsSpeedPatch já ligado)
         try
         {
-            new HeavyWeaponErgoPatch().Enable();            // (050.4b) 🔧 Tanque — +ergo arma pesada (Bunker)
+            // AUD-01-03 — TotalErgonomics consolidado 2 → 1: HeavyWeaponErgoPatch (Bunker) +
+            // WeaponMasteryErgoPatch (maestria) resolviam o MESMO gate por leitura do getter.
+            new TotalErgoPatch().Enable();                  // (050.4b + 058) 🔧 Tanque ergo pesado + ergo por maestria
             new IronLungsPatch().Enable();                  // (050.4b, lever corrigido) 🔧 Caçador — fôlego +longo (BaseHoldBreathConsumption)
         }
         catch (System.Exception ex)
@@ -272,6 +288,49 @@ public class Plugin : BaseUnityPlugin
     private void OnGUI()
     {
         PerkDiagnostics.Draw();   // (052) overlay "super espião" — só desenha se o toggle F12 estiver on
+    }
+
+    // ─────────────────────── PERF-INSTR AUD-01-02/03 — temporary, remove after validation ───────────────────────
+    // Censo periódico das superfícies quentes. O mod NÃO tem hook de raid-end (nenhum patch em
+    // GameWorld.OnDestroy nem BaseLocalGame.Stop — verificado na revisão 01 do relatório, RV-06), então o
+    // dump é por TEMPO. Também é melhor assim: mostra a EVOLUÇÃO ao longo da raid ("o custo cresce?") em vez
+    // de um total no fim.
+    //
+    // ⚠️ PA-01-10: NÃO é um `while (true)` iniciado no Awake. A corrotina é ligada/desligada pelo
+    // SettingChanged do próprio toggle e o laço tem condição de saída real — com o default
+    // (Perk Diagnostics = false) ela NEM EXISTE, inclusive no headless Fika.
+    private Coroutine? _perfDump;
+
+    private void SyncPerfDump()
+    {
+        var on = PerksConfig.DiagnosticsEnabled?.Value == true;
+        if (on && _perfDump == null)
+        {
+            _perfDump = StartCoroutine(PerfDumpLoop());
+        }
+        else if (!on && _perfDump != null)
+        {
+            StopCoroutine(_perfDump);
+            _perfDump = null;
+        }
+    }
+
+    private System.Collections.IEnumerator PerfDumpLoop()
+    {
+        while (PerksConfig.DiagnosticsEnabled?.Value == true)   // condição de saída real
+        {
+            yield return new WaitForSeconds(60f);
+
+            if (!PerkDiag.Enabled || !Comfort.Common.Singleton<EFT.GameWorld>.Instantiated)
+            {
+                continue;
+            }
+
+            Log?.LogInfo($"[CustomClasses][perf] {PerfCount.Dump()}");
+            PerfCount.Reset();
+        }
+
+        _perfDump = null;
     }
 
     private void OnDestroy()

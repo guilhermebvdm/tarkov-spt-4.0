@@ -9,12 +9,120 @@ using SPT.Reflection.Patching;
 namespace CustomClasses.Client;
 
 /// <summary>
-///     🔧 Execution (Furtivo) — dano de melee ×3.5 (B7; era ×5) quando o ATACANTE é o player local.
-///     Prefix em <c>Player.ApplyDamageInfo</c> (mesma infra do Bulwark/Adrenaline): escala
-///     <c>damageInfo.Damage</c> de entrada se for golpe de melee partindo do MainPlayer.
-///     (O dano melee é construído em BaseKnifeController.vmethod_0 com DamageType=Melee.)
+///     ref: AUD-01-03 — branches de <c>Player.ApplyDamageInfo</c>, movidos SEM alteração de fórmula dos
+///     QUATRO patches que consolidaram em <see cref="ClassDamagePatch"/>: <c>LocalHitTypePatch</c> (carimbo
+///     do hit de combate) + <c>BulwarkPatch</c> (Couraça) + <c>ExecutionMeleePatch</c> (melee) nos Prefixes,
+///     e <c>AdrenalineTriggerPatch</c> no Postfix.
+///     <para>
+///     ⚠️ PA-02-06: nenhum dos quatro tinha <c>[HarmonyPriority]</c> — consolidar não move fronteira de ordem
+///     contra mods externos (diferente do <c>PWA.Shoot</c>, ver PA-01-01).
+///     </para>
+///     <para>
+///     ⚠️ <b>A ORDEM DO PRIMEIRO BRANCH É CONTRATO:</b> o carimbo do hit de combate tem de rodar ANTES de
+///     tudo, porque o <c>AimPunchPatch</c> (alvo diferente — <c>ForceEffector.AddForce</c>, invocado a jusante
+///     no mesmo frame) lê o timestamp por RECÊNCIA para distinguir dano de combate de dano de QUEDA.
+///     </para>
 /// </summary>
-internal class ExecutionMeleePatch : ModulePatch
+internal static class DamageBranches
+{
+    /// <summary>
+    ///     (review fix 2026-06-24) Carimba o instante do último dano de COMBATE do player local, para o
+    ///     <c>AimPunchPatch</c> (Rattled / Cool Under Fire) NÃO disparar em dano de QUEDA — que não passa
+    ///     por <c>ApplyDamageInfo</c> (vai por <c>ActiveHealthController.ApplyDamage</c>), então o timestamp
+    ///     fica velho e a janela de recência barra. ref: origem LocalHitTypePatch.
+    /// </summary>
+    internal static void StampCombatHit(Player instance, Player mainPlayer)
+    {
+        if (ReferenceEquals(instance, mainPlayer))
+        {
+            LocalHitState.LastCombatHitTime = UnityEngine.Time.time;
+        }
+    }
+
+    /// <summary>🛡️ Couraça / Bulwark (Tanque) — dano recebido ×0.85. ref: origem BulwarkPatch.</summary>
+    internal static void Bulwark(Player instance, Player mainPlayer, ref DamageInfoStruct damageInfo)
+    {
+        if (PerksConfig.BulwarkEnabled?.Value != true)
+        {
+            return;
+        }
+
+        if (!ReferenceEquals(instance, mainPlayer))
+        {
+            return;   // só o player local (não bots/remotos)
+        }
+
+        if (!SkillMultipliers.IsLocalClass(EClassId.Tank))
+        {
+            return;
+        }
+
+        var mult = PerksConfig.BulwarkDamageTaken?.Value ?? 1f;
+        if (mult >= 1f)
+        {
+            return;   // sem redução configurada
+        }
+
+        // B6: sem armadura pesada de TRONCO equipada → sem Couraça.
+        if (PerksConfig.BulwarkRequireHeavyArmor?.Value == true && !BulwarkArmor.HasHeavyArmor(instance))
+        {
+            return;
+        }
+
+        damageInfo.Damage *= mult;
+    }
+
+    /// <summary>
+    ///     🔧 Execution (Furtivo) — dano de melee ×3.5 (B7) quando o ATACANTE é o player local.
+    ///     (O dano melee é construído em BaseKnifeController.vmethod_0 com DamageType=Melee.)
+    ///     ref: origem ExecutionMeleePatch.
+    /// </summary>
+    internal static void ExecutionMelee(Player mainPlayer, ref DamageInfoStruct damageInfo)
+    {
+        if (PerksConfig.ExecutionMeleeEnabled?.Value != true || damageInfo.DamageType != EDamageType.Melee)
+        {
+            return;
+        }
+
+        // Atacante = player local (damageInfo.Player é IPlayerOwner → comparar pelo ProfileId).
+        if (damageInfo.Player?.iPlayer == null || damageInfo.Player.iPlayer.ProfileId != mainPlayer.ProfileId)
+        {
+            return;
+        }
+
+        if (SkillMultipliers.IsLocalClass(EClassId.Stealth))
+        {
+            damageInfo.Damage *= PerksConfig.ExecutionMeleeDamage?.Value ?? 1f;
+        }
+    }
+
+    /// <summary>
+    ///     🔧 Adrenaline (Fuzileiro) — gatilho: causar dano (atacante = local) OU receber dano (vítima =
+    ///     local) abre/renova a janela. ref: origem AdrenalineTriggerPatch (era o único Postfix dos quatro).
+    /// </summary>
+    internal static void AdrenalineTrigger(Player instance, Player mainPlayer, DamageInfoStruct damageInfo)
+    {
+        if (PerksConfig.AdrenalineEnabled?.Value != true || !SkillMultipliers.IsLocalClass(EClassId.Rifleman))
+        {
+            return;
+        }
+
+        var dealt = damageInfo.Player?.iPlayer != null
+                    && damageInfo.Player.iPlayer.ProfileId == mainPlayer.ProfileId;
+        if (ReferenceEquals(instance, mainPlayer) || dealt)
+        {
+            AdrenalineState.Trigger();
+            AdrenalineState.EnsureReloadResync();   // 085: re-sync do reload no open/close da janela
+        }
+    }
+}
+
+/// <summary>
+///     ref: AUD-01-03 — patch consolidado de <c>Player.ApplyDamageInfo</c> (4 patches → 1 Prefix + 1 Postfix).
+///     O gate (<c>MainPlayer</c>) era resolvido QUATRO vezes por evento de dano de qualquer entidade do mapa;
+///     agora é uma vez por Prefix e uma por Postfix.
+/// </summary>
+internal class ClassDamagePatch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
@@ -22,37 +130,44 @@ internal class ExecutionMeleePatch : ModulePatch
     }
 
     [PatchPrefix]
-    private static void Prefix(ref DamageInfoStruct damageInfo)
+    private static void Prefix(Player __instance, ref DamageInfoStruct damageInfo)
     {
-        try
+        var mp = Singleton<GameWorld>.Instance?.MainPlayer;
+        if (mp == null)
         {
-            if (PerksConfig.ExecutionMeleeEnabled?.Value != true
-                || damageInfo.DamageType != EDamageType.Melee)
-            {
-                return;
-            }
-
-            var mp = Singleton<GameWorld>.Instance?.MainPlayer;
-            if (mp == null)
-            {
-                return;
-            }
-
-            // Atacante = player local (damageInfo.Player é IPlayerOwner → comparar pelo ProfileId).
-            if (damageInfo.Player?.iPlayer == null || damageInfo.Player.iPlayer.ProfileId != mp.ProfileId)
-            {
-                return;
-            }
-
-            if (SkillMultipliers.IsLocalClass(EClassId.Stealth))
-            {
-                damageInfo.Damage *= PerksConfig.ExecutionMeleeDamage?.Value ?? 1f;
-            }
+            return;   // GATE ÚNICO (era resolvido 3× nos Prefixes)
         }
-        catch (Exception ex)
+
+        // PERF-INSTR AUD-01-03 — temporary, remove after validation
+        if (PerkDiag.Enabled)
         {
-            Plugin.Log?.LogError($"[CustomClasses] execution melee falhou: {ex.Message}");
+            PerfCount.DamageCalls++;
+            PerfCount.DamageGates++;
         }
+
+        // ⚠️ ORDEM: o carimbo vem PRIMEIRO (contrato com o AimPunchPatch — ver DamageBranches).
+        // ref: PA-02-01 — try/catch por branch, nunca um externo único.
+        try { DamageBranches.StampCombatHit(__instance, mp); } catch (Exception ex) { BranchFailLog.Once("dmg/stamp", ex); }
+        try { DamageBranches.Bulwark(__instance, mp, ref damageInfo); } catch (Exception ex) { BranchFailLog.Once("dmg/bulwark", ex); }
+        try { DamageBranches.ExecutionMelee(mp, ref damageInfo); } catch (Exception ex) { BranchFailLog.Once("dmg/execution", ex); }
+    }
+
+    [PatchPostfix]
+    private static void Postfix(Player __instance, DamageInfoStruct damageInfo)
+    {
+        var mp = Singleton<GameWorld>.Instance?.MainPlayer;
+        if (mp == null)
+        {
+            return;
+        }
+
+        // PERF-INSTR AUD-01-03 — temporary, remove after validation
+        if (PerkDiag.Enabled)
+        {
+            PerfCount.DamageGates++;
+        }
+
+        try { DamageBranches.AdrenalineTrigger(__instance, mp, damageInfo); } catch (Exception ex) { BranchFailLog.Once("dmg/adrenaline", ex); }
     }
 }
 

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;   // ref: PA-02-01 — HashSet do BranchFailLog
 using System.Reflection;
 using Comfort.Common;
 using EFT;
@@ -6,130 +7,155 @@ using EFT.Animations;
 using EFT.InventoryLogic;
 using HarmonyLib;
 using SPT.Reflection.Patching;
+using UnityEngine;   // ref: AUD-01-03 — Mathf nos branches de recuo movidos
 
 namespace CustomClasses.Client;
 
 /// <summary>
-///     Item 050.2 — recuo da arma por classe.
-///     Prefix em <c>ProceduralWeaponAnimation.Shoot(str)</c> — <c>str</c> escala linearmente a força do recuo do tiro
-///     (mãos, rotação de mãos e rotação de câmera). Gating: só o PWA do MainPlayer local. F12 no apply-time.
-///     Cobre agora: 🔻 Shaky Hands (Médico recuo ×1.25). Adrenaline recuo ×0.7 entra aqui com a state-machine.
+///     ref: AUD-01-03 — branches de <c>FirearmController.SetAnimatorAndProceduralValues</c>, movidos SEM
+///     alteração de fórmula dos três patches que consolidaram em <see cref="FirearmSyncPatch"/>.
+///     <para>
+///     ⚠️ <b>Nenhum branch grava o <c>__state</c></b> (PA-03-02) — quem captura é o Prefix, incondicionalmente,
+///     antes de qualquer um deles rodar.
+///     </para>
 /// </summary>
-internal class ShootRecoilPatch : ModulePatch
+internal static class ReloadBranches
 {
-    protected override MethodBase GetTargetMethod()
+    /// <summary>
+    ///     085 — 🔧 Adrenaline (Fuzileiro): recarga mais rápida na janela. ref: origem ReloadSpeedPatch.
+    ///     Escala <c>BuffInfo.ReloadSpeed ÷ t</c> ANTES do push → arma + corpo em lockstep.
+    /// </summary>
+    /// <remarks>⚠️ Recebe o <c>FirearmController</c>, não o BuffInfo: o tipo dele é OFUSCADO
+    /// (<c>GClass2250</c>) e nomeá-lo numa assinatura violaria o AP-09 — esses números mudam entre builds do
+    /// EFT. O código original também nunca o nomeava (usava <c>var</c>).</remarks>
+    internal static void Adrenaline(Player.FirearmController fc)
     {
-        return AccessTools.Method(typeof(ProceduralWeaponAnimation), nameof(ProceduralWeaponAnimation.Shoot));
+        if (PerksConfig.AdrenalineEnabled?.Value != true || !AdrenalineState.IsActive
+            || !SkillMultipliers.IsLocalClass(EClassId.Rifleman))
+        {
+            return;
+        }
+
+        var buff = fc.BuffInfo;
+        if (buff == null)
+        {
+            return;
+        }
+
+        var t = PerksConfig.AdrenalineReloadTime?.Value ?? 1f;
+        if (t > 0f && t < 1f)
+        {
+            buff.ReloadSpeed /= t;   // tempo 0.7 → speed ÷0.7 ≈ ×1.43
+        }
     }
 
-    [PatchPrefix]
-    private static void Prefix(ProceduralWeaponAnimation __instance, ref float str)
+    /// <summary>
+    ///     084 — 🔫 Recarga Rápida de Escopeta (Tanque). ref: origem ShotgunReloadPatch.
+    ///     ⚠️ <c>WeapClass=="shotgun"</c> é OBRIGATÓRIO: o <c>SupportsInternalReload</c> sozinho pega
+    ///     Mosin/SKS/revólver/M32. Saiga (ExternalMagazine) e bicano (OnlyBarrel) ficam de fora corretamente.
+    ///     <para>Mutuamente exclusivo com <see cref="Adrenaline"/> — Tanque e Fuzileiro são classes distintas,
+    ///     então o Prefix nunca escala o campo duas vezes.</para>
+    /// </summary>
+    /// <remarks>⚠️ Ver a nota de AP-09 em <see cref="Adrenaline"/> — o tipo do BuffInfo é ofuscado.</remarks>
+    internal static void Shotgun(Player.FirearmController fc)
     {
-        try
+        if (PerksConfig.ShotgunReloadEnabled?.Value != true || !SkillMultipliers.IsLocalClass(EClassId.Tank))
         {
-            var p = Singleton<GameWorld>.Instance?.MainPlayer;
-            if (p == null || !ReferenceEquals(__instance, p.ProceduralWeaponAnimation))
-            {
-                return;   // só a arma do player local
-            }
-
-            var str0 = str;   // (052) baseline p/ o diagnóstico
-
-            // 🔻 Falta de habilidade / Unskilled (Médico + Saqueador — 079): +25% de recuo por falta de perícia.
-            if (PerksConfig.ShakyHandsEnabled?.Value == true
-                && (SkillMultipliers.IsLocalClass(EClassId.CombatMedic) || SkillMultipliers.IsLocalClass(EClassId.Scavenger)))
-            {
-                str *= PerksConfig.ShakyHandsRecoil?.Value ?? 1f;
-            }
-
-            // 🔧 Adrenaline (Fuzileiro): −30% de recuo durante a janela.
-            if (PerksConfig.AdrenalineEnabled?.Value == true && AdrenalineState.IsActive
-                && SkillMultipliers.IsLocalClass(EClassId.Rifleman))
-            {
-                str *= PerksConfig.AdrenalineRecoil?.Value ?? 1f;
-            }
-
-            // 🔧 Bunker (Tanque): −15% de recuo com arma pesada (LMG/HMG/GL/underbarrel) na mão.
-            if (PerksConfig.BunkerEnabled?.Value == true && SkillMultipliers.IsLocalClass(EClassId.Tank)
-                && HeavyWeapon.InHand(p))
-            {
-                str *= PerksConfig.BunkerHeavyRecoil?.Value ?? 1f;
-            }
-
-            if (PerkDiag.Enabled)
-            {
-                PerkDiag.RecoilBefore = str0;
-                PerkDiag.RecoilAfter = str;
-            }
+            return;
         }
-        catch (Exception ex)
+
+        var buff = fc.BuffInfo;
+        if (buff == null)
         {
-            Plugin.Log?.LogError($"[CustomClasses] recoil falhou: {ex.Message}");
+            return;
         }
+
+        var weapon = fc.Item;
+        if (weapon == null || weapon.WeapClass != "shotgun" || !weapon.SupportsInternalReload)
+        {
+            return;   // só escopeta de TUBO
+        }
+
+        var t = PerksConfig.ShotgunReloadTime?.Value ?? 1f;
+        if (t > 0f && t < 1f)
+        {
+            buff.ReloadSpeed /= t;   // 0.6 = 40% mais rápido
+        }
+    }
+
+    /// <summary>
+    ///     087 — restaura o <c>Animator.speed</c> GLOBAL para 1f no fim do saque acelerado.
+    ///     ref: origem HolsterDrawResetPatch. O <c>Spawn</c> deixa o speed elevado e NÃO o reseta; o 1º
+    ///     <c>SetAnimatorAndProceduralValues</c> pós-Spawn roda no <c>GClass2055.WeaponAppeared</c> (fim do
+    ///     estado SPAWN / draw-in) — momento certo de zerar. Sem isto a pistola operaria acelerada
+    ///     (tiro/reload/idle) até a próxima troca.
+    /// </summary>
+    internal static void ResetHolsterDraw(Player.FirearmController fc)
+    {
+        if (!HolsterDrawSpeedPatch.BoostedDraw)
+        {
+            return;
+        }
+
+        fc.FirearmsAnimator?.SetAnimationSpeed(1f);   // getter público
+        HolsterDrawSpeedPatch.BoostedDraw = false;
     }
 }
 
 /// <summary>
-///     085 — 🔧 Adrenaline (Fuzileiro) — recarga mais rápida durante a janela de combate. <b>CORRIGIDO (era um
-///     NO-OP)</b>: o alvo antigo <c>GetWeaponReloadAnimationSpeed</c> é CÓDIGO MORTO no EFT 0.16.9 (nada o chama; o
-///     reload speed virou push-based) → o Postfix nunca disparava e o perk não tinha efeito. Migrado para o MESMO
-///     funil do <see cref="ShotgunReloadPatch"/> (084): Prefix ESCALA <c>BuffInfo.ReloadSpeed ÷ t</c> antes do push
-///     (arma+corpo em lockstep), Postfix RESTAURA. Ref: [[reference_eft_reload_speed_getter_dead]].
+///     ref: AUD-01-03 — patch consolidado de <c>FirearmController.SetAnimatorAndProceduralValues</c>
+///     (3 patches → 1 par Prefix/Postfix): <c>ReloadSpeedPatch</c> (085, Adrenalina) +
+///     <c>ShotgunReloadPatch</c> (084, escopeta) + <c>HolsterDrawResetPatch</c> (087, reset do saque).
 ///     <para>
-///     ⚠️ <b>Abrir/fechar a janela NÃO gera sync sozinho</b> (os gatilhos de re-sync são saque/init/skill-level/
-///     mastering/dano-de-braço), então o valor congelaria. O <see cref="AdrenalineState"/> força
-///     <c>FirearmController.SetAnimatorAndProceduralValues()</c> nas transições da janela (watcher) → este Prefix
-///     re-avalia <c>IsActive</c> e aplica/restaura. Gate: MainPlayer local (075) + Rifleman + janela ativa. Vale p/
-///     QUALQUER arma. Coexiste com o 084 no mesmo método sem conflito de <c>__state</c>: são classes MUTUAMENTE
-///     EXCLUSIVAS (Tank vs Rifleman), então nunca escalam juntos.
+///     ⚠️ PA-02-06: nenhum dos três tinha <c>[HarmonyPriority]</c> — consolidar não move fronteira de ordem.
+///     </para>
+///     <para>
+///     ⚠️ <b>Ganho de correção, não só de custo:</b> antes havia DOIS pares Prefix/Postfix independentes
+///     escalando e restaurando o MESMO campo <c>BuffInfo.ReloadSpeed</c>, cada um com o seu <c>__state</c>.
+///     Funcionava só porque Tanque e Fuzileiro são mutuamente exclusivos. Agora é um <c>__state</c> só.
 ///     </para>
 /// </summary>
-internal class ReloadSpeedPatch : ModulePatch
+internal class FirearmSyncPatch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
         return AccessTools.Method(typeof(Player.FirearmController), "SetAnimatorAndProceduralValues");
     }
 
+    // __state = NaN → "não capturei" (o Postfix não restaura).
     [PatchPrefix]
     private static void Prefix(Player.FirearmController __instance, out float __state)
     {
         __state = float.NaN;
-        try
+
+        var buff = __instance.BuffInfo;   // = gclass2250_0 (pode ser null antes do 1º sync de skill)
+        if (buff == null)
         {
-            if (PerksConfig.AdrenalineEnabled?.Value != true || !AdrenalineState.IsActive
-                || !SkillMultipliers.IsLocalClass(EClassId.Rifleman))
-            {
-                return;
-            }
-
-            if (!ReferenceEquals(__instance, Singleton<GameWorld>.Instance?.MainPlayer?.HandsController))
-            {
-                return;   // só a arma do player local (075)
-            }
-
-            var buff = __instance.BuffInfo;
-            if (buff == null)
-            {
-                return;
-            }
-
-            var t = PerksConfig.AdrenalineReloadTime?.Value ?? 1f;
-            if (t > 0f && t < 1f)
-            {
-                __state = buff.ReloadSpeed;
-                buff.ReloadSpeed /= t;   // arma+corpo recebem ×(1/t) em lockstep (tempo 0.7 → speed ÷0.7 ≈ ×1.43)
-            }
+            return;
         }
-        catch (Exception ex)
+
+        if (!ReferenceEquals(__instance, Singleton<GameWorld>.Instance?.MainPlayer?.HandsController))
         {
-            Plugin.Log?.LogError($"[CustomClasses] (085) adrenaline reload (pre) falhou: {ex.Message}");
+            return;   // só a arma do player local (075) — GATE ÚNICO, era resolvido 2×
         }
+
+        // ⚠️ PA-03-02 — captura INCONDICIONAL e ANTES de qualquer branch. O try/catch por branch (PA-02-01)
+        // CONTÉM a exceção mas NÃO desfaz a escrita: um branch que lance depois de mutar ReloadSpeed e antes
+        // de gravar o __state deixaria o campo escalado PELA RAID INTEIRA (recarga permanentemente acelerada),
+        // com um único erro no log. Só esta ordem garante que o Postfix sempre tenha o valor original.
+        __state = buff.ReloadSpeed;
+
+        // ref: PA-02-01 — isolamento por branch.
+        try { ReloadBranches.Adrenaline(__instance); } catch (Exception ex) { BranchFailLog.Once("sync/adrenaline", ex); }
+        try { ReloadBranches.Shotgun(__instance); } catch (Exception ex) { BranchFailLog.Once("sync/shotgun", ex); }
     }
 
     [PatchPostfix]
     private static void Postfix(Player.FirearmController __instance, float __state)
     {
+        // Restaura o campo: não acumula entre syncs nem vaza p/ outros consumidores do mesmo GClass2250
+        // (FixSpeed/AimMovementSpeed etc.). Restaurar o mesmo valor quando nenhum branch escalou é um no-op
+        // inofensivo, e é mais barato que rastrear "mudei ou não".
         try
         {
             if (!float.IsNaN(__state) && __instance.BuffInfo != null)
@@ -137,12 +163,204 @@ internal class ReloadSpeedPatch : ModulePatch
                 __instance.BuffInfo.ReloadSpeed = __state;
             }
         }
-        catch (Exception ex)
+        catch (Exception ex) { BranchFailLog.Once("sync/restore", ex); }
+
+        try { ReloadBranches.ResetHolsterDraw(__instance); } catch (Exception ex) { BranchFailLog.Once("sync/holster-reset", ex); }
+    }
+}
+
+/// <summary>ref: AUD-01-03 · PA-01-01 — estado de UMA invocação de Shoot, gravado pelo
+/// <see cref="ShootCapturePatch"/> e lido pelo <see cref="ShootApplyPatch"/>. Main thread (Shoot roda no
+/// update do player) — sem concorrência. Substitui o antigo <c>RecoilFloorCapturePatch.StrBefore</c>, com o
+/// mesmo papel: dois patches Harmony distintos NÃO compartilham <c>__state</c>, então o estático fica.</summary>
+internal static class ShootRecoilState
+{
+    /// <summary>`str` original desta invocação (NaN = não é a arma do player local → o apply ignora).</summary>
+    internal static float StrBefore = float.NaN;
+}
+
+/// <summary>
+///     ref: AUD-01-03 — branches de recuo, movidos SEM alteração de fórmula dos três patches que
+///     consolidaram em <see cref="ShootApplyPatch"/>. O gate saiu daqui (resolvido uma vez no patch).
+/// </summary>
+internal static class RecoilBranches
+{
+    /// <summary>058 · Perna 2 — recuo × (1 − rec/nível × Level). ref: origem WeaponMasteryRecoilPatch.</summary>
+    internal static void ApplyMastery(Player p, ref float str)
+    {
+        if (PerksConfig.WeaponMasteryEnabled?.Value != true)
         {
-            Plugin.Log?.LogError($"[CustomClasses] (085) adrenaline reload (post) falhou: {ex.Message}");
+            return;
+        }
+
+        var skill = WeaponMastery.SkillForHeld(p.Skills, (p.HandsController as Player.FirearmController)?.Item);
+        var lvl = skill?.Level ?? 0;
+        var rec = PerksConfig.MasteryRecoilPerLevel?.Value ?? 0f;
+        if (lvl > 0 && rec > 0f)
+        {
+            str *= Mathf.Max(0.5f, 1f - rec * lvl);   // clamp: nunca corta mais que 50% via maestria
+        }
+    }
+
+    /// <summary>050.2 — Shaky Hands · Adrenaline · Bunker. ref: origem ShootRecoilPatch.</summary>
+    internal static void ApplyPerks(Player p, ref float str)
+    {
+        // 🔻 Falta de habilidade / Unskilled (Médico + Saqueador — 079): +25% de recuo por falta de perícia.
+        if (PerksConfig.ShakyHandsEnabled?.Value == true
+            && (SkillMultipliers.IsLocalClass(EClassId.CombatMedic) || SkillMultipliers.IsLocalClass(EClassId.Scavenger)))
+        {
+            str *= PerksConfig.ShakyHandsRecoil?.Value ?? 1f;
+        }
+
+        // 🔧 Adrenaline (Fuzileiro): −30% de recuo durante a janela.
+        if (PerksConfig.AdrenalineEnabled?.Value == true && AdrenalineState.IsActive
+            && SkillMultipliers.IsLocalClass(EClassId.Rifleman))
+        {
+            str *= PerksConfig.AdrenalineRecoil?.Value ?? 1f;
+        }
+
+        // 🔧 Bunker (Tanque): −15% de recuo com arma pesada (LMG/HMG/GL/underbarrel) na mão.
+        if (PerksConfig.BunkerEnabled?.Value == true && SkillMultipliers.IsLocalClass(EClassId.Tank)
+            && HeavyWeapon.InHand(p))
+        {
+            str *= PerksConfig.BunkerHeavyRecoil?.Value ?? 1f;
+        }
+    }
+
+    /// <summary>
+    ///     B15 (balance 2026-07-11) — <b>PISO COMBINADO de recuo</b>. ref: origem RecoilFloorApplyPatch
+    ///     (o arquivo <c>RecoilFloorPatch.cs</c> foi removido — PA-03-07 — e este XMLdoc é o histórico dele).
+    ///     <para>
+    ///     Os multiplicadores de recuo empilham por <b>PRODUTO</b> sobre o mesmo <c>ref float str</c>:
+    ///     maestria da arma (058) × perks (050: Shaky Hands / Adrenalina / Bunker). A maestria tem piso
+    ///     PRÓPRIO (0.5 — inalcançável no cap de nível 51), mas o PRODUTO não tinha piso nenhum (Anexo C do
+    ///     balance board): Tanque + LMG + maestria 51 ≈ <b>×0.68</b>; Fuzileiro na janela de Adrenalina +
+    ///     maestria ≈ <b>×0.56</b>. Com o piso 0.60, essencialmente só a janela de Adrenalina morde.
+    ///     </para>
+    ///     <para>
+    ///     ⚠️ O clamp é OPCIONAL (toggle do F12) mas a escrita do diagnóstico NÃO — ela vive fora deste
+    ///     método, no fim do <see cref="ShootApplyPatch"/>, para o overlay 052 sempre refletir o valor real
+    ///     mesmo com o piso desligado (code-review 2026-07-11, 2ª rodada).
+    ///     </para>
+    /// </summary>
+    internal static void ApplyFloor(float str0, ref float str)
+    {
+        if (PerksConfig.RecoilFloorEnabled?.Value != true)
+        {
+            return;
+        }
+
+        var floor = PerksConfig.RecoilFloor?.Value ?? 0.6f;
+        var min = str0 * floor;
+        if (str < min)
+        {
+            str = min;   // o produto (maestria × perks) tentou passar do piso → clampa
         }
     }
 }
+
+/// <summary>
+///     ref: AUD-01-03 · PA-01-01 — <b>FRONTEIRA DE ENTRADA</b> do <c>PWA.Shoot</c>.
+///     <para>
+///     <c>Priority.First</c>: captura o <c>str</c> ANTES de qualquer multiplicador, inclusive os de
+///     <b>OUTROS MODS</b> (o usuário roda RealRecoil). Não muta nada — só observa.
+///     </para>
+///     <para>
+///     ⚠️ É por isto que a consolidação é 4 → <b>2</b> e não 4 → 1: <c>Priority.First</c>/<c>Last</c> ordenam
+///     contra prefixos de terceiros, não só contra os nossos. Num patch único de prioridade <c>Normal</c>, o
+///     "original" capturado já viria multiplicado por um mod de prioridade mais alta e o piso B15 clamparia
+///     ANTES dos multiplicadores externos — em silêncio, e o overlay 052 não pegaria (ele só mede a nossa cadeia).
+///     </para>
+/// </summary>
+internal class ShootCapturePatch : ModulePatch
+{
+    protected override MethodBase GetTargetMethod()
+    {
+        return AccessTools.Method(typeof(ProceduralWeaponAnimation), nameof(ProceduralWeaponAnimation.Shoot));
+    }
+
+    [HarmonyPriority(Priority.First)]
+    [PatchPrefix]
+    private static void Prefix(ProceduralWeaponAnimation __instance, ref float str)
+    {
+        try
+        {
+            var p = Singleton<GameWorld>.Instance?.MainPlayer;
+            ShootRecoilState.StrBefore = p != null && ReferenceEquals(__instance, p.ProceduralWeaponAnimation)
+                ? str
+                : float.NaN;   // arma de bot/remoto → o apply não faz nada
+
+            // PERF-INSTR AUD-01-03 — temporary, remove after validation
+            if (PerkDiag.Enabled)
+            {
+                PerfCount.ShootCalls++;
+                PerfCount.ShootGates++;
+            }
+        }
+        catch (Exception ex)
+        {
+            ShootRecoilState.StrBefore = float.NaN;
+            Plugin.Log?.LogError($"[CustomClasses] recoil capture falhou: {ex.Message}");
+        }
+    }
+}
+
+/// <summary>
+///     ref: AUD-01-03 · PA-01-01 — <b>FRONTEIRA DE SAÍDA</b> do <c>PWA.Shoot</c>.
+///     <para>
+///     <c>Priority.Last</c>: roda depois de TODOS os multiplicadores, nossos e de terceiros. Funde três
+///     patches num só (maestria 058 + perks 050 + piso B15), com a ordem interna <b>escrita em sequência</b>
+///     em vez de emergir da coordenação de três <c>[HarmonyPriority]</c> + um estático compartilhado:
+///     (1) maestria → (2) perks → (3) piso → (4) diagnóstico.
+///     Era: <c>First</c> (capture) → <c>High</c> (maestria) → <c>Normal</c> (perks) → <c>Last</c> (apply).
+///     </para>
+/// </summary>
+internal class ShootApplyPatch : ModulePatch
+{
+    protected override MethodBase GetTargetMethod()
+    {
+        return AccessTools.Method(typeof(ProceduralWeaponAnimation), nameof(ProceduralWeaponAnimation.Shoot));
+    }
+
+    [HarmonyPriority(Priority.Last)]
+    [PatchPrefix]
+    private static void Prefix(ProceduralWeaponAnimation __instance, ref float str)
+    {
+        var str0 = ShootRecoilState.StrBefore;
+        if (float.IsNaN(str0))
+        {
+            return;   // não era a arma do player local nesta invocação
+        }
+
+        var p = Singleton<GameWorld>.Instance?.MainPlayer;
+        if (p == null)
+        {
+            return;   // GATE ÚNICO (era resolvido 3× aqui dentro) — o ganho do AUD-01-03
+        }
+
+        // PERF-INSTR AUD-01-03 — temporary, remove after validation
+        if (PerkDiag.Enabled)
+        {
+            PerfCount.ShootGates++;
+        }
+
+        // ⚠️ ref: PA-02-01 — try/catch POR BRANCH, nunca um externo único. Consolidar o GATE não pode
+        // consolidar a FALHA: `ApplyMastery` toca p.Skills e skill.Level, que ficam nulos numa troca de arma;
+        // num catch externo, ela lançando pularia o PISO B15 e o tiro sairia SEM CLAMP NENHUM.
+        try { RecoilBranches.ApplyMastery(p, ref str); } catch (Exception ex) { BranchFailLog.Once("recoil/mastery", ex); }
+        try { RecoilBranches.ApplyPerks(p, ref str); } catch (Exception ex) { BranchFailLog.Once("recoil/perks", ex); }
+        try { RecoilBranches.ApplyFloor(str0, ref str); } catch (Exception ex) { BranchFailLog.Once("recoil/floor", ex); }
+
+        // (4) baseline = str ORIGINAL. Fora do gate do piso de propósito: com o piso DESLIGADO o overlay
+        // ainda tem de mostrar o valor real, senão volta a mentir (code-review 2026-07-11, 2ª rodada).
+        if (PerkDiag.Enabled)
+        {
+            PerkDiag.RecoilBefore = str0;
+            PerkDiag.RecoilAfter = str;
+        }
+    }
+}
+
 
 /// <summary>
 ///     🔧 Adrenaline (Fuzileiro) — ADS mais rápido durante a janela.
@@ -195,11 +413,80 @@ internal class AdsSpeedPatch : ModulePatch
 }
 
 /// <summary>
-///     🔧 Bunker (Tanque) — +15% de ergonomia com arma pesada (LMG/HMG/lança-granadas/underbarrel) na mão.
-///     Postfix no getter <c>FirearmController.TotalErgonomics</c> (funil real de ergo da arma, lido por
-///     recoil/handling/sway). Gate: a arma atual do MainPlayer + classe Tank + arma pesada.
+///     ref: PA-02-01 — log de falha de branch com dedupe.
+///     <para>
+///     Consolidar patches (AUD-01-03) consolida o GATE, mas <b>não pode consolidar a FALHA</b>: hoje cada
+///     patch é uma unidade Harmony independente com <c>try/catch</c> próprio, então um que lança não impede
+///     os outros de rodar. Os patches consolidados preservam isso com <c>try/catch</c> POR BRANCH — e este
+///     helper existe porque esses branches rodam em hot path (por tiro, por dano): o padrão atual de
+///     <c>LogError</c> a cada ocorrência inunda o console quando algo quebra numa rajada. Uma linha por
+///     branch por sessão basta para diagnosticar.
+///     </para>
 /// </summary>
-internal class HeavyWeaponErgoPatch : ModulePatch
+internal static class BranchFailLog
+{
+    private static readonly HashSet<string> Seen = new(StringComparer.Ordinal);
+
+    internal static void Once(string branch, Exception ex)
+    {
+        if (!Seen.Add(branch))
+        {
+            return;
+        }
+
+        Plugin.Log?.LogError($"[CustomClasses] branch '{branch}' falhou (log 1× por sessão): {ex.Message}");
+    }
+}
+
+/// <summary>
+///     ref: AUD-01-03 — branches de ergonomia, extraídos dos patches que consolidaram em
+///     <see cref="TotalErgoPatch"/>. Fórmulas movidas 1:1; o gate saiu daqui (é resolvido uma vez no patch).
+/// </summary>
+internal static class ErgoBranches
+{
+    /// <summary>🔧 Bunker (Tanque) — +15% de ergo com arma pesada. ref: origem HeavyWeaponErgoPatch.</summary>
+    internal static void Bunker(Player p, Player.FirearmController fc, ref float result)
+    {
+        if (PerksConfig.BunkerEnabled?.Value != true)
+        {
+            return;
+        }
+
+        if (SkillMultipliers.IsLocalClass(EClassId.Tank) && HeavyWeapon.IsHeavy(fc.Item))
+        {
+            result *= PerksConfig.BunkerHeavyErgo?.Value ?? 1f;
+        }
+    }
+
+    /// <summary>058 — ergo × (1 + ergo/nível × Level) da maestria da arma. ref: origem WeaponMasteryErgoPatch.</summary>
+    internal static void Mastery(Player p, Player.FirearmController fc, ref float result)
+    {
+        if (PerksConfig.WeaponMasteryEnabled?.Value != true)
+        {
+            return;
+        }
+
+        var skill = WeaponMastery.SkillForHeld(p.Skills, fc.Item);
+        var lvl = skill?.Level ?? 0;
+        var ergo = PerksConfig.MasteryErgoPerLevel?.Value ?? 0f;
+        if (lvl > 0 && ergo > 0f)
+        {
+            result *= 1f + ergo * lvl;
+        }
+    }
+}
+
+/// <summary>
+///     ref: AUD-01-03 — patch ÚNICO no getter <c>FirearmController.TotalErgonomics</c> (funil real de ergo da
+///     arma, lido por recoil/handling/sway). Substitui <c>HeavyWeaponErgoPatch</c> (050.4b, Bunker) +
+///     <c>WeaponMasteryErgoPatch</c> (058, maestria), que resolviam o MESMO gate duas vezes por leitura.
+///     <para>
+///     Ordem irrelevante entre os dois branches (ambos multiplicam — comuta), mas escrita mesmo assim.
+///     ⚠️ PA-02-06: nenhum dos dois patches originais tinha <c>[HarmonyPriority]</c>, então consolidá-los não
+///     move nenhuma fronteira contra mods externos (ao contrário do <c>PWA.Shoot</c> — ver PA-01-01).
+///     </para>
+/// </summary>
+internal class TotalErgoPatch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
@@ -209,27 +496,22 @@ internal class HeavyWeaponErgoPatch : ModulePatch
     [PatchPostfix]
     private static void Postfix(Player.FirearmController __instance, ref float __result)
     {
-        try
+        // GATE ÚNICO (era resolvido 2×).
+        var p = Singleton<GameWorld>.Instance?.MainPlayer;
+        if (p == null || !ReferenceEquals(__instance, p.HandsController))
         {
-            if (PerksConfig.BunkerEnabled?.Value != true)
-            {
-                return;
-            }
-
-            if (!ReferenceEquals(__instance, Singleton<GameWorld>.Instance?.MainPlayer?.HandsController))
-            {
-                return;   // só a arma do player local
-            }
-
-            if (SkillMultipliers.IsLocalClass(EClassId.Tank) && HeavyWeapon.IsHeavy(__instance.Item))
-            {
-                __result *= PerksConfig.BunkerHeavyErgo?.Value ?? 1f;
-            }
+            return;   // só a arma do player local
         }
-        catch (Exception ex)
+
+        // PERF-INSTR AUD-01-03 — temporary, remove after validation
+        if (PerkDiag.Enabled)
         {
-            Plugin.Log?.LogError($"[CustomClasses] bunker ergo falhou: {ex.Message}");
+            PerfCount.ErgoGates++;
         }
+
+        // ref: PA-02-01 — isolamento POR BRANCH (não um try/catch externo).
+        try { ErgoBranches.Bunker(p, __instance, ref __result); } catch (Exception ex) { BranchFailLog.Once("ergo/bunker", ex); }
+        try { ErgoBranches.Mastery(p, __instance, ref __result); } catch (Exception ex) { BranchFailLog.Once("ergo/mastery", ex); }
     }
 }
 
@@ -285,7 +567,7 @@ internal class AimPunchPatch : ModulePatch
 
             // (review fix 2026-06-24) só aplica se houve dano de COMBATE recente (ApplyDamageInfo). Dano de QUEDA
             // não passa por ApplyDamageInfo → timestamp velho → não dispara. Janela curta = mesmo frame do hit.
-            if (UnityEngine.Time.time - LocalHitTypePatch.LastCombatHitTime > 0.15f)
+            if (UnityEngine.Time.time - LocalHitState.LastCombatHitTime > 0.15f)
             {
                 return;
             }
@@ -398,45 +680,6 @@ internal class HolsterDrawSpeedPatch : ModulePatch
     }
 }
 
-/// <summary>
-///     087 — parceiro do <see cref="HolsterDrawSpeedPatch"/>: restaura o <c>Animator.speed</c> GLOBAL para <c>1f</c>
-///     assim que o saque acelerado termina. O <c>Spawn</c> deixa o speed global elevado e NÃO o reseta; o 1º
-///     <c>SetAnimatorAndProceduralValues</c> após o Spawn roda em <c>GClass2055.WeaponAppeared</c> (fim do estado
-///     SPAWN / draw-in) — momento certo p/ zerar. Só age se o draw-in foi de fato acelerado (flag <c>BoostedDraw</c>)
-///     e no MainPlayer local. Sem isso, a pistola operaria acelerada (tiro/reload/idle) até a próxima troca. Espelha
-///     o vanilla observado (GClass2944 reseta <c>SetAnimationSpeed(1f)</c> no put-away).
-/// </summary>
-internal class HolsterDrawResetPatch : ModulePatch
-{
-    protected override MethodBase GetTargetMethod()
-    {
-        return AccessTools.Method(typeof(Player.FirearmController), "SetAnimatorAndProceduralValues");
-    }
-
-    [PatchPostfix]
-    private static void Postfix(Player.FirearmController __instance)
-    {
-        try
-        {
-            if (!HolsterDrawSpeedPatch.BoostedDraw)
-            {
-                return;
-            }
-
-            if (!ReferenceEquals(__instance, Singleton<GameWorld>.Instance?.MainPlayer?.HandsController))
-            {
-                return;   // só o player local
-            }
-
-            __instance.FirearmsAnimator?.SetAnimationSpeed(1f);   // restaura o speed global pós draw-in (getter público)
-            HolsterDrawSpeedPatch.BoostedDraw = false;
-        }
-        catch (Exception ex)
-        {
-            Plugin.Log?.LogError($"[CustomClasses] (080) quick draw (reset) falhou: {ex.Message}");
-        }
-    }
-}
 
 /// <summary>
 ///     088 — 🔫 <b>Saque Rápido, fase 1</b> (put-away): acelera também o GUARDAR da arma que SAI quando a arma que
@@ -511,122 +754,18 @@ internal class HolsterPutAwaySpeedPatch : ModulePatch
 }
 
 /// <summary>
-///     (review fix 2026-06-24) Captura o tipo do último dano recebido pelo player LOCAL, pra o
-///     <c>AimPunchPatch</c> (Rattled/Cool Under Fire) NÃO disparar em dano de QUEDA. Prefix em
-///     <c>Player.ApplyDamageInfo</c> — roda antes do <c>EffectsController</c>→<c>ForceEffector.AddForce</c>.
+///     ref: AUD-01-03 — o que sobrou do <c>LocalHitTypePatch</c>: só o carimbo. O Prefix em
+///     <c>Player.ApplyDamageInfo</c> virou <c>DamageBranches.StampCombatHit</c>, chamado PRIMEIRO pelo
+///     <c>ClassDamagePatch</c> consolidado.
+///     <para>
+///     Marca o instante do último dano de COMBATE (que passa por <c>ApplyDamageInfo</c>). Dano de QUEDA NÃO
+///     passa por lá — vai por <c>ActiveHealthController.ApplyDamage</c> (review 2026-06-24) → o timestamp
+///     fica velho → o aim-punch de queda é barrado por RECÊNCIA no <see cref="AimPunchPatch"/>.
+///     </para>
 /// </summary>
-internal class LocalHitTypePatch : ModulePatch
+internal static class LocalHitState
 {
-    // Marca o instante do último dano de COMBATE (que passa por Player.ApplyDamageInfo). Dano de QUEDA NÃO passa
-    // por aqui — vai por ActiveHealthController.ApplyDamage (review 2026-06-24) → o timestamp fica velho → o
-    // aim-punch de queda é barrado por RECÊNCIA no AimPunchPatch (o AddForce de combate é síncrono ao ApplyDamageInfo).
     internal static float LastCombatHitTime = -999f;
-
-    protected override MethodBase GetTargetMethod()
-    {
-        return AccessTools.Method(typeof(Player), nameof(Player.ApplyDamageInfo));
-    }
-
-    [PatchPrefix]
-    private static void Prefix(Player __instance)
-    {
-        if (ReferenceEquals(__instance, Singleton<GameWorld>.Instance?.MainPlayer))
-        {
-            LastCombatHitTime = UnityEngine.Time.time;
-        }
-    }
 }
 
-/// <summary>
-///     084 — 🔫 <b>Recarga Rápida Escopeta</b> (Tanque): acelera a recarga de escopetas de TUBO (shell-a-shell). A
-///     mecânica elite "2 cartuchos por vez" (Mag Drills) NÃO existe no EFT 0.16.9 — o fallback do épico é reduzir o
-///     TEMPO. Como a recarga tubular é 100% dirigida por eventos de animação (cada shell = 1 keyframe), acelerar a
-///     animação de reload acelera a cadência shell-a-shell na mesma proporção.
-///     <para>
-///     Alvo: <c>FirearmController.SetAnimatorAndProceduralValues()</c> — o funil REAL que empurra o reload speed
-///     (lê o CAMPO <c>BuffInfo.ReloadSpeed</c> direto e o repassa a DOIS animators em lockstep: o da ARMA
-///     (<c>FirearmsAnimator</c>) e o do CORPO (<c>MovementContext.PlayerAnimator</c>). ⚠️ O getter
-///     <c>GetWeaponReloadAnimationSpeed()</c> é CÓDIGO MORTO no 0.16.9 (nada o chama), então o molde do
-///     <see cref="ReloadSpeedPatch"/> (Postfix no getter) não serve — este ponto é o funil de fato.
-///     </para>
-///     <para>
-///     <b>Estratégia (code-review CR-084):</b> em vez de re-setar SÓ o animator da arma num Postfix (o que
-///     dessincronizaria mãos×corpo, pois o base atualiza os dois), o <b>Prefix ESCALA o campo</b>
-///     <c>BuffInfo.ReloadSpeed ÷ t</c> ANTES do método rodar → os DOIS animators recebem o valor já acelerado, em
-///     lockstep, sem tocar no draw/swap (a branch de quickdraw-fast preserva o próprio <c>draw</c>). O <b>Postfix
-///     RESTAURA</b> o valor original (via <c>__state</c>) → não acumula entre syncs nem vaza para outros consumidores
-///     do campo. Persiste enquanto a escopeta estiver em mãos (o método roda no saque/sync/início de reload).
-///     </para>
-///     <para>Gate: MainPlayer local (075) + Tank + <c>WeapClass=="shotgun"</c> + <c>Weapon.SupportsInternalReload</c>.
-///     ⚠️ O <c>SupportsInternalReload</c> sozinho pega bolt-action (Mosin), SKS, revólveres e a M32 (todos
-///     <c>InternalMagazine</c>) — o <c>WeapClass=="shotgun"</c> restringe às 8 escopetas de tubo (MR-133/153, M870,
-///     KS-23M, 590A1, MP-155, MTs-255, Benelli M3). Saiga (<c>ExternalMagazine</c>) e bicano (<c>OnlyBarrel</c>) ficam
-///     de fora corretamente.</para>
-/// </summary>
-internal class ShotgunReloadPatch : ModulePatch
-{
-    protected override MethodBase GetTargetMethod()
-    {
-        return AccessTools.Method(typeof(Player.FirearmController), "SetAnimatorAndProceduralValues");
-    }
 
-    // __state = NaN → "não escalei" (Postfix não restaura). Senão = o ReloadSpeed original a restaurar.
-    [PatchPrefix]
-    private static void Prefix(Player.FirearmController __instance, out float __state)
-    {
-        __state = float.NaN;
-        try
-        {
-            if (PerksConfig.ShotgunReloadEnabled?.Value != true || !SkillMultipliers.IsLocalClass(EClassId.Tank))
-            {
-                return;
-            }
-
-            if (!ReferenceEquals(__instance, Singleton<GameWorld>.Instance?.MainPlayer?.HandsController))
-            {
-                return;   // só a arma do player local (075)
-            }
-
-            var weapon = __instance.Item;
-            // WeapClass=="shotgun" é OBRIGATÓRIO: SupportsInternalReload sozinho pega Mosin/SKS/revólver/M32.
-            if (weapon == null || weapon.WeapClass != "shotgun" || !weapon.SupportsInternalReload)
-            {
-                return;   // só escopeta de TUBO; Saiga (ExternalMagazine) e bicano (OnlyBarrel) ficam de fora
-            }
-
-            var buff = __instance.BuffInfo;   // = gclass2250_0 (pode ser null antes do 1º sync de skill)
-            if (buff == null)
-            {
-                return;
-            }
-
-            var t = PerksConfig.ShotgunReloadTime?.Value ?? 1f;   // TEMPO de recarga (0.6 = 40% mais rápido)
-            if (t > 0f && t < 1f)
-            {
-                __state = buff.ReloadSpeed;         // salva o original p/ o Postfix restaurar
-                buff.ReloadSpeed /= t;              // escala ANTES do push → arma + corpo recebem ×(1/t) em lockstep
-            }
-        }
-        catch (Exception ex)
-        {
-            Plugin.Log?.LogError($"[CustomClasses] (084) shotgun reload (pre) falhou: {ex.Message}");
-        }
-    }
-
-    [PatchPostfix]
-    private static void Postfix(Player.FirearmController __instance, float __state)
-    {
-        try
-        {
-            // restaura o campo (não acumula a cada sync; não vaza p/ FixSpeed/AimMovementSpeed etc. que leem o mesmo GClass2250)
-            if (!float.IsNaN(__state) && __instance.BuffInfo != null)
-            {
-                __instance.BuffInfo.ReloadSpeed = __state;
-            }
-        }
-        catch (Exception ex)
-        {
-            Plugin.Log?.LogError($"[CustomClasses] (084) shotgun reload (post) falhou: {ex.Message}");
-        }
-    }
-}
