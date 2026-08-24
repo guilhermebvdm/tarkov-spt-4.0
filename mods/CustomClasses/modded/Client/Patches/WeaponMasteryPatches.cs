@@ -54,7 +54,11 @@ internal class UnderbarrelMasteryXpPatch : ModulePatch
             // vanilla (HideoutPlayer.ExecuteShotSkill é override VAZIO — HideoutPlayer.cs:653) → o gate
             // bloqueia SÓ o XP; o EFEITO por nível (abaixo) vale no range também, como nos patches irmãos
             // de recuo/ergo (o range é onde o jogador testa recuo — não pode mentir sobre o in-raid).
-            var inHideout = p.GetType().Name.IndexOf("Hideout", StringComparison.OrdinalIgnoreCase) >= 0;
+            // ref: AUD-01-06 — era `p.GetType().Name.IndexOf("Hideout", OrdinalIgnoreCase) >= 0`, que resolve
+            // o Type e faz busca de substring com dobra de caixa A CADA DISPARO. O teste de tipo é a forma
+            // canônica do repo para esta pergunta (spt-mod-best-practices §2, que desaconselha explicitamente
+            // a checagem por string) e já é a usada no resto do mod.
+            var inHideout = p is HideoutPlayer;
             if (!inHideout)
             {
                 // XP por disparo × fator de XP da classe (consistência com o OnTriggerPatch — PA-01-02).

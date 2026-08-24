@@ -432,7 +432,11 @@ internal class SkillsClassTabPatch : ModulePatch
                 }
             }
 
-            if (!_loggedTabImages)
+            // ref: AUD-01-05 — diagnóstico da "rodada 3" do fix da aba CLASS (o fix fechou; o instrumento
+            // ficou). Sai em LogInfo e monta a string com LINQ + string.Join ANTES de qualquer verificação
+            // de nível, poluindo o console de todo usuário na 1ª abertura da tela de Skills. Gateado no
+            // mesmo toggle que o DumpNativeTexts vizinho (:463) já usa.
+            if (!_loggedTabImages && PerkDiag.Enabled)
             {
                 _loggedTabImages = true;
                 Plugin.Log?.LogInfo($"[CustomClasses][053-tabicon] images=[{string.Join(", ", images.Select(i => $"{i.gameObject.name} w={((RectTransform)i.transform).rect.width:F0} spr={(i.sprite != null ? i.sprite.name : "null")}"))}]");

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;   // ref: AUD-01-07c — cache do texto de tooltip
 using System.Reflection;
 using EFT;          // SkillClass
 using EFT.UI;       // SkillPanel, HoverTooltipArea, ItemUiContext
@@ -19,6 +20,40 @@ internal class SkillPanelPatch : ModulePatch
 {
     private const string MarkerName = "CC_MultMarker";
     private const float MarkerGap = 20f;   // px após o fim do texto do nome (não sobrepor)
+
+    /// <summary>
+    ///     ref: AUD-01-07c — a lista de Skills RECICLA <c>SkillPanel</c> ao rolar, então cada frame de scroll
+    ///     remontava a string do tooltip por linha visível. Cacheado.
+    ///     <para>
+    ///     ⚠️ ref: PA-01-03 — o <c>className</c> é OBRIGATÓRIO na chave: <c>MultiplierFormat.TooltipText</c>
+    ///     depende dele, e ele muda em dois cenários reais — troca de perfil sem reiniciar o cliente
+    ///     (Reset + refetch) e troca de idioma do EFT (o getter <c>ClassName</c> resolve por
+    ///     <c>GameLocale.IsPortuguese</c>). Sem isso o tooltip afirmaria a classe errada.
+    ///     </para>
+    ///     <para>
+    ///     ⚠️ Desvio da spec técnica (§5.7), deliberado: ela previa a chave <c>(ESkillId, float, string?)</c>.
+    ///     A assinatura real é <c>TooltipText(float factor, string? className)</c>
+    ///     (<c>MultiplierFormat.cs:55</c>) — **não recebe o ESkillId**. Incluí-lo produziria N entradas
+    ///     idênticas para o mesmo texto. A chave correta é o par de que o texto de fato depende.
+    ///     </para>
+    /// </summary>
+    private static readonly Dictionary<(float, string?), string> TooltipCache = new();
+
+    /// <summary>ref: PA-04-03 — assinado a <c>SkillMultipliers.ClassChanged</c> no <c>Plugin.Awake</c>.</summary>
+    internal static void ClearTooltipCache() => TooltipCache.Clear();
+
+    private static string TooltipFor(float factor, string? className)
+    {
+        var key = (factor, className);
+        if (TooltipCache.TryGetValue(key, out var cached))
+        {
+            return cached;
+        }
+
+        var text = MultiplierFormat.TooltipText(factor, className);
+        TooltipCache[key] = text;
+        return text;
+    }
 
     protected override MethodBase GetTargetMethod()
     {
@@ -61,7 +96,7 @@ internal class SkillPanelPatch : ModulePatch
             // ref: CR-01-03 — o SimpleTooltip é resolvido 1x na criação (GetOrCreateMarker);
             // aqui só atualiza o texto (rawText:true preserva <color>/<b>).
             marker.GetComponent<HoverTooltipArea>()
-                .SetMessageText(MultiplierFormat.TooltipText(f, SkillMultipliers.ClassName), rawText: true);
+                .SetMessageText(TooltipFor(f, SkillMultipliers.ClassName), rawText: true);   // ref: AUD-01-07c
             marker.SetActive(true);
         }
         catch (Exception ex)

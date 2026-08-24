@@ -66,6 +66,38 @@ internal static class PerkDiagnostics
 {
     private static GUIStyle? _style;
 
+    /// <summary>
+    ///     ref: AUD-01-07d — com o overlay ligado, o <c>AppendPerkList</c> chamava
+    ///     <c>PerksCatalog.LocalGroups()</c> (LINQ + <c>ToArray</c>) a CADA Repaint. Cacheado.
+    ///     <para>
+    ///     Seguro: <c>PerkGroup</c>/<c>PerkLine</c> do <c>Library</c> são SINGLETONS e
+    ///     <c>PerkLine.Multiplier</c> resolve <c>Live?.Invoke()</c> a cada acesso (PerksCatalog.cs:39) —
+    ///     cachear o ARRAY não congela os valores, o F12 continua vivo (B4).
+    ///     </para>
+    ///     <para>ref: PA-04-03 — invalidado por <c>SkillMultipliers.ClassChanged</c>, assinado no Awake.</para>
+    /// </summary>
+    private static PerksCatalog.PerkGroup[]? _cachedGroups;
+    private static bool _groupsCached;
+
+    /// <summary>ref: PA-04-03 — assinado a <c>SkillMultipliers.ClassChanged</c> no <c>Plugin.Awake</c>.</summary>
+    internal static void ClearGroupCache()
+    {
+        _cachedGroups = null;
+        _groupsCached = false;
+    }
+
+    private static PerksCatalog.PerkGroup[]? CachedLocalGroups()
+    {
+        if (_groupsCached)
+        {
+            return _cachedGroups;
+        }
+
+        _cachedGroups = PerksCatalog.LocalGroups();
+        _groupsCached = true;   // cacheia inclusive null (classe vanilla) — não re-tentar por Repaint
+        return _cachedGroups;
+    }
+
     internal static void Draw()
     {
         if (PerksConfig.DiagnosticsEnabled?.Value != true)
@@ -169,7 +201,7 @@ internal static class PerkDiagnostics
     {
         try
         {
-            var groups = PerksCatalog.LocalGroups();
+            var groups = CachedLocalGroups();   // ref: AUD-01-07d
             if (groups == null || groups.Length == 0)
             {
                 return;

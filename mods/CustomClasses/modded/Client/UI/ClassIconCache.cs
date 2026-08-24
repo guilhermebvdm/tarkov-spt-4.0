@@ -17,6 +17,112 @@ internal static class ClassIconCache
     private static readonly Dictionary<string, Sprite?> TintedCache = new(StringComparer.OrdinalIgnoreCase);
     private static string? _iconsDir;
 
+    // ─────────────────────────────────────────────────────────────────────────────────────────────
+    // ref: AUD-01-08 — LIMITE do TintedCache.
+    //
+    // A chave inclui a COR, e a cor é um ConfigEntry<Color> do F12 (item 067). Cada chave nova custa uma
+    // Texture2D 256×256 RGBA32 (256 KB de VRAM) + um Color32[65536] (256 KB gerenciados, acima do limiar de
+    // 85 KB → vai para o Large Object Heap) + 65.536 operações de pixel + upload à GPU. E NADA era liberado:
+    // o DestroySprite só rodava no Dispose (fechar o jogo). Arrastar o picker de cor de uma classe gerava uma
+    // entrada permanente por evento de mudança, em DOIS consumidores (menu via ClassColorsChanged→ApplyToMenu
+    // e aba CLASS via SkillsClassTabPatch.OnColorsChanged).
+    //
+    // Cap 4 por ícone, e não 1: o MESMO iconFile precisa de DUAS variantes vivas ao mesmo tempo — o brasão
+    // com gradiente (top != bottom, ClassIdentityView.cs:134) e a marca d'água chapada (top == bottom,
+    // PerksPanelView.cs:242), ambas visíveis juntas na aba CLASS. 4 = as 2 formas + 1 geração de folga.
+    private const int MaxVariantsPerIcon = 4;
+    private const int ColorQuantum = 8;   // arredonda cada canal p/ múltiplo de 8 → ~32× menos chaves
+
+    /// <summary>Ordem de recência das chaves de cada ícone (índice 0 = menos recente). Ver <see cref="Touch"/>.</summary>
+    private static readonly Dictionary<string, List<string>> VariantsByIcon = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>Frame em que cada chave nasceu — guard anti-eviction no mesmo frame (ver <see cref="EvictIfNeeded"/>).</summary>
+    private static readonly Dictionary<string, int> CreatedFrame = new(StringComparer.Ordinal);
+
+    /// <summary>
+    ///     Quantiza a cor da chave em múltiplos de <see cref="ColorQuantum"/> por canal.
+    ///     <para>
+    ///     ⚠️ Exceção declarada na 01-spec: muda a cor renderizada em até 3/255 por canal (~1,2%),
+    ///     imperceptível, em troca de ~32× menos chaves.
+    ///     </para>
+    ///     <para>
+    ///     ⚠️ ref: PA-01-02 — o clamp vem DEPOIS da quantização. Com v=1.0: round(1.0×255/8) = round(31.875)
+    ///     = 32, e 32×8 = <b>256</b>, que em <c>(byte)</c> unchecked (o default do C#) vira <b>0</b> — o topo
+    ///     do gradiente de uma classe clara (ex.: Saqueador #c4ad45) viraria PRETO, por canal, de forma
+    ///     intermitente. Clampar antes não resolve: o estouro nasce na multiplicação.
+    ///     </para>
+    /// </summary>
+    private static Color32 Quantize(Color c)
+    {
+        static byte Q(float v)
+        {
+            var q = Mathf.RoundToInt(Mathf.Clamp01(v) * 255f / ColorQuantum) * ColorQuantum;
+            return (byte)Mathf.Min(q, 255);
+        }
+
+        return new Color32(Q(c.r), Q(c.g), Q(c.b), 255);
+    }
+
+    /// <summary>
+    ///     ref: AUD-01-08 · PA-03-03 — LRU <b>de verdade</b>: usar uma variante a manda para o FIM da fila.
+    ///     Sem o move-to-end isto degenera em FIFO, e aí o brasão em uso (redesenhado a cada <c>Show</c>)
+    ///     seria evicto antes de uma variante velha e parada — exatamente o sprite que não pode morrer.
+    ///     É esta função que decide qual textura é destruída.
+    /// </summary>
+    private static void Touch(string name, string key)
+    {
+        if (!VariantsByIcon.TryGetValue(name, out var keys))
+        {
+            keys = new List<string>(MaxVariantsPerIcon + 1);
+            VariantsByIcon[name] = keys;
+        }
+
+        var at = keys.IndexOf(key);   // O(n) com n <= 5 — irrelevante
+        if (at >= 0)
+        {
+            keys.RemoveAt(at);
+        }
+
+        keys.Add(key);
+    }
+
+    /// <summary>
+    ///     Destrói as variantes mais antigas do ícone até caber no cap.
+    ///     <para>
+    ///     Guard de MESMO FRAME: nunca destruir algo criado neste frame — dentro de um frame todos os
+    ///     consumidores do <c>ClassColorsChanged</c> (menu + aba CLASS) já se re-apontaram para o sprite
+    ///     novo. Se TODAS forem do frame atual, o cache excede o cap temporariamente (intencional); a
+    ///     próxima inserção resolve.
+    ///     </para>
+    /// </summary>
+    private static void EvictIfNeeded(string name)
+    {
+        if (!VariantsByIcon.TryGetValue(name, out var keys))
+        {
+            return;
+        }
+
+        var i = 0;
+        while (i < keys.Count && keys.Count > MaxVariantsPerIcon)
+        {
+            var k = keys[i];
+            if (CreatedFrame.TryGetValue(k, out var f) && f == Time.frameCount)
+            {
+                i++;
+                continue;
+            }
+
+            if (TintedCache.TryGetValue(k, out var old))
+            {
+                DestroySprite(old);   // libera Texture2D + Sprite
+            }
+
+            TintedCache.Remove(k);
+            CreatedFrame.Remove(k);
+            keys.RemoveAt(i);         // não incrementa i — o próximo desliza para esta posição
+        }
+    }
+
     private static string IconsDir =>
         _iconsDir ??= Path.Combine(
             Path.GetDirectoryName(typeof(ClassIconCache).Assembly.Location) ?? ".", "icons");
@@ -79,12 +185,44 @@ internal static class ClassIconCache
         }
 
         var name = Path.GetFileName(iconFile);
-        var key = $"{name}|{ColorUtility.ToHtmlStringRGBA(top)}|{ColorUtility.ToHtmlStringRGBA(bottom)}";
+
+        // ref: AUD-01-08 — cor QUANTIZADA na chave (~32× menos entradas).
+        var qTop = Quantize(top);
+        var qBottom = Quantize(bottom);
+        var key = $"{name}|{qTop.r:X2}{qTop.g:X2}{qTop.b:X2}|{qBottom.r:X2}{qBottom.g:X2}{qBottom.b:X2}";
+
         if (TintedCache.TryGetValue(key, out var cached))
         {
+            Touch(name, key);   // LRU: recém-usado vai para o fim da fila
             return cached;
         }
 
+        var sprite = BuildTinted(name, qTop, qBottom);
+
+        TintedCache[key] = sprite;
+        CreatedFrame[key] = Time.frameCount;
+        Touch(name, key);
+        EvictIfNeeded(name);
+
+        // PERF-INSTR AUD-01-08 — temporary, remove after validation
+        // Responde a única pergunta que dimensiona o achado: quantas entradas um arrasto do picker gera?
+        // Logado só na INSERÇÃO (o cache é o que impede o flood) e só com o diagnóstico ligado.
+        if (PerkDiag.Enabled)
+        {
+            Plugin.Log?.LogInfo($"[CustomClasses][perf/AUD-01-08] tintedCache={TintedCache.Count} (~{TintedCache.Count * 256} KB VRAM) +{key}");
+        }
+
+        return sprite;
+    }
+
+    /// <summary>
+    ///     (06-fix-02) Constrói a textura tingida. ref: PA-01-09 — extraído do corpo inline do
+    ///     <c>GetTinted</c>, preservando integralmente o <c>try/catch</c>, o aviso de arquivo ausente e o
+    ///     <c>Destroy(tex)</c> do ramo em que <c>LoadImage</c> falha (é ele que evita vazar uma textura
+    ///     quando o PNG está corrompido).
+    /// </summary>
+    private static Sprite? BuildTinted(string name, Color top, Color bottom)
+    {
         Sprite? sprite = null;
         try
         {
@@ -132,7 +270,6 @@ internal static class ClassIconCache
             Plugin.Log?.LogError($"[CustomClasses] falha ao tingir ícone '{name}': {ex.Message}");
         }
 
-        TintedCache[key] = sprite;
         return sprite;
     }
 
@@ -151,6 +288,8 @@ internal static class ClassIconCache
 
         Cache.Clear();
         TintedCache.Clear();
+        VariantsByIcon.Clear();   // ref: AUD-01-08
+        CreatedFrame.Clear();     // ref: AUD-01-08
     }
 
     private static void DestroySprite(Sprite? s)

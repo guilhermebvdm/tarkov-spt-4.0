@@ -1,4 +1,5 @@
 using System;
+using System.Linq.Expressions;   // ref: AUD-01-04 — accessor do emissor compilado 1× (molde do SainSoundPatch)
 using System.Reflection;
 using EFT;
 using EFT.InventoryLogic;
@@ -40,22 +41,39 @@ namespace CustomClasses.Client;
 /// </summary>
 internal class SilentKnifePatch : ModulePatch
 {
-    // 'playersBridge' é protected + tipado por IObserverToPlayerBridge (assembly não referenciável) → reflection
-    // crua cacheada 1×. Resolvidos juntos num static ctor guardado (o FieldType dá o tipo real p/ pegar 'iPlayer'
-    // sem nomear a interface). Um throw aqui NÃO pode virar TypeInitializationException e derrubar o patch.
-    private static readonly FieldInfo? BridgeField;
-    private static readonly PropertyInfo? IPlayerProp;
+    // 'playersBridge' é protected + tipado por IObserverToPlayerBridge (assembly não referenciável) → o
+    // FieldInfo/PropertyInfo precisam ser resolvidos por reflexão. Mas a INVOCAÇÃO não precisa ser reflexiva.
+    //
+    // ref: AUD-01-04 — era `BridgeField.GetValue(inst)` + `IPlayerProp.GetValue(bridge)` A CADA clip de som
+    // não-arma de qualquer entidade (faca, granada, meds, quick-use). `PropertyInfo.GetValue` passa por
+    // `MethodInfo.Invoke`, ~1 ordem de grandeza mais caro que um acesso direto. O padrão certo já existe no
+    // mod, no arquivo vizinho: `SainSoundPatch` compila o getter 1× com Expression.Lambda "p/ tirar o
+    // reflection do hot-path (review)" (ClassSoundPatches.cs:352-355). Aqui só não tinha sido aplicado.
+    //
+    // Um throw aqui NÃO pode virar TypeInitializationException e derrubar o patch → try/catch + null = inerte.
+    private static readonly Func<BaseSoundPlayer, object?>? EmitterOf = BuildEmitterAccessor();
 
-    static SilentKnifePatch()
+    /// <summary>Compila <c>sp => ((IObserverToPlayerBridge)sp.playersBridge).iPlayer</c> uma única vez.</summary>
+    private static Func<BaseSoundPlayer, object?>? BuildEmitterAccessor()
     {
         try
         {
-            BridgeField = AccessTools.Field(typeof(BaseSoundPlayer), "playersBridge");
-            IPlayerProp = BridgeField != null ? AccessTools.Property(BridgeField.FieldType, "iPlayer") : null;
+            var field = AccessTools.Field(typeof(BaseSoundPlayer), "playersBridge");
+            var prop = field != null ? AccessTools.Property(field.FieldType, "iPlayer") : null;
+            if (field == null || prop == null)
+            {
+                Plugin.Log?.LogWarning("[CustomClasses] (083/AUD-01-04) 'playersBridge'/'iPlayer' não resolvidos — Morte Silenciosa inerte.");
+                return null;
+            }
+
+            var sp = Expression.Parameter(typeof(BaseSoundPlayer), "sp");
+            var body = Expression.Convert(Expression.Property(Expression.Field(sp, field), prop), typeof(object));
+            return Expression.Lambda<Func<BaseSoundPlayer, object?>>(body, sp).Compile();
         }
         catch (Exception ex)
         {
-            Plugin.Log?.LogWarning($"[CustomClasses] (083) reflection do BaseSoundPlayer não resolvida — Morte Silenciosa inerte: {ex.Message}");
+            Plugin.Log?.LogWarning($"[CustomClasses] (083/AUD-01-04) accessor do emissor não compilado — Morte Silenciosa inerte: {ex.Message}");
+            return null;
         }
     }
 
@@ -69,9 +87,9 @@ internal class SilentKnifePatch : ModulePatch
     {
         try
         {
-            if (PerksConfig.SilentKnifeEnabled?.Value != true || BridgeField == null || IPlayerProp == null)
+            if (PerksConfig.SilentKnifeEnabled?.Value != true || EmitterOf == null)
             {
-                return true;   // perk off ou reflection ausente → som normal
+                return true;   // perk off ou accessor não compilado → som normal
             }
 
             // (1) arma de fogo (WeaponSoundPlayer herda PlayClip) → descarta sem custo (a maioria das chamadas).
@@ -80,9 +98,9 @@ internal class SilentKnifePatch : ModulePatch
                 return true;
             }
 
-            // (2) emissor — local OU peer Fika: ambos são EFT.Player real (ObservedPlayer : … : Player via PlayerBridge).
-            var bridge = BridgeField.GetValue(__instance);
-            if (bridge == null || IPlayerProp.GetValue(bridge) is not Player emitter)
+            // (2) emissor — local OU peer Fika: ambos são EFT.Player real (ObservedPlayer : … : Player via
+            //     PlayerBridge). ref: AUD-01-04 — delegate compilado, não 2 chamadas reflexivas.
+            if (EmitterOf(__instance) is not Player emitter)
             {
                 return true;
             }
