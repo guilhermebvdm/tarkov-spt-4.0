@@ -6,31 +6,50 @@ Memória cronológica de sessões de trabalho (timestamps em GMT-3). Cada entrad
 
 ---
 
-## Estado Atual (Snapshot ao Fim da Sessão — 2026-08-16)
+## Estado Atual (Snapshot ao Fim da Sessão — 2026-08-25)
 
-**Mod C# Client (v3.2.9) + C# Server (v3.2.9) compilados com sucesso (0 erros).**
+**Mod C# Client (v3.4.1) + C# Server (v3.4.1) compilados com sucesso (0 erros).**
 
 - **Identity**: `TRL-DynamicSpawn` (Client BepInEx DLL: `TRL-DynamicSpawn.dll`, Server C# DLL: `TRL-DynamicSpawn-Server.dll` com Web UI). Compatível com SPT 4.0.13 e EFT 0.16.9.
-- **Correção de Vazamento de Rogues e Raiders a 0% (`v3.2.9`)**:
-  - Adicionadas travas estritas no `DynamicSpawnManager.cs` (`RandomRogueGroup` e `RandomRaiderGroup`).
-  - O mod agora valida `GetBossChanceForMap > 0`, `Enable == true` e `!DisableBosses` antes de gerar qualquer grupo aleatório de Rogues (`exUsec`) ou Raiders (`pmcBot`).
-  - Se o mapa estiver configurado com 0% para o bot na aba BOTS, nenhum grupo aleatório vazará naquele mapa.
-- **Nível de Log de Falha na Criação de Perfil (`DynamicSpawnManager.cs`)**:
-  - Rebaixada a mensagem quando o gerador assíncrono do SPT não retorna um perfil no frame de `LogError` para `LogWarning` (`Bot profile creation skipped... Member safely skipped`), indicando com clareza que o integrante foi pulado com segurança sem afetar a raid.
-  - Adicionada retentativa suave de `0.1s` antes do fallback de dificuldade, reduzindo a frequência de mensagens no console.
-- **Agressividade Total do Zryachiy Não-Nativo (`v3.2.8`)**:
-  - Implementado `ZryachiyAggressivenessPatch.cs` (patcheando `ZyriachyBossLogicClass.IsEnemyNow` e `Activate`).
+- **Estruturação do Workspace (Dual original/modded)**:
+  - `original/`: Backup intacto da versão original canônica.
+  - `modded/`: Código-fonte com as refatorações de alta performance e física aplicada.
+- **Documentação de Engenharia e Ciclo de Vida**:
+  - `docs/ciclo-de-vida-e-arquitetura-bot-spawning.md`: Especificação técnica de ponta a ponta cobrindo as 7 fases de ciclo de vida de bots, topologia FIKA, SAIN e SPT-Waypoints.
+  - `docs/relatorio-auditoria-codigo-02.md`: Diagnóstico arquitetural completo de gargalos de CPU/GC e plano de refatoração.
+- **Refatorações de Alta Performance Aplicadas (v3.4.1)**:
+  - **ZoneCache ([AUD-02-03])**: Eliminação de travamentos de cena de 5ms–15ms por meio do cache estático de `BotZone`.
+  - **Geração Atômica de Esquadrões ([AUD-02-01])**: Spawns de grupo criados em 1 única Task (`BotCreationDataClass.Create` com `groupSize`), preservando a coesão no `BotsGroup`.
+  - **Erradicação de GC Spikes por LINQ ([AUD-02-04])**: Substituição de `.Where().ToList()` e `.OrderBy()` por loops indexados `for` em passagem única (0 bytes de GC lixo).
+  - **Otimização com `sqrMagnitude` ([AUD-02-05])**: Substituição de `Vector3.Distance` por magnitude quadrada, cortando instruções de raiz quadrada (`Mathf.Sqrt`).
+  - **Sequência Atômica de Física no Teleporte ([AUD-02-06] & [AUD-02-07])**: Parada de NavMesh e inércia antes do teleporte físico, com reset cirúrgico de combate e suporte defensivo para SAIN (`ClearEnemy`).
+  - **Zero Memory Leaks entre Raids ([AUD-02-08])**: Limpeza completa de contêineres estáticos em `RaidLifecycle.OnRaidEnd`.
 
 ---
 
 ## Pendências / Próximos Passos Conhecidos (Roadmap)
 
-- 🟡 [P-ROADMAP-01] **Retorno do Viés Direcional (Pós-Debug)**: Retornar a proporção do viés direcional de spawn/teleport para 70% frontal / 30% traseiro pós-testes.
+- 🟡 [P-ROADMAP-01] **Testes em Raid / Validação de Frametime**: Validar a estabilidade do frametime e a ausência de stutters em mapas densos (Streets of Tarkov, Lighthouse).
 - 🟡 [P-ROADMAP-04] **Standalone Mod — Limpador de Corpos Inteligente (Corpse Cleaner)**: Novo mod separado focado em performance (timer individual por corpo).
 
 ---
 
 ## Histórico de Sessões
+
+### 2026-08-25 — Auditoria Arquitetural, Refatoração de Alta Performance e Estruturação original/modded (v3.4.1)
+
+- **Documentação do Ciclo de Vida e Auditoria Profunda**:
+  - Criado `docs/ciclo-de-vida-e-arquitetura-bot-spawning.md` detalhando os contratos do SPT Server, Assembly EFT, FIKA coop, SAIN e pooling.
+  - Elaborado `docs/relatorio-auditoria-codigo-02.md` com o diagnóstico dos 4 eixos de auditoria e snippets C#.
+- **Estruturação Dual original/modded**:
+  - Reorganizado o repositório em `original/Client`, `original/Server`, `modded/Client`, `modded/Server`.
+- **Implementação do ZoneCache & Otimizações de CPU**:
+  - Criado `ZoneCache.cs` para acesso em $O(1)$ a zonas de bot.
+  - Refatorados `DynamicSpawnManager.cs`, `BotDespawnManager.cs` e `Patches.cs` para eliminar LINQ e usar `sqrMagnitude`.
+  - Refatorado `SpawnGroupBotsCoroutine` para geração atômica de esquadrões.
+  - Corrigida a ordem de física do teleporte e adicionado reset defensivo para o mod SAIN.
+- **Validação de Compilação & SemVer (v3.4.1)**:
+  - `TRL-DynamicSpawn-Client.csproj` e `TRL-DynamicSpawn-Server.csproj` compilados com **0 Erros**.
 
 ### 2026-08-16 — Correção de Vazamento de Rogues/Raiders (v3.2.9)
 

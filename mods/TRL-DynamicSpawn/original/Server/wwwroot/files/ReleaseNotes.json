@@ -1,0 +1,316 @@
+﻿[
+  {
+    "Version": "2.0.19",
+    "ReleaseDate": "June 13, 2026",
+    "IsLatest": true,
+    "NewFeatures": [
+      "Configs are now forward compatible - ABPS no longer ships with a config.json",
+      "The server will notify you if your config needs the new features added and will do so without impacting your existing settings"
+    ],
+    "Changes": [
+      "Updated the WebConfig theme",
+      "Added load order to router",
+      "Adjusted rebuild logic to event based actions instead of DI",
+      "Adjusted config logic to event based actions instead of DI",
+      "Adjusted initialization logic",
+      "Adjusted namespace naming"
+    ],
+    "BugFixes": [
+      "Resolved caching racing loading and occasionally causing human players to be skipped"
+    ],
+    "KnownIssues": []
+  },
+  {
+    "Version": "2.0.18",
+    "ReleaseDate": "April 27, 2026",
+    "IsLatest": false,
+    "NewFeatures": [],
+    "Changes": [
+      "Added advanced F12 debug log and put logging behind it (disabled by default)",
+      "Adjusted spawn point handling",
+      "Adjusted caching of bots",
+      "Adjusted positional spawning logic for leaders",
+      "Adjusted spawn point selection for followers",
+      "Adjusted leader lookup for followers for group assignment",
+      "Adjusted error handling"
+    ],
+    "BugFixes": [
+      "Resolved spawn point handling for followers",
+      "Resolved spawn point handling for bots spawning at the same time"
+    ],
+    "KnownIssues": []
+  },
+  {
+    "Version": "2.0.17",
+    "ReleaseDate": "April 25, 2026",
+    "IsLatest": false,
+    "NewFeatures": [],
+    "Changes": [
+      "Added minor logging",
+      "Adjusted initialization order"
+    ],
+    "BugFixes": [],
+    "KnownIssues": []
+  },
+  {
+    "Version": "2.0.16",
+    "ReleaseDate": "April 23, 2026",
+    "IsLatest": false,
+    "NewFeatures": [],
+    "Changes": [
+      "Removed in-raid check cause all the spawn data is retrieved on the client during raid start, any changes wouldn't impact the current raid (probably)"
+    ],
+    "BugFixes": [
+      "Resolved Fika (headless) not tracking progressive/regressive chances",
+      "Resolved Fika (headless) not spawning bots due to null position data",
+      "Resolved Fika (headless) not spawning bots on 2nd raid due to not resetting properly"
+    ],
+    "KnownIssues": []
+  },
+  {
+    "Version": "2.0.15",
+    "ReleaseDate": "April 19, 2026",
+    "IsLatest": false,
+    "NewFeatures": [],
+    "Changes": [
+      "Refactored scav spawning code for performance",
+      "Staggered Pmc Wave spawns 5-15 seconds apart within a single wave",
+      "Changed pending bots to trigger on scav waves to 1",
+      "Adjusted how often scavs attempt to spawn client side",
+      "General code cleanup to prep for full rewrite",
+      "Added additional caching",
+      "Changed Group Size -> Follower Count Limit in Webconfig for clarity",
+      "Changed Group Count -> Group Count Limit in Webconfig for clarity",
+      "Adjusted default Pmc wave Follower Count Limit + Max Pmcs per wave",
+      "Adjusted Starting Pmc Limits for Factory upper max to 8",
+      "Adjusted Scav Wave Custom Timers for Factory/Labyrinth/Labs"
+    ],
+    "BugFixes": [
+      "Resolved Pmcs never spawning in scav raids",
+      "Resolved Marksman never spawning in scav raids",
+      "Resolved client trying to double spawn scavs"
+    ],
+    "KnownIssues": []
+  },
+  {
+    "Version": "2.0.14",
+    "ReleaseDate": "April 1, 2026",
+    "IsLatest": false,
+    "NewFeatures": [
+      "Nothing at all I promise"
+    ],
+    "Changes": [],
+    "BugFixes": [],
+    "KnownIssues": []
+  },
+  {
+    "Version": "2.0.13",
+    "ReleaseDate": "February 14, 2026",
+    "IsLatest": false,
+    "NewFeatures": [],
+    "Changes": [],
+    "BugFixes": [
+      "Resolved the Per Player Scav Spawn Limit check being flipped"
+    ],
+    "KnownIssues": []
+  },
+  {
+    "Version": "2.0.12",
+    "ReleaseDate": "February 14, 2026",
+    "IsLatest": false,
+    "NewFeatures": [
+      "Webconfig toggle for each boss to disable their followers"
+    ],
+    "Changes": [
+      "F12 moved Despawn options into Advanced Menu",
+      "Renamed `Group Size` in PMC Group config for clarity"
+    ],
+    "BugFixes": [
+      "Resolved the Per Player Scav Spawn Limit not being implemented by BSG"
+    ],
+    "KnownIssues": []
+  },
+  {
+    "Version": "2.0.11",
+    "ReleaseDate": "January 10, 2026",
+    "IsLatest": false,
+    "NewFeatures": [],
+    "Changes": [],
+    "BugFixes": [
+      "Resolved Regressive Chances resetting boss to minimum spawn chance if they didn't spawn in prior raid",
+      "Resolved Progressive/Regressive chances impacting Weekly Boss config option"
+    ],
+    "KnownIssues": []
+  },
+  {
+    "Version": "2.0.10",
+    "ReleaseDate": "January 9, 2026",
+    "IsLatest": false,
+    "NewFeatures": [
+      "Added Regressive Chance toggle in F12"
+    ],
+    "Changes": [],
+    "BugFixes": [
+      "Resolved small bug in Progressive Chances"
+    ],
+    "KnownIssues": []
+  },
+  {
+    "Version": "2.0.9",
+    "ReleaseDate": "December 17, 2025",
+    "IsLatest": false,
+    "NewFeatures": [
+      "Added boolean toggle for disabling Pmc waves on Labyrinth"
+    ],
+    "Changes": [
+      "Many little changes in code for readability and consistency",
+      "Many fields marked required for config that were missing designation"
+    ],
+    "BugFixes": [
+      "Resolved WebConfig undo button not undoing changes properly",
+      "Resolved WebConfig displaying Default button when not enabled in some instances"
+    ],
+    "KnownIssues": []
+  },
+  {
+    "Version": "2.0.8",
+    "ReleaseDate": "December 1, 2025",
+    "IsLatest": false,
+    "NewFeatures": [],
+    "Changes": [],
+    "BugFixes": [
+      "Resolved scavs spawning on Labyrinth when they shouldn't"
+    ],
+    "KnownIssues": []
+  },
+  {
+    "Version": "2.0.7",
+    "ReleaseDate": "November 28, 2025",
+    "IsLatest": false,
+    "NewFeatures": [],
+    "Changes": [],
+    "BugFixes": [
+      "Resolved load order issue with SVM, extended raid times will work now",
+      "Resolved Scav New Spawns occasionally throwing a NRE..probably."
+    ],
+    "KnownIssues": []
+  },
+  {
+    "Version": "2.0.6",
+    "ReleaseDate": "November 21, 2025",
+    "IsLatest": false,
+    "NewFeatures": [
+      "F12 option to despawn bots",
+      "F12 option to allow PMCs to spawn anywhere",
+      "Exposed Scav Wave total bot spawn limit in config"
+    ],
+    "Changes": [
+      "Added Customs Old & New Gas to Scav Hotzones",
+      "Changed default Raider spawn chance in config - If you have had issues with your skill in labs and have been complaining you can't edit this, you've been wrong this entire time. All you had to do was changed the chance, or disable adding new spawns. Crazy.",
+      "Changed PMC & Scav `wave` StopTimer to allow max of 3600 seconds in web config"
+    ],
+    "BugFixes": [
+      "Resolved cached spawn points not clearing between raids",
+      "Resolvedminor UI behaviours on web config"
+    ],
+    "KnownIssues": []
+  },
+  {
+    "Version": "2.0.5",
+    "ReleaseDate": "November 15, 2025",
+    "IsLatest": false,
+    "NewFeatures": [
+      "Option to lock web config behind an authorization code."
+    ],
+    "Changes": [
+      "Tweaked Custom Timers for Scav Waves (if you use them)",
+      "Starting Marksman likelihood changes - you should see them more often"
+    ],
+    "BugFixes": [],
+    "KnownIssues": []
+  },
+  {
+    "Version": "2.0.4",
+    "ReleaseDate": "November 4, 2025",
+    "IsLatest": false,
+    "NewFeatures": [
+      "Added `Weekly Boss` feature from SPT, with a tiny twist",
+      "Added PMC Faction Chance configuration slider"
+    ],
+    "Changes": [
+      "Adjusted Pmc spawn logic for proper group assignment",
+      "Adjusted Pmc spawn logic to remove some additional delays for followers",
+      "Adjusted Pmc waves to flip to any Bot spawn points available but only checking 50% of configured distances",
+      "Adjusted Pmc waves to use ABPS spawn logic instead of vanilla when no Player spawn points are available"
+    ],
+    "BugFixes": [
+      "Resolved Pmcs of the same faction being friendly even if they are in different `groups`",
+      "Resolved Scav Zone Reassignment affecting Factory / GZ / Labyrinth / Laboratory"
+    ],
+    "KnownIssues": []
+  },
+  {
+    "Version": "2.0.3",
+    "ReleaseDate": "October 31, 2025",
+    "IsLatest": false,
+    "NewFeatures": [
+      "Added Checkbox to allow the Web Configuration page to check for updates to ABPS",
+      "Added Release Notes to Web Configuration",
+      "Added Toggle for allowing Scavs on Laboratory - Waves",
+      "Added Toggle for allowing Scavs on Labyrinth - Waves"
+    ],
+    "Changes": [
+      "Adjusted Scav + Marksman Hostility to always be friendly to everything except PMCs",
+      "Adjusted PMC Hostility to always be hostile to bossTagillaAgro, bossKillaAgro, and tagillaHelperAgro",
+      "Adjusted Scav Wave Custom Timer to also apply to Labs and Labyrinth",
+      "Adjusted Labyrinth Bot Max Cap - You need to default this in F12 to fix"
+    ],
+    "BugFixes": [
+      "Resolved Progressive Boss Chances not saving correctly",
+      "Resolved Scav brain types not being available on Labyrinth",
+      "Resolved Scavs spawning on Labyrinth when not intended",
+      "Resolved PMCs not spawning on Labyrinth when intended"
+    ],
+    "KnownIssues": []
+  },
+  {
+    "Version": "2.0.2",
+    "ReleaseDate": "October 28, 2025",
+    "IsLatest": false,
+    "NewFeatures": [],
+    "Changes": [
+      "Added additional hostility check for PMCs vs Scavs",
+      "Added additional patch to skip events from reconfiguring hostility"
+    ],
+    "BugFixes": [
+      "Fixes for Fika Headless - Credits to Lacyway <3"
+    ],
+    "KnownIssues": []
+  },
+  {
+    "Version": "2.0.1",
+    "ReleaseDate": "October 28, 2025",
+    "IsLatest": false,
+    "NewFeatures": [],
+    "Changes": [],
+    "BugFixes": [
+      "Skip MaxBotPatch if using Fika Headless",
+      "Fix type on static router for Progressive Chances"
+    ],
+    "KnownIssues": []
+  },
+  {
+    "Version": "2.0.0",
+    "ReleaseDate": "October 27, 2025",
+    "IsLatest": false,
+    "NewFeatures": [],
+    "Changes": [],
+    "BugFixes": [
+      "Marksman spawning incorrectly or in the incorrect order to get a spawn location",
+      "Marksman not spawning on Woods",
+      "Hopefully all the hostility things people complained about that I never saw",
+      "Hopefully all the brain issues people complained about that I never saw"
+    ],
+    "KnownIssues": []
+  }
+]
