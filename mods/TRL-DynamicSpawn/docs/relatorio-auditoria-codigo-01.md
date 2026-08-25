@@ -45,6 +45,7 @@ Auditoria de performance do mod **TRL-DynamicSpawn v3.2.9** (client [mods/TRL-Dy
 | `AUD-01-06` | 🟡 Médio | `Client/Components/DynamicSpawnManager.cs:339, 367-451` | Trabalho com raid vazia | `SpawnHordeLoop` continua gerando waves/`bot/generate` com 0 bots vivos; `Replace Despawned Bots` realimenta |
 | `AUD-01-07` | 🟡 Médio | `Client/Patches/Patches.cs:805-814` + `Client/Patches/BotSpawnLoggerPatch.cs:26` | Logging sem gate | Maiores emissores (6 linhas Warning por `ChooseProfile`) escapam do gate `Enable Debug Logs` |
 | `AUD-01-08` | 🟡 Médio | `Client/Patches/Patches.cs:374-378` (+ vanilla `LocalGame.cs:139-143, :187-194, :359-361`) | Trabalho barrado por tentativa | Ondas vanilla são interceptadas a **cada tentativa** (prefix em `ActivateBotsByWave`) em vez de desligadas **uma vez** na fonte (cenários de onda do `LocalGame`) — *registrado em 2026-08-22 23:16, pós-rodada 1* |
+| `AUD-01-09` | 🟡 Médio | `Client/Components/DynamicSpawnManager.cs:373-457` (`SpawnHordeLoop` ESTÁGIO A) | Warmup que não converge | Com mortes contínuas (jogador/PvP entre facções), `aliveRealBots` nunca iguala `dynamicCap` → ondas de 1–3 vagas **a cada 30 s indefinidamente**, sem nunca entrar no cooldown longo — *registrado em 2026-08-24 22:31, observado na V2; pré-existente (3.2.9)* |
 
 ---
 
@@ -153,6 +154,18 @@ Auditoria de performance do mod **TRL-DynamicSpawn v3.2.9** (client [mods/TRL-Dy
 
 > **Atualização 2026-08-22 23:35 — evidência promovida para Forte (medida na raid de validação V1, client v3.3.0).** O metrônomo de 10 s **persiste com `getConfig` = 1** — logo AUD-01-01 era contribuinte, não a causa. A causa é este achado, e é o próprio jogo: `NonWavesSpawnScenario.Update()` (`references/eft-decompiled/Assembly-CSharp/EFT/NonWavesSpawnScenario.cs:115-159`) roda a cada `float_2` segundos — `location.BotSpawnPeriodCheck` com **piso de 10 s** (`:32-34`, `:146-148`) — calcula `BotMax − bots vivos` (com a raid vazia = o cap inteiro, que o `SetMaxBotCountPatch` ainda eleva) e, para cada vaga que `TrySpawn` libera, chama `ActivateBotsWithoutWave` (`:153-158`) → `BotCreationDataClass.Create` → `ChooseProfile` sobre o pool (**473 perfis** nesta raid, 6 linhas `Warning` por escolha — AUD-01-07) → `BotSpawner.TryToSpawnInZoneAndDelay`, onde o prefix do mod (`Patches.cs:546-554`) barra. **Na raid medida:** 163 bloqueios de `assault` em rajadas de 3–8 a cada ~10 s + 228 `ChooseProfile` + ~1.600 linhas de perfil no console, **com 0 bots vivos e fora da onda do mod**; FPS 90→60 a cada rajada. O `LocalGame.Stop` desliga esse cenário com `nonWavesSpawnScenario_0.Stop()` (`LocalGame.cs:360`) — a API de desligar é a canônica.
 > **Correção proposta (revisada):** em vez de reflection nos campos privados do `LocalGame`, **prefix em `NonWavesSpawnScenario.Run()`** (`:98`, público) retornando `false` quando o mod governa os spawns (host/solo, `!FikaHelper.IsClient()`): `bool_1` nunca arma, `Update()` sai na primeira linha (`:117`) — custo zero por frame, sem reflection, vale para `LocalGame` e `CoopGame`. Os bosses nativos (`BossSpawnScenario`) **não** são tocados; as ondas cronometradas (`WavesSpawnScenario`, 17 bloqueios/raid) ficam para a mesma rodada. Validação: zero `Blocked Vanilla Assault Scav Spawn` no log; metrônomo de 10 s ausente; spawns do mod inalterados.
+
+---
+
+### AUD-01-09 · Warmup que não converge (ondas de reposição a cada 30 s para sempre)
+- **Severidade:** 🟡 Médio
+- **Evidência:** Forte (medida na raid V2 de 2026-08-24: `Attempt 43`, `REAL Alive: 13–15/16`, `Available: 1–3` por ~21 min; cada tentativa spawnou de fato — `SQUAD MEMBER SPAWNED` presente — e as mortes repunham o déficit). **Pré-existente** (mesma lógica na 3.2.9); ficou visível porque a V2 leu o log com atenção. *Registrado em 2026-08-24 22:31 a partir do relato do usuário ("a onda 2 nunca terminou").*
+- **Execução:** ESTÁGIO A do `SpawnHordeLoop` ([DynamicSpawnManager.cs:373-457](../Client/Components/DynamicSpawnManager.cs#L373)): enquanto `aliveRealBots < dynamicCap`, dispara `ProcessWave` a cada `DelayBeforeFirstWave` (30 s) — o cooldown longo (`SecondsBetweenWaves`, 360 s) só é alcançado com o mapa **exatamente** cheio. `dynamicCap = playerCap + especiais vivos` (16 = 15 + 1 na raid medida); com o jogador matando e PMCs se matando entre si, o mapa oscila 1–3 abaixo do teto para sempre.
+- **Impacto Técnico Real:** custo baixo por ciclo (ondas de 1–3 bots já usando o pipeline otimizado da rodada 2), mas cadência de reposição **12× mais agressiva** do que o cooldown configurado, indefinidamente — `bot/generate`/materialização contínuos e experiência de "sempre tem bot chegando" que o usuário percebeu como onda infinita.
+- **Proposta de Correção (rodada 3, discutir com Umbigo — é decisão de design):** considerar "cheio" com tolerância (ex.: `alive ≥ dynamicCap − 2` entra no cooldown longo), e/ou após N tentativas de warmup mudar para o intervalo longo mesmo abaixo do teto. Reavaliar se `dynamicCap` deve somar especiais vivos (persegue vaga que o especial devolve ao morrer).
+- **Como validar:** raid com mortes contínuas → após a tolerância, log mostra `Wave Cooldown active` mesmo com 1–2 vagas abertas; ondas passam à cadência de `SecondsBetweenWaves`.
+- **Decisão:**
+  - `[ ]` Pendente *(rodada 3 — junto com AUD-01-04 residual do pool inicial vanilla e item 011)*
 
 ---
 
