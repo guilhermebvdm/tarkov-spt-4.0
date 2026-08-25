@@ -66,15 +66,15 @@ Todo arquivo `.md` dentro de `mods/<NomeDoMod>/docs/` (exceto `README.md`) deve 
    - Pelo menos 1 a 2 diagramas conceituais por documento (fluxogramas de decisão, diagramas de sequência de eventos de raid, gráficos de máquinas de estado ou diagramas de classes).
 4. **Tabelas Estruturadas:**
    - Tabelas comparativas de parâmetros, enums, limites numéricos, multiplicadores e comportamentos.
-5. **Links Canônicos com Esquema `file://`:**
-   - Todo arquivo, classe ou método citado no texto deve possuir um link markdown funcional apontando para o arquivo no repositório:
-     `[NomeDoArquivo.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/<Mod>/original/<Caminho>/NomeDoArquivo.cs)`
+5. **Links Canônicos Relativos:**
+   - Todo arquivo, classe ou método citado no texto deve possuir um link markdown funcional apontando para o arquivo no repositório, **sempre relativo ao documento** (nunca `file://` absoluto — quebra em outra máquina, AP-05). A partir de `mods/<Mod>/docs/`:
+     `[NomeDoArquivo.cs](../original/<Caminho>/NomeDoArquivo.cs)` · `[GameWorld.cs:2584](../../../references/eft-decompiled/Assembly-CSharp/EFT/GameWorld.cs#L2584)`
 
 ### 4. Geração do `mods/<NomeDoMod>/docs/README.md` (Índice Central)
 Crie um `README.md` na raiz da pasta `docs/` contendo:
 - Apresentação executiva da documentação do mod.
 - Tabela com o sumário de todos os documentos gerados, com links relativos e status.
-- Relação estruturada de todos os arquivos de código-fonte mapeados do mod com links `file://`.
+- Relação estruturada de todos os arquivos de código-fonte mapeados do mod com links relativos.
 
 ### 5. Validação de Conformidade
 Execute a validação manual de cabeçalhos em todos os arquivos markdown criados:
@@ -85,7 +85,7 @@ done
 ```
 
 ### 6. Atualização do `README.md` Raiz do Mod
-Verifique se `mods/<NomeDoMod>/README.md` possui uma seção apontando para a pasta `docs/` e para o catálogo [PROPRIEDADES.md](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/<Mod>/PROPRIEDADES.md).
+Verifique se `mods/<NomeDoMod>/README.md` possui uma seção apontando para a pasta `docs/` e para o catálogo [PROPRIEDADES.md](./PROPRIEDADES.md) (link relativo à raiz do mod).
 
 ---
 

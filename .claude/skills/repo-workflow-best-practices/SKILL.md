@@ -66,6 +66,8 @@ Cada achado de review recebe um **ID permanente, nunca reutilizado**, com prefix
 
 - **PA-NN-MM** — achado de spec-tech-review (Plano de Análise). `NN` = rodada, `MM` = ordem do ponto naquela rodada.
 - **CR-NN-MM** — achado de code-review (Code Review). Mesmo esquema.
+- **AUD-NN-MM** — achado de auditoria técnica (`/audit-mod-code`, inclusive modo `--perf`). Mesmo esquema; a correção entra por um item de backlog agrupador (ver `/optimize-mod-performance`), e o código aplicado cita o ID.
+- **ML-NN-MM** — achado de análise de memory leak (`/analyze-memory-leak`). Mesmo esquema.
 
 Quando um fix dispara mudança em código, o commit/edit inclui o ID no comentário inline:
 
@@ -121,7 +123,7 @@ A **ordem da tabela representa a ordem de execução desejada**, não a ordem cr
 1. **Nomenclatura:** artefato segue `NNN-<slug>-MM-tipo[-NN].md`?
 2. **Sandbox:** edits estão somente em `modded/`? `original/` foi tocado por engano?
 3. **Refs ao Assembly:** todo `arquivo.cs:linha` foi conferido contra `references/eft-decompiled/`?
-4. **Rastreabilidade:** se há fix de código, o comentário inline cita PA-NN-MM ou CR-NN-MM?
+4. **Rastreabilidade:** se há fix de código, o comentário inline cita PA-NN-MM, CR-NN-MM, AUD-NN-MM ou ML-NN-MM?
 5. **Reviews imutáveis:** review anterior foi editado retroativamente (revisionismo)? Pontos resolvidos foram marcados com ✅ + Resolução em vez de reescritos?
 6. **Status:** o `mod-backlog.md` reflete a etapa atual do item?
 7. **PROPRIEDADES.md:** novas `ConfigEntry` foram documentadas?

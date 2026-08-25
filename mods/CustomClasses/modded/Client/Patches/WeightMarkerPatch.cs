@@ -10,7 +10,8 @@ using UnityEngine;
 namespace CustomClasses.Client;
 
 /// <summary>
-///     (056) Marcador "▲ +X%" + tooltip no LIMITE DE PESO (aba Health), atribuindo o bônus ao Pack Mule da classe.
+///     (056) Marcador "±X%" + tooltip no LIMITE DE PESO (aba Health): Pack Mule (Scav/Tank, piso, +X%) OU
+///     Light Frame (Caçador/Furtivo, redução relativa, −X% — v0.16.6). Atribui o efeito à classe.
 ///     O número do peso JÁ reflete o perk (PackMulePatch postfixa <c>SkillManager.CarryingWeightRelativeModifier</c>,
 ///     que entra no <c>Max</c> do peso) — aqui só ANOTAMOS a origem. Postfix em <c>HealthParametersPanel.method_0</c>
 ///     (refresh chamado no fim do Show, após os BindEvents setarem o peso, e no Update — idempotente).

@@ -33,6 +33,9 @@ namespace TRLDynamicSpawn.Helpers
         public static ConfigEntry<bool> showSpawnBubbleCircle;
         public static ConfigEntry<bool> showLoSCone;
 
+        public static ConfigEntry<bool> reloadServerConfig;
+        public static ConfigEntry<int> initialProfilePreload;
+
         public static void Init(ConfigFile config)
         {
             string section = "Host Performance Caps";
@@ -106,8 +109,29 @@ namespace TRLDynamicSpawn.Helpers
             showSpawnBubbleCircle = config.Bind(overlaySection, "Show Spawn Bubble Circle", true, 
                 new ConfigDescription("Displays the cyan outer Spawn Bubble circle around the player on the map."));
 
-            showLoSCone = config.Bind(overlaySection, "Show LoS / FOV Cone", true, 
+            showLoSCone = config.Bind(overlaySection, "Show LoS / FOV Cone", true,
                 new ConfigDescription("Displays the yellow player Field of View (LoS) cone on the map."));
+
+            // ref: AUD-01-01 — manual path that replaces the 5 s live re-fetch (AC-X1). Acts as a button:
+            // only reacts to true, clears the raid-scoped cache and resets itself to false. Zero per-frame cost.
+            string serverSection = "Server Config";
+            reloadServerConfig = config.Bind(serverSection, "Reload Server Config", false,
+                new ConfigDescription("Tick to reload the web panel configuration now (applies edits made during the raid). Unticks itself after reloading."));
+            reloadServerConfig.SettingChanged += (_, __) =>
+            {
+                if (!reloadServerConfig.Value) return;          // the reset below re-enters with false → ignored
+                ServerConfigProvider.ForceRefresh();
+                Plugin.LogSource?.LogInfo("[TRL-DynamicSpawn] Server config cache cleared by user (F12). Next read will fetch.");
+                reloadServerConfig.Value = false;
+            };
+
+            // ref: AUD-01-04 / AC-X2 / CR-01-01 — STANDING PMC profile cache level (USEC and BEAR, normal difficulty) that SPT keeps
+            // replenished during the whole raid (was fixed 30/30). Scav levels are vanilla's (8 per difficulty). Read once per raid.
+            // Minimum 5: with no PMC cache every PMC slot becomes a synchronous LoadBots(3) at spawn time.
+            string poolSection = "Profile Pool (Advanced)";
+            initialProfilePreload = config.Bind(poolSection, "Initial Profile Preload", 15,
+                new ConfigDescription("Standing cache level of PMC bot profiles (USEC and BEAR, normal difficulty) that the game keeps replenished during the whole raid. Higher = first wave ready sooner, more memory. Scav profiles are managed by the game (8 per difficulty).",
+                    new AcceptableValueRange<int>(5, 30), new ConfigurationManagerAttributes { IsAdvanced = true }));
         }
 
         public static int GetMapCap(string mapId)

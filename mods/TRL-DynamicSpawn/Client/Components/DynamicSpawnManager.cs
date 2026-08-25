@@ -21,7 +21,6 @@ namespace TRLDynamicSpawn.Components
         public static bool IsGeneratingDynamicWave = false;
         public static bool IsWarmupActive = true;
         
-        private bool _isSpawningWave = false;
         private int _delayBeforeFirstWave = 60;
         private int _secondsBetweenWaves = 360; 
         private float _nextWaveTime = 0f;
@@ -37,6 +36,7 @@ namespace TRLDynamicSpawn.Components
         private IBotCreator _botCreator;
         private BotsController _botsController;
         private Coroutine _activeWaveCoroutine;
+        private bool _sptQueueClearedThisRaid;   // ref: AUD-01-05 — instance field: the component is re-created per raid (DynamicSpawnManagerPatch.cs:60)
         private string _cachedFikaStatus;
         private BotZone _lastSelectedZone;
 
@@ -64,7 +64,13 @@ namespace TRLDynamicSpawn.Components
 
             try 
             {
-                string json = RequestHandler.GetJson("/trldynamicspawn/getConfig");
+                // ref: AUD-01-01 — same HTTP response as ServerConfigProvider (1 fetch per raid), private copy
+                // because the preset modifiers below mutate _serverConfig (NR-6).
+                // bypassBackoff: this is the raid's one-shot consumer — an earlier failure by another reader
+                // must not deny its single attempt (PA-01-02). Cache hit → no HTTP.
+                string json = ServerConfigProvider.GetConfigJson(bypassBackoff: true);
+                if (string.IsNullOrEmpty(json))
+                    throw new InvalidOperationException("ServerConfig unavailable (see provider warning).");
                 _serverConfig = JsonConvert.DeserializeObject<TRLConfig>(json);
                 _activePreset = _serverConfig.ActivePreset;
 
@@ -137,10 +143,15 @@ namespace TRLDynamicSpawn.Components
                 // Pre-populate SPT Bot Creator Backup target for PMCs to resolve profile generation empty queues
                 if (_botCreator != null)
                 {
-                    Plugin.LogSource.LogInfo("[TRL-DynamicSpawn] Pre-populating SPT Bot Creator Backup target for PMCs, Scavs and Rogues...");
-                    _botCreator.AddToTargetBackup(BotDifficulty.normal, WildSpawnType.pmcUSEC, 30);
-                    _botCreator.AddToTargetBackup(BotDifficulty.normal, WildSpawnType.pmcBEAR, 30);
-                    _botCreator.AddToTargetBackup(BotDifficulty.normal, WildSpawnType.assault, 20);
+                    // ref: AUD-01-04 / AC-X2 / CR-01-01 — AddToTargetBackup is NOT "request N profiles now": it registers a
+                    // STANDING cache level per (role, difficulty) that SPT keeps replenished for the whole raid (GClass684.cs:258-263
+                    // registers the key only if absent; a 5 s timer refills it, GClass684.cs:129-192). The level is configurable
+                    // (was fixed 30/30). assault/marksman are NOT registered here: vanilla already holds them at 8 per difficulty
+                    // (GClass684.cs:113-118) and a second call for the same key is a no-op.
+                    int preload = Settings.initialProfilePreload.Value;
+                    Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Registering standing PMC profile cache levels (USEC/BEAR normal = {preload}; Scav levels are vanilla's 8/difficulty) + Rogues/Goons per config...");
+                    _botCreator.AddToTargetBackup(BotDifficulty.normal, WildSpawnType.pmcUSEC, preload);
+                    _botCreator.AddToTargetBackup(BotDifficulty.normal, WildSpawnType.pmcBEAR, preload);
                     if (_serverConfig?.EliteConfig?.Rogues != null && _serverConfig.EliteConfig.Rogues.Enable)
                     {
                         _botCreator.AddToTargetBackup(BotDifficulty.normal, WildSpawnType.exUsec, 10);
@@ -221,6 +232,41 @@ namespace TRLDynamicSpawn.Components
                 }
             }
             return count;
+        }
+
+        /// <summary>
+        /// Alive human players (host + Fika guests), ignoring bots and the headless "player".
+        /// ref: AUD-01-06 — waves are only computed while someone is alive to spawn for.
+        /// ref: Assembly-CSharp/EFT/GameWorld.cs:556 (AllAlivePlayersList : List&lt;Player&gt;)
+        /// </summary>
+        public int GetAliveHumanCount()
+        {
+            if (_gameWorld == null) return 0;
+            var list = _gameWorld.AllAlivePlayersList;
+            if (list == null) return 0;
+            int n = 0;
+            for (int i = 0; i < list.Count; i++)
+            {
+                var p = list[i];
+                if (p == null || p.IsAI || IsHeadlessPlayer(p)) continue;
+                if (p.HealthController != null && p.HealthController.IsAlive) n++;
+            }
+            return n;
+        }
+
+        /// <summary>
+        /// Raid end (called by RaidLifecycle.OnRaidEnd from the first end hook that fires). Stops every spawn coroutine
+        /// of this manager and resets the static flags. ref: AUD-01-06
+        /// </summary>
+        public static void StopSpawnLoops()
+        {
+            // Static flags FIRST: called from the GameWorld.OnDestroy prefix, the manager (same GameObject) may already
+            // be destroyed (Unity fake-null) and the early return below would skip the reset. ref: PA-01-06
+            IsGeneratingDynamicWave = false;
+            IsWarmupActive = false;
+            if (Instance == null) return;
+            Instance.StopAllCoroutines();   // SpawnHordeLoop, FetchServerConfigAndStart, ProcessWave, SpawnGroupBotsCoroutine, SpawnReplacementBotCoroutine
+            Instance._activeWaveCoroutine = null;
         }
 
         // Roles controlados pelo TRL-DynamicSpawn — qualquer outro é "especial" (boss, guard, rogue, raider, etc.)
@@ -382,9 +428,28 @@ namespace TRLDynamicSpawn.Components
                     int warmupAttempt = 1;
                     while (true)
                     {
-                        // Limpa qualquer perfil preso/pendente na fila do SPT antes de iniciar a onda
-                        ClearSptQueue();
                         yield return new WaitForSeconds(1f);
+
+                        // ref: AUD-01-06 / AC-X3 — no human alive → nothing to spawn for. Stop the wave in flight
+                        // (the child SpawnGroupBotsCoroutine finishes its current group — Unity limitation) and keep
+                        // re-checking; the raid is ending anyway.
+                        if (GetAliveHumanCount() == 0)
+                        {
+                            if (_activeWaveCoroutine != null) { StopCoroutine(_activeWaveCoroutine); _activeWaveCoroutine = null; }
+                            IsGeneratingDynamicWave = false;
+                            _nextWaveTime = 0f;
+                            yield return new WaitForSeconds(5f);
+                            continue;
+                        }
+
+                        // ref: AUD-01-05 — ONE clean-up of the SPT creation queue per raid (item 006 intent preserved).
+                        // It used to run every 1 s here: BotEventHandler.StopBotSpawn() cancels EVERY BotCreationDataClass
+                        // in flight (vanilla and the mod's own) → Create returns null → 44 NRE/raid in TrySpawnFreeInner.
+                        if (!_sptQueueClearedThisRaid)
+                        {
+                            _sptQueueClearedThisRaid = true;
+                            ClearSptQueue();
+                        }
 
                         currentMap = GetCurrentMapName();
                         playerCap = Settings.GetMapCap(currentMap);
@@ -411,6 +476,17 @@ namespace TRLDynamicSpawn.Components
                         for (int elapsed = 0; elapsed < warmupInterval; elapsed++)
                         {
                             yield return new WaitForSeconds(1f);
+
+                            // ref: CR-01-02 / AC-X3 — reach the wave in flight within 1 s, not after warmupInterval:
+                            // stop it here and fall through (capReachedEarly stays false → warmupAttempt++ → top of the
+                            // inner while → the pause branch takes over with its 5 s re-check).
+                            if (GetAliveHumanCount() == 0)
+                            {
+                                if (_activeWaveCoroutine != null) { StopCoroutine(_activeWaveCoroutine); _activeWaveCoroutine = null; }
+                                IsGeneratingDynamicWave = false;
+                                _nextWaveTime = 0f;
+                                break;
+                            }
 
                             currentMap = GetCurrentMapName();
                             playerCap = Settings.GetMapCap(currentMap);
@@ -472,8 +548,7 @@ namespace TRLDynamicSpawn.Components
 
         private IEnumerator ProcessWave(bool isFirstWave)
         {
-            _isSpawningWave = true;
-
+            // ref: CR-01-03 — `_isSpawningWave` removed (dead field, never read); `_activeWaveCoroutine != null` is the real gate.
             string currentMap = GetCurrentMapName();
             int playerCap = Settings.GetMapCap(currentMap);
             int specialBots = GetSpecialBotsCount();
@@ -483,19 +558,15 @@ namespace TRLDynamicSpawn.Components
             int aliveBots = GetRealAliveBotsCount();
             int availableSlots = Mathf.Max(0, dynamicCap - aliveBots);
 
-            Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Calculating Wave: PlayerCap={playerCap}, SpecialBots={specialBots}, DynamicCap={dynamicCap}, Alive={aliveBots}, Available={availableSlots}");
+            if (Settings.enableDebugLogs.Value)   // ref: AUD-01-07
+                Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Calculating Wave: PlayerCap={playerCap}, SpecialBots={specialBots}, DynamicCap={dynamicCap}, Alive={aliveBots}, Available={availableSlots}");
 
-            if (_botCreator != null)
-            {
-                _botCreator.AddToTargetBackup(BotDifficulty.normal, WildSpawnType.pmcUSEC, 10);
-                _botCreator.AddToTargetBackup(BotDifficulty.normal, WildSpawnType.pmcBEAR, 10);
-                _botCreator.AddToTargetBackup(BotDifficulty.normal, WildSpawnType.assault, 10);
-            }
+            // ref: AUD-01-04 / CR-01-01 — the fixed 10/10/10 'normal' AddToTargetBackup per wave was removed: the key
+            // (role, normal) is already registered at raid start, so those calls were no-ops (GClass684.cs:260).
 
             if (availableSlots <= 0)
             {
                 Plugin.LogSource.LogInfo("[TRL-DynamicSpawn] No slots available for this wave. Skipping.");
-                _isSpawningWave = false;
                 yield break;
             }
 
@@ -718,7 +789,8 @@ namespace TRLDynamicSpawn.Components
                 int normalScavSlots = scavSlots - pScavSlots;
 
                 bool isSainActive = IsSainInstalled();
-                if (isSainActive)
+                bool debugLogs = Settings.enableDebugLogs.Value;   // ref: AUD-01-07 — gate before formatting; Info level
+                if (isSainActive && debugLogs)
                 {
                     Plugin.LogSource.LogInfo("[TRL-DynamicSpawn][SPY] SAIN Mod detected! DynamicSpawn difficulty override disabled. SAIN controls AI difficulty.");
                 }
@@ -726,22 +798,30 @@ namespace TRLDynamicSpawn.Components
                 BotDifficulty pmcDiff = isSainActive ? BotDifficulty.normal : GetRandomDifficulty(_serverConfig?.PmcDifficulty);
                 BotDifficulty scavDiff = isSainActive ? BotDifficulty.normal : GetRandomDifficulty(_serverConfig?.ScavDifficulty);
 
-                Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn][SPY] Sampled Wave Difficulties (SAIN Active: {isSainActive}): PMC={pmcDiff}, Scav={scavDiff}");
+                if (debugLogs)
+                {
+                    Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn][SPY] Sampled Wave Difficulties (SAIN Active: {isSainActive}): PMC={pmcDiff}, Scav={scavDiff}");
+                    Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Horde Breakdown (Preset: {_activePreset}):");
+                    Plugin.LogSource.LogInfo($"  PlayerCap={playerCap} | SpecialBots={specialBots} | DynamicCap={dynamicCap} | Available={availableSlots}");
+                    Plugin.LogSource.LogInfo($"  Alive Bots: {aliveBotsTotal} | PMCs: {alivePMCs} ({aliveBears} BEAR, {aliveUsecs} USEC) | Normal Scavs: {aliveNormalScavs}");
+                    Plugin.LogSource.LogInfo($"  Spawning PMCs ({pmcDiff}): {pmcSlots} ({bearSlots} BEAR, {usecSlots} USEC)");
+                    Plugin.LogSource.LogInfo($"  Spawning Scavs ({scavDiff}): {scavSlots} ({normalScavSlots} Normal, {pScavSlots} pScav)");
+                }
 
-                Plugin.LogSource.LogWarning($"[TRL-DynamicSpawn] Horde Breakdown (Preset: {_activePreset}):");
-                Plugin.LogSource.LogWarning($"  PlayerCap={playerCap} | SpecialBots={specialBots} | DynamicCap={dynamicCap} | Available={availableSlots}");
-                Plugin.LogSource.LogWarning($"  Alive Bots: {aliveBotsTotal} | PMCs: {alivePMCs} ({aliveBears} BEAR, {aliveUsecs} USEC) | Normal Scavs: {aliveNormalScavs}");
-
-                Plugin.LogSource.LogWarning($"  Spawning PMCs ({pmcDiff}): {pmcSlots} ({bearSlots} BEAR, {usecSlots} USEC)");
-                Plugin.LogSource.LogWarning($"  Spawning Scavs ({scavDiff}): {scavSlots} ({normalScavSlots} Normal, {pScavSlots} pScav)");
-
-                if (_botCreator != null)
+                // ref: CR-01-01 — these calls register a STANDING cache level for (role, sampled difficulty), kept replenished
+                // by SPT for the rest of the raid; a second call for the same key is ignored (GClass684.cs:258-263). The number
+                // of keys is bounded (2 PMC roles × 4 difficulties; assault easy/normal/hard already vanilla's), so the pool
+                // stays bounded — this is what keeps the per-wave difficulty feature alive without SAIN. With SAIN the
+                // difficulty is always 'normal' (key already registered at raid start → no-op).
+                if (_botCreator != null && !isSainActive)
                 {
                     if (usecSlots > 0) _botCreator.AddToTargetBackup(pmcDiff, WildSpawnType.pmcUSEC, usecSlots);
                     if (bearSlots > 0) _botCreator.AddToTargetBackup(pmcDiff, WildSpawnType.pmcBEAR, bearSlots);
                     int totalScavSlots = normalScavSlots + pScavSlots;
-                    if (totalScavSlots > 0) _botCreator.AddToTargetBackup(scavDiff, WildSpawnType.assault, totalScavSlots);
-                    Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Batch profile pre-fetching requested: {usecSlots} USEC ({pmcDiff}), {bearSlots} BEAR ({pmcDiff}), {totalScavSlots} Scavs ({scavDiff}).");
+                    if (totalScavSlots > 0 && scavDiff == BotDifficulty.impossible)   // easy/normal/hard: vanilla key exists (no-op)
+                        _botCreator.AddToTargetBackup(scavDiff, WildSpawnType.assault, totalScavSlots);
+                    if (debugLogs)
+                        Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Standing backup targets ensured for this wave: USEC/BEAR ({pmcDiff}) = {usecSlots}/{bearSlots}, Scav ({scavDiff}) = {totalScavSlots} (no-op if key already registered).");
                 }
 
                 GenerateAndEnqueueGroups(WildSpawnType.pmcUSEC, pmcDiff, usecSlots, eliteConfig?.Usec);
@@ -768,7 +848,8 @@ namespace TRLDynamicSpawn.Components
                 GenerateAndEnqueueGroups(WildSpawnType.assault, scavDiff, pScavSlots, eliteConfig?.Scav);
             }
 
-            Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Profiles generated. Starting smooth injection...");
+            if (Settings.enableDebugLogs.Value)   // ref: AUD-01-07
+                Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Profiles generated. Starting smooth injection...");
 
 
 
@@ -939,8 +1020,6 @@ namespace TRLDynamicSpawn.Components
                     yield return null; // Just wait 1 frame to not lock main thread
                 }
             } // End foreach
-
-            _isSpawningWave = false;
         }
 
         public class SpawnGroupData
@@ -961,7 +1040,8 @@ namespace TRLDynamicSpawn.Components
             }
 
             bool isSain = IsSainInstalled();
-            Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn][SPY] SQUAD SPAWN INITIATED: Role={role}, Difficulty={diff}, GroupSize={groupSize}, Zone={zone.NameZone}, SAIN Active={isSain}");
+            if (Settings.enableDebugLogs.Value)   // ref: AUD-01-07
+                Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn][SPY] SQUAD SPAWN INITIATED: Role={role}, Difficulty={diff}, GroupSize={groupSize}, Zone={zone.NameZone}, SAIN Active={isSain}");
 
             EPlayerSide side = EPlayerSide.Savage;
             if (role == WildSpawnType.pmcUSEC) side = EPlayerSide.Usec;
@@ -1006,7 +1086,8 @@ namespace TRLDynamicSpawn.Components
 
                 if (botResult != null)
                 {
-                    Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn][SPY] SQUAD MEMBER SPAWNED ({i + 1}/{groupSize}): {role} ({diff}) in {zone.NameZone}");
+                    if (Settings.enableDebugLogs.Value)   // ref: AUD-01-07
+                        Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn][SPY] SQUAD MEMBER SPAWNED ({i + 1}/{groupSize}): {role} ({diff}) in {zone.NameZone}");
                     IsGeneratingDynamicWave = true;
                     try
                     {
@@ -1671,9 +1752,11 @@ namespace TRLDynamicSpawn.Components
 
             if (p.Profile != null)
             {
-                string nickname = p.Profile.Nickname?.ToLower() ?? "";
-                string accountId = p.Profile.AccountId?.ToLower() ?? "";
-                if (nickname.Contains("headless") || accountId.Contains("headless"))
+                // ref: CR-01-05 — ordinal, allocation-free (called once per human per second by GetAliveHumanCount)
+                string nickname = p.Profile.Nickname;
+                string accountId = p.Profile.AccountId;
+                if ((nickname != null && nickname.IndexOf("headless", StringComparison.OrdinalIgnoreCase) >= 0) ||
+                    (accountId != null && accountId.IndexOf("headless", StringComparison.OrdinalIgnoreCase) >= 0))
                 {
                     return true;
                 }

@@ -1,0 +1,567 @@
+﻿@page "/progressivebotsystem/follower"
+@using ProgressiveBotSystem.Web.Components
+@layout MainLayout
+
+<MudMainContent>
+    <MudContainer Class="mb-20">
+        <MudExpansionPanels MultiExpansion="true">
+            <MudExpansionPanel Class="mud-expansion-panels-borders ma-3 pa-5" Text="Follower Specific Configuration" Expanded="true">
+                <MudGrid>
+
+                    <MudSwitchTTWarning
+                        Label="Follower Bot Generation"
+                        TooltipText="Grants APBS control over Boss Followers & Guards (excluding Goons). You will have vanilla versions of these bots if disabled."
+                        WarningTooltip1="All settings on this page, and any other setting that may impact these bots are controlled by this toggle."
+                        WarningTooltip2="EXCEPTION: Normalize Health is always applied if enabled but not excluded."
+                        @bind-Value="FollowerEnabled"
+                        HasPendingChanges="@(MainLayout.pendingChanges.Contains("FollowerEnabled"))"
+                        IsNonDefault="@(!FollowerEnabled)"
+                        OnUndo="UndoFollowerBots"
+                        OnDefault="DefaultFollowerBots" />
+
+                </MudGrid>
+            </MudExpansionPanel>
+            @if (FollowerEnabled)
+            {
+                <MudExpansionPanel Class="mud-expansion-panels-borders ma-3 pa-5" Text="Follower Specific Options" Expanded="true">
+                    <MudGrid>
+
+                        <MudSwitchTT
+                            Label="Loot"
+                            TooltipText="Allows Follower Bots to spawn with additional loot."
+                            @bind-Value="FollowerLootEnabled"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("FollowerLootEnabled") ||
+                                                MainLayout.pendingChanges.Contains("FollowerLootBlacklist"))"
+                            IsNonDefault="@(!FollowerLootEnabled ||
+                                            FollowerLootBlacklist.Count > 0)"
+                            OnUndo="UndoLoot"
+                            OnDefault="DefaultLoot" />
+
+                        <LootBlacklistValues
+                            Blacklist="FollowerLootBlacklist"
+                            OriginalBlacklist="ModConfig.OriginalConfig.FollowerBots.LootConfig.Blacklist"
+                            ChangeKey="FollowerLootBlacklist" />
+
+                        <MudDivider DividerType="DividerType.FullWidth" Class="my-3" />
+
+                        <MudSwitchTT
+                            Label="Roll Ammunition Selection Again"
+                            TooltipText="Allows Boss Followers & Guards (excluding Goons) to reroll their selected round from their weapons caliber, max one time per each magazine."
+                            @bind-Value="FollowerWeaponAmmunitionRollEnabled"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("FollowerWeaponAmmunitionRollEnabled") ||
+                                                MainLayout.pendingChanges.Contains("FollowerWeaponAmmunitionRollChance"))"
+                            IsNonDefault="@(!FollowerWeaponAmmunitionRollEnabled ||
+                                            FollowerWeaponAmmunitionRollChance != 50)"
+                            OnUndo="UndoRollAmmunitionEnabled"
+                            OnDefault="DefaultRollAmmunitionEnabled" />
+
+                        <MudSliderChildTT
+                            Label="Roll Again Chance"
+                            TooltipText="This is the chance that Boss Followers & Guards (excluding Goons) will roll for a different round from the same caliber, max one time per each magazine."
+                            @bind-Value="FollowerWeaponAmmunitionRollChance"
+                            Min="1"
+                            Max="100"
+                            Disabled="@(!FollowerWeaponAmmunitionRollEnabled)" />
+
+                        <MudSwitchTT
+                            Label="Toploading"
+                            TooltipText="Allows Boss Followers & Guards (excluding Goons) to top load their extra magazines."
+                            @bind-Value="FollowerWeaponToploadEnabled"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("FollowerWeaponToploadEnabled") ||
+                                                MainLayout.pendingChanges.Contains("FollowerWeaponToploadChance") ||
+                                                MainLayout.pendingChanges.Contains("FollowerWeaponToploadPercent"))"
+                            IsNonDefault="@(FollowerWeaponToploadEnabled ||
+                                            FollowerWeaponToploadChance != 30 ||
+                                            FollowerWeaponToploadPercent != 30)"
+                            OnUndo="UndoToploadEnabled"
+                            OnDefault="DefaultToploadEnabled" />
+
+                        <MudSliderChildTT
+                            Label="Topload Chance"
+                            TooltipText="This is the chance that Boss Followers & Guards (excluding Goons) will topload their extra magazines."
+                            @bind-Value="FollowerWeaponToploadChance"
+                            Min="1"
+                            Max="100"
+                            Disabled="@(!FollowerWeaponToploadEnabled)" />
+
+                        <MudSliderChildTT
+                            Label="Topload Percent"
+                            TooltipText="This is the percentage of their extra magazine that Boss Followers & Guards (excluding Goons) will topload."
+                            @bind-Value="FollowerWeaponToploadPercent"
+                            Min="10"
+                            Max="50"
+                            Disabled="@(!FollowerWeaponToploadEnabled)" />
+
+                        <MudSwitchTT
+                            Label="Skip Backplate When Missing Front Plate"
+                            TooltipText="Will skip backplates when the front plate is missing, if they had one it would be in the front right?"
+                            @bind-Value="SkipBackPlateIfMissingFrontPlate"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("SkipBackPlateIfMissingFrontPlate"))"
+                            IsNonDefault="@(SkipBackPlateIfMissingFrontPlate)"
+                            OnUndo="UndoSkipBackPlateIfMissingFrontPlate"
+                            OnDefault="DefaultSkipBackPlateIfMissingFrontPlate" />
+
+                        <MudSwitchTT
+                            Label="Limit Plate Class to Front Plate"
+                            TooltipText="Tries to limit the plate class of all plates to the class of the front plate, if possible."
+                            @bind-Value="LimitPlateClassToFrontPlateClass"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("LimitPlateClassToFrontPlateClass"))"
+                            IsNonDefault="@(LimitPlateClassToFrontPlateClass)"
+                            OnUndo="UndoLimitPlateClassToFrontPlateClass"
+                            OnDefault="DefaultLimitPlateClassToFrontPlateClass" />
+
+                        <MudSwitchTT
+                            Label="Resource Randomization"
+                            TooltipText="Allows random resource consumption on Food/Drink/Medical Items."
+                            @bind-Value="FollowerResourceRandomizationEnabled"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("FollowerResourceRandomizationEnabled") ||
+                                                MainLayout.pendingChanges.Contains("FollowerMedRateMaxChance") ||
+                                                MainLayout.pendingChanges.Contains("FollowerMedRateUsagePercent") ||
+                                                MainLayout.pendingChanges.Contains("FollowerFoodRateMaxChance") ||
+                                                MainLayout.pendingChanges.Contains("FollowerFoodRateUsagePercent"))"
+                            IsNonDefault="@(!FollowerResourceRandomizationEnabled ||
+                                            FollowerMedRateMaxChance != 25 ||
+                                            FollowerMedRateUsagePercent != 25 ||
+                                            FollowerFoodRateMaxChance != 25 ||
+                                            FollowerFoodRateUsagePercent != 25)"
+                            OnUndo="UndoResourceRandomization"
+                            OnDefault="DefaultResourceRandomization" />
+
+                        <MedicalFoodValues
+                            @bind-MedMaxChance="FollowerMedRateMaxChance"
+                            @bind-MedUsagePercent="FollowerMedRateUsagePercent"
+                            @bind-FoodMaxChance="FollowerFoodRateMaxChance"
+                            @bind-FoodUsagePercent="FollowerFoodRateUsagePercent"
+                            Disabled="@(!FollowerResourceRandomizationEnabled)" />
+
+                        <MudSwitchTT
+                            Label="Weapon Durability Changes"
+                            TooltipText="Allows configurable weapon durability."
+                            @bind-Value="FollowerWeaponDurabilityEnabled"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("FollowerWeaponDurabilityEnabled") ||
+                                               MainLayout.pendingChanges.Contains("FollowerWeaponDurabilityMin") ||
+                                               MainLayout.pendingChanges.Contains("FollowerWeaponDurabilityMax") ||
+                                               MainLayout.pendingChanges.Contains("FollowerWeaponDurabilityMinDelta") ||
+                                               MainLayout.pendingChanges.Contains("FollowerWeaponDurabilityMaxDelta") ||
+                                               MainLayout.pendingChanges.Contains("FollowerWeaponDurabilityEnhancementChance"))"
+                            IsNonDefault="@(!FollowerWeaponDurabilityEnabled ||
+                                          FollowerWeaponDurabilityMin != 90 ||
+                                          FollowerWeaponDurabilityMax != 100 ||
+                                          FollowerWeaponDurabilityMinDelta != 0 ||
+                                          FollowerWeaponDurabilityMaxDelta != 15 ||
+                                          FollowerWeaponDurabilityEnhancementChance != 0)"
+                            OnUndo="UndoWeaponDurability"
+                            OnDefault="DefaultWeaponDurability" />
+
+                        <DurabilityValues
+                            Label="Weapon"
+                            @bind-Min="FollowerWeaponDurabilityMin"
+                            @bind-Max="FollowerWeaponDurabilityMax"
+                            @bind-MinDelta="FollowerWeaponDurabilityMinDelta"
+                            @bind-MaxDelta="FollowerWeaponDurabilityMaxDelta"
+                            MinLimitPercent="FollowerWeaponDurabilityMinLimitPercent"
+                            MaxLimitPercent="FollowerWeaponDurabilityMaxLimitPercent"
+                            Disabled="@(!FollowerWeaponDurabilityEnabled)" />
+
+                        <MudSliderChildTT
+                            Label="Enhancement Chance"
+                            TooltipText="This is the chance that bot weapons have an enhancement applied to them."
+                            @bind-Value="FollowerWeaponDurabilityEnhancementChance"
+                            Min="0"
+                            Max="100"
+                            Disabled="@(!FollowerWeaponDurabilityEnabled)" />
+
+                        <MudSwitchTT
+                            Label="Armour Durability Changes"
+                            TooltipText="Allows configurable armour durability."
+                            @bind-Value="FollowerArmourDurabilityEnabled"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("FollowerArmourDurabilityEnabled") ||
+                                               MainLayout.pendingChanges.Contains("FollowerArmourDurabilityMin") ||
+                                               MainLayout.pendingChanges.Contains("FollowerArmourDurabilityMax") ||
+                                               MainLayout.pendingChanges.Contains("FollowerArmourDurabilityMinDelta") ||
+                                               MainLayout.pendingChanges.Contains("FollowerArmourDurabilityMaxDelta"))"
+                            IsNonDefault="@(!FollowerArmourDurabilityEnabled ||
+                                          FollowerArmourDurabilityMin != 90 ||
+                                          FollowerArmourDurabilityMax != 100 ||
+                                          FollowerArmourDurabilityMinDelta != 0 ||
+                                          FollowerArmourDurabilityMaxDelta != 15)"
+                            OnUndo="UndoArmourDurability"
+                            OnDefault="DefaultArmourDurability" />
+
+                        <DurabilityValues
+                            Label="Armour"
+                            @bind-Min="FollowerArmourDurabilityMin"
+                            @bind-Max="FollowerArmourDurabilityMax"
+                            @bind-MinDelta="FollowerArmourDurabilityMinDelta"
+                            @bind-MaxDelta="FollowerArmourDurabilityMaxDelta"
+                            MinLimitPercent="FollowerArmourDurabilityMinLimitPercent"
+                            MaxLimitPercent="FollowerArmourDurabilityMaxLimitPercent"
+                            Disabled="@(!FollowerArmourDurabilityEnabled)" />
+
+                    </MudGrid>
+                </MudExpansionPanel>
+            }
+        </MudExpansionPanels>
+    </MudContainer>
+</MudMainContent>
+
+@code {
+    #region ENABLE / DISABLE
+    private bool FollowerEnabled
+    {
+        get => ModConfig.Config.FollowerBots.Enable;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.FollowerBots.Enable, nameof(FollowerEnabled));
+            ModConfig.Config.FollowerBots.Enable = value;
+        }
+    }
+    private void UndoFollowerBots() => FollowerEnabled = ModConfig.OriginalConfig.FollowerBots.Enable;
+    private void DefaultFollowerBots() => FollowerEnabled = true;
+    #endregion
+    #region LOOT
+    private bool FollowerLootEnabled
+    {
+        get => ModConfig.Config.FollowerBots.LootConfig.Enable;
+        set
+        {
+            ModConfig.Config.FollowerBots.LootConfig.Enable = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.FollowerBots.LootConfig.Enable, nameof(FollowerLootEnabled));
+        }
+    }
+    private List<string> FollowerLootBlacklist => ModConfig.Config.FollowerBots.LootConfig.Blacklist;
+    private void UndoLoot()
+    {
+        FollowerLootEnabled = ModConfig.OriginalConfig.FollowerBots.LootConfig.Enable;
+        FollowerLootBlacklist.Clear();
+        foreach (var item in ModConfig.OriginalConfig.FollowerBots.LootConfig.Blacklist)
+        {
+            FollowerLootBlacklist.Add(item);
+        }
+        MainLayout.pendingChanges.Remove("FollowerLootBlacklist");
+    }
+    private void DefaultLoot()
+    {
+        FollowerLootEnabled = true;
+        FollowerLootBlacklist.Clear();
+        MainLayout.pendingChanges.Add("FollowerLootBlacklist");
+    }
+    #endregion
+    #region REROLL
+    private bool FollowerWeaponAmmunitionRollEnabled
+    {
+        get => ModConfig.Config.FollowerBots.RerollConfig.Enable;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.FollowerBots.RerollConfig.Enable, nameof(FollowerWeaponAmmunitionRollEnabled));
+            ModConfig.Config.FollowerBots.RerollConfig.Enable = value;
+            ModConfig.Config.FollowerBots.ToploadConfig.Enable = !value;
+        }
+    }
+    private int FollowerWeaponAmmunitionRollChance
+    {
+        get => ModConfig.Config.FollowerBots.RerollConfig.Chance;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.FollowerBots.RerollConfig.Chance, nameof(FollowerWeaponAmmunitionRollChance));
+            ModConfig.Config.FollowerBots.RerollConfig.Chance = value;
+        }
+    }
+    private void UndoRollAmmunitionEnabled()
+    {
+        FollowerWeaponAmmunitionRollEnabled = ModConfig.OriginalConfig.FollowerBots.RerollConfig.Enable;
+        FollowerWeaponAmmunitionRollChance = ModConfig.OriginalConfig.FollowerBots.RerollConfig.Chance;
+        FollowerWeaponToploadEnabled = ModConfig.OriginalConfig.FollowerBots.ToploadConfig.Enable;
+        FollowerWeaponToploadChance = ModConfig.OriginalConfig.FollowerBots.ToploadConfig.Chance;
+        FollowerWeaponToploadPercent = ModConfig.OriginalConfig.FollowerBots.ToploadConfig.Percent;
+    }
+    private void DefaultRollAmmunitionEnabled()
+    {
+        FollowerWeaponAmmunitionRollEnabled = true;
+        FollowerWeaponAmmunitionRollChance = 50;
+        FollowerWeaponToploadEnabled = false;
+        FollowerWeaponToploadChance = 30;
+        FollowerWeaponToploadPercent = 30;
+    }
+    #endregion
+    #region TOPLOAD
+    private bool FollowerWeaponToploadEnabled
+    {
+        get => ModConfig.Config.FollowerBots.ToploadConfig.Enable;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.FollowerBots.ToploadConfig.Enable, nameof(FollowerWeaponToploadEnabled));
+            ModConfig.Config.FollowerBots.ToploadConfig.Enable = value;
+            ModConfig.Config.FollowerBots.RerollConfig.Enable = !value;
+        }
+    }
+    private int FollowerWeaponToploadChance
+    {
+        get => ModConfig.Config.FollowerBots.ToploadConfig.Chance;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.FollowerBots.ToploadConfig.Chance, nameof(FollowerWeaponToploadChance));
+            ModConfig.Config.FollowerBots.ToploadConfig.Chance = value;
+        }
+    }
+    private int FollowerWeaponToploadPercent
+    {
+        get => ModConfig.Config.FollowerBots.ToploadConfig.Percent;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.FollowerBots.ToploadConfig.Percent, nameof(FollowerWeaponToploadPercent));
+            ModConfig.Config.FollowerBots.ToploadConfig.Percent = value;
+        }
+    }
+    private void UndoToploadEnabled()
+    {
+        FollowerWeaponAmmunitionRollEnabled = ModConfig.OriginalConfig.FollowerBots.RerollConfig.Enable;
+        FollowerWeaponAmmunitionRollChance = ModConfig.OriginalConfig.FollowerBots.RerollConfig.Chance;
+        FollowerWeaponToploadEnabled = ModConfig.OriginalConfig.FollowerBots.ToploadConfig.Enable;
+        FollowerWeaponToploadChance = ModConfig.OriginalConfig.FollowerBots.ToploadConfig.Chance;
+        FollowerWeaponToploadPercent = ModConfig.OriginalConfig.FollowerBots.ToploadConfig.Percent;
+    }
+    private void DefaultToploadEnabled()
+    {
+        FollowerWeaponAmmunitionRollEnabled = true;
+        FollowerWeaponAmmunitionRollChance = 50;
+        FollowerWeaponToploadEnabled = false;
+        FollowerWeaponToploadChance = 30;
+        FollowerWeaponToploadPercent = 30;
+    }
+    #endregion
+    #region PLATE CLASS SELECTION LIMITER
+    private bool SkipBackPlateIfMissingFrontPlate
+    {
+        get => ModConfig.Config.FollowerBots.SkipBackPlateIfMissingFrontPlate;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.FollowerBots.SkipBackPlateIfMissingFrontPlate, nameof(SkipBackPlateIfMissingFrontPlate));
+            ModConfig.Config.FollowerBots.SkipBackPlateIfMissingFrontPlate = value;
+        }
+    }
+    private void UndoSkipBackPlateIfMissingFrontPlate() => SkipBackPlateIfMissingFrontPlate = ModConfig.OriginalConfig.FollowerBots.SkipBackPlateIfMissingFrontPlate;
+    private void DefaultSkipBackPlateIfMissingFrontPlate() => SkipBackPlateIfMissingFrontPlate = false;
+    private bool LimitPlateClassToFrontPlateClass
+    {
+        get => ModConfig.Config.FollowerBots.LimitPlateClassToFrontPlateClass;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.FollowerBots.LimitPlateClassToFrontPlateClass, nameof(LimitPlateClassToFrontPlateClass));
+            ModConfig.Config.FollowerBots.LimitPlateClassToFrontPlateClass = value;
+        }
+    }
+    private void UndoLimitPlateClassToFrontPlateClass() => LimitPlateClassToFrontPlateClass = ModConfig.OriginalConfig.FollowerBots.LimitPlateClassToFrontPlateClass;
+    private void DefaultLimitPlateClassToFrontPlateClass() => LimitPlateClassToFrontPlateClass = false;
+    #endregion
+    #region RESOURCE RANDOMIZATION
+    private bool FollowerResourceRandomizationEnabled
+    {
+        get => ModConfig.Config.FollowerBots.ResourceRandomization.Enable;
+        set
+        {
+            ModConfig.Config.FollowerBots.ResourceRandomization.Enable = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.FollowerBots.ResourceRandomization.Enable, nameof(FollowerResourceRandomizationEnabled));
+        }
+    }
+    private int FollowerFoodRateMaxChance
+    {
+        get => ModConfig.Config.FollowerBots.ResourceRandomization.FoodRateMaxChance;
+        set
+        {
+            ModConfig.Config.FollowerBots.ResourceRandomization.FoodRateMaxChance = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.FollowerBots.ResourceRandomization.FoodRateMaxChance, nameof(FollowerFoodRateMaxChance));
+        }
+    }
+    private int FollowerFoodRateUsagePercent
+    {
+        get => ModConfig.Config.FollowerBots.ResourceRandomization.FoodRateUsagePercent;
+        set
+        {
+            ModConfig.Config.FollowerBots.ResourceRandomization.FoodRateUsagePercent = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.FollowerBots.ResourceRandomization.FoodRateUsagePercent, nameof(FollowerFoodRateUsagePercent));
+        }
+    }
+    private int FollowerMedRateMaxChance
+    {
+        get => ModConfig.Config.FollowerBots.ResourceRandomization.MedRateMaxChance;
+        set
+        {
+            ModConfig.Config.FollowerBots.ResourceRandomization.MedRateMaxChance = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.FollowerBots.ResourceRandomization.MedRateMaxChance, nameof(FollowerMedRateMaxChance));
+        }
+    }
+    private int FollowerMedRateUsagePercent
+    {
+        get => ModConfig.Config.FollowerBots.ResourceRandomization.MedRateUsagePercent;
+        set
+        {
+            ModConfig.Config.FollowerBots.ResourceRandomization.MedRateUsagePercent = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.FollowerBots.ResourceRandomization.MedRateUsagePercent, nameof(FollowerMedRateUsagePercent));
+        }
+    }
+    private void UndoResourceRandomization()
+    {
+        FollowerResourceRandomizationEnabled = ModConfig.OriginalConfig.FollowerBots.ResourceRandomization.Enable;
+        FollowerFoodRateMaxChance = ModConfig.OriginalConfig.FollowerBots.ResourceRandomization.FoodRateMaxChance;
+        FollowerFoodRateUsagePercent = ModConfig.OriginalConfig.FollowerBots.ResourceRandomization.FoodRateUsagePercent;
+        FollowerMedRateMaxChance = ModConfig.OriginalConfig.FollowerBots.ResourceRandomization.MedRateMaxChance;
+        FollowerMedRateUsagePercent = ModConfig.OriginalConfig.FollowerBots.ResourceRandomization.MedRateUsagePercent;
+    }
+    private void DefaultResourceRandomization()
+    {
+        FollowerResourceRandomizationEnabled = true;
+        FollowerFoodRateMaxChance = 25;
+        FollowerFoodRateUsagePercent = 25;
+        FollowerMedRateMaxChance = 25;
+        FollowerMedRateUsagePercent = 25;
+    }
+    #endregion
+    #region DURABILITY
+    private bool FollowerWeaponDurabilityEnabled
+    {
+        get => ModConfig.Config.FollowerBots.WeaponDurability.Enable;
+        set
+        {
+            ModConfig.Config.FollowerBots.WeaponDurability.Enable = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.FollowerBots.WeaponDurability.Enable, nameof(FollowerWeaponDurabilityEnabled));
+        }
+    }
+    private int FollowerWeaponDurabilityMin
+    {
+        get => ModConfig.Config.FollowerBots.WeaponDurability.Min;
+        set
+        {
+            ModConfig.Config.FollowerBots.WeaponDurability.Min = value;
+            ModConfig.Config.FollowerBots.WeaponDurability.MinLimitPercent = value - ModConfig.Config.FollowerBots.WeaponDurability.MaxDelta;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.FollowerBots.WeaponDurability.Min, nameof(FollowerWeaponDurabilityMin));
+        }
+    }
+    private int FollowerWeaponDurabilityMax
+    {
+        get => ModConfig.Config.FollowerBots.WeaponDurability.Max;
+        set
+        {
+            ModConfig.Config.FollowerBots.WeaponDurability.Max = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.FollowerBots.WeaponDurability.Max, nameof(FollowerWeaponDurabilityMax));
+        }
+    }
+    private int FollowerWeaponDurabilityMinDelta
+    {
+        get => ModConfig.Config.FollowerBots.WeaponDurability.MinDelta;
+        set
+        {
+            ModConfig.Config.FollowerBots.WeaponDurability.MinDelta = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.FollowerBots.WeaponDurability.MinDelta, nameof(FollowerWeaponDurabilityMinDelta));
+        }
+    }
+    private int FollowerWeaponDurabilityMaxDelta
+    {
+        get => ModConfig.Config.FollowerBots.WeaponDurability.MaxDelta;
+        set
+        {
+            ModConfig.Config.FollowerBots.WeaponDurability.MaxDelta = value;
+            ModConfig.Config.FollowerBots.WeaponDurability.MinLimitPercent = ModConfig.Config.FollowerBots.WeaponDurability.Min - value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.FollowerBots.WeaponDurability.MaxDelta, nameof(FollowerWeaponDurabilityMaxDelta));
+        }
+    }
+    private int FollowerWeaponDurabilityMinLimitPercent => ModConfig.Config.FollowerBots.WeaponDurability.MinLimitPercent;
+    private int FollowerWeaponDurabilityMaxLimitPercent => ModConfig.Config.FollowerBots.WeaponDurability.Max - ModConfig.Config.FollowerBots.WeaponDurability.MinDelta;
+    private int FollowerWeaponDurabilityEnhancementChance
+    {
+        get => ModConfig.Config.FollowerBots.WeaponDurability.EnhancementChance;
+        set
+        {
+            ModConfig.Config.FollowerBots.WeaponDurability.EnhancementChance = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.FollowerBots.WeaponDurability.EnhancementChance, nameof(FollowerWeaponDurabilityEnhancementChance));
+        }
+    }
+    private void UndoWeaponDurability()
+    {
+        FollowerWeaponDurabilityEnabled = ModConfig.OriginalConfig.FollowerBots.WeaponDurability.Enable;
+        FollowerWeaponDurabilityMin = ModConfig.OriginalConfig.FollowerBots.WeaponDurability.Min;
+        FollowerWeaponDurabilityMax = ModConfig.OriginalConfig.FollowerBots.WeaponDurability.Max;
+        FollowerWeaponDurabilityMinDelta = ModConfig.OriginalConfig.FollowerBots.WeaponDurability.MinDelta;
+        FollowerWeaponDurabilityMaxDelta = ModConfig.OriginalConfig.FollowerBots.WeaponDurability.MaxDelta;
+        FollowerWeaponDurabilityEnhancementChance = ModConfig.OriginalConfig.FollowerBots.WeaponDurability.EnhancementChance;
+    }
+    private void DefaultWeaponDurability()
+    {
+        FollowerWeaponDurabilityEnabled = true;
+        FollowerWeaponDurabilityMin = 90;
+        FollowerWeaponDurabilityMax = 100;
+        FollowerWeaponDurabilityMinDelta = 0;
+        FollowerWeaponDurabilityMaxDelta = 15;
+        FollowerWeaponDurabilityEnhancementChance = 0;
+    }
+    private bool FollowerArmourDurabilityEnabled
+    {
+        get => ModConfig.Config.FollowerBots.ArmourDurability.Enable;
+        set
+        {
+            ModConfig.Config.FollowerBots.ArmourDurability.Enable = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.FollowerBots.ArmourDurability.Enable, nameof(FollowerArmourDurabilityEnabled));
+        }
+    }
+    private int FollowerArmourDurabilityMin
+    {
+        get => ModConfig.Config.FollowerBots.ArmourDurability.Min;
+        set
+        {
+            ModConfig.Config.FollowerBots.ArmourDurability.Min = value;
+            ModConfig.Config.FollowerBots.ArmourDurability.MinLimitPercent = value - ModConfig.Config.FollowerBots.ArmourDurability.MaxDelta;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.FollowerBots.ArmourDurability.Min, nameof(FollowerArmourDurabilityMin));
+        }
+    }
+    private int FollowerArmourDurabilityMax
+    {
+        get => ModConfig.Config.FollowerBots.ArmourDurability.Max;
+        set
+        {
+            ModConfig.Config.FollowerBots.ArmourDurability.Max = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.FollowerBots.ArmourDurability.Max, nameof(FollowerArmourDurabilityMax));
+        }
+    }
+    private int FollowerArmourDurabilityMinDelta
+    {
+        get => ModConfig.Config.FollowerBots.ArmourDurability.MinDelta;
+        set
+        {
+            ModConfig.Config.FollowerBots.ArmourDurability.MinDelta = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.FollowerBots.ArmourDurability.MinDelta, nameof(FollowerArmourDurabilityMinDelta));
+        }
+    }
+    private int FollowerArmourDurabilityMaxDelta
+    {
+        get => ModConfig.Config.FollowerBots.ArmourDurability.MaxDelta;
+        set
+        {
+            ModConfig.Config.FollowerBots.ArmourDurability.MaxDelta = value;
+            ModConfig.Config.FollowerBots.ArmourDurability.MinLimitPercent = ModConfig.Config.FollowerBots.ArmourDurability.Min - value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.FollowerBots.ArmourDurability.MaxDelta, nameof(FollowerArmourDurabilityMaxDelta));
+        }
+    }
+    private int FollowerArmourDurabilityMinLimitPercent => ModConfig.Config.FollowerBots.ArmourDurability.MinLimitPercent;
+    private int FollowerArmourDurabilityMaxLimitPercent => ModConfig.Config.FollowerBots.ArmourDurability.Max - ModConfig.Config.FollowerBots.ArmourDurability.MinDelta;
+    private void UndoArmourDurability()
+    {
+        FollowerArmourDurabilityEnabled = ModConfig.OriginalConfig.FollowerBots.ArmourDurability.Enable;
+        FollowerArmourDurabilityMin = ModConfig.OriginalConfig.FollowerBots.ArmourDurability.Min;
+        FollowerArmourDurabilityMax = ModConfig.OriginalConfig.FollowerBots.ArmourDurability.Max;
+        FollowerArmourDurabilityMinDelta = ModConfig.OriginalConfig.FollowerBots.ArmourDurability.MinDelta;
+        FollowerArmourDurabilityMaxDelta = ModConfig.OriginalConfig.FollowerBots.ArmourDurability.MaxDelta;
+    }
+    private void DefaultArmourDurability()
+    {
+        FollowerArmourDurabilityEnabled = true;
+        FollowerArmourDurabilityMin = 90;
+        FollowerArmourDurabilityMax = 100;
+        FollowerArmourDurabilityMinDelta = 0;
+        FollowerArmourDurabilityMaxDelta = 15;
+    }
+    #endregion
+
+    #region CASCADING PARAMETERS
+    [CascadingParameter] public MainLayout? Layout { get; set; }
+    #endregion
+}

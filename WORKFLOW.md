@@ -56,7 +56,42 @@ Convenção de artefatos: `NNN-<slug>-MM-tipo[-NN].md` — ordem visual = ordem 
 | [/prepare-mod-for-publish](.claude/commands/prepare-mod-for-publish.md) | mod a ser publicado a público | `mods/<mod>/publish/PUBLISH-AUDIT-NN.md` | **auxiliar** (fora do ciclo linear) — prontidão para o SPT Forge em 5 fases com portão: elegibilidade (licença OSI, permissão do autor original, política de IA, assets) → código → identidade TRL → pacote/página → interface web. Fase 1 reprova cedo e para |
 | [/analyze-memory-leak](.claude/commands/analyze-memory-leak.md) | mod com código em `modded/` | `MEMORY-LEAK-review-NN.md` | **auxiliar** (fora do ciclo linear) — auditoria estática de leak: mecanismo (LIFE/EVT/STAT/UNITY/DISP/THRD/HOT/SRV) × taxa de acúmulo (per-frame/raid/event/boot). Foco no OOM do Fika headless (acumula raid a raid); confirmação in-game obrigatória |
 | [/document-mod](.claude/commands/document-mod.md) | mod existe | `mods/<mod>/docs/` (índice README.md + artigos temáticos + Mermaid + validação) | **auxiliar** (fora do ciclo linear) — documentação técnica e funcional modular e completa de todas as features e subsistemas de um mod |
-| [/audit-mod-code](.claude/commands/audit-mod-code.md) | mod com código em `modded/` ou `original/` | `mods/<mod>/docs/relatorio-auditoria-codigo-NN.md` | **auxiliar** (fora do ciclo linear) — auditoria técnica estática profunda de classes/métodos, validação cruzada em `references/` (EFT 0.16.9/SPT 4.0/FIKA), necessidade de `Update()` vs eventos/throttling, vazamento de RAM/GC e antipadrões |
+| [/audit-mod-code](.claude/commands/audit-mod-code.md) | mod com código em `modded/` ou `original/` | `mods/<mod>/docs/relatorio-auditoria-codigo-NN.md` | **auxiliar** (fora do ciclo linear) — auditoria técnica estática profunda de classes/métodos, validação cruzada em `references/` (EFT 0.16.9/SPT 4.0/FIKA), necessidade de `Update()` vs eventos/throttling, vazamento de RAM/GC e antipadrões. Modo `--perf` = auditoria de performance (skill `spt-performance-analysis`): modelo de custo, panorama de execução, evidência Forte/Suspeita/Preventiva, instrumentação |
+| [/optimize-mod-performance](.claude/commands/optimize-mod-performance.md) | mod com código | `relatorio-auditoria-codigo-NN.md` (anotado) + `backlog/NNN-perf-*/` | **auxiliar** (fora do ciclo linear) — pipeline de engenharia de performance em 4 fases com portões: investigação (via `/audit-mod-code --perf`) → plano técnico (achados aceitos viram **um** item de backlog com spec de **não-regressão** + metas medíveis) → implementação (ciclo normal `/code-mod`→`/code-review`→`/compile-mod`, refs `// ref: AUD-NN-MM`) → validação **medida** antes/depois (AP-06) |
+
+## Fluxo auxiliar composto: auditoria + otimização de performance
+
+Pipeline de **engenharia de performance** sobre um mod, executável por qualquer sessão sem contexto prévio. Este resumo é o mapa; os detalhes vivem em [/audit-mod-code](.claude/commands/audit-mod-code.md) (modo `--perf`), [/optimize-mod-performance](.claude/commands/optimize-mod-performance.md) e na skill `spt-performance-analysis` (aponta, não duplica). Pergunta que o processo responde: *"o que este mod está fazendo mais vezes, por mais tempo, para mais entidades ou por mais ciclos de vida do que precisa — e quando deveria parar, ele para?"*
+
+```
+Fase 1  INVESTIGAÇÃO   /audit-mod-code <mod> --perf           (read-only)
+        → mods/<mod>/docs/relatorio-auditoria-codigo-NN.md   (achados AUD-NN-MM)
+        ⏸ PORTÃO: usuário marca a Decisão de cada achado
+Fase 2  PLANO          /optimize-mod-performance <mod> --fase 2
+        → 1 item de backlog "perf" por rodada: 01-spec com perfil de NÃO-REGRESSÃO
+          (comportamento atual preservado + metas medíveis; mudança perceptível só
+          como AC explícito com trade-off) + 02-spec-tech = plano por achado
+        ⏸ PORTÃO: /review-technical-spec até zerar 🔴 (aprovação do plano)
+Fase 3  IMPLEMENTAÇÃO  ciclo normal: /code-mod → /code-review → /apply-code-review
+        → /compile-mod   (código cita // ref: AUD-NN-MM; dizer se client/server/ambos)
+Fase 4  VALIDAÇÃO      medição antes/depois em cenário pareado + matriz de lifecycle
+        → achados anotados ✅ com números · instrumentação removida/desligada
+        → /update-memory <mod> · /update-mod-graph <mod>
+```
+
+A sessão executora **nunca pula portão**: sem Decisões marcadas não há Fase 2; com 🔴 aberto na review técnica não há Fase 3; sem medição não se declara sucesso (AP-06). Prompt de disparo para uma sessão executora:
+
+```
+Rodar o processo de auditoria + otimização de performance no mod <MOD>, seguindo
+WORKFLOW.md § "Fluxo auxiliar composto: auditoria + otimização de performance".
+1. Fase 1: /audit-mod-code <MOD> --perf (read-only). Reporte o resumo e PARE —
+   vou marcar as Decisões no relatório.
+2. Depois das Decisões: /optimize-mod-performance <MOD> --fase 2 e siga o ciclo
+   normal até /compile-mod.
+3. Feche com a Fase 4 (validação MEDIDA antes/depois) e /update-memory.
+Não pule portões; não otimize sem Decisão marcada; não remova funcionalidade sem
+trade-off declarado na spec.
+```
 
 ## Camadas transversais
 
@@ -71,6 +106,7 @@ Convenção de artefatos: `NNN-<slug>-MM-tipo[-NN].md` — ordem visual = ordem 
 | `graph-code-navigation` | spec técnica, reviews, code — grafo vs Grep, receitas de query, "grafo aponta, leitura prova" |
 | `trl-mod-publishing` | `/prepare-mod-for-publish` + qualquer tarefa que renomeie/rebrandeie um mod ou fale em publicar/distribuir — regras do SPT Forge (licença OSI, permissão de autor, fonte pública, rede documentada) e o padrão de identidade TRL (GUID, plugin, assembly, pasta, `.cfg`, versão) |
 | `spt-memory-leak-analysis` | `/analyze-memory-leak` + spec técnica/reviews que alocam estado de raid — taxonomia de leak (mecanismo × taxa de acúmulo), OOM do Fika headless, padrões preventivos de arquitetura |
+| `spt-performance-analysis` | `/audit-mod-code --perf` e `/optimize-mod-performance` + spec técnica/reviews com hot path (patch em método quente, trabalho por-frame/por-bot, timers/polling) — modelo de custo (frequência × entidades × duração × acúmulo), taxonomia de superfícies de execução, estimativa de frequência de alvo Harmony, auditoria de config, instrumentação temporária, validação medida antes/depois |
 
 ### Documentação técnica canônica
 

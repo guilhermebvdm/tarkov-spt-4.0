@@ -43,15 +43,40 @@ namespace TRLDynamicSpawn.Components
 
         private void Start()
         {
-            _teleportCooldowns.Clear();
-            _despawnRoutine = StartCoroutine(DespawnLoop());
+            // ref: AUD-01-02 — the loop is no longer born with the process; it is born with the raid
+            // (RaidLifecycle.OnRaidStart → StartLoop) and stopped by the raid-end hooks (StopLoop).
+        }
+
+        /// <summary>Idempotent: one DespawnLoop per raid, never two. ref: AUD-01-02</summary>
+        public static void StartLoop()
+        {
+            if (_instance == null) return;
+            if (_instance._despawnRoutine != null) return;
+            _teleportCooldowns.Clear();                 // NR-4: previously done in Start() once per process
+            _instance._currentLocation = null;
+            _instance._despawnRoutine = _instance.StartCoroutine(_instance.DespawnLoop());
+        }
+
+        /// <summary>Stops the raid loop. No-op when not running. ref: AUD-01-02</summary>
+        public static void StopLoop()
+        {
+            if (_instance == null || _instance._despawnRoutine == null) return;
+            _instance.StopCoroutine(_instance._despawnRoutine);
+            _instance._despawnRoutine = null;
         }
 
         private IEnumerator DespawnLoop()
         {
             while (true)
             {
-                _serverConfig = ServerConfigProvider.Config;
+                // Safety net: if the raid ended without the hook (should not happen), exit without touching HTTP.
+                if (!Singleton<GameWorld>.Instantiated)
+                {
+                    _despawnRoutine = null;
+                    yield break;
+                }
+
+                _serverConfig = ServerConfigProvider.Config;   // raid-scoped cache hit (no HTTP) — ref: AUD-01-01
 
                 // Config can be null if not loaded yet
                 if (_serverConfig == null || !TRLDynamicSpawn.Helpers.Settings.masterDespawnToggle.Value)

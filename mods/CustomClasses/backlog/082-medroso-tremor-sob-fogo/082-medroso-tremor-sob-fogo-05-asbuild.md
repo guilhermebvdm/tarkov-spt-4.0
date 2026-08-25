@@ -30,7 +30,20 @@ Tipos ofuscados **reconfirmados no decompile atual** (sub-agent): `GClass897`(Bu
 
 **Verificado limpo:** sem vazamento 075 (Trigger só mira MainPlayer; dano gateia IsYourPlayer; near-miss só afeta local); hook estático idempotente + não dispara no menu; sem persistência entre raids (Time.time monotônico + ResetRaid + HC recriado por raid); hot path com early-out cedo; sem div/0 (guard denom≤0). Nota 🟢: scav-raid aplica (a classe é atributo de conta side-agnóstico — igual a todo perk `IsLocalClass`, gap mod-wide se indesejado).
 
+## Bugfix pós-release — v0.16.8 (2026-08-22)
+
+**Sintoma (report in-game de um player):** erro vermelho no console **toda vez que o tremor dispara**. Sem log capturado.
+
+**Causa raiz (diagnóstico via decompile):** o `ScavengerTremor` era uma classe **top-level do mod** herdando `ActiveHealthController.GClass3008`. O EFT monta o registro de serialização de efeitos (`GClass3058.Dictionary_0`, que mapeia efeito → byte na rede/save) **exclusivamente** a partir dos tipos **aninhados** de `ActiveHealthController` (`GetNestedTypes(NonPublic)`, ref: `GClass3058.cs:55`). Como `"ScavengerTremor"` não está nesse dicionário, `GClass3059.Make(effect)` (`effect.GetType().Name`) lançava **`KeyNotFoundException`** — **fora** do try/catch do mod, a cada serialização.
+- **FIKA coop (nosso ambiente):** o sync de saúde roda ao **adicionar** o efeito (`method_28`, `_sendNetworkSyncPackets`) → erro a cada tremor. Explica o report.
+- **SPT solo:** `_sendNetworkSyncPackets=false` → só estouraria no `SerializeState()` (save). Por isso o port original (UnderFire) nunca acusou — dispara raro (Hit off por padrão, cooldown 180s) e roda solo.
+
+**Falsas pistas descartadas:** `GClass3019_0.Tremor` não é null (property que resolve o singleton do backend config, sempre carregado em raid) **e** nem era lido (os `DefaultDelay/ResidueTime` são código morto — o `AddEffect` recebe delay/work/residue explícitos, o `??` curto-circuita). Nenhum membro abstrato faltando; ciclo de vida por-frame limpo (o tremor visual é externo, via `EPhysicalCondition.Tremor` keyed por `GInterface361`).
+
+**Fix:** aplicar o **Tremor NATIVO** (tipo aninhado `protected`, já no registro) por reflexão sobre `AddEffect<T>` (`MakeGenericMethod`), cacheado 1× com fallback silencioso. Comportamento idêntico (também `GInterface331` → sem dedup, cooldown segue como trava; mesmo `EPhysicalCondition.Tremor`; mesmos params). Client-only.
+
 ## Histórico
 | Data | Evento |
 |---|---|
 | 2026-07-26 | Build via g-autodev; port do UnderFire (tipos reconfirmados); code-review CR#7 corrigido; UnderFire global off; 0.10.1 |
+| 2026-08-22 | **Bugfix v0.16.8**: `KeyNotFoundException` (erro vermelho por tremor, crítico no coop) — Tremor nativo via reflexão em vez de subclasse do mod. Commit `6ab034dc`. |

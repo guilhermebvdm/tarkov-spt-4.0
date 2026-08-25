@@ -796,60 +796,76 @@ namespace TRLDynamicSpawn.Patches
             return AccessTools.Method(typeof(BotProfileDataClass), nameof(BotProfileDataClass.ChooseProfile));
         }
 
+        /// <summary>
+        /// Tolerant profile choice for EVERY role (ref: AUD-01-04). Vanilla (BotProfileDataClass.cs:85-96) requires an exact
+        /// Side + Role + Difficulty match and, on a miss, BotsPresets.CreateProfile (BotsPresets.cs:170-189) generates 3 new
+        /// profiles of that exact combination — orphans that nobody consumes when the mod samples a per-wave difficulty.
+        /// Order: exact (Side+Role+Difficulty) → relaxed (Side+Role, any difficulty — AC-X1) → vanilla (nothing of this
+        /// Side+Role in the pool: generating is the right thing). PMC keeps its faction tolerance (Side OR Role), but the old
+        /// "any profile, even a Scav" fallback is dropped on purpose (AC-X5). Single pass, no LINQ. Logs gated (AUD-01-07).
+        /// </summary>
         [PatchPrefix]
         private static bool PatchPrefix(ref Profile __result, BotProfileDataClass __instance, List<Profile> profiles2Select, bool withDelete)
         {
-            if (__instance == null) return true;
+            if (__instance == null || profiles2Select == null || profiles2Select.Count == 0) return true;
 
-            string requestedRole = __instance.WildSpawnType_0.ToString();
-            Plugin.LogSource.LogWarning($"[TRLDynamicSpawn Logger] ChooseProfile CALLED for Role: {requestedRole} (profilesInList: {profiles2Select?.Count ?? 0})");
+            var role = __instance.WildSpawnType_0;   // ref: BotProfileDataClass.cs:16/:19/:43 — public fields; Side is EPlayerSide? (lifted ==, no .Value)
+            var side = __instance.Side;
+            var diff = __instance.BotDifficulty_0;
+            bool debug = Settings.enableDebugLogs.Value;   // gate BEFORE formatting — ref: AUD-01-07
 
-            if (profiles2Select != null && profiles2Select.Count > 0)
+            if (debug)
             {
-                int sampleCount = System.Math.Min(5, profiles2Select.Count);
-                for (int i = 0; i < sampleCount; i++)
+                Plugin.LogSource.LogInfo($"[TRLDynamicSpawn Logger] ChooseProfile CALLED for Role: {role} ({diff}) (profilesInList: {profiles2Select.Count})");
+                int sample = System.Math.Min(5, profiles2Select.Count);
+                for (int i = 0; i < sample; i++)
                 {
                     var p = profiles2Select[i];
-                    Plugin.LogSource.LogWarning($"   -> Available profile [{i}]: Name='{p?.Nickname}', Side={p?.Info?.Side}, Role={p?.Info?.Settings?.Role}");
+                    Plugin.LogSource.LogInfo($"   -> Available profile [{i}]: Name='{p?.Nickname}', Side={p?.Info?.Side}, Role={p?.Info?.Settings?.Role}, Diff={p?.Info?.Settings?.BotDifficulty}");
                 }
             }
 
-            if (profiles2Select == null || profiles2Select.Count == 0) return true;
+            bool isPmc = role == WildSpawnType.pmcUSEC || role == WildSpawnType.pmcBEAR;
+            Profile exact = null, relaxed = null;
+            int exactCount = 0, relaxedCount = 0;
 
-            // Se for PMC (USEC ou BEAR), aceitamos qualquer perfil de PMC cujo Side seja USEC/BEAR ou cuja Role seja sptUsec/sptBear/pmcUSEC/pmcBEAR.
-            if (__instance.WildSpawnType_0 == WildSpawnType.pmcUSEC || __instance.WildSpawnType_0 == WildSpawnType.pmcBEAR)
+            // Reservoir-style random pick: uniform among "exact" and among "relaxed" without building lists.
+            for (int i = 0; i < profiles2Select.Count; i++)
             {
-                bool isUsec = __instance.WildSpawnType_0 == WildSpawnType.pmcUSEC;
-                EPlayerSide targetSide = isUsec ? EPlayerSide.Usec : EPlayerSide.Bear;
+                var p = profiles2Select[i];
+                var info = p?.Info;
+                var st = info?.Settings;
+                if (info == null || st == null) continue;
 
-                var list = profiles2Select.Where(x => 
-                    x != null && x.Info != null && (
-                        x.Info.Side == targetSide || 
-                        x.Info.Settings?.Role == __instance.WildSpawnType_0 ||
-                        (isUsec && (x.Info.Settings?.Role.ToString().ToLower().Contains("usec") ?? false)) ||
-                        (!isUsec && (x.Info.Settings?.Role.ToString().ToLower().Contains("bear") ?? false))
-                    )
-                ).ToList();
+                bool roleMatch = isPmc ? PmcMatches(info, st, role) : (info.Side == side && st.Role == role);
+                if (!roleMatch) continue;
 
-                if (list.Count == 0)
+                relaxedCount++;
+                if (UnityEngine.Random.Range(0, relaxedCount) == 0) relaxed = p;
+                if (st.BotDifficulty == diff)
                 {
-                    Plugin.LogSource.LogWarning($"[TRLDynamicSpawn Logger] WARNING: No exact side match for {requestedRole}! Falling back to ANY profile in profiles2Select ({profiles2Select.Count} profiles).");
-                    list = profiles2Select.Where(x => x != null && x.Info != null).ToList();
-                }
-
-                if (list.Count > 0)
-                {
-                    Profile profile = list[UnityEngine.Random.Range(0, list.Count)];
-                    if (withDelete)
-                    {
-                        profiles2Select.Remove(profile);
-                    }
-                    __result = profile;
-                    Plugin.LogSource.LogWarning($"[TRLDynamicSpawn Logger] CHOSEN PMC PROFILE: '{profile.Nickname}' (Side: {profile.Info.Side}, Role: {profile.Info.Settings?.Role}) for {requestedRole}");
-                    return false; // Skips original method
+                    exactCount++;
+                    if (UnityEngine.Random.Range(0, exactCount) == 0) exact = p;
                 }
             }
-            return true;
+
+            Profile chosen = exact ?? relaxed;   // exact first (NR-4); relaxed only on a difficulty miss (AC-X1)
+            if (chosen == null) return true;     // nothing of this Side+Role → vanilla → null → LoadBots(3)
+
+            if (withDelete) profiles2Select.Remove(chosen);   // same semantics as vanilla BotProfileDataClass.cs:93-96 (CR-01-04)
+            __result = chosen;
+            if (debug)
+                Plugin.LogSource.LogInfo($"[TRLDynamicSpawn Logger] CHOSEN PROFILE: '{chosen.Nickname}' (Side={chosen.Info.Side}, Role={chosen.Info.Settings?.Role}, Diff={chosen.Info.Settings?.BotDifficulty}) for {role} ({diff}){(exact == null ? " [difficulty relaxed]" : "")}");
+            return false; // skips original method
+        }
+
+        // ref: EFT/Profile.cs:632 (InfoClass Info) · InfoClass.cs:123 (ProfileInfoSettingsClass Settings) · ProfileInfoSettingsClass.cs:7/:9 (Role, BotDifficulty)
+        // Side covers any USEC/BEAR profile regardless of Role; Role covers pmcUSEC/pmcBEAR (EFT/WildSpawnType.cs).
+        // No spt* roles exist in 0.16.9 — the old ToString().Contains() heuristic is dropped on purpose (PA-02-01).
+        private static bool PmcMatches(InfoClass info, ProfileInfoSettingsClass st, WildSpawnType requested)
+        {
+            EPlayerSide wantedSide = requested == WildSpawnType.pmcUSEC ? EPlayerSide.Usec : EPlayerSide.Bear;
+            return info.Side == wantedSide || st.Role == requested;
         }
     }
 

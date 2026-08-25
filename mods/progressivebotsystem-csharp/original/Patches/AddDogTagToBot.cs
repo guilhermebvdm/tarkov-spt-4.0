@@ -1,0 +1,132 @@
+﻿using SPTarkov.Reflection.Patching;
+using SPTarkov.Server.Core.DI;
+using SPTarkov.Server.Core.Utils;
+using System.Reflection;
+using HarmonyLib;
+using ProgressiveBotSystem.Globals;
+using SPTarkov.Common.Extensions;
+using SPTarkov.Server.Core.Constants;
+using SPTarkov.Server.Core.Generators;
+using SPTarkov.Server.Core.Helpers;
+using SPTarkov.Server.Core.Models.Common;
+using SPTarkov.Server.Core.Models.Eft.Common.Tables;
+using SPTarkov.Server.Core.Models.Enums;
+
+namespace ProgressiveBotSystem.Patches;
+
+public class AddDogTagToBotPatch : AbstractPatch
+{
+    protected override MethodBase GetTargetMethod()
+    {
+        return AccessTools.Method(typeof(BotGenerator),"AddDogtagToBot");
+    }
+
+    [PatchPrefix]
+    public static bool Prefix(BotBase bot)
+    {
+        // Recover and reset the PrestigeLevel from the GenerateBotLevel patch
+        if (bot.Info.TryGetExtensionData(out var extensionData))
+        {
+            if (extensionData.TryGetValue("PrestigeLevelData", out var prestigeLevelExt))
+            {
+                bot.Info.PrestigeLevel = Convert.ToInt32(prestigeLevelExt);
+            }
+        }
+        
+        Item inventoryItem = new()
+        {
+            Id = new MongoId(),
+            Template = GetDogtagTplByGameVersionAndSide(bot.Info!.Side!, bot.Info!.GameVersion!, bot.Info.PrestigeLevel),
+            ParentId = bot.Inventory!.Equipment,
+            SlotId = Slots.Dogtag,
+            Upd = new Upd { SpawnedInSession = true },
+        };
+
+        bot.Inventory!.Items!.Add(inventoryItem);
+        return false;
+    }
+
+    private static readonly Dictionary<string, Dictionary<MongoId, double>> BackportDogtagDictionary = new()
+    {
+        { "usec", new Dictionary<MongoId, double>
+            {
+                { ItemTpl.BARTER_DOGTAG_USEC, 7500 },
+                { new MongoId("68f15dbab2b53abd200b9378"), 500 }, // Square
+                { new MongoId("68f15e53103c5d9d4f022c78"), 500 }, // Melted
+                { new MongoId("5b9b9020e7ef6f5716480215"), 500 }, // Twitch
+                { new MongoId("68fb4143a854bc7ae80fad3e"), 500 }, // Preorder 1
+                { new MongoId("68fb4157b280c103230e3b3c"), 500 }, // Preorder 2
+            }
+        },
+        { "bear", new Dictionary<MongoId, double>
+            {
+                { ItemTpl.BARTER_DOGTAG_BEAR, 7500 },
+                { new MongoId("68f15cf222c8979ee308f495"), 500 }, // Square
+                { new MongoId("68f15e26f1aa7e100a0ca208"), 500 }, // Melted
+                { new MongoId("68f153aa7da590b6df0515da"), 500 }, // Twitch
+                { new MongoId("68fb41120760c7891606613c"), 500 }, // Preorder 1
+                { new MongoId("68fb412b0760c7891606613e"), 500 }, // Preorder 2
+            }
+        }
+    };
+
+    private static MongoId GetDogtagTplByGameVersionAndSide(string side, string gameVersion, int? prestigeLevel)
+    {
+        side = side.ToLowerInvariant();
+        var prestigeLevelRequested = prestigeLevel ?? 0;
+        var canUseWttBackportDogtags = ModConfig.WttBackport && ModConfig.Config.CompatibilityConfig.WttBackPortAllowDogtags;
+        
+        return side switch
+        {
+            "usec" => prestigeLevelRequested switch
+            {
+                1 => ItemTpl.BARTER_DOGTAG_USEC_PRESTIGE_1,
+                2 => ItemTpl.BARTER_DOGTAG_USEC_PRESTIGE_2,
+                3 => ItemTpl.BARTER_DOGTAG_USEC_PRESTIGE_3,
+                4 => ItemTpl.BARTER_DOGTAG_USEC_PRESTIGE_4,
+                5 => canUseWttBackportDogtags ? new MongoId("68f0f64f183146ea530330aa") : ItemTpl.BARTER_DOGTAG_USEC_PRESTIGE_4,
+                >= 6 => canUseWttBackportDogtags? new MongoId("68f0f662859ebec8d501b76a") : ItemTpl.BARTER_DOGTAG_USEC_PRESTIGE_4,
+                _ => GetNonPrestigeDogTag(side, gameVersion, canUseWttBackportDogtags)
+            },
+            "bear" => prestigeLevelRequested switch
+            {
+                1 => ItemTpl.BARTER_DOGTAG_BEAR_PRESTIGE_1,
+                2 => ItemTpl.BARTER_DOGTAG_BEAR_PRESTIGE_2,
+                3 => ItemTpl.BARTER_DOGTAG_BEAR_PRESTIGE_3,
+                4 => ItemTpl.BARTER_DOGTAG_BEAR_PRESTIGE_4,
+                5 => canUseWttBackportDogtags ? new MongoId("68f0f60a121d878a2303eedb") : ItemTpl.BARTER_DOGTAG_BEAR_PRESTIGE_4,
+                >= 6 => canUseWttBackportDogtags ? new MongoId("68f0f63c645c14a02104142a") : ItemTpl.BARTER_DOGTAG_BEAR_PRESTIGE_4,
+                _ => GetNonPrestigeDogTag(side, gameVersion, canUseWttBackportDogtags)
+            },
+            _ => throw new ArgumentException($"Unknown side: {side}")
+        };
+    }
+
+    private static MongoId GetNonPrestigeDogTag(string side, string gameVersion, bool wttBackportAvailable)
+    {
+        var weightedRandomHelper = ServiceLocator.ServiceProvider.GetRequiredService<WeightedRandomHelper>();
+        var randomUtil = ServiceLocator.ServiceProvider.GetRequiredService<RandomUtil>();
+
+        var hasEditionWithDogtag = gameVersion is GameEditions.UNHEARD or GameEditions.EDGE_OF_DARKNESS;
+        var editionChance = ModConfig.Config.PmcBots.AdditionalOptions.GameVersionDogtagChance;
+
+        if (hasEditionWithDogtag && randomUtil.GetChance100(editionChance))
+        {
+            return gameVersion switch
+            {
+                GameEditions.UNHEARD => side == "usec"
+                    ? ItemTpl.BARTER_DOGTAG_USEC_TUE
+                    : ItemTpl.BARTER_DOGTAG_BEAR_TUE,
+
+                GameEditions.EDGE_OF_DARKNESS => side == "usec"
+                    ? ItemTpl.BARTER_DOGTAG_USEC_EOD
+                    : ItemTpl.BARTER_DOGTAG_BEAR_EOD,
+
+                _ => throw new ArgumentException($"Unknown game edition: {gameVersion}")
+            };
+        }
+        
+        return wttBackportAvailable ? weightedRandomHelper.GetWeightedValue(BackportDogtagDictionary[side])
+            : side == "usec" ? ItemTpl.BARTER_DOGTAG_USEC : ItemTpl.BARTER_DOGTAG_BEAR;
+    }
+}

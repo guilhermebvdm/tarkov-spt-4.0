@@ -117,3 +117,9 @@ Embora funcionais para prototipagem rápida, os repositórios trazem práticas q
      - `references/EscapeFromTushonka-SDK/`: Referência para modding de modelos 3D, skins, armas e AssetBundles.
      - `references/Tarky-Menu/`: Catálogo de snippets práticos de manipulação de engine, bots, itens e física do EFT.
    - **Documentar uma trilha de Asset Modding:** Criar oportunamente um doc técnico (ex.: `docs/technical/spt4-unity-asset-creation.md`) descrevendo o fluxo de integração entre Unity 2022.3.43 (Tushonka SDK) e os plugins BepInEx do repositório.
+
+## Histórico
+
+| Data | Autor | Descrição |
+|---|---|---|
+| 2026-08-22 | Guilherme | chore(CustomClasses): regen graph (v0.16.7) |
