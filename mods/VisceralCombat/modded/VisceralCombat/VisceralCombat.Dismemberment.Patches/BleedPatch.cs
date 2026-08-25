@@ -184,8 +184,7 @@ public class BleedPatch : ModulePatch
 				var main = ps.main;
 				main.duration = time;
 				main.simulationSpace = ParticleSystemSimulationSpace.World;
-				var collision = ps.collision;
-				collision.sendCollisionMessages = true;
+				RagdollHelperClass.ConfigureBloodParticleCollision(ps);
 				if (ps.gameObject.GetComponent<ParticleFloorPainter>() == null)
 				{
 					ps.gameObject.AddComponent<ParticleFloorPainter>();
@@ -245,8 +244,7 @@ public class BleedPatch : ModulePatch
 				var main = ps.main;
 				main.duration = time;
 				main.simulationSpace = ParticleSystemSimulationSpace.World;
-				var collision = ps.collision;
-				collision.sendCollisionMessages = true;
+				RagdollHelperClass.ConfigureBloodParticleCollision(ps);
 				if (ps.gameObject.GetComponent<ParticleFloorPainter>() == null)
 				{
 					ps.gameObject.AddComponent<ParticleFloorPainter>();

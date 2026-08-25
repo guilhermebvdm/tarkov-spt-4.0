@@ -77,6 +77,13 @@ public class BodiesImpulsePatch : ModulePatch
 			return;
 		}
 
+		// Never apply ragdoll impulse or wake rigidbodies on a living player/bot!
+		Player targetPlayer = hitCollider.GetComponentInParent<Player>();
+		if (targetPlayer != null && targetPlayer.HealthController != null && targetPlayer.HealthController.IsAlive)
+		{
+			return;
+		}
+
 		// Wake the corpse's rigidbodies and re-support them in EFT physics
 		Rigidbody[] corpseRbs = RagdollHelperClass.WakeCorpse(hitCollider, 2.5f);
 

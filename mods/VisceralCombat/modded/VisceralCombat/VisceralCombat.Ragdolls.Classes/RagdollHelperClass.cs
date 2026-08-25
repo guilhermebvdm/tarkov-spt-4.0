@@ -184,142 +184,176 @@ public static class RagdollHelperClass
 		RuntimeAnimatorController runtimeAnimatorController = p.BodyAnimatorCommon.runtimeAnimatorController;
 		AnimatorOverrideController overrideController = (AnimatorOverrideController)(object)((runtimeAnimatorController is AnimatorOverrideController) ? runtimeAnimatorController : null);
 		AssetBundle assetBundle = BundleLoaderPlugin.Instance.GetAssetBundle("death_animations");
-		switch ((int)eBodyPart)
+		bool isProne = p != null && (p.IsInPronePose || p.PoseLevel <= 0.1f);
+
+		if (isProne)
 		{
-		case 0:
-		{
-			int num5 = Random.Range(0, 10);
-			if (num5 > 8)
+			// Prone bots: never play standing-up animations (which would teleport/snap the bot upright).
+			// Either play ground flailing (Flail_Loop) or let PuppetMaster collapse directly into natural ragdoll.
+			if (Random.value > 0.35f)
 			{
-				pm.muscleWeight = 0.55f;
-				Muscle[] muscles = pm.muscles;
-				foreach (Muscle muscle in muscles)
+				Object flailAsset = assetBundle.LoadAsset("Flail_Loop");
+				if (flailAsset != null)
 				{
-					if (muscle.name.Contains("arm"))
-					{
-						muscle.props.muscleWeight = 0.002f;
-					}
+					Utils.SetAnimation(overrideController, "cultist_pray", (AnimationClip)(object)((flailAsset is AnimationClip) ? flailAsset : null));
+					p.BodyAnimatorCommon.Play("cultist_pray", 18, 0f);
+					p.BodyAnimatorCommon.speed = Random.Range(0.4f, 0.9f);
+					pm.stateSettings.killDuration = Random.Range(3.0f, 6.0f);
+					pm.pinWeight = 0.02f;
+					pm.muscleWeight = 0.5f;
 				}
-				break;
-			}
-			int num6 = Random.Range(0, 10);
-			if (num6 >= Random.Range(0, 10))
-			{
-				Object obj9 = assetBundle.LoadAsset("Death_Neck");
-				Utils.SetAnimation(overrideController, "cultist_pray", (AnimationClip)(object)((obj9 is AnimationClip) ? obj9 : null));
-				p.BodyAnimatorCommon.Play("cultist_pray", 18, 0f);
-				pm.stateSettings.killDuration = Random.Range(Anim_Neck1_Length / 2f, Anim_Neck1_Length - 1f);
-				pm.pinWeight = 0.02f;
 			}
 			else
 			{
-				Object obj10 = assetBundle.LoadAsset("Death_Neck2");
-				Utils.SetAnimation(overrideController, "cultist_pray", (AnimationClip)(object)((obj10 is AnimationClip) ? obj10 : null));
-				p.BodyAnimatorCommon.Play("cultist_pray", 18, 0f);
-				pm.stateSettings.killDuration = Random.Range(Anim_Neck2_Length / 2f, Anim_Neck2_Length - 1f);
-				pm.pinWeight = 0.02f;
-			}
-			pm.muscleWeight = 0.55f;
-			break;
-		}
-		case 1:
-		{
-			int num2 = Random.Range(0, 10);
-			if (num2 > 7)
-			{
-				int num3 = Random.Range(0, 10);
-				if (num3 >= Random.Range(0, 10))
+				// Pure ragdoll collapse on the ground
+				pm.stateSettings.killDuration = 0f;
+				pm.pinWeight = 0f;
+				pm.muscleWeight = 0f;
+				if (p.BodyAnimatorCommon != null)
 				{
-					Object obj5 = assetBundle.LoadAsset("Death_Neck");
-					Utils.SetAnimation(overrideController, "cultist_pray", (AnimationClip)(object)((obj5 is AnimationClip) ? obj5 : null));
+					p.BodyAnimatorCommon.enabled = false;
+				}
+			}
+		}
+		else
+		{
+			switch ((int)eBodyPart)
+			{
+			case 0:
+			{
+				int num5 = Random.Range(0, 10);
+				if (num5 > 8)
+				{
+					pm.muscleWeight = 0.55f;
+					Muscle[] muscles = pm.muscles;
+					foreach (Muscle muscle in muscles)
+					{
+						if (muscle.name.Contains("arm"))
+						{
+							muscle.props.muscleWeight = 0.002f;
+						}
+					}
+					break;
+				}
+				int num6 = Random.Range(0, 10);
+				if (num6 >= Random.Range(0, 10))
+				{
+					Object obj9 = assetBundle.LoadAsset("Death_Neck");
+					Utils.SetAnimation(overrideController, "cultist_pray", (AnimationClip)(object)((obj9 is AnimationClip) ? obj9 : null));
 					p.BodyAnimatorCommon.Play("cultist_pray", 18, 0f);
 					pm.stateSettings.killDuration = Random.Range(Anim_Neck1_Length / 2f, Anim_Neck1_Length - 1f);
 					pm.pinWeight = 0.02f;
 				}
 				else
 				{
-					Object obj6 = assetBundle.LoadAsset("Death_Neck2");
-					Utils.SetAnimation(overrideController, "cultist_pray", (AnimationClip)(object)((obj6 is AnimationClip) ? obj6 : null));
+					Object obj10 = assetBundle.LoadAsset("Death_Neck2");
+					Utils.SetAnimation(overrideController, "cultist_pray", (AnimationClip)(object)((obj10 is AnimationClip) ? obj10 : null));
 					p.BodyAnimatorCommon.Play("cultist_pray", 18, 0f);
 					pm.stateSettings.killDuration = Random.Range(Anim_Neck2_Length / 2f, Anim_Neck2_Length - 1f);
 					pm.pinWeight = 0.02f;
 				}
+				pm.muscleWeight = 0.55f;
+				break;
 			}
-			else
+			case 1:
 			{
-				int num4 = Random.Range(0, 10);
-				if (num4 >= Random.Range(0, 10))
+				int num2 = Random.Range(0, 10);
+				if (num2 > 7)
 				{
-					Object obj7 = assetBundle.LoadAsset("Flail_Loop");
-					Utils.SetAnimation(overrideController, "cultist_pray", (AnimationClip)(object)((obj7 is AnimationClip) ? obj7 : null));
-					p.BodyAnimatorCommon.Play("cultist_pray", 18, 0f);
-					pm.stateSettings.killDuration = Random.Range(5f, 10f);
+					int num3 = Random.Range(0, 10);
+					if (num3 >= Random.Range(0, 10))
+					{
+						Object obj5 = assetBundle.LoadAsset("Death_Neck");
+						Utils.SetAnimation(overrideController, "cultist_pray", (AnimationClip)(object)((obj5 is AnimationClip) ? obj5 : null));
+						p.BodyAnimatorCommon.Play("cultist_pray", 18, 0f);
+						pm.stateSettings.killDuration = Random.Range(Anim_Neck1_Length / 2f, Anim_Neck1_Length - 1f);
+						pm.pinWeight = 0.02f;
+					}
+					else
+					{
+						Object obj6 = assetBundle.LoadAsset("Death_Neck2");
+						Utils.SetAnimation(overrideController, "cultist_pray", (AnimationClip)(object)((obj6 is AnimationClip) ? obj6 : null));
+						p.BodyAnimatorCommon.Play("cultist_pray", 18, 0f);
+						pm.stateSettings.killDuration = Random.Range(Anim_Neck2_Length / 2f, Anim_Neck2_Length - 1f);
+						pm.pinWeight = 0.02f;
+					}
 				}
 				else
 				{
-					Object obj8 = assetBundle.LoadAsset("Death_Stomach1");
-					Utils.SetAnimation(overrideController, "cultist_pray", (AnimationClip)(object)((obj8 is AnimationClip) ? obj8 : null));
-					p.BodyAnimatorCommon.Play("cultist_pray", 18, 0f);
-					pm.stateSettings.killDuration = Random.Range(5f, 10f);
+					int num4 = Random.Range(0, 10);
+					if (num4 >= Random.Range(0, 10))
+					{
+						Object obj7 = assetBundle.LoadAsset("Flail_Loop");
+						Utils.SetAnimation(overrideController, "cultist_pray", (AnimationClip)(object)((obj7 is AnimationClip) ? obj7 : null));
+						p.BodyAnimatorCommon.Play("cultist_pray", 18, 0f);
+						pm.stateSettings.killDuration = Random.Range(5f, 10f);
+					}
+					else
+					{
+						Object obj8 = assetBundle.LoadAsset("Death_Stomach1");
+						Utils.SetAnimation(overrideController, "cultist_pray", (AnimationClip)(object)((obj8 is AnimationClip) ? obj8 : null));
+						p.BodyAnimatorCommon.Play("cultist_pray", 18, 0f);
+						pm.stateSettings.killDuration = Random.Range(5f, 10f);
+					}
 				}
+				break;
 			}
-			break;
-		}
-		case 5:
-		{
-			Object obj12 = assetBundle.LoadAsset("Death_LThigh1");
-			Utils.SetAnimation(overrideController, "cultist_pray", (AnimationClip)(object)((obj12 is AnimationClip) ? obj12 : null));
-			p.BodyAnimatorCommon.Play("cultist_pray", 18, 0f);
-			pm.stateSettings.killDuration = Random.Range(Anim_Thigh_Length / 2f, Anim_Thigh_Length - 1f);
-			break;
-		}
-		case 6:
-		{
-			Object obj11 = assetBundle.LoadAsset("Death_RThigh1");
-			Utils.SetAnimation(overrideController, "cultist_pray", (AnimationClip)(object)((obj11 is AnimationClip) ? obj11 : null));
-			p.BodyAnimatorCommon.Play("cultist_pray", 18, 0f);
-			pm.stateSettings.killDuration = Random.Range(Anim_Thigh_Length / 2f, Anim_Thigh_Length - 1f);
-			break;
-		}
-		case 2:
-		{
-			int num = Random.Range(0, 10);
-			if (num >= Random.Range(0, 10))
+			case 5:
 			{
-				Object obj3 = assetBundle.LoadAsset("Death_Stomach1");
-				Utils.SetAnimation(overrideController, "cultist_pray", (AnimationClip)(object)((obj3 is AnimationClip) ? obj3 : null));
+				Object obj12 = assetBundle.LoadAsset("Death_LThigh1");
+				Utils.SetAnimation(overrideController, "cultist_pray", (AnimationClip)(object)((obj12 is AnimationClip) ? obj12 : null));
 				p.BodyAnimatorCommon.Play("cultist_pray", 18, 0f);
-				pm.stateSettings.killDuration = Random.Range(Anim_Stomach1_Length / 2f, Anim_Stomach1_Length - 1f);
+				pm.stateSettings.killDuration = Random.Range(Anim_Thigh_Length / 2f, Anim_Thigh_Length - 1f);
+				break;
 			}
-			else
+			case 6:
 			{
-				Object obj4 = assetBundle.LoadAsset("Death_Stomach2");
-				Utils.SetAnimation(overrideController, "cultist_pray", (AnimationClip)(object)((obj4 is AnimationClip) ? obj4 : null));
+				Object obj11 = assetBundle.LoadAsset("Death_RThigh1");
+				Utils.SetAnimation(overrideController, "cultist_pray", (AnimationClip)(object)((obj11 is AnimationClip) ? obj11 : null));
 				p.BodyAnimatorCommon.Play("cultist_pray", 18, 0f);
-				pm.stateSettings.killDuration = Random.Range(Anim_Stomach2_Length / 2f, Anim_Stomach2_Length - 1f);
+				pm.stateSettings.killDuration = Random.Range(Anim_Thigh_Length / 2f, Anim_Thigh_Length - 1f);
+				break;
 			}
-			break;
-		}
-		case 3:
-		{
-			Object obj2 = assetBundle.LoadAsset("Flail_Loop");
-			Utils.SetAnimation(overrideController, "cultist_pray", (AnimationClip)(object)((obj2 is AnimationClip) ? obj2 : null));
-			p.BodyAnimatorCommon.Play("cultist_pray", 18, 0f);
-			p.BodyAnimatorCommon.speed = Random.Range(0.2f, 1f);
-			pm.stateSettings.killDuration = Random.Range(2.5f, 5f);
-			break;
-		}
-		case 4:
-		{
-			Object obj = assetBundle.LoadAsset("Flail_Loop");
-			Utils.SetAnimation(overrideController, "cultist_pray", (AnimationClip)(object)((obj is AnimationClip) ? obj : null));
-			p.BodyAnimatorCommon.Play("cultist_pray", 18, 0f);
-			p.BodyAnimatorCommon.speed = Random.Range(0.2f, 1f);
-			pm.stateSettings.killDuration = Random.Range(2.5f, 5f);
-			break;
-		}
-		default:
-			break;
+			case 2:
+			{
+				int num = Random.Range(0, 10);
+				if (num >= Random.Range(0, 10))
+				{
+					Object obj3 = assetBundle.LoadAsset("Death_Stomach1");
+					Utils.SetAnimation(overrideController, "cultist_pray", (AnimationClip)(object)((obj3 is AnimationClip) ? obj3 : null));
+					p.BodyAnimatorCommon.Play("cultist_pray", 18, 0f);
+					pm.stateSettings.killDuration = Random.Range(Anim_Stomach1_Length / 2f, Anim_Stomach1_Length - 1f);
+				}
+				else
+				{
+					Object obj4 = assetBundle.LoadAsset("Death_Stomach2");
+					Utils.SetAnimation(overrideController, "cultist_pray", (AnimationClip)(object)((obj4 is AnimationClip) ? obj4 : null));
+					p.BodyAnimatorCommon.Play("cultist_pray", 18, 0f);
+					pm.stateSettings.killDuration = Random.Range(Anim_Stomach2_Length / 2f, Anim_Stomach2_Length - 1f);
+				}
+				break;
+			}
+			case 3:
+			{
+				Object obj2 = assetBundle.LoadAsset("Flail_Loop");
+				Utils.SetAnimation(overrideController, "cultist_pray", (AnimationClip)(object)((obj2 is AnimationClip) ? obj2 : null));
+				p.BodyAnimatorCommon.Play("cultist_pray", 18, 0f);
+				p.BodyAnimatorCommon.speed = Random.Range(0.2f, 1f);
+				pm.stateSettings.killDuration = Random.Range(2.5f, 5f);
+				break;
+			}
+			case 4:
+			{
+				Object obj = assetBundle.LoadAsset("Flail_Loop");
+				Utils.SetAnimation(overrideController, "cultist_pray", (AnimationClip)(object)((obj is AnimationClip) ? obj : null));
+				p.BodyAnimatorCommon.Play("cultist_pray", 18, 0f);
+				p.BodyAnimatorCommon.speed = Random.Range(0.2f, 1f);
+				pm.stateSettings.killDuration = Random.Range(2.5f, 5f);
+				break;
+			}
+			default:
+				break;
+			}
 		}
 
 		float totalDuration = Mathf.Max(3f, pm.stateSettings.killDuration + 1f);
@@ -572,6 +606,36 @@ public static class RagdollHelperClass
 			}
 		}
 	}
+
+	/// <summary>
+	/// Configures a ParticleSystem's collision module to only collide with the static environment (floors, walls)
+	/// and strictly ignore Player, HitCollider, Deadbody, and TransparentFX layers with zero physical impulse.
+	/// Prevents micro-stuttering/stumbling when particles spray from the player's own body.
+	/// </summary>
+	public static void ConfigureBloodParticleCollision(ParticleSystem ps)
+	{
+		if (ps == null) return;
+		var collision = ps.collision;
+		collision.enabled = true;
+		collision.type = ParticleSystemCollisionType.World;
+		collision.mode = ParticleSystemCollisionMode.Collision3D;
+		collision.sendCollisionMessages = true;
+		collision.colliderForce = 0f;
+
+		int playerLayer = LayerMask.NameToLayer("Player");
+		int hitColliderLayer = LayerMask.NameToLayer("HitCollider");
+		int deadbodyLayer = LayerMask.NameToLayer("Deadbody");
+		int transparentFxLayer = LayerMask.NameToLayer("TransparentFX");
+
+		int excludedMask = 0;
+		if (playerLayer >= 0) excludedMask |= (1 << playerLayer);
+		if (hitColliderLayer >= 0) excludedMask |= (1 << hitColliderLayer);
+		if (deadbodyLayer >= 0) excludedMask |= (1 << deadbodyLayer);
+		if (transparentFxLayer >= 0) excludedMask |= (1 << transparentFxLayer);
+
+		collision.collidesWith = ~excludedMask;
+	}
+
 	private static readonly HashSet<Transform> _activeWakingCorpses = new HashSet<Transform>();
 
 	/// <summary>
@@ -599,7 +663,7 @@ public static class RagdollHelperClass
 	/// Waits until the corpse has finished any agony animation and all bone rigidbodies have
 	/// completely settled on the floor (velocity ~ 0) before putting rigidbodies into kinematic sleep (0% CPU).
 	/// </summary>
-	public static IEnumerator SleepCorpseWhenAtRest(Transform root, Rigidbody[] rbs, Player player = null, float minWait = 2.0f, float maxTimeout = 15.0f)
+	public static IEnumerator SleepCorpseWhenAtRest(Transform root, Rigidbody[] rbs, Player player = null, float minWait = 2.5f, float maxTimeout = 25.0f)
 	{
 		if (minWait > 0f)
 		{
@@ -607,9 +671,23 @@ public static class RagdollHelperClass
 		}
 
 		float elapsed = minWait;
-		// 1. If an agony animation is active on this player, wait until it finishes
-		while (player != null && VisceralEntry.Instance != null && VisceralEntry.Instance.dismemberedPlayers.Contains(player) && elapsed < maxTimeout)
+		PuppetMaster pm = root != null ? root.GetComponentInChildren<PuppetMaster>() : null;
+		if (pm == null && player != null)
 		{
+			pm = ((Component)player).GetComponentInChildren<PuppetMaster>();
+		}
+
+		// 1. If an agony animation or active ragdoll is playing on this corpse, wait until it completely finishes!
+		while (elapsed < maxTimeout)
+		{
+			bool isAgonizing = (player != null && VisceralEntry.Instance != null && VisceralEntry.Instance.dismemberedPlayers.Contains(player))
+			                || (pm != null && ((Component)pm).gameObject.activeInHierarchy && pm.mappingWeight > 0.01f);
+
+			if (!isAgonizing)
+			{
+				break;
+			}
+
 			yield return new WaitForSeconds(0.3f);
 			elapsed += 0.3f;
 		}
@@ -620,6 +698,13 @@ public static class RagdollHelperClass
 		{
 			yield return new WaitForSeconds(0.2f);
 			elapsed += 0.2f;
+
+			// Do not sleep if PuppetMaster was re-activated
+			if (pm != null && ((Component)pm).gameObject.activeInHierarchy && pm.mappingWeight > 0.01f)
+			{
+				stillChecks = 0;
+				continue;
+			}
 
 			if (IsCorpseAtRest(rbs))
 			{
@@ -662,10 +747,16 @@ public static class RagdollHelperClass
 	{
 		if (hitCollider == null) return null;
 
+		Player p = hitCollider.GetComponentInParent<Player>();
+		if (p != null && p.HealthController != null && p.HealthController.IsAlive)
+		{
+			// Never dynamic-activate bone rigidbodies of living players or bots!
+			return null;
+		}
+
 		Transform root = hitCollider.transform.root;
 		Rigidbody[] rbs = root != null ? root.GetComponentsInChildren<Rigidbody>(true) : null;
 
-		Player p = hitCollider.GetComponentInParent<Player>();
 		if ((rbs == null || rbs.Length == 0) && p?.PlayerBody != null)
 		{
 			rbs = ((Component)p.PlayerBody).gameObject.GetComponentsInChildren<Rigidbody>(true);
@@ -708,6 +799,8 @@ public static class RagdollHelperClass
 	public static void WakeCorpseTemporarily(Player player, float duration = 2.0f)
 	{
 		if (player == null || player.PlayerBody == null) return;
+		if (player.HealthController != null && player.HealthController.IsAlive) return;
+
 		GameObject bodyGo = ((Component)player.PlayerBody).gameObject;
 		if (bodyGo == null) return;
 

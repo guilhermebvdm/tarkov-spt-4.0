@@ -409,6 +409,16 @@ public class KillPatch : ModulePatch
 					GameObject val7 = Object.Instantiate<GameObject>(val6);
 					val7.transform.position = val.position;
 
+					int deadbodyLayer = LayerMask.NameToLayer("Deadbody");
+					if (deadbodyLayer >= 0)
+					{
+						val7.layer = deadbodyLayer;
+						foreach (Transform child in val7.transform)
+						{
+							child.gameObject.layer = deadbodyLayer;
+						}
+					}
+
 					// Ignore collision between severed 3D limb and all player body colliders to prevent depenetration snags
 					Collider[] severedCols = val7.GetComponentsInChildren<Collider>(true);
 					Collider[] playerCols = player.GetComponentsInChildren<Collider>(true);
@@ -738,8 +748,7 @@ public class KillPatch : ModulePatch
 			var main = val.main;
 			main.duration = num;
 			main.simulationSpace = ParticleSystemSimulationSpace.World;
-			var collision = val.collision;
-			collision.sendCollisionMessages = true;
+			RagdollHelperClass.ConfigureBloodParticleCollision(val);
 			((Component)val).gameObject.AddComponent<ParticleFloorPainter>();
 			RagdollHelperClass.ApplyDarkCoagulatedBloodFx(val);
 			val.Play();

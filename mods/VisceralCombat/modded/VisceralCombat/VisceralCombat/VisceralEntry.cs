@@ -28,7 +28,7 @@ using VisceralCombat.Ragdolls.Patches;
 
 namespace VisceralCombat;
 
-[BepInPlugin("com.servph.VisceralCombat", "Visceral Combat", "3.9.5")]
+[BepInPlugin("com.servph.VisceralCombat", "Visceral Combat", "3.9.10")]
 /// <remarks>
 /// GUID used for FIKA mod-presence checks. Must match BepInPlugin first arg.
 /// </remarks>
