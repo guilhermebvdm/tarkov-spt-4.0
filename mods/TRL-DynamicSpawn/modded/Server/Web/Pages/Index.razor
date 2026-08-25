@@ -1031,18 +1031,54 @@ html, body {
     ];
 
     const BOT_ZONES_MAP = {
-        customs: ["ZoneBrige", "ZoneCrossRoad", "ZoneDormitory", "ZoneGasStation", "ZoneFactoryCenter", "ZoneFactorySide", "ZoneOldAZS", "ZoneBlockPost", "ZoneTankSquare", "ZoneWade", "ZoneCustoms", "ZoneScavBase"],
+        customs: [
+            "ZoneBrige", "ZoneCrossRoad", "ZoneDormitory", "ZoneGasStation", "ZoneFactoryCenter", 
+            "ZoneFactorySide", "ZoneOldAZS", "ZoneBlockPost", "ZoneTankSquare", "ZoneWade", 
+            "ZoneCustoms", "ZoneScavBase", "ZoneSnipeBrige", "ZoneSnipeTower", "ZoneSnipeFactory", 
+            "ZoneBlockPostSniper", "ZoneBlockPostSniper3"
+        ],
         factory4_day: ["BotZone"],
         factory4_night: ["BotZone"],
-        interchange: ["ZoneCenter", "ZoneCenterBot", "ZoneGoshan", "ZoneIdea", "ZoneOli", "ZonePowerStation", "ZoneRamp", "ZoneRoad", "ZoneIDEAMall"],
-        laboratory: ["BotZoneFloor1", "BotZoneFloor2", "BotZoneBasement"],
-        lighthouse: ["Zone_TreatmentContainers", "Zone_TreatmentBeach", "Zone_TreatmentRocks", "Zone_Helicopter", "Zone_Bunker", "Zone_Chalet", "Zone_Village", "Zone_LongRoad", "Zone_SniperPeak", "Zone_RuinedHouse", "Zone_Island", "Zone_Blockpost"],
-        rezervbase: ["ZoneSubCommand", "ZoneSubStation", "ZoneBunker", "ZonePTOR1", "ZonePTOR2", "ZoneBarracks", "ZoneRailBunker", "ZoneGluharBase"],
-        shoreline: ["ZoneSanatorium1", "ZoneSanatorium2", "ZonePassFar", "ZonePassClose", "ZoneTunnel", "ZonePowerStation", "ZoneGasStation", "ZonePort", "ZoneVillage", "ZoneBunker"],
-        tarkovstreets: ["ZoneMVD", "ZoneHotel", "ZoneCardi", "ZoneFactory", "ZoneConcordia_1", "ZoneConcordia_2", "ZonePinewood", "ZoneCinema", "ZoneSniper1", "ZoneSniper2", "ZoneSniper3"],
-        woods: ["ZoneRedHouse", "ZoneWoodCutter", "ZoneHouse", "ZoneBigCutter", "ZoneMiniHouse", "ZoneClear", "ZoneScavBase", "ZoneVillage", "ZoneBrokenVill", "ZoneHighRocks"],
-        sandbox: ["ZoneSandbox"],
-        sandbox_high: ["ZoneSandbox"],
+        interchange: [
+            "ZoneCenter", "ZoneCenterBot", "ZoneGoshan", "ZoneIDEA", "ZoneIDEAMall", 
+            "ZoneIDEAPark", "ZoneOLI", "ZoneOLIPark", "ZonePowerStation", "ZoneRoad", 
+            "ZoneTrucks", "ZoneRamp"
+        ],
+        laboratory: [
+            "BotZoneFloor1", "BotZoneFloor2", "BotZoneBasement", "BotZoneGate1", "BotZoneGate2"
+        ],
+        lighthouse: [
+            "Zone_TreatmentContainers", "Zone_TreatmentBeach", "Zone_TreatmentRocks", 
+            "Zone_RoofContainers", "Zone_RoofBeach", "Zone_RoofRocks", "Zone_Hellicopter", 
+            "Zone_Containers", "Zone_Rocks", "Zone_Chalet", "Zone_Village", "Zone_Bridge", 
+            "Zone_OldHouse", "Zone_DestroyedHouse", "Zone_LongRoad", "Zone_Blockpost", 
+            "Zone_Island", "Zone_SniperPeak"
+        ],
+        rezervbase: [
+            "ZoneRailStrorage", "ZonePTOR1", "ZonePTOR2", "ZoneBarrack", "ZoneBunkerStorage", 
+            "ZoneSubStorage", "ZoneSubCommand"
+        ],
+        shoreline: [
+            "ZoneSanatorium1", "ZoneSanatorium2", "ZonePassClose", "ZonePassFar", "ZoneTunnel", 
+            "ZoneStartVillage", "ZoneBunker", "ZoneGreenHouses", "ZoneIsland", "ZoneGasStation", 
+            "ZoneMeteoStation", "ZonePowerStation", "ZoneBusStation", "ZoneRailWays", "ZonePort", 
+            "ZoneForestTruck", "ZoneForestSpawn", "ZoneForestGasStation", "ZoneSmuglers", 
+            "ZoneBunkeSniper", "ZonePowerStationSniper"
+        ],
+        tarkovstreets: [
+            "ZoneSW00", "ZoneSW01", "ZoneConstruction", "ZoneCarShowroom", "ZoneCinema", 
+            "ZoneFactory", "ZoneHotel_1", "ZoneHotel_2", "ZoneConcordia_1", "ZoneConcordiaParking", 
+            "ZoneColumn", "ZoneStilo", "ZoneCard1", "ZoneMvd", "ZoneClimova", 
+            "ZoneSnipeCinema", "ZoneSnipeBuilding", "ZoneSnipeSW01", "ZoneSnipeStilo", 
+            "ZoneSnipeCard", "ZoneSnipeCarShowroom"
+        ],
+        woods: [
+            "ZoneRedHouse", "ZoneWoodCutter", "ZoneHouse", "ZoneBigRocks", "ZoneRoad", 
+            "ZoneMiniHouse", "ZoneScavBase2", "ZoneBrokenVill", "ZoneClearVill", "ZoneHighRocks", 
+            "ZoneUsecBase", "ZoneStoneBunker", "ZoneDepo"
+        ],
+        sandbox: ["ZoneSandbox", "ZoneSandSnipeCenter", "ZoneSandSnipeCenter2"],
+        sandbox_high: ["ZoneSandbox", "ZoneSandSnipeCenter", "ZoneSandSnipeCenter2"],
         labyrinth: ["BotZone"]
     };
 

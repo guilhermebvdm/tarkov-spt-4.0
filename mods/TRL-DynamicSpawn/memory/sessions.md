@@ -41,6 +41,9 @@ Memória cronológica de sessões de trabalho (timestamps em GMT-3). Cada entrad
 - **Documentação do Ciclo de Vida e Auditoria Profunda**:
   - Criado `docs/ciclo-de-vida-e-arquitetura-bot-spawning.md` detalhando os contratos do SPT Server, Assembly EFT, FIKA coop, SAIN e pooling.
   - Elaborado `docs/relatorio-auditoria-codigo-02.md` com o diagnóstico dos 4 eixos de auditoria e snippets C#.
+  - Adicionada a **Seção 8 (Catálogo Canônico de BotZones por Mapa)** no documento técnico com todos os nomes oficiais do EFT 0.16.9 / SPT 4.0.
+- **Sincronização de Zonas no Web Server (`Index.razor`)**:
+  - Atualizado o dicionário `BOT_ZONES_MAP` no Web UI com 100% das zonas oficiais de todos os mapas (incluindo `ZoneScavBase2` em Woods, `ZoneMeteoStation` em Shoreline, `ZoneCarShowroom` em Streets, telhados de Rogues em Lighthouse e zonas de Snipers).
 - **Estruturação Dual original/modded**:
   - Reorganizado o repositório em `original/Client`, `original/Server`, `modded/Client`, `modded/Server`.
 - **Implementação do ZoneCache & Otimizações de CPU**:

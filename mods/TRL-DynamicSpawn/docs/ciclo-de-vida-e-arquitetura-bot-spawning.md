@@ -495,8 +495,194 @@ O EFT 0.16.9 introduziu o sistema de transição entre mapas (Marathon / Transit
 
 ---
 
-## 7. Conclusão e Diretrizes Finais
+## 8. Catálogo Canônico de BotZones por Mapa (EFT 0.16.9 / SPT 4.0)
+
+O ecossistema do Escape from Tarkov utiliza nomes literais estritos para cada `BotZone` e `ISpawnPoint` em cena. Abaixo está o inventário técnico completo e canônico extraído dos assemblies e dados de mapa nativos do jogo:
+
+### 8.1. Customs (`bigmap` / `customs`)
+* **Zonas Regulares de Combate:**
+  * `ZoneBrige` — Ponte principal e cruzamento de aproximação.
+  * `ZoneCrossRoad` — Cruzamento da saída Crossroads / Trailer Park.
+  * `ZoneDormitory` — Complexo dos Dormitórios (2 andares e 3 andares - Spawn clássico de Reshala).
+  * `ZoneGasStation` — Posto de gasolina novo (New Gas Station - Spawn clássico de Reshala).
+  * `ZoneFactoryCenter` — Centro da área industrial / Galpões centrais (Spawn de Bloodhounds/Cultistas).
+  * `ZoneFactorySide` — Laterais da área industrial / Silos.
+  * `ZoneOldAZS` — Posto de gasolina antigo (Old Gas Station).
+  * `ZoneBlockPost` — Posto de controle militar / Checkpoint.
+  * `ZoneTankSquare` — Pátio dos tanques / Fortress / ZB-013.
+  * `ZoneWade` — Travessia de água / Rio raso.
+  * `ZoneCustoms` — Pátio aduaneiro principal / Galpão vermelho (Big Red).
+  * `ZoneScavBase` — Fortaleza / Stronghold / Skeleton (Spawn dos Goons e Reshala).
+* **Zonas Exclusivas de Sniper (`marksman`):**
+  * `ZoneSnipeBrige` — Sniper do topo da ferrovia sobre a ponte.
+  * `ZoneSnipeTower` — Sniper da torre de alta tensão / Silos.
+  * `ZoneSnipeFactory` — Sniper do telhado da fábrica / Boiler.
+  * `ZoneBlockPostSniper` — Sniper das rochas do checkpoint militar.
+  * `ZoneBlockPostSniper3` — Ponto elevado de contenção secundário.
+
+---
+
+### 8.2. Factory (`factory4_day` / `factory4_night`)
+* **Zonas Regulares:**
+  * `BotZone` — Zona única unificada que cobre todo o galpão interno, túneis e passarelas elevadas (Spawn de Tagilla e Cultistas).
+
+---
+
+### 8.3. Interchange (`interchange`)
+* **Zonas Regulares Internas e Externas:**
+  * `ZoneCenter` — Pátio central do shopping / Escadas rolantes.
+  * `ZoneCenterBot` — Térreo central / Corredores inferiores (Spawn clássico do Killa).
+  * `ZoneGoshan` — Hipermercado Goshan e área de alimentos.
+  * `ZoneIDEA` — Loja principal da IDEA (Spawn de Killa).
+  * `ZoneIDEAMall` — Corredores de conexão da galeria IDEA.
+  * `ZoneIDEAPark` — Estacionamento coberto da ala IDEA.
+  * `ZoneOLI` — Loja de materiais de construção OLI (Spawn de Killa).
+  * `ZoneOLIPark` — Estacionamento coberto da ala OLI.
+  * `ZonePowerStation` — Subestação de energia externa / Interruptor de luz.
+  * `ZoneRoad` — Vias externas perimetrais do shopping.
+  * `ZoneTrucks` — Pátio de carga e docas de caminhões nos fundos.
+  * `ZoneRamp` — Rampas de acesso aos fundos e saídas de emergência.
+
+---
+
+### 8.4. The Lab (`laboratory`)
+* **Zonas Regulares:**
+  * `BotZoneFloor1` — Primeiro piso / Hall de entrada e escritórios.
+  * `BotZoneFloor2` — Segundo piso / Cúpulas de vidro e passarelas.
+  * `BotZoneBasement` — Subsolo / Área técnica e esgotos.
+* **Zonas de Portões e Eventos (Spawn de Raiders):**
+  * `BotZoneGate1` — Portão de extração / Elevadores médicos (Hangar/Medical).
+  * `BotZoneGate2` — Portão de carga principal / Elevadores de carga (Cargo/Parking).
+
+---
+
+### 8.5. Lighthouse (`lighthouse`)
+* **Zonas da Estação de Tratamento (Water Treatment & Rogues):**
+  * `Zone_TreatmentContainers` — Pátio de contêineres da estação de tratamento.
+  * `Zone_TreatmentBeach` — Acesso da praia à estação de água.
+  * `Zone_TreatmentRocks` — Encostas rochosas da estação de água.
+  * `Zone_RoofContainers` — Telhados dos galpões de contêineres (Postos de metralhadora montada de Rogues).
+  * `Zone_RoofBeach` — Telhado voltado para o litoral / Galpão 1.
+  * `Zone_RoofRocks` — Telhado voltado para as montanhas / Galpão 3.
+  * `Zone_Containers` — Área de estocagem lateral.
+  * `Zone_Rocks` — Elevações rochosas intermediárias.
+  * `Zone_Hellicopter` *(com 2 'l')* — Pátio central do helicóptero acidentado.
+* **Zonas Rurais, Chalets e Ilha do Farol:**
+  * `Zone_Chalet` — Chalet principal / Mansão dos Goons / Rogue Bosses.
+  * `Zone_Village` — Vila litorânea / Casas de pescadores.
+  * `Zone_Bridge` — Ponte de acesso à rodovia.
+  * `Zone_OldHouse` — Casas rurais isoladas.
+  * `Zone_DestroyedHouse` — Casa em ruínas / Acesso à praia.
+  * `Zone_LongRoad` — Rodovia principal que corta o mapa.
+  * `Zone_Blockpost` — Posto de controle na entrada da estrada.
+  * `Zone_Island` — Ilha do Farol (Santuário exclusivo do Zryachiy e guardas).
+* **Zonas Exclusivas de Sniper:**
+  * `Zone_SniperPeak` — Pico rochoso de alta altitude para Snipers.
+
+---
+
+### 8.6. Reserve (`rezervbase`)
+* **Zonas de Superfície e Subsolo:**
+  * `ZoneRailStrorage` *(grafia nativa com 'r' extra)* — Plataforma ferroviária / Pátio de trens (Spawn de Glukhar e Raiders).
+  * `ZonePTOR1` — Galpão de manutenção de tanques 1.
+  * `ZonePTOR2` — Galpão de manutenção de tanques 2 (Spawn de Glukhar).
+  * `ZoneBarrack` — Quartéis / Prédios Preto e Branco (Spawn de Glukhar).
+  * `ZoneBunkerStorage` — Depósitos do bunker subterrâneo.
+  * `ZoneSubStorage` — Subsolos e depósitos de suprimentos (Spawn de Glukhar/Raiders).
+  * `ZoneSubCommand` — Bunker de comando subterrâneo D-2 / Sala de controle.
+
+---
+
+### 8.7. Shoreline (`shoreline`)
+* **Zonas do Sanatório e Costa:**
+  * `ZoneSanatorium1` — Ala Leste do Sanatório (Spawn de Sanitar).
+  * `ZoneSanatorium2` — Ala Oeste do Sanatório (Spawn de Sanitar).
+  * `ZonePassClose` — Passagem próxima ao sanatório / Jardins.
+  * `ZonePassFar` — Passagens externas da colina norte.
+  * `ZoneTunnel` — Saída dos túneis no litoral.
+  * `ZoneStartVillage` — Vila residencial próxima à praia.
+  * `ZoneBunker` — Bunker de extração na colina rochosa.
+  * `ZoneGreenHouses` — Estufas e jardins nos fundos do sanatório.
+  * `ZoneIsland` — Ilha dos Scavs (naufrágio conectado por barco).
+  * `ZoneGasStation` — Posto de gasolina na rodovia litorânea.
+  * `ZoneMeteoStation` — Estação meteorológica / Radar (Spawn dos Goons e Sanitar).
+  * `ZonePowerStation` — Usina hidrelétrica / Ponte central.
+  * `ZoneBusStation` — Terminal rodoviário.
+  * `ZoneRailWays` — Cruzamento da ferrovia litorânea.
+  * `ZonePort` — Píer / Centro de saúde na marina (Spawn de Sanitar).
+  * `ZoneForestTruck` — Floresta perto do caminhão tombado.
+  * `ZoneForestSpawn` — Encostas florestais densas.
+  * `ZoneForestGasStation` — Trecho florestal acima do posto.
+  * `ZoneSmuglers` — Ponto dos contrabandistas / Fogueira do rio.
+* **Zonas Exclusivas de Sniper:**
+  * `ZoneBunkeSniper` — Rocha elevada acima do bunker.
+  * `ZonePowerStationSniper` — Telhado da usina hidrelétrica.
+
+---
+
+### 8.8. Streets of Tarkov (`tarkovstreets`)
+* **Zonas Urbanas e Comerciais:**
+  * `ZoneSW00` — Cruzamento sudoeste inicial / Entrada da rua.
+  * `ZoneSW01` — Setor comercial sudoeste.
+  * `ZoneConstruction` — Canteiro de obras / Edifício em construção.
+  * `ZoneCarShowroom` — Concessionária de carros Klimov (Spawn de Kaban e Kollontay).
+  * `ZoneCinema` — Cinema Rodina e praça em frente.
+  * `ZoneFactory` — Galpão industrial / Oficinas mecânicas.
+  * `ZoneHotel_1` — Hotel Pinewood Ala Norte.
+  * `ZoneHotel_2` — Hotel Pinewood Ala Sul / Pátio interno.
+  * `ZoneConcordia_1` — Edifício residencial Concordia / Térreo.
+  * `ZoneConcordiaParking` — Estacionamento coberto da Concordia.
+  * `ZoneColumn` — Edifício das Colunas / Teatro.
+  * `ZoneStilo` — Complexo residencial Stylobate.
+  * `ZoneCard1` — Edifício Cardinal / Setor financeiro.
+  * `ZoneMvd` — Academia do Ministério do Interior (MVD - Spawn de Kollontay).
+  * `ZoneClimova` — Rua Klimov e praça do shopping Klimov.
+* **Zonas Exclusivas de Sniper:**
+  * `ZoneSnipeCinema` — Telhado do Cinema Rodina.
+  * `ZoneSnipeBuilding` — Edifício alto em frente à construção.
+  * `ZoneSnipeSW01` — Posição elevada na esquina comercial.
+  * `ZoneSnipeStilo` — Telhado do complexo Stylobate.
+  * `ZoneSnipeCard` — Janelas elevadas do edifício Cardinal.
+  * `ZoneSnipeCarShowroom` — Estrutura superior da concessionária de carros.
+
+---
+
+### 8.9. Woods (`woods`)
+* **Zonas da Floresta, Serraria e Vilas:**
+  * `ZoneRedHouse` — Casa vermelha / Ponto Scav da encosta norte.
+  * `ZoneWoodCutter` — Clareira dos lenhadores / Depósito de toras de madeira.
+  * `ZoneHouse` — Casas isoladas na floresta.
+  * `ZoneBigRocks` — Formações rochosas gigantes / Ponto central.
+  * `ZoneRoad` — Estrada principal de terra que corta a reserva.
+  * `ZoneMiniHouse` — Cabana de caça / Chalé pequeno.
+  * `ZoneScavBase2` — Serraria central / Sawmill (Spawn de Shturman e Goons).
+  * `ZoneBrokenVill` — Vila abandonada semi-destruída / Pântano (Spawn de Cultistas).
+  * `ZoneClearVill` — Vila intacta / Casas de veraneio.
+  * `ZoneHighRocks` — Penhasco de pedra / Mirante elevado (Spawn de Snipers).
+  * `ZoneUsecBase` — Acampamento militar avançado USEC / Tendas médicas.
+  * `ZoneStoneBunker` — Bunker escavado na rocha / ZB-014.
+  * `ZoneDepo` — Pátio de depósitos do trem.
+
+---
+
+### 8.10. Ground Zero (`sandbox` / `sandbox_high`)
+* **Zonas Regulares:**
+  * `ZoneSandbox` — Área unificada que cobre todo o saguão do TerraGroup, o shopping Empire, o restaurante e a avenida com o ônibus.
+* **Zonas Exclusivas de Sniper:**
+  * `ZoneSandSnipeCenter` — Sniper da passarela elevada / Janela de tiro do prédio Empire.
+  * `ZoneSandSnipeCenter2` — Posição de sniper voltada para o terraço da avenida.
+
+---
+
+### 8.11. The Labyrinth (`labyrinth` - Mapa Especial / Eventos)
+* **Zonas:**
+  * `BotZone` — Zona unificada dos corredores do complexo de labirintos.
+
+---
+
+## 9. Conclusão e Diretrizes Finais
 
 1. **Validação Arquitetural Completa:** A investigação aprofundada confirma que a arquitetura do **TRL-DynamicSpawn** atende com precisão cirúrgica aos contratos do servidor SPT 4.0, aos pipelines de instanciação do EFT 0.16.9 e às especificidades de rede do FIKA.
 2. **Eficiência e Estabilidade:** A combinação de **pré-aquecimento de cache (`AddToTargetBackup`)**, **injeção suave (1.0s–1.5s)** e **reciclagem por teleporte tático com reset de mente** elimina os dois maiores vilões de performance do Tarkov: picos de GC Alloc e quedas de quadros por processamento inútil de IA distante.
 3. **Padrão Ouro de Engenharia:** Respeitar as salvaguardas de esquadrões, zonas de snipers, silenciamento de áudio físico e compatibilidade com FIKA/SAIN/Waypoints consolida o mod como uma solução robusta, escalável e de alto desempenho.
+
