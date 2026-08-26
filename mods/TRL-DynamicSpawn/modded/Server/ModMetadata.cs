@@ -9,7 +9,7 @@ public record ModMetadata : AbstractModMetadata, IModWebMetadata
     public override string ModGuid { get; init; } = "com.trl.dynamicspawn";
     public override string Name { get; init; } = "TRL Dynamic Spawn Manager";
     public override string Author { get; init; } = "TRL";
-    public override SemanticVersioning.Version Version { get; init; } = new("3.6.0");
+    public override SemanticVersioning.Version Version { get; init; } = new("3.7.0");
     public override SemanticVersioning.Range SptVersion { get; init; } = new("~4.0.3");
     
     // Satisfy all AbstractModMetadata requirements

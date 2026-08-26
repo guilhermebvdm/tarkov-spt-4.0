@@ -34,6 +34,14 @@ namespace TRLDynamicSpawn.Helpers
         public static ConfigEntry<bool> showSpawnBubbleCircle;
         public static ConfigEntry<bool> showLoSCone;
 
+        // Corpse Optimization & Cleanup
+        public static ConfigEntry<bool> enableCorpseCleanup;
+        public static ConfigEntry<string> corpseCleanupMode;
+        public static ConfigEntry<float> corpseLifetimeMinutes;
+        public static ConfigEntry<float> corpseMinSafeDistance;
+        public static ConfigEntry<bool> protectBossCorpses;
+        public static ConfigEntry<bool> corpseCheckLoS;
+
         public static ConfigEntry<bool> reloadServerConfig;
         public static ConfigEntry<int> initialProfilePreload;
 
@@ -114,6 +122,28 @@ namespace TRLDynamicSpawn.Helpers
 
             showLoSCone = config.Bind(overlaySection, "Show LoS / FOV Cone", true,
                 new ConfigDescription("Displays the yellow player Field of View (LoS) cone on the map."));
+
+            string corpseSection = "Corpse Optimization & Cleanup";
+            enableCorpseCleanup = config.Bind(corpseSection, "Enable Corpse Cleanup", true,
+                new ConfigDescription("Master toggle to optimize dead bodies after cooldown (freezes physics and reduces draw calls)."));
+
+            corpseCleanupMode = config.Bind(corpseSection, "Cleanup Mode", "Backpack Convert",
+                new ConfigDescription("Mode: 'Backpack Convert' hides body meshes and keeps loot interactive; 'Full Despawn' destroys body and loot completely.",
+                new AcceptableValueList<string>("Backpack Convert", "Full Despawn")));
+
+            corpseLifetimeMinutes = config.Bind(corpseSection, "Corpse Lifetime (Minutes)", 5.0f,
+                new ConfigDescription("Time in minutes a corpse remains untouched before conversion or despawn.",
+                new AcceptableValueRange<float>(1.0f, 30.0f)));
+
+            corpseMinSafeDistance = config.Bind(corpseSection, "Min Safe Distance to Players (M)", 25.0f,
+                new ConfigDescription("Minimum distance from any living human player before a corpse can be converted or despawned.",
+                new AcceptableValueRange<float>(10.0f, 100.0f)));
+
+            protectBossCorpses = config.Bind(corpseSection, "Protect Boss Corpses", true,
+                new ConfigDescription("If enabled, Bosses, Rogues, Raiders and Cultists corpses will never be converted or despawned."));
+
+            corpseCheckLoS = config.Bind(corpseSection, "Check Line of Sight (LoS)", true,
+                new ConfigDescription("If enabled, will not convert or despawn corpses while any living human player is directly looking at it."));
 
             // ref: AUD-01-01 — manual path that replaces the 5 s live re-fetch (AC-X1). Acts as a button:
             // only reacts to true, clears the raid-scoped cache and resets itself to false. Zero per-frame cost.

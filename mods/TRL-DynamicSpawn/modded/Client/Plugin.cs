@@ -9,7 +9,7 @@ using TRLDynamicSpawn.Patches;
 namespace TRLDynamicSpawn
 {
     [
-        BepInPlugin("TRLDynamicSpawn.settings", "TRLDynamicSpawn", "3.6.0"),
+        BepInPlugin("TRLDynamicSpawn.settings", "TRLDynamicSpawn", "3.7.0"),
         BepInDependency("com.fika.core", BepInDependency.DependencyFlags.SoftDependency)
     ]
     public class Plugin : BaseUnityPlugin
@@ -40,6 +40,7 @@ namespace TRLDynamicSpawn
             new ChooseProfilePatch().Enable();
             new ZryachiyAggressivenessPatch().Enable();
             new ZryachiyActivatePatch().Enable();
+            new CorpseDeathPatch().Enable();
 
             // Raid lifecycle hooks (backlog 009/010 — ref: AUD-01-01, AUD-01-02, AUD-01-06)
             new RaidStartPatch().Enable();
@@ -53,9 +54,10 @@ namespace TRLDynamicSpawn
             // Vanilla continuous scav spawner refused before profile creation (backlog 010 — ref: AUD-01-08)
             new ActivateBotsWithoutWavePatch().Enable();
 
-            // Enable Despawn Manager & Map Overlay Components
+            // Enable Despawn Manager, Map Overlay & Corpse Cleanup Components
             TRLDynamicSpawn.Components.BotDespawnManager.Enable();
             TRLDynamicSpawn.Components.TRLMapBubbleOverlay.Enable();
+            TRLDynamicSpawn.Components.CorpseCleanupManager.Enable();
         }
 
         private void Update()

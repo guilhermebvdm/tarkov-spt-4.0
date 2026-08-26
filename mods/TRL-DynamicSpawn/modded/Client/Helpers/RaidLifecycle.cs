@@ -22,6 +22,7 @@ namespace TRLDynamicSpawn.Helpers
             // _raidActive from a raid that ended without hooks can never block the next raid.
             _raidActive = true;
             BotDespawnManager.StartLoop();
+            CorpseCleanupManager.StartLoop();
         }
 
         // ref: Assembly-CSharp/EFT/LocalGame.cs:357 (Stop override), fika-plugin CoopGame.cs:718 (Stop) and EFT/GameWorld.cs:2111 (OnDestroy)
@@ -36,6 +37,8 @@ namespace TRLDynamicSpawn.Helpers
             Plugin.LogSource?.LogInfo($"[TRL-DynamicSpawn] Raid end hook fired ({source})."); // 1x/raid
             BotDespawnManager.StopLoop();
             BotDespawnManager.ClearStaticState();
+            CorpseCleanupManager.StopLoop();
+            CorpseCleanupManager.ClearStaticState();
             DynamicSpawnManager.StopSpawnLoops();                // ref: AUD-01-06 — waves/groups stop at the first end hook
             DynamicSpawnManager.ClearStaticState();
             ZoneCache.Clear();
