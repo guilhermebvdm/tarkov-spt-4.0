@@ -20,6 +20,7 @@ namespace TRLDynamicSpawn.Components
         public static DynamicSpawnManager Instance { get; private set; }
         public static bool IsGeneratingDynamicWave = false;
         public static bool IsWarmupActive = true;
+        public static bool RaidInitialElitesSpawned = false;
         
         private int _delayBeforeFirstWave = 60;
         private int _secondsBetweenWaves = 360; 
@@ -60,6 +61,7 @@ namespace TRLDynamicSpawn.Components
             ScavSpawns.Clear();
             IsGeneratingDynamicWave = false;
             IsWarmupActive = true;
+            RaidInitialElitesSpawned = false;
             ZoneCache.Clear();
         }
         
@@ -274,6 +276,7 @@ namespace TRLDynamicSpawn.Components
             // be destroyed (Unity fake-null) and the early return below would skip the reset. ref: PA-01-06
             IsGeneratingDynamicWave = false;
             IsWarmupActive = false;
+            RaidInitialElitesSpawned = false;
             if (Instance == null) return;
             Instance.StopAllCoroutines();   // SpawnHordeLoop, FetchServerConfigAndStart, ProcessWave, SpawnGroupBotsCoroutine, SpawnReplacementBotCoroutine
             Instance._activeWaveCoroutine = null;
@@ -619,7 +622,7 @@ namespace TRLDynamicSpawn.Components
             // ======================================
             // PROCESS NON-NATIVE ELITES / ROGUES / BOSSES
             // ======================================
-            if (isFirstWave && eliteConfig != null && !eliteConfig.DisableBosses)
+            if (isFirstWave && !RaidInitialElitesSpawned && eliteConfig != null && !eliteConfig.DisableBosses)
             {
                 var eliteEntries = new (EliteLocationInfo info, WildSpawnType role, string bossName)[]
                 {
@@ -674,16 +677,19 @@ namespace TRLDynamicSpawn.Components
                             continue;
                         }
 
-                        int targetGroupSize = entry.info.MaxGroupSize > 0 ? entry.info.MaxGroupSize : 1;
-                        if (entry.info.GroupChance > 0 && entry.info.GroupChance < 100)
+                        int targetGroupSize = GetBossGroupSizeForMap(entry.info, mapName);
+                        if (entry.role != WildSpawnType.exUsec && entry.role != WildSpawnType.pmcBot)
                         {
-                            if (UnityEngine.Random.Range(1, 101) > entry.info.GroupChance)
+                            if (entry.info.GroupChance > 0 && entry.info.GroupChance < 100)
                             {
-                                targetGroupSize = 1;
-                            }
-                            else
-                            {
-                                targetGroupSize = UnityEngine.Random.Range(2, Mathf.Max(2, entry.info.MaxGroupSize) + 1);
+                                if (UnityEngine.Random.Range(1, 101) > entry.info.GroupChance)
+                                {
+                                    targetGroupSize = 1;
+                                }
+                                else
+                                {
+                                    targetGroupSize = UnityEngine.Random.Range(2, Mathf.Max(2, entry.info.MaxGroupSize) + 1);
+                                }
                             }
                         }
 
@@ -707,12 +713,13 @@ namespace TRLDynamicSpawn.Components
             // ======================================
             if (availableSlots > 0)
             {
-                if (isFirstWave && eliteConfig != null && !eliteConfig.DisableBosses)
+                if (isFirstWave && !RaidInitialElitesSpawned && eliteConfig != null && !eliteConfig.DisableBosses)
                 {
                     int raiderMapChance = GetBossChanceForMap(eliteConfig.Raiders?.SpawnChance, mapName);
                     if (eliteConfig.RandomRaiderGroup && (eliteConfig.Raiders?.Enable ?? true) && raiderMapChance > 0 && UnityEngine.Random.Range(1, 101) <= eliteConfig.RandomRaiderGroupChance)
                     {
-                        int raiderSlots = Mathf.Min(availableSlots, UnityEngine.Random.Range(2, 5));
+                        int configuredRaiderSquad = GetBossGroupSizeForMap(eliteConfig.Raiders, mapName);
+                        int raiderSlots = Mathf.Min(availableSlots, configuredRaiderSquad > 0 ? configuredRaiderSquad : UnityEngine.Random.Range(2, 5));
                         Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] RANDOM RAIDER GROUP INVASION! Spawning {raiderSlots} Raiders on {mapName}.");
                         GenerateAndEnqueueGroups(WildSpawnType.pmcBot, BotDifficulty.normal, raiderSlots, eliteConfig.Raiders);
                         availableSlots -= raiderSlots;
@@ -721,11 +728,17 @@ namespace TRLDynamicSpawn.Components
                     int rogueMapChance = GetBossChanceForMap(eliteConfig.Rogues?.SpawnChance, mapName);
                     if (eliteConfig.RandomRogueGroup && (eliteConfig.Rogues?.Enable ?? true) && rogueMapChance > 0 && availableSlots > 0 && UnityEngine.Random.Range(1, 101) <= eliteConfig.RandomRogueGroupChance)
                     {
-                        int rogueSlots = Mathf.Min(availableSlots, UnityEngine.Random.Range(2, 5));
+                        int configuredRogueSquad = GetBossGroupSizeForMap(eliteConfig.Rogues, mapName);
+                        int rogueSlots = Mathf.Min(availableSlots, configuredRogueSquad > 0 ? configuredRogueSquad : UnityEngine.Random.Range(2, 5));
                         Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] RANDOM ROGUE GROUP INVASION! Spawning {rogueSlots} Rogues on {mapName}.");
                         GenerateAndEnqueueGroups(WildSpawnType.exUsec, BotDifficulty.normal, rogueSlots, eliteConfig.Rogues);
                         availableSlots -= rogueSlots;
                     }
+                }
+
+                if (isFirstWave)
+                {
+                    RaidInitialElitesSpawned = true;
                 }
 
                 float pmcRatio = 0.5f;
@@ -1537,6 +1550,17 @@ namespace TRLDynamicSpawn.Components
             if (name.Contains("sandbox")) return chance.GroundZero;
             if (name.Contains("laboratory")) return chance.Laboratory;
             return 0;
+        }
+
+        private int GetBossGroupSizeForMap(EliteLocationInfo info, string mapName)
+        {
+            if (info == null) return 3;
+            if (info.MaxGroupSizeByMap != null)
+            {
+                int val = GetBossChanceForMap(info.MaxGroupSizeByMap, mapName);
+                if (val > 0) return val;
+            }
+            return info.MaxGroupSize > 0 ? info.MaxGroupSize : 3;
         }
 
         private string GetBossZoneForMap(ValidLocationString zone, string mapName)

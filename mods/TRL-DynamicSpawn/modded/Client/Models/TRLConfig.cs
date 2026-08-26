@@ -158,6 +158,12 @@ public record EliteLocationInfo
     [JsonProperty("maxGroupSize")] public int MaxGroupSize { get; set; } = 3;
     [JsonProperty("spawnChance")] public ValidLocationInt SpawnChance { get; set; } = new();
     [JsonProperty("bossZone")] public ValidLocationString BossZone { get; set; } = new();
+    [JsonProperty("maxGroupSizeByMap")] public ValidLocationInt MaxGroupSizeByMap { get; set; } = new()
+    {
+        Customs = 3, Factory4Day = 3, Factory4Night = 3, Interchange = 3, Laboratory = 3, 
+        Lighthouse = 3, Reserve = 3, GroundZero = 3, GroundZeroHigh = 3, Shoreline = 3, 
+        TarkovStreets = 3, Woods = 3
+    };
 }
 
 public record ValidLocationInt
