@@ -278,7 +278,7 @@ namespace TRLDynamicSpawn.Components
             IsWarmupActive = false;
             RaidInitialElitesSpawned = false;
             if (Instance == null) return;
-            Instance.StopAllCoroutines();   // SpawnHordeLoop, FetchServerConfigAndStart, ProcessWave, SpawnGroupBotsCoroutine, SpawnReplacementBotCoroutine
+            Instance.StopAllCoroutines();   // SpawnHordeLoop, FetchServerConfigAndStart, ProcessWave, SpawnGroupBotsCoroutine
             Instance._activeWaveCoroutine = null;
         }
 
@@ -1337,59 +1337,6 @@ namespace TRLDynamicSpawn.Components
                 case "sandbox":
                 case "sandbox_high": return info.BossZone.GroundZero;
                 default: return "";
-            }
-        }
-
-
-
-        public void RequestReplacementBot(EPlayerSide side, WildSpawnType role, BotDifficulty difficulty)
-        {
-            StartCoroutine(SpawnReplacementBotCoroutine(side, role, difficulty));
-        }
-
-        private IEnumerator SpawnReplacementBotCoroutine(EPlayerSide side, WildSpawnType role, BotDifficulty difficulty)
-        {
-            BotSpawnParams spawnParams = new BotSpawnParams();
-            BotProfileDataClass profileData = new BotProfileDataClass(side, role, difficulty, 0f, spawnParams);
-            
-            var t = BotCreationDataClass.Create(profileData, _botCreator, 1, _botsController.BotSpawner);
-            while (!t.IsCompleted) yield return null;
-            
-            if (t.Result != null)
-            {
-                string mapName = GetCurrentMapName().ToLower();
-                BotZone selectedZone = null;
-                int retries = 5;
-                bool zoneValid = false;
-
-                while (retries > 0)
-                {
-                    selectedZone = TRLDynamicSpawn.Helpers.Methods.GetRandomZone(_botsController.BotSpawner);
-                    if (selectedZone != null && IsValidSpawnZone(selectedZone, mapName, role))
-                    {
-                        zoneValid = true;
-                        break;
-                    }
-                    retries--;
-                }
-
-                if (zoneValid && selectedZone != null)
-                {
-                    Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] SUCCESS: Spawning replacement bot ({role}) in {selectedZone.NameZone}...");
-                    IsGeneratingDynamicWave = true;
-                    try
-                    {
-                        _botsController.BotSpawner.TryToSpawnInZoneAndDelay(selectedZone, t.Result, true, true, null, true);
-                    }
-                    finally
-                    {
-                        IsGeneratingDynamicWave = false;
-                    }
-                }
-                else
-                {
-                    Plugin.LogSource.LogWarning($"[TRL-DynamicSpawn] FAILED: Could not find a safe zone for replacement bot. Dropping spawn.");
-                }
             }
         }
 

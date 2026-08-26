@@ -25,7 +25,6 @@ namespace TRLDynamicSpawn.Helpers
         public static ConfigEntry<bool> enableDebugLogs;
 
         public static ConfigEntry<bool> masterDespawnToggle;
-        public static ConfigEntry<bool> replaceDespawnedBots;
         public static ConfigEntry<bool> enableSpawnBubble;
 
         public static ConfigEntry<bool> enableMapOverlay;
@@ -88,12 +87,9 @@ namespace TRLDynamicSpawn.Helpers
             enableDebugLogs = config.Bind(debugSection, "Enable Debug Logs", false, 
                 new ConfigDescription("Enable debug logs for map culling and dynamic spawns in the console."));
 
-            string despawnSection = "Despawn Settings";
-            masterDespawnToggle = config.Bind(despawnSection, "Enable Despawn System", true, 
-                new ConfigDescription("Master toggle to enable or disable the bot despawn system entirely on your client."));
-                
-            replaceDespawnedBots = config.Bind(despawnSection, "Replace Despawned Bots", true, 
-                new ConfigDescription("When a bot is despawned, immediately spawn a new bot of the same faction near the player."));
+            string teleportSection = "Bot Teleport & Density Settings";
+            masterDespawnToggle = config.Bind(teleportSection, "Enable Bot Teleport System", true, 
+                new ConfigDescription("Master toggle to enable or disable the bot teleport system (relocates distant bots into active combat zones)."));
 
             string bubbleSection = "Spawn Bubble Settings";
             enableSpawnBubble = config.Bind(bubbleSection, "Enable Spawn Bubble", true, 

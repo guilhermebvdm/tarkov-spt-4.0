@@ -9,7 +9,7 @@ using TRLDynamicSpawn.Patches;
 namespace TRLDynamicSpawn
 {
     [
-        BepInPlugin("TRLDynamicSpawn.settings", "TRLDynamicSpawn", "3.5.0"),
+        BepInPlugin("TRLDynamicSpawn.settings", "TRLDynamicSpawn", "3.5.1"),
         BepInDependency("com.fika.core", BepInDependency.DependencyFlags.SoftDependency)
     ]
     public class Plugin : BaseUnityPlugin
