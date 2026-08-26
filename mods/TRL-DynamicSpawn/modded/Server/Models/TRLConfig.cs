@@ -6,8 +6,14 @@ namespace TRLDynamicSpawnServer.Models;
 
 public record TRLConfig : IRequestData
 {
+    [JsonPropertyName("factionDistribution")]
+    public string FactionDistribution { get; set; } = "Balanced"; // "Balanced", "PMC War", "Scav Infestation", "Quiet Raid", "Warzone", "Random"
+
     [JsonPropertyName("activePreset")] 
-    public string ActivePreset { get; set; } = "Balanced"; // "Equilibrado", "Guerra de PMCs", "Infestação de Scavs", "Aleatório"
+    public string ActivePreset { get; set; } = "balanced"; // "high_end", "balanced", "performance"
+
+    [JsonPropertyName("presets")]
+    public PresetContainer Presets { get; set; } = new();
 
     [JsonPropertyName("pmcDifficulty")] 
     public Dictionary<string, double> PmcDifficulty { get; set; } = new()
@@ -77,6 +83,21 @@ public record TRLConfig : IRequestData
         { "woods", new MapSettings() },
         { "labyrinth", new MapSettings() }
     };
+}
+
+public record PresetContainer
+{
+    [JsonPropertyName("high_end")] public PresetProfile HighEnd { get; set; } = new() { Name = "Full Map / Open World (High-End)", EnableSpawnBubble = false, EnableTeleport = false };
+    [JsonPropertyName("balanced")] public PresetProfile Balanced { get; set; } = new() { Name = "Dynamic Bubble (Balanced)", EnableSpawnBubble = true, EnableTeleport = true };
+    [JsonPropertyName("performance")] public PresetProfile Performance { get; set; } = new() { Name = "Performance / FPS Boost (Low-End)", EnableSpawnBubble = true, EnableTeleport = true };
+}
+
+public record PresetProfile
+{
+    [JsonPropertyName("name")] public string Name { get; set; } = "Dynamic Bubble (Balanced)";
+    [JsonPropertyName("enableSpawnBubble")] public bool EnableSpawnBubble { get; set; } = true;
+    [JsonPropertyName("enableTeleport")] public bool EnableTeleport { get; set; } = true;
+    [JsonPropertyName("mapConfigs")] public Dictionary<string, MapSettings> MapConfigs { get; set; } = new();
 }
 
 public record CustomSpawnsConfig

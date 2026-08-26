@@ -28,7 +28,8 @@ namespace TRLDynamicSpawn.Components
         
         public static float NextWaveTime => Instance != null ? Instance._nextWaveTime : 0f;
         
-        private string _activePreset = "Balanced";
+        private string _factionDistribution = "Balanced";
+        private string _activePerformancePreset = "Balanced";
         private TRLConfig _serverConfig;
         public TRLConfig ServerConfig => ServerConfigProvider.Config ?? _serverConfig;
         
@@ -84,23 +85,30 @@ namespace TRLDynamicSpawn.Components
                 if (string.IsNullOrEmpty(json))
                     throw new InvalidOperationException("ServerConfig unavailable (see provider warning).");
                 _serverConfig = JsonConvert.DeserializeObject<TRLConfig>(json);
-                _activePreset = _serverConfig.ActivePreset;
+                _factionDistribution = !string.IsNullOrEmpty(_serverConfig.FactionDistribution) ? _serverConfig.FactionDistribution : _serverConfig.ActivePreset;
+                if (string.IsNullOrEmpty(_factionDistribution)) _factionDistribution = "Balanced";
 
-                // Handle Random Preset Selection
-                if (_activePreset == "Random")
+                // Handle Random Faction Distribution Selection
+                if (_factionDistribution == "Random")
                 {
                     string[] availablePresets = { "Balanced", "PMC War", "Scav Infestation", "Quiet Raid", "Warzone" };
-                    _activePreset = availablePresets[UnityEngine.Random.Range(0, availablePresets.Length)];
-                    Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Aleatorio rolled preset: {_activePreset}");
+                    _factionDistribution = availablePresets[UnityEngine.Random.Range(0, availablePresets.Length)];
+                    Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Aleatorio rolled faction distribution: {_factionDistribution}");
+                }
+
+                _activePerformancePreset = Settings.activePerformancePreset?.Value;
+                if (string.IsNullOrEmpty(_activePerformancePreset) || _activePerformancePreset == "default")
+                {
+                    _activePerformancePreset = _serverConfig.ActivePreset ?? "Balanced";
                 }
 
                 string currentMapName = GetCurrentMapName();
                 _delayBeforeFirstWave = GetDelayBeforeFirstWaveForMap(currentMapName);
                 _secondsBetweenWaves = GetSecondsBetweenWavesForMap(currentMapName);
-                Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Connected to Server. Active Preset: {_activePreset}");
+                Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Connected to Server. Faction Distribution: {_factionDistribution} | Performance Preset: {_activePerformancePreset}");
 
-                // Apply Preset Modifiers
-                if (_activePreset == "Quiet Raid")
+                // Apply Faction Distribution Modifiers
+                if (_factionDistribution == "Quiet Raid")
                 {
                     if (_serverConfig.EliteConfig != null)
                     {
@@ -109,7 +117,7 @@ namespace TRLDynamicSpawn.Components
                         _serverConfig.EliteConfig.Scav.MaxGroupSize = Mathf.Min(_serverConfig.EliteConfig.Scav.MaxGroupSize, 2);
                     }
                 }
-                else if (_activePreset == "Warzone")
+                else if (_factionDistribution == "Warzone")
                 {
                     if (_serverConfig.EliteConfig != null)
                     {
@@ -119,7 +127,7 @@ namespace TRLDynamicSpawn.Components
                         _serverConfig.EliteConfig.RandomRogueGroupChance = 30;
                     }
                 }
-                else if (_activePreset == "PMC War")
+                else if (_factionDistribution == "PMC War")
                 {
                     if (_serverConfig.EliteConfig != null)
                     {
@@ -129,7 +137,7 @@ namespace TRLDynamicSpawn.Components
                         _serverConfig.EliteConfig.Bear.MaxGroupSize += 1;
                     }
                 }
-                else if (_activePreset == "Scav Infestation")
+                else if (_factionDistribution == "Scav Infestation")
                 {
                     if (_serverConfig.EliteConfig != null)
                     {
@@ -210,11 +218,11 @@ namespace TRLDynamicSpawn.Components
                 seconds = _serverConfig.MapTimers["global"].SecondsBetweenWaves;
             }
 
-            if (_activePreset == "Quiet Raid")
+            if (_factionDistribution == "Quiet Raid")
             {
                 seconds = (int)(seconds * 1.5f);
             }
-            else if (_activePreset == "Warzone")
+            else if (_factionDistribution == "Warzone")
             {
                 seconds = (int)(seconds * 0.5f);
             }
@@ -742,9 +750,9 @@ namespace TRLDynamicSpawn.Components
                 }
 
                 float pmcRatio = 0.5f;
-                if (_activePreset == "PMC War") pmcRatio = 0.7f;
-                else if (_activePreset == "Scav Infestation") pmcRatio = 0.3f;
-                else if (_activePreset == "Warzone") pmcRatio = UnityEngine.Random.Range(0.2f, 0.8f);
+                if (_factionDistribution == "PMC War") pmcRatio = 0.7f;
+                else if (_factionDistribution == "Scav Infestation") pmcRatio = 0.3f;
+                else if (_factionDistribution == "Warzone") pmcRatio = UnityEngine.Random.Range(0.2f, 0.8f);
 
                 int aliveBears = _gameWorld.RegisteredPlayers.Count(p => p.IsAI && p.HealthController != null && p.HealthController.IsAlive && p.Profile.Side == EPlayerSide.Bear);
                 int aliveUsecs = _gameWorld.RegisteredPlayers.Count(p => p.IsAI && p.HealthController != null && p.HealthController.IsAlive && p.Profile.Side == EPlayerSide.Usec);
@@ -824,7 +832,7 @@ namespace TRLDynamicSpawn.Components
                 if (debugLogs)
                 {
                     Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn][SPY] Sampled Wave Difficulties (SAIN Active: {isSainActive}): PMC={pmcDiff}, Scav={scavDiff}");
-                    Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Horde Breakdown (Preset: {_activePreset}):");
+                    Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Horde Breakdown (Faction: {_factionDistribution} | Preset: {_activePerformancePreset}):");
                     Plugin.LogSource.LogInfo($"  PlayerCap={playerCap} | SpecialBots={specialBots} | DynamicCap={dynamicCap} | Available={availableSlots}");
                     Plugin.LogSource.LogInfo($"  Alive Bots: {aliveBotsTotal} | PMCs: {alivePMCs} ({aliveBears} BEAR, {aliveUsecs} USEC) | Normal Scavs: {aliveNormalScavs}");
                     Plugin.LogSource.LogInfo($"  Spawning PMCs ({pmcDiff}): {pmcSlots} ({bearSlots} BEAR, {usecSlots} USEC)");
@@ -1642,7 +1650,7 @@ namespace TRLDynamicSpawn.Components
             GUILayout.BeginArea(new Rect(margin + 10, margin + 25, boxWidth - 20, boxHeight - 30));
             
             GUILayout.Label($"<b>Status de Sessão:</b> {_cachedFikaStatus}");
-            GUILayout.Label($"<b>Config Preset:</b> {_activePreset}");
+            GUILayout.Label($"<b>Facção / Preset:</b> {_factionDistribution} ({_activePerformancePreset})");
             
             string hudMapName = GetCurrentMapName();
             int hudPlayerCap = Settings.GetMapCap(hudMapName);

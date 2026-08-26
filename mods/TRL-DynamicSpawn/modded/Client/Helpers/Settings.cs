@@ -5,6 +5,8 @@ namespace TRLDynamicSpawn.Helpers
 {
     public class Settings
     {
+        public static ConfigEntry<string> activePerformancePreset;
+
         public static ConfigEntry<int> maxBotCapFactory;
         public static ConfigEntry<int> maxBotCapCustoms;
         public static ConfigEntry<int> maxBotCapWoods;
@@ -37,6 +39,11 @@ namespace TRLDynamicSpawn.Helpers
 
         public static void Init(ConfigFile config)
         {
+            string presetSection = "Performance Presets & Style";
+            activePerformancePreset = config.Bind(presetSection, "Active Performance Preset", "Balanced", 
+                new ConfigDescription("Select the active performance preset for spawns. Options: 'Balanced' (Dynamic Bubble), 'High-End' (Full Map / Vanilla), 'Performance' (Compact Bubble / FPS Boost).", 
+                new AcceptableValueList<string>("Balanced", "High-End", "Performance")));
+
             string section = "Host Performance Caps";
 
             maxBotCapFactory = config.Bind(section, "Factory Max Bots", 15, 

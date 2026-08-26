@@ -512,7 +512,7 @@ html, body {
                             </div>
                             <div style="display:flex; gap:8px;">
                                 <span style="background:var(--trl-ground-deep); border:1px solid var(--trl-edge); padding:4px 8px; font-family:var(--trl-font-mono); font-size:11px; color:var(--trl-success);">SPT 4.0.x READY</span>
-                                <span style="background:var(--trl-ground-deep); border:1px solid var(--trl-edge); padding:4px 8px; font-family:var(--trl-font-mono); font-size:11px; color:var(--trl-accent);">v3.5.1</span>
+                                <span style="background:var(--trl-ground-deep); border:1px solid var(--trl-edge); padding:4px 8px; font-family:var(--trl-font-mono); font-size:11px; color:var(--trl-accent);">v3.6.0</span>
                             </div>
                         </div>
                     </div>
@@ -611,6 +611,30 @@ html, body {
 
         <!-- 1. MAP CONFIGS -->
         <section id="sec-map-configs" class="trl-view-section">
+            <!-- PERFORMANCE PRESETS SUBTABS -->
+            <div class="trl-panel" style="margin-bottom: var(--trl-space-4);">
+                <div class="trl-screen-bar">
+                    <span class="trl-screen-bar__title" data-i18n="title_perf_presets">PRESETS DE PERFORMANCE & ESTILO DE SPAWN</span>
+                </div>
+                <div class="trl-panel__body">
+                    <div id="presetSubtabs" class="trl-subtabs" style="margin-bottom:12px;">
+                        <button type="button" class="trl-subtab-btn is-active" id="pTab_balanced" onclick="switchPresetTab('balanced', this)">
+                            <span>⚖️</span> <span data-i18n="preset_tab_balanced">DYNAMIC BUBBLE (EQUILIBRADO)</span>
+                        </button>
+                        <button type="button" class="trl-subtab-btn" id="pTab_high_end" onclick="switchPresetTab('high_end', this)">
+                            <span>🚀</span> <span data-i18n="preset_tab_highend">FULL MAP / OPEN WORLD (HIGH-END)</span>
+                        </button>
+                        <button type="button" class="trl-subtab-btn" id="pTab_performance" onclick="switchPresetTab('performance', this)">
+                            <span>⚡</span> <span data-i18n="preset_tab_perf">PERFORMANCE / FPS BOOST (LOW-END)</span>
+                        </button>
+                    </div>
+                    <div id="presetBanner" style="background:var(--trl-surface-1); border:1px solid var(--trl-edge); border-left:3px solid var(--trl-accent); padding:10px 14px; font-size:12px; color:var(--trl-fg);">
+                        <strong id="presetBannerTitle" style="color:var(--trl-accent);">DYNAMIC BUBBLE:</strong>
+                        <span id="presetBannerDesc" style="color:var(--trl-fg-muted);"> Bolha Dinâmica (~350m) com teleporte de esquadrões e densidade equilibrada ao redor do jogador.</span>
+                    </div>
+                </div>
+            </div>
+
             <div class="trl-panel">
                 <div class="trl-screen-bar">
                     <span class="trl-screen-bar__title" data-i18n="title_maps">PARÂMETROS GLOBAIS DE MAPA</span>
@@ -618,8 +642,8 @@ html, body {
                 <div class="trl-panel__body">
                     <div class="trl-form-grid">
                         <div class="trl-field">
-                            <label class="trl-field__label"><span data-i18n="active_preset">PRESET DE FACÇÃO ATIVO</span></label>
-                            <select id="activePreset" class="trl-select">
+                            <label class="trl-field__label"><span data-i18n="faction_distribution">DISTRIBUIÇÃO ENTRE FACÇÕES</span></label>
+                            <select id="factionDistribution" class="trl-select">
                                 <option value="Balanced" data-i18n="opt_balanced">Equilibrado (50% PMC / 50% Scav)</option>
                                 <option value="PMC War" data-i18n="opt_pmc_war">Guerra de PMCs (70% PMC / 30% Scav)</option>
                                 <option value="Scav Infestation" data-i18n="opt_scav_infestation">Infestação de Scavs (20% PMC / 80% Scav)</option>
@@ -851,7 +875,14 @@ html, body {
             title_events: "EVENTOS E INVASÕES ESPECIAIS", title_custom: "SPAWNPOINTS ADICIONAIS E COORDENADAS DO MOAR",
             undo: "DESFAZER", reset: "PADRÃO", reload: "RECARREGAR", save: "SALVAR CONFIGURAÇÃO",
             synced: "SINCRONIZADO", unsaved: "ALTERAÇÕES NÃO SALVAS",
-            active_preset: "PRESET DE FACÇÃO ATIVO", delay_first_wave: "ESPERA INICIAL DA PRIMEIRA ONDA (SEGUNDOS)",
+            title_perf_presets: "PRESETS DE PERFORMANCE & ESTILO DE SPAWN",
+            preset_tab_balanced: "DYNAMIC BUBBLE (EQUILIBRADO)",
+            preset_tab_highend: "FULL MAP / OPEN WORLD (HIGH-END)",
+            preset_tab_perf: "PERFORMANCE / FPS BOOST (LOW-END)",
+            preset_desc_balanced: "Bolha Dinâmica (~350m) com teleporte de esquadrões e densidade equilibrada ao redor do jogador.",
+            preset_desc_highend: "Sem Bolha e Sem Teleporte. Bots espalhados livremente pelo mapa aberto igual ao Tarkov vanilla.",
+            preset_desc_perf: "Bolha Compacta (~220m) com teleporte ativo e contagem reduzida de bots para máximo ganho de FPS.",
+            active_preset: "DISTRIBUIÇÃO ENTRE FACÇÕES", faction_distribution: "DISTRIBUIÇÃO ENTRE FACÇÕES", delay_first_wave: "ESPERA INICIAL DA PRIMEIRA ONDA (SEGUNDOS)",
             disable_bosses: "Desativar Todos os Bosses em Todos os Mapas", boss_open_zones: "Permitir Bosses em Qualquer Zona do Mapa",
             evt_raiders: "Raiders Aleatórios em Qualquer Mapa", evt_rogues: "Rogues Aleatórios em Qualquer Mapa",
             disable_vanilla_rogues: "Desativar Rogues Nativos da Lighthouse (Vanilla)", disable_vanilla_raiders: "Desativar Raiders Nativos (Vanilla)",
@@ -915,7 +946,14 @@ html, body {
             title_events: "EVENTS & SPECIAL INVASIONS", title_custom: "ADDITIONAL SPAWNPOINTS & MOAR COORDINATES",
             undo: "UNDO", reset: "DEFAULT", reload: "RELOAD", save: "SAVE CONFIGURATION",
             synced: "SYNCED", unsaved: "SAVING IN 1S...",
-            active_preset: "ACTIVE FACTION PRESET", delay_first_wave: "INITIAL FIRST WAVE DELAY (SECONDS)",
+            title_perf_presets: "PERFORMANCE PRESETS & SPAWN STYLES",
+            preset_tab_balanced: "DYNAMIC BUBBLE (BALANCED)",
+            preset_tab_highend: "FULL MAP / OPEN WORLD (HIGH-END)",
+            preset_tab_perf: "PERFORMANCE / FPS BOOST (LOW-END)",
+            preset_desc_balanced: "Dynamic Bubble (~350m) with squad teleport and balanced density around the player.",
+            preset_desc_highend: "No Bubble & No Teleport. Bots distributed freely across the open map like vanilla Tarkov.",
+            preset_desc_perf: "Compact Bubble (~220m) with active teleport and reduced bot cap for maximum FPS boost.",
+            active_preset: "FACTION DISTRIBUTION", faction_distribution: "FACTION DISTRIBUTION", delay_first_wave: "INITIAL FIRST WAVE DELAY (SECONDS)",
             disable_bosses: "Disable All Bosses on All Maps", boss_open_zones: "Allow Bosses in Any Map Zone",
             evt_raiders: "Random Raiders on Any Map", evt_rogues: "Random Rogues on Any Map",
             disable_vanilla_rogues: "Disable Native Lighthouse Rogues (Vanilla)", disable_vanilla_raiders: "Disable Native Raiders (Vanilla)",
@@ -1299,15 +1337,63 @@ html, body {
 
     // --- RENDERIZADORES DE UI ---
 
+    let activePresetTab = "balanced";
+
+    function updatePresetBanner() {
+        const titleEl = document.getElementById("presetBannerTitle");
+        const descEl = document.getElementById("presetBannerDesc");
+        if (!titleEl || !descEl) return;
+
+        const dict = I18N[currentLang] || I18N.pt;
+        if (activePresetTab === "high_end") {
+            titleEl.textContent = "FULL MAP / OPEN WORLD (HIGH-END):";
+            titleEl.style.color = "var(--trl-cyan)";
+            descEl.textContent = " " + dict.preset_desc_highend;
+        } else if (activePresetTab === "performance") {
+            titleEl.textContent = "PERFORMANCE / FPS BOOST (LOW-END):";
+            titleEl.style.color = "var(--trl-amber-400)";
+            descEl.textContent = " " + dict.preset_desc_perf;
+        } else {
+            titleEl.textContent = "DYNAMIC BUBBLE (BALANCED):";
+            titleEl.style.color = "var(--trl-accent)";
+            descEl.textContent = " " + dict.preset_desc_balanced;
+        }
+    }
+
+    function switchPresetTab(presetKey, btn) {
+        activePresetTab = presetKey;
+        document.querySelectorAll("#presetSubtabs .trl-subtab-btn").forEach(b => b.classList.remove("is-active"));
+        if (btn) btn.classList.add("is-active");
+        else {
+            const defaultBtn = document.getElementById("pTab_" + presetKey);
+            if (defaultBtn) defaultBtn.classList.add("is-active");
+        }
+        updatePresetBanner();
+        renderMapSubtabs();
+        renderActiveMapConfig();
+    }
+    window.switchPresetTab = switchPresetTab;
+
     function renderUI() {
         if (!stateCurrent) return;
 
-        // 1. MAP GLOBALS
-        const activePresetEl = document.getElementById("activePreset");
-        if (activePresetEl) {
-            activePresetEl.value = stateCurrent.activePreset || "Balanced";
+        // Sincronizar Preset Tab ativo
+        if (stateCurrent.activePreset && ["high_end", "balanced", "performance"].includes(stateCurrent.activePreset)) {
+            activePresetTab = stateCurrent.activePreset;
+        } else {
+            activePresetTab = "balanced";
+        }
+        document.querySelectorAll("#presetSubtabs .trl-subtab-btn").forEach(b => b.classList.remove("is-active"));
+        const currentBtn = document.getElementById("pTab_" + activePresetTab);
+        if (currentBtn) currentBtn.classList.add("is-active");
+        updatePresetBanner();
+
+        // 1. MAP GLOBALS (FACTION DISTRIBUTION)
+        const factionEl = document.getElementById("factionDistribution");
+        if (factionEl) {
+            factionEl.value = stateCurrent.factionDistribution || stateCurrent.activePreset || "Balanced";
             const descDict = PRESET_DESCRIPTIONS[currentLang] || PRESET_DESCRIPTIONS.pt;
-            document.getElementById("presetDescriptionText").textContent = descDict[activePresetEl.value] || "";
+            document.getElementById("presetDescriptionText").textContent = descDict[factionEl.value] || "";
         }
 
         const globalTimer = stateCurrent.mapTimers?.bigmap?.delayBeforeFirstWave ?? 60;
@@ -1565,7 +1651,8 @@ html, body {
                     return;
                 }
 
-                const sourceCfg = stateCurrent.mapConfigs?.[sourceMapId];
+                const currentProfile = (stateCurrent.presets && stateCurrent.presets[activePresetTab]) ? stateCurrent.presets[activePresetTab] : { mapConfigs: stateCurrent.mapConfigs };
+                const sourceCfg = currentProfile.mapConfigs?.[sourceMapId] || stateCurrent.mapConfigs?.[sourceMapId];
                 if (!sourceCfg) {
                     showToast("warn", t("toast_undo") || "AVISO", t("copy_no_cfg_warn"));
                     return;
@@ -1585,15 +1672,39 @@ html, body {
     }
 
     function ensureMapConfig(mapId) {
-        if (!stateCurrent.mapConfigs) stateCurrent.mapConfigs = {};
-        if (!stateCurrent.mapConfigs[mapId]) {
-            stateCurrent.mapConfigs[mapId] = {
-                secondsBetweenWaves: 360, sniperChance: 30, safeZoneDistance: 30.0,
-                enableDespawn: false, despawnPMCs: false, despawnDistance: 300, despawnInterval: 20,
-                spawnBubbleDistance: 300, enableSpawnBubble: true, teleportMinDistance: 100
+        if (!stateCurrent.presets) {
+            stateCurrent.presets = {
+                high_end: { name: "Full Map / Open World (High-End)", enableSpawnBubble: false, enableTeleport: false, mapConfigs: {} },
+                balanced: { name: "Dynamic Bubble (Balanced)", enableSpawnBubble: true, enableTeleport: true, mapConfigs: {} },
+                performance: { name: "Performance / FPS Boost (Low-End)", enableSpawnBubble: true, enableTeleport: true, mapConfigs: {} }
             };
         }
-        return stateCurrent.mapConfigs[mapId];
+        const profileKey = (activePresetTab && stateCurrent.presets[activePresetTab]) ? activePresetTab : "balanced";
+        const currentProfile = stateCurrent.presets[profileKey];
+        if (!currentProfile.mapConfigs) currentProfile.mapConfigs = {};
+
+        if (!currentProfile.mapConfigs[mapId]) {
+            const isHighEnd = profileKey === 'high_end';
+            const isPerf = profileKey === 'performance';
+            currentProfile.mapConfigs[mapId] = {
+                secondsBetweenWaves: isPerf ? 420 : 360,
+                sniperChance: isHighEnd ? 40 : (isPerf ? 20 : 30),
+                safeZoneDistance: isHighEnd ? 40.0 : (isPerf ? 25.0 : 30.0),
+                enableDespawn: !isHighEnd,
+                despawnPMCs: !isHighEnd,
+                despawnDistance: isHighEnd ? 600 : (isPerf ? 220 : 350),
+                despawnInterval: isPerf ? 15 : 20,
+                spawnBubbleDistance: isHighEnd ? 600 : (isPerf ? 220 : 350),
+                enableSpawnBubble: !isHighEnd,
+                teleportMinDistance: isPerf ? 80 : 100
+            };
+        }
+
+        // Sincroniza mapConfigs raiz para retrocompatibilidade
+        if (!stateCurrent.mapConfigs) stateCurrent.mapConfigs = {};
+        stateCurrent.mapConfigs[mapId] = currentProfile.mapConfigs[mapId];
+
+        return currentProfile.mapConfigs[mapId];
     }
 
     // --- BOSSES & ELITES ---
@@ -2087,7 +2198,11 @@ html, body {
     function collectUI() {
         if (!stateCurrent) return;
 
-        stateCurrent.activePreset = document.getElementById("activePreset").value;
+        const factionEl = document.getElementById("factionDistribution");
+        if (factionEl) {
+            stateCurrent.factionDistribution = factionEl.value;
+        }
+        stateCurrent.activePreset = activePresetTab;
 
         if (!stateCurrent.eliteConfig) stateCurrent.eliteConfig = {};
         stateCurrent.eliteConfig.disableBosses = document.getElementById("disableBosses").checked;
@@ -2124,11 +2239,14 @@ html, body {
         setLanguage("pt");
         fetchConfig();
 
-        document.getElementById("activePreset").onchange = (e) => {
-            const descDict = PRESET_DESCRIPTIONS[currentLang] || PRESET_DESCRIPTIONS.pt;
-            document.getElementById("presetDescriptionText").textContent = descDict[e.target.value] || "";
-            markDirty(true);
-        };
+        const factionEl = document.getElementById("factionDistribution");
+        if (factionEl) {
+            factionEl.onchange = (e) => {
+                const descDict = PRESET_DESCRIPTIONS[currentLang] || PRESET_DESCRIPTIONS.pt;
+                document.getElementById("presetDescriptionText").textContent = descDict[e.target.value] || "";
+                markDirty(true);
+            };
+        }
 
         bindSlider("delayBeforeFirstWave", val => {
             const firstMap = MAP_LIST[0].id;

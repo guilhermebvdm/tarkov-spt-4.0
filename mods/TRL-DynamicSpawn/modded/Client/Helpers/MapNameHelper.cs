@@ -30,23 +30,57 @@ namespace TRLDynamicSpawn.Helpers
         }
 
         /// <summary>
-        /// Obtém com segurança a configuração MapSettings para o mapa atual vinda do TRLConfig.
+        /// Obtém com segurança a configuração MapSettings para o mapa atual vinda do TRLConfig,
+        /// respeitando o Preset de Performance ativo (High-End, Balanced ou Performance).
         /// </summary>
         public static MapSettings GetMapSettings(TRLConfig config, string rawMapName)
         {
-            if (config?.MapConfigs == null) return null;
+            if (config == null) return null;
             string key = Normalize(rawMapName);
 
-            if (config.MapConfigs.TryGetValue(key, out var settings))
-                return settings;
+            // Determina qual preset utilizar (F12 tem precedência ou fallback para o server config)
+            string selectedPreset = Settings.activePerformancePreset?.Value?.ToLower();
+            if (string.IsNullOrEmpty(selectedPreset) || selectedPreset == "default")
+            {
+                selectedPreset = config.ActivePreset?.ToLower() ?? "balanced";
+            }
 
-            // Fallback para variantes de mapa se a chave exata não for encontrada
-            if (key == "bigmap" && config.MapConfigs.TryGetValue("customs", out settings))
-                return settings;
-            if (key == "customs" && config.MapConfigs.TryGetValue("bigmap", out settings))
-                return settings;
-            if (key == "factory4_night" && config.MapConfigs.TryGetValue("factory4_day", out settings))
-                return settings;
+            PresetProfile activeProfile = null;
+            if (config.Presets != null)
+            {
+                if (selectedPreset.Contains("high"))
+                    activeProfile = config.Presets.HighEnd;
+                else if (selectedPreset.Contains("perf") || selectedPreset.Contains("low"))
+                    activeProfile = config.Presets.Performance;
+                else
+                    activeProfile = config.Presets.Balanced;
+            }
+
+            // 1. Tenta buscar no MapConfigs do Preset ativo
+            if (activeProfile?.MapConfigs != null)
+            {
+                if (activeProfile.MapConfigs.TryGetValue(key, out var presetSettings))
+                    return presetSettings;
+                if (key == "bigmap" && activeProfile.MapConfigs.TryGetValue("customs", out presetSettings))
+                    return presetSettings;
+                if (key == "customs" && activeProfile.MapConfigs.TryGetValue("bigmap", out presetSettings))
+                    return presetSettings;
+                if (key == "factory4_night" && activeProfile.MapConfigs.TryGetValue("factory4_day", out presetSettings))
+                    return presetSettings;
+            }
+
+            // 2. Fallback para MapConfigs raiz se existir
+            if (config.MapConfigs != null)
+            {
+                if (config.MapConfigs.TryGetValue(key, out var settings))
+                    return settings;
+                if (key == "bigmap" && config.MapConfigs.TryGetValue("customs", out settings))
+                    return settings;
+                if (key == "customs" && config.MapConfigs.TryGetValue("bigmap", out settings))
+                    return settings;
+                if (key == "factory4_night" && config.MapConfigs.TryGetValue("factory4_day", out settings))
+                    return settings;
+            }
 
             return null;
         }
