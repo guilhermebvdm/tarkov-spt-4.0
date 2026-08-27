@@ -45,6 +45,7 @@ Auditoria de performance do mod **TRL-DynamicSpawn v3.2.9** (client [mods/TRL-Dy
 | `AUD-01-06` | 🟡 Médio | `Client/Components/DynamicSpawnManager.cs:339, 367-451` | Trabalho com raid vazia | `SpawnHordeLoop` continua gerando waves/`bot/generate` com 0 bots vivos; `Replace Despawned Bots` realimenta |
 | `AUD-01-07` | 🟡 Médio | `Client/Patches/Patches.cs:805-814` + `Client/Patches/BotSpawnLoggerPatch.cs:26` | Logging sem gate | Maiores emissores (6 linhas Warning por `ChooseProfile`) escapam do gate `Enable Debug Logs` |
 | `AUD-01-08` | 🟡 Médio | `Client/Patches/Patches.cs:374-378` (+ vanilla `LocalGame.cs:139-143, :187-194, :359-361`) | Trabalho barrado por tentativa | Ondas vanilla são interceptadas a **cada tentativa** (prefix em `ActivateBotsByWave`) em vez de desligadas **uma vez** na fonte (cenários de onda do `LocalGame`) — *registrado em 2026-08-22 23:16, pós-rodada 1* |
+| `AUD-01-09` | 🟡 Médio | `Client/Components/DynamicSpawnManager.cs:373-457` (`SpawnHordeLoop` ESTÁGIO A) | Warmup que não converge | Com mortes contínuas (jogador/PvP entre facções), `aliveRealBots` nunca iguala `dynamicCap` → ondas de 1–3 vagas **a cada 30 s indefinidamente**, sem nunca entrar no cooldown longo — *registrado em 2026-08-24 22:31, observado na V2; pré-existente (3.2.9)* |
 
 ---
 
@@ -156,6 +157,18 @@ Auditoria de performance do mod **TRL-DynamicSpawn v3.2.9** (client [mods/TRL-Dy
 
 ---
 
+### AUD-01-09 · Warmup que não converge (ondas de reposição a cada 30 s para sempre)
+- **Severidade:** 🟡 Médio
+- **Evidência:** Forte (medida na raid V2 de 2026-08-24: `Attempt 43`, `REAL Alive: 13–15/16`, `Available: 1–3` por ~21 min; cada tentativa spawnou de fato — `SQUAD MEMBER SPAWNED` presente — e as mortes repunham o déficit). **Pré-existente** (mesma lógica na 3.2.9); ficou visível porque a V2 leu o log com atenção. *Registrado em 2026-08-24 22:31 a partir do relato do usuário ("a onda 2 nunca terminou").*
+- **Execução:** ESTÁGIO A do `SpawnHordeLoop` ([DynamicSpawnManager.cs:373-457](../Client/Components/DynamicSpawnManager.cs#L373)): enquanto `aliveRealBots < dynamicCap`, dispara `ProcessWave` a cada `DelayBeforeFirstWave` (30 s) — o cooldown longo (`SecondsBetweenWaves`, 360 s) só é alcançado com o mapa **exatamente** cheio. `dynamicCap = playerCap + especiais vivos` (16 = 15 + 1 na raid medida); com o jogador matando e PMCs se matando entre si, o mapa oscila 1–3 abaixo do teto para sempre.
+- **Impacto Técnico Real:** custo baixo por ciclo (ondas de 1–3 bots já usando o pipeline otimizado da rodada 2), mas cadência de reposição **12× mais agressiva** do que o cooldown configurado, indefinidamente — `bot/generate`/materialização contínuos e experiência de "sempre tem bot chegando" que o usuário percebeu como onda infinita.
+- **Proposta de Correção (rodada 3, discutir com Umbigo — é decisão de design):** considerar "cheio" com tolerância (ex.: `alive ≥ dynamicCap − 2` entra no cooldown longo), e/ou após N tentativas de warmup mudar para o intervalo longo mesmo abaixo do teto. Reavaliar se `dynamicCap` deve somar especiais vivos (persegue vaga que o especial devolve ao morrer).
+- **Como validar:** raid com mortes contínuas → após a tolerância, log mostra `Wave Cooldown active` mesmo com 1–2 vagas abertas; ondas passam à cadência de `SecondsBetweenWaves`.
+- **Decisão:**
+  - `[ ]` Pendente *(rodada 3 — junto com AUD-01-04 residual do pool inicial vanilla e item 011)*
+
+---
+
 ## Panorama de execução
 
 | Superfície | Frequência | Entidades | Gate | Quem para / quando |
@@ -205,6 +218,12 @@ Protocolo: mesma raid Customs do baseline/V1, CapFrameX + curva de RAM + `LogOut
 - [ ] **Hooks (PA-02-03):** fonte do `Raid end hook fired` = `CoopGame.Stop` (Fika) — `GameWorld.OnDestroy` como fonte significa que o hook cedo não disparou
 - [ ] **Não-regressão:** NR-1..NR-8 da [01-spec do 010](../backlog/010-perf-spawn-pipeline-r2/010-perf-spawn-pipeline-r2-01-spec.md) (snipers vanilla seguem nascendo, bosses nativos, composição das ondas, F12 `Initial Profile Preload` visível em Avançado)
 
+> **Resultado V2 — parcial (2 raids de 2026-08-24, client 3.4.0, `LogOutput.log:288628-316065` + `errors.log` do último processo):**
+> **Raid A (host/solo, Customs, debug ON):** ✅ `Blocked Vanilla Assault Scav Spawn` = **0** (V1: 163) — no lugar, 1.630 recusas baratas (`Refused vanilla continuous spawn`: branch + 1 linha gated; sem criação de perfil) · ✅ `getConfig` = **1** · ✅ `Clearing pending` = **1** (era 1×/s) · ✅ `profilesInList` **452 → 504** (+52; baseline 337→1155) — obs.: os ~452 iniciais vêm da pré-geração vanilla das waves definidas do mapa, fora do controle do mod (candidato a achado da rodada 3) · ✅ **zero linhas do mod após `Raid end hook fired`** · `difficulty relaxed` = 13 (AC-X1, dentro do esperado) · `bot/generate` não aparece no RequestHandler (rota não logada por ali — usar `profilesInList` como métrica de GROW).
+> **Raid B (guest Fika):** mod inerte como esperado (sem Maestro/waves); 1 `getConfig` (overlay do mapa, fetch-on-miss) · `Enabled patch CoopGameStopPatch` presente (namespace do Fika instalado confere).
+> **`errors.log` (só o último processo sobrevive):** `TrySpawnFreeInner` = **0** (baseline 44) ✅; 141 NRE restantes são `EFT.Player.get_PointOfView` (70×, Fika/espectador) + 1 `WeaponSoundPlayer` — **nenhuma do mod**.
+> **Pendências para fechar a V2:** ⚠️ fonte do hook de fim na raid A foi `GameWorld.OnDestroy` — `CoopGame.Stop` **não disparou nesse encerramento** (patch aplicado com sucesso; hipótese: jogo fechado direto da tela de morte → só o teardown da cena roda; observar a fonte numa raid encerrada por extração normal) · ⚠️ confirmação subjetiva do usuário: metrônomo de 10 s/FPS e curva de RAM (log não mede) · ⚠️ raid host com `Enable Debug Logs = false` (AC-M5) ainda não feita.
+>
 > **Status da rodada 2 (2026-08-23 00:41):** implementada no item [010-perf-spawn-pipeline-r2](../backlog/010-perf-spawn-pipeline-r2/) — client **v3.4.0** compilada e instalada (rollback: `TRL-DynamicSpawn.dll.bak-3.3.0`). AUD-01-04/05/06/07/08: **aplicados, aguardando validação V2**. Achado novo da code review (CR-01-01 do 010): `AddToTargetBackup` é **nível permanente** de cache reposto pelo SPT (`GClass684.cs:258-263`), não "pedir N perfis" — a pré-carga de Scav sempre foi no-op; semântica corrigida no código e na doc.
 
 ## 4. Plano de Ação
