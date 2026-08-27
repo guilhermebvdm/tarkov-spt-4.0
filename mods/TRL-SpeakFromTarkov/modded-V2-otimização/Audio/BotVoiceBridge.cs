@@ -118,7 +118,8 @@ namespace TRL_SpeakFromTarkov.Audio
                 try
                 {
                     player.Say(trigger, demand: true, 0f, (ETagStatus)0, 100, aggressive: isAggressive);
-                    VoIPPlugin.Log.LogInfo($"[SFT-BOT] Janela 250ms -> Pico RMS={peakLevel:F3} | Phrase={trigger} (Aggressive={isAggressive}) | Raio Gradual={power:F1}m | DebugVol={debugVolume * 100:F0}%");
+                    if (VoIPPlugin.EnableDebugLogs != null && VoIPPlugin.EnableDebugLogs.Value)
+                        VoIPPlugin.Log.LogInfo($"[SFT-BOT] Janela 250ms -> Pico RMS={peakLevel:F3} | Phrase={trigger} (Aggressive={isAggressive}) | Raio Gradual={power:F1}m | DebugVol={debugVolume * 100:F0}%");
                 }
                 catch (Exception ex)
                 {
@@ -127,7 +128,9 @@ namespace TRL_SpeakFromTarkov.Audio
             }
             else
             {
-                VoIPPlugin.Log.LogInfo($"[SFT-BOT] Sinal emitido silenciosamente (0%) para IA: Pico RMS={peakLevel:F3} | Phrase={trigger} | Raio Gradual={power:F1}m");
+                // Sinal de alcance sonoro enviado à IA sem voz audível (BotVoiceDebugVolume = 0%)
+                if (VoIPPlugin.EnableDebugLogs != null && VoIPPlugin.EnableDebugLogs.Value)
+                    VoIPPlugin.Log.LogInfo($"[SFT-BOT] Sinal emitido silenciosamente (0%) para IA: Pico RMS={peakLevel:F3} | Phrase={trigger} | Raio Gradual={power:F1}m");
             }
 
             // 3. Resposta Forçada 100% Instantânea dos Bots dentro do raio 'power'
