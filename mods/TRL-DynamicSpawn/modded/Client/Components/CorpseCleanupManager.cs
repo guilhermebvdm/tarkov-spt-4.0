@@ -6,6 +6,7 @@ using UnityEngine;
 using Comfort.Common;
 using EFT;
 using EFT.Interactive;
+using EFT.InventoryLogic;
 using TRLDynamicSpawn.Helpers;
 
 namespace TRLDynamicSpawn.Components
@@ -20,14 +21,19 @@ namespace TRLDynamicSpawn.Components
         public bool IsConverted { get; set; } = false;
         public bool IsDespawned { get; set; } = false;
         public float LastRetryTime { get; set; } = 0f;
+        public GameObject SpawnedBackpackVisual { get; set; }
     }
 
     public class CorpseCleanupManager : MonoBehaviour
     {
+        private const string MBSS_BACKPACK_TEMPLATE = "544a5cde4bdc2d39388b456b"; // Flyye MBSS backpack (UCP)
+
         private static CorpseCleanupManager _instance;
         private Coroutine _corpseRoutine;
         private static readonly Dictionary<string, TrackedCorpse> _trackedCorpses = new Dictionary<string, TrackedCorpse>();
         private static readonly List<Renderer> _tempRenderers = new List<Renderer>(256);
+        private static readonly List<Player> _aliveHumansBuffer = new List<Player>(16);
+        private static GameObject _cachedMbssPrefab;
 
         public static void Enable()
         {
@@ -45,7 +51,7 @@ namespace TRLDynamicSpawn.Components
             // Apenas o Host ou Solo gerencia a limpeza e os timers de corpos
             if (!FikaHelper.IsHostOrSolo()) return;
 
-            _trackedCorpses.Clear();
+            ClearStaticState();
             _instance._corpseRoutine = _instance.StartCoroutine(_instance.CorpseLoop());
             Plugin.LogSource?.LogInfo("[TRL-DynamicSpawn] Corpse Cleanup Loop started on Host.");
         }
@@ -55,12 +61,22 @@ namespace TRLDynamicSpawn.Components
             if (_instance == null || _instance._corpseRoutine == null) return;
             _instance.StopCoroutine(_instance._corpseRoutine);
             _instance._corpseRoutine = null;
-            _trackedCorpses.Clear();
+            ClearStaticState();
         }
 
         public static void ClearStaticState()
         {
+            foreach (var kvp in _trackedCorpses)
+            {
+                if (kvp.Value?.SpawnedBackpackVisual != null)
+                {
+                    UnityEngine.Object.Destroy(kvp.Value.SpawnedBackpackVisual);
+                }
+            }
             _trackedCorpses.Clear();
+            _tempRenderers.Clear();
+            _aliveHumansBuffer.Clear();
+            _cachedMbssPrefab = null;
         }
 
         /// <summary>
@@ -122,24 +138,24 @@ namespace TRLDynamicSpawn.Components
                 var gameWorld = Singleton<GameWorld>.Instance;
                 if (gameWorld == null) continue;
 
-                // Obter todos os jogadores humanos vivos da raid (Host + Convidados Fika)
-                var aliveHumans = new List<Player>();
+                // Obter todos os jogadores humanos vivos da raid (Host + Convidados Fika) sem alocação
+                _aliveHumansBuffer.Clear();
                 for (int i = 0; i < gameWorld.AllAlivePlayersList.Count; i++)
                 {
                     var p = gameWorld.AllAlivePlayersList[i];
                     if (p != null && (p.IsYourPlayer || !p.IsAI))
                     {
                         if (DynamicSpawnManager.IsHeadlessPlayer(p)) continue;
-                        aliveHumans.Add(p);
+                        _aliveHumansBuffer.Add(p);
                     }
                 }
 
-                if (aliveHumans.Count == 0 && gameWorld.MainPlayer != null && !DynamicSpawnManager.IsHeadlessPlayer(gameWorld.MainPlayer))
+                if (_aliveHumansBuffer.Count == 0 && gameWorld.MainPlayer != null && !DynamicSpawnManager.IsHeadlessPlayer(gameWorld.MainPlayer))
                 {
-                    aliveHumans.Add(gameWorld.MainPlayer);
+                    _aliveHumansBuffer.Add(gameWorld.MainPlayer);
                 }
 
-                if (aliveHumans.Count == 0) continue;
+                if (_aliveHumansBuffer.Count == 0) continue;
 
                 float currentTime = Time.time;
                 var keys = _trackedCorpses.Keys.ToList();
@@ -159,6 +175,10 @@ namespace TRLDynamicSpawn.Components
 
                     if (tracked.Player == null || tracked.Player.gameObject == null)
                     {
+                        if (tracked.SpawnedBackpackVisual != null)
+                        {
+                            UnityEngine.Object.Destroy(tracked.SpawnedBackpackVisual);
+                        }
                         _trackedCorpses.Remove(key);
                         continue;
                     }
@@ -176,7 +196,7 @@ namespace TRLDynamicSpawn.Components
                         continue;
 
                     // Teste de segurança (Proximidade + LoS sob demanda)
-                    if (!IsCorpseSafeToProcess(tracked.Player, aliveHumans))
+                    if (!IsCorpseSafeToProcess(tracked.Player, _aliveHumansBuffer))
                     {
                         tracked.LastRetryTime = currentTime;
                         continue; // Sinal Vermelho 🔴: adia a ação
@@ -187,12 +207,12 @@ namespace TRLDynamicSpawn.Components
                     {
                         if (mode == "Backpack Convert")
                         {
-                            ConvertToBackpack(tracked.Player);
+                            ConvertToBackpack(tracked);
                             tracked.IsConverted = true;
                         }
                         else
                         {
-                            DestroyCorpse(tracked.Player);
+                            DestroyCorpse(tracked);
                             tracked.IsDespawned = true;
                             _trackedCorpses.Remove(key);
                         }
@@ -253,8 +273,9 @@ namespace TRLDynamicSpawn.Components
             return true;
         }
 
-        private void ConvertToBackpack(Player corpsePlayer)
+        private void ConvertToBackpack(TrackedCorpse tracked)
         {
+            var corpsePlayer = tracked.Player;
             if (corpsePlayer == null || corpsePlayer.gameObject == null) return;
 
             // 1. Congelar física do Ragdoll (CPU = 0% de física contínua)
@@ -276,7 +297,7 @@ namespace TRLDynamicSpawn.Components
                 if (j != null) j.enableCollision = false;
             }
 
-            // 2. Ocultar malhas de corpo e armas (GPU = 0 Draw Calls para o corpo humano)
+            // 2. Ocultar 100% das malhas do corpo humano, roupas e armas (GPU = 0 Draw Calls para o bot morto)
             _tempRenderers.Clear();
             if (corpsePlayer.PlayerBody != null)
             {
@@ -285,17 +306,7 @@ namespace TRLDynamicSpawn.Components
                 {
                     if (r != null)
                     {
-                        string nameLower = r.gameObject.name.ToLower();
-                        // Mantém a mochila visível se já possuía uma equipada
-                        if (nameLower.Contains("backpack") || nameLower.Contains("bag") || nameLower.Contains("duffle") || nameLower.Contains("pack"))
-                        {
-                            r.forceRenderingOff = false;
-                            r.enabled = true;
-                        }
-                        else
-                        {
-                            r.forceRenderingOff = true;
-                        }
+                        r.forceRenderingOff = true;
                     }
                 }
             }
@@ -306,22 +317,96 @@ namespace TRLDynamicSpawn.Components
             {
                 if (r != null)
                 {
-                    string nameLower = r.gameObject.name.ToLower();
-                    if (!nameLower.Contains("backpack") && !nameLower.Contains("bag") && !nameLower.Contains("pack"))
-                    {
-                        r.forceRenderingOff = true;
-                    }
+                    r.forceRenderingOff = true;
                 }
             }
 
-            Plugin.LogSource?.LogInfo($"[TRL-DynamicSpawn] Corpse Cleanup: Converted '{corpsePlayer.Profile.Nickname}' to Backpack (Physics Frozen + Renderers Culled). Loot remains interactive.");
+            // 3. Instanciar o modelo 3D visual padrão da mochila Flyye MBSS (UCP)
+            try
+            {
+                Vector3 backpackPos = corpsePlayer.Position + Vector3.up * 0.12f;
+                if (corpsePlayer.PlayerBones?.Spine3?.Original != null)
+                {
+                    backpackPos = corpsePlayer.PlayerBones.Spine3.Original.position;
+                }
+
+                GameObject mbssPrefab = GetMbssBackpackPrefab();
+                if (mbssPrefab != null)
+                {
+                    GameObject backpackVisual = UnityEngine.Object.Instantiate(mbssPrefab, backpackPos, Quaternion.identity);
+                    backpackVisual.transform.SetParent(corpsePlayer.gameObject.transform, true);
+
+                    // Garantir que os renderers da mochila instanciada estejam visíveis
+                    var mbssRenderers = backpackVisual.GetComponentsInChildren<Renderer>();
+                    foreach (var r in mbssRenderers)
+                    {
+                        if (r != null)
+                        {
+                            r.forceRenderingOff = false;
+                            r.enabled = true;
+                        }
+                    }
+
+                    // Remover rigidbodies/colliders extras do prefab visual para não colidir com o bot
+                    var visualRbs = backpackVisual.GetComponentsInChildren<Rigidbody>();
+                    foreach (var vrb in visualRbs)
+                    {
+                        if (vrb != null) UnityEngine.Object.Destroy(vrb);
+                    }
+
+                    tracked.SpawnedBackpackVisual = backpackVisual;
+                }
+            }
+            catch (Exception ex)
+            {
+                Plugin.LogSource?.LogWarning($"[TRL-DynamicSpawn] Could not attach visual MBSS backpack: {ex.Message}");
+            }
+
+            Plugin.LogSource?.LogInfo($"[TRL-DynamicSpawn] Corpse Cleanup: Converted '{corpsePlayer.Profile.Nickname}' to standard Flyye MBSS Backpack (Physics Frozen + 0 Draw Calls). Loot remains interactive.");
         }
 
-        private void DestroyCorpse(Player corpsePlayer)
+        private GameObject GetMbssBackpackPrefab()
         {
+            if (_cachedMbssPrefab != null) return _cachedMbssPrefab;
+
+            try
+            {
+                if (Singleton<ItemFactoryClass>.Instantiated)
+                {
+                    var item = Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), MBSS_BACKPACK_TEMPLATE, null);
+                    if (item?.Template?.Prefab != null)
+                    {
+                        if (Singleton<IEasyAssets>.Instantiated)
+                        {
+                            _cachedMbssPrefab = Singleton<IEasyAssets>.Instance.GetAsset<GameObject>(item.Template.Prefab);
+                        }
+
+                        if (_cachedMbssPrefab == null && Singleton<PoolManagerClass>.Instantiated)
+                        {
+                            _cachedMbssPrefab = Singleton<PoolManagerClass>.Instance.CreateCleanLootPrefab(item, EFT.CameraControl.ECameraType.Default);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Plugin.LogSource?.LogWarning($"[TRL-DynamicSpawn] Failed to load MBSS backpack prefab: {ex.Message}");
+            }
+
+            return _cachedMbssPrefab;
+        }
+
+        private void DestroyCorpse(TrackedCorpse tracked)
+        {
+            var corpsePlayer = tracked.Player;
             if (corpsePlayer == null || corpsePlayer.gameObject == null) return;
 
             string nickname = corpsePlayer.Profile?.Nickname ?? "Unknown";
+
+            if (tracked.SpawnedBackpackVisual != null)
+            {
+                UnityEngine.Object.Destroy(tracked.SpawnedBackpackVisual);
+            }
 
             if (Singleton<IBotGame>.Instantiated && Singleton<IBotGame>.Instance?.BotsController != null)
             {
@@ -336,8 +421,9 @@ namespace TRLDynamicSpawn.Components
 
         private static bool IsBossOrSpecial(WildSpawnType role)
         {
-            // Normal Scavs (Assault/CursedAssault) e PMCs (Usec/Bear) NÃO são bosses
+            // Normal Scavs (Assault, CursedAssault, Marksman/Sniper) e PMCs (Usec/Bear) NÃO são bosses
             if (role == WildSpawnType.assault || role == WildSpawnType.cursedAssault ||
+                role == WildSpawnType.marksman ||
                 role == WildSpawnType.pmcUSEC || role == WildSpawnType.pmcBEAR)
             {
                 return false;
