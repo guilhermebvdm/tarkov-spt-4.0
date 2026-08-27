@@ -2,6 +2,16 @@
 
 Versões mais recentes primeiro.
 
+## v1.3.2 (2026-08-27)
+
+### Mitigação de Bug Visual e Sincronização de Armas Estacionárias
+- **`BotMountWeaponFixPatch` / `FikaPlayerOperateStationaryWeaponPatch`**:
+  - Adicionado tratamento completo do comando `Leave` para IAs em armas montadas.
+  - Criado o sub-patch `BotStationaryWeaponDataDropCurWeaponPatch` para desativar a postura estacionária (`MovementContext.PlayerAnimatorSetStationary(false)`) e forçar o saque da arma primária (`Selector.TakeMainWeapon()`) no exato momento em que o bot larga a metralhadora ou o AGS-30.
+  - Elimina o bug visual onde Rogues/IAs ficavam em pé andando pelo mapa segurando uma réplica da arma pesada nas mãos enquanto o tripé continuava na mureta.
+
+---
+
 ## v1.3.1 (2026-08-27)
 
 ### Otimizações de Performance, Null Safety e Padronização

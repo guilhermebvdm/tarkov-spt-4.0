@@ -1,8 +1,8 @@
 # TRL-Fixes — Memória de Sessões
 
 ## Snapshot Delta
-- **Versão:** 1.3.1 (SPT 4.0 / FIKA)
-- **Estado:** Auditoria completa e Code Review (Review 02) finalizados com 0 bloqueadores. Patches otimizados com cache de Reflection, Zero-Alloc e Null Safety defensivo.
+- **Versão:** 1.3.2 (SPT 4.0 / FIKA)
+- **Estado:** Mitigação do bug visual de metralhadora duplicada nas mãos de Rogues/IAs, suporte completo ao comando Leave e sub-patch DropCurWeapon com restabelecimento de arma primária.
 - **Pendências:** 🟢 Nenhuma pendência blocker registrada.
 
 ---
@@ -132,6 +132,26 @@
 7. **Logging Standard**: Migradas todas as chamadas de `UnityEngine.Debug` para `Plugin.Log` nos patches.
 8. **Versionamento e Build**: Bump de versão para `1.3.1` (`Plugin.cs` e `TRLFixes.csproj`), registro no `CHANGELOG.md` e compilação Release com 0 Erros e 0 Warnings.
 9. **Documentação e Code Review**: Criados `relatorio-auditoria-codigo-01.md` e `relatorio-auditoria-codigo-02.md`, e atualizado o índice central `docs/README.md`.
+
+---
+
+## 2026-08-27 — Sessão 10: Mitigação de Bug Visual em Armas Estacionárias (v1.3.2)
+
+**Tema central:** Correção e mitigação do bug visual onde Rogues/IAs ficavam em pé andando pelo mapa segurando uma réplica da arma estacionária (NSV 12.7mm / AGS-30) nas mãos enquanto o tripé original permanecia na mureta do cenário.
+
+**Alterações Realizadas:**
+1. **`BotMountWeaponFixPatch.cs`**:
+   - Adicionado suporte ao comando `Leave` para IAs nos sub-patches `PlayerOperateStationaryWeaponPatch` e `FikaPlayerOperateStationaryWeaponPatch`: ao sair da metralhadora, destranca a arma (`stationaryWeapon.Unlock`), desativa a postura estacionária (`MovementContext.PlayerAnimatorSetStationary(false)`) e aciona imediatamente o seletor do bot (`TakeMainWeapon()`).
+   - Criado o sub-patch `BotStationaryWeaponDataDropCurWeaponPatch`: garante `CanLeave = true` no prefixo para não travar a rotina de descarte da IA e, no pós-fixo, limpa a postura estacionária e força o saque da arma primária do inventário.
+   - Confirmado o isolamento total para IA: todos os sub-patches possuem a guarda `if (!__instance.IsAI) return true;` para não interferir nos controles ou animações do jogador humano.
+2. **`Plugin.cs` & `TRLFixes.csproj`**:
+   - Registrado o novo sub-patch `BotStationaryWeaponDataDropCurWeaponPatch` no `Awake()`.
+   - Bump de versão SemVer para `1.3.2` (`1.3.2.0`).
+3. **`CHANGELOG.md`**:
+   - Registradas as notas da versão `v1.3.2`.
+4. **Validação de Build**:
+   - Compilado `TRLFixes.csproj` (`TRL-Fixes.dll`) com **0 Erros e 0 Warnings**.
+
 
 
 
