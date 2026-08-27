@@ -2,7 +2,7 @@
 
 Sistema VOIP proprietário para FIKA/SPT 4.0 (EFT 0.16.9). Substitui o Dissonance/FIKA VOIP nativo por um pipeline completo de captura, filtragem neural, codificação Opus e reprodução 3D posicional em tempo real, com reatividade de bots à voz do jogador.
 
-**Versão documentada:** `1.5.1` · **Escopo:** `modded-V3-audit/` · **Status:** 🟢 Vivo
+**Versão documentada:** `1.5.2` · **Escopo:** `modded-V3-audit/` · **Status:** 🟢 Vivo
 
 ---
 
@@ -15,7 +15,8 @@ Sistema VOIP proprietário para FIKA/SPT 4.0 (EFT 0.16.9). Substitui o Dissonanc
 | 03 | [Camada de Rede e Protocolo](./03-rede-e-protocolo.md) | SftNetwork, SftAudioPacketV2 (envelope), V1 legado, SftChannelAnnouncementPacket, thread-safety, guards de recepção | 🟢 Vivo |
 | 04 | [Reatividade de Bots e Áudio 3D](./04-bots-e-audio-3d.md) | BotVoiceBridge, interpolação de raio, BotEventHandler, ancoragem 3D, oclusão, patches GameSession | 🟢 Vivo |
 | 05 | [Interface, HUDs e Configurações F12](./05-interface-huds-e-configuracoes.md) | InRaidVoipHUD, VoipHUD, VoiceCalibrationHUD, PlayerVolumeMixerHUD, MenuVoipHUD, catálogo de configs | 🟢 Vivo |
-| 06 | [Relatório de Auditoria Técnica (Review 01)](./relatorio-auditoria-codigo-01.md) | Auditoria de código estática em 6 dimensões (referências, Update, GC, código morto, AP-01..09) | 🟢 Vivo |
+| 06 | [Relatório de Auditoria Técnica (Review 01)](./relatorio-auditoria-codigo-01.md) | 1ª rodada de auditoria estática em 6 dimensões (AUD-01-01 a AUD-01-09 aplicados) | 🟢 Vivo |
+| 07 | [Relatório de Auditoria Técnica (Review 02)](./relatorio-auditoria-codigo-02.md) | 2ª rodada de auditoria pós-refatoração (AUD-02-01 a AUD-02-03) | 🟢 Vivo |
 
 ---
 

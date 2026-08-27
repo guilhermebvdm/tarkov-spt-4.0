@@ -1,8 +1,8 @@
 # TRL-SpeakFromTarkov — Memória de Sessões
 
 ## Snapshot Delta
-- **Versão:** 1.5.2 (SPT 4.0 / FIKA — Auditoria V3 & Refatoração Áudio/Mixer)
-- **Estado:** Auditoria técnica em 6 dimensões executada e documentada em `docs/relatorio-auditoria-codigo-01.md`. Correções AUD-01-01 a AUD-01-09 aplicadas: Canal de mortos 2D estéreo global com escuta dupla para espectadores, AGC inteligente restrito a canais 2D, indexação O(1) de speakers no mixer, correção do bug de volume >110% e limpeza de patches Dissonance. Compilação 100% limpa (0 erros e 0 avisos).
+- **Versão:** 1.5.3 (SPT 4.0 / FIKA — Auditoria V3 Review 02 & Zero-Alloc OnGUI)
+- **Estado:** 2ª rodada de auditoria técnica estática (Review 02) concluída e registrada em `docs/relatorio-auditoria-codigo-02.md`. 100% dos achados AUD-02-01 a AUD-02-03 aplicados: eliminação de GPU churn e GC pressure no OnGUI (InRaidVoipHUD e VoipHUD), guard in-raid no retry de microfone e otimização da busca do BattleStancePanel. Compilação 100% limpa (0 erros e 0 avisos).
 - **Próximo Passo:** Implementação e isolamento do transporte de canais de voz no Menu Principal (relay HTTP/WebSocket desacoplado do FIKA).
 - **Pendências:** 🟢 Nenhuma pendência blocker registrada.
 
@@ -242,5 +242,24 @@
   - `OnDisable()` adicionado no Wizard de Calibração para garantir restauração de input do Tarkov caso o componente seja desativado (AUD-01-09).
 - **Compilação e Versionamento:**
   - SemVer bump para `1.5.2` sincronizado em `VOIPPlugin.cs` e `TRL-SpeakFromTarkov.csproj`.
+  - Compilação Release via `dotnet build` concluída com **0 erros e 0 avisos**.
+
+---
+
+## 2026-08-27 — Sessão 16: v1.5.3 (Auditoria Técnica Review 02 & Otimização Zero-Alloc OnGUI)
+
+**Tema central:** Execução da 2ª rodada de auditoria técnica estática profunda (`docs/relatorio-auditoria-codigo-02.md`), eliminação de GPU churn e GC pressure na camada IMGUI (`InRaidVoipHUD` e `VoipHUD`), inclusão de guard in-raid no retry de microfone e otimização de busca de UI.
+
+**Decisões-chave:**
+- **Zero-Alloc & Zero-GPU Churn no `OnGUI` ([`InRaidVoipHUD.cs`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded-V3-audit/UI/InRaidVoipHUD.cs) & [`VoipHUD.cs`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded-V3-audit/UI/VoipHUD.cs) — AUD-02-01):**
+  - Erradicadas as chamadas dinâmicas a `MakeTex(color)` / `Destroy(fillTex)` executadas a cada frame de repaint durante a fala do jogador. O preenchimento visual agora consome diretamente as texturas 1x1 estáticas pré-alocadas (`_greenTex`, `_yellowTex`, `_redTex`, `_grayTex`).
+  - Cacheamento de todos os estilos `GUIStyle` em campos privados de classe, zerando as alocações de `new GUIStyle` no frame.
+  - Adicionado `OnDestroy()` em `VoipHUD.cs` para destruição limpa de texturas estáticas no ciclo de vida da Unity.
+- **Guard In-Raid no Retry Automático de Microfone ([`VoipController.cs`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded-V3-audit/Core/VoipController.cs) — AUD-02-02):**
+  - Encapsulada a rotina de retry a cada 5s com `Singleton<EFT.GameWorld>.Instantiated`. No menu principal, o microfone agora permanece 100% desligado em repouso sem gerar tentativas repetitivas de captura.
+- **Busca Otimizada de UI ([`InRaidVoipHUD.cs`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded-V3-audit/UI/InRaidVoipHUD.cs) — AUD-02-03):**
+  - Condicionada a busca do `BattleStancePanel` à presença ativa do `GameWorld` e `MainPlayer`.
+- **Compilação e Versionamento:**
+  - SemVer bump para `1.5.3` sincronizado no `VOIPPlugin.cs` e `TRL-SpeakFromTarkov.csproj`.
   - Compilação Release via `dotnet build` concluída com **0 erros e 0 avisos**.
 

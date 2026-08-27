@@ -286,14 +286,14 @@ namespace TRL_SpeakFromTarkov.Core
                 }
             }
             
-            // Retry automático se a captura abortou por clip inválido (freq=0)
-            if (!capturer.IsRecording)
+            // Retry automático se a captura abortou por clip inválido (freq=0) — apenas em raid
+            if (!capturer.IsRecording && Singleton<EFT.GameWorld>.Instantiated)
             {
                 micRetryTimer += Time.deltaTime;
                 if (micRetryTimer >= MIC_RETRY_INTERVAL)
                 {
                     micRetryTimer = 0f;
-                    VoIPPlugin.Log.LogInfo("[SFT] Tentando reabrir microfone...");
+                    VoIPPlugin.Log.LogInfo("[SFT] Tentando reabrir microfone na raid...");
                     string device = GetEftMicrophone();
                     capturer.StartCapture(device);
                 }

@@ -8,16 +8,21 @@ namespace TRL_SpeakFromTarkov.UI
         public VoipProcessor Processor { get; set; } = null!;
         public byte CurrentChannel { get; set; }
         
-        private Texture2D fillTexture = null!;
-        private Texture2D bgTexture = null!;
-        private Texture2D whiteTexture = null!;
-        private Texture2D redTex = null!;
-        private Texture2D greenTex = null!;
-        private Texture2D yellowTex = null!;
-        private Texture2D cyanTex = null!;
-        private Texture2D grayTex = null!;
+        private Texture2D? fillTexture;
+        private Texture2D? bgTexture;
+        private Texture2D? whiteTexture;
+        private Texture2D? redTex;
+        private Texture2D? greenTex;
+        private Texture2D? yellowTex;
+        private Texture2D? cyanTex;
+        private Texture2D? grayTex;
         
         private float smoothLevel = 0f;
+        
+        private GUIStyle? _btnStyle;
+        private GUIStyle? _labelStyle;
+        private GUIStyle? _barLabelStyle;
+        private GUIStyle? _profStyle;
         
         public void Initialize()
         {
@@ -29,6 +34,27 @@ namespace TRL_SpeakFromTarkov.UI
             yellowTex    = MakeTex(Color.yellow);
             cyanTex      = MakeTex(Color.cyan);
             grayTex      = MakeTex(new Color(0.5f, 0.5f, 0.5f, 0.4f));
+        }
+
+        private void OnDestroy()
+        {
+            DestroyTex(ref fillTexture);
+            DestroyTex(ref bgTexture);
+            DestroyTex(ref whiteTexture);
+            DestroyTex(ref redTex);
+            DestroyTex(ref greenTex);
+            DestroyTex(ref yellowTex);
+            DestroyTex(ref cyanTex);
+            DestroyTex(ref grayTex);
+        }
+
+        private void DestroyTex(ref Texture2D? tex)
+        {
+            if (tex != null)
+            {
+                Destroy(tex);
+                tex = null;
+            }
         }
         
         private Texture2D MakeTex(Color c)
@@ -67,8 +93,8 @@ namespace TRL_SpeakFromTarkov.UI
             
             // Botão Interativo de Profiler
             string btnText = VoIPPlugin.IsAudioDebugActive ? "[PROFILER ON]" : "[PROFILER OFF]";
-            GUIStyle btnStyle = new GUIStyle(GUI.skin.button) { fontSize = 9 };
-            if (GUI.Button(new Rect(205, 8, 115, 20), btnText, btnStyle))
+            if (_btnStyle == null) _btnStyle = new GUIStyle(GUI.skin.button) { fontSize = 9 };
+            if (GUI.Button(new Rect(205, 8, 115, 20), btnText, _btnStyle))
             {
                 VoIPPlugin.IsAudioDebugActive = !VoIPPlugin.IsAudioDebugActive;
                 VoIPPlugin.Log.LogInfo($"[SFT-PROFILER] Profiler de Áudio alternado no HUD: {(VoIPPlugin.IsAudioDebugActive ? ">>> ATIVADO <<<" : "--- DESATIVADO ---")}");
@@ -89,12 +115,15 @@ namespace TRL_SpeakFromTarkov.UI
         
         private void DrawStatusDot()
         {
-            Texture2D dotTex = redTex;
+            Texture2D? dotTex = redTex;
             if (!Processor.IsMuted)
             {
                 dotTex = Processor.IsTransmitting ? greenTex : yellowTex;
             }
-            GUI.DrawTexture(new Rect(10, 10, 20, 20), dotTex);
+            if (dotTex != null)
+            {
+                GUI.DrawTexture(new Rect(10, 10, 20, 20), dotTex);
+            }
         }
         
         private void DrawLabel()
@@ -139,17 +168,20 @@ namespace TRL_SpeakFromTarkov.UI
             else
                 state = "ABERTO";
             
-            GUIStyle s = new GUIStyle(GUI.skin.label)
+            if (_labelStyle == null)
             {
-                fontSize = 12,
-                normal = { textColor = Color.white }
-            };
-            GUI.Label(new Rect(35, 10, 285, 20), $"[{channel}] {mode} — {state}", s);
+                _labelStyle = new GUIStyle(GUI.skin.label)
+                {
+                    fontSize = 12,
+                    normal = { textColor = Color.white }
+                };
+            }
+            GUI.Label(new Rect(35, 10, 285, 20), $"[{channel}] {mode} — {state}", _labelStyle);
         }
         
         private void DrawBar()
         {
-            GUIStyle s = new GUIStyle(GUI.skin.label) { fontSize = 10, normal = { textColor = Color.gray } };
+            if (_barLabelStyle == null) _barLabelStyle = new GUIStyle(GUI.skin.label) { fontSize = 10, normal = { textColor = Color.gray } };
             
             // ── Barra 1: Entrada (MIC) ──
             float barX = 10f, barY = 32f, barW = 300f, barH = 10f;
@@ -158,10 +190,11 @@ namespace TRL_SpeakFromTarkov.UI
             float fill = (peakMax > 0f) ? Mathf.Clamp01(smoothLevel / peakMax) : 0f;
             if (fill > 0.001f)
             {
-                Color barColor = !Processor.IsTransmitting ? new Color(0.5f, 0.5f, 0.5f, 0.4f) : (fill > 0.8f ? Color.red : fill > 0.4f ? Color.yellow : Color.green);
-                var barFillTex = MakeTex(barColor);
-                GUI.DrawTexture(new Rect(barX, barY, barW * fill, barH), barFillTex);
-                Object.Destroy(barFillTex);
+                Texture2D? barFillTex = !Processor.IsTransmitting ? grayTex : (fill > 0.8f ? redTex : fill > 0.4f ? yellowTex : greenTex);
+                if (barFillTex != null)
+                {
+                    GUI.DrawTexture(new Rect(barX, barY, barW * fill, barH), barFillTex);
+                }
             }
 
             // ── Barra 2: Saída (RETORNO / ECO DEBUG) ──
@@ -174,7 +207,7 @@ namespace TRL_SpeakFromTarkov.UI
                 outLevel = Core.VoipController.Instance.echoSpeaker.CurrentOutputLevel;
             }
             
-            GUI.Label(new Rect(10, outTextY, 300, 15), $"SAÍDA / RETORNO (DEBUG ECO): {(outLevel > 0.001f ? "TOCANDO" : "SILÊNCIO")}", s);
+            GUI.Label(new Rect(10, outTextY, 300, 15), $"SAÍDA / RETORNO (DEBUG ECO): {(outLevel > 0.001f ? "TOCANDO" : "SILÊNCIO")}", _barLabelStyle);
             
             GUI.DrawTexture(new Rect(barX, outBarY, barW, barH), bgTexture);
             
@@ -187,9 +220,9 @@ namespace TRL_SpeakFromTarkov.UI
             // ── Telemetria de Desempenho (Visível com F9 / Profiler ON) ──
             if (VoIPPlugin.IsAudioDebugActive)
             {
-                GUIStyle profStyle = new GUIStyle(GUI.skin.label) { fontSize = 9, normal = { textColor = new Color(0.2f, 1.0f, 0.4f) } };
+                if (_profStyle == null) _profStyle = new GUIStyle(GUI.skin.label) { fontSize = 9, normal = { textColor = new Color(0.2f, 1.0f, 0.4f) } };
                 int bitrate = VoIPPlugin.OpusBitrate != null ? VoIPPlugin.OpusBitrate.Value / 1000 : 24;
-                GUI.Label(new Rect(10, 78, 300, 15), $"CPU DSP: ~0.08ms (<0.4%) | Banda: ~{bitrate} kbps (3KB/s) | GC: 0.00 KB/s", profStyle);
+                GUI.Label(new Rect(10, 78, 300, 15), $"CPU DSP: ~0.08ms (<0.4%) | Banda: ~{bitrate} kbps (3KB/s) | GC: 0.00 KB/s", _profStyle);
             }
         }
     }

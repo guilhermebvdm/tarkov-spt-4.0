@@ -133,7 +133,7 @@ namespace TRL_SpeakFromTarkov.UI
         {
             if (Processor == null) return;
 
-            if (_battleStancePanel == null)
+            if (_battleStancePanel == null && Comfort.Common.Singleton<EFT.GameWorld>.Instantiated && Comfort.Common.Singleton<EFT.GameWorld>.Instance.MainPlayer != null)
             {
                 _searchTimer += Time.deltaTime;
                 if (_searchTimer >= 2f)
@@ -365,13 +365,14 @@ namespace TRL_SpeakFromTarkov.UI
                 float currentFillH = fillAreaH * fill;
                 float currentFillY = fillAreaY + (fillAreaH - currentFillH);
 
-                Color color = !Processor.IsTransmitting
-                    ? new Color(0.4f, 0.45f, 0.4f, 0.4f)
-                    : (fill > n2Pct ? Color.red : fill > n1Pct ? Color.yellow : Color.green);
+                Texture2D? fillTex = !Processor.IsTransmitting
+                    ? _grayTex
+                    : (fill > n2Pct ? _redTex : fill > n1Pct ? _yellowTex : _greenTex);
 
-                var fillTex = MakeTex(color);
-                GUI.DrawTexture(new Rect(posX + 1, currentFillY, barWidth - 2, currentFillH), fillTex);
-                Destroy(fillTex);
+                if (fillTex != null)
+                {
+                    GUI.DrawTexture(new Rect(posX + 1, currentFillY, barWidth - 2, currentFillH), fillTex);
+                }
             }
 
             // 5. Traços de Divisão dos Níveis de Voz Calibrados
