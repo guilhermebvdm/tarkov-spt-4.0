@@ -535,6 +535,17 @@ namespace SPT.Launcher.Sync
 
                     var rule = _resolver.Resolve(normalized, out string matchedPrefix);
 
+                    // Pasta de DADOS DE RUNTIME de um mod (plugins/<mod>/data/...) — nunca quarentenar. Os
+                    // dados (histórico de raids do CareerLog, progressão do SPTMapProgression, etc.) são
+                    // criados pelo mod, nunca vêm no manifesto; tratá-los como "extra" deslocaria/perderia o
+                    // histórico do jogador. Vale com o mod LIGADO (aqui) e DESLIGADO (via FileMustStay).
+                    if (rule == SyncFolderRule.MirrorMoveDisabled
+                        && SyncPathUtil.IsRuntimeDataPath(normalized, matchedPrefix))
+                    {
+                        plan.Warnings.Add($"dados de runtime preservados (pasta data/): {relative}");
+                        continue;
+                    }
+
                     if (rule == SyncFolderRule.PreserveDivergent
                         || rule == SyncFolderRule.SeedIfMissingByName
                         || rule == SyncFolderRule.MirrorReference
@@ -762,7 +773,8 @@ namespace SPT.Launcher.Sync
             if (SyncPathUtil.ContainsDisabledSegment(norm)) return true;
             if (IsIgnored(norm) || IsExcludedFromCleanup(norm) || _protectedNormalized.Contains(norm)) return true;
             if (SyncCoopSafe.IsCoopEssentialPlugin(norm)) return true;
-            if (_resolver.Resolve(norm, out _) != SyncFolderRule.MirrorMoveDisabled) return true;
+            if (_resolver.Resolve(norm, out string dataPrefix) != SyncFolderRule.MirrorMoveDisabled) return true;
+            if (SyncPathUtil.IsRuntimeDataPath(norm, dataPrefix)) return true; // dados de runtime (pasta data/) — ficam no lugar
             if (manifestPaths.Contains(norm) && !moving.Contains(norm)) return true; // mod ligado / mandatório
             return false;
         }
