@@ -25,6 +25,9 @@ namespace SPT.Launcher.Tests.Sync
         [InlineData("bepinex/plugins/data/foo.dll", "bepinex/plugins", false)]          // "data" é o nome do mod (1º nível)
         [InlineData("bepinex/plugins/mod/database/x.json", "bepinex/plugins", false)]   // "database" != segmento "data"
         [InlineData("bepinex/config/foo/data/x", "bepinex/plugins", false)]             // fora do prefixo casado
+        [InlineData("bepinex/plugins/mod/data/evil.dll", "bepinex/plugins", false)]     // .dll sob data/ = código → quarentena
+        [InlineData("bepinex/plugins/mod/data/tool.exe", "bepinex/plugins", false)]     // .exe idem
+        [InlineData("bepinex/plugins/mod/data", "bepinex/plugins", false)]              // arquivo "data" terminal (não é pasta)
         public void IsRuntimeDataPath_identifies_mod_data_folders(string path, string prefix, bool expected)
         {
             Assert.Equal(expected, SyncPathUtil.IsRuntimeDataPath(path, prefix));
@@ -100,6 +103,28 @@ namespace SPT.Launcher.Tests.Sync
             Assert.Equal(1, plan.MoveCount);       // só o stray
             Assert.Equal(0, plan.MoveDirCount);
             Assert.False(fx.LocalExists("BepInEx/plugins/Softwyx.CareerLog/stray.dll"));
+        }
+
+        // 🟠 CR: um .dll escondido sob data/ NÃO é preservado — o BepInEx o carregaria como plugin fora do
+        // manifesto (coop-desync); só dados (.json/etc.) ficam.
+        [Fact]
+        public async Task Dll_inside_data_folder_is_still_quarantined()
+        {
+            using var fx = new SyncTestFixture();
+            fx.WriteLocal("BepInEx/plugins/Softwyx.CareerLog/Softwyx.CareerLog.dll", "dll");
+            fx.WriteLocal("BepInEx/plugins/Softwyx.CareerLog/data/raid1.json", "r1");     // dado → preservado
+            fx.WriteLocal("BepInEx/plugins/Softwyx.CareerLog/data/sneaky.dll", "sneaky"); // assembly → quarentena
+
+            var manifest = new[]
+            {
+                fx.Entry("BepInEx/plugins/Softwyx.CareerLog/Softwyx.CareerLog.dll", "dll", optional: true, optionalId: "career-log"),
+            };
+
+            var (plan, _, _) = await fx.PlanAndRunAsync(manifest, fx.Options(optionalEnabled: _ => true));
+
+            Assert.Equal(1, plan.MoveCount);                                                   // só o sneaky.dll
+            Assert.False(fx.LocalExists("BepInEx/plugins/Softwyx.CareerLog/data/sneaky.dll"));  // quarentenado
+            Assert.True(fx.LocalExists("BepInEx/plugins/Softwyx.CareerLog/data/raid1.json"));   // dado ficou
         }
 
         // Mod DESLIGADO: o mod vai à quarentena, mas a pasta data/ FICA no lugar (dados nunca se movem).

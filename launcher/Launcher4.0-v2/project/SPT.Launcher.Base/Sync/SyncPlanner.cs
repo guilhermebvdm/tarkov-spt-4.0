@@ -535,11 +535,12 @@ namespace SPT.Launcher.Sync
 
                     var rule = _resolver.Resolve(normalized, out string matchedPrefix);
 
-                    // Pasta de DADOS DE RUNTIME de um mod (plugins/<mod>/data/...) — nunca quarentenar. Os
-                    // dados (histórico de raids do CareerLog, progressão do SPTMapProgression, etc.) são
-                    // criados pelo mod, nunca vêm no manifesto; tratá-los como "extra" deslocaria/perderia o
-                    // histórico do jogador. Vale com o mod LIGADO (aqui) e DESLIGADO (via FileMustStay).
-                    if (rule == SyncFolderRule.MirrorMoveDisabled
+                    // Pasta de DADOS DE RUNTIME de um mod (plugins/<mod>/data/...) — nunca quarentenar NEM
+                    // deletar. Os dados (histórico de raids do CareerLog, progressão do SPTMapProgression,
+                    // etc.) são criados pelo mod, nunca vêm no manifesto; tratá-los como "extra" deslocaria/
+                    // perderia o histórico do jogador. Cobre as duas regras-espelho (move-disabled e o
+                    // delete destrutivo) e vale com o mod LIGADO (aqui) e DESLIGADO (via FileMustStay).
+                    if ((rule == SyncFolderRule.MirrorMoveDisabled || rule == SyncFolderRule.MirrorDelete)
                         && SyncPathUtil.IsRuntimeDataPath(normalized, matchedPrefix))
                     {
                         plan.Warnings.Add($"dados de runtime preservados (pasta data/): {relative}");

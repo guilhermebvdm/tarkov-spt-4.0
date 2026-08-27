@@ -71,7 +71,19 @@ namespace SPT.Launcher.Sync
 
             string remainder = normalizedPath.Substring(matchedPrefix.Length).TrimStart('/');
             string[] segs = remainder.Split('/');
-            for (int i = 1; i < segs.Length; i++) // começa em 1: pula o nome do mod (segs[0])
+            if (segs.Length < 2) return false;
+
+            // O arquivo é CÓDIGO: o BepInEx varre plugins/patchers recursivamente e carregaria um .dll/.exe
+            // sob data/ como plugin. Isentá-lo da quarentena esconderia um plugin fora do manifesto — risco
+            // de coop-desync. Dados de runtime são .json/.bin/etc., nunca assemblies (ref: CR 🟠).
+            string last = segs[segs.Length - 1];
+            if (last.EndsWith(".dll", StringComparison.Ordinal) || last.EndsWith(".exe", StringComparison.Ordinal))
+                return false;
+
+            // "data" tem que ser uma PASTA (segmento não-terminal, com arquivo depois) DENTRO do mod:
+            // varre de 1 (pula o nome do mod) até length-2 (pula o nome do arquivo). Assim um arquivo solto
+            // chamado exatamente "data" não é preservado por engano (ref: CR 🟢).
+            for (int i = 1; i < segs.Length - 1; i++)
             {
                 if (segs[i] == "data") return true;
             }
