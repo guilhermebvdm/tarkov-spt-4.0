@@ -8,7 +8,7 @@ using UnityEngine.SceneManagement;
 
 namespace TRL_SpeakFromTarkov
 {
-    [BepInPlugin("trl.speakfromtarkov", "TRL-SpeakFromTarkov", "1.5.1")]
+    [BepInPlugin("trl.speakfromtarkov", "TRL-SpeakFromTarkov", "1.5.2")]
     [BepInDependency("com.fika.core", BepInDependency.DependencyFlags.HardDependency)]
     public class VoIPPlugin : BaseUnityPlugin
     {
@@ -329,7 +329,6 @@ namespace TRL_SpeakFromTarkov
             new GameSessionPatcher.FikaVoipReceivePatch().Enable();
             new GameSessionPatcher.FikaClientInitializeVoipPatch().Enable();
             new GameSessionPatcher.FikaServerInitializeVoipPatch().Enable();
-            new GameSessionPatcher.FikaVoipControllerUpdatePatch().Enable();
             new GameSessionPatcher.FikaFixVoipAudioDevicePatch().Enable();
             new GameSessionPatcher.FikaObservedPlayerInitVoipPatch().Enable();
             new GameSessionPatcher.FikaPlayerInitVoipPatch().Enable();
@@ -383,7 +382,10 @@ namespace TRL_SpeakFromTarkov
             TRL_SpeakFromTarkov.Network.SftNetwork.EnsurePacketsRegistered();
         }
 
-        void OnDestroy() {}
+        void OnDestroy()
+        {
+            SceneManager.sceneLoaded -= OnSceneLoaded;
+        }
 
         void OnApplicationQuit()
         {

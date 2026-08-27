@@ -391,7 +391,16 @@ namespace TRL_SpeakFromTarkov.Network
                 Player senderPlayer = gameWorld.GetAlivePlayerByProfileID(profileId);
                 if (senderPlayer == null && gameWorld.AllAlivePlayersList != null)
                 {
-                    senderPlayer = gameWorld.AllAlivePlayersList.FirstOrDefault(p => p != null && (p.ProfileId == profileId || (p.Profile != null && p.Profile.Id == profileId)));
+                    var allAlive = gameWorld.AllAlivePlayersList;
+                    for (int i = 0; i < allAlive.Count; i++)
+                    {
+                        var p = allAlive[i];
+                        if (p != null && (p.ProfileId == profileId || (p.Profile != null && p.Profile.Id == profileId)))
+                        {
+                            senderPlayer = p;
+                            break;
+                        }
+                    }
                 }
 
                 bool isSenderAlive = senderPlayer != null && senderPlayer.HealthController != null && senderPlayer.HealthController.IsAlive;
@@ -415,7 +424,10 @@ namespace TRL_SpeakFromTarkov.Network
                 }
             }
 
-            if (Core.VoipController.Instance != null && channel != Core.VoipController.Instance.CurrentChannel)
+            // ── 3. FILTRO DE CANAL (ESPECTADOR OUVE CANAL 2 EM 2D + CANAL 0 EM 3D) ──
+            byte myChannel = Core.VoipController.Instance != null ? Core.VoipController.Instance.CurrentChannel : (byte)1;
+            bool isChannelAllowed = (channel == myChannel) || (myChannel == 2 && channel == 0);
+            if (!isChannelAllowed)
                 return;
 
             RemoteSpeaker speaker;
@@ -428,22 +440,45 @@ namespace TRL_SpeakFromTarkov.Network
 
             if (inRaid && gameWorld != null)
             {
-                speaker.SetEmergency2DMode(false);
-                Player player = gameWorld.GetAlivePlayerByProfileID(profileId);
-                if (player == null && gameWorld.AllAlivePlayersList != null)
+                if (channel == 2)
                 {
-                    player = gameWorld.AllAlivePlayersList.FirstOrDefault(p => p != null && (p.ProfileId == profileId || (p.Profile != null && p.Profile.Id == profileId)));
-                }
-
-                if (player != null)
-                {
-                    Transform targetBone = player.PlayerBones != null && player.PlayerBones.Head != null
-                        ? player.PlayerBones.Head.Original
-                        : player.Transform.Original;
-                    if (speaker.transform.parent != targetBone)
+                    // Canal 2 (Espectador / Chat de mortos): 100% 2D Estéreo Global sem ancoragem a cadáveres
+                    speaker.SetEmergency2DMode(true);
+                    if (speaker.transform.parent != null)
                     {
-                        speaker.transform.SetParent(targetBone, false);
-                        speaker.transform.localPosition = targetBone == player.Transform.Original ? Vector3.up * 1.6f : Vector3.zero;
+                        speaker.transform.SetParent(null, false);
+                        speaker.transform.position = Vector3.zero;
+                    }
+                }
+                else
+                {
+                    // Canal 0 (Proximidade 3D): Ancorado ao avatar do jogador
+                    speaker.SetEmergency2DMode(false);
+                    Player player = gameWorld.GetAlivePlayerByProfileID(profileId);
+                    if (player == null && gameWorld.AllAlivePlayersList != null)
+                    {
+                        var allPlayers = gameWorld.AllAlivePlayersList;
+                        for (int i = 0; i < allPlayers.Count; i++)
+                        {
+                            var p = allPlayers[i];
+                            if (p != null && (p.ProfileId == profileId || (p.Profile != null && p.Profile.Id == profileId)))
+                            {
+                                player = p;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (player != null)
+                    {
+                        Transform targetBone = player.PlayerBones != null && player.PlayerBones.Head != null
+                            ? player.PlayerBones.Head.Original
+                            : player.Transform.Original;
+                        if (speaker.transform.parent != targetBone)
+                        {
+                            speaker.transform.SetParent(targetBone, false);
+                            speaker.transform.localPosition = targetBone == player.Transform.Original ? Vector3.up * 1.6f : Vector3.zero;
+                        }
                     }
                 }
             }
@@ -454,6 +489,14 @@ namespace TRL_SpeakFromTarkov.Network
             }
 
             speaker.EnqueuePacket(audioData, voiceLevel);
+        }
+
+        public RemoteSpeaker? GetRemoteSpeaker(string profileId)
+        {
+            if (string.IsNullOrEmpty(profileId)) return null;
+            if (remoteSpeakers.TryGetValue(profileId, out var speaker))
+                return speaker;
+            return null;
         }
 
         private RemoteSpeaker CreateRemoteSpeaker(string profileId)

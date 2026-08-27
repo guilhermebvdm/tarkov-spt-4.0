@@ -55,13 +55,6 @@ namespace TRL_SpeakFromTarkov.Audio
         private float _gateHoldTimer = 0f;
         private bool  _gateOpen      = false;
 
-        // ── RNNoise Noise Gate ────────────────────────────────────────────────
-#pragma warning disable CS0414
-        private float _rnGateGain      = 0f;
-        private float _rnGateHoldTimer = 0f;
-        private bool  _rnGateOpen      = false;
-#pragma warning restore CS0414
-
         private readonly float _frameDuration;
         private readonly float _attackRate;
         private readonly float _releaseRate;
@@ -77,6 +70,7 @@ namespace TRL_SpeakFromTarkov.Audio
         // ── Novos Filtros Avançados (Qualidade Estúdio) ────────
         public bool EnableAGC { get; set; } = false;
         public bool EnableLimiter { get; set; } = true;
+        public bool Is2DChannel { get; set; } = false;
         
         private float _lpfAlpha;
         private float _lpfPrevOut = 0f;
@@ -148,6 +142,12 @@ namespace TRL_SpeakFromTarkov.Audio
             else
             {
                 ApplyFallback(buffer);
+            }
+
+            // AGC é aplicado exclusivamente em canais 2D (menu ou spectator) para não distorcer proximidade 3D
+            if (EnableAGC && Is2DChannel)
+            {
+                ApplyAGC(buffer);
             }
 
             // O limiter é a última barreira de proteção de áudio
@@ -329,7 +329,6 @@ namespace TRL_SpeakFromTarkov.Audio
             _lpfPrevOut = 0f;
             _agcCurrentGain = 1f;
             _gateGain  = 0f; _gateHoldTimer = 0f; _gateOpen = false;
-            _rnGateGain = 0f; _rnGateHoldTimer = 0f; _rnGateOpen = false;
             _inputWrite = _inputRead = _inputCount = 0;
             _outputWrite = _outputRead = _outputCount = 0;
             Array.Clear(_inputQueue, 0, _inputQueue.Length);

@@ -243,7 +243,16 @@ namespace TRL_SpeakFromTarkov.Audio
                         Player player = gameWorld.GetAlivePlayerByProfileID(TargetProfileId);
                         if (player == null && gameWorld.AllAlivePlayersList != null)
                         {
-                            player = System.Linq.Enumerable.FirstOrDefault(gameWorld.AllAlivePlayersList, p => p != null && (p.ProfileId == TargetProfileId || (p.Profile != null && p.Profile.Id == TargetProfileId)));
+                            var allAlive = gameWorld.AllAlivePlayersList;
+                            for (int i = 0; i < allAlive.Count; i++)
+                            {
+                                var p = allAlive[i];
+                                if (p != null && (p.ProfileId == TargetProfileId || (p.Profile != null && p.Profile.Id == TargetProfileId)))
+                                {
+                                    player = p;
+                                    break;
+                                }
+                            }
                         }
 
                         if (player != null)
@@ -463,6 +472,8 @@ namespace TRL_SpeakFromTarkov.Audio
                 }
 
                 float targetSample = lastSample * finalAttenuation;
+                if (targetSample > 0.98f) targetSample = 0.98f;
+                else if (targetSample < -0.98f) targetSample = -0.98f;
 
                 // Aplica o filtro de absorção do ar (Single-Pole Low-Pass Filter ultraleve)
                 lpfState = lpfState + airDampingAlpha * (targetSample - lpfState);

@@ -99,6 +99,14 @@ namespace TRL_SpeakFromTarkov.UI
             }
         }
 
+        private void OnDisable()
+        {
+            if (IsOpen)
+            {
+                CloseWizard();
+            }
+        }
+
         private static void SetGameInputBlocked(bool blocked)
         {
             try

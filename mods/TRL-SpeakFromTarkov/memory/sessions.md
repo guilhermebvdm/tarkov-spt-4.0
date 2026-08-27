@@ -1,9 +1,9 @@
 # TRL-SpeakFromTarkov — Memória de Sessões
 
 ## Snapshot Delta
-- **Versão:** 1.7.0 (SPT 4.0 / FIKA — Otimizações Arquiteturais V2)
-- **Estado:** 100% das 10 Fases do Masterplan de Otimizações V2 implementadas e testadas com 0 erros e 0 avisos (100% Clean Build). In-Raid Player Volume Mixer HUD (`Alt + P`, modal com bloqueio de input e sliders individuais 0-200% salvos localmente) entregue. Resolução definitiva do travamento de carregamento de raid via bypass assíncrono de `InitializeVOIP()` do FIKA.
-- **Próximo Passo:** Testes de gameplay multiplayer em raid e validação acústica da oclusão física em cenários densos (Dorms, Factory, Reserva Bunker).
+- **Versão:** 1.5.2 (SPT 4.0 / FIKA — Auditoria V3 & Refatoração Áudio/Mixer)
+- **Estado:** Auditoria técnica em 6 dimensões executada e documentada em `docs/relatorio-auditoria-codigo-01.md`. Correções AUD-01-01 a AUD-01-09 aplicadas: Canal de mortos 2D estéreo global com escuta dupla para espectadores, AGC inteligente restrito a canais 2D, indexação O(1) de speakers no mixer, correção do bug de volume >110% e limpeza de patches Dissonance. Compilação 100% limpa (0 erros e 0 avisos).
+- **Próximo Passo:** Implementação e isolamento do transporte de canais de voz no Menu Principal (relay HTTP/WebSocket desacoplado do FIKA).
 - **Pendências:** 🟢 Nenhuma pendência blocker registrada.
 
 ---
@@ -218,4 +218,29 @@
   - Diagnóstico: O patch anterior que bloqueava `FikaCommsNetwork.CreateClient()` impedia a atribuição de `VOIPClient`, fazendo com que `FikaClient.InitializeVOIP()` ficasse preso em um loop assíncrono infinito `do { await Task.Yield(); } while (VOIPClient == null);` chamado pelo `CoopGame.cs:509`.
   - Solução: Criados os patches `FikaClientInitializeVoipPatch` e `FikaServerInitializeVoipPatch` retornando `Task.CompletedTask` e `return false;`. O carregamento da raid do FIKA não aguarda o Dissonance, não carrega a cena aditiva `DissonanceSetupScene` e entra na raid instantaneamente.
 - **Code Reviews:** Executados todos os reviews de 01 a 10 no padrão de 6 categorias × 4 impactos com 100% de aprovação (0 bloqueadores pendentes).
+
+---
+
+## 2026-08-27 — Sessão 15: v1.5.2 (Auditoria Técnica de Código V3 & Refatoração de Áudio 2D/3D e Mixer)
+
+**Tema central:** Conclusão da auditoria técnica profunda do código V3 (`modded-V3-audit`) em 6 dimensões, documentação modular completa (`docs/01` a `05` + `relatorio-auditoria-codigo-01.md`), resolução do canal 2D de mortos com escuta dupla de espectador, ativação do AGC inteligente em 2D, indexação O(1) de speakers e eliminação de bugs de volume do mixer.
+
+**Decisões-chave:**
+- **Canal de Mortos / Espectadores 2D Puro & Escuta Dupla ([`SftNetwork.cs`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded-V3-audit/Network/SftNetwork.cs)):** 
+  - Pacotes recebidos no **Canal 2** configuram o `RemoteSpeaker` em **modo 2D Estéreo Global Puro** (`SetEmergency2DMode(true)`), desvinculados de qualquer cadáver/ragdoll no chão (`transform.SetParent(null)`), sem atenuação de distância 3D e sem oclusão por paredes.
+  - Jogadores mortos (`CurrentChannel == 2`) possuem permissão de escuta dupla: recebem **o Canal 2 em 2D** (chat entre mortos) E **o Canal 0 em 3D** (áudio do jogo ao vivo dos amigos vivos ao redor da câmera assistida). Jogadores vivos continuam filtrando e descartando pacotes de mortos.
+- **AGC (Automatic Gain Control) Inteligente para Canais 2D ([`AudioFilter.cs`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded-V3-audit/Audio/AudioFilter.cs) & [`MicrophoneCapturer.cs`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded-V3-audit/Audio/MicrophoneCapturer.cs)):**
+  - A rotina de ganho automático `ApplyAGC` foi ativada estritamente quando `EnableAGC && Is2DChannel` (canais 2D como espectador/menu). Em raid 3D (Canal 0), o AGC permanece inativo para preservar a percepção natural de distância e sussurros.
+- **Indexação $O(1)$ de Speakers & Proteção do Mixer ([`SftNetwork.cs`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded-V3-audit/Network/SftNetwork.cs), [`PlayerVolumeMixerHUD.cs`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded-V3-audit/UI/PlayerVolumeMixerHUD.cs) & [`RemoteSpeaker.cs`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded-V3-audit/Audio/RemoteSpeaker.cs)):**
+  - Substituída a busca lenta `FindObjectsOfType<RemoteSpeaker>()` por lookup direto no dicionário `SftNetwork.Instance.GetRemoteSpeaker(profileId)`.
+  - Diagnóstico do bug de volume >110%: Na versão original, a lógica dividia o volume por 100 achando que o valor era percentual inteiro, gerando 1% de volume (silêncio). No V3 com ganho DSP direto, foi adicionado clamp suave (`Mathf.Clamp(targetSample, -0.98f, 0.98f)`) garantindo suporte pleno de 0% a 200% sem estouro de buffer no FMOD.
+- **Limpeza de Patches Harmony & Teardown AP-01 ([`GameSessionPatcher.cs`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded-V3-audit/GameSessionPatcher.cs) & [`VOIPPlugin.cs`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded-V3-audit/VOIPPlugin.cs)):**
+  - Removido o patch inativo `FikaVoipControllerUpdatePatch` (AUD-01-01).
+  - Implementado `SceneManager.sceneLoaded -= OnSceneLoaded` no `OnDestroy()` de `VOIPPlugin.cs` (AUD-01-06).
+- **Zero-Alloc LINQ & Segurança de Input ([`RemoteSpeaker.cs`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded-V3-audit/Audio/RemoteSpeaker.cs) & [`VoiceCalibrationHUD.cs`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-SpeakFromTarkov/modded-V3-audit/UI/VoiceCalibrationHUD.cs)):**
+  - `FirstOrDefault` substituído por laços `for` indexados (AUD-01-05).
+  - `OnDisable()` adicionado no Wizard de Calibração para garantir restauração de input do Tarkov caso o componente seja desativado (AUD-01-09).
+- **Compilação e Versionamento:**
+  - SemVer bump para `1.5.2` sincronizado em `VOIPPlugin.cs` e `TRL-SpeakFromTarkov.csproj`.
+  - Compilação Release via `dotnet build` concluída com **0 erros e 0 avisos**.
 

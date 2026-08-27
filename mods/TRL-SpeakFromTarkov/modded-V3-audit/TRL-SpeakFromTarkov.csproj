@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <RootNamespace>TRL_SpeakFromTarkov</RootNamespace>
     <AssemblyName>TRL-SpeakFromTarkov</AssemblyName>
-    <Version>1.5.1</Version>
+    <Version>1.5.2</Version>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>

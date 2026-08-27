@@ -38,10 +38,6 @@ namespace TRL_SpeakFromTarkov.Audio
         public int ActualSampleRate => actualSampleRate;
         public bool IsResampling => actualSampleRate != targetSampleRate;
         public int ClipCount { get; private set; }
-#pragma warning disable CS0414
-        private bool hasPlayed = false;
-        private int dspConfirmed = 0;
-#pragma warning restore CS0414
         private float restartCooldown = 0f;
         private int lastMicPosition = 0;
         private float[] micPollBuffer = new float[48000];
@@ -120,8 +116,6 @@ namespace TRL_SpeakFromTarkov.Audio
             writePos = 0;
             readPos = 0;
             availableSamples = 0;
-            hasPlayed = false;
-            dspConfirmed = 0;
             
             int initialPos = Microphone.GetPosition(deviceName);
             lastMicPosition = initialPos >= 0 ? initialPos : 0;
@@ -169,8 +163,6 @@ namespace TRL_SpeakFromTarkov.Audio
                     Microphone.End(deviceName);
             }
             IsRecording = false;
-            hasPlayed = false;
-            dspConfirmed = 0;
             audioFilter?.Dispose();
             audioFilter = null!;
         }
@@ -251,6 +243,7 @@ namespace TRL_SpeakFromTarkov.Audio
                 audioFilter.EnableAGC             = VoIPPlugin.EnableAGC.Value;
                 audioFilter.EnableLimiter         = VoIPPlugin.EnableLimiter.Value;
                 audioFilter.LPFCutoffHz           = VoIPPlugin.LPFCutoff.Value;
+                audioFilter.Is2DChannel           = (Core.VoipController.Instance != null && Core.VoipController.Instance.CurrentChannel != 0);
             }
         }
 

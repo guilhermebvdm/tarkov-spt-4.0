@@ -125,17 +125,13 @@ namespace TRL_SpeakFromTarkov.UI
 
         private static void ApplyToSpeaker(string profileId)
         {
-            if (Singleton<GameWorld>.Instantiated && SftNetwork.Instance != null)
+            if (SftNetwork.Instance != null)
             {
                 float effVol = GetPlayerEffectiveVolume(profileId);
-                // Busca o RemoteSpeaker deste jogador se ativo
-                var speakers = UnityEngine.Object.FindObjectsOfType<RemoteSpeaker>();
-                foreach (var s in speakers)
+                var speaker = SftNetwork.Instance.GetRemoteSpeaker(profileId);
+                if (speaker != null)
                 {
-                    if (s != null && s.TargetProfileId == profileId)
-                    {
-                        s.SetVolume(effVol);
-                    }
+                    speaker.SetVolume(effVol);
                 }
             }
         }
