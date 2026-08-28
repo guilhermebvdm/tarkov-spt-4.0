@@ -19,6 +19,7 @@ public class LoadAmmoController : IDisposable
     private readonly MagazinePresetLoader _magazinePresetLoader;
     private MagazineItemClass _magazine;
     private bool _isReachable = true;
+    private bool _disposed;
 
     public event Action<float, int, int> OnStartLoading;
     public event Action<Item> OnCloseInventoryLoading;
@@ -221,13 +222,26 @@ public class LoadAmmoController : IDisposable
         return true;
     }
 
+    private readonly List<AmmoItemClass> _allAmmoScratch = [];
+
+    private static readonly Comparison<AmmoItemClass> _ammoComparison = (a, b) =>
+    {
+        var result = b.PenetrationPower.CompareTo(a.PenetrationPower);
+        if (result == 0)
+        {
+            result = a.StackObjectsCount.CompareTo(b.StackObjectsCount);
+        }
+        return result;
+    };
+
     /// <summary>
     /// Find ammo for <paramref name="magazine"/>. Used by loading mag presets in the inventory screen
     /// </summary>
     /// <param name="magazine">Magazine to be checked compatible with</param>
     public bool GetAllAmmoForMagazine(out List<AmmoItemClass> allAmmo, MagazineItemClass magazine)
     {
-        allAmmo = [];
+        _allAmmoScratch.Clear();
+        allAmmo = _allAmmoScratch;
         PlayerInventoryController.Inventory.Equipment.GetAcceptableItemsNonAlloc(
             _reachableAll,
             allAmmo,
@@ -236,17 +250,7 @@ public class LoadAmmoController : IDisposable
         );
         if (allAmmo.Count <= 0) return false;
 
-        // Sort penetration power highest to lowest, then stack count ascending
-        allAmmo.Sort((a, b) =>
-            {
-                var result = b.PenetrationPower.CompareTo(a.PenetrationPower);
-                if (result == 0)
-                {
-                    result = a.StackObjectsCount.CompareTo(b.StackObjectsCount);
-                }
-                return result;
-            }
-        );
+        allAmmo.Sort(_ammoComparison);
         return true;
     }
 
@@ -293,6 +297,9 @@ public class LoadAmmoController : IDisposable
 
     public void Dispose()
     {
+        if (_disposed) return;
+        _disposed = true;
+
         _magazinePresetLoader.Dispose();
         if (PlayerInventoryController is not null)
         {
@@ -321,6 +328,11 @@ public class LoadAmmoController : IDisposable
 
     private void LoadingStart(GEventArgs1 eventArgs)
     {
+        if (_magazinePresetLoader.PresetLoaderIsActive && eventArgs is GEventArgs7 or GEventArgs8)
+        {
+            _magazinePresetLoader.CancelMagPresetLoading();
+        }
+
         switch (eventArgs)
         {
             case GEventArgs7 loadEvent:

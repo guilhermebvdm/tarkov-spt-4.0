@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Reflection;
 using ContinuousLoadAmmo.Utils;
 using EFT;
@@ -21,8 +21,9 @@ public class InventoryScreenClosePatch : ModulePatch
     /// UI, Patch to NOT stop loading ammo on close
     /// </summary>
     [PatchPrefix]
-    protected static void Prefix(ref InventoryController ___inventoryController_0)
+    protected static void Prefix(ref InventoryController ___inventoryController_0, out InventoryController __state)
     {
+        __state = ___inventoryController_0;
         if (!CommonUtils.InRaid) return;
 
         if (___inventoryController_0 is Player.PlayerInventoryController playerInventoryController)
@@ -35,5 +36,14 @@ public class InventoryScreenClosePatch : ModulePatch
         ___inventoryController_0 = null;
 
         OnInventoryClose?.Invoke();
+    }
+
+    [PatchPostfix]
+    protected static void Postfix(ref InventoryController ___inventoryController_0, InventoryController __state)
+    {
+        if (__state != null && ___inventoryController_0 == null)
+        {
+            ___inventoryController_0 = __state;
+        }
     }
 }

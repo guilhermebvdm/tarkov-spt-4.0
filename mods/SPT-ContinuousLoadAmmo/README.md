@@ -8,18 +8,25 @@
 
 ## O que é
 
-(TODO: descrever o mod em 1-2 parágrafos)
+O **Continuous Load Ammo** permite municiar e desmuniciar carregadores continuamente fora da tela de inventário durante incursões no Escape from Tarkov / SPT 4.0. O mod oferece movimentação tática com velocidade reduzida durante o processo, seleção rápida de munições em combate (*Quick Load*) com carrossel visual no HUD, e suporte completo à aplicação de *Magazine Presets* complexos diretamente em raid.
+
+## Documentação Técnica e Propriedades
+
+- 📖 **Documentação Técnica Modular:** [docs/README.md](docs/README.md)
+- ⚙️ **Catálogo de Propriedades e Configurações F12:** [PROPRIEDADES.md](PROPRIEDADES.md)
 
 ## Estrutura desta pasta
 
-| Pasta | Conteúdo |
+| Pasta / Arquivo | Conteúdo |
 |---|---|
+| `docs/` | Documentação técnica modular e arquitetural completa do mod. |
 | `original/` | Clone do repositório oficial, sem `.git`. **Não modificar.** Referência intocada usada para diff e atualizações. |
 | `modded/` | Cópia de trabalho. Modificações vão aqui. |
 | `assets/` | Imagens, prints, documentação externa. |
 | `backlog/` | Ideias, bugs, próximos passos. |
 | `builds/` | Builds geradas para distribuição. |
 | `scripts/` | Scripts auxiliares específicos deste mod. |
+| `PROPRIEDADES.md` | Catálogo de configurações do menu F12 (BepInEx Configuration Manager). |
 | `mod.json` | Metadados machine-readable (alimenta o inventário de mods). |
 
 ## Workflow de desenvolvimento
