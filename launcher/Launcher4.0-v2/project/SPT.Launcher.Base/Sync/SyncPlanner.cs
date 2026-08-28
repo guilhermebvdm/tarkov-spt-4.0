@@ -507,6 +507,7 @@ namespace SPT.Launcher.Sync
             }
 
             var handled = new HashSet<string>(StringComparer.Ordinal);
+            var dataWarned = new HashSet<string>(StringComparer.Ordinal); // 1 aviso de data/ preservada por pasta-mod
 
             foreach (var rootPrefix in scanRoots.Distinct())
             {
@@ -535,15 +536,20 @@ namespace SPT.Launcher.Sync
 
                     var rule = _resolver.Resolve(normalized, out string matchedPrefix);
 
-                    // Pasta de DADOS DE RUNTIME de um mod (plugins/<mod>/data/...) — nunca quarentenar NEM
-                    // deletar. Os dados (histórico de raids do CareerLog, progressão do SPTMapProgression,
-                    // etc.) são criados pelo mod, nunca vêm no manifesto; tratá-los como "extra" deslocaria/
-                    // perderia o histórico do jogador. Cobre as duas regras-espelho (move-disabled e o
-                    // delete destrutivo) e vale com o mod LIGADO (aqui) e DESLIGADO (via FileMustStay).
-                    if ((rule == SyncFolderRule.MirrorMoveDisabled || rule == SyncFolderRule.MirrorDelete)
-                        && SyncPathUtil.IsRuntimeDataPath(normalized, matchedPrefix))
+                    // Pasta de DADOS DE RUNTIME de um mod (<mod>/data/...) sob QUALQUER raiz varrida — nunca
+                    // quarentenar nem deletar. Usa o rootPrefix corrente (não a regra), então cobre também os
+                    // managedPaths (ex.: user/mods/<mod>/data/) que resolvem para Default→DeleteExtra, além de
+                    // plugins/patchers. Os dados são criados pelo mod, nunca vêm no manifesto; tratá-los como
+                    // "extra" deslocaria/deletaria o histórico do jogador. .dll/.exe sob data/ NÃO conta
+                    // (IsRuntimeDataPath os exclui — código carregável, risco de coop-desync).
+                    if (SyncPathUtil.IsRuntimeDataPath(normalized, rootPrefix))
                     {
-                        plan.Warnings.Add($"dados de runtime preservados (pasta data/): {relative}");
+                        // 1 aviso por pasta-mod (senão um mod com centenas de JSONs de raid geraria centenas).
+                        string rem = normalized.Substring(rootPrefix.Length).TrimStart('/');
+                        int slash = rem.IndexOf('/');
+                        string modKey = slash >= 0 ? rootPrefix + "/" + rem.Substring(0, slash) : rootPrefix;
+                        if (dataWarned.Add(modKey))
+                            plan.Warnings.Add($"dados de runtime preservados (pasta data/): {modKey}");
                         continue;
                     }
 

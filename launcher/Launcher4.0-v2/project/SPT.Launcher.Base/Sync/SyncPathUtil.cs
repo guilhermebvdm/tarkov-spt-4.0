@@ -77,7 +77,9 @@ namespace SPT.Launcher.Sync
             // sob data/ como plugin. Isentá-lo da quarentena esconderia um plugin fora do manifesto — risco
             // de coop-desync. Dados de runtime são .json/.bin/etc., nunca assemblies (ref: CR 🟠).
             string last = segs[segs.Length - 1];
-            if (last.EndsWith(".dll", StringComparison.Ordinal) || last.EndsWith(".exe", StringComparison.Ordinal))
+            // OrdinalIgnoreCase (não só Ordinal): os call sites passam path já normalizado (lowercase), mas
+            // o método é público — um chamador futuro com ".DLL" não deve deixar um assembly escapar.
+            if (last.EndsWith(".dll", StringComparison.OrdinalIgnoreCase) || last.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
                 return false;
 
             // "data" tem que ser uma PASTA (segmento não-terminal, com arquivo depois) DENTRO do mod:
@@ -85,7 +87,7 @@ namespace SPT.Launcher.Sync
             // chamado exatamente "data" não é preservado por engano (ref: CR 🟢).
             for (int i = 1; i < segs.Length - 1; i++)
             {
-                if (segs[i] == "data") return true;
+                if (string.Equals(segs[i], "data", StringComparison.OrdinalIgnoreCase)) return true;
             }
             return false;
         }

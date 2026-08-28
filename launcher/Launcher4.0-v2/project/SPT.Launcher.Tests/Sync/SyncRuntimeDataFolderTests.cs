@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using SPT.Launcher.Models.Launcher;
@@ -148,6 +149,65 @@ namespace SPT.Launcher.Tests.Sync
             // ...e a data/ ficou EXATAMENTE onde estava.
             Assert.True(fx.LocalExists("BepInEx/plugins/Softwyx.CareerLog/data/raid1.json"));
             Assert.False(fx.LocalExists("BepInEx/plugins-disabled/optional/Softwyx.CareerLog/data/raid1.json"));
+        }
+
+        // 🟡 CR #1: data/ sob um managedPath (ex.: user/mods/<mod>) resolve p/ Default → DeleteExtra. A
+        // guarda (via rootPrefix) impede a DELEÇÃO silenciosa; um extra normal no mesmo managedPath é limpo.
+        [Fact]
+        public async Task Data_folder_under_managed_path_is_not_deleted()
+        {
+            using var fx = new SyncTestFixture();
+            fx.WriteLocal("user/mods/SomeServerMod/data/state.json", "s");
+            fx.WriteLocal("user/mods/SomeServerMod/stray.json", "x");
+
+            var opts = fx.Options();
+            opts.ManagedPaths = new[] { "user/mods" };
+
+            await fx.PlanAndRunAsync(Array.Empty<ManifestFile>(), opts);
+
+            Assert.True(fx.LocalExists("user/mods/SomeServerMod/data/state.json"));   // dado preservado
+            Assert.False(fx.LocalExists("user/mods/SomeServerMod/stray.json"));       // extra normal deletado
+        }
+
+        // 🟡 CR #2: se plugins for configurado como mirror-delete (folderRules do server), a data/ sobrevive
+        // ao DELETE por esse ramo; um extra normal é deletado.
+        [Fact]
+        public async Task Data_folder_survives_mirror_delete_rule()
+        {
+            using var fx = new SyncTestFixture();
+            fx.WriteLocal("BepInEx/plugins/Mod/data/state.json", "s");
+            fx.WriteLocal("BepInEx/plugins/Mod/stray.txt", "x");
+
+            var resolver = new SyncRuleResolver(new Dictionary<string, string>
+            {
+                ["BepInEx/plugins"] = "mirror-delete",
+                ["plugins"] = "mirror-delete",
+            });
+
+            await fx.PlanAndRunAsync(Array.Empty<ManifestFile>(), fx.Options(), resolver);
+
+            Assert.True(fx.LocalExists("BepInEx/plugins/Mod/data/state.json"));   // data/ preservada do delete
+            Assert.False(fx.LocalExists("BepInEx/plugins/Mod/stray.txt"));        // extra normal deletado
+        }
+
+        // Mod DESLIGADO com um .dll escondido sob data/: o dado (.json) fica, o assembly vai à quarentena.
+        [Fact]
+        public async Task Disabled_mod_dll_under_data_is_quarantined_data_stays()
+        {
+            using var fx = new SyncTestFixture();
+            fx.WriteLocal("BepInEx/plugins/CareerLog/CareerLog.dll", "dll");
+            fx.WriteLocal("BepInEx/plugins/CareerLog/data/raid1.json", "r1");
+            fx.WriteLocal("BepInEx/plugins/CareerLog/data/sneaky.dll", "sneaky");
+
+            var manifest = new[]
+            {
+                fx.Entry("BepInEx/plugins/CareerLog/CareerLog.dll", "dll", optional: true, optionalId: "career-log"),
+            };
+
+            await fx.PlanAndRunAsync(manifest, fx.Options(optionalEnabled: _ => false));
+
+            Assert.True(fx.LocalExists("BepInEx/plugins/CareerLog/data/raid1.json"));   // dado fica no lugar
+            Assert.False(fx.LocalExists("BepInEx/plugins/CareerLog/data/sneaky.dll"));  // assembly quarentenado
         }
     }
 }
