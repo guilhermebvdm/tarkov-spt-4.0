@@ -507,6 +507,7 @@ namespace SPT.Launcher.Sync
             }
 
             var handled = new HashSet<string>(StringComparer.Ordinal);
+            var dataWarned = new HashSet<string>(StringComparer.Ordinal); // 1 aviso de data/ preservada por pasta-mod
 
             foreach (var rootPrefix in scanRoots.Distinct())
             {
@@ -534,6 +535,23 @@ namespace SPT.Launcher.Sync
                     if (SyncPathUtil.ContainsDisabledSegment(normalized)) continue; // R3.4
 
                     var rule = _resolver.Resolve(normalized, out string matchedPrefix);
+
+                    // Pasta de DADOS DE RUNTIME de um mod (<mod>/data/...) sob QUALQUER raiz varrida — nunca
+                    // quarentenar nem deletar. Usa o rootPrefix corrente (não a regra), então cobre também os
+                    // managedPaths (ex.: user/mods/<mod>/data/) que resolvem para Default→DeleteExtra, além de
+                    // plugins/patchers. Os dados são criados pelo mod, nunca vêm no manifesto; tratá-los como
+                    // "extra" deslocaria/deletaria o histórico do jogador. .dll/.exe sob data/ NÃO conta
+                    // (IsRuntimeDataPath os exclui — código carregável, risco de coop-desync).
+                    if (SyncPathUtil.IsRuntimeDataPath(normalized, rootPrefix))
+                    {
+                        // 1 aviso por pasta-mod (senão um mod com centenas de JSONs de raid geraria centenas).
+                        string rem = normalized.Substring(rootPrefix.Length).TrimStart('/');
+                        int slash = rem.IndexOf('/');
+                        string modKey = slash >= 0 ? rootPrefix + "/" + rem.Substring(0, slash) : rootPrefix;
+                        if (dataWarned.Add(modKey))
+                            plan.Warnings.Add($"dados de runtime preservados (pasta data/): {modKey}");
+                        continue;
+                    }
 
                     if (rule == SyncFolderRule.PreserveDivergent
                         || rule == SyncFolderRule.SeedIfMissingByName
@@ -762,7 +780,8 @@ namespace SPT.Launcher.Sync
             if (SyncPathUtil.ContainsDisabledSegment(norm)) return true;
             if (IsIgnored(norm) || IsExcludedFromCleanup(norm) || _protectedNormalized.Contains(norm)) return true;
             if (SyncCoopSafe.IsCoopEssentialPlugin(norm)) return true;
-            if (_resolver.Resolve(norm, out _) != SyncFolderRule.MirrorMoveDisabled) return true;
+            if (_resolver.Resolve(norm, out string dataPrefix) != SyncFolderRule.MirrorMoveDisabled) return true;
+            if (SyncPathUtil.IsRuntimeDataPath(norm, dataPrefix)) return true; // dados de runtime (pasta data/) — ficam no lugar
             if (manifestPaths.Contains(norm) && !moving.Contains(norm)) return true; // mod ligado / mandatório
             return false;
         }

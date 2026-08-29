@@ -55,6 +55,44 @@ namespace SPT.Launcher.Sync
         }
 
         /// <summary>
+        /// True quando o path está DENTRO de uma pasta de DADOS DE RUNTIME de um mod — um segmento
+        /// "data" abaixo do mod (ex.: "bepinex/plugins/careerlog/data/x.json"). O
+        /// <paramref name="matchedPrefix"/> é a raiz-espelho casada ("bepinex/plugins"); o restante
+        /// "&lt;mod&gt;/data/..." só conta se "data" aparece a partir do 2º segmento — o próprio nome do
+        /// mod (1º segmento) nunca dispara, então um mod que por acaso se chame "data" não é preservado.
+        /// Case-insensitive de graça: ambos vêm de <see cref="Normalize"/> (lower-case). Esses dados são
+        /// criados pelo mod, nunca vêm no manifesto, e não devem ser quarentenados como "extra".
+        /// </summary>
+        public static bool IsRuntimeDataPath(string normalizedPath, string matchedPrefix)
+        {
+            if (string.IsNullOrEmpty(normalizedPath) || string.IsNullOrEmpty(matchedPrefix)) return false;
+            if (!IsUnderPrefix(normalizedPath, matchedPrefix)) return false;
+            if (normalizedPath.Length <= matchedPrefix.Length) return false;
+
+            string remainder = normalizedPath.Substring(matchedPrefix.Length).TrimStart('/');
+            string[] segs = remainder.Split('/');
+            if (segs.Length < 2) return false;
+
+            // O arquivo é CÓDIGO: o BepInEx varre plugins/patchers recursivamente e carregaria um .dll/.exe
+            // sob data/ como plugin. Isentá-lo da quarentena esconderia um plugin fora do manifesto — risco
+            // de coop-desync. Dados de runtime são .json/.bin/etc., nunca assemblies (ref: CR 🟠).
+            string last = segs[segs.Length - 1];
+            // OrdinalIgnoreCase (não só Ordinal): os call sites passam path já normalizado (lowercase), mas
+            // o método é público — um chamador futuro com ".DLL" não deve deixar um assembly escapar.
+            if (last.EndsWith(".dll", StringComparison.OrdinalIgnoreCase) || last.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
+                return false;
+
+            // "data" tem que ser uma PASTA (segmento não-terminal, com arquivo depois) DENTRO do mod:
+            // varre de 1 (pula o nome do mod) até length-2 (pula o nome do arquivo). Assim um arquivo solto
+            // chamado exatamente "data" não é preservado por engano (ref: CR 🟢).
+            for (int i = 1; i < segs.Length - 1; i++)
+            {
+                if (string.Equals(segs[i], "data", StringComparison.OrdinalIgnoreCase)) return true;
+            }
+            return false;
+        }
+
+        /// <summary>
         /// Sufixos das pastas-FONTE do server que mapeiam para a pasta do usuário sem o sufixo:
         /// "-server" (SeedIfMissingByName, opt-in) e "-force" (force-to-config). Ambos: "&lt;name&gt;-X/&lt;rel&gt;" → "&lt;name&gt;/&lt;rel&gt;".
         /// NB: o default do config-server (MirrorReference) NÃO usa isto — espelha "config-server/&lt;rel&gt;"
