@@ -4,12 +4,17 @@
 
 ## Estado atual (snapshot ao fim da última sessão)
 
+- **Documentação Técnica Modular:** Criada a pasta `docs/` com 7 artigos modulares cobrindo visão geral, manifesto/sincronização, download do jogo base (WebSeeds), cofre/HWID, pipeline AutoSync, malha Tailscale/QoS e plugins client BepInEx, além do hub central `docs/README.md`.
+- **Auditoria de Código e Resolução de Achados ([relatorio-auditoria-codigo-01.md](../docs/relatorio-auditoria-codigo-01.md)):**
+  - **`AUD-02-01` & `AUD-02-05` (Server):** `HwidManager.cs` migrado para usar `_saveServer.GetProfiles().ToArray()` e `_saveServer.SaveProfileAsync()`, eliminando escrita direta em disco e colisões concorrentes.
+  - **`AUD-02-02` (Client Plugins):** `RedLineRestart` (v2.4.4) e `RedLineShutdown` (v1.0.1) desacoplados do Pastebin e da porta fantasma `7075`. Configurados via `Config.Bind("General", "ServerUrl", "http://127.0.0.1:6969")` com porta real do SPT (`6969`).
+  - **`AUD-02-04` & `AUD-02-06` (Server):** `PlayerIpsManager.cs` atualizado com detecção resiliente de TimeZone Windows/Linux e logs nos blocos de exceção.
+  - **`AUD-02-03` (Server):** `FikaProfilePatch.cs` limpo e formalizado como no-op gerenciado pelo `Fika.Core`.
 - **AutoSync-Cache.ps1 v2** no repo (commits `b72d25c5` + `eedac894`): o gatilho de abrir o jogo passou de "hash agregado de `user\mods` mudou" para **cobertura direta do cache 3D** — só abre o headless se existir `*.bundle` de mod sem cópia válida (existência+tamanho) em `SPT\user\cache\bundles`. Mods só de lógica/JSON (31 dos 44) nunca abrem o jogo.
 - Estado do script em `autosync-state.json` (raiz do servidor): inventário `path → size|mtimeUtcTicks` dos `bundles.json` + `*.bundle` por mod, mais lista `knownMissing` (bundles que um warmup não conseguiu gerar — não reabrem o jogo a cada execução). `ultimo_mod_hash.txt` extinto (auto-removido na primeira gravação de estado).
 - Deploy preparado: `D:\SPT_Files\AutoSync-Cache.ps1` contém a v2 validada; o `AutoSync-Cache.bat` do servidor **não muda** (conteúdo idêntico ao do repo; diferença era só CRLF vs LF, e CRLF é o correto para `.bat`).
 - **Produção (100.106.152.7) ainda roda a versão antiga** até o usuário substituir o `.ps1` — ver [P-1.1].
 - `mods/TarkovRedLine3.11/AutoSync-Cache.ps1` é a variante do servidor legado 3.11 — intocada de propósito.
-- Doc de produto dos fluxos (AutoSync + "Verificar arquivos"): [launcher/Launcher4.0-v2/docs/01-fluxo-autosync-e-verificar-arquivos.md](../../launcher/Launcher4.0-v2/docs/01-fluxo-autosync-e-verificar-arquivos.md) (commit `b73faa33`), com critérios de aceite CA-A1..A7 do AutoSync.
 
 ## Pendências / próximos passos conhecidos
 
@@ -47,5 +52,17 @@
 **Pendências abertas nesta sessão:**
 - [P-1.1] (aberta 2026-08-02) Validar primeira execução real no servidor de produção. Categoria: 🟡 débito.
 
+## 2026-08-29 (GMT-3) — Sessão 2: Documentação modular técnica (01..07) + Auditoria estática e fixes em HwidManager, PlayerIps e Plugins Client
+
+**Tema central:** criar a documentação técnica completa do servidor Tarkov Red Line 4.0 (`docs/01` a `07`), realizar a auditoria estática do código-fonte (`relatorio-auditoria-codigo-01.md`), implementar correções de integridade no `SaveServer`, portabilidade de TimeZone e restaurar a comunicação de rede dos plugins cliente `RedLineRestart` e `RedLineShutdown`.
+
+**Decisões-chave & Correções:**
+- **AUD-02-01 & AUD-02-05 (HwidManager):** Removida leitura/escrita manual direta em `user/profiles/*.json`. Migrado para consulta em memória `_saveServer.GetProfiles().ToArray()` e persistência atômica via `_saveServer.SaveProfileAsync(sessionId)`.
+- **AUD-02-02 (RedLineRestart & RedLineShutdown Plugins):** Eliminada a busca por URL em Pastebin (`https://pastebin.com/raw/PT4cMwLB`) e a substituição arbitrária de portas (`:7075`). Implementado `Config.Bind("General", "ServerUrl", "http://127.0.0.1:6969")` nos plugins BepInEx, restaurando a comunicação do botão de votação e do loop de shutdown diretamente com a porta `6969` do servidor.
+- **AUD-02-03 (FikaProfilePatch):** Código comentado limpo e formalizado como no-op compatível com o ecossistema `Fika.Core`.
+- **AUD-02-04 & AUD-02-06 (PlayerIpsManager):** Implementada detecção de TimeZone cross-platform (`"E. South America Standard Time"` / `"America/Sao_Paulo"` / `Utc`) e adicionados logs de erro nos blocos de captura de exceção.
+- **Compilação de Binários:** `TarkovRedLine.Server.dll` (0 erros), `RedLineRestart.dll` (v2.4.4) e `RedLineShutdown.dll` (v1.0.1) compilados com sucesso.
+
 **Cross-refs:**
-- Trabalho paralelo nesta sessão no launcher (doc de fluxo + descobertas do sync engine): ver `launcher/Launcher4.0-v2/memory/sessions.md` 2026-08-02 (Sessão 2).
+- Auditoria do Launcher: ver `launcher/Launcher4.0-v2/memory/sessions.md` 2026-08-29 (Sessão 3).
+

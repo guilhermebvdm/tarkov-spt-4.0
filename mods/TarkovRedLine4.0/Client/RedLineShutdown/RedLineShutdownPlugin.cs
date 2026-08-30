@@ -6,43 +6,18 @@ using UnityEngine.Networking;
 
 namespace RedLineShutdown
 {
-    [BepInPlugin("com.umbigopreto.redlineshutdown", "RedLine Shutdown Headless", "1.0.0")]
+    [BepInPlugin("com.umbigopreto.redlineshutdown", "RedLine Shutdown Headless", "1.0.1")]
     public class RedLineShutdownPlugin : BaseUnityPlugin
     {
-        private string _serverUrl = "http://8aff080e436d.sn.mynetname.net:7073";
+        private string _serverUrl = "http://127.0.0.1:6969";
 
         private void Awake()
         {
-            Logger.LogInfo("[RedLineShutdown] Plugin iniciado. Modo Headless Shutdown ativado!");
-            StartCoroutine(FetchServerUrlRoutine());
+            var configServerUrl = Config.Bind("General", "ServerUrl", "http://127.0.0.1:6969", "URL do Servidor SPT / Tarkov Red Line (ex: http://127.0.0.1:6969)");
+            _serverUrl = configServerUrl.Value.TrimEnd('/');
+
+            Logger.LogInfo($"[RedLineShutdown] Plugin 1.0.1 iniciado. ServerUrl configurado para: {_serverUrl}. Modo Headless Shutdown ativado!");
             StartCoroutine(CheckShutdownLoop());
-        }
-
-        private IEnumerator FetchServerUrlRoutine()
-        {
-            using (UnityWebRequest webRequest = UnityWebRequest.Get("https://pastebin.com/raw/PT4cMwLB"))
-            {
-                webRequest.timeout = 5;
-                yield return webRequest.SendWebRequest();
-
-                if (webRequest.result == UnityWebRequest.Result.Success)
-                {
-                    string pastebinContent = webRequest.downloadHandler.text;
-                    if (!string.IsNullOrEmpty(pastebinContent))
-                    {
-                        string formattedUrl = pastebinContent.Trim()
-                                .Replace("https://", "http://")
-                                .Replace(":7073", ":7075");
-
-                        _serverUrl = formattedUrl;
-                        Logger.LogInfo($"[RedLineShutdown] ServerUrl atualizado via Pastebin para: {_serverUrl}");
-                    }
-                }
-                else
-                {
-                    Logger.LogError($"[RedLineShutdown] Falha ao buscar Pastebin. Erro: {webRequest.error}");
-                }
-            }
         }
 
         private IEnumerator CheckShutdownLoop()

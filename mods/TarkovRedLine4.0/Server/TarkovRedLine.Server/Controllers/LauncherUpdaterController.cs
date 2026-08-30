@@ -33,15 +33,23 @@ public class LauncherUpdaterController : ControllerBase
     // Nome do exe do launcher NA PASTA Launcher-Updater (o operador coloca o exe com este nome).
     // = nome do exe instalado no cliente (TRL.Launcher.exe). O self-update do cliente grava no
     // próprio binário (Process.MainModule), então este nome é só o do arquivo servido/lido no server.
-    internal const string LauncherExeFileName = "TRL.Launcher.exe";
+    internal const string LauncherExeFileName = "TarkovRedLine.exe";
 
-    private static string GetLauncherExePath()
+    internal static string GetLauncherExePath()
     {
-        return Path.Combine(GetUpdaterBasePath(), LauncherExeFileName);
+        string basePath = GetUpdaterBasePath();
+        string preferred = Path.Combine(basePath, "TarkovRedLine.exe");
+        if (System.IO.File.Exists(preferred)) return preferred;
+
+        string name2 = Path.Combine(basePath, "Tarkov Red Line.exe");
+        if (System.IO.File.Exists(name2)) return name2;
+
+        string name3 = Path.Combine(basePath, "TRL.Launcher.exe");
+        if (System.IO.File.Exists(name3)) return name3;
+
+        return preferred;
     }
 
-    // Item 018 (auto-update-security): assinatura detached publicada AO LADO do exe. O release assina
-    // o TRL.Launcher.exe com a chave privada (ver tools/sign-launcher.ps1) gerando este .sig.
     private static string GetLauncherSignaturePath()
     {
         return GetLauncherExePath() + ".sig";
@@ -98,7 +106,7 @@ public class LauncherUpdaterController : ControllerBase
         string exePath = GetLauncherExePath();
         if (System.IO.File.Exists(exePath))
         {
-            return PhysicalFile(exePath, "application/octet-stream", LauncherExeFileName);
+            return PhysicalFile(exePath, "application/octet-stream", Path.GetFileName(exePath));
         }
 
         return NotFound(new { error = "Launcher executable not found on server" });

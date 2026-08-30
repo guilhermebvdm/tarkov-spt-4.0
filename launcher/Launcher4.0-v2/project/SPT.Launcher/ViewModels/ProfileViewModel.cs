@@ -2,6 +2,7 @@ using SPT.Launcher.Helpers;
 using SPT.Launcher.MiniCommon;
 using SPT.Launcher.Models;
 using SPT.Launcher.Models.Launcher;
+using SPT.Launcher.Download;
 using Avalonia;
 using ReactiveUI;
 using System;
@@ -178,9 +179,86 @@ namespace SPT.Launcher.ViewModels
         /// <summary>Cache hit / nada baixando → texto vazio → o rótulo da taxa fica oculto.</summary>
         public bool HasDownloadSpeed => !string.IsNullOrEmpty(DownloadSpeedText);
 
+        // === Base Game Download (MonoTorrent .NET 9) properties ===
+
+        private BaseGameTorrentDownloader _torrentDownloader;
+
+        private bool _isBaseGameInstalled = true;
+        public bool IsBaseGameInstalled
+        {
+            get => _isBaseGameInstalled;
+            set
+            {
+                this.RaiseAndSetIfChanged(ref _isBaseGameInstalled, value);
+                this.RaisePropertyChanged(nameof(CanStartGame));
+                this.RaisePropertyChanged(nameof(CanVerifyFiles));
+            }
+        }
+
+        private bool _isBaseDownloading;
+        public bool IsBaseDownloading
+        {
+            get => _isBaseDownloading;
+            set => this.RaiseAndSetIfChanged(ref _isBaseDownloading, value);
+        }
+
+        private bool _isBaseDownloadPaused;
+        public bool IsBaseDownloadPaused
+        {
+            get => _isBaseDownloadPaused;
+            set => this.RaiseAndSetIfChanged(ref _isBaseDownloadPaused, value);
+        }
+
+        private double _baseDownloadProgress;
+        public double BaseDownloadProgress
+        {
+            get => _baseDownloadProgress;
+            set => this.RaiseAndSetIfChanged(ref _baseDownloadProgress, value);
+        }
+
+        private string _baseDownloadSpeedText = "";
+        public string BaseDownloadSpeedText
+        {
+            get => _baseDownloadSpeedText;
+            set => this.RaiseAndSetIfChanged(ref _baseDownloadSpeedText, value);
+        }
+
+        private string _baseDownloadEtaText = "";
+        public string BaseDownloadEtaText
+        {
+            get => _baseDownloadEtaText;
+            set => this.RaiseAndSetIfChanged(ref _baseDownloadEtaText, value);
+        }
+
+        private string _baseDownloadStatusText = "";
+        public string BaseDownloadStatusText
+        {
+            get => _baseDownloadStatusText;
+            set => this.RaiseAndSetIfChanged(ref _baseDownloadStatusText, value);
+        }
+
+        private string _baseDownloadStatsText = "";
+        public string BaseDownloadStatsText
+        {
+            get => _baseDownloadStatsText;
+            set => this.RaiseAndSetIfChanged(ref _baseDownloadStatsText, value);
+        }
+
+        // === Heartbeat properties ===
+
+        private bool _isServerOnline = true;
+        public bool IsServerOnline
+        {
+            get => _isServerOnline;
+            set => this.RaiseAndSetIfChanged(ref _isServerOnline, value);
+        }
+
         public ICommand UpdateModsCommand { get; }
         public ICommand VerifyFilesCommand { get; }
         public ICommand CancelUpdateCommand { get; }
+        public ICommand PauseBaseDownloadCommand { get; }
+        public ICommand ResumeBaseDownloadCommand { get; }
+        public ICommand StartBaseDownloadCommand { get; }
 
         private CancellationTokenSource _syncCts;
 
@@ -196,6 +274,7 @@ namespace SPT.Launcher.ViewModels
             {
                 this.RaiseAndSetIfChanged(ref _isSyncRunning, value);
                 this.RaisePropertyChanged(nameof(CanVerifyFiles));
+                this.RaisePropertyChanged(nameof(CanStartGame));
             }
         }
 
@@ -221,17 +300,11 @@ namespace SPT.Launcher.ViewModels
             UpdateModsCommand = ReactiveCommand.CreateFromTask(async () => await ForceCheckForUpdates());
             VerifyFilesCommand = ReactiveCommand.CreateFromTask(async () => await ForceCheckForUpdates());
             CancelUpdateCommand = ReactiveCommand.CreateFromTask(async () => await CancelUpdate());
+            PauseBaseDownloadCommand = ReactiveCommand.CreateFromTask(async () => await PauseBaseGameDownloadAsync());
+            ResumeBaseDownloadCommand = ReactiveCommand.CreateFromTask(async () => await ResumeBaseGameDownloadAsync());
+            StartBaseDownloadCommand = ReactiveCommand.CreateFromTask(async () => await StartBaseGameDownloadAsync());
 
             LoadLastUpdateInfo();
-
-            LauncherSettingsProvider.Instance.PropertyChanged += (s, e) =>
-            {
-                if (e.PropertyName == nameof(LauncherSettingsProvider.Instance.CanStartGame))
-                {
-                    this.RaisePropertyChanged(nameof(CanStartGame));
-                    this.RaisePropertyChanged(nameof(CanVerifyFiles)); // ref: CR-01-01
-                }
-            };
 
             // ref: CR-02-01 (013L) — se o fetch do connect falhou transitoriamente, a versão
             // fica "—" a sessão toda (read-once). Refetch async barato aqui: ServerVersion é
@@ -251,8 +324,36 @@ namespace SPT.Launcher.ViewModels
             // carrossel ocorre no logout via GC (timer parado não fica ancorado no Dispatcher).
             this.WhenActivated((CompositeDisposable disposables) =>
             {
+                // ref: AUD-01-01 — desinscrever do singleton ao desativar a tela para evitar leak no GC
+                System.ComponentModel.PropertyChangedEventHandler onSettingsChanged = (s, e) =>
+                {
+                    if (e.PropertyName == nameof(LauncherSettingsProvider.Instance.CanStartGame))
+                    {
+                        this.RaisePropertyChanged(nameof(CanStartGame));
+                        this.RaisePropertyChanged(nameof(CanVerifyFiles)); // ref: CR-01-01
+                    }
+                };
+                LauncherSettingsProvider.Instance.PropertyChanged += onSettingsChanged;
+                Disposable.Create(() => LauncherSettingsProvider.Instance.PropertyChanged -= onSettingsChanged).DisposeWith(disposables);
+
                 Carousel.Start();
                 Disposable.Create(() => Carousel.Stop()).DisposeWith(disposables);
+
+                // Sincronizar imagens do carrossel em background com o servidor SPT
+                _ = Task.Run(async () =>
+                {
+                    await ImageRequest.SyncCarouselImagesAsync();
+                    Dispatcher.UIThread.Post(() => Carousel.Reload());
+                });
+
+                // Heartbeat monitor a cada 5s
+                ServerHeartbeatMonitor.Instance.Start();
+                Action<bool> onHeartbeat = online => Dispatcher.UIThread.Post(() => IsServerOnline = online);
+                ServerHeartbeatMonitor.Instance.ServerStatusChanged += onHeartbeat;
+                Disposable.Create(() =>
+                {
+                    ServerHeartbeatMonitor.Instance.ServerStatusChanged -= onHeartbeat;
+                }).DisposeWith(disposables);
 
                 // CR-03-04: o resumo "Mods e Configs" é materializado por string.Format (não é binding
                 // reativo), então não reage sozinho à troca de idioma. Re-renderiza quando o locale muda
@@ -272,7 +373,7 @@ namespace SPT.Launcher.ViewModels
                 }
             });
 
-            // Auto-check for updates, depois aplica opcionais pendentes
+            // Auto-check for updates ou download base, depois aplica opcionais pendentes
             _ = InitializeAsync();
         }
 
@@ -340,14 +441,111 @@ namespace SPT.Launcher.ViewModels
             return !LauncherSettingsProvider.Instance.ModsConfigsOnboardingDone;
         }
 
-        public bool CanStartGame => LauncherSettingsProvider.Instance.CanStartGame;
+        public bool CanStartGame => LauncherSettingsProvider.Instance.CanStartGame && IsBaseGameInstalled && !IsSyncRunning;
 
         private async Task InitializeAsync()
         {
-            // Item 013: versão do server agora vem do endpoint /redline/server/version
-            // (populada no connect via ServerManager) — o read do config.json do
-            // TarkovRedLine-ServerMod foi removido por ser fonte local defasável.
-            await CheckForUpdates();
+            string gamePath = LauncherSettingsProvider.Instance.GamePath;
+            IsBaseGameInstalled = GameStateDetector.IsBaseGameInstalled(gamePath);
+
+            if (!IsBaseGameInstalled)
+            {
+                LogManager.Instance.Info("[Profile] Jogo base ausente ou incompleto no disco. Iniciando modo de download base...");
+                await StartBaseGameDownloadAsync();
+            }
+            else
+            {
+                LogManager.Instance.Info("[Profile] Jogo base verificado e completo. Executando verificação de mods...");
+                await CheckForUpdates();
+            }
+        }
+
+        public async Task StartBaseGameDownloadAsync()
+        {
+            if (IsBaseDownloading) return;
+
+            string gamePath = LauncherSettingsProvider.Instance.GamePath;
+            string serverUrl = ServerManager.SelectedServer?.backendUrl ?? LauncherSettingsProvider.Instance.Server.Url;
+            string torrentUrl = $"{serverUrl.TrimEnd('/')}{SPT.Launcher.RequestHandler.ModRoutePrefix}/redline/base-game.torrent";
+            string webSeedUrl = $"{serverUrl.TrimEnd('/')}{SPT.Launcher.RequestHandler.ModRoutePrefix}/redline/base-game/";
+
+            IsBaseDownloading = true;
+            IsBaseDownloadPaused = false;
+            BaseDownloadStatusText = "Conectando ao motor de download...";
+
+            _torrentDownloader?.Dispose();
+            _torrentDownloader = new BaseGameTorrentDownloader(gamePath);
+
+            _torrentDownloader.ProgressChanged += progress =>
+            {
+                Dispatcher.UIThread.Post(() =>
+                {
+                    BaseDownloadProgress = progress.ProgressPercentage;
+                    BaseDownloadSpeedText = progress.DownloadSpeedBytesPerSec > 1024
+                        ? $"{progress.DownloadSpeedBytesPerSec / (1024.0 * 1024.0):F1} MB/s"
+                        : "";
+
+                    BaseDownloadEtaText = progress.Eta.HasValue
+                        ? $"Tempo restante: {progress.Eta.Value.Hours:D2}:{progress.Eta.Value.Minutes:D2}:{progress.Eta.Value.Seconds:D2}"
+                        : "";
+
+                    double downloadedGb = progress.DownloadedBytes / (1024.0 * 1024.0 * 1024.0);
+                    double totalGb = progress.TotalBytes / (1024.0 * 1024.0 * 1024.0);
+                    BaseDownloadStatsText = totalGb > 0
+                        ? $"{downloadedGb:F1} GB / {totalGb:F1} GB ({progress.OpenConnections} peers)"
+                        : "";
+
+                    BaseDownloadStatusText = progress.StateDescription;
+                });
+            };
+
+            _torrentDownloader.DownloadCompleted += () =>
+            {
+                Dispatcher.UIThread.Post(async () =>
+                {
+                    LogManager.Instance.Info("[Profile] Download base concluído com 100% de integridade.");
+                    IsBaseDownloading = false;
+                    IsBaseGameInstalled = true;
+                    SendNotification("Download Concluído", "O jogo base foi baixado e verificado com sucesso! Verificando mods...", Avalonia.Controls.Notifications.NotificationType.Success);
+                    await CheckForUpdates();
+                });
+            };
+
+            _torrentDownloader.DownloadFailed += errorMsg =>
+            {
+                Dispatcher.UIThread.Post(() =>
+                {
+                    LogManager.Instance.Error($"[Profile] Erro no download base: {errorMsg}");
+                    BaseDownloadStatusText = $"Erro no download: {errorMsg}";
+                    SendNotification("Erro no Download", errorMsg, Avalonia.Controls.Notifications.NotificationType.Error);
+                });
+            };
+
+            bool started = await _torrentDownloader.InitializeAndStartAsync(torrentUrl, webSeedUrl);
+            if (!started)
+            {
+                BaseDownloadStatusText = "Aguardando conexão com o servidor para download do jogo base...";
+            }
+        }
+
+        public async Task PauseBaseGameDownloadAsync()
+        {
+            if (_torrentDownloader != null)
+            {
+                await _torrentDownloader.PauseAsync();
+                IsBaseDownloadPaused = true;
+                BaseDownloadStatusText = "Download pausado.";
+            }
+        }
+
+        public async Task ResumeBaseGameDownloadAsync()
+        {
+            if (_torrentDownloader != null)
+            {
+                await _torrentDownloader.ResumeAsync();
+                IsBaseDownloadPaused = false;
+                BaseDownloadStatusText = "Retomando download...";
+            }
         }
 
         public void OpenModsInfoCommand() =>

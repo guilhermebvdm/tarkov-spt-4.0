@@ -53,8 +53,8 @@ namespace SPT.Launcher.Models
         private const int DecodeWidth = 2560;
         private const double IntervalSeconds = 10;
 
-        private readonly List<string> _descriptors;
-        private readonly Bitmap[] _decoded;
+        private List<string> _descriptors;
+        private Bitmap[] _decoded;
         private readonly object _lock = new object();
 
         private DispatcherTimer _timer;
@@ -218,49 +218,97 @@ namespace SPT.Launcher.Models
             }
         }
 
+        private void DisposeDecodedBitmaps()
+        {
+            lock (_lock)
+            {
+                if (_decoded != null)
+                {
+                    for (int i = 0; i < _decoded.Length; i++)
+                    {
+                        try
+                        {
+                            _decoded[i]?.Dispose();
+                        }
+                        catch { }
+                        _decoded[i] = null;
+                    }
+                }
+            }
+        }
+
+        public void Reload()
+        {
+            DisposeDecodedBitmaps();
+            var newDescriptors = BuildDescriptors();
+            _descriptors = newDescriptors;
+            _decoded = new Bitmap[_descriptors.Count];
+
+            Dots.Clear();
+            for (int i = 0; i < _descriptors.Count; i++)
+            {
+                int captured = i;
+                Dots.Add(new CarouselDot(captured, Select) { IsActive = i == 0 });
+            }
+
+            this.RaisePropertyChanged(nameof(HasMultiple));
+
+            if (_descriptors.Count > 0)
+            {
+                _currentIndex = 0;
+                Bitmap first = GetDecoded(0);
+                if (first != null)
+                {
+                    CurrentBackground = first;
+                }
+                Start();
+            }
+            else
+            {
+                CurrentBackground = null;
+                Stop();
+            }
+        }
+
         /// <summary>
-        /// Union of the cached <c>bg/</c> folder (first) and the bundled fallbacks, deduped by
-        /// file name. Empty/missing folder degrades to bundled only. Never throws.
+        /// Scans cached image folders (carrocel/ and legacy bg/).
+        /// Supports 0, 1 or N images dynamically. Never throws.
         /// </summary>
         private static List<string> BuildDescriptors()
         {
             var result = new List<string>();
             var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var validExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ".png", ".jpg", ".jpeg" };
 
-            try
+            string[] searchFolders = new[]
             {
-                string bgFolder = Path.Combine(ImageRequest.ImageCacheFolder, "bg");
+                Path.Combine(ImageRequest.ImageCacheFolder, "carrocel"),
+                Path.Combine(ImageRequest.ImageCacheFolder, "bg")
+            };
 
-                if (Directory.Exists(bgFolder))
+            foreach (string folder in searchFolders)
+            {
+                try
                 {
-                    var validExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ".png", ".jpg", ".jpeg" };
-
-                    IEnumerable<string> files = Directory
-                        .EnumerateFiles(bgFolder)
-                        .Where(f => validExtensions.Contains(Path.GetExtension(f)))
-                        .OrderBy(Path.GetFileName, StringComparer.OrdinalIgnoreCase);
-
-                    foreach (string file in files)
+                    if (Directory.Exists(folder))
                     {
-                        if (seen.Add(Path.GetFileName(file)))
+                        IEnumerable<string> files = Directory
+                            .EnumerateFiles(folder)
+                            .Where(f => validExtensions.Contains(Path.GetExtension(f)))
+                            .OrderBy(Path.GetFileName, StringComparer.OrdinalIgnoreCase);
+
+                        foreach (string file in files)
                         {
-                            result.Add(file);
+                            if (seen.Add(Path.GetFileName(file)))
+                            {
+                                result.Add(file);
+                            }
                         }
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                LogManager.Instance.Warning($"[Carousel] Falha ao varrer a pasta bg: {ex.Message}");
-            }
-
-            string assemblyName = Assembly.GetExecutingAssembly().GetName().Name;
-
-            foreach (string bundled in new[] { "bg_01.jpg", "bg_02.jpg", "bg_03.jpg" })
-            {
-                if (seen.Add(bundled))
+                catch (Exception ex)
                 {
-                    result.Add($"avares://{assemblyName}/Assets/Backgrounds/{bundled}");
+                    LogManager.Instance.Warning($"[Carousel] Falha ao varrer a pasta {folder}: {ex.Message}");
                 }
             }
 
@@ -272,6 +320,7 @@ namespace SPT.Launcher.Models
             if (_disposed) return;
 
             _disposed = true;
+            DisposeDecodedBitmaps();
 
             if (_timer != null)
             {

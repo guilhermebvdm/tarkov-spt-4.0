@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace RedLineRestart
 {
-    [BepInPlugin("com.umbigopreto.redlinerestart", "RedLine Restarter", "2.4.3")]
+    [BepInPlugin("com.umbigopreto.redlinerestart", "RedLine Restarter", "2.4.4")]
     public class RedLinePlugin : BaseUnityPlugin
     {
         private RedLineUI _ui = new RedLineUI();
@@ -16,34 +16,10 @@ namespace RedLineRestart
 
         void Awake()
         {
-            Logger.LogInfo("[RedLine] Plugin 2.4.3 iniciado. Modo seguro de UI ativado.");
-            _ = FetchServerUrlAsync();
-        }
+            var configServerUrl = Config.Bind("General", "ServerUrl", "http://127.0.0.1:6969", "URL do Servidor SPT / Tarkov Red Line (ex: http://127.0.0.1:6969 ou http://100.x.y.z:6969)");
+            RedLineState.ServerUrl = configServerUrl.Value.TrimEnd('/');
 
-        private async Task FetchServerUrlAsync()
-        {
-            try
-            {
-                using (HttpClient client = new HttpClient())
-                {
-                    string pastebinContent = await client.GetStringAsync("https://pastebin.com/raw/PT4cMwLB");
-                    if (!string.IsNullOrEmpty(pastebinContent))
-                    {
-                        // O pastebin retorna: https://xxx.xxx.xxx.xxx:7073
-                        // Substituímos https por http e 7073 por 7075
-                        string formattedUrl = pastebinContent.Trim()
-                                .Replace("https://", "http://")
-                                .Replace(":7073", ":7075");
-                        
-                        RedLineState.ServerUrl = formattedUrl;
-                        Logger.LogInfo($"[RedLine] ServerUrl atualizado via Pastebin para: {RedLineState.ServerUrl}");
-                    }
-                }
-            }
-            catch (System.Exception e)
-            {
-                Logger.LogError($"[RedLine] Falha ao buscar ServerUrl do Pastebin. Usando IP local fallback. Erro: {e.Message}");
-            }
+            Logger.LogInfo($"[RedLine] Plugin 2.4.4 iniciado. ServerUrl configurado para: {RedLineState.ServerUrl}");
         }
 
         void Update()

@@ -1,9 +1,11 @@
-# Fluxo do AutoSync (servidor) e do "Verificar arquivos" (launcher)
+---
+title: "Tarkov Red Line Launcher — Fluxo do AutoSync (Servidor) e Verificar Arquivos (Launcher)"
+date: 2026-08-29
+status: 🟢 Vivo
+authors: Guilherme, Antigravity
+---
 
-> **Data:** 2026-07-25<br>
-> **Status:** 🟢 Vivo<br>
-> **Responsáveis:** Guilherme<br>
-> **Referências:** —<br>
+# Fluxo do AutoSync (Servidor) e do "Verificar Arquivos" (Launcher)
 
 ---
 
@@ -18,6 +20,8 @@ Dois fluxos cooperam para isso:
 | **AutoSync** | Na máquina do servidor | Prepara o "pacote" de distribuição: mantém o cache 3D coerente com os mods instalados e o publica na prateleira de distribuição. Só abre o jogo (operação demorada) quando é realmente necessário. |
 | **Verificar arquivos** | No launcher de cada jogador | Consome o pacote: compara o que o jogador tem com o que o servidor publicou e corrige as diferenças — baixando o que falta, preservando o que o jogador personalizou. |
 
+---
+
 ## 2. Conceitos-chave
 
 - **Bundle** — arquivo de assets 3D (roupas, armas, capacetes, texturas) que alguns mods trazem. Dos ~44 mods do servidor, só ~13 têm bundles; os demais são apenas lógica/configuração.
@@ -26,6 +30,8 @@ Dois fluxos cooperam para isso:
 - **Inventário de distribuição** — a lista `arquivo → impressão digital → tamanho` que o servidor monta a partir da prateleira e entrega ao launcher. Não é um arquivo em disco: é montado em memória a cada reinício do servidor.
 - **Impressão digital (hash)** — resumo único do conteúdo de um arquivo. Se dois arquivos têm a mesma impressão digital, são idênticos; se diferem, algo mudou.
 - **Memória do instalado** (`SPT\user\launcher\sync-state.json`, na máquina do jogador) — registro do que o launcher instalou da última vez. É o que permite distinguir "o servidor atualizou este arquivo" de "o jogador personalizou este arquivo".
+
+---
 
 ## 3. Fluxo 1 — AutoSync (no servidor)
 
@@ -55,6 +61,8 @@ Pontos de negócio importantes:
 - **Remover um mod também não abre o jogo**: a limpeza do cache é feita diretamente — e o que sai do cache sai também da prateleira, reduzindo o que os jogadores precisam manter.
 - **O servidor de produção sempre sobe ao final**, mesmo que o aquecimento do cache tenha falhado. Uma falha adia a atualização do cache, nunca derruba o serviço.
 - Existe um **modo simulação** (`-CheckOnly`): mostra tudo o que o fluxo faria — o que limparia, o que baixaria, se abriria o jogo — sem alterar nada.
+
+---
 
 ## 4. Fluxo 2 — "Verificar arquivos" (no launcher do jogador)
 
@@ -102,7 +110,7 @@ A decisão final para arquivos personalizados e extras depende do **tipo de past
 | Conteúdo opcional | Só é baixado se o jogador ativou o grupo opcional correspondente. |
 | **Dev Mode** ligado | Builds e arquivos de trabalho local **nunca** são sobrescritos ou movidos — modo de proteção para desenvolvimento. |
 
-Nota de produto: o launcher grava um resumo do último inventário (`manifest_hash.txt`), que permitiria pular a verificação quando nada mudou — esse atalho está **desativado por decisão**: a verificação completa roda sempre, priorizando integridade sobre velocidade.
+---
 
 ## 5. Arquivos gerados e mantidos pelos fluxos
 
@@ -114,11 +122,10 @@ Nota de produto: o launcher grava um resumo do último inventário (`manifest_ha
 | `Launcher-Updater\mods_repo\` | Servidor | AutoSync (espelho do cache) + administrador (mods/configs) | A prateleira de distribuição — tudo que está aqui chega aos jogadores. |
 | `SPT\user\launcher\sync-state.json` | Máquina do jogador | Launcher, após cada verificação | A memória do instalado — base para distinguir atualização de personalização. |
 | `SPT\user\launcher\manifest_hash.txt` | Máquina do jogador | Launcher | Resumo do último inventário recebido (atalho de verificação, hoje desativado). |
-| `ultimo_mod_hash.txt` | Raiz do servidor | **Extinto** | Mecanismo antigo de detecção do AutoSync; é removido automaticamente na primeira execução da versão atual. |
+
+---
 
 ## 6. Critérios de aceite
-
-CA = critério de aceite. **CA-A** = AutoSync (servidor) · **CA-L** = "Verificar arquivos" (launcher).
 
 | ID | Critério |
 |---|---|
@@ -135,9 +142,3 @@ CA = critério de aceite. **CA-A** = AutoSync (servidor) · **CA-L** = "Verifica
 | CA-L4 | Arquivo extra em pasta espelhada vai para quarentena `-disabled` — nunca é apagado. |
 | CA-L5 | Com Dev Mode ligado, nenhum arquivo local de trabalho é sobrescrito ou movido. |
 | CA-L6 | O cache 3D distribuído pelo launcher evita o download de bundles dentro do jogo para conteúdo já publicado. |
-
-## Histórico de Alterações
-
-| Data | Autor | Alteração |
-|---|---|---|
-| 2026-07-25 | Guilherme | Criação — fluxos AutoSync v2 e "Verificar arquivos" em visão de produto, com diagramas e critérios de aceite. |

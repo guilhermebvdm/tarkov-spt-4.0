@@ -11,15 +11,11 @@ namespace SPT.Launcher.Base.Helpers
             {
                 string baseDir = AppContext.BaseDirectory;
                 string sptSubDir = Path.Combine(baseDir, "SPT");
-                
-                // Se existe uma subpasta chamada "SPT" e dentro dela tem a pasta "SPT_Data",
-                // assumimos que os arquivos do SPT estão lá dentro.
-                if (Directory.Exists(sptSubDir) && Directory.Exists(Path.Combine(sptSubDir, "SPT_Data")))
+                if (!Directory.Exists(sptSubDir))
                 {
-                    return sptSubDir;
+                    try { Directory.CreateDirectory(sptSubDir); } catch { }
                 }
-                
-                return baseDir;
+                return sptSubDir;
             }
         }
     }

@@ -2,8 +2,8 @@ namespace RedLineRestart
 {
     public static class RedLineState
     {
-        // Valor default, que será atualizado no Awake() do Plugin buscando do Pastebin
-        public static string ServerUrl = "https://8aff080e436d.sn.mynetname.net:7073";
+        // Valor default, que será atualizado no Awake() do Plugin buscando de BepInEx Config
+        public static string ServerUrl = "http://127.0.0.1:6969";
         public static string ClientId = System.Guid.NewGuid().ToString();
 
 

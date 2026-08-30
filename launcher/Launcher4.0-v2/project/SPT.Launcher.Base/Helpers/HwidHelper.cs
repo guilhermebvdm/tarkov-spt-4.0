@@ -60,12 +60,16 @@ namespace SPT.Launcher.Helpers
                     query += $" WHERE {condition}";
 
                 using (var searcher = new ManagementObjectSearcher(query))
+                using (var collection = searcher.Get())
                 {
-                    foreach (var obj in searcher.Get())
+                    foreach (var obj in collection)
                     {
-                        var value = obj[property]?.ToString();
-                        if (!string.IsNullOrEmpty(value))
-                            return value;
+                        using (obj)
+                        {
+                            var value = obj[property]?.ToString();
+                            if (!string.IsNullOrEmpty(value))
+                                return value;
+                        }
                     }
                 }
             }

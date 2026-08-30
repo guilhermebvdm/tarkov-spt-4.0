@@ -4,7 +4,7 @@
 
 ## Estado atual
 
-> **Delta 2026-07-26:** Launcher em **v2.7.3** em produção, funcionando sem reports (validação por uso; pendências in-game dos itens entregues fechadas por uso). O **item 030 (tela "Mods e Configs")** foi **IMPLEMENTADO nesta data** via `/g-autodev` — Fases 1-3 (motor + servidor + UI) + code-review adversarial, 239 testes verdes, ver [[P-1.1]]. **Ainda NÃO em produção:** falta o conteúdo do servidor ([[P-1.2]]), os gates in-game e o rollout ordenado (R-11). O canal de performance virou regra de pasta `performance-to-config` (aposentou o overlay do item 008); mods opcionais vêm de `plugins-optional.json` (aposentou a pasta `Opcionais/` + rotas `optionals-*`).
+> **Delta 2026-08-29:** Launcher em **v2.10.2** compilado e assinado digitalmente com `.sig` RSA-2048 SHA-256 (`Build/TarkovRedLine.exe`). Documentação técnica modular completa estruturada em `docs/` (artigos 01 a 08 + índice central), auditoria técnica de código estática profunda realizada ([relatorio-auditoria-codigo-01.md](../docs/relatorio-auditoria-codigo-01.md)) e correções críticas aplicadas: eliminação de memory leaks em ViewModels (`AUD-01-01`), descarte de memória gráfica não gerenciada no carrossel (`AUD-01-02`), liberação de handles Win32 no `ProcessMonitor` (`AUD-01-03`), blindagem WMI em `HwidHelper` (`AUD-01-05`) e feedback no seletor de classes (`AUD-01-06`). Suíte de 315 testes unitários 100% aprovada.
 
 - **Estrutura (papéis, análogos ao mod):** `project/` = código editável (papel do `modded/`); upstream intocado em `launcher/Launcher4.0/` (papel do `original/` — **nunca editar**, citar como `// ref: Launcher4.0/<arquivo>:<linha>`); `backlog/` (mesmo SDD dos mods); `docs/`; `tools/` (`sign-launcher.ps1`, geração de chave); `dist/` (builds); `assets/`; esta `memory/` (criada 2026-07-26).
 - **Build:** self-contained single-file (~145 MB) — **não** framework-dependent. ⚠️ O csproj tem `RuntimeIdentifier=win-x64` mas **não** força `SelfContained`; depende do flag `--self-contained true` no `dotnet publish`. Publish/build sem o flag gera exe de ~244 KB que **exige .NET runtime instalado** e mostra "You must install .NET Desktop Runtime" — foi o que quebrou pro amigo do usuário (2026-07-26); resolvido entregando o single-file. `dotnet build launcher/Launcher4.0-v2/project/Launcher.sln` (o `/compile-mod` não cobre o launcher).
@@ -54,5 +54,19 @@
 2. Doc 01 escrito no padrão `NN-` com cabeçalho/histórico, commitado (`b73faa33`).
 3. Mermaid não renderizava no preview do editor (Antigravity) — resolvido com artifact + extensão `bierner.markdown-mermaid` instalada com aprovação do usuário.
 
+## 2026-08-29 (GMT-3) — Sessão 3: Documentação modular técnica (01..08) + Auditoria estática e fixes de memória (v2.10.2)
+
+**Tema central:** criar a documentação técnica completa do Launcher v2 (`docs/01` a `08`), diagnosticar a falha de cadastro do Avalonia (`bg2.png`), executar a auditoria técnica de código em 6 dimensões (`relatorio-auditoria-codigo-01.md`), aplicar correções em ViewModels/Bitmaps/WMI/Processos e gerar o release compilado e assinado v2.10.2.
+
+**Decisões-chave & Correções:**
+- **Recuperação de imagens estáticas:** Telas de login, registro e seleção de classes usam recursos locais embutidos (`bg1.png`, `bg2.png`), enquanto apenas o carrossel da tela de perfil busca dinamicamente do servidor.
+- **AUD-01-01 (Memory Leak):** Inscrições em `LauncherSettingsProvider.Instance.PropertyChanged` movidas para o ciclo reativo `this.WhenActivated` com `Disposable.Create().DisposeWith(disposables)` em `ProfileViewModel.cs` e `LoginViewModel.cs`.
+- **AUD-01-02 (Memory Leak Gráfico):** Implementado `DisposeDecodedBitmaps()` no `BackgroundCarousel.cs` sob `lock (_lock)` para liberar ponteiros nativos de GPU/Skia de instâncias `Bitmap` no `Reload()` e `Dispose()`.
+- **AUD-01-03 (Win32 Handles):** Adicionado `try/finally` com descarte (`.Dispose()`) de cada instância de `Process` retornado por `Process.GetProcessesByName` no `ProcessMonitor.cs`.
+- **AUD-01-05 (COM/WMI Leaks):** Encapsuladas as consultas `ManagementObjectSearcher.Get()` e instâncias de `ManagementObject` em blocos `using` no `HwidHelper.cs`.
+- **AUD-01-06 (UX Guard):** Adicionado feedback dinâmico em `RegisterErrorMsg` no `ClassSelectionViewModel.cs` caso o clique ocorra antes de selecionar uma classe.
+- **Build & Assinatura:** Versão bumpada para `2.10.2` em todos os campos do csproj; executável single-file `Build/TarkovRedLine.exe` publicado e assinado via `sign-launcher.ps1` (`Verified OK`). 315 testes unitários 100% aprovados.
+
 **Cross-refs:**
-- Trabalho principal desta sessão (rework do AutoSync-Cache v2): ver `mods/TarkovRedLine4.0/memory/sessions.md` 2026-08-02 (Sessão 1).
+- Auditoria do servidor e plugins cliente: ver `mods/TarkovRedLine4.0/memory/sessions.md` 2026-08-29 (Sessão 2).
+
