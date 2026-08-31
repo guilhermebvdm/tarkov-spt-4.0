@@ -4,7 +4,7 @@
 
 ## Estado atual
 
-> **Delta 2026-08-30:** Launcher em **v2.11.2** compilado e assinado digitalmente com `.sig` RSA-2048 SHA-256 (`Build/TarkovRedLine.exe`). Ajustado o caminho de persistência do estado do jogo base (`base-game-state.json`) para dentro da pasta canônica `SPT/user/launcher/` (`GameStateDetector.cs`), mantendo a raiz do jogo limpa e adicionando migração automática e transparente de arquivos de estado legados. Suíte de 315 testes unitários 100% aprovada.
+> **Delta 2026-08-30:** Launcher em **v2.11.2** compilado e assinado digitalmente com `.sig` RSA-2048 SHA-256 (`Build/TarkovRedLine.exe`). Principais capacidades entregues: (1) Novo motor de download HTTP multi-thread (`BaseGameHttpDownloader.cs`) direto da Cloudflare R2 (70.93 GB, 8 conexões paralelas, resume inteligente, sem custo de upload); (2) Gate de auto-update preventivo no botão "JOGAR" (`StartGameCore`); (3) Resiliência automática à queda/retorno do servidor SPT durante o download com auto-resume; (4) Padronização do arquivo de estado em `SPT/user/launcher/base-game-state.json` com migração automática; (5) Suíte de 315 testes unitários 100% aprovada.
 
 - **Estrutura (papéis, análogos ao mod):** `project/` = código editável (papel do `modded/`); upstream intocado em `launcher/Launcher4.0/` (papel do `original/` — **nunca editar**, citar como `// ref: Launcher4.0/<arquivo>:<linha>`); `backlog/` (mesmo SDD dos mods); `docs/`; `tools/` (`sign-launcher.ps1`, geração de chave); `dist/` (builds); `assets/`; esta `memory/` (criada 2026-07-26).
 - **Build:** self-contained single-file (~145 MB) — **não** framework-dependent. ⚠️ O csproj tem `RuntimeIdentifier=win-x64` mas **não** força `SelfContained`; depende do flag `--self-contained true` no `dotnet publish`. Publish/build sem o flag gera exe de ~244 KB que **exige .NET runtime instalado** e mostra "You must install .NET Desktop Runtime" — foi o que quebrou pro amigo do usuário (2026-07-26); resolvido entregando o single-file. `dotnet build launcher/Launcher4.0-v2/project/Launcher.sln` (o `/compile-mod` não cobre o launcher).
@@ -67,6 +67,34 @@
 - **AUD-01-06 (UX Guard):** Adicionado feedback dinâmico em `RegisterErrorMsg` no `ClassSelectionViewModel.cs` caso o clique ocorra antes de selecionar uma classe.
 - **Build & Assinatura:** Versão bumpada para `2.10.2` em todos os campos do csproj; executável single-file `Build/TarkovRedLine.exe` publicado e assinado via `sign-launcher.ps1` (`Verified OK`). 315 testes unitários 100% aprovados.
 
-**Cross-refs:**
-- Auditoria do servidor e plugins cliente: ver `mods/TarkovRedLine4.0/memory/sessions.md` 2026-08-29 (Sessão 2).
+## 2026-08-30 (GMT-3) — Sessão 4: Migração para Cloudflare R2 (HTTP Nativo) + Gate de Auto-Update no JOGAR + Resiliência Offline e Padronização Canônica (v2.10.8 -> v2.11.2)
+
+**Tema central:** Substituir integralmente o motor de download BitTorrent/P2P (MonoTorrent) por um novo motor HTTP nativo multi-thread integrado à CDN global Cloudflare R2; implementar verificação preventiva obrigatória de atualização no botão "JOGAR"; adicionar resiliência automática à queda/retorno do servidor SPT durante o download; padronizar caminhos de persistência de estado em `SPT/user/launcher/`; indexar 11.631 arquivos (70.93 GB) no manifesto público e entregar os releases v2.10.8 a v2.11.2 assinados digitalmente.
+
+**Decisões-chave & Implementações:**
+- **Infraestrutura Cloudflare R2:** Configurado o bucket `tarkov-redline-base` com acesso público via subdomínio `r2.dev`. O tráfego de download (egress) é 100% gratuito e ilimitado, eliminando sobrecarga de upload na máquina host e prevenindo custos de tráfego de rede.
+- **Motor `BaseGameHttpDownloader.cs` (v2.11.0):**
+  - Download paralelo com pool de concorrência (`SemaphoreSlim(8)`).
+  - Resume inteligente: escaneia o diretório de instalação local e faz download estritamente dos arquivos faltantes ou corrompidos.
+  - Escrita atômica em arquivos `.tmp` com movimentação `File.Move` após fechamento do stream, garantindo integridade caso o processo seja interrompido.
+  - Cálculo de velocidade em tempo real (MB/s) com média exponencial móvel e estimativa de tempo restante (ETA).
+  - Throttling de gravação em disco a cada 5 segundos para persistência de estado.
+  - Atribuição automática de atributos `Hidden | System` no `EscapeFromTarkov.exe` ao concluir o download.
+- **Gate de Auto-Update no Botão "JOGAR" (v2.10.9):**
+  - Método `LauncherUpdateHelper.CheckForAvailableUpdateAsync(serverUrl)` adicionado com timeout curto de 5s.
+  - Antes de executar `StartGameCore()` (login e lançamento do processo), o Launcher consulta se o servidor possui versão superior do Launcher.
+  - Se houver atualização pendente: cancela o início do jogo, abre o diálogo de confirmação (`ConfirmationDialogViewModel`) e, ao confirmar, dispara o auto-update seguro com validação de assinatura digital RSA-2048 (`.sig`).
+- **Resiliência a Quedas e Retorno do Servidor SPT (v2.11.1):**
+  - O `ServerHeartbeatMonitor` teve seu intervalo reduzido de 15s para 5s.
+  - No `ProfileViewModel.cs`, se o servidor ficar offline durante um download ativo do jogo base, o download é pausado com segurança e a interface exibe aviso de espera.
+  - Assim que o servidor restabelece conexão (online), o Launcher detecta a volta em até 5s, exibe mensagem de reconexão e retoma o download da Cloudflare R2 de forma 100% automática e transparente.
+- **Padronização Canônica de Pastas (v2.11.2):**
+  - Ajustado `GetStateFilePath` em `GameStateDetector.cs` para persistir em `<GamePath>/SPT/user/launcher/base-game-state.json` (junto ao `config.json` e `sync-state.json`), mantendo a raiz do jogo limpa.
+  - Implementada rotina de migração automática: se o Launcher detectar um `base-game-state.json` legado na raiz `user/launcher/`, ele move automaticamente para a pasta `SPT/user/launcher/` no boot, preservando o progresso sem perdas.
+- **Gerador de Manifesto do Jogo Base:** Script Node.js `generate-base-manifest.js` escaneou `E:\base-client` gerando o `base-manifest.json` com 11.631 arquivos (70.93 GB) e hashes SHA-256 para distribuição pública.
+- **Ciclo de Compilação & Assinatura Digital:**
+  - Versão SemVer bumpada nos 4 campos do `SPT.Launcher.csproj` a cada entrega (`2.10.8` -> `2.10.9` -> `2.11.0` -> `2.11.1` -> `2.11.2`).
+  - Binário Single-File Release `launcher/Launcher4.0-v2/Build/TarkovRedLine.exe` publicado e assinado via OpenSSL RSA-2048 SHA-256 (`TarkovRedLine.exe.sig`, `Verified OK`).
+  - Suíte de 315 testes unitários 100% aprovada em todos os builds.
+
 
