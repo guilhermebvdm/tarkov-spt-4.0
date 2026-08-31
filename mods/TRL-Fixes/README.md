@@ -17,6 +17,7 @@ Coleção de patches e correções essenciais de baixo nível para o ecossistema
 - **`DynamicMapsSafetyPatch`**: Absorve exceções durante o descarte de telas de interface no encerramento de raid (`OnRaidEnd`).
 
 ### 3. Integração e Sincronização FIKA Coop
+- **`FikaInventoryDesyncSafetyPatch`**: Previne e corrige desyncs de grid, itens invisíveis/fantasmas e rejeições de inventário (`is taken by another item` / `GClass1543`) através de reserva virtual em `Ctrl+Click` rápido e auto-recuperação visual na Main Thread.
 - **`FixFikaReviveRagdollPatch`**: Restaura hitboxes (`Layer 12 HitCollider`), placas balísticas e congela Rigidbodies após reanimar jogadores em partidas cooperativas.
 - **`FikaProceedEmptyHandsSafetyPatch`**: Resolve falhas de rejeição no `FikaServer` para pacotes de mãos vazias (`ProceedType.EmptyHands`).
 - **`FikaRefreshSlotViewsSafetyPatch`**: Elimina erros críticos de colisão de dicionário em armas com múltiplos trilhos táticos idênticos.

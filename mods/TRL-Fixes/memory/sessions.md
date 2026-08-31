@@ -1,8 +1,8 @@
 # TRL-Fixes — Memória de Sessões
 
 ## Snapshot Delta
-- **Versão:** 1.3.2 (SPT 4.0 / FIKA)
-- **Estado:** Mitigação do bug visual de metralhadora duplicada nas mãos de Rogues/IAs, suporte completo ao comando Leave e sub-patch DropCurWeapon com restabelecimento de arma primária.
+- **Versão:** 1.4.0 (SPT 4.0 / FIKA)
+- **Estado:** Implementado FikaInventoryDesyncSafetyPatch com reserva virtual de slots em QuickMove (prevenção de colisões concorrentes por Ctrl+Click rápido), auto-recuperação visual de grid em caso de rejeição de servidor ("is taken by another item" / GClass1543) com MainThreadDispatcher e proteção contra descarte de itens em fechamento de contêineres.
 - **Pendências:** 🟢 Nenhuma pendência blocker registrada.
 
 ---
@@ -152,6 +152,19 @@
 4. **Validação de Build**:
    - Compilado `TRLFixes.csproj` (`TRL-Fixes.dll`) com **0 Erros e 0 Warnings**.
 
+---
 
+## 2026-08-31 — Sessão 11: Fix de Desync de Inventário & Quick-Move (v1.4.0)
 
+**Tema central:** Diagnóstico e resolução do bug de itens fantasmas/invisíveis e desync de grid no modo cooperativo do FIKA (`ReceiveStatusFromServer: Client operation rejected by server ... is taken by another item` / `GClass1543` e `Operation conversion failed`), ocorrendo comumente em raids com Headless host ou Player Host durante uso rápido de `Ctrl+Click` (Quick Move) e fechamento de inventário.
 
+**Alterações Realizadas:**
+1. **`FikaInventoryDesyncSafetyPatch.cs`**:
+   - **`QuickMoveSlotReservationPatch`**: Intercepta `StashGridClass.FindFreeSpace` e mantém registro estático transitório das coordenadas alocadas nos últimos 1.5s na mesma rajada de `Ctrl+Click`, calculando rotas alternativas preemptivamente e impedindo que dois cliques rápidos disputem as mesmas coordenadas `(x, y)` no servidor.
+   - **`InventoryRejectionAutoRecoveryPatch`**: Intercepta `ClientInventoryOperationHandler.ReceiveStatusFromServer` (e `TraderControllerClass.method_13`). Ao detectar rejeição por colisão de slot (`is taken by another item` / `GClass1543`), despacha na Main Thread do Unity a reconstrução geométrica do grid (`RaiseResizeEvent()`) e `RaiseRefreshEvent()` no contêiner pai (`ParentItem`), forçando a UI a renderizar os itens reais imediatamente sem exigir que o jogador jogue a mochila no chão.
+   - **`MainThreadDispatcher`**: Componente `MonoBehaviour` dedicado para assegurar a execução thread-safe de eventos de UI a partir dos callbacks assíncronos de rede do LiteNetLib.
+2. **`Plugin.cs` & `TRLFixes.csproj`**:
+   - Ativação do patch no `Awake()` com tratamento defensivo de exceção.
+   - Bump de versão SemVer para **v1.4.0** (`1.4.0.0`).
+3. **Validação de Build**:
+   - Compilado `TRLFixes.csproj` (`TRL-Fixes.dll`) em Release com **0 Erros e 0 Avisos**.
