@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 #if SPT_4_0
@@ -190,15 +190,6 @@ namespace tarkin.ladders.bep
             float newCurlAmount = Mathf.MoveTowards(currentCurl, curlAmountTarget, changeSpeed * Time.deltaTime);
 
             SetCurl(newCurlAmount);
-        }
-
-        public void TestSinAnimation()
-        {
-            float t = Time.time;
-
-            float normalizedTime = (Mathf.Sin(t * 3f) + 1f) * 0.5f;
-
-            SetCurl(normalizedTime);
         }
 
         void SetCurl(float t)

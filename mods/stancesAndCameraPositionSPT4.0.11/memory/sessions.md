@@ -58,6 +58,25 @@ retroativamente (gravada em 02/08, trabalho de 26-27/07): a narrativa completa d
 - **[P-7.2] (aberta 2026-07-11) 🟢 Dívida técnica** (herda a antiga P-5.3): unificar a interpolação em `SpringMath.SpringDamp`, eliminar a reflection que roda a cada frame, `try/catch` nos ~19 patches restantes (só os 6 do Manual Chambering têm), auditar o reset de estado estático entre raids. Adiada porque mexe em código de câmera **já validado** — risco > valor até surgir bug real.
 - **[P-7.3] (aberta 2026-07-11) 🟢 Dívida da revisão do F12** (achados adiados do `PROPRIEDADES-review-01.md`): reordenar as seções (**MP-01-03** — os binds de uma mesma seção estão espalhados pelo `Awake`, ex.: Stance 2 em L766 **e** L1184; reordenar arriscaria quebrar um arquivo de 1700 linhas já validado), rever onde ficam as opções de velocidade (**MP-01-08**) e se a seção da Stance 0 se justifica (**MP-01-10**).
 
+## 2026-08-30 (GMT-3) — Sessão 16: Documentação Modular, Auditoria Estática e Fix do Lock de Inventário (v2.17.2)
+
+- **Documentação Modular (`/document-mod`)**:
+  - Estruturada a pasta `docs/` com 7 artigos técnicos modulares (100% validados contra cabeçalhos canônicos):
+    - `01-visao-geral-e-arquitetura.md`, `02-sistema-de-posturas-e-transicoes.md`, `03-sistemas-de-mira-ads-e-movimentacao.md`, `04-sistemas-de-apoiamento-e-respiracao.md`, `05-manual-chambering-e-mecanicas-de-armas.md`, `06-integracao-fika-coop-e-rede.md` e `README.md`.
+- **Auditoria Técnica & Causa Raiz do Bug (`/audit-mod-code`)**:
+  - Analisado o log de raid `LogOutput (5).log` onde o jogador perdeu a capacidade de disparar armas após 40 minutos de partida no FIKA multiplayer.
+  - **Diagnóstico:** Em `ManualChamberingPatches.cs`, o patch `StartEquipWeapPatch` (Prefix com `return false`) e `ManualChamberingInputPatch` executavam manipulação manual de `PopTo` e atraso assíncrono de 200ms em `ChamberUnload`. Isso abria operações locais de inventário (`InOutHandsProcess`) que nunca eram resolvidas no servidor do FIKA, gerando `GClass1561` (*"Default Inventory is currently being modified"*) e travando a inicialização do `FirearmController` no cliente.
+  - Relatório registrado em `docs/relatorio-auditoria-codigo-01.md`.
+- **Code Review & Correções Aplicadas**:
+  - **`ManualChamberingPatches.cs`**: Desativado `StartEquipWeapPatch` e removida a `Phase = 3` com delay de 200ms. O bloqueio de auto-chambering foi delegado nativamente ao `SetAmmoCompatiblePatch` (`compatible = false`), que impede a alimentação automática pelo próprio EFT sem violar transações de inventário.
+  - **`HandsStateGuard.cs`**: Conectado nas portas de entrada do `StanceManager.cs` (`Update()`, `HandleStanceHotkeys()`, `HandleLinearScroll()`, `TryInterceptTriggerDown()`) para bloquear trocas de postura durante itens médicos, comida, bebida, granadas ou transições de mãos.
+  - **`StanceManager.cs`**: Adicionado timeout defensivo de 6.0s para destravar a `ActionStance` caso o evento de Idle seja interrompido.
+- **Versionamento & Build**:
+  - Bump de versão SemVer para **v2.17.2** em `Plugin.cs` e `CameraRotationMod.csproj`.
+  - Compilado `CameraRotationMod.csproj` via `dotnet build` com **0 Erros e 0 Avisos** (`TRL-StancesAndMobility.dll`).
+
+---
+
 ## 2026-08-02 (GMT-3) — Sessão 15: Isolamento no Canal 3 FIKA, Cópia modded-testchannel e Guard de Mãos
 
 - **Análise Forense de Log (`LogOutput.log`)**:

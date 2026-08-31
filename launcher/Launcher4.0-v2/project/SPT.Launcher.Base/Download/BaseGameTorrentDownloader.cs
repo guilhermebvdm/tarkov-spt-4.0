@@ -30,11 +30,13 @@ namespace SPT.Launcher.Download
         private ClientEngine _engine;
         private TorrentManager _manager;
         private Timer _progressTicker;
+        private Timer _bandwidthTicker;
         private CancellationTokenSource _cts;
         private readonly string _gamePath;
         private readonly string _torrentCacheDir;
         private bool _isPaused = false;
         private bool _isCompleted = false;
+        private long _lastStateSaveTime = 0;
 
         public event Action<BaseGameDownloadProgress> ProgressChanged;
         public event Action DownloadCompleted;
@@ -55,18 +57,18 @@ namespace SPT.Launcher.Download
                 Directory.CreateDirectory(_torrentCacheDir);
             }
 
-            // Escutar eventos do Heartbeat para autorefresh e limite dinâmico de banda
+            // Escutar reconexão do Heartbeat para autorefresh dos WebSeeds
             ServerHeartbeatMonitor.Instance.ServerReconnected += OnServerReconnected;
-            ServerHeartbeatMonitor.Instance.BandwidthStatusChanged += OnBandwidthStatusChanged;
         }
 
-        private void OnBandwidthStatusChanged(ServerBandwidthStatus status)
+        private async Task CheckBandwidthAsync()
         {
-            if (_manager == null || status == null || status.MaxDownloadRateBytesSec <= 0) return;
+            if (_manager == null || _isPaused || _isCompleted) return;
 
-            Task.Run(async () =>
+            try
             {
-                try
+                var status = await ServerHeartbeatMonitor.Instance.FetchBandwidthStatusAsync();
+                if (status != null && status.MaxDownloadRateBytesSec > 0)
                 {
                     if (_manager != null && _manager.Settings.MaximumDownloadRate != status.MaxDownloadRateBytesSec)
                     {
@@ -76,14 +78,14 @@ namespace SPT.Launcher.Download
                         }.ToSettings();
 
                         await _manager.UpdateSettingsAsync(newSettings);
-                        LogManager.Instance.Info($"[TorrentDownloader] Limite adaptativo atualizado pelo servidor: {status.Mode} ({status.MaxDownloadRateMBps} MB/s)");
+                        LogManager.Instance.Info($"[TorrentDownloader] Limite adaptativo atualizado pelo servidor (QoS 60s): {status.Mode} ({status.MaxDownloadRateMBps} MB/s)");
                     }
                 }
-                catch (Exception ex)
-                {
-                    LogManager.Instance.Warning($"[TorrentDownloader] Falha ao ajustar limite dinâmico: {ex.Message}");
-                }
-            });
+            }
+            catch (Exception ex)
+            {
+                LogManager.Instance.Warning($"[TorrentDownloader] Falha ao verificar status de banda: {ex.Message}");
+            }
         }
 
         public async Task<bool> InitializeAndStartAsync(string torrentSource, string webSeedFallbackUrl = null)
@@ -125,16 +127,37 @@ namespace SPT.Launcher.Download
                 // 4. Adicionar ao Engine
                 _manager = await _engine.AddAsync(torrent, _gamePath, torrentSettings);
 
+                // Mapear cada arquivo para salvar diretamente na raiz de _gamePath sem subpasta de torrent
+                foreach (var file in _manager.Files)
+                {
+                    string relativePath = file.Path;
+                    if (!string.IsNullOrEmpty(torrent.Name))
+                    {
+                        if (relativePath.StartsWith(torrent.Name + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase) ||
+                            relativePath.StartsWith(torrent.Name + "/", StringComparison.OrdinalIgnoreCase) ||
+                            relativePath.StartsWith(torrent.Name + "\\", StringComparison.OrdinalIgnoreCase))
+                        {
+                            relativePath = relativePath.Substring(torrent.Name.Length + 1);
+                        }
+                    }
+
+                    string targetFullPath = Path.GetFullPath(Path.Combine(_gamePath, relativePath));
+                    if (!string.Equals(file.FullPath, targetFullPath, StringComparison.OrdinalIgnoreCase))
+                    {
+                        await _manager.MoveFileAsync(file, targetFullPath);
+                    }
+                }
+
                 // Configurar eventos
                 _manager.TorrentStateChanged += OnTorrentStateChanged;
-                _manager.PieceHashed += OnPieceHashed;
 
                 // 5. Iniciar Download
                 await _manager.StartAsync();
-                LogManager.Instance.Info("[TorrentDownloader] Download iniciado.");
+                LogManager.Instance.Info("[TorrentDownloader] Download iniciado diretamente na raiz do jogo.");
 
-                // 6. Iniciar Ticker de Progresso (atualiza a cada 500ms)
+                // 6. Iniciar Tickers de Progresso (500ms) e Limite de Banda QoS (60s)
                 _progressTicker = new Timer(OnTickProgress, null, 500, 500);
+                _bandwidthTicker = new Timer(async _ => await CheckBandwidthAsync(), null, 0, 60000);
 
                 return true;
             }
@@ -214,6 +237,9 @@ namespace SPT.Launcher.Download
 
             try
             {
+                _bandwidthTicker?.Dispose();
+                _bandwidthTicker = null;
+
                 await _manager.PauseAsync();
                 _isPaused = true;
                 GameStateDetector.MarkAsPaused(_gamePath, _manager.Progress);
@@ -233,6 +259,8 @@ namespace SPT.Launcher.Download
             {
                 await _manager.StartAsync();
                 _isPaused = false;
+                _bandwidthTicker?.Dispose();
+                _bandwidthTicker = new Timer(async _ => await CheckBandwidthAsync(), null, 0, 60000);
                 LogManager.Instance.Info("[TorrentDownloader] Download retomado.");
             }
             catch (Exception ex)
@@ -249,6 +277,8 @@ namespace SPT.Launcher.Download
             {
                 _progressTicker?.Dispose();
                 _progressTicker = null;
+                _bandwidthTicker?.Dispose();
+                _bandwidthTicker = null;
 
                 await _manager.StopAsync();
                 LogManager.Instance.Info("[TorrentDownloader] Motor parado com sucesso.");
@@ -282,23 +312,17 @@ namespace SPT.Launcher.Download
             }
         }
 
-        private void OnPieceHashed(object sender, PieceHashedEventArgs e)
-        {
-            if (_manager == null) return;
-
-            // Salvar estado periodicamente a cada progresso
-            GameStateDetector.MarkAsDownloading(
-                _gamePath,
-                _manager.Torrent?.InfoHashes.V1OrV2.ToHex() ?? "",
-                _manager.Progress,
-                _manager.Monitor.DataBytesReceived,
-                _manager.Torrent?.Size ?? 0
-            );
-        }
-
         private void OnTorrentStateChanged(object sender, TorrentStateChangedEventArgs e)
         {
             LogManager.Instance.Info($"[TorrentDownloader] Estado mudou: {e.OldState} -> {e.NewState}");
+
+            if (e.NewState == TorrentState.Error)
+            {
+                string errorReason = _manager?.Error?.Exception?.Message ?? "Erro desconhecido durante a checagem/download do torrent";
+                LogManager.Instance.Error($"[TorrentDownloader] MonoTorrent entrou em estado de erro: {errorReason}\n{_manager?.Error?.Exception?.StackTrace}");
+                DownloadFailed?.Invoke($"Erro no download: {errorReason}");
+                return;
+            }
 
             if (e.NewState == TorrentState.Seeding || (_manager != null && _manager.Progress >= 99.99))
             {
@@ -308,9 +332,27 @@ namespace SPT.Launcher.Download
                     _isPaused = false;
                     _progressTicker?.Dispose();
                     _progressTicker = null;
+                    _bandwidthTicker?.Dispose();
+                    _bandwidthTicker = null;
 
                     string hash = _manager.Torrent?.InfoHashes.V1OrV2.ToHex() ?? "";
                     long totalSize = _manager.Torrent?.Size ?? 0;
+
+                    // Ocultar executável do jogo com flags de Sistema (Hidden + System)
+                    string eftExe = Path.Combine(_gamePath, "EscapeFromTarkov.exe");
+                    if (File.Exists(eftExe))
+                    {
+                        try
+                        {
+                            var currentAttrs = File.GetAttributes(eftExe);
+                            File.SetAttributes(eftExe, currentAttrs | FileAttributes.Hidden | FileAttributes.System);
+                            LogManager.Instance.Info("[TorrentDownloader] Atributos (Hidden + System) aplicados com sucesso em EscapeFromTarkov.exe.");
+                        }
+                        catch (Exception ex)
+                        {
+                            LogManager.Instance.Warning($"[TorrentDownloader] Falha ao aplicar atributos ao executável: {ex.Message}");
+                        }
+                    }
 
                     GameStateDetector.MarkAsInstalled(_gamePath, hash, totalSize);
                     DownloadCompleted?.Invoke();
@@ -329,6 +371,20 @@ namespace SPT.Launcher.Download
                 long total = _manager.Torrent?.Size ?? 0;
                 double progress = _manager.Progress;
                 int connections = _manager.OpenConnections;
+
+                // Salvar estado em disco periodicamente (a cada 5s) durante o download ativo
+                long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                if (now - _lastStateSaveTime >= 5000 && (_manager.State == TorrentState.Downloading || _manager.State == TorrentState.Starting))
+                {
+                    _lastStateSaveTime = now;
+                    GameStateDetector.MarkAsDownloading(
+                        _gamePath,
+                        _manager.Torrent?.InfoHashes.V1OrV2.ToHex() ?? "",
+                        progress,
+                        downloaded,
+                        total
+                    );
+                }
 
                 TimeSpan? eta = null;
                 if (speed > 1024 && total > downloaded)
@@ -377,8 +433,8 @@ namespace SPT.Launcher.Download
         public void Dispose()
         {
             ServerHeartbeatMonitor.Instance.ServerReconnected -= OnServerReconnected;
-            ServerHeartbeatMonitor.Instance.BandwidthStatusChanged -= OnBandwidthStatusChanged;
             _progressTicker?.Dispose();
+            _bandwidthTicker?.Dispose();
             _engine?.Dispose();
         }
     }

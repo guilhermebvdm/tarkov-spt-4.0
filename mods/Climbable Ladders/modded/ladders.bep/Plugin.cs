@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace tarkin.ladders.bep
 {
-    [BepInPlugin("com.tarkin.ladders", "tarkin.ladders", "1.0.3")]
+    [BepInPlugin("com.tarkin.ladders", "tarkin.ladders", "1.0.5")]
     public class Plugin : BaseUnityPlugin
     {
         public static new ManualLogSource Logger { get; private set; }

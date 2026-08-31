@@ -182,7 +182,18 @@ namespace CameraRotationMod
             }
 
             // Action Stance: o término é detectado via ActionStanceOnIdlePatch (OnIdleStartEvent).
-            // Sem polling aqui — o evento nativo é preciso e sem gaps.
+            // Timeout de segurança (6s): previne que a ActionStance fique eternamente presa se a animação for interrompida
+            if (_isActionStanceActive && (Time.time - _actionStanceStartTime > 6.0f))
+            {
+                Plugin.Logger.LogWarning("[ActionStance] Timeout de segurança (6s) atingido. Forçando encerramento da ActionStance.");
+                EndActionStance(forceCancel: true);
+            }
+
+            // Guard de mãos: não processar comandos de troca de postura se as mãos estiverem ocupadas ou em transição
+            if (!HandsStateGuard.CanChangeStance(gameWorld?.MainPlayer))
+            {
+                return;
+            }
 
             // Se estiver mirando (ADS), não processamos as hotkeys ou a roda do mouse,
             // mas ainda queremos rodar a ActionStance e UpdateTacSprint, então apenas pulamos a entrada.
@@ -238,6 +249,9 @@ namespace CameraRotationMod
         /// </summary>
         private static void HandleLinearScroll(float scrollDelta)
         {
+            var gw = GetCachedGameWorld();
+            if (!HandsStateGuard.CanChangeStance(gw?.MainPlayer)) return;
+
             Stance next = CurrentStance;
             if (scrollDelta > 0) // scroll-up
             {
@@ -277,6 +291,7 @@ namespace CameraRotationMod
         {
             var gw = GetCachedGameWorld();
             if (gw?.MainPlayer == null) return false;
+            if (!HandsStateGuard.CanChangeStance(gw.MainPlayer)) return false;                // guard de mãos / medicina / transição
             if (gw.MainPlayer.IsSprintEnabled) return false;                                  // bloqueio sprint
             if (gw.MainPlayer.ProceduralWeaponAnimation?.IsAiming == true) return false;      // ignora em ADS
             if (gw.MainPlayer.IsInPronePose) return false;                                    // bloqueio prone
@@ -400,6 +415,7 @@ namespace CameraRotationMod
         {
             var gw = GetCachedGameWorld();
             if (gw?.MainPlayer == null) return false;
+            if (!HandsStateGuard.CanChangeStance(gw.MainPlayer)) return false;
             
             if (gw.MainPlayer.ProceduralWeaponAnimation?.IsAiming == true)
             {

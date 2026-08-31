@@ -61,6 +61,47 @@ namespace SPT.Launcher.Helpers
             global::SPT.Launcher.Controllers.LogManager.Instance.Error(msg);
 
         /// <summary>
+        /// Realiza consulta rápida (timeout de 5s) para verificar se existe uma versão mais recente do Launcher disponível no servidor.
+        /// Retorna a versão mais recente em caso positivo, ou null se o Launcher já estiver atualizado ou inalcançável.
+        /// </summary>
+        public static async Task<string?> CheckForAvailableUpdateAsync(string serverUrl)
+        {
+            if (string.IsNullOrWhiteSpace(serverUrl)) return null;
+
+            try
+            {
+                using var client = new HttpClient(CreatePinnedHandler());
+                client.Timeout = TimeSpan.FromSeconds(5);
+
+                string updateServerUrl = serverUrl.TrimEnd('/');
+                string versionUrl = $"{updateServerUrl}{SPT.Launcher.RequestHandler.ModRoutePrefix}/redline/launcher/version";
+
+                var response = await client.GetAsync(versionUrl);
+                if (!response.IsSuccessStatusCode)
+                    return null;
+
+                string versionJson = await response.Content.ReadAsStringAsync();
+                using var doc = JsonDocument.Parse(versionJson);
+                var root = doc.RootElement;
+
+                string newVersion = root.TryGetProperty("version", out var vEl) && vEl.ValueKind == JsonValueKind.String
+                    ? vEl.GetString() ?? "1.0.0"
+                    : "1.0.0";
+
+                if (UpdateVersion.IsNewerVersion(CurrentVersion, newVersion))
+                {
+                    return newVersion;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogInfo($"[AutoUpdate] Verificação rápida de versão do launcher: {ex.Message}");
+            }
+
+            return null;
+        }
+
+        /// <summary>
         /// Checks the server for a newer launcher and, if one exists, downloads it to QUARANTINE, verifies
         /// its detached signature against the embedded public key, and only then promotes + restarts.
         /// FAIL-CLOSED (01-spec RN-1): any doubt aborts without touching the running binary. Returns an

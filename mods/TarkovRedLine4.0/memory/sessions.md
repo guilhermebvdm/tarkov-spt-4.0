@@ -58,10 +58,10 @@
 
 **Decisões-chave & Correções:**
 - **AUD-02-01 & AUD-02-05 (HwidManager):** Removida leitura/escrita manual direta em `user/profiles/*.json`. Migrado para consulta em memória `_saveServer.GetProfiles().ToArray()` e persistência atômica via `_saveServer.SaveProfileAsync(sessionId)`.
-- **AUD-02-02 (RedLineRestart & RedLineShutdown Plugins):** Eliminada a busca por URL em Pastebin (`https://pastebin.com/raw/PT4cMwLB`) e a substituição arbitrária de portas (`:7075`). Implementado `Config.Bind("General", "ServerUrl", "http://127.0.0.1:6969")` nos plugins BepInEx, restaurando a comunicação do botão de votação e do loop de shutdown diretamente com a porta `6969` do servidor.
+- **AUD-02-02 (RedLineRestart & RedLineShutdown Plugins):** Substituído o Pastebin pelo GitHub Gist canônico (`https://gist.githubusercontent.com/rockettechnology-dev/1fe6a8a243ea568c07e46a84744dff41/raw/gistfile1.txt`), o mesmo utilizado pelo Launcher em `ConnectServerViewModel.cs`. Se o Gist estiver inacessível ou offline, os plugins usam o fallback local configurável `Config.Bind("General", "ServerUrl", "http://100.106.152.7:6969")`.
 - **AUD-02-03 (FikaProfilePatch):** Código comentado limpo e formalizado como no-op compatível com o ecossistema `Fika.Core`.
 - **AUD-02-04 & AUD-02-06 (PlayerIpsManager):** Implementada detecção de TimeZone cross-platform (`"E. South America Standard Time"` / `"America/Sao_Paulo"` / `Utc`) e adicionados logs de erro nos blocos de captura de exceção.
-- **Compilação de Binários:** `TarkovRedLine.Server.dll` (0 erros), `RedLineRestart.dll` (v2.4.4) e `RedLineShutdown.dll` (v1.0.1) compilados com sucesso.
+- **Compilação de Binários:** `TarkovRedLine.Server.dll` (0 erros), `RedLineRestart.dll` (v2.4.5) e `RedLineShutdown.dll` (v1.0.2) compilados com sucesso.
 
 **Cross-refs:**
 - Auditoria do Launcher: ver `launcher/Launcher4.0-v2/memory/sessions.md` 2026-08-29 (Sessão 3).

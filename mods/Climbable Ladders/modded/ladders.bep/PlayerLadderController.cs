@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -379,7 +380,8 @@ namespace tarkin.ladders.bep
                 if (currentHeight + 0.5f < 0f)
                     return true;
 
-                if (Physics.Raycast(player.Position + ladder.transform.forward * 0.35f, Vector3.down, 0.1f, LayerMaskController.TerrainLowPoly))
+                // ref: AUD-01-06 Gating de proximidade: só consulta a física se estiver próximo à base
+                if (currentHeight < 1.0f && Physics.Raycast(player.Position + ladder.transform.forward * 0.35f, Vector3.down, 0.1f, LayerMaskController.TerrainLowPoly))
                 {
                     return true;
                 }
@@ -426,6 +428,43 @@ namespace tarkin.ladders.bep
             }
         }
 
+        private static void SafeRestoreWeapon(Player player)
+        {
+            if (player == null || player.HealthController == null || !player.HealthController.IsAlive)
+                return;
+
+            player.StartCoroutine(RestoreWeaponWhenReady(player));
+        }
+
+        private static IEnumerator RestoreWeaponWhenReady(Player player)
+        {
+            float timeout = 3.0f;
+            float elapsed = 0f;
+
+            // ref: AUD-01-09 Aguarda o término de qualquer vaulting, desarmamento prévio (HandsIsEmpty) e animações pendentes
+            while (player != null && elapsed < timeout)
+            {
+                bool isVaulting = player.MovementContext != null && player.MovementContext.PlayerAnimatorGetIsVaulting();
+                bool isHandsInteracting = player.HandsController != null && player.HandsController.IsInInteraction();
+                bool isWaitingEmptyHands = !player.HandsIsEmpty && player.IsInBufferZone;
+
+                if (!isVaulting && !isHandsInteracting && !isWaitingEmptyHands)
+                    break;
+
+                elapsed += Time.deltaTime;
+                yield return null;
+            }
+
+            // Respiro adicional de 1 frame para garantir que a fila de operações do servidor Fika processou o ack do desarmamento
+            yield return null;
+
+            if (player == null || player.HealthController == null || !player.HealthController.IsAlive)
+                yield break;
+
+            player.IsInBufferZone = false;
+            player.TrySetLastEquippedWeapon();
+        }
+
         void OnDestroy()
         {
             _destroyCts.Cancel();
@@ -435,7 +474,6 @@ namespace tarkin.ladders.bep
             Patch_MoveInputTranslator_TranslateAxes.Unsubscribe(player, OnPlayerInput);
 
             player.MovementContext.IsAxesIgnored = false;
-            player.IsInBufferZone = false;
 
             Patch_Physical_CanClimb.OverrideCanClimb = false;
             Patch_Physical_CanVault.OverrideCanVault = false;
@@ -453,7 +491,7 @@ namespace tarkin.ladders.bep
                 capsuleCollider.radius = originalCapsuleColliderRadius;
             }
 
-            player.TrySetLastEquippedWeapon();
+            SafeRestoreWeapon(player);
             player.SetCompensationScale();
         }
     }

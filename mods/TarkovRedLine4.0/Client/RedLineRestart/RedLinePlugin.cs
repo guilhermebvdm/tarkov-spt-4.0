@@ -7,19 +7,42 @@ using System.Threading.Tasks;
 
 namespace RedLineRestart
 {
-    [BepInPlugin("com.umbigopreto.redlinerestart", "RedLine Restarter", "2.4.4")]
+    [BepInPlugin("com.umbigopreto.redlinerestart", "RedLine Restarter", "2.4.5")]
     public class RedLinePlugin : BaseUnityPlugin
     {
+        private const string GistUrl = "https://gist.githubusercontent.com/rockettechnology-dev/1fe6a8a243ea568c07e46a84744dff41/raw/gistfile1.txt";
         private RedLineUI _ui = new RedLineUI();
         private float _nextUpdate = 0f;
         private float _nextButtonAttempt = 0f;
 
         void Awake()
         {
-            var configServerUrl = Config.Bind("General", "ServerUrl", "http://127.0.0.1:6969", "URL do Servidor SPT / Tarkov Red Line (ex: http://127.0.0.1:6969 ou http://100.x.y.z:6969)");
+            var configServerUrl = Config.Bind("General", "ServerUrl", "http://100.106.152.7:6969", "URL do Servidor SPT / Tarkov Red Line (ex: http://100.106.152.7:6969 ou http://127.0.0.1:6969)");
             RedLineState.ServerUrl = configServerUrl.Value.TrimEnd('/');
 
-            Logger.LogInfo($"[RedLine] Plugin 2.4.4 iniciado. ServerUrl configurado para: {RedLineState.ServerUrl}");
+            Logger.LogInfo($"[RedLine] Plugin 2.4.5 iniciado. Buscando URL atualizada via Gist...");
+            _ = FetchGistUrlAsync();
+        }
+
+        private async Task FetchGistUrlAsync()
+        {
+            try
+            {
+                using (HttpClient client = new HttpClient { Timeout = System.TimeSpan.FromSeconds(5) })
+                {
+                    string content = await client.GetStringAsync(GistUrl);
+                    if (!string.IsNullOrWhiteSpace(content))
+                    {
+                        string formatted = content.Trim().Replace("https://", "http://").TrimEnd('/');
+                        RedLineState.ServerUrl = formatted;
+                        Logger.LogInfo($"[RedLine] ServerUrl atualizado via Gist para: {RedLineState.ServerUrl}");
+                    }
+                }
+            }
+            catch (System.Exception ex)
+            {
+                Logger.LogWarning($"[RedLine] Falha ao consultar Gist ({ex.Message}). Usando ServerUrl configurado: {RedLineState.ServerUrl}");
+            }
         }
 
         void Update()

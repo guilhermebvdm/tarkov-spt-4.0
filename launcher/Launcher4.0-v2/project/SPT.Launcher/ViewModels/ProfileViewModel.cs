@@ -179,9 +179,10 @@ namespace SPT.Launcher.ViewModels
         /// <summary>Cache hit / nada baixando → texto vazio → o rótulo da taxa fica oculto.</summary>
         public bool HasDownloadSpeed => !string.IsNullOrEmpty(DownloadSpeedText);
 
-        // === Base Game Download (MonoTorrent .NET 9) properties ===
+        // === Base Game Download (Cloudflare R2 HTTP Multi-Thread) properties ===
 
-        private BaseGameTorrentDownloader _torrentDownloader;
+        private BaseGameHttpDownloader _httpDownloader;
+        private bool _pausedDueToServerOffline = false;
 
         private bool _isBaseGameInstalled = true;
         public bool IsBaseGameInstalled
@@ -348,7 +349,38 @@ namespace SPT.Launcher.ViewModels
 
                 // Heartbeat monitor a cada 5s
                 ServerHeartbeatMonitor.Instance.Start();
-                Action<bool> onHeartbeat = online => Dispatcher.UIThread.Post(() => IsServerOnline = online);
+                Action<bool> onHeartbeat = online => Dispatcher.UIThread.Post(async () =>
+                {
+                    bool wasOffline = !IsServerOnline;
+                    IsServerOnline = online;
+
+                    if (!online)
+                    {
+                        if (IsBaseDownloading && !IsBaseDownloadPaused && _httpDownloader != null)
+                        {
+                            LogManager.Instance.Warning("[Profile] Servidor SPT offline detectado durante o download. Pausando temporariamente...");
+                            _pausedDueToServerOffline = true;
+                            await _httpDownloader.PauseAsync();
+                            IsBaseDownloadPaused = true;
+                            BaseDownloadStatusText = "Servidor SPT offline. Download pausado temporariamente. Aguardando servidor voltar online...";
+                        }
+                    }
+                    else if (online && wasOffline && _pausedDueToServerOffline)
+                    {
+                        LogManager.Instance.Info("[Profile] Servidor SPT voltou online! Retomando download base automaticamente...");
+                        _pausedDueToServerOffline = false;
+                        IsBaseDownloadPaused = false;
+                        BaseDownloadStatusText = "Servidor online novamente! Retomando download da Cloudflare R2...";
+                        if (_httpDownloader != null)
+                        {
+                            await _httpDownloader.ResumeAsync();
+                        }
+                        else
+                        {
+                            await StartBaseGameDownloadAsync();
+                        }
+                    }
+                });
                 ServerHeartbeatMonitor.Instance.ServerStatusChanged += onHeartbeat;
                 Disposable.Create(() =>
                 {
@@ -465,18 +497,15 @@ namespace SPT.Launcher.ViewModels
             if (IsBaseDownloading) return;
 
             string gamePath = LauncherSettingsProvider.Instance.GamePath;
-            string serverUrl = ServerManager.SelectedServer?.backendUrl ?? LauncherSettingsProvider.Instance.Server.Url;
-            string torrentUrl = $"{serverUrl.TrimEnd('/')}{SPT.Launcher.RequestHandler.ModRoutePrefix}/redline/base-game.torrent";
-            string webSeedUrl = $"{serverUrl.TrimEnd('/')}{SPT.Launcher.RequestHandler.ModRoutePrefix}/redline/base-game/";
 
             IsBaseDownloading = true;
             IsBaseDownloadPaused = false;
-            BaseDownloadStatusText = "Conectando ao motor de download...";
+            BaseDownloadStatusText = "Conectando à Cloudflare R2...";
 
-            _torrentDownloader?.Dispose();
-            _torrentDownloader = new BaseGameTorrentDownloader(gamePath);
+            _httpDownloader?.Dispose();
+            _httpDownloader = new BaseGameHttpDownloader(gamePath);
 
-            _torrentDownloader.ProgressChanged += progress =>
+            _httpDownloader.ProgressChanged += progress =>
             {
                 Dispatcher.UIThread.Post(() =>
                 {
@@ -492,18 +521,18 @@ namespace SPT.Launcher.ViewModels
                     double downloadedGb = progress.DownloadedBytes / (1024.0 * 1024.0 * 1024.0);
                     double totalGb = progress.TotalBytes / (1024.0 * 1024.0 * 1024.0);
                     BaseDownloadStatsText = totalGb > 0
-                        ? $"{downloadedGb:F1} GB / {totalGb:F1} GB ({progress.OpenConnections} peers)"
+                        ? $"{downloadedGb:F1} GB / {totalGb:F1} GB ({progress.OpenConnections} conexões)"
                         : "";
 
                     BaseDownloadStatusText = progress.StateDescription;
                 });
             };
 
-            _torrentDownloader.DownloadCompleted += () =>
+            _httpDownloader.DownloadCompleted += () =>
             {
                 Dispatcher.UIThread.Post(async () =>
                 {
-                    LogManager.Instance.Info("[Profile] Download base concluído com 100% de integridade.");
+                    LogManager.Instance.Info("[Profile] Download base da Cloudflare concluído com sucesso!");
                     IsBaseDownloading = false;
                     IsBaseGameInstalled = true;
                     SendNotification("Download Concluído", "O jogo base foi baixado e verificado com sucesso! Verificando mods...", Avalonia.Controls.Notifications.NotificationType.Success);
@@ -511,7 +540,7 @@ namespace SPT.Launcher.ViewModels
                 });
             };
 
-            _torrentDownloader.DownloadFailed += errorMsg =>
+            _httpDownloader.DownloadFailed += errorMsg =>
             {
                 Dispatcher.UIThread.Post(() =>
                 {
@@ -521,18 +550,18 @@ namespace SPT.Launcher.ViewModels
                 });
             };
 
-            bool started = await _torrentDownloader.InitializeAndStartAsync(torrentUrl, webSeedUrl);
+            bool started = await _httpDownloader.InitializeAndStartAsync();
             if (!started)
             {
-                BaseDownloadStatusText = "Aguardando conexão com o servidor para download do jogo base...";
+                BaseDownloadStatusText = "Aguardando conexão com a nuvem Cloudflare R2...";
             }
         }
 
         public async Task PauseBaseGameDownloadAsync()
         {
-            if (_torrentDownloader != null)
+            if (_httpDownloader != null)
             {
-                await _torrentDownloader.PauseAsync();
+                await _httpDownloader.PauseAsync();
                 IsBaseDownloadPaused = true;
                 BaseDownloadStatusText = "Download pausado.";
             }
@@ -540,11 +569,15 @@ namespace SPT.Launcher.ViewModels
 
         public async Task ResumeBaseGameDownloadAsync()
         {
-            if (_torrentDownloader != null)
+            if (_httpDownloader != null)
             {
-                await _torrentDownloader.ResumeAsync();
                 IsBaseDownloadPaused = false;
-                BaseDownloadStatusText = "Retomando download...";
+                BaseDownloadStatusText = "Retomando download da Cloudflare R2...";
+                await _httpDownloader.ResumeAsync();
+            }
+            else
+            {
+                await StartBaseGameDownloadAsync();
             }
         }
 
@@ -1170,6 +1203,34 @@ namespace SPT.Launcher.ViewModels
 
         private async Task StartGameCore()
         {
+            string serverUrl = ServerManager.SelectedServer?.backendUrl ?? LauncherSettingsProvider.Instance.Server.Url;
+
+            // Verificação obrigatória de atualização do Launcher antes de dar start no jogo
+            string? newLauncherVersion = await LauncherUpdateHelper.CheckForAvailableUpdateAsync(serverUrl);
+            if (!string.IsNullOrEmpty(newLauncherVersion))
+            {
+                LogManager.Instance.Info($"[Profile] Atualização do Launcher disponível ({newLauncherVersion}). Cancelando start do jogo para atualização.");
+
+                var confirm = await ShowDialog(new Dialogs.ConfirmationDialogViewModel(
+                    null,
+                    $"Uma nova versão do Launcher ({newLauncherVersion}) está disponível no servidor.\nÉ necessário reiniciar e atualizar o Launcher antes de iniciar o jogo.\n\nDeseja atualizar agora?",
+                    ConfirmButtonText: "Atualizar",
+                    DenyButtonText: "Cancelar"
+                ));
+
+                if (confirm is bool and true)
+                {
+                    SendNotification("Atualizando", "Baixando nova versão do Launcher e reiniciando...", Avalonia.Controls.Notifications.NotificationType.Information);
+                    var outcome = await LauncherUpdateHelper.CheckAndUpdateAsync(serverUrl);
+                    if (outcome == UpdateOutcome.VerificationFailed)
+                    {
+                        SendNotification("Erro de Assinatura", "A assinatura da atualização do Launcher falhou na verificação de segurança.", Avalonia.Controls.Notifications.NotificationType.Error);
+                    }
+                }
+
+                return;
+            }
+
             LauncherSettingsProvider.Instance.AllowSettings = false;
             LogManager.Instance.Info("[Profile] Iniciando jogo...");
 

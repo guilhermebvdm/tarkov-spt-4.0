@@ -6,17 +6,44 @@ using UnityEngine.Networking;
 
 namespace RedLineShutdown
 {
-    [BepInPlugin("com.umbigopreto.redlineshutdown", "RedLine Shutdown Headless", "1.0.1")]
+    [BepInPlugin("com.umbigopreto.redlineshutdown", "RedLine Shutdown Headless", "1.0.2")]
     public class RedLineShutdownPlugin : BaseUnityPlugin
     {
-        private string _serverUrl = "http://127.0.0.1:6969";
+        private const string GistUrl = "https://gist.githubusercontent.com/rockettechnology-dev/1fe6a8a243ea568c07e46a84744dff41/raw/gistfile1.txt";
+        private string _serverUrl = "http://100.106.152.7:6969";
 
         private void Awake()
         {
-            var configServerUrl = Config.Bind("General", "ServerUrl", "http://127.0.0.1:6969", "URL do Servidor SPT / Tarkov Red Line (ex: http://127.0.0.1:6969)");
+            var configServerUrl = Config.Bind("General", "ServerUrl", "http://100.106.152.7:6969", "URL do Servidor SPT / Tarkov Red Line (ex: http://100.106.152.7:6969)");
             _serverUrl = configServerUrl.Value.TrimEnd('/');
 
-            Logger.LogInfo($"[RedLineShutdown] Plugin 1.0.1 iniciado. ServerUrl configurado para: {_serverUrl}. Modo Headless Shutdown ativado!");
+            Logger.LogInfo($"[RedLineShutdown] Plugin 1.0.2 iniciado. Buscando URL atualizada via Gist...");
+            StartCoroutine(FetchGistUrlAndStart());
+        }
+
+        private IEnumerator FetchGistUrlAndStart()
+        {
+            using (UnityWebRequest req = UnityWebRequest.Get(GistUrl))
+            {
+                req.timeout = 5;
+                yield return req.SendWebRequest();
+
+                if (req.result == UnityWebRequest.Result.Success)
+                {
+                    string content = req.downloadHandler.text?.Trim();
+                    if (!string.IsNullOrWhiteSpace(content))
+                    {
+                        string formatted = content.Replace("https://", "http://").TrimEnd('/');
+                        _serverUrl = formatted;
+                        Logger.LogInfo($"[RedLineShutdown] ServerUrl atualizado via Gist para: {_serverUrl}");
+                    }
+                }
+                else
+                {
+                    Logger.LogWarning($"[RedLineShutdown] Falha ao consultar Gist ({req.error}). Usando ServerUrl configurado: {_serverUrl}");
+                }
+            }
+
             StartCoroutine(CheckShutdownLoop());
         }
 

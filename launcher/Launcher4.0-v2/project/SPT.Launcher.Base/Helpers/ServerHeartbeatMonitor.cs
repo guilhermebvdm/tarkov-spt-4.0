@@ -47,7 +47,7 @@ namespace SPT.Launcher.Helpers
 
             _cts = new CancellationTokenSource();
             _monitorTask = Task.Run(() => MonitorLoopAsync(_cts.Token));
-            LogManager.Instance.Info("[Heartbeat] Monitor de servidor iniciado (intervalo: 5s).");
+            LogManager.Instance.Info("[Heartbeat] Monitor de servidor iniciado (intervalo: 15s).");
         }
 
         public void Stop()
@@ -75,11 +75,6 @@ namespace SPT.Launcher.Helpers
 
                     bool currentStatus = await PingServerCoreAsync();
                     UpdateStatus(currentStatus);
-
-                    if (currentStatus)
-                    {
-                        await CheckBandwidthStatusAsync();
-                    }
                 }
                 catch (OperationCanceledException)
                 {
@@ -93,10 +88,10 @@ namespace SPT.Launcher.Helpers
             }
         }
 
-        private async Task CheckBandwidthStatusAsync()
+        public async Task<ServerBandwidthStatus> FetchBandwidthStatusAsync()
         {
             string url = ServerManager.SelectedServer?.backendUrl ?? LauncherSettingsProvider.Instance.Server?.Url;
-            if (string.IsNullOrWhiteSpace(url)) return;
+            if (string.IsNullOrWhiteSpace(url)) return null;
 
             try
             {
@@ -110,6 +105,7 @@ namespace SPT.Launcher.Helpers
                     {
                         CurrentBandwidthStatus = status;
                         BandwidthStatusChanged?.Invoke(status);
+                        return status;
                     }
                 }
             }
@@ -117,6 +113,8 @@ namespace SPT.Launcher.Helpers
             {
                 // Silencioso se rota não responder
             }
+
+            return null;
         }
 
         public async Task<bool> CheckNowAsync()

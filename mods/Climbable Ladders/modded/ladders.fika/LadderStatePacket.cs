@@ -1,23 +1,23 @@
-﻿using Fika.Core.Networking.LiteNetLib.Utils;
+using Fika.Core.Networking.LiteNetLib.Utils;
 
 namespace tarkin.ladders.fika
 {
     public struct LadderStatePacket : INetSerializable
     {
-        public int PlayerId;
+        public int NetId;
         public EStateType Type;
         public string LadderId;
 
         public void Deserialize(NetDataReader reader)
         {
-            PlayerId = reader.GetInt();
+            NetId = reader.GetInt();
             Type = reader.GetEnum<EStateType>();
             LadderId = reader.GetString();
         }
 
         public readonly void Serialize(NetDataWriter writer)
         {
-            writer.Put(PlayerId);
+            writer.Put(NetId);
             writer.PutEnum(Type);
             writer.Put(LadderId);
         }

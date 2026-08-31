@@ -119,8 +119,6 @@
                     </TransformGroup>
                 </Image.RenderTransform>
             </Image>
-            <!-- overlay mais leve (menos ofuscação) — a key art fica mais visível -->
-            <Border Background="{DynamicResource TrlPhotoOverlaySoftBrush}" IsHitTestVisible="False"/>
 
             <!-- Layout Sobreposto da Tela Principal -->
             <Grid RowDefinitions="*, AUTO, AUTO">
@@ -247,7 +245,7 @@
 
                         <Grid ColumnDefinitions="*,Auto">
                             <TextBlock Text="{Binding BaseDownloadStatsText}" Classes="trl-faint trl-mono" FontSize="{DynamicResource TrlText2Xs}"/>
-                            <TextBlock Grid.Column="1" Text="Download Híbrido P2P + WebSeed HTTP" Classes="trl-faint" FontSize="{DynamicResource TrlText2Xs}"/>
+                            <TextBlock Grid.Column="1" Text="Download Direto Nuvem — Cloudflare R2" Classes="trl-faint" FontSize="{DynamicResource TrlText2Xs}"/>
                         </Grid>
                     </StackPanel>
                 </Border>

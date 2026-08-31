@@ -1,4 +1,4 @@
-﻿using EFT;
+using EFT;
 using EFT.Vaulting;
 using HarmonyLib;
 using SPT.Reflection.Patching;
@@ -18,8 +18,6 @@ namespace tarkin.ladders.bep
         [PatchPostfix]
         private static void PatchPostfix(VaultingComponent __instance, bool __result)
         {
-            return;
-
             if (!__result)
             {
                 NotificationManagerClass.DisplayWarningNotification("vault denied early");
