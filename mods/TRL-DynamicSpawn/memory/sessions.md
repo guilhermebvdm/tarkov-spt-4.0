@@ -6,11 +6,16 @@ Memória cronológica de sessões de trabalho (timestamps em GMT-3). Cada entrad
 
 ---
 
-## Estado Atual (Snapshot ao Fim da Sessão — 2026-08-25)
+## Estado Atual (Snapshot ao Fim da Sessão — 2026-08-31)
 
-**Mod C# Client (v3.4.1) + C# Server (v3.4.1) compilados com sucesso (0 erros).**
+**Mod C# Client (v3.7.1) + C# Server (v3.7.1) compilados com sucesso (0 erros).**
 
 - **Identity**: `TRL-DynamicSpawn` (Client BepInEx DLL: `TRL-DynamicSpawn.dll`, Server C# DLL: `TRL-DynamicSpawn-Server.dll` com Web UI). Compatível com SPT 4.0.13 e EFT 0.16.9 / FIKA.
+- **Garantia de Spawn Agrupado Ombro a Ombro (`v3.7.1`)**:
+  - Em `DynamicSpawnManager.cs` (`SpawnGroupBotsCoroutine`), ao instanciar um grupo com `groupSize > 1`, o mod inicializa `spawnParams.ShallBeGroup = new ShallBeGroupParams(true, true, groupSize)`.
+  - Notifica o motor nativo de spawn da EFT (`SpawnSystem.SelectAISpawnPoints`) para alocar posições de nascimento agrupadas (ombro a ombro em um raio de 3 a 8 metros) para todos os membros do esquadrão.
+- **Eliminação de Log Spam e Stutterings (`v3.7.0`)**:
+  - `ChooseProfilePatch` e `BotSpawnLoggerPatch` refatorados para usar o gate `Settings.enableDebugLogs.Value` e o nível `LogInfo`, removendo a escrita contínua em disco durante o pre-loading de perfis do SPT e eliminando os travamentos de I/O síncrono.
 - **Estruturação do Workspace (Dual original/modded)**:
   - `original/`: Backup intacto da versão original canônica.
   - `modded/`: Código-fonte com as refatorações de alta performance e física aplicada.
@@ -46,6 +51,18 @@ Memória cronológica de sessões de trabalho (timestamps em GMT-3). Cada entrad
 ---
 
 ## Histórico de Sessões
+
+### 2026-08-31 — Garantia de Spawn Agrupado Ombro a Ombro (v3.7.1) e Eliminação de Log Spam (v3.7.0)
+
+- **Garantia de Spawn Agrupado Ombro a Ombro (`v3.7.1`)**:
+  - Implementada a inicialização de `spawnParams.ShallBeGroup = new ShallBeGroupParams(true, true, groupSize)` quando `groupSize > 1` no `DynamicSpawnManager.cs` (`SpawnGroupBotsCoroutine`).
+  - Ativa o algoritmo nativo da EFT (`SpawnSystem.SelectAISpawnPoints`) para alocar pontos de nascimento adjacentes (3m a 8m de raio) para os membros do esquadrão no momento do spawn da onda.
+- **Eliminação de Log Spam e Stutterings (`v3.7.0`)**:
+  - `ChooseProfilePatch` e `BotSpawnLoggerPatch` silenciados sob o gate `Settings.enableDebugLogs.Value` e migrados para `LogInfo`.
+  - Eliminado o gargalo de I/O síncrono que ocorria durante o pre-loading de perfis em segundo plano pelo gerador do SPT.
+- **Code Review e Validação**:
+  - Relatório de Code Review executado com 0 bloqueadores.
+  - `TRL-DynamicSpawn-Client.csproj` e `TRL-DynamicSpawn-Server.csproj` compilados com **0 Erros**.
 
 ### 2026-08-25 — Auditoria Arquitetural, Refatoração de Alta Performance e Estruturação original/modded (v3.4.1)
 
