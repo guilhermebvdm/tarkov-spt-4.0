@@ -1,8 +1,9 @@
 # TRL-Fixes — Memória de Sessões
 
 ## Snapshot Delta
+- **Fork Ativo / Canônico:** `modded-V2-audit` (Release v1.4.0)
 - **Versão:** 1.4.0 (SPT 4.0 / FIKA)
-- **Estado:** Implementado FikaInventoryDesyncSafetyPatch com reserva virtual de slots em QuickMove (prevenção de colisões concorrentes por Ctrl+Click rápido), auto-recuperação visual de grid em caso de rejeição de servidor ("is taken by another item" / GClass1543) com MainThreadDispatcher e proteção contra descarte de itens em fechamento de contêineres.
+- **Estado:** Implementado FikaInventoryDesyncSafetyPatch em `modded-V2-audit` com reserva virtual de slots em QuickMove (prevenção de colisões concorrentes por Ctrl+Click rápido), auto-recuperação visual de grid em caso de rejeição de servidor ("is taken by another item" / GClass1543) com MainThreadDispatcher e proteção contra descarte de itens em fechamento de contêineres.
 - **Pendências:** 🟢 Nenhuma pendência blocker registrada.
 
 ---

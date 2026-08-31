@@ -2,6 +2,16 @@
 
 Versões mais recentes primeiro.
 
+## v1.4.0 (2026-08-31)
+
+### Correções de Desync de Inventário, Itens Fantasmas e Quick-Move
+- **`FikaInventoryDesyncSafetyPatch`**: Previne e corrige desyncs de grid e rejeições de inventário (`is taken by another item` / `GClass1543` / `SlotTakenError`) no modo cooperativo do FIKA e SPT:
+  - **Reserva Virtual Preemptiva de Slots (`QuickMoveSlotReservation`)**: Intercepta `StashGridClass.FindFreeSpace` e mantém um registro transitório de alocações em rajadas de `Ctrl+Click` rápido, garantindo que dois itens despachados em sequência não disputem as mesmas coordenadas `(x, y)` no servidor.
+  - **Auto-Recuperação Visual Instantânea (`InventoryRejectionAutoRecovery`)**: Intercepta rejeições de rede em `ClientInventoryOperationHandler.ReceiveStatusFromServer` e despacha na Main Thread a reconstrução geométrica do grid e o evento `RaiseRefreshEvent` no contêiner pai, fazendo o item que estava invisível no cliente reaparecer imediatamente na interface sem que o jogador precise jogar a mochila no chão.
+  - **`MainThreadDispatcher`**: Componente dedicado para despacho thread-safe de eventos de UI do EFT a partir dos callbacks assíncronos do LiteNetLib com limite de segurança defensivo contra vazamento de memória.
+
+---
+
 ## v1.3.2 (2026-08-27)
 
 ### Mitigação de Bug Visual e Sincronização de Armas Estacionárias
