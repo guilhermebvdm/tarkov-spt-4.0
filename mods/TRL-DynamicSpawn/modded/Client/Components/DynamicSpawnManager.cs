@@ -1140,6 +1140,11 @@ namespace TRLDynamicSpawn.Components
             else if (role == WildSpawnType.pmcBEAR) side = EPlayerSide.Bear;
 
             BotSpawnParams spawnParams = new BotSpawnParams();
+            if (groupSize > 1)
+            {
+                spawnParams.ShallBeGroup = new ShallBeGroupParams(true, true, groupSize);
+            }
+
             var botProfile = new BotProfileDataClass(side, role, diff, 0f, spawnParams);
 
             // ref: AUD-02-01 — Geração atômica de esquadrão em uma única Task assíncrona
