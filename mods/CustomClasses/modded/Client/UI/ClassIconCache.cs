@@ -60,6 +60,10 @@ internal static class ClassIconCache
             return (byte)Mathf.Min(q, 255);
         }
 
+        // ref: CR-01-05 — alpha FIXO em 255 na chave, de propósito: o laço de tingimento do BuildTinted
+        // multiplica só RGB e preserva o alpha da textura de ORIGEM (a silhueta), então o alpha da cor nunca
+        // influenciou o resultado. Duas cores que só diferem em alpha produzem a MESMA textura — colidir na
+        // chave é correto, não um bug.
         return new Color32(Q(c.r), Q(c.g), Q(c.b), 255);
     }
 

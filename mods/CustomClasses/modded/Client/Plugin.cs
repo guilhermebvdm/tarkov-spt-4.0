@@ -303,15 +303,27 @@ public class Plugin : BaseUnityPlugin
 
     private void SyncPerfDump()
     {
-        var on = PerksConfig.DiagnosticsEnabled?.Value == true;
-        if (on && _perfDump == null)
+        // ⚠️ ref: CR-01-03 — StartCoroutine/StopCoroutine são APIs Unity restritas à MAIN THREAD, e este
+        // método é chamado de um handler de ConfigEntry.SettingChanged: vindo do F12 é main thread, mas um
+        // reload do arquivo de config (ou outro mod escrevendo a entrada) pode não ser, e aí lança. É
+        // instrumentação temporária — não pode derrubar nada. Fail-safe: loga 1× e o dump fica off.
+        try
         {
-            _perfDump = StartCoroutine(PerfDumpLoop());
+            var on = PerksConfig.DiagnosticsEnabled?.Value == true;
+            if (on && _perfDump == null)
+            {
+                _perfDump = StartCoroutine(PerfDumpLoop());
+            }
+            else if (!on && _perfDump != null)
+            {
+                StopCoroutine(_perfDump);
+                _perfDump = null;
+            }
         }
-        else if (!on && _perfDump != null)
+        catch (System.Exception ex)
         {
-            StopCoroutine(_perfDump);
             _perfDump = null;
+            BranchFailLog.Once("perf-dump/sync", ex);
         }
     }
 

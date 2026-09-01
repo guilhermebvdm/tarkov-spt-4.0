@@ -122,11 +122,51 @@ internal class FirearmSyncPatch : ModulePatch
         return AccessTools.Method(typeof(Player.FirearmController), "SetAnimatorAndProceduralValues");
     }
 
-    // __state = NaN → "não capturei" (o Postfix não restaura).
-    [PatchPrefix]
-    private static void Prefix(Player.FirearmController __instance, out float __state)
+    /// <summary>
+    ///     ref: CR-01-01 — o <c>__state</c> é um PAR, não só o valor.
+    ///     <para>
+    ///     <c>Original</c> é capturado <b>incondicionalmente antes de qualquer branch</b> (exigência do
+    ///     PA-03-02: o try/catch por branch contém a exceção mas NÃO desfaz uma escrita parcial).
+    ///     <c>MayHaveScaled</c> resolve o outro lado: sem ele o Postfix restauraria <b>sempre</b>, e um Prefix
+    ///     de OUTRO MOD que escrevesse <c>ReloadSpeed</c> depois do nosso seria sobrescrito — uma fronteira de
+    ///     composição alterada como efeito colateral da consolidação, exatamente o que o PA-01-01 ensinou a
+    ///     não fazer. O flag é setado <b>antes</b> de chamar os branches (não por eles), então um branch que
+    ///     lance no meio de uma mutação continua coberto.
+    ///     </para>
+    /// </summary>
+    internal readonly struct SyncState
     {
-        __state = float.NaN;
+        internal readonly float Original;
+        internal readonly bool MayHaveScaled;
+
+        internal SyncState(float original, bool mayHaveScaled)
+        {
+            Original = original;
+            MayHaveScaled = mayHaveScaled;
+        }
+    }
+
+    /// <summary>
+    ///     Algum branch PODE agir nesta invocação? Teste barato (config + classe), sem tocar no estado.
+    ///     Espelha a condição de entrada de <see cref="ReloadBranches.Adrenaline"/> e
+    ///     <see cref="ReloadBranches.Shotgun"/> — as duas são mutuamente exclusivas (Fuzileiro × Tanque).
+    /// </summary>
+    private static bool AnyReloadBranchMayAct()
+    {
+        var adrenaline = PerksConfig.AdrenalineEnabled?.Value == true
+                         && AdrenalineState.IsActive
+                         && SkillMultipliers.IsLocalClass(EClassId.Rifleman);
+
+        var shotgun = PerksConfig.ShotgunReloadEnabled?.Value == true
+                      && SkillMultipliers.IsLocalClass(EClassId.Tank);
+
+        return adrenaline || shotgun;
+    }
+
+    [PatchPrefix]
+    private static void Prefix(Player.FirearmController __instance, out SyncState __state)
+    {
+        __state = default;   // Original=0, MayHaveScaled=false → o Postfix não restaura
 
         var buff = __instance.BuffInfo;   // = gclass2250_0 (pode ser null antes do 1º sync de skill)
         if (buff == null)
@@ -141,9 +181,18 @@ internal class FirearmSyncPatch : ModulePatch
 
         // ⚠️ PA-03-02 — captura INCONDICIONAL e ANTES de qualquer branch. O try/catch por branch (PA-02-01)
         // CONTÉM a exceção mas NÃO desfaz a escrita: um branch que lance depois de mutar ReloadSpeed e antes
-        // de gravar o __state deixaria o campo escalado PELA RAID INTEIRA (recarga permanentemente acelerada),
-        // com um único erro no log. Só esta ordem garante que o Postfix sempre tenha o valor original.
-        __state = buff.ReloadSpeed;
+        // de gravar o original deixaria o campo escalado PELA RAID INTEIRA (recarga permanentemente
+        // acelerada), com um único erro no log. Só esta ordem garante que o Postfix tenha o valor original.
+        //
+        // ⚠️ CR-01-01 — o flag é decidido AQUI, antes dos branches: se nenhum deles pode agir, o Postfix não
+        // toca no campo e uma escrita de terceiro sobrevive.
+        var mayScale = AnyReloadBranchMayAct();
+        __state = new SyncState(buff.ReloadSpeed, mayScale);
+
+        if (!mayScale)
+        {
+            return;   // nada a fazer nesta invocação — nem escalar, nem restaurar
+        }
 
         // ref: PA-02-01 — isolamento por branch.
         try { ReloadBranches.Adrenaline(__instance); } catch (Exception ex) { BranchFailLog.Once("sync/adrenaline", ex); }
@@ -151,16 +200,18 @@ internal class FirearmSyncPatch : ModulePatch
     }
 
     [PatchPostfix]
-    private static void Postfix(Player.FirearmController __instance, float __state)
+    private static void Postfix(Player.FirearmController __instance, SyncState __state)
     {
         // Restaura o campo: não acumula entre syncs nem vaza p/ outros consumidores do mesmo GClass2250
-        // (FixSpeed/AimMovementSpeed etc.). Restaurar o mesmo valor quando nenhum branch escalou é um no-op
-        // inofensivo, e é mais barato que rastrear "mudei ou não".
+        // (FixSpeed/AimMovementSpeed etc.).
+        // ref: CR-01-01 — SÓ quando algum branch podia ter escalado. O alvo apenas LÊ ReloadSpeed
+        // (Player.cs:12634-12664; quem escreve é o SyncWithCharacterSkills, ANTES da chamada), então
+        // restaurar à toa não quebrava o vanilla — mas clobberaria a escrita de um Prefix de outro mod.
         try
         {
-            if (!float.IsNaN(__state) && __instance.BuffInfo != null)
+            if (__state.MayHaveScaled && __instance.BuffInfo != null)
             {
-                __instance.BuffInfo.ReloadSpeed = __state;
+                __instance.BuffInfo.ReloadSpeed = __state.Original;
             }
         }
         catch (Exception ex) { BranchFailLog.Once("sync/restore", ex); }

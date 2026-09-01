@@ -9,6 +9,8 @@
 ## Resumo
 
 > 🔴 Bloqueadores: 1 · 🟡 Importantes: 2 · 🟢 Menores: 3 · ✅ Verificados sem achado: 9 · Total: 6 achados
+>
+> **✅ TODOS OS 6 APLICADOS em 2026-09-01** (commit de correção). `CR-01-01` corrigido (não documentado): `__state` virou o par `SyncState(Original, MayHaveScaled)`, com o flag decidido ANTES dos branches — preserva o PA-03-02 e fecha a fronteira com terceiros. `CR-01-02`: teste de config+classe movido para antes do `MainPlayer` no Postfix de dano. `CR-01-03`: `SyncPerfDump` blindado com try/catch. `CR-01-04`/`CR-01-06`: registrados no `05-asbuild`. `CR-01-05`: comentário do alpha no `Quantize`.
 
 **Build:** `dotnet build --no-incremental` → **0 erros, 1 warning** (`CS8602` em `ClassMovementPatches.cs:108` — **pré-existente**, era a linha 95 antes das inserções de instrumentação; não é regressão, e a 01-spec já previa que ele podia sobreviver).
 
@@ -69,7 +71,7 @@ No Prefix: capturar `original` incondicionalmente; setar `MayHaveScaled = true` 
 
 **Como validar:** recarregar escopeta como Tanque e recarregar na janela de Adrenalina como Fuzileiro — os dois devem manter o ganho de velocidade; e um perfil de classe **sem** perk de recarga não deve ter `ReloadSpeed` alterado em nenhum momento.
 
-**Decisão:** `[ ]` Pendente · `[ ]` Aceitar sugestão · `[ ]` Aceitar alternativa (documentar) · `[ ]` Caminho alternativo: ______
+**Decisão:** `[ ]` Pendente · `[x]` Aceitar sugestão · `[ ]` Aceitar alternativa (documentar) · `[ ]` Caminho alternativo: ______
 
 ---
 
@@ -91,7 +93,7 @@ if (mp == null) return;
 
 O contador `DamageGates` do INSTR-2 passa a ser incrementado depois — o que continua correto para a métrica 4→2 (o Postfix segue contando 1 gate quando executa).
 
-**Decisão:** `[ ]` Pendente · `[ ]` Aceitar sugestão · `[ ]` Caminho alternativo: ______
+**Decisão:** `[ ]` Pendente · `[x]` Aceitar sugestão · `[ ]` Caminho alternativo: ______
 
 ---
 
@@ -105,7 +107,7 @@ O contador `DamageGates` do INSTR-2 passa a ser incrementado depois — o que co
 
 **Correção proposta.** Envolver o corpo de `SyncPerfDump` em `try/catch` com log único, e/ou trocar a corrotina por uma checagem de tempo dentro do `OnGUI`/`Update` já existente (que é garantidamente main thread). Preferência: o `try/catch` — mantém o desenho do PA-01-10 (nada roda com o toggle off) e custa quase nada.
 
-**Decisão:** `[ ]` Pendente · `[ ]` Aceitar sugestão · `[ ]` Caminho alternativo: ______
+**Decisão:** `[ ]` Pendente · `[x]` Aceitar sugestão · `[ ]` Caminho alternativo: ______
 
 ---
 
@@ -117,7 +119,7 @@ O contador `DamageGates` do INSTR-2 passa a ser incrementado depois — o que co
 
 **Correção proposta.** Manter o incremento (é o número honesto) e acrescentar ao `05-asbuild` a nota de leitura: *"`shoot=(N) gates=(M)`: M ≈ 2N num tiro do player local e ≈ N para tiros de bot, porque o Capture resolve o gate para todos e o Apply só para o local."*
 
-**Decisão:** `[ ]` Pendente · `[ ]` Aceitar sugestão · `[ ]` Caminho alternativo: ______
+**Decisão:** `[ ]` Pendente · `[x]` Aceitar sugestão · `[ ]` Caminho alternativo: ______
 
 ---
 
@@ -129,7 +131,7 @@ O contador `DamageGates` do INSTR-2 passa a ser incrementado depois — o que co
 
 **Correção proposta.** Uma linha de comentário no `Quantize`: *"alpha fixo em 255 na chave: o laço de tingimento multiplica só RGB e preserva o alpha da textura de origem — duas cores que só diferem em alpha geram a MESMA textura, então colidir é correto."*
 
-**Decisão:** `[ ]` Pendente · `[ ]` Aceitar sugestão · `[ ]` Caminho alternativo: ______
+**Decisão:** `[ ]` Pendente · `[x]` Aceitar sugestão · `[ ]` Caminho alternativo: ______
 
 ---
 

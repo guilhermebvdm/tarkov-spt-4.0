@@ -155,6 +155,15 @@ internal class ClassDamagePatch : ModulePatch
     [PatchPostfix]
     private static void Postfix(Player __instance, DamageInfoStruct damageInfo)
     {
+        // ⚠️ ref: CR-01-02 — ORDEM BARATO→CARO. O único branch do Postfix é a Adrenalina, então o teste de
+        // config + classe (1 deref + 1 compare de int) vem ANTES de resolver o Singleton/MainPlayer. Para
+        // quem não é Fuzileiro — a maioria dos perfis — isso sai na primeira linha, e este Postfix roda em
+        // TODO evento de dano de QUALQUER entidade do mapa. A consolidação tinha invertido essa ordem.
+        if (PerksConfig.AdrenalineEnabled?.Value != true || !SkillMultipliers.IsLocalClass(EClassId.Rifleman))
+        {
+            return;
+        }
+
         var mp = Singleton<GameWorld>.Instance?.MainPlayer;
         if (mp == null)
         {
