@@ -501,6 +501,7 @@ namespace SPT.Launcher.ViewModels
             IsBaseDownloading = true;
             IsBaseDownloadPaused = false;
             BaseDownloadStatusText = "Conectando à Cloudflare R2...";
+            ServerHeartbeatMonitor.Instance.IsHighFrequencyMode = true;
 
             _httpDownloader?.Dispose();
             _httpDownloader = new BaseGameHttpDownloader(gamePath);
@@ -533,6 +534,7 @@ namespace SPT.Launcher.ViewModels
                 Dispatcher.UIThread.Post(async () =>
                 {
                     LogManager.Instance.Info("[Profile] Download base da Cloudflare concluído com sucesso!");
+                    ServerHeartbeatMonitor.Instance.IsHighFrequencyMode = false;
                     IsBaseDownloading = false;
                     IsBaseGameInstalled = true;
                     SendNotification("Download Concluído", "O jogo base foi baixado e verificado com sucesso! Verificando mods...", Avalonia.Controls.Notifications.NotificationType.Success);
@@ -545,6 +547,7 @@ namespace SPT.Launcher.ViewModels
                 Dispatcher.UIThread.Post(() =>
                 {
                     LogManager.Instance.Error($"[Profile] Erro no download base: {errorMsg}");
+                    ServerHeartbeatMonitor.Instance.IsHighFrequencyMode = false;
                     BaseDownloadStatusText = $"Erro no download: {errorMsg}";
                     SendNotification("Erro no Download", errorMsg, Avalonia.Controls.Notifications.NotificationType.Error);
                 });
@@ -561,6 +564,7 @@ namespace SPT.Launcher.ViewModels
         {
             if (_httpDownloader != null)
             {
+                ServerHeartbeatMonitor.Instance.IsHighFrequencyMode = false;
                 await _httpDownloader.PauseAsync();
                 IsBaseDownloadPaused = true;
                 BaseDownloadStatusText = "Download pausado.";
@@ -571,6 +575,7 @@ namespace SPT.Launcher.ViewModels
         {
             if (_httpDownloader != null)
             {
+                ServerHeartbeatMonitor.Instance.IsHighFrequencyMode = true;
                 IsBaseDownloadPaused = false;
                 BaseDownloadStatusText = "Retomando download da Cloudflare R2...";
                 await _httpDownloader.ResumeAsync();

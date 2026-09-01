@@ -20,7 +20,12 @@ namespace SPT.Launcher.Helpers
         private Task _monitorTask;
         private bool _isServerOnline = true;
         private int _consecutiveFailures = 0;
-        private readonly TimeSpan _checkInterval = TimeSpan.FromSeconds(5);
+        public bool IsHighFrequencyMode { get; set; } = false;
+
+        public TimeSpan CurrentInterval =>
+            !_isServerOnline || IsHighFrequencyMode
+                ? TimeSpan.FromSeconds(5)
+                : TimeSpan.FromSeconds(30);
 
         public bool IsServerOnline => _isServerOnline;
         public bool IsMonitoring => _cts != null && !_cts.IsCancellationRequested;
@@ -47,7 +52,7 @@ namespace SPT.Launcher.Helpers
 
             _cts = new CancellationTokenSource();
             _monitorTask = Task.Run(() => MonitorLoopAsync(_cts.Token));
-            LogManager.Instance.Info("[Heartbeat] Monitor de servidor iniciado (intervalo: 15s).");
+            LogManager.Instance.Info("[Heartbeat] Monitor de servidor iniciado (adaptativo: 30s ocioso / 5s download ou offline).");
         }
 
         public void Stop()
@@ -70,7 +75,7 @@ namespace SPT.Launcher.Helpers
             {
                 try
                 {
-                    await Task.Delay(_checkInterval, ct);
+                    await Task.Delay(CurrentInterval, ct);
                     if (ct.IsCancellationRequested) break;
 
                     bool currentStatus = await PingServerCoreAsync();

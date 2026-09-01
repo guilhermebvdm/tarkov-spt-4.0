@@ -67,9 +67,9 @@
 - **AUD-01-06 (UX Guard):** Adicionado feedback dinâmico em `RegisterErrorMsg` no `ClassSelectionViewModel.cs` caso o clique ocorra antes de selecionar uma classe.
 - **Build & Assinatura:** Versão bumpada para `2.10.2` em todos os campos do csproj; executável single-file `Build/TarkovRedLine.exe` publicado e assinado via `sign-launcher.ps1` (`Verified OK`). 315 testes unitários 100% aprovados.
 
-## 2026-08-30 (GMT-3) — Sessão 4: Migração para Cloudflare R2 (HTTP Nativo) + Gate de Auto-Update no JOGAR + Resiliência Offline e Padronização Canônica (v2.10.8 -> v2.11.2)
+## 2026-08-30/31 (GMT-3) — Sessão 4: Migração para Cloudflare R2 (HTTP Nativo) + Gate de Auto-Update no JOGAR + Resiliência Offline, Padronização Canônica e Heartbeat Adaptativo (v2.10.8 -> v2.11.3)
 
-**Tema central:** Substituir integralmente o motor de download BitTorrent/P2P (MonoTorrent) por um novo motor HTTP nativo multi-thread integrado à CDN global Cloudflare R2; implementar verificação preventiva obrigatória de atualização no botão "JOGAR"; adicionar resiliência automática à queda/retorno do servidor SPT durante o download; padronizar caminhos de persistência de estado em `SPT/user/launcher/`; indexar 11.631 arquivos (70.93 GB) no manifesto público e entregar os releases v2.10.8 a v2.11.2 assinados digitalmente.
+**Tema central:** Substituir integralmente o motor de download BitTorrent/P2P (MonoTorrent) por um novo motor HTTP nativo multi-thread integrado à CDN global Cloudflare R2; implementar verificação preventiva obrigatória de atualização no botão "JOGAR"; adicionar resiliência automática à queda/retorno do servidor SPT durante o download; padronizar caminhos de persistência de estado em `SPT/user/launcher/`; indexar 11.631 arquivos (70.93 GB) no manifesto público; implementar Heartbeat Adaptativo Inteligente para despoluir o console do servidor e entregar os releases v2.10.8 a v2.11.3 assinados digitalmente.
 
 **Decisões-chave & Implementações:**
 - **Infraestrutura Cloudflare R2:** Configurado o bucket `tarkov-redline-base` com acesso público via subdomínio `r2.dev`. O tráfego de download (egress) é 100% gratuito e ilimitado, eliminando sobrecarga de upload na máquina host e prevenindo custos de tráfego de rede.
@@ -85,15 +85,18 @@
   - Antes de executar `StartGameCore()` (login e lançamento do processo), o Launcher consulta se o servidor possui versão superior do Launcher.
   - Se houver atualização pendente: cancela o início do jogo, abre o diálogo de confirmação (`ConfirmationDialogViewModel`) e, ao confirmar, dispara o auto-update seguro com validação de assinatura digital RSA-2048 (`.sig`).
 - **Resiliência a Quedas e Retorno do Servidor SPT (v2.11.1):**
-  - O `ServerHeartbeatMonitor` teve seu intervalo reduzido de 15s para 5s.
   - No `ProfileViewModel.cs`, se o servidor ficar offline durante um download ativo do jogo base, o download é pausado com segurança e a interface exibe aviso de espera.
   - Assim que o servidor restabelece conexão (online), o Launcher detecta a volta em até 5s, exibe mensagem de reconexão e retoma o download da Cloudflare R2 de forma 100% automática e transparente.
 - **Padronização Canônica de Pastas (v2.11.2):**
   - Ajustado `GetStateFilePath` em `GameStateDetector.cs` para persistir em `<GamePath>/SPT/user/launcher/base-game-state.json` (junto ao `config.json` e `sync-state.json`), mantendo a raiz do jogo limpa.
   - Implementada rotina de migração automática: se o Launcher detectar um `base-game-state.json` legado na raiz `user/launcher/`, ele move automaticamente para a pasta `SPT/user/launcher/` no boot, preservando o progresso sem perdas.
+- **Heartbeat Adaptativo Inteligente (v2.11.3):**
+  - Implementada propriedade dinâmica `CurrentInterval` e flag `IsHighFrequencyMode` no `ServerHeartbeatMonitor.cs`.
+  - Quando ocioso/pronto no menu, o ping ocorre a cada 30 segundos (reduzindo em 83% os logs de `/launcher/ping` no console do SPT Server).
+  - Durante downloads ativos do jogo base (`ProfileViewModel.cs`) ou quando o servidor estiver offline/reconectando, o modo de alta frequência de 5 segundos é ativado automaticamente.
 - **Gerador de Manifesto do Jogo Base:** Script Node.js `generate-base-manifest.js` escaneou `E:\base-client` gerando o `base-manifest.json` com 11.631 arquivos (70.93 GB) e hashes SHA-256 para distribuição pública.
 - **Ciclo de Compilação & Assinatura Digital:**
-  - Versão SemVer bumpada nos 4 campos do `SPT.Launcher.csproj` a cada entrega (`2.10.8` -> `2.10.9` -> `2.11.0` -> `2.11.1` -> `2.11.2`).
+  - Versão SemVer bumpada nos 4 campos do `SPT.Launcher.csproj` a cada entrega (`2.10.8` -> `2.10.9` -> `2.11.0` -> `2.11.1` -> `2.11.2` -> `2.11.3`).
   - Binário Single-File Release `launcher/Launcher4.0-v2/Build/TarkovRedLine.exe` publicado e assinado via OpenSSL RSA-2048 SHA-256 (`TarkovRedLine.exe.sig`, `Verified OK`).
   - Suíte de 315 testes unitários 100% aprovada em todos os builds.
 
