@@ -1,0 +1,25 @@
+/* ============================================================================
+ * TRL Design System — Bender webfont (v1.0.0)
+ *
+ * Optional layer: consumers that skip this file fall back to Bahnschrift
+ * (ships with Windows 10+) via the --trl-font-display stack in tokens.css.
+ * Keep this <link> FIRST, before tokens.css.
+ *
+ * Provenance & license: see LICENSE-NOTE.txt in this directory.
+ * ============================================================================ */
+
+@font-face {
+  font-family: 'Bender';
+  src: url('Bender-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Bender';
+  src: url('Bender-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}

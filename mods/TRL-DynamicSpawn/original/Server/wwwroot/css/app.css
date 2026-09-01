@@ -1,0 +1,222 @@
+﻿/* ============================================================
+   SCROLLBAR
+   ============================================================ */
+
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #0b0e14;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #2a2d33;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #6366f1;
+}
+
+/* ============================================================
+   BACKGROUND IMAGE (content areas)
+   ============================================================ */
+
+:scope .content {
+    overflow: auto;
+    position: relative;
+    animation-name: transition;
+    animation-duration: 1.5s;
+    animation-delay: 0s;
+    animation-fill-mode: forwards;
+}
+
+.content::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: -1;
+    display: block;
+    width: 100%;
+    height: 100%;
+    background-image: url('/TRL-DynamicSpawn-Server/images/background.jpg');
+    background-size: cover;
+    background-position: center;
+    -webkit-filter: blur(4px);
+    filter: blur(4px);
+    opacity: 0.35;
+    animation-name: transitionBG;
+    animation-duration: 3.5s;
+    animation-delay: 1s;
+    animation-fill-mode: forwards;
+}
+
+:scope .no-animation-content {
+    overflow: auto;
+    position: relative;
+    user-select: none;
+    -webkit-user-drag: none;
+    -webkit-user-select: none;
+}
+
+.no-animation-content::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: -1;
+    display: block;
+    width: 100%;
+    height: 100%;
+    background-image: url('/TRL-DynamicSpawn-Server/images/background.jpg');
+    background-size: cover;
+    background-position: center;
+    -webkit-filter: blur(4px);
+    filter: blur(4px);
+    opacity: 0.35;
+}
+
+/* ============================================================
+   MISC GLOBAL RESETS
+   ============================================================ */
+
+.no-highlight {
+    -webkit-user-drag: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+#blazor-error-ui {
+    background: lightyellow;
+    bottom: 0;
+    box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
+    display: none;
+    left: 0;
+    padding: 0.6rem 1.25rem 0.7rem 1.25rem;
+    position: fixed;
+    width: 100%;
+    z-index: 1000;
+    color: red;
+    margin-left: 3rem;
+}
+
+#blazor-error-ui .dismiss {
+    cursor: pointer;
+    position: absolute;
+    right: 0.75rem;
+    top: 0.5rem;
+}
+
+.custom-blur-background {
+    backdrop-filter: blur(7px);
+}
+.trl-select-container {
+    position: relative;
+    width: 100%;
+    outline: none;
+    font-family: 'Open Sans', sans-serif;
+}
+.trl-label {
+    display: block;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.75rem;
+    margin-bottom: 2px;
+}
+.trl-select-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background-color: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    cursor: pointer;
+    min-height: 36px;
+}
+.trl-select-box:hover {
+    border-color: rgba(255, 255, 255, 0.5);
+}
+.trl-select-text {
+    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: #e0e0e0;
+    font-size: 0.875rem;
+}
+.trl-select-box svg {
+    width: 24px;
+    height: 24px;
+    fill: rgba(255, 255, 255, 0.54);
+}
+.trl-select-popover {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    max-height: 300px;
+    overflow-y: auto;
+    background-color: #0f131f;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    border-radius: 4px;
+    margin-top: 4px;
+}
+.trl-select-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 16px;
+    cursor: pointer;
+    color: #e0e0e0;
+    font-size: 0.875rem;
+}
+.trl-select-item:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+.trl-checkbox {
+    margin-right: 12px;
+    accent-color: #6366f1;
+    width: 16px;
+    height: 16px;
+}
+.trl-select-wrapper {
+    position: relative;
+    width: 100%;
+}
+.trl-native-select {
+    width: 100%;
+    padding: 8px 12px;
+    background-color: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    cursor: pointer;
+    min-height: 36px;
+    color: #e0e0e0;
+    font-size: 0.875rem;
+    appearance: none;
+    -webkit-appearance: none;
+    outline: none;
+}
+.trl-native-select:hover {
+    border-color: rgba(255, 255, 255, 0.5);
+}
+.trl-native-select option {
+    background-color: #0f131f;
+    color: #e0e0e0;
+}
+.trl-select-arrow {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 24px;
+    fill: rgba(255, 255, 255, 0.54);
+    pointer-events: none;
+}

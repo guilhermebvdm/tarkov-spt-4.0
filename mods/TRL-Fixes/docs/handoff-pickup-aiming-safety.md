@@ -1,3 +1,10 @@
+---
+title: "TRL-Fixes — Handoff Técnico: Correção de Trava de Entrada (Pickup Aiming Safety)"
+date: 2026-08-01
+status: 🟢 Vivo
+authors: Antigravity
+---
+
 # 📋 Handoff Técnico — Correção de Trava de Entrada (Pickup/Equip NRE Guard)
 
 **Data:** 25 de Julho de 2026  

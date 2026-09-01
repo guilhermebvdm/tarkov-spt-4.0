@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using EFT;
 using EFT.Ballistics;
@@ -7,6 +8,7 @@ using EFT.Interactive;
 using EFT.InventoryLogic;
 using SPT.Reflection.Patching;
 using UnityEngine;
+using VisceralCombat.Ragdolls.Classes;
 
 namespace VisceralCombat.Ragdolls.Patches;
 
@@ -23,45 +25,21 @@ public class BodiesImpulsePatch : ModulePatch
 		{ "Caliber762x35", 60f },
 		{ "Caliber556x45NATO", 30f },
 		{ "Caliber127x55", 100f },
-		{ "Caliber127x108", 350f },
-		{ "Caliber366TKM", 60f },
-		{ "Caliber40x46", 200f },
-		{ "Caliber26x75", 70f },
-		{ "Caliber30x29", 350f },
-		{ "Caliber762x54R", 95f },
-		{ "Caliber86x70", 800f },
-		{ "Caliber9x19PARA", 12f },
-		{ "Caliber1143x23ACP", 12f },
-		{ "Caliber9x21", 5f },
-		{ "Caliber57x28", 40f },
-		{ "Caliber23x75", 200f },
-		{ "Caliber25x59mm", 180f },
-		{ "Caliber12.7x99", 110f },
-		{ "Caliber68x51", 40f }
-	};
-
-	private static Dictionary<string, float> _bonedictionary = new Dictionary<string, float>
-	{
-		{ "Base HumanSpine3", 0.65f },
-		{ "Base HumanSpine2", 0.65f },
-		{ "Base HumanSpine1", 0.65f },
-		{ "Base HumanPelvis", 0.65f },
-		{ "Base HumanHead", 3.5f },
-		{ "Base HumanNeck", 3.5f },
-		{ "Base HumanLUpperarm", 0.75f },
-		{ "Base HumanLForearm1", 1f },
-		{ "Base HumanRUpperarm", 0.75f },
-		{ "Base HumanRForearm1", 1f },
-		{ "Base HumanLThigh1", 0.75f },
-		{ "Base HumanLThigh2", 0.8f },
-		{ "Base HumanLCalf", 1f },
-		{ "Base HumanLFoot", 1f },
-		{ "Base HumanLToe", 1f },
-		{ "Base HumanRThigh1", 0.75f },
-		{ "Base HumanRThigh2", 0.8f },
-		{ "Base HumanRCalf", 1f },
-		{ "Base HumanRFoot", 1f },
-		{ "Base HumanRToe", 1f }
+		{ "Caliber9x19PARA", 18f },
+		{ "Caliber40mmRU", 100f },
+		{ "Caliber9x21", 20f },
+		{ "Caliber1143x23ACP", 22f },
+		{ "Caliber46x30", 25f },
+		{ "Caliber762x25TT", 20f },
+		{ "Caliber20g", 110f },
+		{ "Caliber57x28", 22f },
+		{ "Caliber762x54R", 70f },
+		{ "Caliber366TKM", 50f },
+		{ "Caliber23x75", 160f },
+		{ "Caliber86x70", 120f },
+		{ "Caliber9x33R", 40f },
+		{ "Caliber26x75", 80f },
+		{ "Caliber68x51", 80f }
 	};
 
 	protected override MethodBase GetTargetMethod()
@@ -73,24 +51,7 @@ public class BodiesImpulsePatch : ModulePatch
 	private static void Postfix(EftBulletClass shot)
 	{
 		if (shot == null) return;
-		((MonoBehaviour)StaticManager.Instance).StartCoroutine(WatchShot(shot));
-	}
-
-	private static System.Collections.IEnumerator WatchShot(EftBulletClass shot)
-	{
-		if (shot == null) yield break;
-
-		float timeout = 3.0f;
-		while (!shot.IsShotFinished && timeout > 0f)
-		{
-			timeout -= Time.deltaTime;
-			yield return null;
-		}
-
-		if (shot != null && shot.IsShotFinished && shot.HitCollider != null)
-		{
-			ProcessImpulse(shot);
-		}
+		VisceralCombat.Combined.Classes.VisceralShotProcessor.RegisterShot(shot);
 	}
 
 	public static void ProcessImpulse(EftBulletClass shot)
@@ -98,27 +59,42 @@ public class BodiesImpulsePatch : ModulePatch
 		if (shot == null || shot.HitCollider == null) return;
 
 		Collider hitCollider = shot.HitCollider;
-		Rigidbody rb = hitCollider.attachedRigidbody;
-		if (rb == null) return;
 
-		// Calculate realistic physical momentum: p = m * v (mass in kg * speed in m/s) with 0.25f scale (divided by 4 for natural ragdoll movement)
-		float massKg = (shot.BulletMassGram > 0f) ? (shot.BulletMassGram / 1000f) : 0.008f; // Default 8g fallback
-		float speed = (shot.Speed > 0f) ? shot.Speed : 400f; // Default 400 m/s fallback
-
-		float physicalImpulse = (massKg * speed) * 0.25f; // Linear momentum in N.s (scaled by 0.25)
+		// Calculate realistic physical momentum: p = m * v (mass in kg * speed in m/s) with 0.25f scale
+		float massKg = (shot.BulletMassGram > 0f) ? (shot.BulletMassGram / 1000f) : 0.008f;
+		float speed = (shot.Speed > 0f) ? shot.Speed : 400f;
+		float physicalImpulse = (massKg * speed) * 0.25f;
 
 		// Check if hitting dropped loot item
-		if (rb.gameObject.GetComponent<ObservedLootItem>() != null)
+		Rigidbody lootRb = hitCollider.attachedRigidbody ?? hitCollider.GetComponentInParent<Rigidbody>();
+		if (lootRb != null && lootRb.gameObject.GetComponent<ObservedLootItem>() != null)
 		{
 			if (VisceralEntry.Instance != null && VisceralEntry.Instance.ItemForce.Value)
 			{
 				physicalImpulse *= VisceralEntry.Instance.objectIntensity.Value;
+				lootRb.AddForceAtPosition(shot.Direction * physicalImpulse, shot.HitPoint, ForceMode.Impulse);
 			}
-			else
-			{
-				return;
-			}
+			return;
 		}
+
+		// Never apply ragdoll impulse or wake rigidbodies on a living player/bot!
+		Player targetPlayer = hitCollider.GetComponentInParent<Player>();
+		if (targetPlayer != null && targetPlayer.HealthController != null && targetPlayer.HealthController.IsAlive)
+		{
+			return;
+		}
+
+		// Wake the corpse's rigidbodies and re-support them in EFT physics
+		Rigidbody[] corpseRbs = RagdollHelperClass.WakeCorpse(hitCollider, 2.5f);
+
+		// Resolve the target Rigidbody to apply impulse
+		Rigidbody targetRb = hitCollider.attachedRigidbody ?? hitCollider.GetComponentInParent<Rigidbody>();
+		if (targetRb == null && corpseRbs != null && corpseRbs.Length > 0)
+		{
+			targetRb = corpseRbs.FirstOrDefault(r => r != null && !RagdollHelperClass.ParentIsDismembered(r.transform));
+		}
+
+		if (targetRb == null) return;
 
 		string hitName = hitCollider.name.ToLower();
 		float bodyPartMult = 1.0f;
@@ -132,6 +108,7 @@ public class BodiesImpulsePatch : ModulePatch
 
 		float totalIntensity = (VisceralEntry.Instance != null && VisceralEntry.Instance.ShotIntensity != null) ? VisceralEntry.Instance.ShotIntensity.Value : 1f;
 		Vector3 impulse = shot.Direction * (physicalImpulse * bodyPartMult * totalIntensity);
-		rb.AddForceAtPosition(impulse, shot.HitPoint, ForceMode.Impulse);
+
+		targetRb.AddForceAtPosition(impulse, shot.HitPoint, ForceMode.Impulse);
 	}
 }

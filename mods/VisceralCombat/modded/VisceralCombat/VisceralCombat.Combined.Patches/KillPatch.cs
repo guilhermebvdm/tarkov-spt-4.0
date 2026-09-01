@@ -103,7 +103,7 @@ public class KillPatch : ModulePatch
 					PuppetMaster pm = __instance.gameObject.GetComponentInChildren<PuppetMaster>(true);
 					if (pm != null)
 					{
-						RagdollHelperClass.InterruptAgony(__instance, pm);
+						RagdollHelperClass.InterruptAgony(__instance, pm, forceInstant: true);
 					}
 					else if (__instance.BodyAnimatorCommon != null)
 					{
@@ -280,6 +280,16 @@ public class KillPatch : ModulePatch
 				}
 			}
 
+			// Disable all Colliders on the dismembered limb so it never acts as a floating obstacle in the air
+			Collider[] limbColliders = val.GetComponentsInChildren<Collider>(true);
+			foreach (Collider col in limbColliders)
+			{
+				if (col != null)
+				{
+					col.enabled = false;
+				}
+			}
+
 			// Destroy PhysX Joint constraints on scaled limb transforms to prevent 1000x joint anchor scale explosion
 			Joint[] limbJoints = val.GetComponentsInChildren<Joint>(true);
 			foreach (Joint j in limbJoints)
@@ -360,6 +370,12 @@ public class KillPatch : ModulePatch
 							}
 							m.rigidbody.isKinematic = true;
 							m.rigidbody.detectCollisions = false;
+
+							Collider[] mCols = m.rigidbody.GetComponentsInChildren<Collider>(true);
+							foreach (Collider mc in mCols)
+							{
+								if (mc != null) mc.enabled = false;
+							}
 						}
 					}
 				}
@@ -392,6 +408,29 @@ public class KillPatch : ModulePatch
 					}
 					GameObject val7 = Object.Instantiate<GameObject>(val6);
 					val7.transform.position = val.position;
+
+					int deadbodyLayer = LayerMask.NameToLayer("Deadbody");
+					if (deadbodyLayer >= 0)
+					{
+						val7.layer = deadbodyLayer;
+						foreach (Transform child in val7.transform)
+						{
+							child.gameObject.layer = deadbodyLayer;
+						}
+					}
+
+					// Ignore collision between severed 3D limb and all player body colliders to prevent depenetration snags
+					Collider[] severedCols = val7.GetComponentsInChildren<Collider>(true);
+					Collider[] playerCols = player.GetComponentsInChildren<Collider>(true);
+					foreach (Collider sc in severedCols)
+					{
+						if (sc == null) continue;
+						foreach (Collider pc in playerCols)
+						{
+							if (pc == null) continue;
+							Physics.IgnoreCollision(sc, pc, true);
+						}
+					}
 				}
 			}
 
@@ -405,7 +444,7 @@ public class KillPatch : ModulePatch
 				}
 			}
 			SpawnOldVolumetricBlood(val, Direction, 1f);
-			SpawnArterialSprays(val, Direction);
+			SpawnArterialSprays(player, val, Direction, bone);
 		}
 		if (player.IsYourPlayer && (int)bodyPartType == 0)
 		{
@@ -483,7 +522,7 @@ public class KillPatch : ModulePatch
 				return;
 			}
 
-			componentInChildren.pinWeight = 0.25f;
+			componentInChildren.pinWeight = 0.02f;
 			componentInChildren.stateSettings.enableAngularLimitsOnKill = true;
 			componentInChildren.stateSettings.deadMuscleWeight = 0.01f;
 			componentInChildren.muscleSpring = 175f;
@@ -594,20 +633,112 @@ public class KillPatch : ModulePatch
 		});
 	}
 
-	private static void SpawnArterialSprays(Transform target, Vector3 direction)
+	internal static Transform GetPhysicalBone(Player player, Transform animatedTarget, string boneKeyword = null)
+	{
+		if (player == null) return animatedTarget;
+
+		// 1. Try resolving via PlayerBones
+		if (player.PlayerBones != null && !string.IsNullOrEmpty(boneKeyword))
+		{
+			string kw = boneKeyword.ToLower();
+			if (kw.Contains("head") || kw.Contains("neck"))
+			{
+				Transform t = player.PlayerBones.Head?.Original?.GetComponent<Rigidbody>() != null ? player.PlayerBones.Head.Original : player.PlayerBones.Neck;
+				if (t != null) return t;
+			}
+			else if (kw.Contains("rib") || kw.Contains("spine"))
+			{
+				Transform t = player.PlayerBones.Ribcage?.Original ?? player.PlayerBones.Spine3?.Original;
+				if (t != null) return t;
+			}
+			else if (kw.Contains("pelvis"))
+			{
+				Transform t = player.PlayerBones.Pelvis?.Original;
+				if (t != null) return t;
+			}
+			else if (kw.Contains("lupperarm") || kw.Contains("lforearm") || kw.Contains("larm"))
+			{
+				Transform t = player.PlayerBones.LeftShoulder?.Original ?? (player.PlayerBones.Upperarms != null && player.PlayerBones.Upperarms.Length > 0 ? player.PlayerBones.Upperarms[0] : null);
+				if (t != null) return t;
+			}
+			else if (kw.Contains("rupperarm") || kw.Contains("rforearm") || kw.Contains("rarm"))
+			{
+				Transform t = player.PlayerBones.RightShoulder?.Original ?? (player.PlayerBones.Upperarms != null && player.PlayerBones.Upperarms.Length > 1 ? player.PlayerBones.Upperarms[1] : null);
+				if (t != null) return t;
+			}
+			else if (kw.Contains("lthigh") || kw.Contains("lcalf") || kw.Contains("lleg"))
+			{
+				Transform t = player.PlayerBones.LeftThigh1?.Original ?? player.PlayerBones.LeftThigh2?.Original;
+				if (t != null) return t;
+			}
+			else if (kw.Contains("rthigh") || kw.Contains("rcalf") || kw.Contains("rleg"))
+			{
+				Transform t = player.PlayerBones.RightThigh1?.Original ?? player.PlayerBones.RightThigh2?.Original;
+				if (t != null) return t;
+			}
+		}
+
+		// 2. Search all physical Rigidbodies on PlayerBody
+		if (player.PlayerBody != null)
+		{
+			Rigidbody[] rbs = ((Component)player.PlayerBody).gameObject.GetComponentsInChildren<Rigidbody>(true);
+			if (rbs != null && rbs.Length > 0)
+			{
+				if (!string.IsNullOrEmpty(boneKeyword))
+				{
+					string kw = boneKeyword.ToLower();
+					foreach (Rigidbody rb in rbs)
+					{
+						if (rb == null) continue;
+						if (rb.gameObject.name.ToLower().Contains(kw))
+						{
+							return rb.transform;
+						}
+					}
+				}
+
+				// 3. Fallback: closest physical rigidbody to animatedTarget position
+				if (animatedTarget != null)
+				{
+					Rigidbody closest = null;
+					float minDist = float.MaxValue;
+					foreach (Rigidbody rb in rbs)
+					{
+						if (rb == null) continue;
+						float d = Vector3.SqrMagnitude(rb.position - animatedTarget.position);
+						if (d < minDist)
+						{
+							minDist = d;
+							closest = rb;
+						}
+					}
+					if (closest != null) return closest.transform;
+				}
+			}
+		}
+
+		return animatedTarget;
+	}
+
+	private static void SpawnArterialSprays(Player player, Transform target, Vector3 direction, string boneKeyword = null)
 	{
 		if (!VisceralEntry.Instance.ArterySpray.Value || !VisceralEntry.Instance.EnableBloodEffects.Value)
 			return;
 		if (VisceralEntry.Instance.effectContainer == null || (Object)(object)VisceralEntry.Instance.effectContainer.limbSquirter == (Object)null)
 			return;
 
+		Transform physBone = GetPhysicalBone(player, target, boneKeyword);
+		Transform attachTransform = physBone ?? target;
+
 		GameObject bloodParticleObject = Object.Instantiate<GameObject>(VisceralEntry.Instance.effectContainer.limbSquirter);
 		bloodParticleObject.AddComponent<ParticleFloorPainter>();
-		Transform targetParent = ((Component)target).transform.parent != null ? ((Component)target).transform.parent : ((Component)target).transform;
-		bloodParticleObject.transform.SetParent(targetParent, false);
-		bloodParticleObject.transform.position = ((Component)target).transform.position;
-		bloodParticleObject.transform.rotation = Quaternion.Euler(-90f, 0f, 0f);
+
+		// Parent directly to moving physical bone so emitter follows ragdoll from Point A to Point B
+		bloodParticleObject.transform.SetParent(attachTransform, false);
+		bloodParticleObject.transform.localPosition = Vector3.zero;
+		bloodParticleObject.transform.localRotation = Quaternion.Euler(-90f, 0f, 0f);
 		bloodParticleObject.transform.localScale = Vector3.one;
+
 		ParticleSystem[] componentsInChildren = bloodParticleObject.GetComponentsInChildren<ParticleSystem>();
 		float num = Random.Range(VisceralEntry.Instance.ArterySprayMin.Value, VisceralEntry.Instance.ArterySprayMax.Value);
 		ParticleSystem[] array = componentsInChildren;
@@ -616,8 +747,8 @@ public class KillPatch : ModulePatch
 			val.loop = false;
 			var main = val.main;
 			main.duration = num;
-			var collision = val.collision;
-			collision.sendCollisionMessages = true;
+			main.simulationSpace = ParticleSystemSimulationSpace.World;
+			RagdollHelperClass.ConfigureBloodParticleCollision(val);
 			((Component)val).gameObject.AddComponent<ParticleFloorPainter>();
 			RagdollHelperClass.ApplyDarkCoagulatedBloodFx(val);
 			val.Play();

@@ -28,7 +28,7 @@ using VisceralCombat.Ragdolls.Patches;
 
 namespace VisceralCombat;
 
-[BepInPlugin("com.servph.VisceralCombat", "Visceral Combat", "3.8.2")]
+[BepInPlugin("com.servph.VisceralCombat", "Visceral Combat", "3.9.10")]
 /// <remarks>
 /// GUID used for FIKA mod-presence checks. Must match BepInPlugin first arg.
 /// </remarks>
@@ -275,7 +275,9 @@ public class VisceralEntry : BaseUnityPlugin
 		DisableRagdollsAfterTime = ((BaseUnityPlugin)this).Config.Bind<bool>("Ragdolls | Performance", "Disable Active Ragdolls After Animation", true, (ConfigDescription)null);
 		OnlyPlayersCanActiveRagdollEnemies = ((BaseUnityPlugin)this).Config.Bind<bool>("Ragdolls | Performance", "Allow AI to Activate Ragdolls", false, (ConfigDescription)null);
 		RagdollMaxDistance = ((BaseUnityPlugin)this).Config.Bind<int>("Ragdolls | Performance", "Max Distance the Ragdolls can Activate at", 50, (ConfigDescription)null);
-		RagdollSleepTime = ((BaseUnityPlugin)this).Config.Bind<int>("Ragdolls | Performance", "Ragdoll Sleep Time", 60, "Experiemental! May cause bodies to go be sent into ORBIT.");
+		RagdollSleepTime = ((BaseUnityPlugin)this).Config.Bind<int>("Ragdolls | Performance", "Ragdoll Sleep Time", 4, new ConfigDescription("Time before an inactive ragdoll enters physics sleep (1-15s). Wakes back up on bullet/grenade impact.", new AcceptableValueRange<int>(1, 15)));
+		NeverDeleteShells = ((BaseUnityPlugin)this).Config.Bind<bool>("Combat | Visuals", "Infinite Shell Casing Lifetime", false, "Keeps active shell casings on floor longer (capped to 50)");
+		((ModulePatch)new ShellCasingPatch()).Enable();
 		((ModulePatch)new BodiesImpulsePatch()).Enable();
 		((ModulePatch)new CreateCorpsePatch()).Enable();
 		((ModulePatch)new GrenadeDeadBodiesPatch()).Enable();

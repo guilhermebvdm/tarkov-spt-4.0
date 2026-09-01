@@ -7,42 +7,41 @@ using System.Threading.Tasks;
 
 namespace RedLineRestart
 {
-    [BepInPlugin("com.umbigopreto.redlinerestart", "RedLine Restarter", "2.4.3")]
+    [BepInPlugin("com.umbigopreto.redlinerestart", "RedLine Restarter", "2.4.5")]
     public class RedLinePlugin : BaseUnityPlugin
     {
+        private const string GistUrl = "https://gist.githubusercontent.com/rockettechnology-dev/1fe6a8a243ea568c07e46a84744dff41/raw/gistfile1.txt";
         private RedLineUI _ui = new RedLineUI();
         private float _nextUpdate = 0f;
         private float _nextButtonAttempt = 0f;
 
         void Awake()
         {
-            Logger.LogInfo("[RedLine] Plugin 2.4.3 iniciado. Modo seguro de UI ativado.");
-            _ = FetchServerUrlAsync();
+            var configServerUrl = Config.Bind("General", "ServerUrl", "http://100.106.152.7:6969", "URL do Servidor SPT / Tarkov Red Line (ex: http://100.106.152.7:6969 ou http://127.0.0.1:6969)");
+            RedLineState.ServerUrl = configServerUrl.Value.TrimEnd('/');
+
+            Logger.LogInfo($"[RedLine] Plugin 2.4.5 iniciado. Buscando URL atualizada via Gist...");
+            _ = FetchGistUrlAsync();
         }
 
-        private async Task FetchServerUrlAsync()
+        private async Task FetchGistUrlAsync()
         {
             try
             {
-                using (HttpClient client = new HttpClient())
+                using (HttpClient client = new HttpClient { Timeout = System.TimeSpan.FromSeconds(5) })
                 {
-                    string pastebinContent = await client.GetStringAsync("https://pastebin.com/raw/PT4cMwLB");
-                    if (!string.IsNullOrEmpty(pastebinContent))
+                    string content = await client.GetStringAsync(GistUrl);
+                    if (!string.IsNullOrWhiteSpace(content))
                     {
-                        // O pastebin retorna: https://xxx.xxx.xxx.xxx:7073
-                        // Substituímos https por http e 7073 por 7075
-                        string formattedUrl = pastebinContent.Trim()
-                                .Replace("https://", "http://")
-                                .Replace(":7073", ":7075");
-                        
-                        RedLineState.ServerUrl = formattedUrl;
-                        Logger.LogInfo($"[RedLine] ServerUrl atualizado via Pastebin para: {RedLineState.ServerUrl}");
+                        string formatted = content.Trim().Replace("https://", "http://").TrimEnd('/');
+                        RedLineState.ServerUrl = formatted;
+                        Logger.LogInfo($"[RedLine] ServerUrl atualizado via Gist para: {RedLineState.ServerUrl}");
                     }
                 }
             }
-            catch (System.Exception e)
+            catch (System.Exception ex)
             {
-                Logger.LogError($"[RedLine] Falha ao buscar ServerUrl do Pastebin. Usando IP local fallback. Erro: {e.Message}");
+                Logger.LogWarning($"[RedLine] Falha ao consultar Gist ({ex.Message}). Usando ServerUrl configurado: {RedLineState.ServerUrl}");
             }
         }
 

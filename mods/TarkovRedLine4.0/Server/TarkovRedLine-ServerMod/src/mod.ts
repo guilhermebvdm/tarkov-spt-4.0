@@ -64,6 +64,12 @@ class TarkovRedLineMod implements IPreSptLoadMod, IPostDBLoadMod {
         // Configuração HWID/Launcher
         let modsRepoPath   = path.join(__dirname, "..", "mods_repo");
         let opcionaisPath  = path.join(__dirname, "..", "Opcionais");
+        let carouselPath   = path.resolve(process.cwd(), "Launcher-Updater", "carrocel");
+        let baseClientPath = path.resolve(process.cwd(), "Launcher-Updater", "base-client");
+        let torrentFilePath = path.resolve(process.cwd(), "Launcher-Updater", "base-game.torrent");
+        let totalUploadMbps = 100;
+        let idlePercent = 85;
+        let raidActivePercent = 40;
         let managedPaths   = [];
         let deleteFiles    = [];
         let ignoredFiles   = [];
@@ -76,6 +82,14 @@ class TarkovRedLineMod implements IPreSptLoadMod, IPostDBLoadMod {
                 const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
                 if (config.modsRepoPath)                modsRepoPath    = path.resolve(process.cwd(), config.modsRepoPath);
                 if (config.opcionaisPath)               opcionaisPath   = path.resolve(process.cwd(), config.opcionaisPath);
+                if (config.carouselPath)                carouselPath    = path.resolve(process.cwd(), config.carouselPath);
+                if (config.baseClientPath)              baseClientPath  = path.resolve(process.cwd(), config.baseClientPath);
+                if (config.torrentFilePath)             torrentFilePath = path.resolve(process.cwd(), config.torrentFilePath);
+                if (config.bandwidthControl) {
+                    if (config.bandwidthControl.totalUploadMbps) totalUploadMbps = config.bandwidthControl.totalUploadMbps;
+                    if (config.bandwidthControl.idlePercent) idlePercent = config.bandwidthControl.idlePercent;
+                    if (config.bandwidthControl.raidActivePercent) raidActivePercent = config.bandwidthControl.raidActivePercent;
+                }
                 if (Array.isArray(config.managedPaths)) managedPaths    = config.managedPaths;
                 if (Array.isArray(config.deleteFiles))  deleteFiles     = config.deleteFiles;
                 if (Array.isArray(config.ignoredFiles)) ignoredFiles    = config.ignoredFiles;
@@ -87,6 +101,29 @@ class TarkovRedLineMod implements IPreSptLoadMod, IPostDBLoadMod {
             logger.error(`[RedLine] Erro ao ler config.json: ${e.message}`);
         }
 
+        // === Rastreamento de Raids Ativas com Watchdog (CR-01-03) ===
+        const activeRaidPlayers = new Map<string, number>();
+
+        function updatePlayerActivity(sessionId: string) {
+            if (!sessionId) return;
+            activeRaidPlayers.set(sessionId, Date.now());
+        }
+
+        function endPlayerRaid(sessionId: string) {
+            if (!sessionId) return;
+            activeRaidPlayers.delete(sessionId);
+        }
+
+        setInterval(() => {
+            const now = Date.now();
+            for (const [sessionId, lastActive] of activeRaidPlayers.entries()) {
+                if (now - lastActive > 60000) {
+                    activeRaidPlayers.delete(sessionId);
+                    logger.info(`[Watchdog] Sessão inativa em raid removida: ${sessionId}`);
+                }
+            }
+        }, 15000);
+
         try {
             const staticRouterModService = container.resolve<StaticRouterModService>("StaticRouterModService");
             staticRouterModService.registerStaticRouter(
@@ -96,6 +133,20 @@ class TarkovRedLineMod implements IPreSptLoadMod, IPostDBLoadMod {
                         url: "/launcher/mods/version",
                         action: async (url: string, info: any, sessionId: string, output: string) => {
                             return JSON.stringify({ version: serverVersion });
+                        }
+                    },
+                    {
+                        url: "/client/raid/configuration",
+                        action: async (url: string, info: any, sessionId: string, output: string) => {
+                            updatePlayerActivity(sessionId);
+                            return output;
+                        }
+                    },
+                    {
+                        url: "/raid/profile/save",
+                        action: async (url: string, info: any, sessionId: string, output: string) => {
+                            endPlayerRaid(sessionId);
+                            return output;
                         }
                     },
                     {
@@ -189,6 +240,122 @@ class TarkovRedLineMod implements IPreSptLoadMod, IPostDBLoadMod {
 
             // GET Routes
             if (req.method === "GET") {
+                // --- TELEMETRIA DE BANDA (Turbo vs RaidActive) ---
+                if (url.includes("/redline/server/bandwidth-status")) {
+                    const inRaid = activeRaidPlayers.size > 0;
+                    const percent = inRaid ? (raidActivePercent / 100) : (idlePercent / 100);
+                    const maxBytesSec = Math.floor((totalUploadMbps * 1024 * 1024 / 8) * percent);
+                    const maxMBps = +(maxBytesSec / (1024 * 1024)).toFixed(1);
+                    res.writeHead(200, { "Content-Type": "application/json" });
+                    res.end(JSON.stringify({
+                        inRaid,
+                        activeRaids: activeRaidPlayers.size,
+                        maxDownloadRateBytesSec: maxBytesSec,
+                        maxDownloadRateMBps: maxMBps,
+                        mode: inRaid ? "RaidActive" : "Turbo"
+                    }));
+                    return;
+                }
+
+                // --- CARROSSEL DINÂMICO (CR-01-01) ---
+                if (url === "/redline/launcher/carousel" || url.startsWith("/redline/launcher/carousel?")) {
+                    try {
+                        if (!fs.existsSync(carouselPath)) {
+                            fs.mkdirSync(carouselPath, { recursive: true });
+                        }
+                        const validExts = [".jpg", ".jpeg", ".png"];
+                        const files = fs.readdirSync(carouselPath).filter(f => validExts.includes(path.extname(f).toLowerCase()));
+                        res.writeHead(200, { "Content-Type": "application/json" });
+                        res.end(JSON.stringify({ images: files }));
+                    } catch (e: any) {
+                        res.writeHead(500, { "Content-Type": "application/json" });
+                        res.end(JSON.stringify({ error: e.message }));
+                    }
+                    return;
+                }
+
+                if (url.startsWith("/redline/launcher/carousel/")) {
+                    const rawFileName = url.replace("/redline/launcher/carousel/", "").split("?")[0];
+                    const fileName = path.basename(decodeURIComponent(rawFileName));
+                    const filePath = path.resolve(carouselPath, fileName);
+
+                    // Anti Path-Traversal (CR-01-01)
+                    if (!filePath.startsWith(carouselPath) || !fs.existsSync(filePath)) {
+                        res.writeHead(404, { "Content-Type": "application/json" });
+                        res.end(JSON.stringify({ error: "Imagem não encontrada" }));
+                        return;
+                    }
+                    const ext = path.extname(fileName).toLowerCase();
+                    const contentType = ext === ".png" ? "image/png" : "image/jpeg";
+                    const stats = fs.statSync(filePath);
+                    res.writeHead(200, { "Content-Type": contentType, "Content-Length": stats.size.toString() });
+                    fs.createReadStream(filePath).pipe(res);
+                    return;
+                }
+
+                // --- TORRENT METADATA (Jogo Base) ---
+                if (url.includes("/redline/base-game.torrent")) {
+                    if (!fs.existsSync(torrentFilePath)) {
+                        res.writeHead(404, { "Content-Type": "application/json" });
+                        res.end(JSON.stringify({ error: "Torrent do jogo base ainda não foi gerado no servidor." }));
+                        return;
+                    }
+                    const stats = fs.statSync(torrentFilePath);
+                    res.writeHead(200, {
+                        "Content-Type": "application/x-bittorrent",
+                        "Content-Length": stats.size.toString(),
+                        "Content-Disposition": 'attachment; filename="base-game.torrent"'
+                    });
+                    fs.createReadStream(torrentFilePath).pipe(res);
+                    return;
+                }
+
+                // --- STREAMING DO JOGO BASE (CR-01-01 & CR-01-02 Range 206) ---
+                if (url.startsWith("/redline/base-game/")) {
+                    const relativeUrl = decodeURIComponent(url.replace("/redline/base-game/", "")).split("?")[0];
+                    const fullPath = path.resolve(baseClientPath, relativeUrl);
+
+                    // Anti Path-Traversal (CR-01-01)
+                    if (!fullPath.startsWith(baseClientPath) || !fs.existsSync(fullPath) || fs.statSync(fullPath).isDirectory()) {
+                        res.writeHead(404, { "Content-Type": "application/json" });
+                        res.end(JSON.stringify({ error: "Arquivo não encontrado" }));
+                        return;
+                    }
+
+                    const stats = fs.statSync(fullPath);
+                    const range = req.headers.range;
+
+                    // Suporte HTTP Range 206 para MonoTorrent WebSeed (CR-01-02)
+                    if (range) {
+                        const parts = range.replace(/bytes=/, "").split("-");
+                        const start = parseInt(parts[0], 10);
+                        const end = parts[1] ? parseInt(parts[1], 10) : stats.size - 1;
+
+                        if (start >= stats.size || end >= stats.size) {
+                            res.writeHead(416, { "Content-Range": `bytes */${stats.size}` });
+                            res.end();
+                            return;
+                        }
+
+                        const chunksize = (end - start) + 1;
+                        res.writeHead(206, {
+                            "Content-Range": `bytes ${start}-${end}/${stats.size}`,
+                            "Accept-Ranges": "bytes",
+                            "Content-Length": chunksize.toString(),
+                            "Content-Type": "application/octet-stream"
+                        });
+                        fs.createReadStream(fullPath, { start, end }).pipe(res);
+                    } else {
+                        res.writeHead(200, {
+                            "Content-Length": stats.size.toString(),
+                            "Accept-Ranges": "bytes",
+                            "Content-Type": "application/octet-stream"
+                        });
+                        fs.createReadStream(fullPath).pipe(res);
+                    }
+                    return;
+                }
+
                 if (url.includes("/redline/launcher/version")) { res.writeHead(200, { "Content-Type": "application/json" }); res.end(JSON.stringify({ version: launcherVersion })); return; }
                 if (url.includes("/redline/launcher/download")) {
                     const launcherFile = path.join(__dirname, "..", "launcher", "Tarkov Red Line.exe");

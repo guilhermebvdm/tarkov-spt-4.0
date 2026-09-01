@@ -1,0 +1,165 @@
+@page "/trldynamicspawn/events"
+@layout MainLayout
+@using TRLDynamicSpawnServer.Models
+@using System.Collections.Generic
+@using System.Linq
+
+<MudMainContent Class="pt-4">
+    <MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
+        <MudText Typo="Typo.h4" Class="mb-4">@Localization.T("In-Raid Events & Invasions")</MudText>
+
+        <MudPaper Class="pa-4 pa-sm-6 ma-4 ma-sm-6" Elevation="2">
+            <MudText Typo="Typo.h5" Class="mb-4">@Localization.T("Global Boss Controls")</MudText>
+            
+            <MudGrid>
+                <MudItem xs="12" sm="6">
+                    <MudTooltip Delay="500" Color="Color.Secondary" Text="@Localization.T("Completely disables all Boss spawns across all maps.")">
+                        <MudSwitch @bind-Value="Elite.DisableBosses" Color="Color.Primary" Label="@Localization.T("Disable All Bosses")" />
+                    </MudTooltip>
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudTooltip Delay="500" Color="Color.Secondary" Text="@Localization.T("Allows Bosses to spawn in ANY valid zone on the map, not just their native areas.")">
+                        <MudSwitch @bind-Value="Elite.BossOpenZones" Color="Color.Primary" Label="@Localization.T("Enable Boss Open Zones")" />
+                    </MudTooltip>
+                </MudItem>
+            </MudGrid>
+        </MudPaper>
+
+        <MudPaper Class="pa-4 pa-sm-6 ma-4 ma-sm-6" Elevation="2">
+            <MudText Typo="Typo.h5" Class="mb-4">@Localization.T("Boss Invasion")</MudText>
+            <MudText Typo="Typo.body2" Class="mb-4 text-muted">
+                @Localization.T("The Boss Invasion system rolls a chance for an invasion to occur on the map, and if successful, selects the allowed bosses to invade regardless of their native zones.")
+            </MudText>
+            
+            <MudGrid>
+                <MudItem xs="12">
+                    <MudSwitch @bind-Value="Elite.BossInvasion.Enable" Color="Color.Primary" Label="@Localization.T("Enable Boss Invasion")" />
+                </MudItem>
+                
+                @if (Elite.BossInvasion.Enable)
+                {
+                    <MudItem xs="12" sm="6">
+                        <MudText Typo="Typo.caption">@Localization.T("Map Invasion Chance (%)"): <b>@Elite.BossInvasion.MapChance%</b></MudText>
+                        <MudSlider @bind-Value="Elite.BossInvasion.MapChance" Min="1" Max="100" Color="Color.Primary" ValueLabel="true" Class="mt-2" />
+                        <MudText Typo="Typo.caption" Class="text-muted">@Localization.T("The chance of the current MAP suffering an invasion.")</MudText>
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudText Typo="Typo.caption">@Localization.T("Boss Spawn Chance (%)"): <b>@Elite.BossInvasion.BossChance%</b></MudText>
+                        <MudSlider @bind-Value="Elite.BossInvasion.BossChance" Min="1" Max="100" Color="Color.Primary" ValueLabel="true" Class="mt-2" />
+                        <MudText Typo="Typo.caption" Class="text-muted">@Localization.T("The chance of EACH SELECTED BOSS spawning during an invasion.")</MudText>
+                    </MudItem>
+                    
+                    <MudItem xs="12" sm="6">
+                        <TRLMultiSelect Label="@Localization.T("Selected Bosses")" @bind-SelectedValues="selectedBosses" Items="@(new List<string> { "All", "Random", "bossKnight", "bossTagilla", "bossKilla", "bossGluhar", "bossSanitar", "bossKolontay", "bossBully", "bossBoar", "bossPartisan", "gifter" })" />
+                    </MudItem>
+                    
+                    <MudItem xs="12" sm="6">
+                        <TRLMultiSelect Label="@Localization.T("Selected Maps")" @bind-SelectedValues="selectedMaps" Items="@(new List<string> { "All", "Random", "bigmap", "factory4_day", "factory4_night", "interchange", "laboratory", "lighthouse", "rezervbase", "shoreline", "tarkovstreets", "woods", "sandbox" })" />
+                    </MudItem>
+                }
+            </MudGrid>
+                </MudPaper>
+        
+        <MudPaper Class="pa-4 pa-sm-6 ma-4 ma-sm-6" Elevation="2">
+            <MudText Typo="Typo.h5" Class="mb-4">@Localization.T("Random Raider Groups")</MudText>
+            <MudText Typo="Typo.body2" Class="mb-4 text-muted">
+                @Localization.T("Allows Raider groups to spawn randomly on any map instead of just their native fixed locations (e.g. Labs).")
+            </MudText>
+            <MudGrid>
+                <MudItem xs="12" sm="6">
+                    <MudSwitch @bind-Value="Elite.RandomRaiderGroup" Color="Color.Primary" Label="@Localization.T("Enable Random Raider Groups")" />
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    @if(Elite.RandomRaiderGroup) {
+                        <MudText Typo="Typo.caption">@Localization.T("Spawn Chance (%)"): <b>@Elite.RandomRaiderGroupChance%</b></MudText>
+                        <MudSlider @bind-Value="Elite.RandomRaiderGroupChance" Min="1" Max="100" Color="Color.Primary" ValueLabel="true" Class="mt-2" />
+                    }
+                </MudItem>
+            </MudGrid>
+        </MudPaper>
+        
+        <MudPaper Class="pa-4 pa-sm-6 ma-4 ma-sm-6" Elevation="2">
+            <MudText Typo="Typo.h5" Class="mb-4">@Localization.T("Random Rogue Groups")</MudText>
+            <MudText Typo="Typo.body2" Class="mb-4 text-muted">
+                @Localization.T("Allows Rogue groups to spawn randomly on any map instead of just on Lighthouse.")
+            </MudText>
+            <MudGrid>
+                <MudItem xs="12" sm="6">
+                    <MudSwitch @bind-Value="Elite.RandomRogueGroup" Color="Color.Primary" Label="@Localization.T("Enable Random Rogue Groups")" />
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    @if(Elite.RandomRogueGroup) {
+                        <MudText Typo="Typo.caption">@Localization.T("Spawn Chance (%)"): <b>@Elite.RandomRogueGroupChance%</b></MudText>
+                        <MudSlider @bind-Value="Elite.RandomRogueGroupChance" Min="1" Max="100" Color="Color.Primary" ValueLabel="true" Class="mt-2" />
+                    }
+                </MudItem>
+            </MudGrid>
+        </MudPaper>
+
+    </MudContainer>
+</MudMainContent>
+
+@code {
+    public TRLConfig Config => TRLDynamicSpawnServer.Routers.TRLRouters.CurrentConfig;
+    public EliteConfig Elite => Config.EliteConfig;
+
+    private readonly List<string> AllBosses = new() { "All", "bossKnight", "bossTagilla", "bossKilla", "bossGluhar", "bossSanitar", "bossKolontay", "bossBully", "bossBoar", "bossPartisan", "gifter" };
+    private readonly List<string> AllMaps = new() { "All", "bigmap", "factory4_day", "factory4_night", "interchange", "laboratory", "lighthouse", "rezervbase", "shoreline", "tarkovstreets", "woods", "sandbox" };
+
+    public IEnumerable<string> selectedBosses
+    {
+        get => Elite.BossInvasion.SelectedBosses;
+        set
+        {
+            var newList = value.ToList();
+            if (newList.Contains("All") && !Elite.BossInvasion.SelectedBosses.Contains("All"))
+            {
+                newList = AllBosses.ToList();
+                newList.Remove("Random");
+            }
+            else if (newList.Contains("Random") && !Elite.BossInvasion.SelectedBosses.Contains("Random"))
+            {
+                newList = new List<string> { "Random" };
+            }
+            else
+            {
+                if (newList.Contains("All") && newList.Count < AllBosses.Count - 1)
+                    newList.Remove("All");
+                if (newList.Contains("Random") && newList.Count > 1)
+                    newList.Remove("Random");
+            }
+            Elite.BossInvasion.SelectedBosses = newList;
+        }
+    }
+
+    public IEnumerable<string> selectedMaps
+    {
+        get => Elite.BossInvasion.SelectedMaps;
+        set
+        {
+            var newList = value.ToList();
+            if (newList.Contains("All") && !Elite.BossInvasion.SelectedMaps.Contains("All"))
+            {
+                newList = AllMaps.ToList();
+                newList.Remove("Random");
+            }
+            else if (newList.Contains("Random") && !Elite.BossInvasion.SelectedMaps.Contains("Random"))
+            {
+                newList = new List<string> { "Random" };
+            }
+            else
+            {
+                if (newList.Contains("All") && newList.Count < AllMaps.Count - 1)
+                    newList.Remove("All");
+                if (newList.Contains("Random") && newList.Count > 1)
+                    newList.Remove("Random");
+            }
+            Elite.BossInvasion.SelectedMaps = newList;
+        }
+    }
+}
+
+
+
+
+

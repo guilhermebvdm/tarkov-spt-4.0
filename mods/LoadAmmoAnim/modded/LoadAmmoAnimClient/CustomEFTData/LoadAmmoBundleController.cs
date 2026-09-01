@@ -186,14 +186,6 @@ namespace Manimal.LoadAmmoAnim.CustomEFTData
                     }
                 }
             }
-
-            // Save-offset hotkey (Ctrl+S by default). Only fires when animation is active.
-            if (Plugin.SaveOffsetHotkey != null
-                && (Plugin.SaveOffsetHotkey.Value.IsDown() || ((Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) && Input.GetKeyDown(KeyCode.S)))
-                && _attachedMagGameObject != null)
-            {
-                Plugin.SaveCurrentActiveOffset();
-            }
         }
 
         /// <summary>

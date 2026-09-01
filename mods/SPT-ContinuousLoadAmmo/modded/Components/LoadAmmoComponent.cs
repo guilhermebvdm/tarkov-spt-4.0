@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using ContinuousLoadAmmo.Controllers;
@@ -150,9 +150,12 @@ public class LoadAmmoComponent : InputNode
 
     public void OnDestroy()
     {
+        Close();
         _chosenAmmoTcs?.TrySetResult(null);
         _chosenAmmoTcs = null;
         CommonUtils.InputTree.Remove(this);
+        _loadAmmoControllerController?.Dispose();
+        _loadAmmoControllerController = null;
     }
 
     private async Task OpenAmmoSelectorAsync()

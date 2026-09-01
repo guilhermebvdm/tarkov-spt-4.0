@@ -1,9 +1,55 @@
 # Visceral Combat — Memória de Sessões
 
 ## Snapshot Delta
-- **Versão:** 3.8.2 (SPT 4.0 / FIKA 2.2.6)
-- **Estado:** Compilação 100% limpa em C# 12 (0 erros). Físicas de impacto reduzidas por fator universal de 0.25x. Tiros fatais de calibres pesados (>= 5 N.s) bloqueiam animação de agonia. Dano de exsanguição ajustado para 20f HP/s. Materiais originais de sangue preservados intactos. Nuvem de sangue de impacto (vanilla) ajustável via F12. Tiros em placas de colete/capacete substituem sangue por faíscas metálicas nativas.
+- **Versão:** 3.9.10 (SPT 4.0 / FIKA 2.2.6)
+- **Estado:** Compilação 100% limpa em C# 12 (0 erros). Arquitetura de Wake on Hit implementada para cadáveres em repouso cinemático (0% CPU). Eliminação de travamentos de CPU em granadas (deduplicação de corpos e rigidbodies). Proteção de `SupportRigidbody` contra duplicações na lista do EFT. Ancoragem de esguichos e jatos arteriais ao osso físico em movimento. Eliminação de tropeços/deslizes involuntários do PMC ao tomar tiro (proteção de entidades vivas em `BodiesImpulsePatch`). Intangibilidade de partículas de sangue em personagens (`ConfigureBloodParticleCollision`). Emissão de poças reais de ambiente no chão (`EmitBloodOnEnvironment` a 0.15s). Eliminação do teleporte em pé de bots deitados (substituição por `Flail_Loop` no chão e ragdoll natural).
 - **Pendências:** 🟢 Nenhuma pendência aberta.
+
+---
+
+## 2026-08-24 21:55 (GMT-3) — Sessão 2026-08-24: Refatoração de Performance, Wake on Hit, Ancoragem de Sangue, Correção de Impulso em Vivos, Poças de Ambiente e Prone Death
+
+**Tema central:** Refatoração profunda de estabilidade e performance do Visceral Combat (versões 3.9.0 a 3.9.10), abrangendo Wake on Hit dinâmico, preservação de animações de agonia, mitigação de gargalos de CPU no EFT, ancoragem precisa de esguichos arteriais, bloqueio de impulsos físicos em jogadores/bots vivos, geração de poças reais no chão e eliminação de teleporte em pé de bots deitados.
+
+**Decisões-chave:**
+- **Wake on Hit & Sono Cinemático Inteligente (`RagdollHelperClass.cs`):**
+  - Cadáveres entram em sono cinemático (`isKinematic = true`, `UnsupportRigidbody`, discrete collision) após repouso completo (3 checagens consecutivas < 0.08 m/s) e término das animações de agonia do PuppetMaster.
+  - Ao receberem tiros ou impacto de granadas, `WakeCorpse(hitCollider, duration)` acorda temporariamente os rigidbodies por 2.5s, permitindo reações físicas completas e retornando ao repouso cinemático logo em seguida (consumindo 0% de CPU na maior parte da raid).
+  - Adicionada guarda `if (rb.isKinematic)` antes de chamar `EFTPhysicsClass.GClass745.SupportRigidbody`, evitando duplicações desnecessárias na `List_0` interna do EFT.
+- **Otimização de Granadas (`GrenadeDeadBodiesPatch.cs` e `GrenadeItemsPatch.cs`):**
+  - Substituído `SphereCastAll` por `Physics.OverlapSphere`.
+  - Implementada deduplicação via `HashSet<Transform> awakenedRoots` (1 chamada de `WakeCorpse` por cadáver) e `HashSet<Rigidbody> processedRigidbodies` (1 impulso por osso físico), eliminando o travamento de CPU ao explodir granadas perto de múltiplos corpos.
+- **Ancoragem Dinâmica dos Esguichos Arteriais (`KillPatch.cs` e `BleedPatch.cs`):**
+  - Implementado `GetPhysicalBone` para ancorar `SpawnArterialSprays` diretamente ao osso físico em movimento do ragdoll.
+  - `HitEffect` e `BleedEffect` ancorados diretamente ao transform/rigidbody atingido (`worldPositionStays = true`, `simulationSpace = World`), eliminando o bug do esguicho jorrando fixo no ar no ponto A da morte enquanto o corpo caía no ponto B.
+- **Eliminação do Deslize/Tropeço do Jogador ao Tomar Tiro (`BodiesImpulsePatch.cs` & `RagdollHelperClass.cs`):**
+  - Adicionada verificação `targetPlayer.HealthController.IsAlive`.
+  - Se a entidade atingida estiver **VIVA**, o impulso de ragdoll e a ativação de rigidbodies (`WakeCorpse`) são estritamente ignorados, mantendo os ossos em `isKinematic = true` sob controle do `CharacterController` do Tarkov e eliminando empurrões/tropeços involuntários para trás.
+- **Intangibilidade de Partículas de Sangue em Personagens (`ConfigureBloodParticleCollision`):**
+  - Força `collision.enabled = true` em modo 3D World para detecção no ambiente, mas exclui explicitamente as camadas `Player`, `HitCollider`, `Deadbody` e `TransparentFX` de `collision.collidesWith`, com `colliderForce = 0f`.
+- **Geração Real de Poças de Sangue no Ambiente (`ParticleFloorPainter.cs`):**
+  - Substituído o método de micro-pingos (`EmitBleeding`) pelo método de poças reais (`Singleton<Effects>.Instance.EmitBloodOnEnvironment`).
+  - Reduzido o cooldown para `0.15s` e garantida a resolução resiliente de `ParticleSystem` em nós pais e filhos.
+- **Morte Suave de Bots Deitados (`RagdollHelperClass.cs`):**
+  - Detecção de postura `isProne` (`p.IsInPronePose || p.PoseLevel <= 0.1f`).
+  - Bloqueio de animações gravadas em pé (`Death_Neck`, `Death_Stomach`, `Death_Thigh`), substituindo-as por `Flail_Loop` no chão (65%) ou colapso direto em ragdoll natural (35%), eliminando o snap/teleporte em pé de bots deitados ao morrerem.
+
+**Lições / hipóteses descartadas:**
+- *Cena de Física Fantasma (Shadow Scene):* Avaliada a viabilidade da técnica de `darkarchon` (Multi-Scene Physics na Unity). Concluiu-se que o sistema Wake on Hit atual já entrega >95% do ganho real de desempenho (0% CPU com corpos no chão) sem os riscos de corpos atravessarem o mapa ou dessincronizarem no FIKA coop.
+- *Falso Positivo de Sangue no Tropeço:* O tropeço involuntário do PMC ocorria devido a `BodiesImpulsePatch` chamar `WakeCorpse` em jogadores vivos, ativando física dinâmica nos ossos do PMC que colidiam por dentro com a cápsula do `CharacterController`.
+
+**Atividade cronológica:**
+1. Implementado Wake on Hit e preservação física de rigidbodies/joints em `RagdollHelperClass.cs`.
+2. Implementada detecção de repouso dinâmico `IsCorpseAtRest` e proteção contra corpos pendurados.
+3. Corrigida a ancoragem de esguichos arteriais aos ossos físicos em movimento em `KillPatch.cs` e `BleedPatch.cs`.
+4. Otimizados os patches de granadas (`GrenadeDeadBodiesPatch` e `GrenadeItemsPatch`) com `OverlapSphere` e deduplicação.
+5. Corrigido vazamento de CPU em `SupportRigidbody` com verificação `rb.isKinematic`.
+6. Implementado `ConfigureBloodParticleCollision` para isolar colisões de partículas de sangue das camadas de personagens.
+7. Corrigido `SleepCorpseWhenAtRest` para inspecionar PuppetMaster ativo e evitar congelamento prematuro de agonias.
+8. Bloqueado impulso físico e `WakeCorpse` em jogadores vivos em `BodiesImpulsePatch.cs`.
+9. Atualizado `ParticleFloorPainter.cs` para emitir poças de ambiente reais via `EmitBloodOnEnvironment` com cooldown de 0.15s.
+10. Implementada mitigação para bots deitados (`isProne`) em `PlayDeathAnimation`, eliminando teleporte em pé.
+11. Compilada a versão final `3.9.10` com 0 erros.
 
 ---
 

@@ -119,8 +119,6 @@
                     </TransformGroup>
                 </Image.RenderTransform>
             </Image>
-            <!-- overlay mais leve (menos ofuscação) — a key art fica mais visível -->
-            <Border Background="{DynamicResource TrlPhotoOverlaySoftBrush}" IsHitTestVisible="False"/>
 
             <!-- Layout Sobreposto da Tela Principal -->
             <Grid RowDefinitions="*, AUTO, AUTO">
@@ -210,6 +208,47 @@
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
+
+                <!-- PAINEL DE DOWNLOAD DO JOGO BASE (MonoTorrent .NET 9) -->
+                <Border Grid.Row="1" Margin="20,0,20,10" Padding="15,12" Background="{DynamicResource TrlPanelOverPhotoBrush}"
+                        BorderBrush="{DynamicResource TrlEdgeBrush}" BorderThickness="1" CornerRadius="0"
+                        IsVisible="{Binding !IsBaseGameInstalled}">
+                    <StackPanel Spacing="8">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding BaseDownloadStatusText}" Classes="trl-accent" FontWeight="Bold" FontSize="{DynamicResource TrlTextSm}"/>
+                                <Border Background="{DynamicResource TrlWarningBgBrush}" BorderBrush="{DynamicResource TrlWarningBrush}" BorderThickness="1" Padding="6,1"
+                                        IsVisible="{Binding !IsServerOnline}" VerticalAlignment="Center">
+                                    <TextBlock Text="Servidor Offline / Reconectando..." FontSize="{DynamicResource TrlText2Xs}" Foreground="{DynamicResource TrlWarningBrush}" FontWeight="Bold"/>
+                                </Border>
+                            </StackPanel>
+                            <TextBlock Grid.Column="1" Text="{Binding BaseDownloadEtaText}" Classes="trl-muted trl-mono" FontSize="{DynamicResource TrlTextXs}" VerticalAlignment="Center"/>
+                        </Grid>
+
+                        <Grid ColumnDefinitions="*,Auto,Auto" VerticalAlignment="Center">
+                            <ProgressBar Minimum="0" Maximum="100" Value="{Binding BaseDownloadProgress}" VerticalAlignment="Center" Height="14"/>
+                            <TextBlock Grid.Column="1" Text="{Binding BaseDownloadSpeedText}" Classes="trl-mono trl-accent" VerticalAlignment="Center" Margin="12,0,0,0"
+                                       FontSize="{DynamicResource TrlTextXs}" FontWeight="Bold"/>
+                            
+                            <!-- Botão Pausar / Retomar -->
+                            <Button Grid.Column="2" Classes="sm" Cursor="Hand" Margin="10,0,0,0" VerticalAlignment="Center"
+                                    Command="{Binding PauseBaseDownloadCommand}" IsVisible="{Binding !IsBaseDownloadPaused}"
+                                    ToolTip.Tip="Pausar download">
+                                <TextBlock Text="Pausar" VerticalAlignment="Center"/>
+                            </Button>
+                            <Button Grid.Column="2" Classes="primary sm" Cursor="Hand" Margin="10,0,0,0" VerticalAlignment="Center"
+                                    Command="{Binding ResumeBaseDownloadCommand}" IsVisible="{Binding IsBaseDownloadPaused}"
+                                    ToolTip.Tip="Retomar download">
+                                <TextBlock Text="Retomar" VerticalAlignment="Center"/>
+                            </Button>
+                        </Grid>
+
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Text="{Binding BaseDownloadStatsText}" Classes="trl-faint trl-mono" FontSize="{DynamicResource TrlText2Xs}"/>
+                            <TextBlock Grid.Column="1" Text="Download Direto Nuvem — Cloudflare R2" Classes="trl-faint" FontSize="{DynamicResource TrlText2Xs}"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
 
                 <!-- BARRA DE PROGRESSO / UPDATE (item 007: cancelar + link do relatório) -->
                 <StackPanel Grid.Row="1" Margin="20,0,20,5" IsVisible="{Binding IsUpdateVisible}" Spacing="5" VerticalAlignment="Bottom">

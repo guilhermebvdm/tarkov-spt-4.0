@@ -12,6 +12,7 @@ using Splat;
 using System;
 using System.Collections.ObjectModel;
 using System.Reactive;
+using System.Reactive.Disposables;
 using System.Threading.Tasks;
 using Avalonia.Threading;
 using SPT.Launcher.Controllers;
@@ -278,25 +279,32 @@ namespace SPT.Launcher.ViewModels
                 Login.Password = LauncherSettingsProvider.Instance.LastPassword;
             }
 
-            // item 015: desmarcar "Lembrar usuário" no meio da sessão desarma o auto-login na
-            // hora (sem depender de um novo login) e persiste.
-            LauncherSettingsProvider.Instance.PropertyChanged += (s, e) =>
+            // item 015 & AUD-01-01: desmarcar "Lembrar usuário" no meio da sessão desarma o auto-login na
+            // hora e persiste. Desinscrição no WhenActivated evita retenção de memória no GC ao sair da tela.
+            this.WhenActivated((System.Reactive.Disposables.CompositeDisposable disposables) =>
             {
-                if (e.PropertyName == "RememberUsername")
+                System.ComponentModel.PropertyChangedEventHandler onSettingsChanged = (s, e) =>
                 {
-                    if (!LauncherSettingsProvider.Instance.RememberUsername)
+                    if (e.PropertyName == "RememberUsername")
                     {
-                        LauncherSettingsProvider.Instance.UseAutoLogin = false;
-                        LauncherSettingsProvider.Instance.Server.AutoLoginCreds = null;
-                        LauncherSettingsProvider.Instance.LastPassword = "";
+                        if (!LauncherSettingsProvider.Instance.RememberUsername)
+                        {
+                            LauncherSettingsProvider.Instance.UseAutoLogin = false;
+                            LauncherSettingsProvider.Instance.Server.AutoLoginCreds = null;
+                            LauncherSettingsProvider.Instance.LastPassword = "";
+                        }
+                        LauncherSettingsProvider.Instance.SaveSettings();
                     }
-                    LauncherSettingsProvider.Instance.SaveSettings();
-                }
-                else if (e.PropertyName == "UseAutoLogin")
-                {
-                    LauncherSettingsProvider.Instance.SaveSettings();
-                }
-            };
+                    else if (e.PropertyName == "UseAutoLogin")
+                    {
+                        LauncherSettingsProvider.Instance.SaveSettings();
+                    }
+                };
+
+                LauncherSettingsProvider.Instance.PropertyChanged += onSettingsChanged;
+                System.Reactive.Disposables.Disposable.Create(() => LauncherSettingsProvider.Instance.PropertyChanged -= onSettingsChanged)
+                    .DisposeWith(disposables);
+            });
         }
 
         public void LoginProfileCommand(object parameter)

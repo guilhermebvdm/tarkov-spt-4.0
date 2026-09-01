@@ -2,6 +2,7 @@ using SPT.Launcher.Helpers;
 using SPT.Launcher.MiniCommon;
 using SPT.Launcher.Models;
 using SPT.Launcher.Models.Launcher;
+using SPT.Launcher.Download;
 using Avalonia;
 using ReactiveUI;
 using System;
@@ -178,9 +179,87 @@ namespace SPT.Launcher.ViewModels
         /// <summary>Cache hit / nada baixando → texto vazio → o rótulo da taxa fica oculto.</summary>
         public bool HasDownloadSpeed => !string.IsNullOrEmpty(DownloadSpeedText);
 
+        // === Base Game Download (Cloudflare R2 HTTP Multi-Thread) properties ===
+
+        private BaseGameHttpDownloader _httpDownloader;
+        private bool _pausedDueToServerOffline = false;
+
+        private bool _isBaseGameInstalled = true;
+        public bool IsBaseGameInstalled
+        {
+            get => _isBaseGameInstalled;
+            set
+            {
+                this.RaiseAndSetIfChanged(ref _isBaseGameInstalled, value);
+                this.RaisePropertyChanged(nameof(CanStartGame));
+                this.RaisePropertyChanged(nameof(CanVerifyFiles));
+            }
+        }
+
+        private bool _isBaseDownloading;
+        public bool IsBaseDownloading
+        {
+            get => _isBaseDownloading;
+            set => this.RaiseAndSetIfChanged(ref _isBaseDownloading, value);
+        }
+
+        private bool _isBaseDownloadPaused;
+        public bool IsBaseDownloadPaused
+        {
+            get => _isBaseDownloadPaused;
+            set => this.RaiseAndSetIfChanged(ref _isBaseDownloadPaused, value);
+        }
+
+        private double _baseDownloadProgress;
+        public double BaseDownloadProgress
+        {
+            get => _baseDownloadProgress;
+            set => this.RaiseAndSetIfChanged(ref _baseDownloadProgress, value);
+        }
+
+        private string _baseDownloadSpeedText = "";
+        public string BaseDownloadSpeedText
+        {
+            get => _baseDownloadSpeedText;
+            set => this.RaiseAndSetIfChanged(ref _baseDownloadSpeedText, value);
+        }
+
+        private string _baseDownloadEtaText = "";
+        public string BaseDownloadEtaText
+        {
+            get => _baseDownloadEtaText;
+            set => this.RaiseAndSetIfChanged(ref _baseDownloadEtaText, value);
+        }
+
+        private string _baseDownloadStatusText = "";
+        public string BaseDownloadStatusText
+        {
+            get => _baseDownloadStatusText;
+            set => this.RaiseAndSetIfChanged(ref _baseDownloadStatusText, value);
+        }
+
+        private string _baseDownloadStatsText = "";
+        public string BaseDownloadStatsText
+        {
+            get => _baseDownloadStatsText;
+            set => this.RaiseAndSetIfChanged(ref _baseDownloadStatsText, value);
+        }
+
+        // === Heartbeat properties ===
+
+        private bool _isServerOnline = true;
+        public bool IsServerOnline
+        {
+            get => _isServerOnline;
+            set => this.RaiseAndSetIfChanged(ref _isServerOnline, value);
+        }
+
         public ICommand UpdateModsCommand { get; }
         public ICommand VerifyFilesCommand { get; }
         public ICommand CancelUpdateCommand { get; }
+        public ICommand PauseBaseDownloadCommand { get; }
+        public ICommand ResumeBaseDownloadCommand { get; }
+        public ICommand StartBaseDownloadCommand { get; }
 
         private CancellationTokenSource _syncCts;
 
@@ -196,6 +275,7 @@ namespace SPT.Launcher.ViewModels
             {
                 this.RaiseAndSetIfChanged(ref _isSyncRunning, value);
                 this.RaisePropertyChanged(nameof(CanVerifyFiles));
+                this.RaisePropertyChanged(nameof(CanStartGame));
             }
         }
 
@@ -221,17 +301,11 @@ namespace SPT.Launcher.ViewModels
             UpdateModsCommand = ReactiveCommand.CreateFromTask(async () => await ForceCheckForUpdates());
             VerifyFilesCommand = ReactiveCommand.CreateFromTask(async () => await ForceCheckForUpdates());
             CancelUpdateCommand = ReactiveCommand.CreateFromTask(async () => await CancelUpdate());
+            PauseBaseDownloadCommand = ReactiveCommand.CreateFromTask(async () => await PauseBaseGameDownloadAsync());
+            ResumeBaseDownloadCommand = ReactiveCommand.CreateFromTask(async () => await ResumeBaseGameDownloadAsync());
+            StartBaseDownloadCommand = ReactiveCommand.CreateFromTask(async () => await StartBaseGameDownloadAsync());
 
             LoadLastUpdateInfo();
-
-            LauncherSettingsProvider.Instance.PropertyChanged += (s, e) =>
-            {
-                if (e.PropertyName == nameof(LauncherSettingsProvider.Instance.CanStartGame))
-                {
-                    this.RaisePropertyChanged(nameof(CanStartGame));
-                    this.RaisePropertyChanged(nameof(CanVerifyFiles)); // ref: CR-01-01
-                }
-            };
 
             // ref: CR-02-01 (013L) — se o fetch do connect falhou transitoriamente, a versão
             // fica "—" a sessão toda (read-once). Refetch async barato aqui: ServerVersion é
@@ -251,8 +325,67 @@ namespace SPT.Launcher.ViewModels
             // carrossel ocorre no logout via GC (timer parado não fica ancorado no Dispatcher).
             this.WhenActivated((CompositeDisposable disposables) =>
             {
+                // ref: AUD-01-01 — desinscrever do singleton ao desativar a tela para evitar leak no GC
+                System.ComponentModel.PropertyChangedEventHandler onSettingsChanged = (s, e) =>
+                {
+                    if (e.PropertyName == nameof(LauncherSettingsProvider.Instance.CanStartGame))
+                    {
+                        this.RaisePropertyChanged(nameof(CanStartGame));
+                        this.RaisePropertyChanged(nameof(CanVerifyFiles)); // ref: CR-01-01
+                    }
+                };
+                LauncherSettingsProvider.Instance.PropertyChanged += onSettingsChanged;
+                Disposable.Create(() => LauncherSettingsProvider.Instance.PropertyChanged -= onSettingsChanged).DisposeWith(disposables);
+
                 Carousel.Start();
                 Disposable.Create(() => Carousel.Stop()).DisposeWith(disposables);
+
+                // Sincronizar imagens do carrossel em background com o servidor SPT
+                _ = Task.Run(async () =>
+                {
+                    await ImageRequest.SyncCarouselImagesAsync();
+                    Dispatcher.UIThread.Post(() => Carousel.Reload());
+                });
+
+                // Heartbeat monitor a cada 5s
+                ServerHeartbeatMonitor.Instance.Start();
+                Action<bool> onHeartbeat = online => Dispatcher.UIThread.Post(async () =>
+                {
+                    bool wasOffline = !IsServerOnline;
+                    IsServerOnline = online;
+
+                    if (!online)
+                    {
+                        if (IsBaseDownloading && !IsBaseDownloadPaused && _httpDownloader != null)
+                        {
+                            LogManager.Instance.Warning("[Profile] Servidor SPT offline detectado durante o download. Pausando temporariamente...");
+                            _pausedDueToServerOffline = true;
+                            await _httpDownloader.PauseAsync();
+                            IsBaseDownloadPaused = true;
+                            BaseDownloadStatusText = "Servidor SPT offline. Download pausado temporariamente. Aguardando servidor voltar online...";
+                        }
+                    }
+                    else if (online && wasOffline && _pausedDueToServerOffline)
+                    {
+                        LogManager.Instance.Info("[Profile] Servidor SPT voltou online! Retomando download base automaticamente...");
+                        _pausedDueToServerOffline = false;
+                        IsBaseDownloadPaused = false;
+                        BaseDownloadStatusText = "Servidor online novamente! Retomando download da Cloudflare R2...";
+                        if (_httpDownloader != null)
+                        {
+                            await _httpDownloader.ResumeAsync();
+                        }
+                        else
+                        {
+                            await StartBaseGameDownloadAsync();
+                        }
+                    }
+                });
+                ServerHeartbeatMonitor.Instance.ServerStatusChanged += onHeartbeat;
+                Disposable.Create(() =>
+                {
+                    ServerHeartbeatMonitor.Instance.ServerStatusChanged -= onHeartbeat;
+                }).DisposeWith(disposables);
 
                 // CR-03-04: o resumo "Mods e Configs" é materializado por string.Format (não é binding
                 // reativo), então não reage sozinho à troca de idioma. Re-renderiza quando o locale muda
@@ -272,7 +405,7 @@ namespace SPT.Launcher.ViewModels
                 }
             });
 
-            // Auto-check for updates, depois aplica opcionais pendentes
+            // Auto-check for updates ou download base, depois aplica opcionais pendentes
             _ = InitializeAsync();
         }
 
@@ -340,14 +473,117 @@ namespace SPT.Launcher.ViewModels
             return !LauncherSettingsProvider.Instance.ModsConfigsOnboardingDone;
         }
 
-        public bool CanStartGame => LauncherSettingsProvider.Instance.CanStartGame;
+        public bool CanStartGame => LauncherSettingsProvider.Instance.CanStartGame && IsBaseGameInstalled && !IsSyncRunning;
 
         private async Task InitializeAsync()
         {
-            // Item 013: versão do server agora vem do endpoint /redline/server/version
-            // (populada no connect via ServerManager) — o read do config.json do
-            // TarkovRedLine-ServerMod foi removido por ser fonte local defasável.
-            await CheckForUpdates();
+            string gamePath = LauncherSettingsProvider.Instance.GamePath;
+            IsBaseGameInstalled = GameStateDetector.IsBaseGameInstalled(gamePath);
+
+            if (!IsBaseGameInstalled)
+            {
+                LogManager.Instance.Info("[Profile] Jogo base ausente ou incompleto no disco. Iniciando modo de download base...");
+                await StartBaseGameDownloadAsync();
+            }
+            else
+            {
+                LogManager.Instance.Info("[Profile] Jogo base verificado e completo. Executando verificação de mods...");
+                await CheckForUpdates();
+            }
+        }
+
+        public async Task StartBaseGameDownloadAsync()
+        {
+            if (IsBaseDownloading) return;
+
+            string gamePath = LauncherSettingsProvider.Instance.GamePath;
+
+            IsBaseDownloading = true;
+            IsBaseDownloadPaused = false;
+            BaseDownloadStatusText = "Conectando à Cloudflare R2...";
+            ServerHeartbeatMonitor.Instance.IsHighFrequencyMode = true;
+
+            _httpDownloader?.Dispose();
+            _httpDownloader = new BaseGameHttpDownloader(gamePath);
+
+            _httpDownloader.ProgressChanged += progress =>
+            {
+                Dispatcher.UIThread.Post(() =>
+                {
+                    BaseDownloadProgress = progress.ProgressPercentage;
+                    BaseDownloadSpeedText = progress.DownloadSpeedBytesPerSec > 1024
+                        ? $"{progress.DownloadSpeedBytesPerSec / (1024.0 * 1024.0):F1} MB/s"
+                        : "";
+
+                    BaseDownloadEtaText = progress.Eta.HasValue
+                        ? $"Tempo restante: {progress.Eta.Value.Hours:D2}:{progress.Eta.Value.Minutes:D2}:{progress.Eta.Value.Seconds:D2}"
+                        : "";
+
+                    double downloadedGb = progress.DownloadedBytes / (1024.0 * 1024.0 * 1024.0);
+                    double totalGb = progress.TotalBytes / (1024.0 * 1024.0 * 1024.0);
+                    BaseDownloadStatsText = totalGb > 0
+                        ? $"{downloadedGb:F1} GB / {totalGb:F1} GB ({progress.OpenConnections} conexões)"
+                        : "";
+
+                    BaseDownloadStatusText = progress.StateDescription;
+                });
+            };
+
+            _httpDownloader.DownloadCompleted += () =>
+            {
+                Dispatcher.UIThread.Post(async () =>
+                {
+                    LogManager.Instance.Info("[Profile] Download base da Cloudflare concluído com sucesso!");
+                    ServerHeartbeatMonitor.Instance.IsHighFrequencyMode = false;
+                    IsBaseDownloading = false;
+                    IsBaseGameInstalled = true;
+                    SendNotification("Download Concluído", "O jogo base foi baixado e verificado com sucesso! Verificando mods...", Avalonia.Controls.Notifications.NotificationType.Success);
+                    await CheckForUpdates();
+                });
+            };
+
+            _httpDownloader.DownloadFailed += errorMsg =>
+            {
+                Dispatcher.UIThread.Post(() =>
+                {
+                    LogManager.Instance.Error($"[Profile] Erro no download base: {errorMsg}");
+                    ServerHeartbeatMonitor.Instance.IsHighFrequencyMode = false;
+                    BaseDownloadStatusText = $"Erro no download: {errorMsg}";
+                    SendNotification("Erro no Download", errorMsg, Avalonia.Controls.Notifications.NotificationType.Error);
+                });
+            };
+
+            bool started = await _httpDownloader.InitializeAndStartAsync();
+            if (!started)
+            {
+                BaseDownloadStatusText = "Aguardando conexão com a nuvem Cloudflare R2...";
+            }
+        }
+
+        public async Task PauseBaseGameDownloadAsync()
+        {
+            if (_httpDownloader != null)
+            {
+                ServerHeartbeatMonitor.Instance.IsHighFrequencyMode = false;
+                await _httpDownloader.PauseAsync();
+                IsBaseDownloadPaused = true;
+                BaseDownloadStatusText = "Download pausado.";
+            }
+        }
+
+        public async Task ResumeBaseGameDownloadAsync()
+        {
+            if (_httpDownloader != null)
+            {
+                ServerHeartbeatMonitor.Instance.IsHighFrequencyMode = true;
+                IsBaseDownloadPaused = false;
+                BaseDownloadStatusText = "Retomando download da Cloudflare R2...";
+                await _httpDownloader.ResumeAsync();
+            }
+            else
+            {
+                await StartBaseGameDownloadAsync();
+            }
         }
 
         public void OpenModsInfoCommand() =>
@@ -972,6 +1208,34 @@ namespace SPT.Launcher.ViewModels
 
         private async Task StartGameCore()
         {
+            string serverUrl = ServerManager.SelectedServer?.backendUrl ?? LauncherSettingsProvider.Instance.Server.Url;
+
+            // Verificação obrigatória de atualização do Launcher antes de dar start no jogo
+            string? newLauncherVersion = await LauncherUpdateHelper.CheckForAvailableUpdateAsync(serverUrl);
+            if (!string.IsNullOrEmpty(newLauncherVersion))
+            {
+                LogManager.Instance.Info($"[Profile] Atualização do Launcher disponível ({newLauncherVersion}). Cancelando start do jogo para atualização.");
+
+                var confirm = await ShowDialog(new Dialogs.ConfirmationDialogViewModel(
+                    null,
+                    $"Uma nova versão do Launcher ({newLauncherVersion}) está disponível no servidor.\nÉ necessário reiniciar e atualizar o Launcher antes de iniciar o jogo.\n\nDeseja atualizar agora?",
+                    ConfirmButtonText: "Atualizar",
+                    DenyButtonText: "Cancelar"
+                ));
+
+                if (confirm is bool and true)
+                {
+                    SendNotification("Atualizando", "Baixando nova versão do Launcher e reiniciando...", Avalonia.Controls.Notifications.NotificationType.Information);
+                    var outcome = await LauncherUpdateHelper.CheckAndUpdateAsync(serverUrl);
+                    if (outcome == UpdateOutcome.VerificationFailed)
+                    {
+                        SendNotification("Erro de Assinatura", "A assinatura da atualização do Launcher falhou na verificação de segurança.", Avalonia.Controls.Notifications.NotificationType.Error);
+                    }
+                }
+
+                return;
+            }
+
             LauncherSettingsProvider.Instance.AllowSettings = false;
             LogManager.Instance.Info("[Profile] Iniciando jogo...");
 

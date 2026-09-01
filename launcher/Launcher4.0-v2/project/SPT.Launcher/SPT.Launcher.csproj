@@ -7,18 +7,18 @@
     <Nullable>enable</Nullable>
     <ApplicationIcon>Assets\spt-logo.ico</ApplicationIcon>
     <NoWin32Manifest>true</NoWin32Manifest>
-    <AssemblyName>Tarkov Red Line</AssemblyName>
+    <AssemblyName>TarkovRedLine</AssemblyName>
     <Product>Tarkov Red Line</Product>
-    <Version>2.9.2</Version>
-    <AssemblyVersion>2.9.2.0</AssemblyVersion>
-    <FileVersion>2.9.2.0</FileVersion>
-    <InformationalVersion>2.9.2</InformationalVersion>
+    <Version>2.11.3</Version>
+    <AssemblyVersion>2.11.3.0</AssemblyVersion>
+    <FileVersion>2.11.3.0</FileVersion>
+    <InformationalVersion>2.11.3</InformationalVersion>
     <!-- Server lê ProductVersion (=InformationalVersion) do exe p/ auto-update:
          sem o sufixo +sha, senão IsNewerVersion/Version.TryParse falha (item 014). -->
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\tailscale-setup-1.98.4-amd64.msi">
+    <EmbeddedResource Include="Resources\tailscale-setup-1.102.3-amd64.msi">
       <LogicalName>TailscaleInstaller</LogicalName>
     </EmbeddedResource>
     <!-- i18n (TRL): locales OFICIAIS completos embutidos no exe. O LocaleBootstrap os escreve na pasta

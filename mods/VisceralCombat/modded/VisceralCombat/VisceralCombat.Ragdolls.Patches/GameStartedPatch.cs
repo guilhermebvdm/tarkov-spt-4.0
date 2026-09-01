@@ -23,15 +23,6 @@ public class GameStartedPatch : ModulePatch
 	[PatchPostfix]
 	private static void Postfix(GameWorld __instance)
 	{
-		TarkovApplication obj = (TarkovApplication)Singleton<ClientApplication<ISession>>.Instance;
-		RaidSettings val = (RaidSettings)typeof(TarkovApplication).GetField("_raidSettings", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(obj);
-		IEnumerable<GameObject> enumerable = from go in Object.FindObjectsOfType<GameObject>()
-			where go.layer == LayerMask.NameToLayer("Grass")
-			select go;
-		IEnumerable<GameObject> enumerable2 = from go in Object.FindObjectsOfType<GameObject>()
-			where go.layer == LayerMask.NameToLayer("Foliage")
-			select go;
-		GameObject val2 = GameObject.Find("TerrainsAI");
 		LayerMasksDataAbstractClass.HitMask = VisceralEntry.Instance.LayerMaskConstructor(VisceralEntry.WorldLayers.Concat(VisceralEntry.DeadBodyLayers.Concat(VisceralEntry.HitColliderLayers)).ToArray());
 		
 		SetupNewLayer(LayerMask.NameToLayer("TransparentFX"));
@@ -39,8 +30,11 @@ public class GameStartedPatch : ModulePatch
 		VisceralEntry.Instance.dismemberedPlayers.Clear();
 		VisceralEntry.Instance.deadPlayers.Clear();
 		VisceralCombat.Ragdolls.Patches.LimbKillPatch.ClearLivingVolleys();
+		VisceralCombat.Ragdolls.Classes.RagdollHelperClass.ClearAgonyTimers();
+		VisceralCombat.Combined.Classes.VisceralShotProcessor.ClearShots();
+		VisceralCombat.Combat.Patches.ShellCasingPatch.ClearCasings();
 		GoreObjectPool.Instance?.ClearPool();
-		QuickLogger.Log(ELogType.Log, "GameStartedPatch: Cleaned deadPlayers, dismemberedPlayers, GoreObjectPool, and living volleys for new raid.");
+		QuickLogger.Log(ELogType.Log, "GameStartedPatch: Cleaned deadPlayers, dismemberedPlayers, GoreObjectPool, living volleys, agony timers, and casings for new raid.");
 
 		// Only the host (FikaServer) initiates the handshake; solo SPT also triggers immediately.
 		// Clients skip — they respond to the host's ping via VisceralEntry registered packets.

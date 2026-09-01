@@ -21,6 +21,7 @@ public class LivingDismembermentController : MonoBehaviour
 	private BotOwner _botOwner;
 	private EBodyPart _dismemberedLeg;
 
+	private float _nextProneLockCheck;
 	private float _nextBleedCheck;
 	private float _nextDecalTick;
 	private float _nextVoiceTick;
@@ -121,8 +122,12 @@ public class LivingDismembermentController : MonoBehaviour
 			return;
 		}
 
-		// 1. Re-assert prone lock every frame
-		ForceProneLock();
+		// 1. Re-assert prone lock periodically (every 0.5s)
+		if (Time.time >= _nextProneLockCheck)
+		{
+			_nextProneLockCheck = Time.time + 0.5f;
+			ForceProneLock();
+		}
 
 		// 2. Ensure HeavyBleeding is active and apply 10 HP bleed damage per second (allows bot time to crawl & leave trail while outpacing healing)
 		if (Time.time >= _nextBleedCheck)

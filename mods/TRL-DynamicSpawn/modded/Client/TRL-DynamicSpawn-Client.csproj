@@ -1,0 +1,80 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <OutputType>Library</OutputType>
+    <RootNamespace>MOAR</RootNamespace>
+    <AssemblyName>TRL-DynamicSpawn</AssemblyName>
+    <Version>3.7.0</Version>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <Deterministic>true</Deterministic>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <FikaReferencesDir>..\..\..\..\references\fika-plugin\References\</FikaReferencesDir>
+    <CameraReferencesDir>..\..\..\..\mods\stancesAndCameraPositionSPT4.0.11\modded\References\</CameraReferencesDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>$(CameraReferencesDir)0Harmony.dll</HintPath>
+    </Reference>
+    <Reference Include="Spt.Common">
+      <HintPath>$(FikaReferencesDir)spt-common.dll</HintPath>
+    </Reference>
+    <Reference Include="Spt.Reflection">
+      <HintPath>$(FikaReferencesDir)spt-reflection.dll</HintPath>
+    </Reference>
+    <Reference Include="Spt.Custom">
+      <HintPath>$(FikaReferencesDir)spt-custom.dll</HintPath>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>$(CameraReferencesDir)Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="BepInEx">
+      <HintPath>$(CameraReferencesDir)BepInEx.dll</HintPath>
+    </Reference>
+    <Reference Include="Comfort">
+      <HintPath>$(CameraReferencesDir)Comfort.dll</HintPath>
+    </Reference>
+    <Reference Include="Comfort.Unity">
+      <HintPath>$(CameraReferencesDir)Comfort.Unity.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>$(CameraReferencesDir)Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="Sirenix.Serialization">
+      <HintPath>$(CameraReferencesDir)Sirenix.Serialization.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>$(CameraReferencesDir)UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(CameraReferencesDir)UnityEngine.CoreModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>$(CameraReferencesDir)UnityEngine.IMGUIModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.PhysicsModule">
+      <HintPath>$(CameraReferencesDir)UnityEngine.PhysicsModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule">
+      <HintPath>$(CameraReferencesDir)UnityEngine.TextRenderingModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>$(CameraReferencesDir)UnityEngine.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.InputLegacyModule">
+      <HintPath>$(CameraReferencesDir)UnityEngine.InputLegacyModule.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Postprocessing.Runtime">
+      <HintPath>$(CameraReferencesDir)Unity.Postprocessing.Runtime.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

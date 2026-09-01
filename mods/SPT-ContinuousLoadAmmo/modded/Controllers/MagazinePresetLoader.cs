@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -182,7 +182,7 @@ public class MagazinePresetLoader : IDisposable
         if (matchingAmmo is null)
         {
             var missingMessage =
-                $"{MagazineBuildPresetClass.Class1023.String_0.Localized()} {preset.TemplateId.LocalizedShortName()}, Count: {toLoad}";
+                $"{"Preset missing ammo".Localized()}: {preset.TemplateId.LocalizedShortName()}, Count: {toLoad}";
             CommonUtils.DisplayNotification(missingMessage, ENotificationIconType.Alert, true, ENotificationDurationType.Long);
 
             if (ContinuousLoadAmmo.MagPresetFallback.Value)

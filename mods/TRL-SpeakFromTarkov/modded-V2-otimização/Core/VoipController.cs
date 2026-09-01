@@ -270,13 +270,17 @@ namespace TRL_SpeakFromTarkov.Core
             if (inRaidHud != null) inRaidHud.CurrentChannel = CurrentChannel;
             
             // Interação de Voz com Bots (Main Thread Safe + Janela de Amostragem 250ms)
+            // Guard extra: só processa se IBotGame está ativo, garantindo que estamos dentro
+            // de uma raid real com bots — evita spam de log no menu, hideout e tela pós-raid.
             if (processor != null && botVoiceBridge != null)
             {
-                if (Singleton<EFT.GameWorld>.Instantiated && Singleton<EFT.GameWorld>.Instance.MainPlayer != null)
+                if (Singleton<EFT.GameWorld>.Instantiated &&
+                    Singleton<EFT.GameWorld>.Instance.MainPlayer != null &&
+                    Singleton<IBotGame>.Instantiated)
                 {
                     botVoiceBridge.ProcessVoiceFrame(
-                        Singleton<EFT.GameWorld>.Instance.MainPlayer, 
-                        processor.DisplayLevel, 
+                        Singleton<EFT.GameWorld>.Instance.MainPlayer,
+                        processor.DisplayLevel,
                         processor.IsTransmitting
                     );
                 }

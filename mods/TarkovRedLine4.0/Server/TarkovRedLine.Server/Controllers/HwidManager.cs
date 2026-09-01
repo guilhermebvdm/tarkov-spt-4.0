@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Text.Json;
+using System.Linq;
 using Microsoft.AspNetCore.Mvc;
+using SPTarkov.Server.Core.Servers;
 
 namespace TarkovRedLine.Server.Controllers;
 
@@ -10,10 +10,9 @@ namespace TarkovRedLine.Server.Controllers;
 [Route(ModRouting.RoutePrefix + "launcher/hwid")]
 public class HwidManagerController : ControllerBase
 {
-    private static readonly string ProfilesPath = Path.Combine(Directory.GetCurrentDirectory(), "user", "profiles");
-    private readonly SPTarkov.Server.Core.Servers.SaveServer _saveServer;
+    private readonly SaveServer _saveServer;
 
-    public HwidManagerController(SPTarkov.Server.Core.Servers.SaveServer saveServer)
+    public HwidManagerController(SaveServer saveServer)
     {
         _saveServer = saveServer;
     }
@@ -25,72 +24,40 @@ public class HwidManagerController : ControllerBase
     }
 
     [HttpPost("register")]
-    public IActionResult Register([FromBody] HwidRequest request)
+    public async System.Threading.Tasks.Task<IActionResult> Register([FromBody] HwidRequest request)
     {
         if (string.IsNullOrEmpty(request?.username) || string.IsNullOrEmpty(request?.hwid))
         {
             return BadRequest(new { status = "INVALID_REQUEST" });
         }
 
-        string debugLogPath = Path.Combine(Directory.GetCurrentDirectory(), $"hwid_debug_log{ModRouting.StateSuffix}.txt");
-
         try
         {
-            var files = Directory.GetFiles(ProfilesPath, "*.json");
-            foreach (var file in files)
+            var profiles = _saveServer.GetProfiles().ToArray();
+            foreach (var kvp in profiles)
             {
-                var content = System.IO.File.ReadAllText(file);
-                var json = System.Text.Json.Nodes.JsonNode.Parse(content);
-
-                if (json?["info"]?["username"] != null)
+                var profile = kvp.Value;
+                if (string.Equals(profile?.ProfileInfo?.Username, request.username, StringComparison.OrdinalIgnoreCase))
                 {
-                    string fileUsername = json["info"]["username"].GetValue<string>();
-                    if (string.Equals(fileUsername, request.username, StringComparison.OrdinalIgnoreCase))
+                    var extData = profile.ProfileInfo.ExtensionData ??= new Dictionary<string, object>();
+                    if (extData.TryGetValue("hwid", out var existingHwid) && 
+                        !string.IsNullOrWhiteSpace(existingHwid?.ToString()))
                     {
-                        var hwidNode = json["info"]["hwid"];
-                        if (hwidNode != null && !string.IsNullOrEmpty(hwidNode.GetValue<string>()))
-                        {
-                            return Ok(new { status = "ALREADY_REGISTERED" });
-                        }
-
-                        // Registra o HWID no json
-                        json["info"]["hwid"] = request.hwid;
-                        var options = new JsonSerializerOptions { WriteIndented = true };
-                        System.IO.File.WriteAllText(file, json.ToJsonString(options));
-
-                        // Atualiza na memória
-                        try
-                        {
-                            var profiles = _saveServer.GetProfiles();
-                            foreach (var kvp in profiles)
-                            {
-                                if (string.Equals(kvp.Value.ProfileInfo?.Username, request.username, StringComparison.OrdinalIgnoreCase))
-                                {
-                                    if (kvp.Value.ProfileInfo.ExtensionData == null)
-                                    {
-                                        kvp.Value.ProfileInfo.ExtensionData = new Dictionary<string, object>();
-                                    }
-                                    kvp.Value.ProfileInfo.ExtensionData["hwid"] = request.hwid;
-                                    break;
-                                }
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            System.IO.File.AppendAllText(debugLogPath, $"Failed to update memory for HWID: {ex.Message}\n");
-                        }
-
-                        return Ok(new { status = "OK" });
+                        return Ok(new { status = "ALREADY_REGISTERED" });
                     }
+
+                    extData["hwid"] = request.hwid;
+                    await _saveServer.SaveProfileAsync(kvp.Key);
+                    return Ok(new { status = "OK" });
                 }
             }
         }
         catch (Exception ex)
         {
-            System.IO.File.AppendAllText(debugLogPath, $"[ERROR] HWID Register: {ex.Message}\n");
+            Console.WriteLine($"[HwidManager] Erro ao registrar HWID: {ex.Message}");
         }
 
-        return Ok(new { status = "OK" }); // Retorna OK mesmo se não achar perfil ainda, o perfil pode ser criado depois
+        return Ok(new { status = "OK" });
     }
 
     [HttpPost("reset-password")]
@@ -103,36 +70,32 @@ public class HwidManagerController : ControllerBase
 
         try
         {
-            var files = Directory.GetFiles(ProfilesPath, "*.json");
-            foreach (var file in files)
+            var profiles = _saveServer.GetProfiles().ToArray();
+            foreach (var kvp in profiles)
             {
-                var content = System.IO.File.ReadAllText(file);
-                var json = System.Text.Json.Nodes.JsonNode.Parse(content);
-
-                if (json?["info"]?["username"] != null)
+                var profile = kvp.Value;
+                if (string.Equals(profile?.ProfileInfo?.Username, request.username, StringComparison.OrdinalIgnoreCase))
                 {
-                    string fileUsername = json["info"]["username"].GetValue<string>();
-                    if (string.Equals(fileUsername, request.username, StringComparison.OrdinalIgnoreCase))
+                    var extData = profile.ProfileInfo?.ExtensionData;
+                    if (extData == null || !extData.TryGetValue("hwid", out var existingHwid) || 
+                        string.IsNullOrWhiteSpace(existingHwid?.ToString()))
                     {
-                        var hwidNode = json["info"]["hwid"];
-                        if (hwidNode == null || string.IsNullOrEmpty(hwidNode.GetValue<string>()))
-                        {
-                            return StatusCode(403, new { status = "NO_HWID_REGISTERED" });
-                        }
-
-                        string storedHwid = hwidNode.GetValue<string>();
-                        if (!string.Equals(storedHwid, request.hwid, StringComparison.OrdinalIgnoreCase))
-                        {
-                            return StatusCode(403, new { status = "HWID_MISMATCH" });
-                        }
-
-                        return Ok(new { status = "OK" });
+                        return StatusCode(403, new { status = "NO_HWID_REGISTERED" });
                     }
+
+                    string storedHwid = existingHwid.ToString()!;
+                    if (!string.Equals(storedHwid, request.hwid, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return StatusCode(403, new { status = "HWID_MISMATCH" });
+                    }
+
+                    return Ok(new { status = "OK" });
                 }
             }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Console.WriteLine($"[HwidManager] Erro ao validar HWID para reset: {ex.Message}");
             return StatusCode(500, new { status = "SERVER_ERROR" });
         }
 

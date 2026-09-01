@@ -25,6 +25,8 @@ public class BleedPatch : ModulePatch
 
 	public static List<string> heavy_calibers = new List<string>();
 
+	private static readonly FieldInfo _preAllocatedRenderersListField = typeof(Player).GetField("_preAllocatedRenderersList", BindingFlags.Instance | BindingFlags.NonPublic);
+
 	protected override MethodBase GetTargetMethod()
 	{
 		return typeof(BallisticsCalculator).GetMethod("CreateShot", BindingFlags.Instance | BindingFlags.Public);
@@ -35,24 +37,7 @@ public class BleedPatch : ModulePatch
 	{
 		if (VisceralEntry.Instance != null && VisceralEntry.Instance.EnableBloodEffects.Value && __result != null)
 		{
-			((MonoBehaviour)StaticManager.Instance).StartCoroutine(WatchShot(__result));
-		}
-	}
-
-	private static System.Collections.IEnumerator WatchShot(EftBulletClass shot)
-	{
-		if (shot == null) yield break;
-
-		float timeout = 3.0f;
-		while (!shot.IsShotFinished && timeout > 0f)
-		{
-			timeout -= Time.deltaTime;
-			yield return null;
-		}
-
-		if (shot != null && shot.IsShotFinished && shot.HitCollider != null)
-		{
-			ProcessWatchShot(shot);
+			VisceralCombat.Combined.Classes.VisceralShotProcessor.RegisterShot(__result);
 		}
 	}
 
@@ -104,7 +89,7 @@ public class BleedPatch : ModulePatch
 
 			VisceralCombat.Ragdolls.Classes.RagdollHelperClass.ApplyBloodCloudSettings();
 
-			List<BodyRendererDataStruct> renderers = Traverse.Create(targetPlayer).Field<List<BodyRendererDataStruct>>("_preAllocatedRenderersList").Value;
+			List<BodyRendererDataStruct> renderers = _preAllocatedRenderersListField?.GetValue(targetPlayer) as List<BodyRendererDataStruct>;
 			if (renderers != null && renderers.Count > 0 && Singleton<Effects>.Instantiated)
 			{
 				Singleton<Effects>.Instance.PlayerMeshesHit(renderers, shot.HitPoint, -shot.HitNormal);
@@ -178,9 +163,16 @@ public class BleedPatch : ModulePatch
 		{
 			GameObject bloodParticleObject = Object.Instantiate<GameObject>(val);
 			bloodParticleObject.AddComponent<ParticleFloorPainter>();
-			Transform rootParent = player != null && player.Transform?.Original != null ? player.Transform.Original : col.transform.root;
-			bloodParticleObject.transform.SetParent(rootParent, false);
-			bloodParticleObject.transform.position = shot.HitPoint;
+			Transform attachBone = (col != null && col.attachedRigidbody != null) ? col.attachedRigidbody.transform : (col != null ? col.transform : (player?.PlayerBody != null ? ((Component)player.PlayerBody).transform : null));
+			if (attachBone != null)
+			{
+				bloodParticleObject.transform.SetParent(attachBone, true);
+				bloodParticleObject.transform.position = shot.HitPoint;
+			}
+			else
+			{
+				bloodParticleObject.transform.position = shot.HitPoint;
+			}
 			bloodParticleObject.transform.localScale = Vector3.one;
 
 			Vector3 hitNorm1 = -shot.HitNormal;
@@ -191,8 +183,8 @@ public class BleedPatch : ModulePatch
 			{
 				var main = ps.main;
 				main.duration = time;
-				var collision = ps.collision;
-				collision.sendCollisionMessages = true;
+				main.simulationSpace = ParticleSystemSimulationSpace.World;
+				RagdollHelperClass.ConfigureBloodParticleCollision(ps);
 				if (ps.gameObject.GetComponent<ParticleFloorPainter>() == null)
 				{
 					ps.gameObject.AddComponent<ParticleFloorPainter>();
@@ -231,12 +223,16 @@ public class BleedPatch : ModulePatch
 			GameObject bloodParticleObject = Object.Instantiate<GameObject>(val);
 			bloodParticleObject.AddComponent<ParticleFloorPainter>();
 			Player targetPlayer = col != null ? col.GetComponentInParent<Player>() : null;
-			Transform rootParent = targetPlayer != null && targetPlayer.Transform?.Original != null ? targetPlayer.Transform.Original : (col != null ? col.transform.root : null);
-			if (rootParent != null)
+			Transform attachBone = (col != null && col.attachedRigidbody != null) ? col.attachedRigidbody.transform : (col != null ? col.transform : (targetPlayer?.PlayerBody != null ? ((Component)targetPlayer.PlayerBody).transform : null));
+			if (attachBone != null)
 			{
-				bloodParticleObject.transform.SetParent(rootParent, false);
+				bloodParticleObject.transform.SetParent(attachBone, true);
+				bloodParticleObject.transform.position = shot.HitPoint;
 			}
-			bloodParticleObject.transform.position = shot.HitPoint;
+			else
+			{
+				bloodParticleObject.transform.position = shot.HitPoint;
+			}
 			bloodParticleObject.transform.localScale = Vector3.one;
 
 			Vector3 hitNorm2 = -shot.HitNormal;
@@ -247,8 +243,8 @@ public class BleedPatch : ModulePatch
 			{
 				var main = ps.main;
 				main.duration = time;
-				var collision = ps.collision;
-				collision.sendCollisionMessages = true;
+				main.simulationSpace = ParticleSystemSimulationSpace.World;
+				RagdollHelperClass.ConfigureBloodParticleCollision(ps);
 				if (ps.gameObject.GetComponent<ParticleFloorPainter>() == null)
 				{
 					ps.gameObject.AddComponent<ParticleFloorPainter>();

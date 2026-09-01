@@ -65,7 +65,16 @@ public class BFX_BloodDecalLayers : MonoBehaviour
 		{
 			component.depthTextureMode = defaultMode;
 		}
-		RenderTexture.ReleaseTemporary(rt);
+		if (depthCamera != null)
+		{
+			Destroy(depthCamera.gameObject);
+			depthCamera = null;
+		}
+		if (rt != null)
+		{
+			RenderTexture.ReleaseTemporary(rt);
+			rt = null;
+		}
 		Shader.DisableKeyword("USE_CUSTOM_DECAL_LAYERS");
 		if (DecalRenderingMode == DecalLayersProperty.IgnoreSelectedLayers)
 		{

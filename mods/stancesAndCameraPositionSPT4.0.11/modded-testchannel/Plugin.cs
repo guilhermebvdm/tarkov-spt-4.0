@@ -20,7 +20,7 @@ public enum ScrollMode
     Linear,
 }
 
-[BepInPlugin("com.trl.stancesandmobility", "TRL-StancesAndMobility", "2.17.1")]
+[BepInPlugin("com.trl.stancesandmobility", "TRL-StancesAndMobility", "2.17.2")]
 public class Plugin : BaseUnityPlugin
 {
     public static Plugin Instance { get; private set; }
@@ -1322,8 +1322,7 @@ public class Plugin : BaseUnityPlugin
         SafeEnable("ActionStanceOnIdlePatch", () => new Patches.ActionStanceOnIdlePatch());
         SafeEnable("ActionStanceCheckFireModePatch", () => new Patches.ActionStanceCheckFireModePatch());
 
-        // Item 010: Manual Chambering
-        SafeEnable("StartEquipWeapPatch", () => new Patches.StartEquipWeapPatch());
+        // Item 010: Manual Chambering (StartEquipWeapPatch desativado — auto-chambering gerenciado nativamente via SetAmmoCompatiblePatch)
         SafeEnable("StartReloadResetPatch", () => new Patches.StartReloadResetPatch());
         SafeEnable("SetAmmoCompatiblePatch", () => new Patches.SetAmmoCompatiblePatch());
         SafeEnable("SetAmmoOnMagPatch", () => new Patches.SetAmmoOnMagPatch());

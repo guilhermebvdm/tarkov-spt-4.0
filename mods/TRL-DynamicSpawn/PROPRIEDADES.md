@@ -1,6 +1,6 @@
 # TRL Dynamic Spawn — Propriedades (F12 / BepInEx ConfigurationManager)
 
-> **Plugin:** `TRLDynamicSpawn.settings` — TRLDynamicSpawn v3.1.2<br>
+> **Plugin:** `TRLDynamicSpawn.settings` — TRLDynamicSpawn v3.2.9 (versão corrente; o `/compile-mod` do item 009 aplica bump minor)<br>
 > **Fonte:** [Client/Helpers/Settings.cs](Client/Helpers/Settings.cs)<br>
 
 ## Host Performance Caps
@@ -53,3 +53,19 @@
 | Show Safe Zone Circle | Exibir Círculo de Zona Segura | `bool` | `true` | Exibe o círculo vermelho de Zona Segura ao redor do jogador. |
 | Show Spawn Bubble Circle | Exibir Círculo da Bolha | `bool` | `true` | Exibe o círculo ciano da Bolha de Spawn no mapa. |
 | Show LoS / FOV Cone | Exibir Cone de Visão (FOV) | `bool` | `true` | Exibe o cone amarelo do campo de visão no mapa. |
+
+## Server Config
+
+| Propriedade | Tradução (pt-BR) | Tipo | Padrão | Tooltip (pt-BR) |
+|---|---|---|---|---|
+| Reload Server Config | Recarregar Configuração do Servidor | `bool` | `false` | Marque para recarregar agora a configuração do painel web (aplica as edições feitas durante a raid). Desmarca sozinho após recarregar. |
+
+> Funciona como um **botão**: a configuração do painel web é buscada **uma vez por raid** (item 009 / AUD-01-01). Edições feitas no painel **durante** a raid só entram na próxima raid — ou imediatamente, marcando esta opção.
+
+## Profile Pool (Advanced)
+
+| Propriedade | Tradução (pt-BR) | Tipo | Padrão | Faixa | Avançado | Tooltip (pt-BR) |
+|---|---|---|---|---|---|---|
+| Initial Profile Preload | Nível de Cache de Perfis PMC | `int` | `15` | `5`–`30` | sim | Nível permanente de perfis de bot PMC (USEC e BEAR, dificuldade normal) que o jogo mantém reposto durante toda a raid. Valores altos deixam a primeira onda pronta mais cedo, ao custo de memória. Perfis de Scav são geridos pelo jogo (8 por dificuldade). |
+
+> **Como funciona de verdade (CR-01-01):** o SPT mantém um "estoque-alvo" de perfis por (papel, dificuldade) e o repõe a cada ~30 s quando cai abaixo do nível. Este valor é o nível para USEC/BEAR `normal`; antes do item 010 era fixo em 30/30 (e a chamada para Scav, 20, nunca teve efeito — o jogo já registra 8 por dificuldade). As ondas registram níveis adicionais apenas para dificuldades sorteadas ainda não registradas (no máximo 2 facções × 4 dificuldades) — sem SAIN; com SAIN a dificuldade é sempre `normal`.

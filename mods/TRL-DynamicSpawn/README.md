@@ -7,6 +7,10 @@ Sistema de geração dinâmica de bots, limites por mapa, despespawn inteligente
 - `Server/` — Mod de servidor TypeScript/JavaScript SPT 4.0 para injeção e manipulação do sistema de ondas e profiles.
 - `config/` — Arquivos de configuração JSON do servidor.
 
+## Painel web e aplicação da configuração
+
+A configuração do painel web é lida pelo cliente **uma vez por raid** (item 009 — cache com escopo de raid). Edições feitas **durante** a raid entram na **próxima raid** — ou imediatamente, marcando `F12 → Server Config → Reload Server Config` (a opção se desmarca sozinha após recarregar).
+
 ## Governança
 - `PROPRIEDADES.md` — Tabela completa de configurações F12 (Caps de bots, LoS, Smooth Spawning, Despawn Bubble, Overlay).
 - `backlog/` — Tarefas, specs e documentações de desativação de ondas nativas.

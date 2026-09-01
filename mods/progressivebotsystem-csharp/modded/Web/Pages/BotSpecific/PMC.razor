@@ -1,0 +1,1220 @@
+﻿@page "/progressivebotsystem/pmc"
+@using ProgressiveBotSystem.Web.Components
+@layout MainLayout
+
+@inject ISnackbar Snackbar
+
+<MudMainContent>
+    <MudContainer Class="mb-20">
+        <MudExpansionPanels MultiExpansion="true">
+            <MudExpansionPanel Class="mud-expansion-panels-borders ma-3 pa-5" Text="PMC Specific Configuration" Expanded="true">
+                <MudGrid>
+
+                    <MudSwitchTTWarning
+                        Label="PMC Bot Generation"
+                        TooltipText="Grants APBS control over PMC Bots. You will have vanilla versions of these bots if disabled."
+                        WarningTooltip1="All settings on this page, and any other setting that may impact these bots are controlled by this toggle."
+                        WarningTooltip2="EXCEPTION: Normalize Health is always applied if enabled but not excluded."
+                        @bind-Value="PmcEnabled"
+                        HasPendingChanges="@(MainLayout.pendingChanges.Contains("_pmcEnabled"))"
+                        IsNonDefault="@(!PmcEnabled)"
+                        OnUndo="UndoPmcBots"
+                        OnDefault="DefaultPmcBots" />
+
+                </MudGrid>
+            </MudExpansionPanel>
+            @if (PmcEnabled)
+            {
+                <MudExpansionPanel Class="mud-expansion-panels-borders ma-3 pa-5" Style="padding-bottom:25px" Text="PMC Specific Options" Expanded="true">
+                    <MudGrid>
+
+                        <MudSwitchTT
+                            Label="Loot"
+                            TooltipText="Allows PMC Bots to spawn with additional loot."
+                            @bind-Value="PmcLootEnabled"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("PmcLootEnabled") ||
+                                                MainLayout.pendingChanges.Contains("PmcLootBlacklist"))"
+                            IsNonDefault="@(PmcLootEnabled ||
+                                            PmcLootBlacklist.Count != 0)"
+                            OnUndo="UndoLoot"
+                            OnDefault="DefaultLoot" />
+
+                        <LootBlacklistValues
+                            Blacklist="PmcLootBlacklist"
+                            OriginalBlacklist="ModConfig.OriginalConfig.PmcBots.LootConfig.Blacklist"
+                            ChangeKey="PmcLootBlacklist" />
+
+                        <MudDivider DividerType="DividerType.FullWidth" Class="my-3" />
+
+                        <MudSwitchTT
+                            Label="Prestiging"
+                            TooltipText="Allow PMCs to prestige with the player."
+                            @bind-Value="PmcPrestigeEnabled"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("PmcPrestigeEnabled"))"
+                            IsNonDefault="@(!PmcPrestigeEnabled)"
+                            OnUndo="UndoPrestiging"
+                            OnDefault="DefaultPrestiging" />
+
+                        <MudSwitchTT
+                            Label="Bots Can Be Any Level if Prestiged"
+                            TooltipText="Allow bots to be any level if the player has prestiged. Required Prestiging enabled."
+                            @bind-Value="PmcPrestigeAnyLevel"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("PmcPrestigeAnyLevel"))"
+                            IsNonDefault="@(!PmcPrestigeAnyLevel)"
+                            OnUndo="UndoPrestigeAnyLevel"
+                            OnDefault="DefaultPrestigeAnyLevel" />
+
+                        <MudSwitchTT
+                            Label="Roll Ammunition Selection Again"
+                            TooltipText="Allows PMCs to reroll their selected round from their weapons caliber, max one time per each magazine."
+                            @bind-Value="PmcWeaponAmmunitionRollEnabled"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("PmcWeaponAmmunitionRollEnabled") ||
+                                                MainLayout.pendingChanges.Contains("PmcWeaponAmmunitionRollChance"))"
+                            IsNonDefault="@(PmcWeaponAmmunitionRollEnabled ||
+                                            PmcWeaponAmmunitionRollChance != 50)"
+                            OnUndo="UndoRollAmmunitionEnabled"
+                            OnDefault="DefaultRollAmmunitionEnabled" />
+
+                        <MudSliderChildTT
+                            Label="Roll Again Chance"
+                            TooltipText="This is the chance that PMCs will roll for a different round from the same caliber, max one time per each magazine."
+                            @bind-Value="PmcWeaponAmmunitionRollChance"
+                            Min="1"
+                            Max="100"
+                            Disabled="@(!PmcWeaponAmmunitionRollEnabled)" />
+
+                        <MudSwitchTT
+                            Label="Toploading"
+                            TooltipText="Allows PMCs to top load their extra magazines."
+                            @bind-Value="PmcWeaponToploadEnabled"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("PmcWeaponToploadEnabled") ||
+                                                MainLayout.pendingChanges.Contains("PmcWeaponToploadEnabled") ||
+                                                MainLayout.pendingChanges.Contains("PmcWeaponToploadPercent"))"
+                            IsNonDefault="@(!PmcWeaponToploadEnabled ||
+                                            PmcWeaponToploadChance != 30 ||
+                                            PmcWeaponToploadPercent != 30)"
+                            OnUndo="UndoToploadEnabled"
+                            OnDefault="DefaultToploadEnabled" />
+
+                        <MudSliderChildTT
+                            Label="Topload Chance"
+                            TooltipText="This is the chance that PMCs will topload their extra magazines."
+                            @bind-Value="PmcWeaponToploadChance"
+                            Min="1"
+                            Max="100"
+                            Disabled="@(!PmcWeaponToploadEnabled)" />
+
+                        <MudSliderChildTT
+                            Label="Topload Percent"
+                            TooltipText="This is the percentage of their extra magazine that PMCs will topload."
+                            @bind-Value="PmcWeaponToploadPercent"
+                            Min="10"
+                            Max="50"
+                            Disabled="@(!PmcWeaponToploadEnabled)" />
+
+                        <MudSwitchTT
+                            Label="Skip Backplate When Missing Front Plate"
+                            TooltipText="Will skip backplates when the front plate is missing, if they had one it would be in the front right?"
+                            @bind-Value="SkipBackPlateIfMissingFrontPlate"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("SkipBackPlateIfMissingFrontPlate"))"
+                            IsNonDefault="@(SkipBackPlateIfMissingFrontPlate)"
+                            OnUndo="UndoSkipBackPlateIfMissingFrontPlate"
+                            OnDefault="DefaultSkipBackPlateIfMissingFrontPlate" />
+
+                        <MudSwitchTT
+                            Label="Limit Plate Class to Front Plate"
+                            TooltipText="Tries to limit the plate class of all plates to the class of the front plate, if possible."
+                            @bind-Value="LimitPlateClassToFrontPlateClass"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("LimitPlateClassToFrontPlateClass"))"
+                            IsNonDefault="@(LimitPlateClassToFrontPlateClass)"
+                            OnUndo="UndoLimitPlateClassToFrontPlateClass"
+                            OnDefault="DefaultLimitPlateClassToFrontPlateClass" />
+
+                        <MudSwitchTT
+                            Label="Resource Randomization"
+                            TooltipText="Allows random resource consumption on Food/Drink/Medical Items."
+                            @bind-Value="PmcResourceRandomizationEnabled"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("PmcResourceRandomizationEnabled") ||
+                                                MainLayout.pendingChanges.Contains("PmcMedRateMaxChance") ||
+                                                MainLayout.pendingChanges.Contains("PmcMedRateUsagePercent") ||
+                                                MainLayout.pendingChanges.Contains("PmcFoodRateMaxChance") ||
+                                                MainLayout.pendingChanges.Contains("PmcFoodRateUsagePercent"))"
+                            IsNonDefault="@(!PmcResourceRandomizationEnabled ||
+                                            PmcMedRateMaxChance != 10 ||
+                                            PmcMedRateUsagePercent != 33 ||
+                                            PmcFoodRateMaxChance != 10 ||
+                                            PmcFoodRateUsagePercent != 33)"
+                            OnUndo="UndoResourceRandomization"
+                            OnDefault="DefaultResourceRandomization" />
+
+                        <MedicalFoodValues
+                            @bind-MedMaxChance="PmcMedRateMaxChance"
+                            @bind-MedUsagePercent="PmcMedRateUsagePercent"
+                            @bind-FoodMaxChance="PmcFoodRateMaxChance"
+                            @bind-FoodUsagePercent="PmcFoodRateUsagePercent"
+                            Disabled="@(!PmcResourceRandomizationEnabled)" />
+
+                        <MudSwitchTT
+                            Label="Weapon Durability Changes"
+                            TooltipText="Allows configurable weapon durability."
+                            @bind-Value="PmcWeaponDurabilityEnabled"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("PmcWeaponDurabilityEnabled") ||
+                                               MainLayout.pendingChanges.Contains("PmcWeaponDurabilityMin") ||
+                                               MainLayout.pendingChanges.Contains("PmcWeaponDurabilityMax") ||
+                                               MainLayout.pendingChanges.Contains("PmcWeaponDurabilityMinDelta") ||
+                                               MainLayout.pendingChanges.Contains("PmcWeaponDurabilityMaxDelta") ||
+                                               MainLayout.pendingChanges.Contains("PmcWeaponDurabilityEnhancementChance"))"
+                            IsNonDefault="@(!PmcWeaponDurabilityEnabled ||
+                                          PmcWeaponDurabilityMin != 95 ||
+                                          PmcWeaponDurabilityMax != 100 ||
+                                          PmcWeaponDurabilityMinDelta != 0 ||
+                                          PmcWeaponDurabilityMaxDelta != 5 ||
+                                          PmcWeaponDurabilityEnhancementChance != 10)"
+                            OnUndo="UndoWeaponDurability"
+                            OnDefault="DefaultWeaponDurability" />
+
+                        <DurabilityValues
+                            Label="Weapon"
+                            @bind-Min="PmcWeaponDurabilityMin"
+                            @bind-Max="PmcWeaponDurabilityMax"
+                            @bind-MinDelta="PmcWeaponDurabilityMinDelta"
+                            @bind-MaxDelta="PmcWeaponDurabilityMaxDelta"
+                            MinLimitPercent="PmcWeaponDurabilityMinLimitPercent"
+                            MaxLimitPercent="PmcWeaponDurabilityMaxLimitPercent"
+                            Disabled="@(!PmcWeaponDurabilityEnabled)" />
+
+                        <MudSliderChildTT
+                            Label="Enhancement Chance"
+                            TooltipText="This is the chance that bot weapons have an enhancement applied to them."
+                            @bind-Value="PmcWeaponDurabilityEnhancementChance"
+                            Min="0"
+                            Max="100"
+                            Disabled="@(!PmcWeaponDurabilityEnabled)" />
+
+                        <MudSwitchTT
+                            Label="Armour Durability Changes"
+                            TooltipText="Allows configurable armour durability."
+                            @bind-Value="PmcArmourDurabilityEnabled"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("PmcArmourDurabilityEnabled") ||
+                                               MainLayout.pendingChanges.Contains("PmcArmourDurabilityMin") ||
+                                               MainLayout.pendingChanges.Contains("PmcArmourDurabilityMax") ||
+                                               MainLayout.pendingChanges.Contains("PmcArmourDurabilityMinDelta") ||
+                                               MainLayout.pendingChanges.Contains("PmcArmourDurabilityMaxDelta"))"
+                            IsNonDefault="@(!PmcArmourDurabilityEnabled ||
+                                          PmcArmourDurabilityMin != 95 ||
+                                          PmcArmourDurabilityMax != 100 ||
+                                          PmcArmourDurabilityMinDelta != 0 ||
+                                          PmcArmourDurabilityMaxDelta != 5)"
+                            OnUndo="UndoArmourDurability"
+                            OnDefault="DefaultArmourDurability" />
+
+                        <DurabilityValues
+                            Label="Armour"
+                            @bind-Min="PmcArmourDurabilityMin"
+                            @bind-Max="PmcArmourDurabilityMax"
+                            @bind-MinDelta="PmcArmourDurabilityMinDelta"
+                            @bind-MaxDelta="PmcArmourDurabilityMaxDelta"
+                            MinLimitPercent="PmcArmourDurabilityMinLimitPercent"
+                            MaxLimitPercent="PmcArmourDurabilityMaxLimitPercent"
+                            Disabled="@(!PmcArmourDurabilityEnabled)" />
+
+                        <MudSwitchTT
+                            Label="Seasonal PMC Appearance"
+                            TooltipText="PMCs will wear clothing that more closely resembles the active season."
+                            @bind-Value="PmcSeasonalAppearanceEnabled"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("PmcSeasonalAppearanceEnabled"))"
+                            IsNonDefault="@(!PmcSeasonalAppearanceEnabled)"
+                            OnUndo="UndoPmcSeasonalAppearance"
+                            OnDefault="DefaultPmcSeasonalAppearance" />
+
+                        <MudSwitchTT
+                            Label="Quest Loadouts"
+                            TooltipText="PMCs have a chance to wear quest loadouts on appropriate maps at appropriate levels."
+                            @bind-Value="PmcQuestLoadoutEnabled"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("PmcQuestLoadoutEnabled") ||
+                                                MainLayout.pendingChanges.Contains("PmcQuestLoadoutChance"))"
+                            IsNonDefault="@(!PmcQuestLoadoutEnabled || 
+                                            PmcQuestLoadoutChance != 5)"
+                            OnUndo="UndoPmcQuestLoadouts"
+                            OnDefault="DefaultPmcQuestLoadouts" />
+
+                        <MudSliderChildTT
+                            Label="Quest Chance"
+                            TooltipText="Chance of them using quest loadouts."
+                            @bind-Value="PmcQuestLoadoutChance"
+                            Min="1"
+                            Max="100"
+                            Disabled="@(!PmcQuestLoadoutEnabled)" />
+
+                        <MudSwitchTTWarning
+                            Label="Poverty Check"
+                            TooltipText=""
+                            WarningTooltip1="PMCs have a chance to be poor compared to other PMCs at their level & tier, if they are not assigned a quest."
+                            WarningTooltip2="Disabling this means they will always use gear that is available in their tier."
+                            @bind-Value="PmcPovertyEnabled"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("PmcPovertyEnabled") ||
+                                                MainLayout.pendingChanges.Contains("PmcPovertyChance"))"
+                            IsNonDefault="@(!PmcPovertyEnabled || 
+                                            PmcPovertyChance != 5)"
+                            OnUndo="UndoPmcPoverty"
+                            OnDefault="DefaultPmcPoverty" />
+
+                        <MudSliderChildTT
+                            Label="Poverty Chance"
+                            TooltipText="Chance of PMC being poor for their level, this is not rolled if they are assigned a quest."
+                            @bind-Value="PmcPovertyChance"
+                            Min="1"
+                            Max="100"
+                            Disabled="@(!PmcPovertyEnabled)" />
+
+                        <MudSwitchTT
+                            Label="Ammo Tier Sliding"
+                            TooltipText="Allows PMCs to slide down to a lower ammo pool tier when they are generated."
+                            @bind-Value="PmcAmmoTierSlideEnabled"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("PmcAmmoTierSlideEnabled") ||
+                                                MainLayout.pendingChanges.Contains("PmcAmmoTierSlideAmount") ||
+                                                MainLayout.pendingChanges.Contains("PmcAmmoTierSlideChance"))"
+                            IsNonDefault="@(PmcAmmoTierSlideEnabled ||
+                                            PmcAmmoTierSlideAmount != 1 ||
+                                            PmcAmmoTierSlideChance != 33)"
+                            OnUndo="UndoPmcAmmoTierSliding"
+                            OnDefault="DefaultPmcAmmoTierSliding" />
+
+                        <MudSliderChildTT
+                            Label="Slide Amount"
+                            TooltipText="How many tiers they can slide downward."
+                            @bind-Value="PmcAmmoTierSlideAmount"
+                            Min="1"
+                            Max="7"
+                            Disabled="@(!PmcAmmoTierSlideEnabled)" />
+
+                        <MudSliderChildTT
+                            Label="Slide Chance"
+                            TooltipText="Chance they slide down tiers."
+                            @bind-Value="PmcAmmoTierSlideChance"
+                            Min="1"
+                            Max="100"
+                            Disabled="@(!PmcAmmoTierSlideEnabled)" />
+
+                        <MudSliderChildTT
+                            Label="TUE/EOD Specific Dogtag Chance"
+                            TooltipText="If the bot is Unheard or EOD, how often they should have that dogtag."
+                            @bind-Value="PmcVersionDogtagChance"
+                            Min="0"
+                            Max="100" />
+
+                        <MudSwitchTT
+                            Label="Game Version Weighting"
+                            TooltipText="Adjust how often you see specific game versions."
+                            @bind-Value="PmcVersionWeightingEnabled"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("PmcVersionWeightingEnabled") ||
+                                                MainLayout.pendingChanges.Contains("PmcStandardVersionWeight") ||
+                                                MainLayout.pendingChanges.Contains("PmcLeftBehindVersionWeight") ||
+                                                MainLayout.pendingChanges.Contains("PmcPrepareForEscapeVersionWeight") ||
+                                                MainLayout.pendingChanges.Contains("PmcEdgeOfDarknessVersionWeight") ||
+                                                MainLayout.pendingChanges.Contains("PmcUnheardVersionWeight"))"
+                            IsNonDefault="@(PmcVersionWeightingEnabled ||
+                                            PmcStandardVersionWeight != 20 ||
+                                            PmcLeftBehindVersionWeight != 10 ||
+                                            PmcPrepareForEscapeVersionWeight != 10 ||
+                                            PmcEdgeOfDarknessVersionWeight != 40 ||
+                                            PmcUnheardVersionWeight != 20)"
+                            OnUndo="UndoPmcVersionWeighting"
+                            OnDefault="DefaultPmcVersionWeighting" />
+
+                        <MudSliderChildTT
+                            Label="Standard"
+                            TooltipText="Higher number is more common. Lower number is more rare. Compare this to the weights of other game versions."
+                            @bind-Value="PmcStandardVersionWeight"
+                            Min="1"
+                            Max="100"
+                            Disabled="@(!PmcVersionWeightingEnabled)" />
+
+                        <MudSliderChildTT
+                            Label="Left Behind"
+                            TooltipText="Higher number is more common. Lower number is more rare. Compare this to the weights of other game versions."
+                            @bind-Value="PmcLeftBehindVersionWeight"
+                            Min="1"
+                            Max="100"
+                            Disabled="@(!PmcVersionWeightingEnabled)" />
+
+                        <MudSliderChildTT
+                            Label="Prepare for Escape"
+                            TooltipText="Higher number is more common. Lower number is more rare. Compare this to the weights of other game versions."
+                            @bind-Value="PmcPrepareForEscapeVersionWeight"
+                            Min="1"
+                            Max="100"
+                            Disabled="@(!PmcVersionWeightingEnabled)" />
+
+                        <MudSliderChildTT
+                            Label="Edge of Darkness"
+                            TooltipText="Higher number is more common. Lower number is more rare. Compare this to the weights of other game versions."
+                            @bind-Value="PmcEdgeOfDarknessVersionWeight"
+                            Min="1"
+                            Max="100"
+                            Disabled="@(!PmcVersionWeightingEnabled)" />
+
+                        <MudSliderChildTT
+                            Label="Unheard Edition"
+                            TooltipText="Higher number is more common. Lower number is more rare. Compare this to the weights of other game versions."
+                            @bind-Value="PmcUnheardVersionWeight"
+                            Min="1"
+                            Max="100"
+                            Disabled="@(!PmcVersionWeightingEnabled)" />
+
+                    </MudGrid>
+                </MudExpansionPanel>
+
+                <MudExpansionPanel Class="mud-expansion-panels-borders ma-3 pa-5" Style="padding-bottom:25px" Text="PMC Plate Class Selection" Expanded="true">
+                    <MudGrid>
+                        @foreach (var tier in new[] {
+                            ("Tier 1 (Lv1-10)",  "Pmc_PlateClass_Tier1", ModConfig.Config.GeneralConfig.PlateClasses.Pmc.Tier1, ModConfig.OriginalConfig.GeneralConfig.PlateClasses.Pmc.Tier1),
+                            ("Tier 2 (Lv11-20)", "Pmc_PlateClass_Tier2", ModConfig.Config.GeneralConfig.PlateClasses.Pmc.Tier2, ModConfig.OriginalConfig.GeneralConfig.PlateClasses.Pmc.Tier2),
+                            ("Tier 3 (Lv21-30)", "Pmc_PlateClass_Tier3", ModConfig.Config.GeneralConfig.PlateClasses.Pmc.Tier3, ModConfig.OriginalConfig.GeneralConfig.PlateClasses.Pmc.Tier3),
+                            ("Tier 4 (Lv31-40)", "Pmc_PlateClass_Tier4", ModConfig.Config.GeneralConfig.PlateClasses.Pmc.Tier4, ModConfig.OriginalConfig.GeneralConfig.PlateClasses.Pmc.Tier4),
+                            ("Tier 5 (Lv41-50)", "Pmc_PlateClass_Tier5", ModConfig.Config.GeneralConfig.PlateClasses.Pmc.Tier5, ModConfig.OriginalConfig.GeneralConfig.PlateClasses.Pmc.Tier5),
+                            ("Tier 6 (Lv51-60)", "Pmc_PlateClass_Tier6", ModConfig.Config.GeneralConfig.PlateClasses.Pmc.Tier6, ModConfig.OriginalConfig.GeneralConfig.PlateClasses.Pmc.Tier6),
+                            ("Tier 7 (Lv61-79)", "Pmc_PlateClass_Tier7", ModConfig.Config.GeneralConfig.PlateClasses.Pmc.Tier7, ModConfig.OriginalConfig.GeneralConfig.PlateClasses.Pmc.Tier7),
+                        })
+                        {
+                            var tierTooltip = $"Adjust the plate class levels for {tier.Item1}. If a plate is selected that cannot fit in the armour, APBS will upgrade the plate level by 1 until it is valid.";
+                            var tierDefaults = PmcTierDefaults[tier.Item1];
+
+                            <PlateClassTier
+                                TierLabel="@tier.Item1"
+                                TooltipText="@tierTooltip"
+                                ChangeKeyPrefix="@tier.Item2"
+                                FrontValues="@ToDict(tier.Item3["front_plate"])"
+                                BackValues="@ToDict(tier.Item3["back_plate"])"
+                                LeftValues="@ToDict(tier.Item3["left_side_plate"])"
+                                RightValues="@ToDict(tier.Item3["right_side_plate"])"
+                                Defaults="@tierDefaults"
+                                ValuesChanged="@((e) => HandlePlateChanged(tier.Item2, tier.Item3, tier.Item4, e))"
+                                OnUndo="@((pos) => HandlePlateUndo(tier.Item2, tier.Item3, tier.Item4, pos))"
+                                OnDefault="@((pos) => HandlePlateDefault(tier.Item2, tier.Item3, pos, tierDefaults))" />
+                        }
+                    </MudGrid>
+                </MudExpansionPanel>
+
+                <MudExpansionPanel Class="mud-expansion-panels-borders ma-3 pa-5" Style="padding-bottom:25px" Text="Nothing to see here..." Expanded="false">
+                    <MudGrid>
+
+                        <MudSwitchTT
+                            Label="Developer Bots"
+                            TooltipText="Flags SPT & APBS Devs as Developers. Also contributors to APBS."
+                            @bind-Value="PmcSecretDevelopersNameMarkEnabled"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("PmcSecretDevelopersNameMarkEnabled") ||
+                                                MainLayout.pendingChanges.Contains("PmcSecretDevelopersNameList"))"
+                            IsNonDefault="@(!PmcSecretDevelopersNameMarkEnabled ||
+                                            PmcSecretDevelopersNameList.Count != 10 ||
+                                            !PmcSecretDevelopersNameList.Contains("Chomp") ||
+                                            !PmcSecretDevelopersNameList.Contains("Dirtbikercj") ||
+                                            !PmcSecretDevelopersNameList.Contains("Clodan") ||
+                                            !PmcSecretDevelopersNameList.Contains("CWX") ||
+                                            !PmcSecretDevelopersNameList.Contains("DrakiaXYZ") ||
+                                            !PmcSecretDevelopersNameList.Contains("Kaeno") ||
+                                            !PmcSecretDevelopersNameList.Contains("Refringe") ||
+                                            !PmcSecretDevelopersNameList.Contains("Waffle") ||
+                                            !PmcSecretDevelopersNameList.Contains("AcidPhantasm") ||
+                                            !PmcSecretDevelopersNameList.Contains("Archangel"))"
+                            OnUndo="UndoSecretDeveloperEnabled"
+                            OnDefault="DefaultSecretDeveloperEnabled" />
+
+                        <MudItem xs="1">
+                            <MudPaper Class="d-flex flex-column align-center justify-center mud-width-full py-2">
+                                <MudTooltip Text="Enter the name of the bot you want marked as a developer, then click the arrow (or press enter) to add it." Color="Color.Dark" Placement="Placement.Right" Arrow="true">
+                                    <MudIconButton Icon="@Icons.Material.Filled.Warning" Size="Size.Small" />
+                                </MudTooltip>
+                            </MudPaper>
+                        </MudItem>
+                        <MudItem xs="4" Class="align-center">
+                            <MudTextField T="string" @bind-Value="@PmcSecretDevelopersEntryHolder"
+                                Typo="Typo.body2" HelperText="Enter valid Bot name"
+                                Placeholder="Bot Name"
+                                Variant="Variant.Text"
+                                Disabled="!PmcSecretDevelopersNameMarkEnabled"
+                                OnKeyDown="@((e) => { if (HandleKeyDown(e)) TryAddDeveloperName(); })"
+                                Validation="@(new Func<string, IEnumerable<string>>(Utils.StringLengthValidation))"
+                                Immediate="true"
+                                Adornment="Adornment.End"
+                                AdornmentIcon="@Icons.Material.Filled.ArrowRight"
+                                OnAdornmentClick="TryAddDeveloperName" />
+                        </MudItem>
+                        <MudItem xs="6">
+                            @foreach (var item in PmcSecretDevelopersNameList)
+                            {
+                                <MudChip Disabled="!PmcSecretDevelopersNameMarkEnabled" Value="@item" T="string" Color="Color.Default"
+                                    OnClose="@(() => {
+                                        PmcSecretDevelopersNameList.Remove(item);
+                                        Utils.UpdateView(PmcSecretDevelopersNameList, ModConfig.OriginalConfig.PmcBots.Secrets.DeveloperSettings.DevNames.NameList, "PmcSecretDevelopersNameList");
+                                    })">@item</MudChip>
+                            }
+                        </MudItem>
+
+                        <MudDivider DividerType="DividerType.FullWidth" Class="my-3" />
+
+                        <MudSwitchTT
+                            Label="Force Developer Bot Levels"
+                            TooltipText="Allows enabled developer bots to always spawn within the specified level ranges."
+                            @bind-Value="PmcSecretDeveloperLevelsEnabled"
+                            HasPendingChanges="@(MainLayout.pendingChanges.Contains("PmcSecretDeveloperLevelsEnabled"))"
+                            IsNonDefault="@(PmcSecretDeveloperLevelsEnabled)"
+                            OnUndo="UndoSecretDeveloperLevelsEnabled"
+                            OnDefault="DefaultSecretDeveloperLevelsEnabled" />
+
+                        <MudItem xs="2" />
+                        <MudItem xs="3">
+                            <MudTooltip Text="Minimum and maximum levels for bots in the Developer Name list, if enabled." Color="Color.Dark" Placement="Placement.Right" Arrow="true">
+                                <MudText>Developer Bot Level Values</MudText>
+                            </MudTooltip>
+                        </MudItem>
+                        <MudItem xs="6">
+                            <MudPaper Class="d-flex align-start mud-width-full" Style="margin-top: -20px;" Elevation="0">
+                                <MudTooltip Text="Lowest level that above named bots can be." Color="Color.Dark" Placement="Placement.Right" Arrow="true">
+                                    <MudNumericField Margin="Margin.Dense" HideSpinButtons="true" @bind-Value="PmcSecretDeveloperLevelsMin" Label="Minimum" HelperText="Level" Variant="Variant.Filled"
+                                        Min="1" Max="@(PmcSecretDeveloperLevelsMax - 1)" Disabled="!PmcSecretDeveloperLevelsEnabled" />
+                                </MudTooltip>
+                                <MudSpacer />
+                                <MudTooltip Text="Highest level that above named bots can be." Color="Color.Dark" Placement="Placement.Left" Arrow="true">
+                                    <MudNumericField Margin="Margin.Dense" HideSpinButtons="true" @bind-Value="PmcSecretDeveloperLevelsMax" Label="Maximum" HelperText="Level" Variant="Variant.Filled"
+                                        Min="@(PmcSecretDeveloperLevelsMin + 1)" Max="79" Disabled="!PmcSecretDeveloperLevelsEnabled" />
+                                </MudTooltip>
+                            </MudPaper>
+                        </MudItem>
+                        <MudItem xs="1">
+                            @if (MainLayout.AppUndoButtonToggle && (
+                                MainLayout.pendingChanges.Contains("PmcSecretDeveloperLevelsMin") ||
+                                MainLayout.pendingChanges.Contains("PmcSecretDeveloperLevelsMax")))
+                            {
+                                <MudButton @onclick="UndoSecretDeveloperLevelsMinMax" Variant="Variant.Filled" Color="Color.Inherit" Size="Size.Small">Undo</MudButton>
+                            }
+                            else if (MainLayout.AppDefaultButtonToggle && (
+                                PmcSecretDeveloperLevelsMin != 30 ||
+                                PmcSecretDeveloperLevelsMax != 79))
+                            {
+                                <MudButton @onclick="DefaultSecretDeveloperLevelsMinMax" Variant="Variant.Filled" Color="Color.Dark" Size="Size.Small">Default</MudButton>
+                            }
+                        </MudItem>
+
+                    </MudGrid>
+                </MudExpansionPanel>
+            }
+        </MudExpansionPanels>
+    </MudContainer>
+</MudMainContent>
+
+@code {
+    #region ENABLE / DISABLE
+    private bool PmcEnabled
+    {
+        get => ModConfig.Config.PmcBots.Enable;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.PmcBots.Enable, nameof(PmcEnabled));
+            ModConfig.Config.PmcBots.Enable = value;
+        }
+    }
+    private void UndoPmcBots() => PmcEnabled = ModConfig.OriginalConfig.PmcBots.Enable;
+    private void DefaultPmcBots() => PmcEnabled = true;
+    #endregion
+    #region LOOT
+    private bool PmcLootEnabled
+    {
+        get => ModConfig.Config.PmcBots.LootConfig.Enable;
+        set
+        {
+            ModConfig.Config.PmcBots.LootConfig.Enable = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.PmcBots.LootConfig.Enable, nameof(PmcLootEnabled));
+        }
+    }
+    private List<string> PmcLootBlacklist => ModConfig.Config.PmcBots.LootConfig.Blacklist;
+    private void UndoLoot()
+    {
+        PmcLootEnabled = ModConfig.OriginalConfig.PmcBots.LootConfig.Enable;
+        PmcLootBlacklist.Clear();
+        foreach (var item in ModConfig.OriginalConfig.PmcBots.LootConfig.Blacklist)
+        {
+            PmcLootBlacklist.Add(item);
+        }
+        MainLayout.pendingChanges.Remove("PmcLootEnabled");
+        MainLayout.pendingChanges.Remove("PmcLootBlacklist");
+    }
+    private void DefaultLoot()
+    {
+        PmcLootEnabled = false;
+        PmcLootBlacklist.Clear();
+        if (!MainLayout.pendingChanges.Contains("PmcLootEnabled")) MainLayout.pendingChanges.Add("PmcLootEnabled");
+        if (!MainLayout.pendingChanges.Contains("PmcLootBlacklist")) MainLayout.pendingChanges.Add("PmcLootBlacklist");
+    }
+    #endregion
+    #region REROLL
+    private bool PmcWeaponAmmunitionRollEnabled
+    {
+        get => ModConfig.Config.PmcBots.RerollConfig.Enable;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.PmcBots.RerollConfig.Enable, nameof(PmcWeaponAmmunitionRollEnabled));
+            ModConfig.Config.PmcBots.RerollConfig.Enable = value;
+            ModConfig.Config.PmcBots.ToploadConfig.Enable = !value;
+        }
+    }
+    private int PmcWeaponAmmunitionRollChance
+    {
+        get => ModConfig.Config.PmcBots.RerollConfig.Chance;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.PmcBots.RerollConfig.Chance, nameof(PmcWeaponAmmunitionRollChance));
+            ModConfig.Config.PmcBots.RerollConfig.Chance = value;
+        }
+    }
+    private void UndoRollAmmunitionEnabled()
+    {
+        PmcWeaponAmmunitionRollEnabled = ModConfig.OriginalConfig.PmcBots.RerollConfig.Enable;
+        PmcWeaponAmmunitionRollChance = ModConfig.OriginalConfig.PmcBots.RerollConfig.Chance;
+        PmcWeaponToploadEnabled = ModConfig.OriginalConfig.PmcBots.ToploadConfig.Enable;
+        PmcWeaponToploadChance = ModConfig.OriginalConfig.PmcBots.ToploadConfig.Chance;
+        PmcWeaponToploadPercent = ModConfig.OriginalConfig.PmcBots.ToploadConfig.Percent;
+    }
+    private void DefaultRollAmmunitionEnabled()
+    {
+        PmcWeaponAmmunitionRollEnabled = false;
+        PmcWeaponAmmunitionRollChance = 50;
+        PmcWeaponToploadEnabled = true;
+        PmcWeaponToploadChance = 30;
+        PmcWeaponToploadPercent = 30;
+    }
+    #endregion
+    #region TOPLOAD
+    private bool PmcWeaponToploadEnabled
+    {
+        get => ModConfig.Config.PmcBots.ToploadConfig.Enable;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.PmcBots.ToploadConfig.Enable, nameof(PmcWeaponToploadEnabled));
+            ModConfig.Config.PmcBots.ToploadConfig.Enable = value;
+            ModConfig.Config.PmcBots.RerollConfig.Enable = !value;
+        }
+    }
+    private int PmcWeaponToploadChance
+    {
+        get => ModConfig.Config.PmcBots.ToploadConfig.Chance;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.PmcBots.ToploadConfig.Chance, nameof(PmcWeaponToploadChance));
+            ModConfig.Config.PmcBots.ToploadConfig.Chance = value;
+        }
+    }
+    private int PmcWeaponToploadPercent
+    {
+        get => ModConfig.Config.PmcBots.ToploadConfig.Percent;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.PmcBots.ToploadConfig.Percent, nameof(PmcWeaponToploadPercent));
+            ModConfig.Config.PmcBots.ToploadConfig.Percent = value;
+        }
+    }
+    private void UndoToploadEnabled()
+    {
+        PmcWeaponAmmunitionRollEnabled = ModConfig.OriginalConfig.PmcBots.RerollConfig.Enable;
+        PmcWeaponAmmunitionRollChance = ModConfig.OriginalConfig.PmcBots.RerollConfig.Chance;
+        PmcWeaponToploadEnabled = ModConfig.OriginalConfig.PmcBots.ToploadConfig.Enable;
+        PmcWeaponToploadChance = ModConfig.OriginalConfig.PmcBots.ToploadConfig.Chance;
+        PmcWeaponToploadPercent = ModConfig.OriginalConfig.PmcBots.ToploadConfig.Percent;
+    }
+    private void DefaultToploadEnabled()
+    {
+        PmcWeaponAmmunitionRollEnabled = false;
+        PmcWeaponAmmunitionRollChance = 50;
+        PmcWeaponToploadEnabled = true;
+        PmcWeaponToploadChance = 30;
+        PmcWeaponToploadPercent = 30;
+    }
+    #endregion
+    #region PLATE CLASS SELECTION LIMITER
+    private bool SkipBackPlateIfMissingFrontPlate
+    {
+        get => ModConfig.Config.PmcBots.SkipBackPlateIfMissingFrontPlate;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.PmcBots.SkipBackPlateIfMissingFrontPlate, nameof(SkipBackPlateIfMissingFrontPlate));
+            ModConfig.Config.PmcBots.SkipBackPlateIfMissingFrontPlate = value;
+        }
+    }
+    private void UndoSkipBackPlateIfMissingFrontPlate() => SkipBackPlateIfMissingFrontPlate = ModConfig.OriginalConfig.PmcBots.SkipBackPlateIfMissingFrontPlate;
+    private void DefaultSkipBackPlateIfMissingFrontPlate() => SkipBackPlateIfMissingFrontPlate = false;
+    private bool LimitPlateClassToFrontPlateClass
+    {
+        get => ModConfig.Config.PmcBots.LimitPlateClassToFrontPlateClass;
+        set
+        {
+            Utils.UpdateView(value, ModConfig.OriginalConfig.PmcBots.LimitPlateClassToFrontPlateClass, nameof(LimitPlateClassToFrontPlateClass));
+            ModConfig.Config.PmcBots.LimitPlateClassToFrontPlateClass = value;
+        }
+    }
+    private void UndoLimitPlateClassToFrontPlateClass() => LimitPlateClassToFrontPlateClass = ModConfig.OriginalConfig.PmcBots.LimitPlateClassToFrontPlateClass;
+    private void DefaultLimitPlateClassToFrontPlateClass() => LimitPlateClassToFrontPlateClass = false;
+    #endregion
+    #region RESOURCE RANDOMIZATION
+    private bool PmcResourceRandomizationEnabled
+    {
+        get => ModConfig.Config.PmcBots.ResourceRandomization.Enable;
+        set
+        {
+            ModConfig.Config.PmcBots.ResourceRandomization.Enable = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.PmcBots.ResourceRandomization.Enable, nameof(PmcResourceRandomizationEnabled));
+        }
+    }
+    private int PmcFoodRateMaxChance
+    {
+        get => ModConfig.Config.PmcBots.ResourceRandomization.FoodRateMaxChance;
+        set
+        {
+            ModConfig.Config.PmcBots.ResourceRandomization.FoodRateMaxChance = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.PmcBots.ResourceRandomization.FoodRateMaxChance, nameof(PmcFoodRateMaxChance));
+        }
+    }
+    private int PmcFoodRateUsagePercent
+    {
+        get => ModConfig.Config.PmcBots.ResourceRandomization.FoodRateUsagePercent;
+        set
+        {
+            ModConfig.Config.PmcBots.ResourceRandomization.FoodRateUsagePercent = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.PmcBots.ResourceRandomization.FoodRateUsagePercent, nameof(PmcFoodRateUsagePercent));
+        }
+    }
+    private int PmcMedRateMaxChance
+    {
+        get => ModConfig.Config.PmcBots.ResourceRandomization.MedRateMaxChance;
+        set
+        {
+            ModConfig.Config.PmcBots.ResourceRandomization.MedRateMaxChance = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.PmcBots.ResourceRandomization.MedRateMaxChance, nameof(PmcMedRateMaxChance));
+        }
+    }
+    private int PmcMedRateUsagePercent
+    {
+        get => ModConfig.Config.PmcBots.ResourceRandomization.MedRateUsagePercent;
+        set
+        {
+            ModConfig.Config.PmcBots.ResourceRandomization.MedRateUsagePercent = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.PmcBots.ResourceRandomization.MedRateUsagePercent, nameof(PmcMedRateUsagePercent));
+        }
+    }
+    private void UndoResourceRandomization()
+    {
+        PmcResourceRandomizationEnabled = ModConfig.OriginalConfig.PmcBots.ResourceRandomization.Enable;
+        PmcFoodRateMaxChance = ModConfig.OriginalConfig.PmcBots.ResourceRandomization.FoodRateMaxChance;
+        PmcFoodRateUsagePercent = ModConfig.OriginalConfig.PmcBots.ResourceRandomization.FoodRateUsagePercent;
+        PmcMedRateMaxChance = ModConfig.OriginalConfig.PmcBots.ResourceRandomization.MedRateMaxChance;
+        PmcMedRateUsagePercent = ModConfig.OriginalConfig.PmcBots.ResourceRandomization.MedRateUsagePercent;
+    }
+    private void DefaultResourceRandomization()
+    {
+        PmcResourceRandomizationEnabled = true;
+        PmcFoodRateMaxChance = 10;
+        PmcFoodRateUsagePercent = 33;
+        PmcMedRateMaxChance = 10;
+        PmcMedRateUsagePercent = 33;
+    }
+    #endregion
+    #region DURABILITY
+    private bool PmcWeaponDurabilityEnabled
+    {
+        get => ModConfig.Config.PmcBots.WeaponDurability.Enable;
+        set
+        {
+            ModConfig.Config.PmcBots.WeaponDurability.Enable = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.PmcBots.WeaponDurability.Enable, nameof(PmcWeaponDurabilityEnabled));
+        }
+    }
+    private int PmcWeaponDurabilityMin
+    {
+        get => ModConfig.Config.PmcBots.WeaponDurability.Min;
+        set
+        {
+            ModConfig.Config.PmcBots.WeaponDurability.Min = value;
+            ModConfig.Config.PmcBots.WeaponDurability.MinLimitPercent = value - ModConfig.Config.PmcBots.WeaponDurability.MaxDelta;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.PmcBots.WeaponDurability.Min, nameof(PmcWeaponDurabilityMin));
+        }
+    }
+    private int PmcWeaponDurabilityMax
+    {
+        get => ModConfig.Config.PmcBots.WeaponDurability.Max;
+        set
+        {
+            ModConfig.Config.PmcBots.WeaponDurability.Max = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.PmcBots.WeaponDurability.Max, nameof(PmcWeaponDurabilityMax));
+        }
+    }
+    private int PmcWeaponDurabilityMinDelta
+    {
+        get => ModConfig.Config.PmcBots.WeaponDurability.MinDelta;
+        set
+        {
+            ModConfig.Config.PmcBots.WeaponDurability.MinDelta = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.PmcBots.WeaponDurability.MinDelta, nameof(PmcWeaponDurabilityMinDelta));
+        }
+    }
+    private int PmcWeaponDurabilityMaxDelta
+    {
+        get => ModConfig.Config.PmcBots.WeaponDurability.MaxDelta;
+        set
+        {
+            ModConfig.Config.PmcBots.WeaponDurability.MaxDelta = value;
+            ModConfig.Config.PmcBots.WeaponDurability.MinLimitPercent = ModConfig.Config.PmcBots.WeaponDurability.Min - value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.PmcBots.WeaponDurability.MaxDelta, nameof(PmcWeaponDurabilityMaxDelta));
+        }
+    }
+    private int PmcWeaponDurabilityMinLimitPercent
+        => ModConfig.Config.PmcBots.WeaponDurability.MinLimitPercent;
+    private int PmcWeaponDurabilityMaxLimitPercent
+        => ModConfig.Config.PmcBots.WeaponDurability.Max - ModConfig.Config.PmcBots.WeaponDurability.MinDelta;
+    private int PmcWeaponDurabilityEnhancementChance
+    {
+        get => ModConfig.Config.PmcBots.WeaponDurability.EnhancementChance;
+        set
+        {
+            ModConfig.Config.PmcBots.WeaponDurability.EnhancementChance = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.PmcBots.WeaponDurability.EnhancementChance, nameof(PmcWeaponDurabilityEnhancementChance));
+        }
+    }
+    private void UndoWeaponDurability()
+    {
+        PmcWeaponDurabilityEnabled = ModConfig.OriginalConfig.PmcBots.WeaponDurability.Enable;
+        PmcWeaponDurabilityMin = ModConfig.OriginalConfig.PmcBots.WeaponDurability.Min;
+        PmcWeaponDurabilityMax = ModConfig.OriginalConfig.PmcBots.WeaponDurability.Max;
+        PmcWeaponDurabilityMinDelta = ModConfig.OriginalConfig.PmcBots.WeaponDurability.MinDelta;
+        PmcWeaponDurabilityMaxDelta = ModConfig.OriginalConfig.PmcBots.WeaponDurability.MaxDelta;
+        PmcWeaponDurabilityEnhancementChance = ModConfig.OriginalConfig.PmcBots.WeaponDurability.EnhancementChance;
+    }
+    private void DefaultWeaponDurability()
+    {
+        PmcWeaponDurabilityEnabled = true;
+        PmcWeaponDurabilityMin = 95;
+        PmcWeaponDurabilityMax = 100;
+        PmcWeaponDurabilityMinDelta = 0;
+        PmcWeaponDurabilityMaxDelta = 5;
+        PmcWeaponDurabilityEnhancementChance = 10;
+    }
+    private bool PmcArmourDurabilityEnabled
+    {
+        get => ModConfig.Config.PmcBots.ArmourDurability.Enable;
+        set
+        {
+            ModConfig.Config.PmcBots.ArmourDurability.Enable = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.PmcBots.ArmourDurability.Enable, nameof(PmcArmourDurabilityEnabled));
+        }
+    }
+    private int PmcArmourDurabilityMin
+    {
+        get => ModConfig.Config.PmcBots.ArmourDurability.Min;
+        set
+        {
+            ModConfig.Config.PmcBots.ArmourDurability.Min = value;
+            ModConfig.Config.PmcBots.ArmourDurability.MinLimitPercent = value - ModConfig.Config.PmcBots.ArmourDurability.MaxDelta;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.PmcBots.ArmourDurability.Min, nameof(PmcArmourDurabilityMin));
+        }
+    }
+    private int PmcArmourDurabilityMax
+    {
+        get => ModConfig.Config.PmcBots.ArmourDurability.Max;
+        set
+        {
+            ModConfig.Config.PmcBots.ArmourDurability.Max = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.PmcBots.ArmourDurability.Max, nameof(PmcArmourDurabilityMax));
+        }
+    }
+    private int PmcArmourDurabilityMinDelta
+    {
+        get => ModConfig.Config.PmcBots.ArmourDurability.MinDelta;
+        set
+        {
+            ModConfig.Config.PmcBots.ArmourDurability.MinDelta = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.PmcBots.ArmourDurability.MinDelta, nameof(PmcArmourDurabilityMinDelta));
+        }
+    }
+    private int PmcArmourDurabilityMaxDelta
+    {
+        get => ModConfig.Config.PmcBots.ArmourDurability.MaxDelta;
+        set
+        {
+            ModConfig.Config.PmcBots.ArmourDurability.MaxDelta = value;
+            ModConfig.Config.PmcBots.ArmourDurability.MinLimitPercent = ModConfig.Config.PmcBots.ArmourDurability.Min - value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.PmcBots.ArmourDurability.MaxDelta, nameof(PmcArmourDurabilityMaxDelta));
+        }
+    }
+    private int PmcArmourDurabilityMinLimitPercent => ModConfig.Config.PmcBots.ArmourDurability.MinLimitPercent;
+    private int PmcArmourDurabilityMaxLimitPercent => ModConfig.Config.PmcBots.ArmourDurability.Max - ModConfig.Config.PmcBots.ArmourDurability.MinDelta;
+    private void UndoArmourDurability()
+    {
+        PmcArmourDurabilityEnabled = ModConfig.OriginalConfig.PmcBots.ArmourDurability.Enable;
+        PmcArmourDurabilityMin = ModConfig.OriginalConfig.PmcBots.ArmourDurability.Min;
+        PmcArmourDurabilityMax = ModConfig.OriginalConfig.PmcBots.ArmourDurability.Max;
+        PmcArmourDurabilityMinDelta = ModConfig.OriginalConfig.PmcBots.ArmourDurability.MinDelta;
+        PmcArmourDurabilityMaxDelta = ModConfig.OriginalConfig.PmcBots.ArmourDurability.MaxDelta;
+    }
+    private void DefaultArmourDurability()
+    {
+        PmcArmourDurabilityEnabled = true;
+        PmcArmourDurabilityMin = 95;
+        PmcArmourDurabilityMax = 100;
+        PmcArmourDurabilityMinDelta = 0;
+        PmcArmourDurabilityMaxDelta = 5;
+    }
+    #endregion
+    #region PMC-SPECIFIC OPTIONS
+    private bool PmcPrestigeEnabled
+    {
+        get => ModConfig.Config.PmcBots.AdditionalOptions.EnablePrestiging;
+        set
+        {
+            ModConfig.Config.PmcBots.AdditionalOptions.EnablePrestiging = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.PmcBots.AdditionalOptions.EnablePrestiging, nameof(PmcPrestigeEnabled));
+        }
+    }
+    private void UndoPrestiging() => PmcPrestigeEnabled = ModConfig.OriginalConfig.PmcBots.AdditionalOptions.EnablePrestiging;
+    private void DefaultPrestiging() => PmcPrestigeEnabled = true;
+
+    private bool PmcPrestigeAnyLevel
+    {
+        get => ModConfig.Config.PmcBots.AdditionalOptions.EnablePrestigeAnyLevel;
+        set
+        {
+            ModConfig.Config.PmcBots.AdditionalOptions.EnablePrestigeAnyLevel = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.PmcBots.AdditionalOptions.EnablePrestigeAnyLevel, nameof(PmcPrestigeAnyLevel));
+        }
+    }
+    private void UndoPrestigeAnyLevel() => PmcPrestigeAnyLevel = ModConfig.OriginalConfig.PmcBots.AdditionalOptions.EnablePrestigeAnyLevel;
+    private void DefaultPrestigeAnyLevel() => PmcPrestigeAnyLevel = true;
+
+    private bool PmcSeasonalAppearanceEnabled
+    {
+        get => ModConfig.Config.PmcBots.AdditionalOptions.SeasonalPmcAppearance;
+        set
+        {
+            ModConfig.Config.PmcBots.AdditionalOptions.SeasonalPmcAppearance = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.PmcBots.AdditionalOptions.SeasonalPmcAppearance, nameof(PmcSeasonalAppearanceEnabled));
+        }
+    }
+    private void UndoPmcSeasonalAppearance() => PmcSeasonalAppearanceEnabled = ModConfig.OriginalConfig.PmcBots.AdditionalOptions.SeasonalPmcAppearance;
+    private void DefaultPmcSeasonalAppearance() => PmcSeasonalAppearanceEnabled = true;
+
+    private bool PmcQuestLoadoutEnabled
+    {
+        get => ModConfig.Config.PmcBots.QuestConfig.Enable;
+        set
+        {
+            ModConfig.Config.PmcBots.QuestConfig.Enable = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.PmcBots.QuestConfig.Enable, nameof(PmcQuestLoadoutEnabled));
+        }
+    }
+    private int PmcQuestLoadoutChance
+    {
+        get => ModConfig.Config.PmcBots.QuestConfig.Chance;
+        set
+        {
+            ModConfig.Config.PmcBots.QuestConfig.Chance = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.PmcBots.QuestConfig.Chance, nameof(PmcQuestLoadoutChance));
+        }
+    }
+    private void UndoPmcQuestLoadouts()
+    {
+        PmcQuestLoadoutEnabled = ModConfig.OriginalConfig.PmcBots.QuestConfig.Enable;
+        PmcQuestLoadoutChance = ModConfig.OriginalConfig.PmcBots.QuestConfig.Chance;
+    }
+    private void DefaultPmcQuestLoadouts()
+    {
+        PmcQuestLoadoutEnabled = true;
+        PmcQuestLoadoutChance = 5;
+    }
+
+    private bool PmcPovertyEnabled
+    {
+        get => ModConfig.Config.PmcBots.PovertyConfig.Enable;
+        set
+        {
+            ModConfig.Config.PmcBots.PovertyConfig.Enable = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.PmcBots.PovertyConfig.Enable, nameof(PmcPovertyEnabled));
+        }
+    }
+    private int PmcPovertyChance
+    {
+        get => ModConfig.Config.PmcBots.PovertyConfig.Chance;
+        set
+        {
+            ModConfig.Config.PmcBots.PovertyConfig.Chance = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.PmcBots.PovertyConfig.Chance, nameof(PmcPovertyChance));
+        }
+    }
+    private void UndoPmcPoverty()
+    {
+        PmcPovertyEnabled = ModConfig.OriginalConfig.PmcBots.PovertyConfig.Enable;
+        PmcPovertyChance = ModConfig.OriginalConfig.PmcBots.PovertyConfig.Chance;
+    }
+    private void DefaultPmcPoverty()
+    {
+        PmcPovertyEnabled = true;
+        PmcPovertyChance = 5;
+    }
+
+    private bool PmcAmmoTierSlideEnabled
+    {
+        get => ModConfig.Config.PmcBots.AdditionalOptions.AmmoTierSliding.Enable;
+        set
+        {
+            ModConfig.Config.PmcBots.AdditionalOptions.AmmoTierSliding.Enable = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.PmcBots.AdditionalOptions.AmmoTierSliding.Enable, nameof(PmcAmmoTierSlideEnabled));
+        }
+    }
+    private int PmcAmmoTierSlideAmount
+    {
+        get => ModConfig.Config.PmcBots.AdditionalOptions.AmmoTierSliding.SlideAmount;
+        set
+        {
+            ModConfig.Config.PmcBots.AdditionalOptions.AmmoTierSliding.SlideAmount = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.PmcBots.AdditionalOptions.AmmoTierSliding.SlideAmount, nameof(PmcAmmoTierSlideAmount));
+        }
+    }
+    private int PmcAmmoTierSlideChance
+    {
+        get => ModConfig.Config.PmcBots.AdditionalOptions.AmmoTierSliding.SlideChance;
+        set
+        {
+            ModConfig.Config.PmcBots.AdditionalOptions.AmmoTierSliding.SlideChance = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.PmcBots.AdditionalOptions.AmmoTierSliding.SlideChance, nameof(PmcAmmoTierSlideChance));
+        }
+    }
+    private void UndoPmcAmmoTierSliding()
+    {
+        PmcAmmoTierSlideEnabled = ModConfig.OriginalConfig.PmcBots.AdditionalOptions.AmmoTierSliding.Enable;
+        PmcAmmoTierSlideAmount = ModConfig.OriginalConfig.PmcBots.AdditionalOptions.AmmoTierSliding.SlideAmount;
+        PmcAmmoTierSlideChance = ModConfig.OriginalConfig.PmcBots.AdditionalOptions.AmmoTierSliding.SlideChance;
+    }
+    private void DefaultPmcAmmoTierSliding()
+    {
+        PmcAmmoTierSlideEnabled = false;
+        PmcAmmoTierSlideAmount = 1;
+        PmcAmmoTierSlideChance = 33;
+    }
+
+    private int PmcVersionDogtagChance
+    {
+        get => ModConfig.Config.PmcBots.AdditionalOptions.GameVersionDogtagChance;
+        set
+        {
+            ModConfig.Config.PmcBots.AdditionalOptions.GameVersionDogtagChance = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.PmcBots.AdditionalOptions.GameVersionDogtagChance, nameof(PmcVersionDogtagChance));
+        }
+    }
+
+    private bool PmcVersionWeightingEnabled
+    {
+        get => ModConfig.Config.PmcBots.AdditionalOptions.GameVersionWeighting.Enable;
+        set
+        {
+            ModConfig.Config.PmcBots.AdditionalOptions.GameVersionWeighting.Enable = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.PmcBots.AdditionalOptions.GameVersionWeighting.Enable, nameof(PmcVersionWeightingEnabled));
+        }
+    }
+    private int PmcStandardVersionWeight
+    {
+        get => ModConfig.Config.PmcBots.AdditionalOptions.GameVersionWeighting.Standard;
+        set
+        {
+            ModConfig.Config.PmcBots.AdditionalOptions.GameVersionWeighting.Standard = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.PmcBots.AdditionalOptions.GameVersionWeighting.Standard, nameof(PmcStandardVersionWeight));
+        }
+    }
+    private int PmcLeftBehindVersionWeight
+    {
+        get => ModConfig.Config.PmcBots.AdditionalOptions.GameVersionWeighting.LeftBehind;
+        set
+        {
+            ModConfig.Config.PmcBots.AdditionalOptions.GameVersionWeighting.LeftBehind = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.PmcBots.AdditionalOptions.GameVersionWeighting.LeftBehind, nameof(PmcLeftBehindVersionWeight));
+        }
+    }
+    private int PmcPrepareForEscapeVersionWeight
+    {
+        get => ModConfig.Config.PmcBots.AdditionalOptions.GameVersionWeighting.PrepareForEscape;
+        set
+        {
+            ModConfig.Config.PmcBots.AdditionalOptions.GameVersionWeighting.PrepareForEscape = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.PmcBots.AdditionalOptions.GameVersionWeighting.PrepareForEscape, nameof(PmcPrepareForEscapeVersionWeight));
+        }
+    }
+    private int PmcEdgeOfDarknessVersionWeight
+    {
+        get => ModConfig.Config.PmcBots.AdditionalOptions.GameVersionWeighting.EdgeOfDarkness;
+        set
+        {
+            ModConfig.Config.PmcBots.AdditionalOptions.GameVersionWeighting.EdgeOfDarkness = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.PmcBots.AdditionalOptions.GameVersionWeighting.EdgeOfDarkness, nameof(PmcEdgeOfDarknessVersionWeight));
+        }
+    }
+    private int PmcUnheardVersionWeight
+    {
+        get => ModConfig.Config.PmcBots.AdditionalOptions.GameVersionWeighting.UnheardEdition;
+        set
+        {
+            ModConfig.Config.PmcBots.AdditionalOptions.GameVersionWeighting.UnheardEdition = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.PmcBots.AdditionalOptions.GameVersionWeighting.UnheardEdition, nameof(PmcUnheardVersionWeight));
+        }
+    }
+    private void UndoPmcVersionWeighting()
+    {
+        PmcVersionWeightingEnabled = ModConfig.OriginalConfig.PmcBots.AdditionalOptions.GameVersionWeighting.Enable;
+        PmcStandardVersionWeight = ModConfig.OriginalConfig.PmcBots.AdditionalOptions.GameVersionWeighting.Standard;
+        PmcLeftBehindVersionWeight = ModConfig.OriginalConfig.PmcBots.AdditionalOptions.GameVersionWeighting.LeftBehind;
+        PmcPrepareForEscapeVersionWeight = ModConfig.OriginalConfig.PmcBots.AdditionalOptions.GameVersionWeighting.PrepareForEscape;
+        PmcEdgeOfDarknessVersionWeight = ModConfig.OriginalConfig.PmcBots.AdditionalOptions.GameVersionWeighting.EdgeOfDarkness;
+        PmcUnheardVersionWeight = ModConfig.OriginalConfig.PmcBots.AdditionalOptions.GameVersionWeighting.UnheardEdition;
+    }
+    private void DefaultPmcVersionWeighting()
+    {
+        PmcVersionWeightingEnabled = false;
+        PmcStandardVersionWeight = 20;
+        PmcLeftBehindVersionWeight = 10;
+        PmcPrepareForEscapeVersionWeight = 10;
+        PmcEdgeOfDarknessVersionWeight = 40;
+        PmcUnheardVersionWeight = 20;
+    }
+    #endregion
+    #region PLATE CLASSES
+    private static readonly Dictionary<string, Dictionary<string, double>> PmcTierDefaults = new()
+    {
+        ["Tier 1 (Lv1-10)"]  = new() { {"2",0}, {"3",90}, {"4",10}, {"5",0},  {"6",0}  },
+        ["Tier 2 (Lv11-20)"] = new() { {"2",0}, {"3",65}, {"4",33}, {"5",2},  {"6",0}  },
+        ["Tier 3 (Lv21-30)"] = new() { {"2",0}, {"3",16}, {"4",75}, {"5",7},  {"6",2}  },
+        ["Tier 4 (Lv31-40)"] = new() { {"2",0}, {"3",1},  {"4",50}, {"5",39}, {"6",10} },
+        ["Tier 5 (Lv41-50)"] = new() { {"2",0}, {"3",0},  {"4",20}, {"5",70}, {"6",10} },
+        ["Tier 6 (Lv51-60)"] = new() { {"2",0}, {"3",0},  {"4",10}, {"5",70}, {"6",20} },
+        ["Tier 7 (Lv61-79)"] = new() { {"2",0}, {"3",0},  {"4",5},  {"5",75}, {"6",20} },
+    };
+
+    private Dictionary<string, double> ToDict(Dictionary<string, double> source) => new(source);
+
+    private void HandlePlateChanged(string keyPrefix, Dictionary<string, Dictionary<string, double>> config, Dictionary<string, Dictionary<string, double>> original, (string position, string classNum, double value) e)
+    {
+        config[e.position][e.classNum] = e.value;
+        Utils.UpdateView(e.value, original[e.position][e.classNum], $"{keyPrefix}_{e.position}_Class{e.classNum}");
+    }
+
+    private void HandlePlateUndo(string keyPrefix, Dictionary<string, Dictionary<string, double>> config, Dictionary<string, Dictionary<string, double>> original, string position)
+    {
+        foreach (var classNum in new[] { "2", "3", "4", "5", "6" })
+        {
+            config[position][classNum] = original[position][classNum];
+            MainLayout.pendingChanges.Remove($"{keyPrefix}_{position}_Class{classNum}");
+        }
+        MainLayout.TriggerUIRefresh();
+    }
+
+    private void HandlePlateDefault(string keyPrefix, Dictionary<string, Dictionary<string, double>> config, string position, Dictionary<string, double> defaults)
+    {
+        foreach (var (classNum, value) in defaults)
+        {
+            config[position][classNum] = value;
+            Utils.UpdateView(value, value, $"{keyPrefix}_{position}_Class{classNum}");
+        }
+        MainLayout.TriggerUIRefresh();
+    }
+    #endregion
+    #region SECRET
+    private bool PmcSecretDevelopersNameMarkEnabled
+    {
+        get => ModConfig.Config.PmcBots.Secrets.DeveloperSettings.DevNames.Enable;
+        set
+        {
+            ModConfig.Config.PmcBots.Secrets.DeveloperSettings.DevNames.Enable = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.PmcBots.Secrets.DeveloperSettings.DevNames.Enable, nameof(PmcSecretDevelopersNameMarkEnabled));
+        }
+    }
+    private string PmcSecretDevelopersEntryHolder { get; set; } = "";
+    private List<string> PmcSecretDevelopersNameList => ModConfig.Config.PmcBots.Secrets.DeveloperSettings.DevNames.NameList;
+
+    private void TryAddDeveloperName()
+    {
+        if (string.IsNullOrEmpty(PmcSecretDevelopersEntryHolder)) return;
+        if (PmcSecretDevelopersNameList.Contains(PmcSecretDevelopersEntryHolder))
+        {
+            Snackbar.Add("Name already added.", Severity.Error, config => { config.ShowCloseIcon = false; });
+            return;
+        }
+        if (!Utils.IsStringAndValidLength(PmcSecretDevelopersEntryHolder))
+        {
+            Snackbar.Add("Invalid Name.", Severity.Error, config => { config.ShowCloseIcon = false; });
+            return;
+        }
+        PmcSecretDevelopersNameList.Add(PmcSecretDevelopersEntryHolder);
+        PmcSecretDevelopersEntryHolder = "";
+        Utils.UpdateView(PmcSecretDevelopersNameList, ModConfig.OriginalConfig.PmcBots.Secrets.DeveloperSettings.DevNames.NameList, nameof(PmcSecretDevelopersNameList));
+    }
+
+    private void UndoSecretDeveloperEnabled()
+    {
+        PmcSecretDevelopersNameMarkEnabled = ModConfig.OriginalConfig.PmcBots.Secrets.DeveloperSettings.DevNames.Enable;
+        PmcSecretDevelopersNameList.Clear();
+        foreach (var item in ModConfig.OriginalConfig.PmcBots.Secrets.DeveloperSettings.DevNames.NameList)
+            PmcSecretDevelopersNameList.Add(item);
+        MainLayout.pendingChanges.Remove("PmcSecretDevelopersNameMarkEnabled");
+        MainLayout.pendingChanges.Remove("PmcSecretDevelopersNameList");
+    }
+    private void DefaultSecretDeveloperEnabled()
+    {
+        PmcSecretDevelopersNameMarkEnabled = true;
+        PmcSecretDevelopersNameList.Clear();
+        foreach (var name in new[] { "Chomp", "Dirtbikercj", "Clodan", "CWX", "DrakiaXYZ", "Kaeno", "Refringe", "Waffle", "AcidPhantasm", "Archangel" })
+            PmcSecretDevelopersNameList.Add(name);
+        if (!MainLayout.pendingChanges.Contains("PmcSecretDevelopersNameMarkEnabled")) MainLayout.pendingChanges.Add("PmcSecretDevelopersNameMarkEnabled");
+        if (!MainLayout.pendingChanges.Contains("PmcSecretDevelopersNameList")) MainLayout.pendingChanges.Add("PmcSecretDevelopersNameList");
+    }
+
+    private bool PmcSecretDeveloperLevelsEnabled
+    {
+        get => ModConfig.Config.PmcBots.Secrets.DeveloperSettings.DevLevels.Enable;
+        set
+        {
+            ModConfig.Config.PmcBots.Secrets.DeveloperSettings.DevLevels.Enable = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.PmcBots.Secrets.DeveloperSettings.DevLevels.Enable, nameof(PmcSecretDeveloperLevelsEnabled));
+        }
+    }
+    private void UndoSecretDeveloperLevelsEnabled() => PmcSecretDeveloperLevelsEnabled = ModConfig.OriginalConfig.PmcBots.Secrets.DeveloperSettings.DevLevels.Enable;
+    private void DefaultSecretDeveloperLevelsEnabled() => PmcSecretDeveloperLevelsEnabled = false;
+
+    private int PmcSecretDeveloperLevelsMin
+    {
+        get => ModConfig.Config.PmcBots.Secrets.DeveloperSettings.DevLevels.Min;
+        set
+        {
+            ModConfig.Config.PmcBots.Secrets.DeveloperSettings.DevLevels.Min = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.PmcBots.Secrets.DeveloperSettings.DevLevels.Min, nameof(PmcSecretDeveloperLevelsMin));
+        }
+    }
+    private int PmcSecretDeveloperLevelsMax
+    {
+        get => ModConfig.Config.PmcBots.Secrets.DeveloperSettings.DevLevels.Max;
+        set
+        {
+            ModConfig.Config.PmcBots.Secrets.DeveloperSettings.DevLevels.Max = value;
+            Utils.UpdateView(value, ModConfig.OriginalConfig.PmcBots.Secrets.DeveloperSettings.DevLevels.Max, nameof(PmcSecretDeveloperLevelsMax));
+        }
+    }
+    private void UndoSecretDeveloperLevelsMinMax()
+    {
+        PmcSecretDeveloperLevelsMin = ModConfig.OriginalConfig.PmcBots.Secrets.DeveloperSettings.DevLevels.Min;
+        PmcSecretDeveloperLevelsMax = ModConfig.OriginalConfig.PmcBots.Secrets.DeveloperSettings.DevLevels.Max;
+    }
+    private void DefaultSecretDeveloperLevelsMinMax()
+    {
+        PmcSecretDeveloperLevelsMin = 30;
+        PmcSecretDeveloperLevelsMax = 79;
+    }
+    #endregion
+    #region INPUT HANDLING
+    private bool HandleKeyDown(KeyboardEventArgs e) => e.Key == "Enter" && !e.ShiftKey;
+    #endregion
+    #region CASCADING PARAMETERS
+    [CascadingParameter] public MainLayout? Layout { get; set; }
+    #endregion
+}

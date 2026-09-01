@@ -153,14 +153,14 @@ namespace Manimal.LoadAmmoAnim
                     new AcceptableValueRange<float>(0.1f, 10f)));
 
             SaveOffsetHotkey = Config.Bind("4. Calibration Tools (F12)", "Save Current Magazine Offset",
-                new KeyboardShortcut(KeyCode.S, KeyCode.LeftControl),
-                "While the loading animation is active or holding the weapon, press this hotkey to save the current " +
-                "magazine's position/rotation (including F12 slider deltas) to offsets.json.");
+                KeyboardShortcut.Empty,
+                "Press this hotkey while in raid to save the current magazine's calibration offsets to offsets.json. " +
+                "Unset by default to prevent accidental saves.");
         }
 
         private void Update()
         {
-            if (SaveOffsetHotkey != null && (SaveOffsetHotkey.Value.IsDown() || ((Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) && Input.GetKeyDown(KeyCode.S))))
+            if (SaveOffsetHotkey != null && SaveOffsetHotkey.Value.MainKey != KeyCode.None && SaveOffsetHotkey.Value.IsDown())
             {
                 SaveCurrentActiveOffset();
             }

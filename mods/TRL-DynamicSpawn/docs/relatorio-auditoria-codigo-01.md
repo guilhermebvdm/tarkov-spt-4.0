@@ -44,6 +44,8 @@ Auditoria de performance do mod **TRL-DynamicSpawn v3.2.9** (client [mods/TRL-Dy
 | `AUD-01-05` | 🟠 Alto | `Client/Components/DynamicSpawnManager.cs:168-175, :386` | Cancelamento global / NRE | `ClearSptQueue()` → `StopBotSpawn()` a cada 1 s no warmup cancela `BotCreationDataClass` em voo → NRE vanilla |
 | `AUD-01-06` | 🟡 Médio | `Client/Components/DynamicSpawnManager.cs:339, 367-451` | Trabalho com raid vazia | `SpawnHordeLoop` continua gerando waves/`bot/generate` com 0 bots vivos; `Replace Despawned Bots` realimenta |
 | `AUD-01-07` | 🟡 Médio | `Client/Patches/Patches.cs:805-814` + `Client/Patches/BotSpawnLoggerPatch.cs:26` | Logging sem gate | Maiores emissores (6 linhas Warning por `ChooseProfile`) escapam do gate `Enable Debug Logs` |
+| `AUD-01-08` | 🟡 Médio | `Client/Patches/Patches.cs:374-378` (+ vanilla `LocalGame.cs:139-143, :187-194, :359-361`) | Trabalho barrado por tentativa | Ondas vanilla são interceptadas a **cada tentativa** (prefix em `ActivateBotsByWave`) em vez de desligadas **uma vez** na fonte (cenários de onda do `LocalGame`) — *registrado em 2026-08-22 23:16, pós-rodada 1* |
+| `AUD-01-09` | 🟡 Médio | `Client/Components/DynamicSpawnManager.cs:373-457` (`SpawnHordeLoop` ESTÁGIO A) | Warmup que não converge | Com mortes contínuas (jogador/PvP entre facções), `aliveRealBots` nunca iguala `dynamicCap` → ondas de 1–3 vagas **a cada 30 s indefinidamente**, sem nunca entrar no cooldown longo — *registrado em 2026-08-24 22:31, observado na V2; pré-existente (3.2.9)* |
 
 ---
 
@@ -98,7 +100,7 @@ Auditoria de performance do mod **TRL-DynamicSpawn v3.2.9** (client [mods/TRL-Dy
 - **Proposta de Correção:** estender o `ChooseProfilePatch` para resolver também Scav/marksman ignorando dificuldade (como já faz p/ PMC), OU normalizar a dificuldade pedida ao `AddToTargetBackup` para a mesma usada no consumo; adicionar limpeza do pool no fim de raid.
 - **Como validar:** logar `profilesInList` no início/fim (instrumentação abaixo); critério: pool estável (±50) durante a raid e curva de RAM sem crescimento monotônico.
 - **Decisão:**
-  - `[ ]` Pendente *(rodada 2 — coordenar com Umbigo)*
+  - `[x]` Aceitar sugestão *(rodada 2 — aprovado pelo usuário em 2026-08-22 23:46; inclui revisar o tamanho da pré-carga `AddToTargetBackup` como meta medível)*
 
 ### AUD-01-05 · `ClearSptQueue()` cancela spawns em voo a cada 1 s (44 NREs)
 - **Severidade:** 🟠 Alto
@@ -111,7 +113,7 @@ Auditoria de performance do mod **TRL-DynamicSpawn v3.2.9** (client [mods/TRL-Dy
 - **Proposta de Correção:** remover a chamada periódica (ou torná-la one-shot no início do warmup); se o objetivo é limpar fila travada, filtrar apenas os pedidos do próprio mod.
 - **Como validar:** errors.log da raid de validação: 0 NREs em `TrySpawnFreeInner` (baseline: 44).
 - **Decisão:**
-  - `[ ]` Pendente *(rodada 2 — coordenar com Umbigo)*
+  - `[x]` Aceitar sugestão *(rodada 2 — aprovado pelo usuário em 2026-08-22 23:46)*
 
 ### AUD-01-06 · Waves continuam com a raid vazia; replace realimenta o ciclo
 - **Severidade:** 🟡 Médio
@@ -123,7 +125,7 @@ Auditoria de performance do mod **TRL-DynamicSpawn v3.2.9** (client [mods/TRL-Dy
 - **Proposta de Correção:** condicionar novas waves a estado de raid ativo + orçamento de spawn; rever se replace deve valer para despawn por distância.
 - **Como validar:** RequestHandler: nenhuma `bot/generate` após o último bot morto (cenário "limpar o mapa e esperar 2 min").
 - **Decisão:**
-  - `[ ]` Pendente *(rodada 2 — coordenar com Umbigo)*
+  - `[x]` Aceitar sugestão *(rodada 2 — aprovado pelo usuário em 2026-08-22 23:46)*
 
 ### AUD-01-07 · Logging Warning fora do gate de debug
 - **Severidade:** 🟡 Médio
@@ -135,7 +137,35 @@ Auditoria de performance do mod **TRL-DynamicSpawn v3.2.9** (client [mods/TRL-Dy
 - **Proposta de Correção:** aplicar o gate existente a todos os emissores e rebaixar para `LogDebug`/`LogInfo`.
 - **Como validar:** raid com `Enable Debug Logs = false` → 0 linhas `ChooseProfile`/`Available profile`/`SPAWN ->` no log.
 - **Decisão:**
-  - `[x]` Aceitar com modificação: **executar somente na rodada 1.5, após a validação V1** (os logs são a observabilidade do teste da rodada 1 — decisão do usuário no plano)
+  - `[x]` Aceitar com modificação: **executar somente na rodada 1.5, após a validação V1** (os logs são a observabilidade do teste da rodada 1 — decisão do usuário no plano) — *2026-08-22 23:46: V1 parcial concluída (getConfig = 1); usuário aprovou entrar na rodada 2 junto com 04/05/06/08. Os emissores ficam **gated** por `Enable Debug Logs` (não removidos) para continuarem servindo à V2.*
+
+### AUD-01-08 · Ondas vanilla barradas por tentativa em vez de desligadas na fonte
+- **Severidade:** 🟡 Médio
+- **Evidência:** Suspeita (mecanismo confirmado no código do mod e do vanilla; **frequência das tentativas e efeito colateral de parar os cenários cedo ainda não medidos**) — *achado registrado após a rodada 1 (2026-08-22 23:16), a partir da pergunta do usuário sobre os nomes de bots no console fora da hora da onda*
+- **Execução:** por tentativa de onda vanilla, raid inteira. O jogo mantém seus próprios "roteiros" de spawn — `WavesSpawnScenario` (ondas cronometradas), `NonWavesSpawnScenario` (spawner contínuo) e `BossSpawnScenario` — criados em `LocalGame.cs:139-143` e postos a rodar em `:187-194`; cada onda disparada chama `BotsController.ActivateBotsByWave`, onde o prefix do mod a rejeita.
+- **Localização no Mod:** [Patches.cs:374-378](../Client/Patches/Patches.cs#L374-L378) (`DisableVanillaWavesPatch` → `BotsController.ActivateBotsByWave(BotWaveDataClass)`), `:407-409` (`DisableVanillaBossWavesPatch`), logs `:431/:444/:513` ("Blocked Vanilla Horde Wave" / Rogue / Raider)
+- **Referência Cruzada:** `references/eft-decompiled/Assembly-CSharp/EFT/LocalGame.cs:141` (`WavesSpawnScenario.smethod_0(..., wave => botsController_0.ActivateBotsByWave(wave), ...)`), `:139` (`NonWavesSpawnScenario`), `:359-361` (o próprio `LocalGame.Stop` para os três cenários com `.Stop()` — a API de desligar existe e é a canônica)
+- **Causa Raiz:** o mod escolheu **interceptar o efeito** (cada ativação de onda) em vez de **parar a causa** (os cenários). O vanilla continua agendando, acordando e tentando; o mod paga o prefix + log a cada tentativa e o jogo paga o agendamento. Parte dos "nomes de bots fora da hora da onda" no console vem daqui (a outra parte é AUD-01-05/06/07).
+- **Impacto Técnico Real:** trabalho zumbi do vanilla a raid inteira + linhas de log por tentativa; não é o maior ofensor do baseline (CPU por tentativa é baixo), mas é custo por construção que a rodada 2 pode zerar de graça.
+- **Proposta de Correção:** no start hook do mod (`RaidLifecycle.OnRaidStart`, já existe desde o item 009), chamar **uma vez** `wavesSpawnScenario_0.Stop()` / `nonWavesSpawnScenario_0.Stop()` do `LocalGame` (campos privados — resolver por reflection cacheada ou pela API pública se houver), mantendo `bossSpawnScenario_0` conforme a configuração de chefes nativos (o mod **quer** os bosses nativos — ver `AdjustVanillaBossWaves`). O prefix atual vira rede de segurança (continua, mas sem tráfego). **Antes de decidir:** (1) medir quantas vezes/raid o prefix dispara hoje (contador `// PERF-INSTR AUD-01-08`); (2) confirmar no dump que `Stop()` cedo não derruba o `BotSpawner`/`BotsController` de que o mod depende (`Patches.cs:378` usa o mesmo `BotsController`); (3) conferir o equivalente no `CoopGame` do Fika (`CoopGame.cs`) — o headless roda o mod.
+- **Como validar:** log da raid sem nenhuma linha `Blocked Vanilla Horde Wave` (baseline: por tentativa); spawns do mod inalterados; bosses nativos continuam nascendo conforme config.
+- **Decisão:**
+  - `[x]` Aceitar sugestão (revisada na atualização abaixo: prefix em `NonWavesSpawnScenario.Run`) *(rodada 2 — aprovado pelo usuário em 2026-08-22 23:46)*
+
+> **Atualização 2026-08-22 23:35 — evidência promovida para Forte (medida na raid de validação V1, client v3.3.0).** O metrônomo de 10 s **persiste com `getConfig` = 1** — logo AUD-01-01 era contribuinte, não a causa. A causa é este achado, e é o próprio jogo: `NonWavesSpawnScenario.Update()` (`references/eft-decompiled/Assembly-CSharp/EFT/NonWavesSpawnScenario.cs:115-159`) roda a cada `float_2` segundos — `location.BotSpawnPeriodCheck` com **piso de 10 s** (`:32-34`, `:146-148`) — calcula `BotMax − bots vivos` (com a raid vazia = o cap inteiro, que o `SetMaxBotCountPatch` ainda eleva) e, para cada vaga que `TrySpawn` libera, chama `ActivateBotsWithoutWave` (`:153-158`) → `BotCreationDataClass.Create` → `ChooseProfile` sobre o pool (**473 perfis** nesta raid, 6 linhas `Warning` por escolha — AUD-01-07) → `BotSpawner.TryToSpawnInZoneAndDelay`, onde o prefix do mod (`Patches.cs:546-554`) barra. **Na raid medida:** 163 bloqueios de `assault` em rajadas de 3–8 a cada ~10 s + 228 `ChooseProfile` + ~1.600 linhas de perfil no console, **com 0 bots vivos e fora da onda do mod**; FPS 90→60 a cada rajada. O `LocalGame.Stop` desliga esse cenário com `nonWavesSpawnScenario_0.Stop()` (`LocalGame.cs:360`) — a API de desligar é a canônica.
+> **Correção proposta (revisada):** em vez de reflection nos campos privados do `LocalGame`, **prefix em `NonWavesSpawnScenario.Run()`** (`:98`, público) retornando `false` quando o mod governa os spawns (host/solo, `!FikaHelper.IsClient()`): `bool_1` nunca arma, `Update()` sai na primeira linha (`:117`) — custo zero por frame, sem reflection, vale para `LocalGame` e `CoopGame`. Os bosses nativos (`BossSpawnScenario`) **não** são tocados; as ondas cronometradas (`WavesSpawnScenario`, 17 bloqueios/raid) ficam para a mesma rodada. Validação: zero `Blocked Vanilla Assault Scav Spawn` no log; metrônomo de 10 s ausente; spawns do mod inalterados.
+
+---
+
+### AUD-01-09 · Warmup que não converge (ondas de reposição a cada 30 s para sempre)
+- **Severidade:** 🟡 Médio
+- **Evidência:** Forte (medida na raid V2 de 2026-08-24: `Attempt 43`, `REAL Alive: 13–15/16`, `Available: 1–3` por ~21 min; cada tentativa spawnou de fato — `SQUAD MEMBER SPAWNED` presente — e as mortes repunham o déficit). **Pré-existente** (mesma lógica na 3.2.9); ficou visível porque a V2 leu o log com atenção. *Registrado em 2026-08-24 22:31 a partir do relato do usuário ("a onda 2 nunca terminou").*
+- **Execução:** ESTÁGIO A do `SpawnHordeLoop` ([DynamicSpawnManager.cs:373-457](../Client/Components/DynamicSpawnManager.cs#L373)): enquanto `aliveRealBots < dynamicCap`, dispara `ProcessWave` a cada `DelayBeforeFirstWave` (30 s) — o cooldown longo (`SecondsBetweenWaves`, 360 s) só é alcançado com o mapa **exatamente** cheio. `dynamicCap = playerCap + especiais vivos` (16 = 15 + 1 na raid medida); com o jogador matando e PMCs se matando entre si, o mapa oscila 1–3 abaixo do teto para sempre.
+- **Impacto Técnico Real:** custo baixo por ciclo (ondas de 1–3 bots já usando o pipeline otimizado da rodada 2), mas cadência de reposição **12× mais agressiva** do que o cooldown configurado, indefinidamente — `bot/generate`/materialização contínuos e experiência de "sempre tem bot chegando" que o usuário percebeu como onda infinita.
+- **Proposta de Correção (rodada 3, discutir com Umbigo — é decisão de design):** considerar "cheio" com tolerância (ex.: `alive ≥ dynamicCap − 2` entra no cooldown longo), e/ou após N tentativas de warmup mudar para o intervalo longo mesmo abaixo do teto. Reavaliar se `dynamicCap` deve somar especiais vivos (persegue vaga que o especial devolve ao morrer).
+- **Como validar:** raid com mortes contínuas → após a tolerância, log mostra `Wave Cooldown active` mesmo com 1–2 vagas abertas; ondas passam à cadência de `SecondsBetweenWaves`.
+- **Decisão:**
+  - `[ ]` Pendente *(rodada 3 — junto com AUD-01-04 residual do pool inicial vanilla e item 011)*
 
 ---
 
@@ -169,10 +199,35 @@ Protocolo: raid Customs, mesma rota do baseline 2026-08-22, CapFrameX + curva de
 - [ ] `getConfig` no RequestHandler durante a raid = 1 (baseline: 111)
 - [ ] Metrônomo de 10 s ausente na captura (baseline: stutters >50 ms a cada 10,0 s cravados)
 - [ ] RequestHandler silencioso no menu/hideout pós-raid
-- [ ] Não-regressão: spawns/despawns/teleports funcionando como antes; painel web aplica config via `ForceRefresh` (caminho manual)
+- [ ] Não-regressão: spawns/despawns/teleports funcionando como antes; painel web aplica config via `ForceRefresh` (caminho manual — toggle F12 `Server Config → Reload Server Config`)
+- [ ] Log do mod mostra, 1× por raid: `Server config fetched (raid-scoped cache)` e `Raid end hook fired (BaseLocalGame.Stop)` — se a fonte logada for `GameWorld.OnDestroy`, o patch de `Stop` não dispara (PA-01-05: remover e anotar na spec)
+
+> **Resultado parcial V1 (raid de 2026-08-22 ~23:20, client 3.3.0, log `LogOutput.log:279056-285190`):** ✅ `getConfig` = **1** (baseline 111) · ✅ `Server config fetched (raid-scoped cache)` 1× · ✅ `Raid end hook fired` 1× — **fonte `GameWorld.OnDestroy`**, ou seja, o patch em `BaseLocalGame<>.Stop` **não disparou** (PA-01-05: remover na próxima build e anotar na spec) · ❌ **metrônomo de 10 s persiste** (FPS 90→60 em rajadas com 0 bots) — causa identificada e medida em **AUD-01-08** (spawner contínuo do vanilla), não em AUD-01-01. `bot/generate` = 0 nesta raid (pool já com 473 perfis).
+>
+> **Status da rodada 1 (2026-08-22):** implementada no item [009-perf-config-cache-raid](../backlog/009-perf-config-cache-raid/) — client **v3.3.0** compilada e instalada em `BepInEx/plugins/TRL-DynamicSpawn.dll` (rollback: `TRL-DynamicSpawn.dll.bak-3.2.9`). AUD-01-01/02/03: **aplicados, aguardando validação V1** (medição in-game pendente — não fecham sem números).
+
+## Plano de validação (V2 — pós-rodada 2, client v3.4.0)
+
+Protocolo: mesma raid Customs do baseline/V1, CapFrameX + curva de RAM + `LogOutput.log` + `errors.log`. **Rodar com `Enable Debug Logs = true`** (os contadores abaixo dependem das linhas gated) e uma segunda raid curta com `false` para o AC-M5.
+
+- [ ] **AUD-01-08:** `Blocked Vanilla Assault Scav Spawn` = 0 (V1: 163); `Refused vanilla continuous spawn` aparece no lugar (1 linha por vaga, só com debug); metrônomo de 10 s **ausente** com 0 bots vivos (V1: FPS 90→60)
+- [ ] **AUD-01-04:** `profilesInList` no fim − no início ≤ 50 (baseline 337→1155; V1: 473 estável sem `bot/generate`); `bot/generate` (incl. `byBackup`) ≤ 2 × bots spawnados; curva de RAM sem crescimento monotônico
+- [ ] **AUD-01-05:** `NullReferenceException` em `TrySpawnFreeInner` ≤ 1 (baseline 44); `Clearing pending/stuck` = 1 por raid; nenhum `Member safely skipped` por cancelamento
+- [ ] **AUD-01-06:** após `Raid end hook fired` nenhuma linha de onda/`SQUAD`/`bot/generate`; morrer com bots por nascer → onda interrompida em ≤ 1 s (`SQUAD MEMBER SPAWNED` para)
+- [ ] **AUD-01-07:** raid com `Enable Debug Logs = false` → 0 linhas `Logger`/`SPY`/`SPAWN ->`/`Available profile`/`Horde Breakdown` (V1: ~1.900); só as operacionais por onda (≤ 8/onda)
+- [ ] **Hooks (PA-02-03):** fonte do `Raid end hook fired` = `CoopGame.Stop` (Fika) — `GameWorld.OnDestroy` como fonte significa que o hook cedo não disparou
+- [ ] **Não-regressão:** NR-1..NR-8 da [01-spec do 010](../backlog/010-perf-spawn-pipeline-r2/010-perf-spawn-pipeline-r2-01-spec.md) (snipers vanilla seguem nascendo, bosses nativos, composição das ondas, F12 `Initial Profile Preload` visível em Avançado)
+
+> **Resultado V2 — parcial (2 raids de 2026-08-24, client 3.4.0, `LogOutput.log:288628-316065` + `errors.log` do último processo):**
+> **Raid A (host/solo, Customs, debug ON):** ✅ `Blocked Vanilla Assault Scav Spawn` = **0** (V1: 163) — no lugar, 1.630 recusas baratas (`Refused vanilla continuous spawn`: branch + 1 linha gated; sem criação de perfil) · ✅ `getConfig` = **1** · ✅ `Clearing pending` = **1** (era 1×/s) · ✅ `profilesInList` **452 → 504** (+52; baseline 337→1155) — obs.: os ~452 iniciais vêm da pré-geração vanilla das waves definidas do mapa, fora do controle do mod (candidato a achado da rodada 3) · ✅ **zero linhas do mod após `Raid end hook fired`** · `difficulty relaxed` = 13 (AC-X1, dentro do esperado) · `bot/generate` não aparece no RequestHandler (rota não logada por ali — usar `profilesInList` como métrica de GROW).
+> **Raid B (guest Fika):** mod inerte como esperado (sem Maestro/waves); 1 `getConfig` (overlay do mapa, fetch-on-miss) · `Enabled patch CoopGameStopPatch` presente (namespace do Fika instalado confere).
+> **`errors.log` (só o último processo sobrevive):** `TrySpawnFreeInner` = **0** (baseline 44) ✅; 141 NRE restantes são `EFT.Player.get_PointOfView` (70×, Fika/espectador) + 1 `WeaponSoundPlayer` — **nenhuma do mod**.
+> **Pendências para fechar a V2:** ⚠️ fonte do hook de fim na raid A foi `GameWorld.OnDestroy` — `CoopGame.Stop` **não disparou nesse encerramento** (patch aplicado com sucesso; hipótese: jogo fechado direto da tela de morte → só o teardown da cena roda; observar a fonte numa raid encerrada por extração normal) · ⚠️ confirmação subjetiva do usuário: metrônomo de 10 s/FPS e curva de RAM (log não mede) · ⚠️ raid host com `Enable Debug Logs = false` (AC-M5) ainda não feita.
+>
+> **Status da rodada 2 (2026-08-23 00:41):** implementada no item [010-perf-spawn-pipeline-r2](../backlog/010-perf-spawn-pipeline-r2/) — client **v3.4.0** compilada e instalada (rollback: `TRL-DynamicSpawn.dll.bak-3.3.0`). AUD-01-04/05/06/07/08: **aplicados, aguardando validação V2**. Achado novo da code review (CR-01-01 do 010): `AddToTargetBackup` é **nível permanente** de cache reposto pelo SPT (`GClass684.cs:258-263`), não "pedir N perfis" — a pré-carga de Scav sempre foi no-op; semântica corrigida no código e na doc.
 
 ## 4. Plano de Ação
 
 1. **Rodada 1 (aprovada):** AUD-01-01 + 02 + 03 via `/optimize-mod-performance TRL-DynamicSpawn --fase 2 --escopo Client`.
 2. **Validação V1** (checklist acima) → **rodada 1.5:** AUD-01-07.
-3. **Rodada 2 (pendente, com Umbigo):** decidir AUD-01-04/05/06 — os dois primeiros são os candidatos diretos ao crescimento de RAM (~2 GB/min) e às NREs do baseline.
+3. **Rodada 2 (pendente, com Umbigo):** decidir AUD-01-04/05/06 — os dois primeiros são os candidatos diretos ao crescimento de RAM (~2 GB/min) e às NREs do baseline — **+ AUD-01-08** (desligar os cenários de onda vanilla na fonte; Suspeita → medir o contador antes de decidir).

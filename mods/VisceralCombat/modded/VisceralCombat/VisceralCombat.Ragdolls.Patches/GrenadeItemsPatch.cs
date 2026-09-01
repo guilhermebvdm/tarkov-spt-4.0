@@ -1,9 +1,9 @@
+using System.Collections.Generic;
 using System.Reflection;
 using EFT;
 using EFT.Interactive;
 using SPT.Reflection.Patching;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace VisceralCombat.Ragdolls.Patches;
 
@@ -17,22 +17,29 @@ public class GrenadeItemsPatch : ModulePatch
 	[PatchPostfix]
 	private static void Postfix(IExplosiveItem grenadeItem, Vector3 grenadePosition)
 	{
-		//IL_0013: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0014: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0019: Unknown result type (might be due to invalid IL or missing references)
-		//IL_003e: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0043: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0099: Unknown result type (might be due to invalid IL or missing references)
-		float num = Random.Range(grenadeItem.MinExplosionDistance, grenadeItem.MaxExplosionDistance);
-		RaycastHit[] array = Physics.SphereCastAll(new Ray(grenadePosition, Vector3.up), num, grenadeItem.MaxExplosionDistance, LayerMask.NameToLayer("Default"));
-		RaycastHit[] array2 = array;
-		for (int i = 0; i < array2.Length; i++)
+		if (grenadeItem == null || VisceralEntry.Instance == null) return;
+		if (VisceralEntry.Instance.ItemForce == null || !VisceralEntry.Instance.ItemForce.Value) return;
+
+		float maxDist = grenadeItem.MaxExplosionDistance;
+		int defaultLayerMask = 1 << LayerMask.NameToLayer("Default");
+		Collider[] colliders = Physics.OverlapSphere(grenadePosition, maxDist, defaultLayerMask);
+		if (colliders == null || colliders.Length == 0) return;
+
+		HashSet<Rigidbody> processedItems = new HashSet<Rigidbody>();
+		float forceMultiplier = grenadeItem.GetStrength * 0.5f * VisceralEntry.Instance.GrenadeExplIntensity.Value;
+
+		for (int i = 0; i < colliders.Length; i++)
 		{
-			RaycastHit val = array2[i];
-			Rigidbody component = ((Component)val.collider).GetComponent<Rigidbody>();
-			if (component != null && component.gameObject.GetComponent<ObservedLootItem>() != null)
+			Collider col = colliders[i];
+			if (col == null) continue;
+
+			Rigidbody rb = col.attachedRigidbody ?? col.GetComponent<Rigidbody>();
+			if (rb != null && processedItems.Add(rb))
 			{
-				component.AddExplosionForce(grenadeItem.GetStrength * 0.5f * VisceralEntry.Instance.GrenadeExplIntensity.Value, grenadePosition, num);
+				if (rb.gameObject.GetComponent<ObservedLootItem>() != null)
+				{
+					rb.AddExplosionForce(forceMultiplier, grenadePosition, maxDist);
+				}
 			}
 		}
 	}
