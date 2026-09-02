@@ -199,12 +199,14 @@ public class BotComponent : BotComponentBase, ISPlayer
 
     public float DistanceToClosestHuman { get; private set; } = float.MaxValue;
     public bool IsLODTier0 { get; private set; } = true;
+    public int CurrentLodTier { get; private set; } = 0;
 
     public void ForceInstantWakeup(bool alertSquad = true)
     {
         _combatLockoutTime = Time.time + COMBAT_LOCKOUT_DURATION;
         _nextLODTickTime = 0f;
         IsLODTier0 = true;
+        CurrentLodTier = 0;
 
         if (alertSquad)
         {
@@ -274,7 +276,12 @@ public class BotComponent : BotComponentBase, ISPlayer
 
                 if (isTier0)
                 {
+                    CurrentLodTier = 0;
                     _nextLODTickTime = 0f;
+                }
+                else
+                {
+                    CurrentLodTier = distToHuman <= LOD_MID_DIST ? 1 : 2;
                 }
 
                 bool shouldTickLOD = isTier0;
