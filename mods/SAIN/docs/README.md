@@ -20,6 +20,7 @@ Documentação técnica atualizada cobrindo todas as melhorias balísticas, otim
 | [**06. Personalidades e Sistema de Presets**](./modded/06-personalidades-e-sistema-de-presets.md) | Arquétipos de Personalidade (`EPersonality`), Personalidades de Esquadrão (`ESquadPersonality`), Reset Dinâmico (`.Clear()`), Serialização JSON e Editor Gráfico In-Game Desacoplado (F6). | 🟢 Vivo |
 | [**07. Táticas de Esquadrão, Comunicação e Interoperabilidade**](./modded/07-taticas-de-esquadrao-comunicacao-e-interop.md) | Hierarquia de Esquadrão, Teardown Seguro de Grupos (`BotSquads.Dispose()`), Templates de Frases Estáticos sem Reflexão e Matriz de Interoperabilidade (Fika, QuestingBots, LootingBots, Realism). | 🟢 Vivo |
 | [**08. Sistemas Auxiliares: Portas, Médico, Extração e Patches**](./modded/08-sistemas-auxiliares-portas-medico-extracao-e-patches.md) | Manipulação e Chute de Portas (`DoorOpener`), Medicina de Campo, Extração com Limites Quadráticos Corrigidos, Unity Jobs e Catálogo Completo de Patches Harmony sem Reflexão. | 🟢 Vivo |
+| [**09. Arquitetura Multithread e LOD de IA**](./09-arquitetura-multithread-e-lod.md) | Engenharia de Alta Performance em `modded-multithread`: Jobs paralelos (`CoverEvaluationJob`, `PathNodeGenerationJob`, `GainSightBatchJob`), Zero-Alloc NativeArray Pools, LOD adaptativo por distância e Preservação Estrita de API Pública. | 🟢 Vivo |
 
 ---
 
