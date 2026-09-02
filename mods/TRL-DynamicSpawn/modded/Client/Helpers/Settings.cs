@@ -25,6 +25,7 @@ namespace TRLDynamicSpawn.Helpers
         public static ConfigEntry<float> smoothSpawningDelay;
 
         public static ConfigEntry<bool> enableDebugLogs;
+        public static ConfigEntry<bool> enableDebugHUD;
 
         public static ConfigEntry<bool> masterDespawnToggle;
         public static ConfigEntry<bool> enableSpawnBubble;
@@ -98,9 +99,12 @@ namespace TRLDynamicSpawn.Helpers
             smoothSpawningDelay = config.Bind(spawnSection, "Smooth Spawning Delay", 1.5f, 
                 new ConfigDescription("Delay in seconds between bot/group spawns if Smooth Spawning is enabled.", new AcceptableValueRange<float>(0f, 10f)));
 
-            string debugSection = "Debug Logs";
+            string debugSection = "Debug Logs & Developer HUD";
             enableDebugLogs = config.Bind(debugSection, "Enable Debug Logs", false, 
                 new ConfigDescription("Enable debug logs for map culling and dynamic spawns in the console."));
+
+            enableDebugHUD = config.Bind(debugSection, "Enable Developer HUD", false,
+                new ConfigDescription("Displays an on-screen developer HUD showing wave timers, session status, and active bot counts. Disabled by default."));
 
             string teleportSection = "Bot Teleport & Density Settings";
             masterDespawnToggle = config.Bind(teleportSection, "Enable Bot Teleport System", true, 

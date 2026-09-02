@@ -1542,19 +1542,9 @@ namespace TRLDynamicSpawn.Components
             return "";
         }
 
-        private bool _showDebugUI = true;
-
-        private void Update()
-        {
-            if (Input.GetKeyDown(KeyCode.F12))
-            {
-                _showDebugUI = !_showDebugUI;
-            }
-        }
-
         private void OnGUI()
         {
-            if (!_showDebugUI || _gameWorld == null) return;
+            if (!Settings.enableDebugHUD.Value || _gameWorld == null) return;
             
             // Info Setup
             Dictionary<string, int> factionCounts = new Dictionary<string, int>();
@@ -1685,8 +1675,6 @@ namespace TRLDynamicSpawn.Components
             }
             
             GUILayout.FlexibleSpace();
-            GUILayout.Label("<color=grey>[F12] Ocultar Painel</color>");
-            
             GUILayout.EndArea();
         }
 

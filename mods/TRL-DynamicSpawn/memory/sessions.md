@@ -6,16 +6,15 @@ Memória cronológica de sessões de trabalho (timestamps em GMT-3). Cada entrad
 
 ---
 
-## Estado Atual (Snapshot ao Fim da Sessão — 2026-08-31)
+## Estado Atual (Snapshot ao Fim da Sessão — 2026-09-02)
 
-**Mod C# Client (v3.7.1) + C# Server (v3.7.1) compilados com sucesso (0 erros).**
+**Mod C# Client (v3.7.2) + C# Server (v3.7.2) compilados com sucesso (0 erros).**
 
 - **Identity**: `TRL-DynamicSpawn` (Client BepInEx DLL: `TRL-DynamicSpawn.dll`, Server C# DLL: `TRL-DynamicSpawn-Server.dll` com Web UI). Compatível com SPT 4.0.13 e EFT 0.16.9 / FIKA.
-- **Garantia de Spawn Agrupado Ombro a Ombro (`v3.7.1`)**:
-  - Em `DynamicSpawnManager.cs` (`SpawnGroupBotsCoroutine`), ao instanciar um grupo com `groupSize > 1`, o mod inicializa `spawnParams.ShallBeGroup = new ShallBeGroupParams(true, true, groupSize)`.
-  - Notifica o motor nativo de spawn da EFT (`SpawnSystem.SelectAISpawnPoints`) para alocar posições de nascimento agrupadas (ombro a ombro em um raio de 3 a 8 metros) para todos os membros do esquadrão.
-- **Eliminação de Log Spam e Stutterings (`v3.7.0`)**:
-  - `ChooseProfilePatch` e `BotSpawnLoggerPatch` refatorados para usar o gate `Settings.enableDebugLogs.Value` e o nível `LogInfo`, removendo a escrita contínua em disco durante o pre-loading de perfis do SPT e eliminando os travamentos de I/O síncrono.
+- **Developer HUD no Menu F12 (`v3.7.2`)**:
+  - Removida a captura da tecla `F12` em `Update()` que colidia com a abertura da interface do BepInEx e mantinha o HUD sempre ativo na tela por padrão.
+  - Adicionada a opção `Enable Developer HUD` na seção `Debug Logs & Developer HUD` do menu F12 (`Settings.cs`), com valor **desabilitado por padrão (`false`)**.
+  - O painel em `DynamicSpawnManager.cs` (`OnGUI`) passa a respeitar estritamente a opção `Settings.enableDebugHUD.Value`.
 - **Estruturação do Workspace (Dual original/modded)**:
   - `original/`: Backup intacto da versão original canônica.
   - `modded/`: Código-fonte com as refatorações de alta performance e física aplicada.
@@ -51,6 +50,15 @@ Memória cronológica de sessões de trabalho (timestamps em GMT-3). Cada entrad
 ---
 
 ## Histórico de Sessões
+
+### 2026-09-02 — Developer HUD no Menu F12 e Desativação por Padrão (v3.7.2)
+
+- **Controle de Exibição do Developer HUD (`v3.7.2`)**:
+  - Removido o atalho de teclado `F12` em `Update()` que entrava em conflito com o menu de configuração do BepInEx.
+  - Criada a configuração `Enable Developer HUD` em `Settings.cs` (na seção `Debug Logs & Developer HUD`), **desabilitada por padrão (`false`)**.
+  - O método `OnGUI()` em `DynamicSpawnManager.cs` agora depende exclusivamente de `Settings.enableDebugHUD.Value`.
+- **Validação de Build**:
+  - `TRL-DynamicSpawn-Client.csproj` e `TRL-DynamicSpawn-Server.csproj` compilados com **0 Erros**.
 
 ### 2026-08-31 — Garantia de Spawn Agrupado Ombro a Ombro (v3.7.1) e Eliminação de Log Spam (v3.7.0)
 
