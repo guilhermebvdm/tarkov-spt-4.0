@@ -30,14 +30,19 @@ public struct PlayerTickData(PlayerComponent inOwner)
         List<OtherPlayerData> OtherPlayers = Owner.OtherPlayersData.DataList;
         int count = OtherPlayers.Count;
 
-        // ref: AUD-09-03 - Buffer nativo persistente redimensionado sob demanda (Zero-Alloc)
-        if (!OtherPlayerDirectionData.IsCreated || OtherPlayerDirectionData.Length != count)
+        // ref: AUD-09-03 / CR-02-02 - Buffer nativo persistente redimensionado sob demanda com guarda count > 0
+        if (count > 0 && (!OtherPlayerDirectionData.IsCreated || OtherPlayerDirectionData.Length != count))
         {
             if (OtherPlayerDirectionData.IsCreated)
             {
                 OtherPlayerDirectionData.Dispose();
             }
             OtherPlayerDirectionData = new NativeArray<PlayerDirectionData>(count, Allocator.Persistent);
+        }
+        else if (count == 0 && OtherPlayerDirectionData.IsCreated)
+        {
+            OtherPlayerDirectionData.Dispose();
+            OtherPlayerDirectionData = default;
         }
 
         for (int j = 0; j < count; j++)

@@ -37,30 +37,7 @@ public class EnemyPlaceRaycastJob : BotManagerBase
 
         public void Dispose()
         {
-            if (PlacePositions.IsCreated)
-            {
-                PlacePositions.Dispose();
-            }
-
-            if (BotPositions.IsCreated)
-            {
-                BotPositions.Dispose();
-            }
-
-            if (EnemyPositions.IsCreated)
-            {
-                EnemyPositions.Dispose();
-            }
-
-            if (PlaceDistancesToBot.IsCreated)
-            {
-                PlaceDistancesToBot.Dispose();
-            }
-
-            if (PlaceDistancesToEnemy.IsCreated)
-            {
-                PlaceDistancesToEnemy.Dispose();
-            }
+            // ref: CR-02-01 - Memória nativa gerenciada exclusivamente pelos buffers persistentes de EnemyPlaceRaycastJob (fatias GetSubArray)
         }
     }
 
