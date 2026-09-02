@@ -25,7 +25,7 @@ graph TD
 ```
 
 * **Manutenibilidade:** O SAIN permanece como base limpa e estável. As mecânicas táticas avançadas residem em seu próprio mod.
-* **Injeção Não-Invasiva:** Utilização do `BigBrain` para registrar *Brain Layers* de alta prioridade (`BreachAndClearLayer`, `BoundingOverwatchLayer`, `AirdropContestedLayer`) que assumem o bot apenas durante os eventos táticos coordenados.
+* **Injeção Não-Invasiva:** Utilização do `BigBrain` para registrar *Brain Layers* de alta prioridade (`BreachAndClearLayer`, `BoundingOverwatchLayer`, `AirdropContestedLayer`, `DoorNavigationLayer`) que assumem o bot apenas durante os eventos táticos coordenados.
 * **Prevenção de Conflitos Internos:** Bloqueio de reações espúrias do SAIN (como fuga em pânico de granadas arremessadas pelo próprio bot ou gatilhos falsos de *unstuck* durante a espera em cobertura).
 
 ---
@@ -57,6 +57,11 @@ graph TD
 - [ ] **Criação Dinâmica de Hotspot de Alto Interesse:** Registro da coordenada de pouso da caixa como um Ponto de Interesse (POI) de altíssima prioridade para bots (PMCs e Scavs) num raio amplo (ex: 150m–300m).
 - [ ] **Aproximação Tática e Estabelecimento de Perímetro:** Bots não correm a descoberto diretamente para o loot; esquadrões se movem em formação de cerco, varrem a área contra emboscadores e estabelecem posições defensivas ao redor da fumaça do sinalizador.
 - [ ] **Disputa e Coleta Sob Tensão:** Concorrência hostil entre grupos pelo controle da caixa. Enquanto um bot realiza a busca e extração de itens de alto valor, membros aliados cobrem os ângulos de aproximação, transformando o Airdrop em uma zona de combate de alto risco para o jogador.
+
+### 5. Navegação Físico-Espacial e Eliminação de Bugs de Portas (*Door Navigation & Anti-Stuck*)
+- [ ] **Mitigação de Atravessamento Fantasma de Portas:** Pausar o avanço vetorial do `NavMeshAgent` durante a animação de rotação da porta e condicionar a liberação de travessia ao alcance de pelo menos 70% do ângulo total de abertura (`door.Angle >= door.OpenAngle * 0.7f`), impedindo que bots em alta velocidade atravessem a madeira sólida antes da abertura visual.
+- [ ] **Recuo Tático em Portas "Pull" (*Backstep / Side-Step on Pull*):** Utilizar `DoorOpener.IsDoorPullOpen()` para identificar quando a folha da porta gira em direção ao bot. Ao acionar a maçaneta em portas *Pull*, aplicar automaticamente um recuo tático de 1.0m a 1.5m para trás e para o lado oposto da dobradiça, aguardando o fim do arco de giro antes de avançar para o vão e eliminando a armadilha de cunha atrás da porta.
+- [ ] **Avanço Direto em Portas "Push" e Chutes (*Breach*):** Manter o avanço contínuo sem recuo quando a porta abrir para dentro do cômodo ou for arrombada com chute (*KickOpen*), preservando a agressividade e o ritmo tático.
 
 ---
 
