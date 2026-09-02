@@ -6,7 +6,7 @@
     <Nullable>disable</Nullable>
     <RootNamespace>SAIN</RootNamespace>
     <AssemblyName>SAIN</AssemblyName>
-    <Version>4.6.0</Version>
+    <Version>4.7.0</Version>
     <ReleaseOutputDir>..\Build\BepInEx\plugins\SAIN\</ReleaseOutputDir>
   </PropertyGroup>
 
