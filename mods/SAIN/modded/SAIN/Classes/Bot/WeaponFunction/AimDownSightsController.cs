@@ -1,4 +1,4 @@
-﻿using EFT;
+using EFT;
 using SAIN.Components;
 using SAIN.Models.Enums;
 using SAIN.SAINComponent.Classes.EnemyClasses;
@@ -34,18 +34,19 @@ public class AimDownSightsController : BotComponentClassBase
         }
 
         // If a bot is sneaky, don't change ADS if their enemy is close to avoid alerting them.
+        // ref: AUD-23-01 - Null-safety em KnownPlaces
         if (
             Bot?.Info?.PersonalitySettings?.Search?.Sneaky == true
             && Enemy != null
             && !Enemy.IsVisible
-            && Enemy.KnownPlaces.EnemyDistanceFromLastKnown < 40f
+            && Enemy.KnownPlaces?.EnemyDistanceFromLastKnown < 40f
         )
         {
             return;
         }
 
         bool wasAiming = AimingDownSights;
-        AimingDownSights = ShallAimDownSights(Enemy?.KnownPlaces.LastKnownPosition, Enemy);
+        AimingDownSights = ShallAimDownSights(Enemy?.KnownPlaces?.LastKnownPosition, Enemy);
         if (AimingDownSights != wasAiming)
         {
             _timeLastCheckedStatus = Time.time;
@@ -59,7 +60,8 @@ public class AimDownSightsController : BotComponentClassBase
     public bool ShallAimDownSights(Vector3? targetPosition = null, Enemy enemy = null)
     {
         bool result = false;
-        if (BotOwner.WeaponManager?.Reload.Reloading == true)
+        // ref: AUD-23-01 - Null-safety em WeaponManager.Reload
+        if (BotOwner?.WeaponManager?.Reload?.Reloading == true)
         {
             return false; // Don't aim down sights while reloading
         }
@@ -68,7 +70,6 @@ public class AimDownSightsController : BotComponentClassBase
         {
             status = GetADSStatus(targetPosition.Value, enemy);
         }
-        float timeSinceChangeDecision = Bot.Decision.TimeSinceChangeDecision;
         switch (status)
         {
             case EAimDownSightsStatus.EnemyHeardRecent:
@@ -89,8 +90,9 @@ public class AimDownSightsController : BotComponentClassBase
                 break;
 
             case EAimDownSightsStatus.HoldInCover:
+                // ref: AUD-05-02 - Cálculo de tempo de decisão restrito ao escopo do estado HoldInCover
                 result =
-                    timeSinceChangeDecision > 3f
+                    Bot.Decision.TimeSinceChangeDecision > 3f
                     && (
                         EFTMath.RandomBool(60)
                         || enemy != null && enemy.KnownPlaces.BotDistanceFromLastKnown > (AimingDownSights ? 5f : 10f)

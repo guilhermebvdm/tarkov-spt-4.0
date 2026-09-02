@@ -72,7 +72,8 @@ public class BotManagerComponent : MonoBehaviour
 
     public void PlayerEnviromentChanged(string profileID, IndoorTrigger trigger)
     {
-        SAINGameWorld.PlayerTracker.GetPlayerComponent(profileID)?.AIData.PlayerLocation.UpdateEnvironment(trigger);
+        // ref: AUD-25-01 - Null-safety em SAINGameWorld.PlayerTracker
+        SAINGameWorld?.PlayerTracker?.GetPlayerComponent(profileID)?.AIData?.PlayerLocation?.UpdateEnvironment(trigger);
     }
 
     public void Activate(GameWorldComponent gameWorldComp)
@@ -112,10 +113,16 @@ public class BotManagerComponent : MonoBehaviour
     {
         try
         {
-            GameWorld.OnDispose -= Dispose;
+            // ref: AUD-25-01 - Desinscrição segura de GameWorld.OnDispose
+            if (GameWorld != null)
+            {
+                GameWorld.OnDispose -= Dispose;
+            }
             StopAllCoroutines();
             BotJobs.Dispose();
             BotSpawnController.UnSubscribe();
+            // ref: AUD-03-03 - Descarte de esquadrões
+            BotSquads?.Dispose();
 
             if (BotEventHandler != null)
             {
@@ -137,6 +144,8 @@ public class BotManagerComponent : MonoBehaviour
             Logger.LogError($"Dispose SAIN BotController Error: {ex}");
         }
 
+        // ref: AUD-07-02 - Resetar singleton no descarte para prevenir fake-null hazard
+        Instance = null;
         Destroy(this);
     }
 

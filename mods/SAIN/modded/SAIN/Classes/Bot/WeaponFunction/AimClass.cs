@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using EFT;
 using SAIN.Classes;
 using SAIN.Components;
@@ -56,7 +56,8 @@ public class AimClass : BotComponentClassBase, IBotClass
     {
         BotOwner botOwner = bot.BotOwner;
         BotWeaponManager weaponManager = botOwner.WeaponManager;
-        if (!weaponManager.HaveBullets || weaponManager.Reload.Reloading)
+        // ref: AUD-11-02 - Null-safety em weaponManager.Reload
+        if (!weaponManager.HaveBullets || weaponManager.Reload?.Reloading == true)
         {
             botOwner.ShootData.EndShoot();
             AimComplete = false;
@@ -65,25 +66,29 @@ public class AimClass : BotComponentClassBase, IBotClass
         }
 
         Vector3 firePort = bot.Transform.WeaponData.FirePort;
+        // ref: AUD-05-01 - Null-safety defensivo para velocidade do projétil com valor padrão de fallback (500 m/s)
+        float bulletSpeed = bot.PlayerComponent.Equipment?.CurrentWeaponInfo?.BulletSpeed ?? 500f;
+        // ref: AUD-11-01 - Extração defensiva de velocidade do jogador inimigo com fallback seguro
+        Vector3 enemyVelocity = enemy?.EnemyPlayer?.Velocity ?? Vector3.zero;
         Vector3 ballisticOffset = PlayerMovementController.Util.CalculateBallisticOffset(
             firePort,
             shootPoint,
-            enemy.EnemyPlayer.Velocity,
-            bot.PlayerComponent.Equipment.CurrentWeaponInfo.BulletSpeed
+            enemyVelocity,
+            bulletSpeed
         );
         Vector3 aimPoint = shootPoint + ballisticOffset;
 
         var smoother = enemy.PositionSmoother;
 
-        // If we weren't previously aiming, reset smoothing.
-        if (AimStatus == AimStatus.NoTarget || enemy != _lastAimEnemy)
+        // ref: AUD-05-02 - Resetar suavizador apenas se nao havia alvo previo, permitindo transicao inercial
+        if (AimStatus == AimStatus.NoTarget)
         {
             smoother.Snap(aimPoint);
-            _lastAimEnemy = enemy;
         }
+        _lastAimEnemy = enemy;
 
         // Feed desired aim point to the smoother to account for enemy movement.
-        smoother.Update(aimPoint, enemy.EnemyPlayer.Velocity, Time.deltaTime);
+        smoother.Update(aimPoint, enemyVelocity, Time.deltaTime);
 
         // Input the final aim point to EFT's bot aim system.
         currentAiming.SetTarget(smoother.Position);

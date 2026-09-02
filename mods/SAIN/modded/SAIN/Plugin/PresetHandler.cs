@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using SAIN.Editor;
 using SAIN.Preset;
@@ -124,9 +124,10 @@ internal class PresetHandler
 
     public static void ExportEditorDefaults()
     {
-        if (EditorDefaults.SelectedDefaultPreset == SAINDifficulty.none && LoadedPreset.Info.IsCustom)
+        // ref: AUD-12-01 - Null-safety defensivo em LoadedPreset.Info
+        if (EditorDefaults.SelectedDefaultPreset == SAINDifficulty.none && LoadedPreset?.Info?.IsCustom == true)
         {
-            EditorDefaults.SelectedCustomPreset = LoadedPreset.Info.Name;
+            EditorDefaults.SelectedCustomPreset = LoadedPreset?.Info?.Name ?? string.Empty;
         }
         else
         {

@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Comfort.Common;
@@ -52,6 +52,18 @@ public class ExtractFinderComponent : MonoBehaviour
     public void OnDisable()
     {
         StopAllCoroutines();
+    }
+
+    // ref: AUD-04-03 - Esvaziamento de dicionários de pontos de extração no encerramento do componente
+    public void OnDestroy()
+    {
+        StopAllCoroutines();
+        ValidExfils.Clear();
+        ValidScavExfils.Clear();
+        extractPositionFinders.Clear();
+        // ref: AUD-22-02 - Limpeza de arrays de pontos de extração
+        AllExfils = null;
+        AllScavExfils = null;
     }
 
     public void OnGUI()

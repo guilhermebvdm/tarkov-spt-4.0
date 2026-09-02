@@ -1,4 +1,4 @@
-﻿using SAIN.Models.Direction;
+using SAIN.Models.Direction;
 using SAIN.Models.PlayerData;
 using UnityEngine;
 
@@ -17,7 +17,7 @@ public struct BotPathCorner(Vector3 startPosition, Vector3 navCornerPosition, EB
     public int Index = index;
     public Vector3 Position = navCornerPosition;
     public DirectionCache DirectionFromPrevious = new(startPosition, navCornerPosition);
-    public DirectionCache? DirectionToNext = null;
+    public DirectionCache DirectionToNext = null;
     public float TimeStarted = -1;
     public float TimeComplete = -1;
 }

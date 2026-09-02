@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using Comfort.Common;
 using EFT;
 using HarmonyLib;
@@ -63,8 +63,6 @@ public class SprintLookDirPatch : ModulePatch
 /// </summary>
 public class PlayerSetPosePatch : ModulePatch
 {
-    private static readonly FieldInfo playerField = AccessTools.Field(typeof(MovementContext), "_player");
-
     protected override MethodBase GetTargetMethod()
     {
         return AccessTools.Method(typeof(RunStateClass), nameof(RunStateClass.ChangePose));
@@ -73,20 +71,11 @@ public class PlayerSetPosePatch : ModulePatch
     [PatchPrefix]
     public static bool Patch(RunStateClass __instance)
     {
-        if (playerField.GetValue(__instance.MovementContext) is Player player)
+        // ref: AUD-04-04 - Leitura direta da propriedade publica IsBot sem alocacao de reflection
+        if (__instance.MovementContext.IsBot && __instance.MovementContext.IsSprintEnabled)
         {
-            if (player.IsAI && __instance.MovementContext.IsSprintEnabled)
-            {
-                __instance.MovementContext.SetPoseLevel(1f, true);
-                return false;
-            }
-            return true;
-        }
-        else
-        {
-#if DEBUG
-            Logger.LogError("nope");
-#endif
+            __instance.MovementContext.SetPoseLevel(1f, true);
+            return false;
         }
         return true;
     }

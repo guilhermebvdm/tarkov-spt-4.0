@@ -27,8 +27,15 @@ public class EnemyTalk : BotBase
         {
             Singleton<BotEventHandler>.Instance.OnGrenadeExplosive += tryFakeDeathGrenade;
         }
-        BotManagerComponent.Instance.BotHearing.PlayerTalk += playerTalked;
-        Bot.EnemyController.Events.OnEnemyKilled += enemyKilled;
+        // ref: AUD-27-02 - Inscrições defensivas de eventos de áudio e eliminação
+        if (BotManagerComponent.Instance?.BotHearing != null)
+        {
+            BotManagerComponent.Instance.BotHearing.PlayerTalk += playerTalked;
+        }
+        if (Bot?.EnemyController?.Events != null)
+        {
+            Bot.EnemyController.Events.OnEnemyKilled += enemyKilled;
+        }
         base.Init();
     }
 
@@ -98,17 +105,22 @@ public class EnemyTalk : BotBase
         {
             Singleton<BotEventHandler>.Instance.OnGrenadeExplosive -= tryFakeDeathGrenade;
         }
-        BotManagerComponent.Instance.BotHearing.PlayerTalk -= playerTalked;
-        if (Bot?.EnemyController != null)
+        // ref: AUD-03-06 - Desinscrição defensiva de evento singleton
+        if (BotManagerComponent.Instance?.BotHearing != null)
+        {
+            BotManagerComponent.Instance.BotHearing.PlayerTalk -= playerTalked;
+        }
+        if (Bot?.EnemyController?.Events != null)
         {
             Bot.EnemyController.Events.OnEnemyKilled -= enemyKilled;
         }
         base.Dispose();
     }
 
+    // ref: AUD-27-02 - Null-safety em PersonalitySettings
     private PersonalityTalkSettings PersonalitySettings
     {
-        get { return Bot?.Info?.PersonalitySettings.Talk; }
+        get { return Bot?.Info?.PersonalitySettings?.Talk; }
     }
 
     private SAINSettingsClass FileSettings

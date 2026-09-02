@@ -1,4 +1,4 @@
-﻿using SAIN.Components;
+using SAIN.Components;
 using SAIN.SAINComponent.Classes.EnemyClasses;
 using UnityEngine;
 
@@ -31,8 +31,16 @@ public class DogFightDecisionClass : BotBase
 
     public bool CheckShallDogFight(EnemyList KnownEnemies, out Enemy result)
     {
+        // ref: AUD-15-02 - Guarda para KnownEnemies nulo/vazio e null-safety em weaponManager.Reload
+        if (KnownEnemies == null || KnownEnemies.Count == 0)
+        {
+            _lastDogFightTarget = null;
+            result = null;
+            return false;
+        }
+
         BotWeaponManager weaponManager = BotOwner?.WeaponManager;
-        if (weaponManager == null || !weaponManager.HaveBullets || weaponManager.Reload.Reloading)
+        if (weaponManager == null || !weaponManager.HaveBullets || weaponManager.Reload?.Reloading == true)
         {
             _lastDogFightTarget = null;
             result = null;
@@ -83,16 +91,29 @@ public class DogFightDecisionClass : BotBase
         if (_changeDFTargetTime < Time.time)
         {
             _changeDFTargetTime = Time.time + 0.5f;
-            KnownEnemies.Sort((x, y) => x.Path.PathLength.CompareTo(y.Path.PathLength));
+            // ref: AUD-03-04 - Busca linear sem delegate/alocação e sem reordenar a lista compartilhada
+            Enemy closestEnemy = null;
+            float shortestPath = float.MaxValue;
+
             for (int i = 0; i < KnownEnemies.Count; i++)
             {
                 Enemy enemy = KnownEnemies[i];
-                if (ShallDogfightEnemy(enemy))
+                if (enemy != null && ShallDogfightEnemy(enemy))
                 {
-                    _lastDogFightTarget = enemy;
-                    result = enemy;
-                    return true;
+                    float length = enemy.Path.PathLength;
+                    if (length < shortestPath)
+                    {
+                        shortestPath = length;
+                        closestEnemy = enemy;
+                    }
                 }
+            }
+
+            if (closestEnemy != null)
+            {
+                _lastDogFightTarget = closestEnemy;
+                result = closestEnemy;
+                return true;
             }
         }
         result = _lastDogFightTarget;

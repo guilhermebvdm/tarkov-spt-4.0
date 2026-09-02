@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using EFT;
 using SAIN.Components;
 using SAIN.Helpers;
@@ -38,7 +38,11 @@ public class SAINBotSuppressClass : BotComponentClassBase
 
     public override void Init()
     {
-        Bot.EnemyController.Events.OnEnemyRemoved += EnemyRemoved;
+        // ref: AUD-29-01 - Inscrição defensiva de eventos
+        if (Bot?.EnemyController?.Events != null)
+        {
+            Bot.EnemyController.Events.OnEnemyRemoved += EnemyRemoved;
+        }
         base.Init();
     }
 
@@ -92,7 +96,14 @@ public class SAINBotSuppressClass : BotComponentClassBase
 
     public override void Dispose()
     {
-        Bot.EnemyController.Events.OnEnemyRemoved -= EnemyRemoved;
+        // ref: AUD-29-01 - Desinscrição segura e anulação de delegates
+        if (Bot?.EnemyController?.Events != null)
+        {
+            Bot.EnemyController.Events.OnEnemyRemoved -= EnemyRemoved;
+        }
+        OnSuppressionStateChanged = null;
+        LastSuppressByEnemy = null;
+        EnemyBeingSuppressed = null;
         base.Dispose();
     }
 

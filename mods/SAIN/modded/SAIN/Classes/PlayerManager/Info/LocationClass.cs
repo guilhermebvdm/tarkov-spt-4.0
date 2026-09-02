@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using SeasonController = Class444;
 
 namespace SAIN.Components;
@@ -48,10 +48,12 @@ public class LocationClass : GameWorldBase, IGameWorldClass
         _weatherFound = true;
     }
 
+    // ref: AUD-19-01 - Throttling de resolução de localização para evitar alocações de string todo frame
     private void findLocation()
     {
-        if (!_foundLocation)
+        if (!_foundLocation && _nextCheckLocationTime < Time.time)
         {
+            _nextCheckLocationTime = Time.time + 0.5f;
             Location = parseLocation();
         }
     }
@@ -139,5 +141,6 @@ public class LocationClass : GameWorldBase, IGameWorldClass
 
     private bool _weatherFound;
     private float _nextCheckWeatherTime;
+    private float _nextCheckLocationTime;
     private bool _foundLocation;
 }

@@ -86,7 +86,8 @@ public static class JsonUtility
                 {
                     string json = File.ReadAllText(path);
                     var obj = DeserializeObject<SAINPresetDefinition>(json);
-                    if (obj.IsCustom)
+                    // ref: AUD-24-02 - Null-safety defensivo se o JSON retornar nulo ou corrompido
+                    if (obj != null && obj.IsCustom)
                     {
                         list.Add(obj);
                     }
@@ -149,7 +150,11 @@ public static class JsonUtility
                     return true;
                 }
             }
-            catch (JsonSerializationException) { }
+            catch (JsonSerializationException ex)
+            {
+                // ref: AUD-06-03 - Log explicito de falha de desserializacao para diagnostico de presets corrompidos
+                Logger.LogError($"Failed to deserialize JSON object [{fileName}]: {ex.Message}");
+            }
             obj = default;
             return false;
         }

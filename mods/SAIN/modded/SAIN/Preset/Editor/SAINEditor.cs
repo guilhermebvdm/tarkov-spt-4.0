@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using BepInEx;
 using EFT.Console.Core;
 using EFT.UI;
@@ -49,7 +49,9 @@ public static class SAINEditor
             CheckKeyLimiter = Time.time + 0.1f;
             ShiftKeyPressed = Input.GetKey(KeyCode.LeftShift);
             CtrlKeyPressed = Input.GetKey(KeyCode.LeftControl);
-            ToggleKeyPressed = Input.GetKeyDown(SAINPlugin.OpenEditorConfigEntry.Value.MainKey);
+            // ref: AUD-12-02 - Null-safety na captura da tecla de abertura do editor
+            KeyCode toggleKey = SAINPlugin.OpenEditorConfigEntry?.Value.MainKey ?? KeyCode.F6;
+            ToggleKeyPressed = Input.GetKeyDown(toggleKey);
             EscapeKeyPressed = Input.GetKeyDown(KeyCode.Escape);
         }
     }
@@ -60,6 +62,8 @@ public static class SAINEditor
         {
             CursorSettings.SetUnlockCursor(0, true);
             MouseFunctions.Update();
+            // ref: AUD-06-01 - Atualizar tracker no ciclo de lógica uma única vez por frame
+            ConfigEditingTracker.Update();
         }
         else
         {
@@ -102,7 +106,6 @@ public static class SAINEditor
             GUIUtility.ScaleAroundPivot(ScaledPivot, Vector2.zero);
             MainWindow = GUI.Window(0, MainWindow, MainWindowFunc, "SAIN AI Settings Editor", GetStyle(Style.window));
             UnityInput.Current.ResetInputAxes();
-            ConfigEditingTracker.Update();
         }
     }
 
@@ -130,9 +133,11 @@ public static class SAINEditor
     private static void CreateDragBar()
     {
         GUI.DrawTexture(DragRect, DragBackgroundTexture, ScaleMode.StretchToFill, true, 0);
+        // ref: AUD-06-01 - Null-safety defensivo no nome do preset
+        string presetName = SAINPlugin.LoadedPreset?.Info?.Name ?? "None";
         GUI.Box(
             DragRect,
-            $"SAIN {AssemblyInfoClass.SAINVersion} GUI Editor | Preset: {SAINPlugin.LoadedPreset.Info.Name}",
+            $"SAIN {AssemblyInfoClass.SAINVersion} GUI Editor | Preset: {presetName}",
             GetStyle(Style.dragBar)
         );
         GUI.DragWindow(DragRect);
@@ -142,7 +147,7 @@ public static class SAINEditor
 
     private static readonly GUIContent SaveContent = new(
         "Save All Changes",
-        $"Export All Changes to SAIN/Presets/{SAINPlugin.LoadedPreset.Info.Name}"
+        "Export All Changes to SAIN/Presets"
     );
 
     private static void CreateTopBarOptions()
@@ -153,10 +158,11 @@ public static class SAINEditor
         var oldAlignment = style.alignment;
         style.alignment = TextAnchor.MiddleCenter;
 
-        bool advancedEnabled = PresetHandler.EditorDefaults.AdvancedBotConfigs;
+        // ref: AUD-18-02 - Null-safety defensivo em PresetHandler.EditorDefaults
+        bool advancedEnabled = PresetHandler.EditorDefaults?.AdvancedBotConfigs == true;
         string status = advancedEnabled ? "ON" : "OFF";
         bool newValue = GUI.Toggle(AdvRect, advancedEnabled, $"Advanced Settings: [{status}]", GetStyle(Style.botTypeGrid));
-        if (advancedEnabled != newValue)
+        if (advancedEnabled != newValue && PresetHandler.EditorDefaults != null)
         {
             PlaySound(EUISoundType.MenuEscape);
             PresetHandler.EditorDefaults.AdvancedBotConfigs = newValue;

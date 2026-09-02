@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Reflection;
 using EFT;
 using HarmonyLib;
@@ -53,24 +53,20 @@ public class UpdateLightEnablePatch : ModulePatch
         }
         if (wantOff)
         {
-            try
-            {
-                __instance.TurnOff(true, true);
-            }
-            catch { }
-#if DEBUG
+            // ref: AUD-02-05 - Chamada única de TurnOff com log de exceção condicional em debug
             try
             {
                 __instance.TurnOff(true, true);
             }
             catch (Exception e)
             {
+#if DEBUG
                 if (SAINPlugin.DebugMode)
                 {
                     Logger.LogError(e);
                 }
-            }
 #endif
+            }
 
             if (__instance.IsEnable)
             {
@@ -92,7 +88,7 @@ public class UpdateLightEnablePatch : ModulePatch
                 }
                 if (
                     playerComponent.Flashlight.WhiteLight
-                    || (__instance.BotOwner_0.NightVision.UsingNow && playerComponent.Flashlight.IRLight)
+                    || (__instance.BotOwner_0.NightVision?.UsingNow == true && playerComponent.Flashlight.IRLight)
                 )
                 {
                     float min = __instance.BotOwner_0.Settings.FileSettings.Look.VISIBLE_DISNACE_WITH_LIGHT;

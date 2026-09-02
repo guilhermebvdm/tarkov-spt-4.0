@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Text;
 using EFT;
 using EFT.InventoryLogic;
@@ -221,18 +221,24 @@ public class AimTimePatch : ModulePatch
     private static float CalculateAim(BotComponent botComponent, float distance, float angle, bool moving, bool panicing, float aimDelay)
     {
         BotOwner botOwner = botComponent.BotOwner;
-        StringBuilder stringBuilder = SAINPlugin.LoadedPreset.GlobalSettings.General.Debug.Logs.DebugAimCalculations
-            ? new StringBuilder()
-            : null;
-        stringBuilder?.AppendLine(
-            $"Aim Time Calculation for [{botOwner?.name} : {botOwner?.Profile?.Info?.Settings?.Role} : {botOwner?.Profile?.Info?.Settings?.BotDifficulty}]"
-        );
+        // ref: AUD-05-04 - Condicionar criacao e interpolacao de strings apenas quando debug esta ativo
+        bool debugLogs = SAINPlugin.LoadedPreset.GlobalSettings.General.Debug.Logs.DebugAimCalculations;
+        StringBuilder stringBuilder = debugLogs ? new StringBuilder() : null;
+        if (stringBuilder != null)
+        {
+            stringBuilder.AppendLine(
+                $"Aim Time Calculation for [{botOwner?.name} : {botOwner?.Profile?.Info?.Settings?.Role} : {botOwner?.Profile?.Info?.Settings?.BotDifficulty}]"
+            );
+        }
 
         SAINAimingSettings sainAimSettings = botComponent.Info.FileSettings.Aiming;
         BotSettingsComponents fileSettings = botOwner.Settings.FileSettings;
 
         float baseAimTime = fileSettings.Aiming.BOTTOM_COEF;
-        stringBuilder?.AppendLine($"baseAimTime [{baseAimTime}]");
+        if (stringBuilder != null)
+        {
+            stringBuilder.AppendLine($"baseAimTime [{baseAimTime}]");
+        }
         baseAimTime = CalcCoverMod(baseAimTime, botOwner, botComponent, fileSettings, stringBuilder);
         BotCurvSettings curve = botOwner.Settings.Curv;
         float angleTime = CalcCurveOutput(curve.AimAngCoef, angle, sainAimSettings.AngleAimTimeMultiplier, stringBuilder, "Angle");
@@ -247,7 +253,10 @@ public class AimTimePatch : ModulePatch
         calculatedAimTime = CalcPanic(panicing, calculatedAimTime, fileSettings, stringBuilder);
 
         float timeToAimResult = (baseAimTime + calculatedAimTime + aimDelay);
-        stringBuilder?.AppendLine($"timeToAimResult [{timeToAimResult}] (baseAimTime + calculatedAimTime + aimDelay)");
+        if (stringBuilder != null)
+        {
+            stringBuilder.AppendLine($"timeToAimResult [{timeToAimResult}] (baseAimTime + calculatedAimTime + aimDelay)");
+        }
 
         timeToAimResult = CalcMoveModifier(moving, timeToAimResult, fileSettings, stringBuilder);
         timeToAimResult = CalcADSModifier(botOwner.WeaponManager?.ShootController?.IsAiming == true, timeToAimResult, stringBuilder);
@@ -396,8 +405,9 @@ public class SmoothTurnPatch : ModulePatch
     [PatchPrefix]
     public static bool Patch(BotSteering __instance)
     {
-        BotOwner botOwner = __instance.BotOwner_0;
-        if (GameWorldComponent.TryGetPlayerComponent(botOwner, out PlayerComponent playerComponent) && playerComponent.BotComponent != null)
+        // ref: AUD-29-02 - Null-safety defensivo em BotOwner_0 e CharacterController
+        BotOwner botOwner = __instance?.BotOwner_0;
+        if (botOwner != null && GameWorldComponent.TryGetPlayerComponent(botOwner, out PlayerComponent playerComponent) && playerComponent?.BotComponent != null && playerComponent.CharacterController != null)
         {
             if (playerComponent.BotComponent.SAINLayersActive)
             {

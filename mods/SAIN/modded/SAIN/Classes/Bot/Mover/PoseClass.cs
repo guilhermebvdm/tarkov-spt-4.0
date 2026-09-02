@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using EFT;
 using SAIN.Components;
 using SAIN.Helpers;
@@ -33,18 +33,20 @@ public class PoseClass : BotBase
         }
     }
 
+    // ref: AUD-16-02 - Null-safety defensivo em Player ao atualizar postura
     private void SetPlayerPoseLevel(float value)
     {
-        if (Player.IsInPronePose)
+        var player = Player;
+        if (player == null || player.IsInPronePose)
         {
             return;
         }
         BotOwner?.SetPose(value);
         const float poseChangeSpeedCoef = 1f;
-        float difference = value - this.Player.PoseLevel;
+        float difference = value - player.PoseLevel;
         if (Math.Abs(difference) >= 1E-45f)
         {
-            this.Player.ChangePose(difference * poseChangeSpeedCoef);
+            player.ChangePose(difference * poseChangeSpeedCoef);
         }
     }
 
@@ -53,14 +55,20 @@ public class PoseClass : BotBase
         SpeedValue.Set(value);
     }
 
+    // ref: AUD-16-02 - Null-safety defensivo em Player ao atualizar velocidade
     private void SetPlayerSpeed(float value)
     {
+        var player = Player;
+        if (player == null)
+        {
+            return;
+        }
         const float SPEED_CHANGE_SPEED_COEF = 1f;
-        float difference = value - this.Player.Speed;
+        float difference = value - player.Speed;
         BotOwner?.SetTargetMoveSpeed(value);
         if (Math.Abs(difference) >= 1E-45f)
         {
-            this.Player.ChangeSpeed(difference * SPEED_CHANGE_SPEED_COEF);
+            player.ChangeSpeed(difference * SPEED_CHANGE_SPEED_COEF);
         }
     }
 

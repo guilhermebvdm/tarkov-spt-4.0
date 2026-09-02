@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -64,14 +64,20 @@ public class GameWorldComponent : MonoBehaviour
         var OtherPlayerData = Player.OtherPlayersData.DataDictionary;
         Vector3 PlayerLookDir = Player.LookDirection;
 
-        List<OtherPlayerData> PlayersToCheck = [];
-        PlayersToCheck.AddRange(
-            from Data in OtherPlayerData
-            let OtherPlayerDirNormal = Data.Value.DistanceData.DirectionNormal
-            let PlayerComponent = Data.Value.OtherPlayerComponent
-            where PlayerComponent?.IsAI == true && PlayerComponent.IsActive && Vector3.Dot(OtherPlayerDirNormal, PlayerLookDir) > 0.75f
-            select Data.Value
-        );
+        // ref: AUD-01-02 - Substituição de consulta LINQ por laço foreach com capacidade pré-alocada
+        List<OtherPlayerData> PlayersToCheck = new(OtherPlayerData.Count);
+        foreach (var kvp in OtherPlayerData)
+        {
+            var data = kvp.Value;
+            var otherComp = data?.OtherPlayerComponent;
+            if (otherComp?.IsAI == true && otherComp.IsActive)
+            {
+                if (Vector3.Dot(data.DistanceData.DirectionNormal, PlayerLookDir) > 0.75f)
+                {
+                    PlayersToCheck.Add(data);
+                }
+            }
+        }
 
         const float MaxFlyByDistSqr = 10 * 10;
 
@@ -218,13 +224,17 @@ public class GameWorldComponent : MonoBehaviour
         events.Clear();
     }
 
+    private float _nextFindSpawnTime;
+
     private void findSpawnPointMarkers()
     {
-        if ((SpawnPointMarkers != null) || (Camera.main == null))
+        // ref: AUD-01-05 - Throttling de 1.0s para evitar varredura pesada de cena a cada frame
+        if (SpawnPointMarkers != null || Time.time < _nextFindSpawnTime || Camera.main == null)
         {
             return;
         }
 
+        _nextFindSpawnTime = Time.time + 1.0f;
         SpawnPointMarkers = UnityEngine.Object.FindObjectsOfType<SpawnPointMarker>();
 
 #if DEBUG
@@ -329,7 +339,14 @@ public class GameWorldComponent : MonoBehaviour
 
         StopAllCoroutines();
         Instance = null;
-        GameWorld.OnDispose -= DestroyComponent;
+        // ref: AUD-13-02 - Desinscrição defensiva de GameWorld e limpeza de marcadores de spawn
+        if (GameWorld != null)
+        {
+            GameWorld.OnDispose -= DestroyComponent;
+        }
+        SpawnPointMarkers = null;
+        // ref: AUD-22-01 - Limpeza de lista estática de pontos de vault no encerramento de raid
+        SAIN.SAINComponent.Classes.Mover.SAINVaultClass.GlobalVaultPoints.Clear();
         Destroy(this);
         //Logger.LogDebug("SAIN GameWorld Destroyed.");
     }

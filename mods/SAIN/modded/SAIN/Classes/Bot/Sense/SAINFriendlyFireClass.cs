@@ -1,4 +1,4 @@
-﻿using EFT;
+using EFT;
 using SAIN.Components;
 using UnityEngine;
 
@@ -23,7 +23,8 @@ public class SAINFriendlyFireClass : BotComponentClassBase
     {
         if (FriendlyFireStatus == FriendlyFireStatus.FriendlyBlock)
         {
-            BotOwner.ShootData?.EndShoot();
+            // ref: AUD-20-01 - Null-safety em BotOwner.ShootData
+            BotOwner?.ShootData?.EndShoot();
         }
         base.ManualUpdate();
     }
@@ -70,6 +71,8 @@ public class SAINFriendlyFireClass : BotComponentClassBase
         return CheckFriendlyFire(weaponFirePort, (weaponFirePort - target).magnitude, weaponPointDirection, bot);
     }
 
+    private static readonly RaycastHit[] _friendlyFireHitBuffer = new RaycastHit[16];
+
     public static FriendlyFireStatus CheckFriendlyFire(
         Vector3 weaponFirePort,
         float distance,
@@ -77,22 +80,37 @@ public class SAINFriendlyFireClass : BotComponentClassBase
         BotComponent bot
     )
     {
-        RaycastHit[] hits = SphereCastAll(weaponFirePort, distance, weaponPointDirection);
-        int count = hits.Length;
+        // ref: AUD-02-03 - SphereCastNonAlloc com buffer fixo estático para zero alocações de GC
+        const float sphereCastRadius = 0.2f;
+        int count = Physics.SphereCastNonAlloc(
+            weaponFirePort,
+            sphereCastRadius,
+            weaponPointDirection,
+            _friendlyFireHitBuffer,
+            distance,
+            LayerMaskClass.PlayerMask
+        );
+
         if (count == 0)
+        {
+            return FriendlyFireStatus.None;
+        }
+
+        var gameWorld = GameWorldComponent.Instance?.GameWorld;
+        if (gameWorld == null)
         {
             return FriendlyFireStatus.None;
         }
 
         for (int i = 0; i < count; i++)
         {
-            var hit = hits[i];
-            if (hit.collider == null)
+            var collider = _friendlyFireHitBuffer[i].collider;
+            if (collider == null)
             {
                 continue;
             }
 
-            Player player = GameWorldComponent.Instance.GameWorld.GetPlayerByCollider(hit.collider);
+            Player player = gameWorld.GetPlayerByCollider(collider);
             if (player == null)
             {
                 continue;
@@ -103,17 +121,12 @@ public class SAINFriendlyFireClass : BotComponentClassBase
                 continue;
             }
 
-            if (!bot.EnemyController.IsPlayerAnEnemy(player.ProfileId))
+            // ref: AUD-20-01 - Null-safety em bot.EnemyController
+            if (bot == null || bot.EnemyController?.IsPlayerAnEnemy(player.ProfileId) == false)
             {
                 return FriendlyFireStatus.FriendlyBlock;
             }
         }
         return FriendlyFireStatus.Clear;
-    }
-
-    private static RaycastHit[] SphereCastAll(Vector3 weaponFirePort, float targetDistance, Vector3 weaponPointDirection)
-    {
-        const float sphereCastRadius = 0.2f;
-        return Physics.SphereCastAll(weaponFirePort, sphereCastRadius, weaponPointDirection, targetDistance, LayerMaskClass.PlayerMask);
     }
 }

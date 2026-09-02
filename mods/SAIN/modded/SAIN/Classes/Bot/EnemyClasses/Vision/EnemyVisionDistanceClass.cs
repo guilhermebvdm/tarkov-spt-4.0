@@ -1,4 +1,4 @@
-﻿using EFT;
+using EFT;
 using SAIN.Components;
 using UnityEngine;
 
@@ -22,12 +22,13 @@ public class EnemyVisionDistanceClass : EnemyBase
         }
     }
 
+    // ref: AUD-20-02 - Null-safety defensivo em TimeVision
     private bool IsEnemyAlwaysInVisibleDistance()
     {
         if (
             Enemy.Vision.Angles.AngleToEnemy < 30f
             && Enemy.KnownPlaces.EnemyDistanceFromLastKnown < 3
-            && BotManagerComponent.Instance.TimeVision.VisibilityRatio > 0.5f
+            && BotManagerComponent.Instance?.TimeVision?.VisibilityRatio > 0.5f
         )
         {
             return true;
@@ -56,7 +57,8 @@ public class EnemyVisionDistanceClass : EnemyBase
         float underFire = shotAtMe ? 1.5f : 1f;
         float finalModifier = (moveMod * angleMod * flareMod * positionalFlareMod * underFire) / gearMod;
 
-        float defaultVisDist = BotOwner.LookSensor.VisibleDist;
+        // ref: AUD-20-02 - Null-safety em BotOwner.LookSensor
+        float defaultVisDist = BotOwner?.LookSensor?.VisibleDist ?? 0f;
         float result = (defaultVisDist * finalModifier) - defaultVisDist;
 
         // if (EnemyPlayer.IsYourPlayer &&
@@ -83,9 +85,10 @@ public class EnemyVisionDistanceClass : EnemyBase
         return result;
     }
 
+    // ref: AUD-20-02 - Null-safety em LoadedPreset
     private static float _sprintMod
     {
-        get { return SAINPlugin.LoadedPreset.GlobalSettings.Look.VisionDistance.MovementDistanceModifier; }
+        get { return SAINPlugin.LoadedPreset?.GlobalSettings?.Look?.VisionDistance?.MovementDistanceModifier ?? 1f; }
     }
 
     private float CalcAngleMod()

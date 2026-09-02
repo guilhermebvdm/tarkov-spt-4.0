@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using SAIN.Plugin;
 using SAIN.Preset;
 using SAIN.SAINComponent.Classes.Info;
@@ -28,14 +28,18 @@ public class Firerate(BotWeaponInfoClass weaponInfoClass)
         UpdateSettings(SAINPlugin.LoadedPreset);
     }
 
+    // ref: AUD-17-01 - Null-safety em preset e dicionario estatico de cadencia por metro
     private static void UpdateSettings(SAINPresetClass preset)
     {
-        var settings = preset.GlobalSettings.Shoot;
-        PERMETER_SETTINGS = settings.WeaponPerMeter;
-        MIN_FIRE_RATE_INTERVAL = settings.MIN_FIRE_RATE_INTERVAL;
-        MAX_FIRE_RATE_INTERVAL = settings.MAX_FIRE_RATE_INTERVAL;
-        MAX_FIRE_RATE_COEF_FULLAUTO = settings.MAX_FIRE_RATE_COEF_FULLAUTO;
-        FIRERATE_RANDOMIZATION_COEF = settings.FIRERATE_RANDOMIZATION_COEF;
+        var settings = preset?.GlobalSettings?.Shoot;
+        if (settings != null)
+        {
+            PERMETER_SETTINGS = settings.WeaponPerMeter;
+            MIN_FIRE_RATE_INTERVAL = settings.MIN_FIRE_RATE_INTERVAL;
+            MAX_FIRE_RATE_INTERVAL = settings.MAX_FIRE_RATE_INTERVAL;
+            MAX_FIRE_RATE_COEF_FULLAUTO = settings.MAX_FIRE_RATE_COEF_FULLAUTO;
+            FIRERATE_RANDOMIZATION_COEF = settings.FIRERATE_RANDOMIZATION_COEF;
+        }
     }
 
     private static float MIN_FIRE_RATE_INTERVAL = 0.1f;
@@ -62,13 +66,16 @@ public class Firerate(BotWeaponInfoClass weaponInfoClass)
 
     public static float GetPerMeter(EWeaponClass weaponClass)
     {
-        if (PERMETER_SETTINGS.TryGetValue(weaponClass, out float perMeter))
+        if (PERMETER_SETTINGS != null)
         {
-            return perMeter;
-        }
-        if (PERMETER_SETTINGS.TryGetValue(EWeaponClass.Default, out perMeter))
-        {
-            return perMeter;
+            if (PERMETER_SETTINGS.TryGetValue(weaponClass, out float perMeter))
+            {
+                return perMeter;
+            }
+            if (PERMETER_SETTINGS.TryGetValue(EWeaponClass.Default, out perMeter))
+            {
+                return perMeter;
+            }
         }
         return 80f;
     }

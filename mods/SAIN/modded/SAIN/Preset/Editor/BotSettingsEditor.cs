@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Text;
 using EFT.UI;
 using SAIN.Attributes;
@@ -13,6 +13,14 @@ public static class BotSettingsEditor
 
     public static void ShowAllSettingsGUI(object settings, out bool wasEdited, string name, string savePath, float height, out bool Saved)
     {
+        // ref: AUD-30-02 - Null-safety defensivo em settings
+        if (settings == null)
+        {
+            wasEdited = false;
+            Saved = false;
+            return;
+        }
+
         BeginHorizontal();
 
         Box(name, Height(height));
@@ -22,6 +30,13 @@ public static class BotSettingsEditor
         Label("Search", Width(125f), Height(height));
 
         var container = SettingsContainers.GetContainer(settings.GetType(), name);
+        if (container == null)
+        {
+            wasEdited = false;
+            Saved = false;
+            EndHorizontal();
+            return;
+        }
         container.SearchPattern = TextField(container.SearchPattern, null, Width(250), Height(height));
 
         if (Button("Clear", EUISoundType.MenuContextMenu, Width(80), Height(height)))
@@ -58,6 +73,11 @@ public static class BotSettingsEditor
 
     public static bool CheckIfOpen(SettingsContainer container, float height = 30f)
     {
+        // ref: AUD-30-02 - Null-safety em container
+        if (container == null)
+        {
+            return false;
+        }
         BeginHorizontal();
         container.Open = BuilderClass.ExpandableMenu(container.Name, container.Open, null, height);
         if (Button("Clear", "Clear Selected Options in this Menu", EFT.UI.EUISoundType.MenuDropdownSelect, Width(100), Height(height)))

@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Text;
 using EFT;
 using SAIN.Components;
@@ -78,6 +78,11 @@ public class BotSquads(BotManagerComponent botController) : BotManagerBase(botCo
 
     public Squad GetSquad(BotOwner botOwner)
     {
+        // ref: AUD-21-02 - Null-safety defensivo em botOwner
+        if (botOwner == null)
+        {
+            return null;
+        }
         Squad result = null;
         var group = botOwner.BotsGroup;
         if (group != null)
@@ -141,6 +146,22 @@ public class BotSquads(BotManagerComponent botController) : BotManagerBase(botCo
             }
         }
         return result;
+    }
+
+    // ref: AUD-03-03 - Limpeza completa de esquadrões no encerramento de raid
+    public void Dispose()
+    {
+        foreach (Squad squad in SquadArray)
+        {
+            if (squad != null)
+            {
+                squad.OnSquadEmpty -= RemoveSquad;
+                squad.Dispose();
+            }
+        }
+        Squads.Clear();
+        SquadArray.Clear();
+        _squadsToRemove.Clear();
     }
 
     private void RemoveSquad(Squad squad)

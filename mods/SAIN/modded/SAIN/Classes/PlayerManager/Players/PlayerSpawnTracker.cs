@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using EFT;
 using UnityEngine;
@@ -57,23 +57,33 @@ public class PlayerSpawnTracker
         return closestPlayer;
     }
 
+    // ref: AUD-01-01 - Busca linear O(N) zero-alloc sem mutar a lista compartilhada de jogadores
     public PlayerComponent FindClosestHumanPlayer(out float distance, PlayerComponent quierrier, out Player player)
     {
         List<OtherPlayerData> otherPlayers = quierrier.OtherPlayersData.DataList;
-        otherPlayers.Sort((x, y) => x.DistanceData.Distance.CompareTo(y.DistanceData.Distance));
+        PlayerComponent closestHuman = null;
+        float minDistance = float.MaxValue;
+        player = null;
+
         for (int i = 0; i < otherPlayers.Count; i++)
         {
             OtherPlayerData otherPlayer = otherPlayers[i];
-            if (otherPlayer != null && !otherPlayer.OtherPlayerComponent.IsAI)
+            // ref: AUD-13-01 - Null-safety em OtherPlayerComponent ao buscar jogador humano mais proximo
+            var otherComp = otherPlayer?.OtherPlayerComponent;
+            if (otherComp != null && !otherComp.IsAI)
             {
-                distance = otherPlayer.DistanceData.Distance;
-                player = otherPlayer.OtherPlayerComponent.Player;
-                return otherPlayer.OtherPlayerComponent;
+                float dist = otherPlayer.DistanceData.Distance;
+                if (dist < minDistance)
+                {
+                    minDistance = dist;
+                    closestHuman = otherComp;
+                    player = otherComp.Player;
+                }
             }
         }
-        distance = float.MaxValue;
-        player = null;
-        return null;
+
+        distance = minDistance;
+        return closestHuman;
     }
 
     public PlayerComponent AddPlayerManual(IPlayer player)
@@ -156,14 +166,13 @@ public class PlayerSpawnTracker
 
     public void Dispose()
     {
-        if (_sainGameWorld == null)
+        if (_sainGameWorld != null)
         {
-            return;
-        }
-        var gameWorld = _sainGameWorld.GameWorld;
-        if (gameWorld != null)
-        {
-            gameWorld.OnPersonAdd -= AddPlayer;
+            var gameWorld = _sainGameWorld.GameWorld;
+            if (gameWorld != null)
+            {
+                gameWorld.OnPersonAdd -= AddPlayer;
+            }
         }
         foreach (var (_, player) in AlivePlayersDictionary)
         {
@@ -173,6 +182,12 @@ public class PlayerSpawnTracker
             }
         }
         AlivePlayersDictionary.Clear();
+        // ref: AUD-01-01 / AUD-07-01 - Limpar conjuntos, listas e delegates no fim da raid
+        AlivePlayerArray.Clear();
+        DeadPlayers.Clear();
+        _ids.Clear();
+        OnPlayerAdded = null;
+        OnPlayerRemoved = null;
     }
 
     private bool TryAddPlayerComponent(Player player)
@@ -213,6 +228,11 @@ public class PlayerSpawnTracker
                 playerComponent.Dispose();
             }
             AlivePlayersDictionary.Remove(profileId);
+            // ref: AUD-01-01 - Remover bot morto do HashSet para cessar updates e liberar memoria
+            if (playerComponent != null)
+            {
+                AlivePlayerArray.Remove(playerComponent);
+            }
             return true;
         }
         return false;

@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using SAIN.Components.PlayerComponentSpace;
 
 namespace SAIN.SAINComponent.Classes.EnemyClasses;
@@ -26,6 +26,11 @@ public class EnemyPartsClass
         CanBeSeen = false;
         LineOfSight = false;
         CanShoot = false;
+        // ref: AUD-26-02 - Guarda defensiva em PartsArray
+        if (PartsArray == null)
+        {
+            return;
+        }
         foreach (var part in PartsArray)
         {
             part.Update(currentTime);
@@ -48,7 +53,12 @@ public class EnemyPartsClass
 
     private void CreatePartDatas(PlayerComponent enemyPlayer)
     {
-        var parts = enemyPlayer.BodyParts.Parts;
+        // ref: AUD-26-02 - Null-safety defensivo em BodyParts
+        var parts = enemyPlayer?.BodyParts?.Parts;
+        if (parts == null)
+        {
+            return;
+        }
         foreach (var bodyPart in parts)
         {
             Parts.Add(bodyPart.Key, new EnemyPartDataClass(bodyPart.Key, bodyPart.Value.Transform, bodyPart.Value.Colliders));

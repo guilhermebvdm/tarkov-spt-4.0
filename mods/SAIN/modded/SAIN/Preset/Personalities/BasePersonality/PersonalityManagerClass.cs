@@ -1,4 +1,4 @@
-﻿using SAIN.Helpers;
+using SAIN.Helpers;
 using SAIN.Models.Preset.Personalities;
 
 namespace SAIN.Preset.Personalities;
@@ -22,11 +22,13 @@ public class PersonalityManagerClass : BasePreset
         }
     }
 
+    // ref: AUD-18-01 - Proteção contra KeyNotFoundException usando TryGetValue
     public void UpdateDefaults(PersonalityManagerClass replacementClass = null)
     {
         foreach (var settings in PersonalityDictionary)
         {
-            var replacementSettings = replacementClass?.PersonalityDictionary[settings.Key];
+            PersonalitySettingsClass replacementSettings = null;
+            replacementClass?.PersonalityDictionary.TryGetValue(settings.Key, out replacementSettings);
             settings.Value.UpdateDefaults(replacementSettings);
         }
     }
@@ -57,14 +59,8 @@ public class PersonalityManagerClass : BasePreset
 
     public void ResetAllToDefaults()
     {
-        PersonalityDictionary.Remove(EPersonality.Wreckless);
-        PersonalityDictionary.Remove(EPersonality.SnappingTurtle);
-        PersonalityDictionary.Remove(EPersonality.GigaChad);
-        PersonalityDictionary.Remove(EPersonality.Chad);
-        PersonalityDictionary.Remove(EPersonality.Rat);
-        PersonalityDictionary.Remove(EPersonality.Coward);
-        PersonalityDictionary.Remove(EPersonality.Timmy);
-        PersonalityDictionary.Remove(EPersonality.Normal);
+        // ref: AUD-06-04 - Limpeza completa e dinamica de todas as personalidades
+        PersonalityDictionary.Clear();
         PersonalityDefaultsClass.InitDefaults(PersonalityDictionary, Preset);
     }
 

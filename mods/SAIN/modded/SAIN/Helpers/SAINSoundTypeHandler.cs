@@ -1,4 +1,4 @@
-﻿using EFT;
+using EFT;
 using UnityEngine;
 
 namespace SAIN.Components.Helpers;
@@ -13,7 +13,8 @@ public class SAINSoundTypeHandler
         }
 
         SAINSoundType soundType = SAINSoundType.None;
-        var Item = player.HandsController.Item;
+        // ref: AUD-02-05 - Null-safety no HandsController
+        var Item = player.HandsController?.Item;
         float soundDist = 20f;
 
         if (Item != null)
@@ -40,10 +41,21 @@ public class SAINSoundTypeHandler
                     soundDist *= 0.5f;
                 }
             }
-            else
+            else if (Item is FoodDrinkItemClass)
+            {
+                soundType = SAINSoundType.Food;
+                soundDist = SAINPlugin.LoadedPreset.GlobalSettings.Hearing.BaseSoundRange_EatDrink;
+            }
+            // ref: AUD-02-02 - Classificar como Reload apenas se o clipe de audio for de recarga/mag
+            else if (!string.IsNullOrEmpty(sound) && (sound.IndexOf("Reload", System.StringComparison.OrdinalIgnoreCase) >= 0 || sound.IndexOf("Mag", System.StringComparison.OrdinalIgnoreCase) >= 0))
             {
                 soundType = SAINSoundType.Reload;
                 soundDist = SAINPlugin.LoadedPreset.GlobalSettings.Hearing.BaseSoundRange_Reload;
+            }
+            else
+            {
+                soundType = SAINSoundType.GearSound;
+                soundDist = SAINPlugin.LoadedPreset.GlobalSettings.Hearing.BaseSoundRange_AimingandGearRattle;
             }
         }
 

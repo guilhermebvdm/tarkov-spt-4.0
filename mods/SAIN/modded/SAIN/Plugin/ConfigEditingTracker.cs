@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using SAIN.Attributes;
@@ -60,8 +60,9 @@ internal static class ConfigEditingTracker
     private static void AddToStringBuilder(string name, object value)
     {
         string _string;
-        Type type = value.GetType();
-        if (type == _float || type == _bool)
+        // ref: AUD-06-02 - Null-safety defensivo para valores nulos de configuracao
+        Type type = value?.GetType();
+        if (type != null && (type == _float || type == _bool))
         {
             _string = $"{name}: {value}";
         }

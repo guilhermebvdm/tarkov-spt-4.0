@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using EFT;
 using SAIN.Components;
 using SAIN.Preset.GlobalSettings;
@@ -30,8 +29,6 @@ public class LeanClass : BotBase
         TickInterval = 1f / 20f;
     }
 
-    private static readonly ECombatDecision[] DontLean = [ECombatDecision.Retreat, ECombatDecision.RunAway, ECombatDecision.MeleeAttack];
-
     public override void ManualUpdate()
     {
         float time = Time.time;
@@ -41,9 +38,16 @@ public class LeanClass : BotBase
 
     private void SetTilt()
     {
-        if (Player.IsSprintEnabled)
+        // ref: AUD-28-01 - Null-safety defensivo em Player e MovementContext
+        var player = Player;
+        if (player == null || player.MovementContext == null)
         {
-            Player.MovementContext.SetTilt(0);
+            return;
+        }
+
+        if (player.IsSprintEnabled)
+        {
+            player.MovementContext.SetTilt(0);
             LeanAngleValue.Set(0);
             LeanAngleValue.Get(Time.fixedDeltaTime);
         }
@@ -57,7 +61,7 @@ public class LeanClass : BotBase
             };
             LeanAngleValue.Set(num);
             float tiltValue = LeanAngleValue.Get(Time.fixedDeltaTime);
-            Player.MovementContext.SetTilt(tiltValue);
+            player.MovementContext.SetTilt(tiltValue);
         }
     }
 
@@ -115,7 +119,8 @@ public class LeanClass : BotBase
         }
         var CurrentDecision = Bot.Decision.CurrentCombatDecision;
         var enemy = Bot.GoalEnemy;
-        if (enemy == null || DontLean.Contains(CurrentDecision) || Bot.Suppression.IsHeavySuppressed)
+        // ref: AUD-04-05 - Pattern matching sem array nem iteracao LINQ
+        if (enemy == null || CurrentDecision is ECombatDecision.Retreat or ECombatDecision.RunAway or ECombatDecision.MeleeAttack || Bot.Suppression.IsHeavySuppressed)
         {
             return false;
         }

@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using EFT;
 using SAIN.Helpers;
@@ -55,6 +55,8 @@ public class CoverFinderComponent : BotComponentBase
             Bot.BotActivation.BotActiveToggle.OnToggle -= botEnabled;
             Bot.BotActivation.BotStandByToggle.OnToggle -= botInStandBy;
         }
+        // ref: AUD-10-02 - Esvaziamento explícito da lista de pontos de cobertura no descarte
+        CoverPoints.Clear();
         Destroy(this);
     }
 

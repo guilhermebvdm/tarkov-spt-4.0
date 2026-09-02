@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using EFT;
 using SAIN.Components;
 using SAIN.Helpers;
@@ -204,6 +204,14 @@ public class SAINVaultClass : BotComponentClassBase
 #endif
 
         return false;
+    }
+
+    // ref: AUD-22-01 - Limpeza de VaultPointHistory no descarte do componente do bot
+    public override void Dispose()
+    {
+        CurrentVaultPoint = null;
+        VaultPointHistory.Clear();
+        base.Dispose();
     }
 }
 

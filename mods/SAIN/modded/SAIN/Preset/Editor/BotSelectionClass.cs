@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using EFT.UI;
 using SAIN.Attributes;
@@ -35,19 +35,25 @@ public static class BotSelectionClass
     {
         BeginHorizontal();
         FlexibleSpace();
+        // ref: AUD-30-01 - Null-safety em LoadedPreset
+        string presetName = SAINPlugin.LoadedPreset?.Info?.Name ?? "Default";
         string toolTip =
             $"Apply Values set below to selected Bot Type. "
-            + $"Exports edited values to SAIN/Presets/{SAINPlugin.LoadedPreset.Info.Name}/BotSettings folder";
+            + $"Exports edited values to SAIN/Presets/{presetName}/BotSettings folder";
         if (BuilderClass.SaveChanges(ConfigEditingTracker.GetUnsavedValuesString(), 35f))
         {
-            SAINPresetClass.ExportAll(SAINPlugin.LoadedPreset);
+            if (SAINPlugin.LoadedPreset != null)
+            {
+                SAINPresetClass.ExportAll(SAINPlugin.LoadedPreset);
+            }
         }
         FlexibleSpace();
         EndHorizontal();
         BeginHorizontal();
         FlexibleSpace();
         Space(3);
-        float sectionWidth = 1850f / Sections.Length;
+        // ref: AUD-30-01 - Divisão segura prevenindo NaN/Infinity em caso de Sections vazio
+        float sectionWidth = Sections.Length > 0 ? 1850f / Sections.Length : 1850f;
         for (int i = 0; i < Sections.Length; i++)
         {
             BeginVertical();

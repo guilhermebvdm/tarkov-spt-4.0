@@ -1,4 +1,4 @@
-﻿using EFT;
+using EFT;
 using EFT.InventoryLogic;
 using SAIN.Components;
 using SAIN.Helpers;
@@ -55,7 +55,8 @@ public class Recoil(BotComponent sain) : BotBase(sain)
             float decayTime = Time.fixedDeltaTime * _recoilDecayCoef;
             _currentRecoilHorizAngle = Mathf.LerpAngle(0, _currentRecoilHorizAngle, 1f - decayTime);
             _currentRecoilVertAngle = Mathf.LerpAngle(0, _currentRecoilVertAngle, 1f - decayTime);
-            if (_currentRecoilHorizAngle <= 0.001f && _currentRecoilVertAngle < 0.001f)
+            // ref: AUD-05-01 - Usar Mathf.Abs para checagem bidirecional de decaimento de recuo
+            if (Mathf.Abs(_currentRecoilHorizAngle) <= 0.001f && Mathf.Abs(_currentRecoilVertAngle) <= 0.001f)
             {
                 _recoilFinished = true;
                 _currentRecoilHorizAngle = 0f;

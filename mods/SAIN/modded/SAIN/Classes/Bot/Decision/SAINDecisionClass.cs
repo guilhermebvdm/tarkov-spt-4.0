@@ -1,4 +1,4 @@
-﻿using SAIN.Components;
+using SAIN.Components;
 
 namespace SAIN.SAINComponent.Classes.Decision;
 
@@ -106,20 +106,22 @@ public class SAINDecisionClass : BotComponentClassBase
 
     public override void ManualUpdate()
     {
-        DecisionManager.ManualUpdate();
-        SelfActionDecisions.ManualUpdate();
-        EnemyDecisions.ManualUpdate();
-        SquadDecisions.ManualUpdate();
-        DogFightDecision.ManualUpdate();
+        // ref: AUD-27-01 - Null-safety defensivo em cascata
+        DecisionManager?.ManualUpdate();
+        SelfActionDecisions?.ManualUpdate();
+        EnemyDecisions?.ManualUpdate();
+        SquadDecisions?.ManualUpdate();
+        DogFightDecision?.ManualUpdate();
         base.ManualUpdate();
     }
 
     public override void Dispose()
     {
-        DecisionManager.Dispose();
-        SelfActionDecisions.Dispose();
-        EnemyDecisions.Dispose();
-        SquadDecisions.Dispose();
+        // ref: AUD-27-01 - Descarte defensivo em cascata
+        DecisionManager?.Dispose();
+        SelfActionDecisions?.Dispose();
+        EnemyDecisions?.Dispose();
+        SquadDecisions?.Dispose();
         DogFightDecision?.Dispose();
         base.Dispose();
     }

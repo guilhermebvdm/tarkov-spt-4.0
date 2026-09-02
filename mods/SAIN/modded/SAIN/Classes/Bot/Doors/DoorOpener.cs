@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using EFT;
 using EFT.Interactive;
 using SAIN.Components;
@@ -40,7 +40,12 @@ public class DoorOpener : BotComponentClassBase
         ActiveDoor = data;
         InteractionType = interactionType;
         _doorInteractionEndTime = time + (IsDoorPullOpen(data, Bot.NavMeshPosition) ? 1.25f : 1f);
-        Bot.Player.MovementContext.IgnoreInteractionCollision(data.Door.Collider, true);
+        // ref: AUD-10-01 - Validacao defensiva de colisor e MovementContext ao iniciar interacao
+        var collider = data.Door?.Collider;
+        if (collider != null && Bot.Player?.MovementContext != null)
+        {
+            Bot.Player.MovementContext.IgnoreInteractionCollision(collider, true);
+        }
         return true;
     }
 
@@ -104,7 +109,12 @@ public class DoorOpener : BotComponentClassBase
 
     private void Clear()
     {
-        Bot.Player.MovementContext.IgnoreInteractionCollision(ActiveDoor.Door?.Collider, false);
+        // ref: AUD-04-03 - Validacao defensiva de colisor e movement context
+        var collider = ActiveDoor.Door?.Collider;
+        if (collider != null && Bot.Player?.MovementContext != null)
+        {
+            Bot.Player.MovementContext.IgnoreInteractionCollision(collider, false);
+        }
         Interacting = false;
         _interactionDoorIndex = 0;
         ActiveDoor = new();
@@ -404,6 +414,15 @@ public class DoorOpener : BotComponentClassBase
         Vector3 botDirection = (botPosition - doorPos).normalized;
         float dotProduct = Vector3.Dot(openDirection, botDirection);
         return dotProduct > 0;
+    }
+
+    // ref: AUD-04-01 - Teardown defensivo no descarte do bot para reverter colisões ignoradas e limpar coleções
+    public override void Dispose()
+    {
+        Clear();
+        _allDoors.Clear();
+        _interactionDoors.Clear();
+        base.Dispose();
     }
 
     public DoorDataStruct ActiveDoor = new();

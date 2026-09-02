@@ -1,4 +1,4 @@
-﻿using SAIN.Preset.GlobalSettings;
+using SAIN.Preset.GlobalSettings;
 using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.EnemyClasses;
@@ -70,15 +70,15 @@ public class EnemyVisionClass(EnemyData enemyData) : EnemyBase(enemyData, enemyD
         return GetMaxVisionRange(myBot.CurrentAILimit);
     }
 
+    // ref: AUD-14-01 - Proteção contra KeyNotFoundException usando TryGetValue
     private static float GetMaxVisionRange(AILimitSetting aiLimit)
     {
-        return aiLimit switch
+        var ranges = GlobalSettingsClass.Instance?.General?.AILimit?.MaxVisionRanges;
+        if (ranges != null && ranges.TryGetValue(aiLimit, out float range))
         {
-            AILimitSetting.Far => GlobalSettingsClass.Instance.General.AILimit.MaxVisionRanges[AILimitSetting.Far],
-            AILimitSetting.VeryFar => GlobalSettingsClass.Instance.General.AILimit.MaxVisionRanges[AILimitSetting.VeryFar],
-            AILimitSetting.Narnia => GlobalSettingsClass.Instance.General.AILimit.MaxVisionRanges[AILimitSetting.Narnia],
-            _ => float.MaxValue,
-        };
+            return range;
+        }
+        return float.MaxValue;
     }
 
     public void TickEnemy(float currentTime)

@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using HarmonyLib;
 using SAIN.Components;
 using SAIN.Preset.GlobalSettings;
@@ -20,7 +20,8 @@ public class SetGrenadePatch : ModulePatch
         {
             return;
         }
-        if (!BotManagerComponent.Instance.GetSAIN(__instance.BotOwner_0, out var botComponent))
+        // ref: AUD-05-03 - Acesso defensivo padronizado via SAINEnableClass
+        if (!SAINEnableClass.GetSAIN(__instance.BotOwner_0?.ProfileId, out var botComponent))
         {
             return;
         }
@@ -39,7 +40,8 @@ public class ResetGrenadePatch : ModulePatch
     [PatchPostfix]
     public static void Patch(BotGrenadeController __instance)
     {
-        if (!BotManagerComponent.Instance.GetSAIN(__instance.BotOwner_0, out var botComponent))
+        // ref: AUD-05-03 - Acesso defensivo padronizado via SAINEnableClass
+        if (!SAINEnableClass.GetSAIN(__instance.BotOwner_0?.ProfileId, out var botComponent))
         {
             return;
         }
@@ -69,7 +71,8 @@ public class DisableGrenadesPatch : ModulePatch
             return;
         }
 
-        if (SAINEnableClass.GetSAIN(__instance.BotOwner_0.ProfileId, out BotComponent bot))
+        // ref: AUD-17-02 - Null-safety em BotOwner_0
+        if (SAINEnableClass.GetSAIN(__instance.BotOwner_0?.ProfileId, out BotComponent bot))
         {
             if (!bot.Info.FileSettings.Core.CanGrenade)
             {

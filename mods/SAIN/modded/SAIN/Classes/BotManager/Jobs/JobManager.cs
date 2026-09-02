@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using SAIN.Types.Jobs;
 using UnityEngine;
@@ -35,5 +35,7 @@ public class JobManager : IDisposable
         {
             job?.Stop();
         }
+        // ref: AUD-01-04 - Esvaziamento explícito da lista no descarte
+        Jobs.Clear();
     }
 }

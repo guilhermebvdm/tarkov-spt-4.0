@@ -1,4 +1,5 @@
-﻿using EFT;
+using System;
+using EFT;
 using SAIN.Components;
 using SAIN.SAINComponent.Classes.EnemyClasses;
 using UnityEngine;
@@ -42,19 +43,29 @@ public class BotLightController : BotComponentClassBase
 
     private void setLight(bool value)
     {
+        // ref: AUD-05-05 - Protecao defensiva de nulo em BotLight
+        var botLight = BotOwner?.BotLight;
+        if (botLight == null)
+        {
+            return;
+        }
+
         try
         {
             if (value)
             {
-                BotOwner.BotLight.TurnOn(true);
+                botLight.TurnOn(true);
             }
             else
             {
-                BotOwner.BotLight.TurnOff(false, true);
+                botLight.TurnOff(false, true);
             }
         }
-        catch
-        { // eft code go burr
+        catch (Exception ex)
+        {
+#if DEBUG
+            Logger.LogDebug($"BotLight error: {ex}");
+#endif
         }
     }
 
@@ -65,6 +76,7 @@ public class BotLightController : BotComponentClassBase
 
     private bool wantLightOn;
 
+    // ref: Compatibilidade de API com mods externos / chamadores legados
     public void ToggleLaser(bool value) { }
 
     public void HandleLightForSearch(float distanceToCurrentCornerSqr)

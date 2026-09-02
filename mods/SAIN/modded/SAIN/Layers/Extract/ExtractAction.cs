@@ -1,4 +1,4 @@
-﻿using Comfort.Common;
+using Comfort.Common;
 using DrakiaXYZ.BigBrain.Brains;
 using EFT;
 using EFT.HealthSystem;
@@ -168,13 +168,17 @@ internal class ExtractAction(BotOwner bot) : BotAction(bot, "Extract"), IBotActi
         }
     }
 
-    private bool shouldStartExtract(float distance)
+    private static readonly float _minExtractDistSqr = MinDistanceToStartExtract * MinDistanceToStartExtract; // 36f
+    private static readonly float _maxExtractDistSqr = (MinDistanceToStartExtract * 2) * (MinDistanceToStartExtract * 2); // 144f
+
+    private bool shouldStartExtract(float distanceSqr)
     {
-        if (distance > MinDistanceToStartExtract * 2)
+        // ref: AUD-04-06 - Comparar sqrMagnitude com os limites ao quadrado corretos
+        if (distanceSqr > _maxExtractDistSqr)
         {
             ExtractStarted = false;
         }
-        if (distance < MinDistanceToStartExtract)
+        else if (distanceSqr < _minExtractDistSqr)
         {
             ExtractStarted = true;
         }

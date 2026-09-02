@@ -24,7 +24,6 @@ public class SAINBotTalkClass : BotComponentClassBase
         : base(sain)
     {
         TickRequirement = ESAINTickState.OnlyNoSleep;
-        PhraseObjectsAdd(_phraseDictionary);
         GroupTalk = new GroupTalk(sain);
         EnemyTalk = new EnemyTalk(sain);
         _timeCanTalk = Time.time + UnityEngine.Random.Range(1f, 2f);
@@ -108,13 +107,14 @@ public class SAINBotTalkClass : BotComponentClassBase
                     && Bot.GoalEnemy?.IsVisible == false
                 )
                 {
+                    // ref: AUD-03-01 - Operador nulo-seguro para proteger contra NRE caso as maos estejam ocupadas
                     if (TalkPack.Value.phraseInfo.Phrase == EPhraseTrigger.Roger)
                     {
-                        Player.HandsController.ShowGesture(EInteraction.OkGesture);
+                        Player.HandsController?.ShowGesture(EInteraction.OkGesture);
                     }
                     else
                     {
-                        Player.HandsController.ShowGesture(EInteraction.NoGesture);
+                        Player.HandsController?.ShowGesture(EInteraction.NoGesture);
                     }
                     return;
                 }
@@ -462,6 +462,16 @@ public class SAINBotTalkClass : BotComponentClassBase
         }
     }
 
+    // ref: AUD-03-07 - Template estático compartilhado inicializado uma única vez
+    private static readonly Dictionary<EPhraseTrigger, PhraseInfo> _defaultPhraseTemplate = CreateDefaultPhraseDictionary();
+
+    private static Dictionary<EPhraseTrigger, PhraseInfo> CreateDefaultPhraseDictionary()
+    {
+        var dict = new Dictionary<EPhraseTrigger, PhraseInfo>();
+        PhraseObjectsAdd(dict);
+        return dict;
+    }
+
     private BotTalkPackage? _botTalkPackage;
     private BotTalkPackage? _talkDelayPackage;
     private bool _talkCacheActive = false;
@@ -471,7 +481,8 @@ public class SAINBotTalkClass : BotComponentClassBase
     private float _timeCanTalk;
     private float _talkDelayTimer = 0f;
 
-    private readonly Dictionary<EPhraseTrigger, PhraseInfo> _phraseDictionary = new();
+    // ref: AUD-03-07 - Inicialização por cópia de template em vez de reflexão em cada bot
+    private readonly Dictionary<EPhraseTrigger, PhraseInfo> _phraseDictionary = new(_defaultPhraseTemplate);
 }
 
 public struct BotTalkPackage

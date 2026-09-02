@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Reflection;
 using EFT;
 using HarmonyLib;
@@ -22,7 +22,8 @@ public class AddBotComponentPatch : ModulePatch
     {
         try
         {
-            BotSpawnController.Instance.AddBot(__instance);
+            // ref: AUD-01-06 - Guarda defensiva contra instanciação antecipada antes do BotSpawnController
+            BotSpawnController.Instance?.AddBot(__instance);
         }
         catch (Exception ex)
         {

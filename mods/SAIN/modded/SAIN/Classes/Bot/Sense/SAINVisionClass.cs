@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using EFT;
 using SAIN.Components;
 using SAIN.SAINComponent.Classes.Sense;
@@ -76,8 +76,15 @@ public class SAINVisionClass : BotComponentClassBase
 
             lookSensor.ClearVisibleDist = finalVisionDistance;
 
-            finalVisionDistance = BotOwner.NightVision.UpdateVision(finalVisionDistance);
-            finalVisionDistance = BotOwner.BotLight.UpdateLightEnable(finalVisionDistance);
+            // ref: AUD-02-03 - Null-safety defensivo em NightVision e BotLight
+            if (BotOwner.NightVision != null)
+            {
+                finalVisionDistance = BotOwner.NightVision.UpdateVision(finalVisionDistance);
+            }
+            if (BotOwner.BotLight != null)
+            {
+                finalVisionDistance = BotOwner.BotLight.UpdateLightEnable(finalVisionDistance);
+            }
             lookSensor.VisibleDist = finalVisionDistance;
         }
 

@@ -1,4 +1,4 @@
-﻿using EFT;
+using EFT;
 using SAIN.Components;
 using SAIN.Preset.GlobalSettings;
 using UnityEngine;
@@ -302,7 +302,13 @@ public static class EnemyGainSightClass
 
     private static bool EnemyUsingLight(out float modifier, Enemy Enemy)
     {
-        var flashlight = Enemy.EnemyPlayerComponent.Flashlight;
+        // ref: AUD-14-02 - Null-safety em EnemyPlayerComponent.Flashlight e BotOwner.NightVision (nulo para humanos)
+        var flashlight = Enemy?.EnemyPlayerComponent?.Flashlight;
+        if (flashlight == null)
+        {
+            modifier = 1f;
+            return false;
+        }
         if (flashlight.WhiteLight)
         {
             modifier = ENEMYLIGHT_WHITELIGHT_MOD;
@@ -313,7 +319,7 @@ public static class EnemyGainSightClass
             modifier = ENEMYLIGHT_LASER_MOD;
             return true;
         }
-        bool usingNVGS = Enemy.BotOwner.NightVision.UsingNow;
+        bool usingNVGS = Enemy.BotOwner?.NightVision?.UsingNow == true;
         if (usingNVGS)
         {
             if (flashlight.IRLaser)
@@ -393,7 +399,8 @@ public static class EnemyGainSightClass
         {
             return 1f;
         }
-        return BotManagerComponent.Instance.WeatherVision.GainSightModifier;
+        // ref: AUD-14-03 - Null-safety em BotManagerComponent.Instance
+        return BotManagerComponent.Instance?.WeatherVision?.GainSightModifier ?? 1f;
     }
 
     private static float BaseTimeModifier(bool flareEnabled)
@@ -402,7 +409,8 @@ public static class EnemyGainSightClass
         {
             return 1f;
         }
-        return BotManagerComponent.Instance.TimeVision.TimeGainSightModifier;
+        // ref: AUD-14-03 - Null-safety em BotManagerComponent.Instance
+        return BotManagerComponent.Instance?.TimeVision?.TimeGainSightModifier ?? 1f;
     }
 
     // private static float _nextLogTime;

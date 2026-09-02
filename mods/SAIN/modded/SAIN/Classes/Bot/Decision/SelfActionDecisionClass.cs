@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Reflection;
 using EFT;
 using EFT.InventoryLogic;
@@ -32,7 +32,8 @@ public class SelfActionDecisionClass : BotBase
         }
 
         BotOwner botOwner = BotOwner;
-        if (botOwner.WeaponManager?.Reload.Reloading == true)
+        // ref: AUD-15-03 - Null-safety em Reload e ShootData
+        if (botOwner.WeaponManager?.Reload?.Reloading == true)
         {
             _lastReloadTime = Time.time;
         }
@@ -40,7 +41,7 @@ public class SelfActionDecisionClass : BotBase
         {
             return true;
         }
-        if (botOwner.ShootData.Shooting)
+        if (botOwner.ShootData?.Shooting == true)
         {
             Decision = ESelfActionType.None;
             return false;

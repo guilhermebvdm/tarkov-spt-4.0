@@ -1,4 +1,4 @@
-﻿using EFT;
+using EFT;
 using SAIN.Components;
 using SAIN.SAINComponent.Classes.EnemyClasses;
 using UnityEngine;
@@ -37,12 +37,14 @@ public class SAINBotLookClass : BotBase
         for (int i = 0; i < lookData.ReportsData.Count; i++)
         {
             EnemyVisionCheck enemyVision = lookData.ReportsData[i];
-            BotOwner.BotsGroup.ReportAboutEnemy(enemyVision.Enemy, enemyVision.VisibleOnlyBySence, BotOwner);
+            // ref: AUD-26-01 - Null-safety em BotsGroup
+            BotOwner?.BotsGroup?.ReportAboutEnemy(enemyVision.Enemy, enemyVision.VisibleOnlyBySence, BotOwner);
         }
 
         if (lookData.ReportsData.Count > 0)
         {
-            BotOwner.Memory.SetLastTimeSeeEnemy();
+            // ref: AUD-26-01 - Null-safety em Memory
+            BotOwner?.Memory?.SetLastTimeSeeEnemy();
         }
 
         if (lookData.ShallRecalcGoal)
@@ -56,7 +58,12 @@ public class SAINBotLookClass : BotBase
     private static int UpdateLookForEnemies(LookAllData lookAll, float currentTime, BotComponent bot)
     {
         int updated = 0;
-        var lookSensor = bot.BotOwner.LookSensor;
+        // ref: AUD-26-01 - Null-safety em LookSensor
+        var lookSensor = bot?.BotOwner?.LookSensor;
+        if (lookSensor == null)
+        {
+            return 0;
+        }
 
         var transform = bot.Transform;
         Vector3 viewPosition = transform.EyePosition;
@@ -65,7 +72,7 @@ public class SAINBotLookClass : BotBase
         // Update look sensors fields since we are not calling the original botowner code that does this.
         // We should check for changes between tarkov updates.
         lookSensor.WeaponRootPoint = weaponRoot;
-        lookSensor.LookSensorShootPosition.UpdateShootPosition(weaponRoot);
+        lookSensor.LookSensorShootPosition?.UpdateShootPosition(weaponRoot);
         lookSensor.HeadPoint = viewPosition;
 
         lookAll.Reset();

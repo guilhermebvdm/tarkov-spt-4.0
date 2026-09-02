@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Comfort.Common;
 using EFT.Interactive;
@@ -35,6 +35,9 @@ public class DoorHandler : GameWorldBase, IGameWorldClass
             GameObject.Destroy(door.Value);
         }
         _doorsWithTriggers.Clear();
+        // ref: AUD-19-02 - Limpeza de delegates de eventos para evitar memory leak
+        OnDoorStateChanged = null;
+        OnDoorsDisabled = null;
     }
 
     public void ChangeDoorState(Door door, EDoorState state, bool shallInvert)

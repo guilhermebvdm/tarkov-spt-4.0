@@ -230,7 +230,8 @@ public class GroupTalk : BotBase
             bool shallGesture = gesture != EInteraction.None && Bot.Squad.VisibleMembers.Count > 0 && Bot.GoalEnemy?.IsVisible == false;
             if (shallGesture)
             {
-                Player.HandsController.ShowGesture(gesture);
+                // ref: AUD-03-05 - Null-safety defensivo no HandsController
+                Player.HandsController?.ShowGesture(gesture);
             }
 
             member.Talk.Say(memberTrigger, ETagStatus.Combat, false);
@@ -940,7 +941,8 @@ public class GroupTalk : BotBase
 
             if (shallGesture)
             {
-                Player.HandsController.ShowGesture(gesture);
+                // ref: AUD-09-02 - Null-safety defensivo em HandsController ao emitir gestos
+                Player.HandsController?.ShowGesture(gesture);
             }
 
             allMembersSay(memberTrigger, ETagStatus.Aware, commandTrigger, Random.Range(0.75f, 1.5f), 35f);
@@ -948,7 +950,8 @@ public class GroupTalk : BotBase
         }
         else if (shallGesture)
         {
-            Player.HandsController.ShowGesture(gesture);
+            // ref: AUD-09-02 - Null-safety defensivo em HandsController ao emitir gestos
+            Player.HandsController?.ShowGesture(gesture);
         }
         return false;
     }
@@ -961,7 +964,8 @@ public class GroupTalk : BotBase
             var trigger = EPhraseTrigger.PhraseNone;
             var mask = ETagStatus.Aware;
 
-            if (Bot.GoalEnemy.IsVisible && enemy.EnemyLookingAtMe && EFTMath.RandomBool(_enemyNeedHelpChance))
+            // ref: AUD-09-03 - Usar enemy.IsVisible em vez de Bot.GoalEnemy.IsVisible para evitar NRE
+            if (enemy.IsVisible && enemy.EnemyLookingAtMe && EFTMath.RandomBool(_enemyNeedHelpChance))
             {
                 mask = ETagStatus.Combat;
                 bool injured = !Bot.Memory.Health.Healthy && !Bot.Memory.Health.Injured;

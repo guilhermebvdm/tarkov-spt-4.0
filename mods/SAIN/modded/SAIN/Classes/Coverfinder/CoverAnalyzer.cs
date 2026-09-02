@@ -1,4 +1,4 @@
-﻿using Comfort.Common;
+using Comfort.Common;
 using EFT;
 using SAIN.Components;
 using SAIN.Components.CoverFinder;
@@ -191,20 +191,21 @@ public class CoverAnalyzer(BotComponent bot, CoverFinderComponent coverFinder) :
     {
         // Direction vector from start to end
         Vector3 lineDir = end - start;
-        float lineLength = lineDir.sqrMagnitude;
-        if (lineLength < 0.01f)
+        float lineLengthSqr = lineDir.sqrMagnitude;
+        if (lineLengthSqr < 0.01f)
         {
-            return (position - start).magnitude <= maxDistanceSqr;
+            // ref: AUD-04-02 - Comparar sqrMagnitude com maxDistanceSqr
+            return (position - start).sqrMagnitude <= maxDistanceSqr;
         }
 
-        // Project position onto the line (clamped to segment)
-        float t = Vector3.Dot(position - start, lineDir.normalized) / lineLength;
+        // ref: AUD-04-01 - Projecao ortogonal canonica: ((P - A) . V) / ||V||^2
+        float t = Vector3.Dot(position - start, lineDir) / lineLengthSqr;
         t = Mathf.Clamp01(t); // Clamp between 0 and 1 for segment
 
         Vector3 closestPoint = start + t * lineDir;
-        float dist = (position - closestPoint).sqrMagnitude;
+        float distSqr = (position - closestPoint).sqrMagnitude;
 
-        return dist <= maxDistanceSqr;
+        return distSqr <= maxDistanceSqr;
     }
 
     private bool checkPositionVsOtherBots(Vector3 position)
@@ -237,32 +238,21 @@ public class CoverAnalyzer(BotComponent bot, CoverFinderComponent coverFinder) :
         return true;
     }
 
+    // ref: AUD-04-02 - Utilizar retorno numérico de OverlapSphereNonAlloc sem zeramento manual de array
     private static bool checkIfPlayerCollidersNear(Vector3 point, string botProfileId, float radius)
     {
-        for (int i = 0; i < _playerColliderArray.Length; i++)
-        {
-            _playerColliderArray[i] = null;
-        }
-
-        Physics.OverlapSphereNonAlloc(point, radius, _playerColliderArray, LayerMaskClass.PlayerMask);
-
-        int count = 0;
-        Collider foundCollider = null;
-        foreach (var collider in _playerColliderArray)
-        {
-            if (collider == null)
-            {
-                continue;
-            }
-
-            count++;
-            if (count > 1)
-            {
-                return true;
-            }
-            foundCollider = collider;
-        }
+        int count = Physics.OverlapSphereNonAlloc(point, radius, _playerColliderArray, LayerMaskClass.PlayerMask);
         if (count == 0)
+        {
+            return false;
+        }
+        if (count > 1)
+        {
+            return true;
+        }
+
+        Collider foundCollider = _playerColliderArray[0];
+        if (foundCollider == null)
         {
             return false;
         }

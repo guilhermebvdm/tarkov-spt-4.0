@@ -1,4 +1,4 @@
-﻿using EFT;
+using EFT;
 using SAIN.Components;
 using SAIN.Models.Enums;
 using SAIN.SAINComponent.Classes.EnemyClasses;
@@ -23,7 +23,9 @@ public class SquadDecisionClass : BotBase
     public bool GetDecision(out ESquadDecision Decision, Enemy enemy)
     {
         Decision = ESquadDecision.None;
-        if (!Squad.BotInGroup || Bot.Squad.SquadInfo?.LeaderComponent == null || Squad.LeaderComponent?.IsDead == true)
+        // ref: AUD-21-01 - Null-safety defensivo em Squad
+        var squad = Squad;
+        if (squad == null || !squad.BotInGroup || squad.SquadInfo?.LeaderComponent == null || squad.LeaderComponent?.IsDead == true)
         {
             return false;
         }
@@ -62,35 +64,41 @@ public class SquadDecisionClass : BotBase
                 return false;
             }
         }
-        if (Bot.Squad.LeaderComponent != null && shallGroupSearch())
+        if (Bot.Squad?.LeaderComponent != null && shallGroupSearch())
         {
             Decision = ESquadDecision.GroupSearch;
             return true;
         }
 
-        foreach (var member in Bot.Squad.Members.Values)
+        // ref: AUD-21-01 - Null-safety em Members e member.BotOwner
+        var members = Bot.Squad?.Members?.Values;
+        if (members != null)
         {
-            if (member == null || member.BotOwner == BotOwner || member.BotOwner.IsDead)
+            foreach (var member in members)
             {
-                continue;
-            }
-            if (!HasRadioComms && (Bot.Transform.Position - member.Transform.Position).sqrMagnitude > SquaDecision_RadioCom_MaxDistSq)
-            {
-                continue;
-            }
-            if (myEnemy != null && member.HasEnemy)
-            {
-                if (myEnemy.EnemyPlayer == member.GoalEnemy.EnemyPlayer)
+                if (member == null || member.BotOwner == BotOwner || member.BotOwner?.IsDead != false)
                 {
-                    if (shallSuppressEnemy(member))
+                    continue;
+                }
+                if (!HasRadioComms && (Bot.Transform.Position - member.Transform.Position).sqrMagnitude > SquaDecision_RadioCom_MaxDistSq)
+                {
+                    continue;
+                }
+                if (myEnemy != null && member.HasEnemy)
+                {
+                    // ref: AUD-03-02 - Null-safety defensivo para GoalEnemy antes da selecao de alvo
+                    if (myEnemy.EnemyPlayer == member.GoalEnemy?.EnemyPlayer)
                     {
-                        Decision = ESquadDecision.Suppress;
-                        return true;
-                    }
-                    if (shallHelp(member))
-                    {
-                        Decision = ESquadDecision.Help;
-                        return true;
+                        if (shallSuppressEnemy(member))
+                        {
+                            Decision = ESquadDecision.Suppress;
+                            return true;
+                        }
+                        if (shallHelp(member))
+                        {
+                            Decision = ESquadDecision.Help;
+                            return true;
+                        }
                     }
                 }
             }
@@ -224,15 +232,22 @@ public class SquadDecisionClass : BotBase
     float SquadDecision_EndHelpFriendDist = 45f;
     float SquadDecision_EndHelp_FriendsEnemySeenRecentTime = 8f;
 
+    // ref: AUD-03-02 - Null-safety defensivo para GoalEnemy antes de checar socorro ao aliado
     private bool shallHelp(BotComponent member)
     {
-        float distance = member.GoalEnemy.Path.PathLength;
-        bool visible = member.GoalEnemy.IsVisible;
+        var goalEnemy = member?.GoalEnemy;
+        if (goalEnemy == null)
+        {
+            return false;
+        }
 
-        if (Bot.Decision.CurrentSquadDecision == ESquadDecision.Help && member.GoalEnemy.Seen)
+        float distance = goalEnemy.Path.PathLength;
+        bool visible = goalEnemy.IsVisible;
+
+        if (Bot.Decision.CurrentSquadDecision == ESquadDecision.Help && goalEnemy.Seen)
         {
             return distance < SquadDecision_EndHelpFriendDist
-                && member.GoalEnemy.TimeSinceSeen < SquadDecision_EndHelp_FriendsEnemySeenRecentTime;
+                && goalEnemy.TimeSinceSeen < SquadDecision_EndHelp_FriendsEnemySeenRecentTime;
         }
         return distance < SquadDecision_StartHelpFriendDist && visible;
     }

@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using EFT;
 using SAIN.Components;
 using SAIN.Models.Enums;
@@ -46,7 +46,8 @@ public class EnemyDecisionClass : BotBase
 #endif
 
         BotWeaponManager weaponManager = BotOwner.WeaponManager;
-        if (weaponManager == null || !weaponManager.HaveBullets || weaponManager.Reload.Reloading)
+        // ref: AUD-15-01 - Null-safety em weaponManager.Reload
+        if (weaponManager == null || !weaponManager.HaveBullets || weaponManager.Reload?.Reloading == true)
         {
             result = ECombatDecision.Retreat;
             return true;

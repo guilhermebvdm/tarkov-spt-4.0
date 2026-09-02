@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Reflection;
 using BepInEx.Bootstrap;
 using SAIN.Helpers;
@@ -36,6 +36,8 @@ public static class ModDetection
         private static Type FikaBackendUtils { get; set; }
         private static PropertyInfo IsServerProperty { get; set; }
         private static PropertyInfo IsClientProperty { get; set; }
+        private static Func<bool> _isServerDelegate;
+        private static Func<bool> _isClientDelegate;
 
         public static void InitializeInterop()
         {
@@ -54,28 +56,28 @@ public static class ModDetection
             }
 
             FikaBackendUtils = FikaAssembly.GetType("Fika.Core.Main.Utils.FikaBackendUtils");
-            IsServerProperty = FikaBackendUtils.GetProperty("IsServer", BindingFlags.Public | BindingFlags.Static);
-            IsClientProperty = FikaBackendUtils.GetProperty("IsClient", BindingFlags.Public | BindingFlags.Static);
+            IsServerProperty = FikaBackendUtils?.GetProperty("IsServer", BindingFlags.Public | BindingFlags.Static);
+            IsClientProperty = FikaBackendUtils?.GetProperty("IsClient", BindingFlags.Public | BindingFlags.Static);
+
+            // ref: AUD-01-03 - Compilar delegados para eliminar reflection em hot path (WorldTickPatch)
+            if (IsServerProperty?.GetGetMethod() != null)
+            {
+                _isServerDelegate = (Func<bool>)Delegate.CreateDelegate(typeof(Func<bool>), IsServerProperty.GetGetMethod());
+            }
+            if (IsClientProperty?.GetGetMethod() != null)
+            {
+                _isClientDelegate = (Func<bool>)Delegate.CreateDelegate(typeof(Func<bool>), IsClientProperty.GetGetMethod());
+            }
         }
 
         public static bool IsServer()
         {
-            if (IsServerProperty == null)
-            {
-                return false;
-            }
-
-            return (bool)IsServerProperty.GetValue(null);
+            return _isServerDelegate?.Invoke() ?? false;
         }
 
         public static bool IsClient()
         {
-            if (IsClientProperty == null)
-            {
-                return false;
-            }
-
-            return (bool)IsClientProperty.GetValue(null);
+            return _isClientDelegate?.Invoke() ?? false;
         }
     }
 

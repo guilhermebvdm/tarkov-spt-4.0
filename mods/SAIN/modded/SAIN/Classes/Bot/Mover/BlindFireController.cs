@@ -15,10 +15,11 @@ public class BlindFireController : BotBase, IBotClass
 
     private bool CheckAllowBlindFire()
     {
+        // ref: AUD-16-01 - Null-safety em WeaponManager
         if (
             !Bot.SAINLayersActive
-            || !BotOwner.WeaponManager.IsReady
-            || !BotOwner.WeaponManager.HaveBullets
+            || BotOwner.WeaponManager?.IsReady != true
+            || BotOwner.WeaponManager?.HaveBullets != true
             || Bot.Mover.Moving
             || Bot.Cover.CoverInUse == null
         )
@@ -81,7 +82,8 @@ public class BlindFireController : BotBase, IBotClass
             return;
         }
 
-        Vector3? lastKnownPos = Bot.GoalEnemy.KnownPlaces.LastKnownPosition;
+        // ref: AUD-16-01 - Null-safety em KnownPlaces
+        Vector3? lastKnownPos = Bot.GoalEnemy?.KnownPlaces?.LastKnownPosition;
         if (lastKnownPos == null)
         {
             ResetBlindFire();

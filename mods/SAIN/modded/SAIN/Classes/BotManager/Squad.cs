@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using EFT;
 using SAIN.Components;
@@ -473,6 +473,7 @@ public class Squad
         }
     }
 
+    // ref: AUD-09-01 - Desinscrição do evento estático de preset, teardown de botsGroup e esvaziamento de coleções
     public void Dispose()
     {
         if (MemberInfos.Count > 0)
@@ -487,10 +488,24 @@ public class Squad
         {
             BotsGroup.OnMemberRemove -= removeMember;
         }
+        if (_botsGroup != null)
+        {
+            _botsGroup.OnMemberRemove -= removeMember;
+            _botsGroup = null;
+        }
 
         PresetHandler.OnPresetUpdated -= updateSettings;
-        MemberInfos.Clear();
         Members.Clear();
+        MemberInfos.Clear();
+        Roles.Clear();
+        PlayerPlaceChecks.Clear();
+        LeaderComponent = null;
+        OnMemberDecisionMade = null;
+        OnMemberHeardEnemy = null;
+        OnSquadEmpty = null;
+        LeaderKilled = null;
+        OnMemberKilled = null;
+        NewLeaderFound = null;
     }
 
     private bool isInCommunicationRange(BotComponent a, BotComponent b)

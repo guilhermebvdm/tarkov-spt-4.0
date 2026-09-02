@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using EFT;
 using SAIN.Components;
 using SAIN.Helpers.Events;
@@ -81,17 +81,20 @@ public class BotDecisionManager(SAINDecisionClass decisionClass) : BotSubClass<S
             }
             if (enemy.RealDistance < 35 && enemy.Path.PathLength < 30 && enemy.Status.VulnerableAction != EEnemyAction.None)
             {
-                enemy.BotOwner.WeaponManager.Melee.ShallEndRun = false;
+                // ref: AUD-03-01 - Corrigido para referenciar o BotOwner do proprio Tagilla
+                Bot.BotOwner.WeaponManager.Melee.ShallEndRun = false;
                 return true;
             }
             if (enemy.RealDistance < 20 && enemy.Path.PathLength < 15)
             {
-                enemy.BotOwner.WeaponManager.Melee.ShallEndRun = false;
+                // ref: AUD-03-01 - Corrigido para referenciar o BotOwner do proprio Tagilla
+                Bot.BotOwner.WeaponManager.Melee.ShallEndRun = false;
                 return true;
             }
             return false;
         }
-        if (enemy.BotOwner.WeaponManager.Melee.ShallEndRun)
+        // ref: AUD-03-01 - Corrigido para referenciar o BotOwner do proprio Tagilla
+        if (Bot.BotOwner.WeaponManager.Melee.ShallEndRun)
         {
             return false;
         }
@@ -134,11 +137,13 @@ public class BotDecisionManager(SAINDecisionClass decisionClass) : BotSubClass<S
         if (enemy != null && enemy.IsZombie)
         {
             bool hasShooterContact = false;
+            // ref: AUD-03-03 - Interromper laço imediatamente ao detectar o primeiro contato de atirador não-zumbi
             foreach (var knownEnemy in Bot.EnemyController.KnownEnemies)
             {
                 if (knownEnemy?.IsZombie != true)
                 {
                     hasShooterContact = true;
+                    break;
                 }
             }
 

@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using EFT;
 using EFT.InventoryLogic;
 using HarmonyLib;
@@ -20,7 +20,8 @@ public class BotShootPatch : ModulePatch
     public static bool PatchPrefix(ShootData __instance, ref bool __result)
     {
         BotOwner botOwner = __instance.Owner;
-        if (!SAINEnableClass.GetSAIN(botOwner.ProfileId, out BotComponent bot))
+        // ref: AUD-23-02 - Null-safety em botOwner
+        if (!SAINEnableClass.GetSAIN(botOwner?.ProfileId, out BotComponent bot))
         {
             return true;
         }
@@ -29,8 +30,9 @@ public class BotShootPatch : ModulePatch
         {
             return false;
         }
-        BotUnderbarrelLauncherController underbarrelLauncherController = botOwner.WeaponManager.UnderbarrelLauncherController;
-        if (underbarrelLauncherController.IsActive)
+        // ref: AUD-23-02 - Null-safety em UnderbarrelLauncherController
+        BotUnderbarrelLauncherController underbarrelLauncherController = botOwner?.WeaponManager?.UnderbarrelLauncherController;
+        if (underbarrelLauncherController?.IsActive == true)
         {
             if (underbarrelLauncherController.NeedToReload() && !underbarrelLauncherController.TryReload(null))
             {
@@ -57,7 +59,8 @@ public class BotShootPatch : ModulePatch
             __instance.LastTriggerPressd = Time.time;
             __instance.ShootController.IsInLauncherMode();
             __instance.ShootController.SetTriggerPressed(true);
-            botOwner.AimingManager.CurrentAiming.TriggerPressedDone();
+            // ref: AUD-23-02 - Null-safety em AimingManager
+            botOwner?.AimingManager?.CurrentAiming?.TriggerPressedDone();
             __result = true;
             return false;
         }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using EFT;
@@ -203,24 +203,22 @@ public class PlayerComponent : MonoBehaviour, IDisposable, ISPlayer
         int Count = AISoundCachedEvents.Count;
         if (Count >= MaxCachedSounds)
         {
-            bool ShallInsert = false;
             float BaseRange = InRange * InVolume;
-            for (int i = 0; i < Count; i++)
+            // ref: AUD-01-03 - Localizar o menor elemento em O(1) e substituir in-place sem alocacoes de delegado/Sort
+            int minIndex = 0;
+            float minRange = AISoundCachedEvents[0].BaseRangeWithVolume;
+            for (int i = 1; i < Count; i++)
             {
-                if (BaseRange < AISoundCachedEvents[i].BaseRangeWithVolume)
+                if (AISoundCachedEvents[i].BaseRangeWithVolume < minRange)
                 {
-                    continue;
+                    minRange = AISoundCachedEvents[i].BaseRangeWithVolume;
+                    minIndex = i;
                 }
-                ShallInsert = true;
-                break;
             }
-            if (!ShallInsert)
+            if (BaseRange > minRange)
             {
-                return;
+                AISoundCachedEvents[minIndex] = new(InSoundType, InPosition, this, InRange, InVolume, SoundSpeed, Phrase, TagStatus);
             }
-            AISoundCachedEvents.Add(new(InSoundType, InPosition, this, InRange, InVolume, SoundSpeed, Phrase, TagStatus));
-            AISoundCachedEvents.Sort((a, b) => b.BaseRangeWithVolume.CompareTo(a.BaseRangeWithVolume));
-            AISoundCachedEvents.RemoveAt(AISoundCachedEvents.Count - 1);
             return;
         }
         AISoundCachedEvents.Add(new(InSoundType, InPosition, this, InRange, InVolume, SoundSpeed, Phrase, TagStatus));
@@ -369,15 +367,27 @@ public class PlayerComponent : MonoBehaviour, IDisposable, ISPlayer
         ActivationClass.OnPlayerActiveChanged -= HandleCoroutines;
         Equipment?.Dispose();
         OtherPlayersData?.Dispose();
-        Player.MovementContext.OnStateChanged -= SoundController.HandleMovementState;
-        SoundController.Dispose();
+        // ref: AUD-01-07 - Desinscricao defensiva no teardown de PlayerComponent
+        if (Player?.MovementContext != null && SoundController != null)
+        {
+            Player.MovementContext.OnStateChanged -= SoundController.HandleMovementState;
+        }
+        SoundController?.Dispose();
+        // ref: AUD-07-03 - Esvaziamento de buffer de som e anulação de delegates
+        AISoundCachedEvents.Clear();
+        OnShoot = null;
+        OnBulletFlyBy = null;
+        OnComponentDestroyed = null;
+        OnWeaponEquipped = null;
+        OnItemEquipped = null;
         Destroy(this);
     }
 
     public bool PlayVoiceLine(EPhraseTrigger phrase, ETagStatus mask, bool aggressive)
     {
-        var speaker = Player.Speaker;
-        if (speaker.Speaking || speaker.Busy)
+        // ref: AUD-25-02 - Null-safety defensivo em Player.Speaker
+        var speaker = Player?.Speaker;
+        if (speaker == null || speaker.Speaking || speaker.Busy)
         {
             return false;
         }

@@ -1,4 +1,4 @@
-﻿using EFT;
+using EFT;
 using SAIN.Components;
 using SAIN.Helpers;
 using SAIN.SAINComponent.Classes.EnemyClasses;
@@ -26,7 +26,8 @@ public class FlashLightDazzleClass : BotBase
             FlashLightClass flashlight = enemy?.EnemyPlayerComponent?.Flashlight;
             if (flashlight != null)
             {
-                bool usingNVGs = BotOwner.NightVision.UsingNow;
+                // ref: AUD-08-01 - Null-safety defensivo em NightVision
+                bool usingNVGs = BotOwner.NightVision?.UsingNow == true;
                 if ((flashlight.WhiteLight || (usingNVGs && flashlight.IRLight)) && EnemyWithFlashlight(enemy))
                 {
                     return;
@@ -47,11 +48,14 @@ public class FlashLightDazzleClass : BotBase
         {
             Vector3 botPos = BotOwner.MyHead.position;
             Vector3 weaponRoot = enemy.EnemyPlayer.WeaponRoot.position;
+            // ref: AUD-02-04 - Reutilizar vetor e magnitude calculada para evitar duplo .normalized e .magnitude
+            Vector3 toHead = botPos - weaponRoot;
+            float headDist = toHead.magnitude;
             if (
                 !Physics.Raycast(
                     weaponRoot,
-                    (botPos - weaponRoot).normalized,
-                    (botPos - weaponRoot).magnitude,
+                    toHead / headDist,
+                    headDist,
                     LayerMaskClass.HighPolyWithTerrainMask
                 )
             )
@@ -76,11 +80,14 @@ public class FlashLightDazzleClass : BotBase
         {
             Vector3 botPos = BotOwner.MyHead.position;
             Vector3 weaponRoot = enemy.EnemyPlayer.WeaponRoot.position;
+            // ref: AUD-02-04 - Reutilizar vetor e magnitude calculada para evitar duplo .normalized e .magnitude
+            Vector3 toHead = botPos - weaponRoot;
+            float headDist = toHead.magnitude;
             if (
                 !Physics.Raycast(
                     weaponRoot,
-                    (botPos - weaponRoot).normalized,
-                    (botPos - weaponRoot).magnitude,
+                    toHead / headDist,
+                    headDist,
                     LayerMaskClass.HighPolyWithTerrainMask
                 )
             )

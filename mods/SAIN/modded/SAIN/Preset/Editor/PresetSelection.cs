@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -23,7 +23,12 @@ public static class PresetSelection
 
     public static void PresetSelectionMenu()
     {
-        SAINPresetDefinition selectedPreset = SAINPlugin.LoadedPreset.Info;
+        // ref: AUD-24-01 - Null-safety defensivo em LoadedPreset
+        SAINPresetDefinition selectedPreset = SAINPlugin.LoadedPreset?.Info;
+        if (selectedPreset == null)
+        {
+            return;
+        }
         checkCreateWarning(selectedPreset);
 
         /////
@@ -35,14 +40,19 @@ public static class PresetSelection
         checkCreateNew();
         if (checkDeletePreset())
         {
-            selectedPreset = SAINPresetClass.Instance.Info;
+            selectedPreset = SAINPresetClass.Instance?.Info;
+            if (selectedPreset == null)
+            {
+                EndHorizontal();
+                return;
+            }
         }
         FlexibleSpace();
 
         EndHorizontal();
         /////
 
-        if (selectedPreset.Name != SAINPlugin.LoadedPreset.Info.Name)
+        if (SAINPlugin.LoadedPreset?.Info != null && selectedPreset.Name != SAINPlugin.LoadedPreset.Info.Name)
         {
             PresetHandler.InitPresetFromDefinition(selectedPreset);
         }

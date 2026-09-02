@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using EFT;
 using SAIN.SAINComponent.Classes.EnemyClasses;
 using Unity.Collections;
@@ -135,7 +135,13 @@ public struct RaycastJob : IRaycastJob, IBotRaycastJobSingleOwner, IBotRaycastJo
         for (int i = 0; i < Count; i++)
         {
             Vector3 Direction = Points[i] - ViewPosition;
-            Result[i] = new RaycastCommand(ViewPosition, Direction, new QueryParameters { layerMask = Mask }, 1f);
+            // ref: AUD-01-04 - Normalizar vetor e utilizar magnitude real como alcance
+            Result[i] = new RaycastCommand(
+                ViewPosition,
+                Direction.normalized,
+                new QueryParameters { layerMask = Mask },
+                Direction.magnitude
+            );
         }
         return Result;
     }

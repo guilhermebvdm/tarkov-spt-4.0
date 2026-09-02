@@ -1,4 +1,4 @@
-﻿using EFT;
+using EFT;
 using SAIN.Components;
 using SAIN.Helpers;
 using SAIN.Preset.GlobalSettings;
@@ -18,7 +18,11 @@ public class ProneClass : BotBase
 
     public void SetProne(bool value)
     {
-        BotOwner.BotLay.IsLay = value;
+        // ref: AUD-28-02 - Null-safety em BotOwner.BotLay
+        if (BotOwner?.BotLay != null)
+        {
+            BotOwner.BotLay.IsLay = value;
+        }
     }
 
     public bool ShallProne(bool withShoot, float mindist = 25f)
@@ -27,7 +31,8 @@ public class ProneClass : BotBase
         {
             return false;
         }
-        if (Player.MovementContext.CanProne)
+        // ref: AUD-28-02 - Null-safety em Player.MovementContext
+        if (Player?.MovementContext?.CanProne == true)
         {
             var enemy = Bot.GoalEnemy;
             if (enemy != null)
@@ -58,7 +63,7 @@ public class ProneClass : BotBase
         }
         if (_nextChangeProneTime > Time.time)
         {
-            return Player.IsInPronePose;
+            return Player?.IsInPronePose == true;
         }
 
         if (Bot.Decision.CurrentSelfDecision == ESelfActionType.None)
@@ -66,11 +71,11 @@ public class ProneClass : BotBase
             return false;
         }
 
-        if (!Player.MovementContext.CanProne)
+        if (Player?.MovementContext?.CanProne != true)
         {
             return false;
         }
-        if (enemy.KnownPlaces.BotDistanceFromLastKnown < mindist)
+        if (enemy.KnownPlaces?.BotDistanceFromLastKnown < mindist)
         {
             return false;
         }
