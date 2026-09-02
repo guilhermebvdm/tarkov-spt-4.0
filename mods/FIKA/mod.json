@@ -1,0 +1,44 @@
+{
+  "name": "FIKA",
+  "display_name": "Project Fika — Coop Ecosystem",
+  "description": "Suíte completa de conectividade cooperativa para SPT 4.0, composta por Plugin Client BepInEx (Fika.Core), Servidor C# (FikaServer), Cliente Headless e Documentação Técnica (Wiki).",
+  "spt_version": "4.0.13",
+  "created_at": "2026-09-02T00:22:00Z",
+  "components": {
+    "plugin": {
+      "name": "Fika-Plugin",
+      "upstream_url": "https://github.com/project-fika/Fika-Plugin.git",
+      "version": "2.3.9",
+      "tag": "v2.3.9",
+      "upstream_sha": "73ab774a97c5b608eed7ef66d02c83a0b9d703f5",
+      "path": "Fika-Plugin",
+      "role": "client"
+    },
+    "server": {
+      "name": "Fika-Server-CSharp",
+      "upstream_url": "https://github.com/project-fika/Fika-Server-CSharp.git",
+      "version": "2.3.5",
+      "tag": "v2.3.5",
+      "upstream_sha": "a56e9994eec692f31be4754727b5ff9803619364",
+      "path": "Fika-Server-CSharp",
+      "role": "server"
+    },
+    "headless": {
+      "name": "Fika-Headless",
+      "upstream_url": "https://github.com/project-fika/Fika-Headless.git",
+      "version": "1.4.15",
+      "tag": "v1.4.15",
+      "upstream_sha": "112f26fb298c70a52988d710aef59bb660902c5f",
+      "path": "Fika-Headless",
+      "role": "client-headless"
+    },
+    "wiki": {
+      "name": "gitbook-wiki",
+      "upstream_url": "https://github.com/project-fika/gitbook-wiki.git",
+      "upstream_sha": "a52c1638f57d73397e627c432e39a708ebcd32d7",
+      "upstream_branch": "main",
+      "path": "wiki",
+      "role": "documentation"
+    }
+  }
+}

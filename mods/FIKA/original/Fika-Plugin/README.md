@@ -1,0 +1,74 @@
+# Fika - Bepinex plugin
+
+[![Discord](https://img.shields.io/discord/1202292159366037545?style=plastic&logo=discord&logoColor=FFFFFF&label=Fika%20Discord)](https://discord.gg/project-fika)
+[![Downloads](https://img.shields.io/github/downloads/project-fika/Fika-Plugin/total?style=plastic&logo=github)](https://github.com/project-fika/Fika-Plugin/releases/latest)
+![Size](https://img.shields.io/github/languages/code-size/project-fika/Fika-Plugin?style=plastic&logo=github)
+![Issues](https://img.shields.io/github/issues/project-fika/Fika-Plugin?style=plastic&logo=github)
+[![License](https://img.shields.io/badge/CC--BY--NC--SA--4.0-blue?style=plastic&logo=creativecommons&logoColor=FFFFFF&label=License)](https://github.com/project-fika/Fika-Plugin/blob/main/LICENSE.md)
+[![Crowdin](https://badges.crowdin.net/project-fika/localized.svg)](https://crowdin.com/project/project-fika)
+[![.NET Test](https://github.com/project-fika/Fika-Plugin/actions/workflows/dotnet.yml/badge.svg)](https://github.com/project-fika/Fika-Plugin/actions/workflows/dotnet.yml)
+
+Client-side changes to make multiplayer work.
+
+## State of the project
+
+Fully functional with minimal bugs.
+
+- All base game features are replicating and working properly
+- Unique interpolation system inspired by the id Tech 3 networking model
+- Extremely efficient bandwidth usage
+- Headless client to off-load AI (see [Fika-Headless](https://github.com/project-fika/Fika-Headless) repo)
+- Base game bug fixes that have been unfixed for years
+- Base game performance fixes
+- DNS support
+- Works with all mods that are developed without hacky workarounds
+
+## Supported OS
+Fika is meant to be ran on Windows 10/11. Any other OS might work, but is not officially supported nor do we develop for them. Please respect this when creating an issue/bug report.
+
+## Contributing
+
+You are free to fork, improve and send PRs to improve the project. Please try
+to make your code coherent for the other developers.
+It is recommended to check in with our developers on Discord before spending time on a pull request, so that no time is wasted on unwanted features.
+
+## Requirements
+
+- [Visual Studio Code](https://code.visualstudio.com/)
+- [.NET SDK 10.0.x](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
+
+## Setup
+
+1. Copy-paste the contents of `EscapeFromTarkov_Data/Managed/` into
+    `References/`
+2. Copy-paste from SPT.Modules `project/Shared/Hollowed/hollowed.dll` into
+    `References/`
+
+## Build
+
+### Debug / Release
+
+**Tool**   | **Action**
+---------- | ------------------------------
+PowerShell | `dotnet build`
+VSCode     | `Terminal > Run Build Task...`
+
+You have to create a `References` folder and populate it with the required
+dependencies from your game installation for the project to build.
+
+## Licenses
+
+[<img src="https://mirrors.creativecommons.org/presskit/buttons/88x31/svg/by-nc-sa.svg" alt="cc by-nc-sa" width="180" height="63" align="right">](https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.en)
+
+This project is licensed under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.en).
+
+### Credits
+
+**Project** | **License**
+----------- | -----------------------------------------------------------------------
+SPT.Modules | [NCSA](https://dev.sp-tarkov.com/SPT/Modules/src/branch/master/LICENSE.md)
+SIT         | [NCSA](./Licenses/LICENSE-SIT.md) (`Forked from SIT.Client master:9de30d8`)
+Open.NAT    | [MIT](https://github.com/lontivero/Open.NAT/blob/master/LICENSE) (for UPnP implementation)
+LiteNetLib  | [MIT](https://github.com/RevenantX/LiteNetLib/blob/master/LICENSE.txt) (for P2P UDP implementation)
+
+<a href="https://crowdin.com/?utm_term=click-badge-add-on" rel="nofollow"><img style="width:140;height:40px" src="https://badges.crowdin.net/badge/light/crowdin-on-dark.png" srcset="https://badges.crowdin.net/badge/light/crowdin-on-dark.png 1x,https://badges.crowdin.net/badge/light/crowdin-on-dark@2x.png 2x" alt="Crowdin | Agile localization for tech companies" /></a>
