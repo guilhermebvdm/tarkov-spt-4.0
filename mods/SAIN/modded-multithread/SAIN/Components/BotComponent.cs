@@ -230,27 +230,19 @@ public class BotComponent : BotComponentBase, ISPlayer
         }
         _nextDistCheckTime = currentTime + 0.5f;
 
-        float minDistance = float.MaxValue;
-        var otherPlayers = PlayerComponent?.OtherPlayersData?.DataList;
-        if (otherPlayers != null)
+        // ref: CR-01-02 - Reuso de PlayerSpawnTracker.FindClosestHumanPlayer para busca de humano
+        var tracker = GameWorldComponent.Instance?.PlayerTracker;
+        if (tracker != null && tracker.FindClosestHumanPlayer(out float closestSqrMag, Position, out _) != null)
         {
-            for (int i = 0; i < otherPlayers.Count; i++)
-            {
-                var other = otherPlayers[i];
-                var otherPlayer = other?.OtherPlayerComponent?.Player;
-                if (otherPlayer != null && !otherPlayer.IsAI && other.DistanceData != null)
-                {
-                    float dist = other.DistanceData.Distance;
-                    if (dist < minDistance)
-                    {
-                        minDistance = dist;
-                    }
-                }
-            }
+            float dist = Mathf.Sqrt(closestSqrMag);
+            _cachedDistToHuman = dist;
+            DistanceToClosestHuman = dist;
+            return dist;
         }
-        _cachedDistToHuman = minDistance;
-        DistanceToClosestHuman = minDistance;
-        return minDistance;
+
+        _cachedDistToHuman = float.MaxValue;
+        DistanceToClosestHuman = float.MaxValue;
+        return float.MaxValue;
     }
 
     public void ManualUpdate(float currentTime, float deltaTime)
@@ -271,9 +263,11 @@ public class BotComponent : BotComponentBase, ISPlayer
                 // Determinar se o bot está em Tier 0 (Full Tick - 60+ Hz)
                 bool isUnderFire = botOwner.Memory?.IsUnderFire == true;
                 bool isLockoutActive = _combatLockoutTime > currentTime;
-                bool isRecentlyShot = Medical != null && Medical.TimeSinceShot < 10f;
+                // ref: CR-01-03 - Exigir que TimeLastShot > 0 para evitar falso-positivo no início da raid
+                bool isRecentlyShot = Medical != null && Medical.TimeLastShot > 0f && Medical.TimeSinceShot < 10f;
                 float distToHuman = GetMinDistanceToHumanPlayer(currentTime);
-                bool isCloseToHuman = distToHuman <= LOD_CLOSE_DIST || distToHuman == float.MaxValue;
+                // ref: CR-01-01 - Fallback de float.MaxValue restrito aos primeiros 5s de aquecimento
+                bool isCloseToHuman = distToHuman <= LOD_CLOSE_DIST || (currentTime < 5f && distToHuman == float.MaxValue);
 
                 bool isTier0 = inCombat || isUnderFire || isLockoutActive || isRecentlyShot || isCloseToHuman;
                 IsLODTier0 = isTier0;
