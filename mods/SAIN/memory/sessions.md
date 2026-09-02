@@ -12,7 +12,7 @@
 ## Pendências
 
 - [P-1.1] (aberta 2026-09-02) **VALIDAR IN-GAME a build consolidada v4.5.1 do SAIN** — Cenários a testar: **(1)** Raids consecutivas no SPT/FIKA monitorando memória/GC para certificar ausência de OOM entre raids; **(2)** Combates em ambientes fechados (CQB) e abertos para certificar ausência de NREs nos logs BepInEx; **(3)** Abertura e salvamento de presets no editor in-game F6; **(4)** Interoperabilidade com o mod de VOIP e resposta a gritos do jogador. 🟡 Validação in-game.
-- [P-1.2] (aberta 2026-09-02) **Planejamento e especificação do Addon MilSim (TRL-MilSimAI)** — Estruturar a camada desacoplada de BigBrain para *Breach & Clear* (granadas/flashbangs em portas) e *Bounding Overwatch* em esquadrão conforme [`docs/ROADMAP.md`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/SAIN/docs/ROADMAP.md). 🟢 Ideia.
+- [P-1.2] (aberta 2026-09-02) **Planejamento e especificação do Addon MilSim (TRL-MilSimAI)** — Estruturar a camada desacoplada de BigBrain para *Breach & Clear* (granadas/flashbangs em portas), *Bounding Overwatch* em esquadrão e disputa/looting agressivo de *Airdrop* conforme [`docs/ROADMAP.md`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/SAIN/docs/ROADMAP.md). 🟢 Ideia.
 
 ---
 

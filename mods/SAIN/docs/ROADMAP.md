@@ -17,14 +17,15 @@ Este documento define a visão, a arquitetura e as entregas do futuro **Addon de
 graph TD
     A["Escape From Tarkov (0.16.9 / SPT 4.0)"] --> B["BigBrain (xyz.drakia.bigbrain)"]
     B --> C["SAIN (Motor Base: Visão, Cobertura, Raycasts, Áudio)"]
-    C --> D["Addon MilSim (Mod Separado)"]
+    B --> D["LootingBots / QuestingBots"]
+    C --> E["Addon MilSim (Mod Separado)"]
     
-    D -.->|Injeta Camadas de Ação com Alta Prioridade| B
-    D -.->|Consulta Estado: BotComponent, Squad, DoorHandler| C
+    E -.->|Injeta Camadas de Ação com Alta Prioridade| B
+    E -.->|Consulta Estado: BotComponent, Squad, DoorHandler| C
 ```
 
 * **Manutenibilidade:** O SAIN permanece como base limpa e estável. As mecânicas táticas avançadas residem em seu próprio mod.
-* **Injeção Não-Invasiva:** Utilização do `BigBrain` para registrar *Brain Layers* de alta prioridade (`BreachAndClearLayer`, `BoundingOverwatchLayer`) que assumem o bot apenas durante os eventos táticos coordenados.
+* **Injeção Não-Invasiva:** Utilização do `BigBrain` para registrar *Brain Layers* de alta prioridade (`BreachAndClearLayer`, `BoundingOverwatchLayer`, `AirdropContestedLayer`) que assumem o bot apenas durante os eventos táticos coordenados.
 * **Prevenção de Conflitos Internos:** Bloqueio de reações espúrias do SAIN (como fuga em pânico de granadas arremessadas pelo próprio bot ou gatilhos falsos de *unstuck* durante a espera em cobertura).
 
 ---
@@ -50,6 +51,12 @@ graph TD
 - [ ] **Prioridade de Sobrevivência:** Transição imediata para cobertura sólida ou postura deitada (*prone*) ao sofrer fogo concentrado, evitando trocas de tiro expostas.
 - [ ] **Choque de Supressão (*Suppression Flinch*):** Penalidade temporária na velocidade de aquisição de mira e dispersão de disparos ao receber tiros rasantes.
 - [ ] **Disciplina de Reexposição:** Redução drástica na frequência com que o bot repete o mesmo ângulo de observação (*re-peeking*) após ser alvejado.
+
+### 4. Ponto de Interesse e Disputa Agressiva por Airdrop (*Airdrop Contested Zone & Looting*)
+- [ ] **Detecção de Eventos de Airdrop:** Escuta de eventos do jogo para acionamento de sinalizadores (`Flare`), passagem de avião de suprimentos e aterrissagem da caixa (`AirdropBox` / `AirdropPoint` / `SynchronizableObject`).
+- [ ] **Criação Dinâmica de Hotspot de Alto Interesse:** Registro da coordenada de pouso da caixa como um Ponto de Interesse (POI) de altíssima prioridade para bots (PMCs e Scavs) num raio amplo (ex: 150m–300m).
+- [ ] **Aproximação Tática e Estabelecimento de Perímetro:** Bots não correm a descoberto diretamente para o loot; esquadrões se movem em formação de cerco, varrem a área contra emboscadores e estabelecem posições defensivas ao redor da fumaça do sinalizador.
+- [ ] **Disputa e Coleta Sob Tensão:** Concorrência hostil entre grupos pelo controle da caixa. Enquanto um bot realiza a busca e extração de itens de alto valor, membros aliados cobrem os ângulos de aproximação, transformando o Airdrop em uma zona de combate de alto risco para o jogador.
 
 ---
 
