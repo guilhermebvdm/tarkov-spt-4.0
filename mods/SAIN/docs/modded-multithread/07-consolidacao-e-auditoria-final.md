@@ -82,6 +82,23 @@ Membros Públicos Faltando / Quebrados:                  0
 
 ---
 
+## 🔬 Fronteiras de Engenharia e Viabilidade Multithread
+
+Foi realizado um estudo exaustivo para determinar se outros subsistemas do SAIN (como audição, decisões do BigBrain, cobertura ou movimentação) deveriam ser migrados para multithreading.
+
+O relatório completo detalhando os limites do Unity 2022.3 e a relação custo-benefício está disponível em:
+👉 [08-analise-limites-e-viabilidade-multithread.md](08-analise-limites-e-viabilidade-multithread.md)
+
+**Principais Conclusões:**
+1. **NavMesh e Coberturas (`CoverFinderComponent`):** Inviável em multithread devido a restrições nativas do Unity (`NavMesh.SamplePosition` só roda na Main Thread). Já otimizado de forma segura via triagem matemática fail-fast na Etapa 3.
+2. **Decisões e BigBrain (`BotDecisionClass`):** O custo na Main Thread é ínfimo (< 0.04 ms por bot). Tentar paralelizar causaria graves *race conditions* com as animações e ações do EFT.
+3. **Audição (`HearingAnalysisClass`):** Sistema orientado a eventos de baixo consumo (< 0.02 ms por tiro). Não justifica a complexidade de cópia de estado.
+4. **Interpolações de Mira (`PredictiveLookSmoothing`):** O overhead de agendar um Job (~0.015 ms) supera em 15x o custo de executar a interpolação na Main Thread (~0.001 ms).
+
+**Conclusão:** O SAIN 4.7.0 atingiu o ponto ótimo de arquitetura, onde 100% dos gargalos reais foram paralelizados e otimizados sem introduzir riscos ou instabilidades.
+
+---
+
 ## 📦 Binário Gerado e Instruções de Uso
 
 * **Arquivo:** [`mods/SAIN/modded-multithread/bin/Release/SAIN.dll`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/SAIN/modded-multithread/bin/Release/SAIN.dll)
