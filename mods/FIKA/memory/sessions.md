@@ -2,13 +2,13 @@
 
 ## Estado atual
 
-> **Delta 2026-09-02 (Sessão 1):** FIKA modded compilado com 0 Erros em todos os 4 módulos do ecossistema ([`mods/FIKA/modded/`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/FIKA/modded/)). Concluído o ciclo de engenharia composto por: (1) Auditoria Diagnóstica da base original (8 relatórios em `docs/original/`); (2) Fase B de Correções Cirúrgicas com integração dos patches comprovados do `TRL-Fixes` (#1 a #6) e saneamento de vazamentos de memória (8 relatórios em `docs/modded/relatorio-correcao-01.md a 08.md`); (3) Re-Auditoria Técnica Profunda da versão modded (8 relatórios em `docs/modded/relatorio-auditoria-codigo-01.md a 08.md`); (4) Aplicação da 2ª Rodada de Refino (eliminação de acessos inseguros a Singletons AP-02, remoção de varreduras pesadas de hierarquia `GameObject.Find` na FreeCam e timeouts assíncronos em WebSockets); (5) Planejamento arquitetural das 3 grandes features futuras no [`docs/ROADMAP.md`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/FIKA/docs/ROADMAP.md) (Correção de Desync no Reconect, Raids Abertas / Late-Join e Senha Temporária de Raid); (6) 100% de contratos públicos preservados para compatibilidade com mods dependentes (*Speak From Tarkov*, *SAIN*, *Dynamic Maps*, *Questing Bots*, *Realism*, *TRL-FIXES*).
+> **Delta 2026-09-02 (Sessão 1):** FIKA modded compilado com 0 Erros em todos os 4 módulos do ecossistema ([`mods/FIKA/modded/`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/FIKA/modded/)). Concluído o ciclo de engenharia composto por: (1) Auditoria Diagnóstica da base original (8 relatórios em `docs/original/`); (2) Fase B de Correções Cirúrgicas com integração dos patches comprovados do `TRL-Fixes` (#1 a #6) e saneamento de vazamentos de memória (8 relatórios em `docs/modded/relatorio-correcao-01.md a 08.md`); (3) Re-Auditoria Técnica Profunda da versão modded (8 relatórios em `docs/modded/relatorio-auditoria-codigo-01.md a 08.md`); (4) Aplicação da 2ª Rodada de Refino (eliminação de acessos inseguros a Singletons AP-02, remoção de varreduras pesadas de hierarquia `GameObject.Find` na FreeCam e timeouts assíncronos em WebSockets); (5) Planejamento arquitetural das 3 grandes features futuras no [`docs/ROADMAP.md`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/FIKA/docs/ROADMAP.md) (Correção de Desync no Reconect, Raids Abertas / Late-Join e Senha Temporária de Raid); (6) Especificação de infraestrutura dedicada e multi-instâncias Headless com `AssetNuker` (redução de 20 GB para ~3 GB de RAM por instância); (7) 100% de contratos públicos preservados para compatibilidade com mods dependentes (*Speak From Tarkov*, *SAIN*, *Dynamic Maps*, *Questing Bots*, *Realism*, *TRL-FIXES*).
 
 - **Módulos Compilados e Versionados:**
-  - `Fika.Core.dll` (v2.3.10 — .NET Standard 2.1) $\rightarrow$ 0 erros / 0 avisos
-  - `FikaServer.dll` (v2.3.6 — .NET 9.0) $\rightarrow$ 0 erros
-  - `Fika.Headless.dll` (v1.4.16 — .NET Standard 2.1) $\rightarrow$ 0 erros / 0 avisos
-  - `Fika.Headless.AssetNuker.dll` (v1.4.16 — .NET 9.0 win-x64) $\rightarrow$ 0 erros / 0 avisos
+  - `Fika.Core.dll` (v2.3.10 — .NET Standard 2.1) $\rightarrow$ 🟢 0 erros / 0 avisos
+  - `FikaServer.dll` (v2.3.6 — .NET 9.0) $\rightarrow$ 🟢 0 erros
+  - `Fika.Headless.dll` (v1.4.16 — .NET Standard 2.1) $\rightarrow$ 🟢 0 erros / 0 avisos
+  - `Fika.Headless.AssetNuker.dll` (v1.4.16 — .NET 9.0 win-x64) $\rightarrow$ 🟢 0 erros / 0 avisos
 - **Documentação Técnica Integral:** 24 relatórios e documentos modulares criados, validados e versionados em `mods/FIKA/docs/`.
 
 ---
@@ -21,9 +21,9 @@
 
 ---
 
-## 2026-09-02 03:30 (GMT-3) — Sessão 1: Auditoria Integral, Saneamento de Memória, TRL-Fixes, Re-Auditoria, Roadmap e Builds v2.3.10 / v2.3.6 / v1.4.16
+## 2026-09-02 04:15 (GMT-3) — Sessão 1: Auditoria Integral, Saneamento de Memória, TRL-Fixes, Re-Auditoria, Roadmap, Infraestrutura Headless e Builds v2.3.10 / v2.3.6 / v1.4.16
 
-**Tema central:** Auditoria completa do ecossistema FIKA (Plugin, Servidor C#, Headless e Asset Nuker), aplicação cirúrgica de correções de memory leaks, integração de correções de estabilidade multiplayer, 2ª rodada de refinamento e consolidação do Roadmap de grandes features.
+**Tema central:** Auditoria completa do ecossistema FIKA (Plugin, Servidor C#, Headless e Asset Nuker), aplicação cirúrgica de correções de memory leaks, integração de correções de estabilidade multiplayer, 2ª rodada de refinamento, consolidação do Roadmap de grandes features e diretrizes de infraestrutura para servidores dedicados.
 
 **Decisões-chave:**
 - [Auditoria Integral em 8 Partições]: Cobertura de 100% dos subsistemas de rede, replicação de jogadores, inventário estrito, bots, ciclo de vida de raid, HUD, servidor C# e cliente headless.
@@ -43,6 +43,9 @@
   - Proteção contra acessos diretos a Singletons (`AP-02`) na FreeCam e `SyncObjectProcessorFactory`.
   - Remoção da busca de cena `GameObject.Find("BattleUIScreen")` no loop da FreeCam.
   - Timeout de segurança com `CancellationTokenSource` em fechamento de WebSocket headless.
+- [Infraestrutura Headless & Multi-Instância]:
+  - `AssetNuker` homologado para redução drástica de pegada de RAM (~3 GB por instância dedicada).
+  - Padrão de isolamento para 2 instâncias Headless no mesmo computador: pastas clonadas, portas UDP distintas (`25565` / `25566`), perfis SPT separados e isolamento de processo via usuários secundários do Windows (`runas`) ou Sandboxie-Plus.
 - [Preservação Total de Contratos Públicos]: 100% das classes, métodos, enums e delegates originais preservados para garantir compatibilidade com todos os mods dependentes do ecossistema.
 - [Roadmap de Novas Features]: Documentação técnica detalhada das 3 grandes iniciativas futuras no `docs/ROADMAP.md`.
 
@@ -54,4 +57,4 @@
 5. Implementação da 2ª rodada de correções cirúrgicas (FreeCam, Singletons, WebSockets).
 6. Compilação com 0 erros de todos os projetos em Release.
 7. Estruturação e detalhamento do `docs/ROADMAP.md`.
-8. Criação da memória de sessões em `mods/FIKA/memory/sessions.md`.
+8. Documentação das diretrizes de infraestrutura dedicada e criação da memória de sessões em `mods/FIKA/memory/sessions.md`.
