@@ -50,7 +50,19 @@ namespace TRLDynamicSpawn.Components
             _botsController = botsController;
 
             ZoneCache.Initialize();
+            if (_botsController?.BotSpawner != null)
+            {
+                _botsController.BotSpawner.OnBotCreated += OnBotCreatedSafetySnap;
+            }
             StartCoroutine(FetchServerConfigAndStart());
+        }
+
+        private void OnDestroy()
+        {
+            if (_botsController?.BotSpawner != null)
+            {
+                _botsController.BotSpawner.OnBotCreated -= OnBotCreatedSafetySnap;
+            }
         }
 
         public static Dictionary<string, List<Vector3Model>> PmcSpawns = new();
@@ -286,6 +298,10 @@ namespace TRLDynamicSpawn.Components
             IsWarmupActive = false;
             RaidInitialElitesSpawned = false;
             if (Instance == null) return;
+            if (Instance._botsController?.BotSpawner != null)
+            {
+                Instance._botsController.BotSpawner.OnBotCreated -= Instance.OnBotCreatedSafetySnap;
+            }
             Instance.StopAllCoroutines();   // SpawnHordeLoop, FetchServerConfigAndStart, ProcessWave, SpawnGroupBotsCoroutine
             Instance._activeWaveCoroutine = null;
         }
@@ -941,6 +957,18 @@ namespace TRLDynamicSpawn.Components
 
                 if (selectedZone == null)
                 {
+                    // Se este grupo for um Elite/Boss configurado com zonas específicas no painel web,
+                    // mas nenhuma zona pôde ser selecionada (ou não foi encontrada), NÃO caia na seleção aleatória de Scavs/PMCs!
+                    if (gData.Info != null)
+                    {
+                        string configuredZones = GetBossZoneForMap(gData.Info.BossZone, mapName);
+                        if (!string.IsNullOrEmpty(configuredZones))
+                        {
+                            Plugin.LogSource.LogWarning($"[TRL-DynamicSpawn] Dropping spawn for {gData.Role}: Configured zone(s) '{configuredZones}' unavailable. Disallowing spawn in unconfigured map zones.");
+                            continue;
+                        }
+                    }
+
                     if (SpawnPointHelper.IsSniperRole(gData.Role))
                     {
                         var snipeZones = ZoneCache.GetSniperZones();
@@ -1412,6 +1440,17 @@ namespace TRLDynamicSpawn.Components
                         if (!string.IsNullOrEmpty(spawnZones))
                         {
                             wave.BossZone = spawnZones;
+                            var configuredZoneNames = spawnZones.Split(',').Select(z => z.Trim()).Where(z => !string.IsNullOrEmpty(z)).ToArray();
+                            var allZones = LocationScene.GetAllObjects<BotZone>();
+                            if (allZones != null && configuredZoneNames.Length > 0)
+                            {
+                                var matchingBotZones = allZones.Where(z => z != null && configuredZoneNames.Any(cz => string.Equals(cz, z.NameZone, StringComparison.OrdinalIgnoreCase))).ToList();
+                                if (matchingBotZones.Count > 0)
+                                {
+                                    wave.PossibleShuffledZones = matchingBotZones;
+                                    wave.BornZone = matchingBotZones[UnityEngine.Random.Range(0, matchingBotZones.Count)].NameZone;
+                                }
+                            }
                         }
 
                         Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Configured vanilla boss wave {wave.BossName}: Chance={wave.BossChance}%, Zones='{wave.BossZone}'");
@@ -1462,10 +1501,23 @@ namespace TRLDynamicSpawn.Components
                     string[] possibleZones = zonesString.Split(',').Select(z => z.Trim()).Where(z => !string.IsNullOrEmpty(z)).ToArray();
                     if (possibleZones.Length > 0)
                     {
-                        string selectedZoneName = possibleZones[UnityEngine.Random.Range(0, possibleZones.Length)];
                         var allZones = LocationScene.GetAllObjects<BotZone>();
-                        var zone = allZones != null ? allZones.FirstOrDefault(z => z != null && string.Equals(z.NameZone, selectedZoneName, StringComparison.OrdinalIgnoreCase)) : null;
-                        if (zone != null) return zone;
+                        var matchingZones = allZones?.Where(z => z != null && possibleZones.Any(pz => string.Equals(pz, z.NameZone, StringComparison.OrdinalIgnoreCase))).ToList();
+                        if (matchingZones != null && matchingZones.Count > 0)
+                        {
+                            for (int i = 0; i < matchingZones.Count; i++)
+                            {
+                                var candidate = matchingZones[UnityEngine.Random.Range(0, matchingZones.Count)];
+                                if (IsValidSpawnZone(candidate, mapName, role))
+                                {
+                                    return candidate;
+                                }
+                            }
+                            return matchingZones[UnityEngine.Random.Range(0, matchingZones.Count)];
+                        }
+
+                        Plugin.LogSource.LogWarning($"[TRL-DynamicSpawn] Configured zone(s) '{zonesString}' not found in scene for {role} on {mapName}. Aborting spawn outside configured areas.");
+                        return null;
                     }
                 }
             }
@@ -1490,7 +1542,45 @@ namespace TRLDynamicSpawn.Components
                 }
             }
 
+            // Se o usuário NÃO configurou nenhuma zona (campo vazio no painel web), permite qualquer zona do mapa
             return TRLDynamicSpawn.Helpers.Methods.GetRandomZone(_botsController?.BotSpawner);
+        }
+
+        private void OnBotCreatedSafetySnap(BotOwner bot)
+        {
+            if (bot == null || bot.GetPlayer == null || bot.Transform == null) return;
+
+            try
+            {
+                // Isentar Snipers de snap agressivo para não perturbar poleiros/torres estreitas (CR-PLAN-01)
+                if (bot.Profile?.Info?.Settings != null && SpawnPointHelper.IsSniperRole(bot.Profile.Info.Settings.Role))
+                    return;
+
+                Vector3 currentPos = bot.Transform.position;
+                Vector3 targetPos = currentPos;
+
+                // 1. Amostra a malha do NavMesh mais próxima (em um raio de 2.5m)
+                if (UnityEngine.AI.NavMesh.SamplePosition(currentPos, out UnityEngine.AI.NavMeshHit hit, 2.5f, UnityEngine.AI.NavMesh.AllAreas))
+                {
+                    targetPos = hit.position;
+                }
+
+                // 2. Raycast vertical de segurança para detectar a malha física do chão/asfalto
+                if (Physics.Raycast(targetPos + Vector3.up * 1.5f, Vector3.down, out RaycastHit rayHit, 3.0f, LayerMaskClass.HighPolyWithTerrainMask | LayerMaskClass.PlayerStaticCollisionsMask))
+                {
+                    targetPos.y = rayHit.point.y;
+                }
+
+                // 3. Se houver discrepância vertical perceptível (> 0.15m de afundamento ou > 0.5m de distância), teletransporta para a superfície
+                if (Mathf.Abs(currentPos.y - targetPos.y) > 0.15f || (currentPos - targetPos).sqrMagnitude > 0.5f)
+                {
+                    bot.GetPlayer.Teleport(targetPos, true);
+                }
+            }
+            catch (Exception ex)
+            {
+                Plugin.LogSource.LogWarning($"[TRL-DynamicSpawn] SafetySnap error: {ex.Message}");
+            }
         }
 
         private int GetBossChanceForMap(ValidLocationInt chance, string mapName)

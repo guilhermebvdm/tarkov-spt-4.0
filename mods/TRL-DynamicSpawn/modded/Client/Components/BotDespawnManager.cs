@@ -760,6 +760,16 @@ namespace TRLDynamicSpawn.Components
                     Vector3 offset = (i == 0) ? Vector3.zero : new Vector3(UnityEngine.Random.Range(-1.5f, 1.5f), 0f, UnityEngine.Random.Range(-1.5f, 1.5f));
                     Vector3 targetPos = spawnPoint.Position + offset;
 
+                    // Alinha verticalmente ao NavMesh e à malha física do chão para evitar soterramento/clipping em declives
+                    if (UnityEngine.AI.NavMesh.SamplePosition(targetPos, out UnityEngine.AI.NavMeshHit navHit, 2.5f, UnityEngine.AI.NavMesh.AllAreas))
+                    {
+                        targetPos = navHit.position;
+                    }
+                    if (Physics.Raycast(targetPos + Vector3.up * 1.5f, Vector3.down, out RaycastHit rayHit, 3.0f, LayerMaskClass.HighPolyWithTerrainMask | LayerMaskClass.PlayerStaticCollisionsMask))
+                    {
+                        targetPos.y = rayHit.point.y;
+                    }
+
                     // 1. Interrompe navegação de NavMesh no ponto de origem ANTES de teleportar
                     try { m.Mover?.Stop(); } catch { }
 

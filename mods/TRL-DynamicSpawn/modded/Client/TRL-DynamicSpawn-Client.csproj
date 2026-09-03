@@ -5,7 +5,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>MOAR</RootNamespace>
     <AssemblyName>TRL-DynamicSpawn</AssemblyName>
-    <Version>3.7.0</Version>
+    <Version>3.7.3</Version>
     <LangVersion>latest</LangVersion>
     <Nullable>disable</Nullable>
     <OutputPath>bin\$(Configuration)\</OutputPath>
@@ -74,6 +74,9 @@
     </Reference>
     <Reference Include="Unity.Postprocessing.Runtime">
       <HintPath>$(CameraReferencesDir)Unity.Postprocessing.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.AIModule">
+      <HintPath>$(CameraReferencesDir)UnityEngine.AIModule.dll</HintPath>
     </Reference>
   </ItemGroup>
 

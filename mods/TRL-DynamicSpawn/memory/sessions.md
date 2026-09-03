@@ -6,15 +6,18 @@ Memória cronológica de sessões de trabalho (timestamps em GMT-3). Cada entrad
 
 ---
 
-## Estado Atual (Snapshot ao Fim da Sessão — 2026-09-02)
+## Estado Atual (Snapshot ao Fim da Sessão — 2026-09-03)
 
-**Mod C# Client (v3.7.2) + C# Server (v3.7.2) compilados com sucesso (0 erros).**
+**Mod C# Client (v3.7.3) + C# Server (v3.7.3) compilados com sucesso (0 erros).**
 
 - **Identity**: `TRL-DynamicSpawn` (Client BepInEx DLL: `TRL-DynamicSpawn.dll`, Server C# DLL: `TRL-DynamicSpawn-Server.dll` com Web UI). Compatível com SPT 4.0.13 e EFT 0.16.9 / FIKA.
-- **Developer HUD no Menu F12 (`v3.7.2`)**:
-  - Removida a captura da tecla `F12` em `Update()` que colidia com a abertura da interface do BepInEx e mantinha o HUD sempre ativo na tela por padrão.
-  - Adicionada a opção `Enable Developer HUD` na seção `Debug Logs & Developer HUD` do menu F12 (`Settings.cs`), com valor **desabilitado por padrão (`false`)**.
-  - O painel em `DynamicSpawnManager.cs` (`OnGUI`) passa a respeitar estritamente a opção `Settings.enableDebugHUD.Value`.
+- **Restrição Estrita de Zonas para Bosses/Goons (`v3.7.3`)**:
+  - `GetZoneFromConfig`: Se houver zonas configuradas no painel web, o sorteio é restrito exclusivamente a elas. Se nenhuma estiver disponível, o spawn é cancelado e não cai em zonas proibidas (como BigRed). O fallback para qualquer zona só ocorre se o campo de zonas estiver 100% vazio.
+  - `AdjustVanillaBossWaves`: Re-inicializa `PossibleShuffledZones` e `BornZone` do `BossLocationSpawn` nativo da EFT, impedindo o motor vanilla de vazar Goons para a BigRed.
+  - `SpawnGroup`: Bloqueado o fallback para zonas de Scav/PMC para grupos de Elites/Bosses com zonas configuradas.
+- **Snap de Terreno e NavMesh contra Soterramento (`v3.7.3`)**:
+  - `OnBotCreatedSafetySnap`: Registrado no evento `OnBotCreated` do `BotSpawner`, aplicando `NavMesh.SamplePosition` e `Physics.Raycast` vertical para cima da superfície física. Se o bot nascer soterrado no asfalto ou dentro de veículos/caixas, é reposicionado com segurança na superfície transitável (snipers em poleiros são preservados).
+  - `AttemptToTeleportGroup`: Snap vertical similar aplicado no teleporte de seguidores para declives e rampas.
 - **Estruturação do Workspace (Dual original/modded)**:
   - `original/`: Backup intacto da versão original canônica.
   - `modded/`: Código-fonte com as refatorações de alta performance e física aplicada.
@@ -50,6 +53,20 @@ Memória cronológica de sessões de trabalho (timestamps em GMT-3). Cada entrad
 ---
 
 ## Histórico de Sessões
+
+### 2026-09-03 — Restrição Estrita de Zonas dos Goons e Snap NavMesh contra Soterramento (v3.7.3)
+
+- **Restrição Estrita de Zonas para Bosses/Goons (`v3.7.3`)**:
+  - Eliminado o vazamento de Goons para a BigRed (`ZoneCrossRoad`) na Customs quando apenas zonas específicas (ex: `ZoneOldAZS` e `ZoneScavBase`) foram selecionadas no Painel Web.
+  - No `GetZoneFromConfig`, o mod agora restringe exclusivamente às zonas marcadas no painel. Se nenhuma estiver disponível na hora da onda, o spawn é abortado com aviso em vez de cair em zonas arbitrárias. O fallback para qualquer zona do mapa só é permitido se a configuração no painel estiver 100% vazia.
+  - No `AdjustVanillaBossWaves`, foi forçada a re-inicialização de `PossibleShuffledZones` e `BornZone` do `BossLocationSpawn` nativo da EFT, impedindo a engine original de sortear a BigRed.
+  - Em `SpawnGroup`, adicionada trava impedindo que elites com zonas configuradas vazem para o algoritmo dinâmico de Scavs/PMCs.
+- **Snap Físico de Solo e NavMesh contra Soterramento (`v3.7.3`)**:
+  - Implementado `OnBotCreatedSafetySnap` no evento `BotSpawner.OnBotCreated`: ao nascer qualquer bot, o mod verifica `NavMesh.SamplePosition` e executa um `Physics.Raycast` vertical para cima da superfície física. Se o bot estiver enterrado no asfalto (diferença vertical `> 0.15m`) ou sob veículos/caixotes, é reposicionado de forma limpa na superfície transitável.
+  - Snipers em torres/chaminés são isentos de snap agressivo (`SpawnPointHelper.IsSniperRole`) para preservar poleiros estreitos.
+  - Snap de solo similar adicionado em `AttemptToTeleportGroup` no `BotDespawnManager.cs`.
+- **Validação de Build**:
+  - `TRL-DynamicSpawn-Client.csproj` e `TRL-DynamicSpawn-Server.csproj` compilados com **0 Erros**.
 
 ### 2026-09-02 — Developer HUD no Menu F12 e Desativação por Padrão (v3.7.2)
 
