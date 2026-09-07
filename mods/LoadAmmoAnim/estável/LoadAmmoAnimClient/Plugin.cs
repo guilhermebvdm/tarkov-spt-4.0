@@ -222,7 +222,7 @@ namespace Manimal.LoadAmmoAnim
                         BulletRotZ?.Value ?? 0f),
                 };
 
-                string name = mag?.Template?._name ?? mag?.Template?.ShortName ?? mag?.Template?.Name ?? magTpl;
+                string name = mag?.Template?.Name ?? magTpl;
                 OffsetFileStore.Save(magTpl, name, absoluteData);
 
                 string msg = $"LoadAmmoAnim: Salvo offset para '{name}' ({magTpl}) no offsets.json!";

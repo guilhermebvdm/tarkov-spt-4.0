@@ -1,0 +1,18 @@
+{
+  "manifest": [
+    {
+      "key": "manimal/stanags_container.bundle",
+      "dependencyKeys": [
+        "shaders",
+        "cubemaps",
+        "assets/commonassets/physics/physicsmaterials.bundle",
+        "assets/content/prefabs/muzzleflash_base.bundle",
+        "assets/content/weapons/additional_hands/client_assets.bundle",
+        "assets/content/weapons/animations/simple_animations.bundle",
+        "assets/content/weapons/animations/spirit_animations.bundle",
+        "assets/content/weapons/weapon_root_anim_fix.bundle",
+        "assets/content/audio/weapons/usable_items/item_medkit_grizzly.bundle"
+      ]
+    }
+  ]
+}

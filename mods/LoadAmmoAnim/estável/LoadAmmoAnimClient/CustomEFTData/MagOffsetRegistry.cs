@@ -271,14 +271,9 @@ namespace Manimal.LoadAmmoAnim.CustomEFTData
             // Handle special form factors
             if (mag != null)
             {
-                string magName = mag.Template?._name ?? mag.Template?.ShortName ?? mag.Template?.Name ?? string.Empty;
-
-                int magWidth = mag.Template != null ? mag.Width : 1;
-                int magHeight = mag.Template != null ? mag.Height : 1;
-
                 // 1. Drum Magazine Detection (2x2 grid size or drum name)
-                bool isDrum = (magWidth >= 2 && magHeight >= 2)
-                    || (!string.IsNullOrEmpty(magName) && magName.IndexOf("drum", StringComparison.OrdinalIgnoreCase) >= 0);
+                bool isDrum = (mag.Width >= 2 && mag.Height >= 2)
+                    || (mag.Template != null && mag.Template.Name.IndexOf("drum", StringComparison.OrdinalIgnoreCase) >= 0);
 
                 if (isDrum)
                 {
@@ -288,11 +283,11 @@ namespace Manimal.LoadAmmoAnim.CustomEFTData
                 }
 
                 // 2. SMG stick magazines in 9x19 or .45 (e.g. MP5, MPX, Vector) vs Pistol in-grip magazines
-                bool isSmgStick = magHeight >= 2 && (!string.IsNullOrEmpty(magName) &&
-                    (magName.IndexOf("mp5", StringComparison.OrdinalIgnoreCase) >= 0
-                    || magName.IndexOf("mpx", StringComparison.OrdinalIgnoreCase) >= 0
-                    || magName.IndexOf("vector", StringComparison.OrdinalIgnoreCase) >= 0
-                    || magName.IndexOf("pp19", StringComparison.OrdinalIgnoreCase) >= 0));
+                bool isSmgStick = mag.Height >= 2 && (mag.Template != null &&
+                    (mag.Template.Name.IndexOf("mp5", StringComparison.OrdinalIgnoreCase) >= 0
+                    || mag.Template.Name.IndexOf("mpx", StringComparison.OrdinalIgnoreCase) >= 0
+                    || mag.Template.Name.IndexOf("vector", StringComparison.OrdinalIgnoreCase) >= 0
+                    || mag.Template.Name.IndexOf("pp19", StringComparison.OrdinalIgnoreCase) >= 0));
 
                 if (isSmgStick)
                 {
@@ -304,7 +299,7 @@ namespace Manimal.LoadAmmoAnim.CustomEFTData
                 }
 
                 // 3. FN P90 horizontal top magazine
-                if (!string.IsNullOrEmpty(magName) && magName.IndexOf("p90", StringComparison.OrdinalIgnoreCase) >= 0)
+                if (mag.Template != null && mag.Template.Name.IndexOf("p90", StringComparison.OrdinalIgnoreCase) >= 0)
                 {
                     baseOffset.MagPosition = BaseMagPos + new Vector3(-0.020f, 0.030f, -0.010f);
                     baseOffset.MagRotation = BaseMagRot * Quaternion.Euler(0f, 90f, 0f);

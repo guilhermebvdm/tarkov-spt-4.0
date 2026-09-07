@@ -23,7 +23,7 @@ namespace Manimal.LoadAmmoAnim.Patches
 
         public static void EnablePatches()
         {
-            Plugin.LogSource.LogInfo("[LoadAmmoAnim] ContinuousLoadAmmo detectado, habilitando patches de compatibilidade.");
+            Plugin.LogSource.LogInfo("[LoadAmmoAnim] ContinuousLoadAmmo detected, enabling compat patches.");
             new ClaSetEmptyHandsPatch().Enable();
             new ClaStopOnHandsChangePatch().Enable();
             new ClaTrySetLastEquippedWeaponPatch().Enable();

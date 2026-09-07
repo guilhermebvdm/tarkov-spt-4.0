@@ -112,7 +112,7 @@ namespace Manimal.LoadAmmoAnim.CustomEFTData
                     return true;
                 }
 
-                string name = mag.Template?._name ?? mag.Template?.ShortName ?? mag.Template?.Name ?? string.Empty;
+                string name = mag.Template.Name;
                 if (!string.IsNullOrEmpty(name))
                 {
                     if (name.IndexOf("cylinder", StringComparison.OrdinalIgnoreCase) >= 0 ||

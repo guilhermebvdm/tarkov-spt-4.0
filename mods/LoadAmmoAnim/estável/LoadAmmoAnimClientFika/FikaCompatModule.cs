@@ -2,8 +2,6 @@ using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
 using Fika.Core.Main.Players;
-using Fika.Core.Modding;
-using Fika.Core.Modding.Events;
 using Fika.Core.Networking;
 using Fika.Core.Networking.LiteNetLib;
 using Manimal.LoadAmmoAnim;
@@ -21,25 +19,28 @@ namespace Manimal.LoadAmmoAnim.Fika
         // separate logger so Fika-related lines are easy to grep in BepInEx.log.
         private static ManualLogSource _log;
 
-        // captured at Enable / OnNetworkManagerCreated. used both to send and to register receivers.
+        // captured at Enable. used both to send and to register receivers.
         private static IFikaNetworkManager _netManager;
 
         public static void Enable()
         {
             _log = BepInEx.Logging.Logger.CreateLogSource("LoadAmmoAnim.Fika");
 
-            // Registro canônico no frame zero: assina a criação de qualquer instância do IFikaNetworkManager
-            FikaEventDispatcher.SubscribeEvent<FikaNetworkManagerCreatedEvent>(OnNetworkManagerCreated);
-
-            if (Singleton<IFikaNetworkManager>.Instantiated && Singleton<IFikaNetworkManager>.Instance != null)
+            _netManager = Singleton<IFikaNetworkManager>.Instance;
+            if (_netManager == null)
             {
-                _netManager = Singleton<IFikaNetworkManager>.Instance;
-                RegisterReceivers(_netManager);
-                _log.LogInfo("[LoadAmmoAnim.Fika] IFikaNetworkManager pre-existente registrado.");
+                // Fika initializes its network manager later than our Awake. defer
+                // registration to the first packet event we observe. for v1 we just
+                // bail and warn — the user can reload the mod after raid join if
+                // its actually missing.
+                _log.LogWarning(
+                    "[LoadAmmoAnim.Fika] IFikaNetworkManager singleton not ready at Enable. " +
+                    "we'll lazily resolve on first send. receive registration will be skipped — " +
+                    "if observed-player anims dont play, restart the raid.");
             }
             else
             {
-                _log.LogInfo("[LoadAmmoAnim.Fika] Aguardando FikaNetworkManagerCreatedEvent para registro imediato no frame zero.");
+                RegisterReceivers(_netManager);
             }
 
             // subscribe to driver events for the local-player session lifecycle.
@@ -51,16 +52,6 @@ namespace Manimal.LoadAmmoAnim.Fika
             LoadAmmoAnimEvents.MagSwapped  += OnMagSwapped;
 
             _log.LogInfo("[LoadAmmoAnim.Fika] enabled.");
-        }
-
-        private static void OnNetworkManagerCreated(FikaNetworkManagerCreatedEvent ev)
-        {
-            _netManager = ev.Manager;
-            if (_netManager != null)
-            {
-                RegisterReceivers(_netManager);
-                _log?.LogInfo("[LoadAmmoAnim.Fika] Pacotes registrados no frame zero do IFikaNetworkManager criado.");
-            }
         }
 
         private static void RegisterReceivers(IFikaNetworkManager net)
@@ -75,11 +66,8 @@ namespace Manimal.LoadAmmoAnim.Fika
         private static IFikaNetworkManager EnsureNetManager()
         {
             if (_netManager != null) return _netManager;
-            if (Singleton<IFikaNetworkManager>.Instantiated)
-            {
-                _netManager = Singleton<IFikaNetworkManager>.Instance;
-                if (_netManager != null) RegisterReceivers(_netManager);
-            }
+            _netManager = Singleton<IFikaNetworkManager>.Instance;
+            if (_netManager != null) RegisterReceivers(_netManager);
             return _netManager;
         }
 

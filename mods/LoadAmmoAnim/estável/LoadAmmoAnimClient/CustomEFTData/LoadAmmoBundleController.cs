@@ -53,16 +53,6 @@ namespace Manimal.LoadAmmoAnim.CustomEFTData
                 BundleAnimator.Update(0f);
                 BundleAnimator.SetBool("Active", true);
 
-                if (player?.ProceduralWeaponAnimation?.HandsContainer != null && player.ProceduralWeaponAnimation.HandsContainer.WeaponRootAnim == null)
-                {
-                    var animRoot = weaponPrefab.GetComponentsInChildren<Transform>(true)
-                        .FirstOrDefault(t => t.name == "Weapon_root_anim");
-                    if (animRoot != null)
-                    {
-                        player.ProceduralWeaponAnimation.HandsContainer.WeaponRootAnim = animRoot;
-                    }
-                }
-
                 DynamicItemAttachmentService.DumpHierarchyOnce(weaponPrefab.gameObject);
             }
             catch (Exception ex)
@@ -82,124 +72,50 @@ namespace Manimal.LoadAmmoAnim.CustomEFTData
             AmmoItemClass ammo,
             string ammoTemplateId)
         {
-            try
-            {
-                ReleaseDynamicItems();
-            }
-            catch (Exception ex)
-            {
-                Plugin.LogSource?.LogWarning($"[LoadAmmoAnim] ReleaseDynamicItems error: {ex.Message}");
-            }
+            ReleaseDynamicItems();
 
             GameObject root = ControllerGameObject;
             if (root == null) return;
 
             // 1. Dump hierarchy for troubleshooting
-            try
-            {
-                DynamicItemAttachmentService.DumpHierarchyOnce(root);
-            }
-            catch (Exception ex)
-            {
-                Plugin.LogSource?.LogWarning($"[LoadAmmoAnim] DumpHierarchyOnce error: {ex.Message}");
-            }
+            DynamicItemAttachmentService.DumpHierarchyOnce(root);
 
             // 2. Disable any old static embedded meshes
-            try
-            {
-                DynamicItemAttachmentService.DisableEmbeddedMeshes(root);
-            }
-            catch (Exception ex)
-            {
-                Plugin.LogSource?.LogWarning($"[LoadAmmoAnim] DisableEmbeddedMeshes error: {ex.Message}");
-            }
+            DynamicItemAttachmentService.DisableEmbeddedMeshes(root);
 
             // 3. Resolve sockets
-            Transform magSocket = null;
-            Transform bulletSocket = null;
-            try
-            {
-                magSocket = DynamicItemAttachmentService.ResolveSocket(root, SocketMagazineName, FallbackMagazineMesh);
-                bulletSocket = DynamicItemAttachmentService.ResolveSocket(root, SocketBulletName, FallbackBulletMesh);
-            }
-            catch (Exception ex)
-            {
-                Plugin.LogSource?.LogWarning($"[LoadAmmoAnim] ResolveSocket error: {ex.Message}");
-            }
+            Transform magSocket = DynamicItemAttachmentService.ResolveSocket(root, SocketMagazineName, FallbackMagazineMesh);
+            Transform bulletSocket = DynamicItemAttachmentService.ResolveSocket(root, SocketBulletName, FallbackBulletMesh);
 
             // 4. Look up caliber offset — priority: offsets.json (by templateId) > caliber family > default.
-            string caliber = ammo?.Caliber;
-            if (string.IsNullOrEmpty(caliber) && mag?.Cartridges != null)
-            {
-                try
-                {
-                    var firstAmmo = mag.Cartridges.Items?.OfType<AmmoItemClass>().FirstOrDefault()
-                        ?? mag.Cartridges.Last as AmmoItemClass;
-                    caliber = firstAmmo?.Caliber;
-                }
-                catch (Exception ex)
-                {
-                    Plugin.LogSource?.LogWarning($"[LoadAmmoAnim] Resolving caliber from Cartridges error: {ex.Message}");
-                }
-            }
-
-            try
-            {
-                _baseOffsets = MagOffsetRegistry.GetOffset(caliber, magTemplateId, mag);
-            }
-            catch (Exception ex)
-            {
-                Plugin.LogSource?.LogWarning($"[LoadAmmoAnim] MagOffsetRegistry.GetOffset error: {ex.Message}");
-                _baseOffsets = OffsetData.Default;
-            }
+            string caliber = ammo?.Caliber ?? (mag?.Cartridges?.Items_1?.FirstOrDefault() as AmmoItemClass)?.Caliber;
+            _baseOffsets = MagOffsetRegistry.GetOffset(caliber, magTemplateId, mag);
 
             // Cache for save-hotkey use in LateUpdate.
             _ownerPlayer = player;
             _currentMagTemplateId = magTemplateId;
 
             // 5. Attach native magazine prefab
-            try
-            {
-                _attachedMagGameObject = DynamicItemAttachmentService.AttachItem(
-                    player,
-                    mag,
-                    magTemplateId,
-                    magSocket,
-                    _baseOffsets.MagPosition,
-                    _baseOffsets.MagRotation);
-            }
-            catch (Exception ex)
-            {
-                Plugin.LogSource?.LogError($"[LoadAmmoAnim] AttachItem(mag) error: {ex.Message}");
-            }
+            _attachedMagGameObject = DynamicItemAttachmentService.AttachItem(
+                player,
+                mag,
+                magTemplateId,
+                magSocket,
+                _baseOffsets.MagPosition,
+                _baseOffsets.MagRotation);
 
             // 6. Attach native bullet prefab
-            try
-            {
-                _attachedBulletGameObject = DynamicItemAttachmentService.AttachItem(
-                    player,
-                    ammo,
-                    ammoTemplateId,
-                    bulletSocket,
-                    _baseOffsets.BulletPosition,
-                    _baseOffsets.BulletRotation);
-            }
-            catch (Exception ex)
-            {
-                Plugin.LogSource?.LogError($"[LoadAmmoAnim] AttachItem(bullet) error: {ex.Message}");
-            }
+            _attachedBulletGameObject = DynamicItemAttachmentService.AttachItem(
+                player,
+                ammo,
+                ammoTemplateId,
+                bulletSocket,
+                _baseOffsets.BulletPosition,
+                _baseOffsets.BulletRotation);
 
-            try
-            {
-                _bulletRenderers = _attachedBulletGameObject != null
-                    ? _attachedBulletGameObject.GetComponentsInChildren<Renderer>(true)
-                    : null;
-            }
-            catch (Exception ex)
-            {
-                Plugin.LogSource?.LogWarning($"[LoadAmmoAnim] GetComponentsInChildren<Renderer> error: {ex.Message}");
-                _bulletRenderers = null;
-            }
+            _bulletRenderers = _attachedBulletGameObject != null
+                ? _attachedBulletGameObject.GetComponentsInChildren<Renderer>(true)
+                : null;
         }
 
         private void LateUpdate()
