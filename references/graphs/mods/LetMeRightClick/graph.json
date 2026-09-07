@@ -1,0 +1,533 @@
+{
+  "directed": false,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {
+      "id": "lmrc_plugin_letmerightclick_lmrc_plugin",
+      "label": "LMRC_Plugin",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "LMRC_Plugin",
+      "file_type": "code",
+      "metadata": {
+        "namespace": "LetMeRightClick",
+        "scope_chain": [
+          "s77"
+        ]
+      },
+      "norm_label": "lmrc_plugin",
+      "source_file": "mods/LetMeRightClick/modded/LMRC_Plugin.cs",
+      "source_location": "L7"
+    },
+    {
+      "id": "patches_itemuicontext_getitemcontextinteractions_patch_letmerightclick_patches_itemuicontext_getitemcontextinteractions_patch",
+      "label": "ItemUiContext_GetItemContextInteractions_Patch",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "ItemUiContext_GetItemContextInteractions_Patch",
+      "file_type": "code",
+      "metadata": {
+        "namespace": "LetMeRightClick.Patches",
+        "scope_chain": [
+          "s97"
+        ]
+      },
+      "norm_label": "itemuicontext_getitemcontextinteractions_patch",
+      "source_file": "mods/LetMeRightClick/modded/Patches/ItemUiContext_GetItemContextInteractions_Patch.cs",
+      "source_location": "L8"
+    },
+    {
+      "id": "lmrc_plugin_letmerightclick_lmrc_plugin_awake",
+      "label": ".Awake()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "LMRC_Plugin",
+      "file_type": "code",
+      "metadata": {
+        "namespace": "LetMeRightClick",
+        "scope_chain": [
+          "s77"
+        ],
+        "unresolved_calls": [
+          {
+            "callee": "LogInfo",
+            "receiver_type": "ManualLogSource",
+            "lang": "csharp",
+            "line": "L17"
+          }
+        ]
+      },
+      "norm_label": ".awake()",
+      "source_file": "mods/LetMeRightClick/modded/LMRC_Plugin.cs",
+      "source_location": "L14"
+    },
+    {
+      "id": "patches_itemuicontext_getitemcontextinteractions_patch_letmerightclick_patches_itemuicontext_getitemcontextinteractions_patch_transpile",
+      "label": ".Transpile()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": ".Transpile",
+      "file_type": "code",
+      "metadata": {
+        "namespace": "LetMeRightClick.Patches",
+        "scope_chain": [
+          "s97"
+        ],
+        "unresolved_calls": [
+          {
+            "callee": "ToList",
+            "receiver_type": "IEnumerable",
+            "lang": "csharp",
+            "line": "L19"
+          }
+        ]
+      },
+      "norm_label": ".transpile()",
+      "source_file": "mods/LetMeRightClick/modded/Patches/ItemUiContext_GetItemContextInteractions_Patch.cs",
+      "source_location": "L16"
+    },
+    {
+      "id": "patches_itemuicontext_getitemcontextinteractions_patch_letmerightclick_patches_itemuicontext_getitemcontextinteractions_patch_gettargetmethod",
+      "label": ".GetTargetMethod()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "ItemUiContext_GetItemContextInteractions_Patch",
+      "file_type": "code",
+      "metadata": {
+        "namespace": "LetMeRightClick.Patches",
+        "scope_chain": [
+          "s97"
+        ]
+      },
+      "norm_label": ".gettargetmethod()",
+      "source_file": "mods/LetMeRightClick/modded/Patches/ItemUiContext_GetItemContextInteractions_Patch.cs",
+      "source_location": "L10"
+    },
+    {
+      "id": "baseunityplugin",
+      "label": "BaseUnityPlugin",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "LMRC_Plugin",
+      "file_type": "code",
+      "norm_label": "baseunityplugin",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "manuallogsource",
+      "label": "ManualLogSource",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "LMRC_Plugin",
+      "file_type": "code",
+      "norm_label": "manuallogsource",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "codeinstruction",
+      "label": "CodeInstruction",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": ".Transpile",
+      "file_type": "code",
+      "norm_label": "codeinstruction",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "ienumerable",
+      "label": "IEnumerable",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": ".Transpile",
+      "file_type": "code",
+      "norm_label": "ienumerable",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "patchtranspiler",
+      "label": "PatchTranspiler",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": ".Transpile",
+      "file_type": "code",
+      "norm_label": "patchtranspiler",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "csharp_namespace:3f575adcc3417dc9",
+      "label": "LetMeRightClick.Patches",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "LMRC_Plugin.cs",
+      "file_type": "code",
+      "metadata": {
+        "kind": "csharp_namespace",
+        "namespace": "LetMeRightClick.Patches"
+      },
+      "norm_label": "letmerightclick.patches",
+      "source_file": "mods/LetMeRightClick/modded/Patches/ItemUiContext_GetItemContextInteractions_Patch.cs",
+      "source_location": "L6",
+      "type": "namespace"
+    },
+    {
+      "id": "csharp_namespace:94655f1e7fa91720",
+      "label": "LetMeRightClick",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "LMRC_Plugin.cs",
+      "file_type": "code",
+      "metadata": {
+        "kind": "csharp_namespace",
+        "namespace": "LetMeRightClick"
+      },
+      "norm_label": "letmerightclick",
+      "source_file": "mods/LetMeRightClick/modded/LMRC_Plugin.cs",
+      "source_location": "L5",
+      "type": "namespace"
+    },
+    {
+      "id": "lmrc_plugin",
+      "label": "LMRC_Plugin.cs",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "LMRC_Plugin.cs",
+      "file_type": "code",
+      "norm_label": "lmrc_plugin.cs",
+      "source_file": "mods/LetMeRightClick/modded/LMRC_Plugin.cs",
+      "source_location": "L1"
+    },
+    {
+      "id": "patches_itemuicontext_getitemcontextinteractions_patch",
+      "label": "ItemUiContext_GetItemContextInteractions_Patch.cs",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "LMRC_Plugin.cs",
+      "file_type": "code",
+      "norm_label": "itemuicontext_getitemcontextinteractions_patch.cs",
+      "source_file": "mods/LetMeRightClick/modded/Patches/ItemUiContext_GetItemContextInteractions_Patch.cs",
+      "source_location": "L1"
+    },
+    {
+      "id": "methodbase",
+      "label": "MethodBase",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "ItemUiContext_GetItemContextInteractions_Patch",
+      "file_type": "code",
+      "norm_label": "methodbase",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "modulepatch",
+      "label": "ModulePatch",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "ItemUiContext_GetItemContextInteractions_Patch",
+      "file_type": "code",
+      "norm_label": "modulepatch",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "letmerightclick_csproj_letmerightclick",
+      "label": "LetMeRightClick",
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "LetMeRightClick",
+      "file_type": "code",
+      "norm_label": "letmerightclick",
+      "source_file": "mods/LetMeRightClick/modded/LetMeRightClick.csproj",
+      "source_location": null
+    },
+    {
+      "id": "framework_netstandard2_1",
+      "label": "netstandard2.1",
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "LetMeRightClick",
+      "file_type": "concept",
+      "norm_label": "netstandard2.1",
+      "source_file": "mods/LetMeRightClick/modded/LetMeRightClick.csproj",
+      "source_location": null
+    },
+    {
+      "id": "sdk_microsoft_net_sdk",
+      "label": "Microsoft.NET.Sdk",
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "LetMeRightClick",
+      "file_type": "concept",
+      "norm_label": "microsoft.net.sdk",
+      "source_file": "mods/LetMeRightClick/modded/LetMeRightClick.csproj",
+      "source_location": null
+    },
+    {
+      "id": "letmerightclick_sln_letmerightclick",
+      "label": "LetMeRightClick.sln",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "LetMeRightClick.sln",
+      "file_type": "code",
+      "norm_label": "letmerightclick.sln",
+      "source_file": "mods/LetMeRightClick/modded/LetMeRightClick.sln",
+      "source_location": null
+    }
+  ],
+  "links": [
+    {
+      "source": "patches_itemuicontext_getitemcontextinteractions_patch_letmerightclick_patches_itemuicontext_getitemcontextinteractions_patch_transpile",
+      "target": "patchtranspiler",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "attribute",
+      "metadata": {
+        "ref_token": "PatchTranspiler"
+      },
+      "source_file": "mods/LetMeRightClick/modded/Patches/ItemUiContext_GetItemContextInteractions_Patch.cs",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "lmrc_plugin_letmerightclick_lmrc_plugin",
+      "target": "manuallogsource",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "field",
+      "metadata": {
+        "ref_token": "ManualLogSource"
+      },
+      "source_file": "mods/LetMeRightClick/modded/LMRC_Plugin.cs",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "patches_itemuicontext_getitemcontextinteractions_patch_letmerightclick_patches_itemuicontext_getitemcontextinteractions_patch_transpile",
+      "target": "codeinstruction",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "generic_arg",
+      "metadata": {
+        "ref_token": "CodeInstruction"
+      },
+      "source_file": "mods/LetMeRightClick/modded/Patches/ItemUiContext_GetItemContextInteractions_Patch.cs",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "lmrc_plugin",
+      "target": "csharp_namespace:3f575adcc3417dc9",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "metadata": {
+        "using_kind": "namespace",
+        "target_fqn": "LetMeRightClick.Patches",
+        "scope_kind": "file"
+      },
+      "source_file": "mods/LetMeRightClick/modded/LMRC_Plugin.cs",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "patches_itemuicontext_getitemcontextinteractions_patch_letmerightclick_patches_itemuicontext_getitemcontextinteractions_patch_transpile",
+      "target": "ienumerable",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "return_type",
+      "metadata": {
+        "ref_token": "IEnumerable"
+      },
+      "source_file": "mods/LetMeRightClick/modded/Patches/ItemUiContext_GetItemContextInteractions_Patch.cs",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "patches_itemuicontext_getitemcontextinteractions_patch_letmerightclick_patches_itemuicontext_getitemcontextinteractions_patch_gettargetmethod",
+      "target": "methodbase",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "return_type",
+      "metadata": {
+        "ref_token": "MethodBase"
+      },
+      "source_file": "mods/LetMeRightClick/modded/Patches/ItemUiContext_GetItemContextInteractions_Patch.cs",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "lmrc_plugin_letmerightclick_lmrc_plugin",
+      "target": "baseunityplugin",
+      "relation": "inherits",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "metadata": {
+        "ref_token": "BaseUnityPlugin"
+      },
+      "source_file": "mods/LetMeRightClick/modded/LMRC_Plugin.cs",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "patches_itemuicontext_getitemcontextinteractions_patch_letmerightclick_patches_itemuicontext_getitemcontextinteractions_patch",
+      "target": "modulepatch",
+      "relation": "inherits",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "metadata": {
+        "ref_token": "ModulePatch"
+      },
+      "source_file": "mods/LetMeRightClick/modded/Patches/ItemUiContext_GetItemContextInteractions_Patch.cs",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "letmerightclick_sln_letmerightclick",
+      "target": "letmerightclick_sln_letmerightclick",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mods/LetMeRightClick/modded/LetMeRightClick.sln",
+      "weight": 1.0
+    },
+    {
+      "source": "lmrc_plugin",
+      "target": "csharp_namespace:94655f1e7fa91720",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mods/LetMeRightClick/modded/LMRC_Plugin.cs",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "lmrc_plugin",
+      "target": "lmrc_plugin_letmerightclick_lmrc_plugin",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mods/LetMeRightClick/modded/LMRC_Plugin.cs",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "patches_itemuicontext_getitemcontextinteractions_patch",
+      "target": "csharp_namespace:3f575adcc3417dc9",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mods/LetMeRightClick/modded/Patches/ItemUiContext_GetItemContextInteractions_Patch.cs",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "patches_itemuicontext_getitemcontextinteractions_patch",
+      "target": "patches_itemuicontext_getitemcontextinteractions_patch_letmerightclick_patches_itemuicontext_getitemcontextinteractions_patch",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mods/LetMeRightClick/modded/Patches/ItemUiContext_GetItemContextInteractions_Patch.cs",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "lmrc_plugin_letmerightclick_lmrc_plugin",
+      "target": "lmrc_plugin_letmerightclick_lmrc_plugin_awake",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mods/LetMeRightClick/modded/LMRC_Plugin.cs",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "patches_itemuicontext_getitemcontextinteractions_patch_letmerightclick_patches_itemuicontext_getitemcontextinteractions_patch",
+      "target": "patches_itemuicontext_getitemcontextinteractions_patch_letmerightclick_patches_itemuicontext_getitemcontextinteractions_patch_gettargetmethod",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mods/LetMeRightClick/modded/Patches/ItemUiContext_GetItemContextInteractions_Patch.cs",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "patches_itemuicontext_getitemcontextinteractions_patch_letmerightclick_patches_itemuicontext_getitemcontextinteractions_patch",
+      "target": "patches_itemuicontext_getitemcontextinteractions_patch_letmerightclick_patches_itemuicontext_getitemcontextinteractions_patch_transpile",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mods/LetMeRightClick/modded/Patches/ItemUiContext_GetItemContextInteractions_Patch.cs",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "letmerightclick_csproj_letmerightclick",
+      "target": "framework_netstandard2_1",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mods/LetMeRightClick/modded/LetMeRightClick.csproj",
+      "weight": 1.0
+    },
+    {
+      "source": "letmerightclick_csproj_letmerightclick",
+      "target": "sdk_microsoft_net_sdk",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mods/LetMeRightClick/modded/LetMeRightClick.csproj",
+      "weight": 1.0
+    },
+    {
+      "source": "lmrc_plugin_letmerightclick_lmrc_plugin_awake",
+      "target": "patches_itemuicontext_getitemcontextinteractions_patch_letmerightclick_patches_itemuicontext_getitemcontextinteractions_patch",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "call",
+      "source_file": "mods/LetMeRightClick/modded/LMRC_Plugin.cs",
+      "source_location": "L19",
+      "weight": 1.0
+    }
+  ],
+  "hyperedges": [],
+  "built_at_commit": "5ddac6387453551fc5b94eacd945c15974575de2"
+}
