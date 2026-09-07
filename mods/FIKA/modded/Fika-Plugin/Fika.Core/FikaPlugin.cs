@@ -6,6 +6,7 @@ using EFT.UI;
 using Fika.Core.Bundles;
 using Fika.Core.ConsoleCommands;
 using Fika.Core.Main.Custom;
+using Fika.Core.Main.Patches.InventoryPatches;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Websocket;
@@ -45,7 +46,7 @@ namespace Fika.Core;
 [BepInDependency("com.SPT.debugging", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after spt-debugging, that way we can disable its patches
 public class FikaPlugin : BaseUnityPlugin
 {
-    public const string FikaVersion = "2.3.10";
+    public const string FikaVersion = "2.3.14";
     public const string FikaNATPunchMasterServer = "natpunch.project-fika.com";
     public const ushort FikaNATPunchMasterPort = 6790;
 
@@ -177,6 +178,13 @@ public class FikaPlugin : BaseUnityPlugin
     private void EnableModulePatches()
     {
         _patchManager.EnablePatches();
+
+        // ref: CR-01-01 — registro explícito para não depender de auto-discovery de ModulePatch
+        // aninhados (InOutHandsProcessTimestampPatch.CaptureMovedItemOnRemove/RecordBeginSucceed
+        // são classes aninhadas; o único precedente confirmado de auto-discovery no mod,
+        // ObservedPlayer_DropBackpackSafety_Patch, é top-level).
+        _patchManager.EnablePatch(new InOutHandsProcessTimestampPatch.CaptureMovedItemOnRemove());
+        _patchManager.EnablePatch(new InOutHandsProcessTimestampPatch.RecordBeginSucceed());
     }
 
 #if RELEASE || GOLDMASTER

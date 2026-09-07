@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
@@ -190,6 +190,7 @@ public sealed class ClientInventoryController : BaseInventoryController
     {
         var id = operation.Id;
         FikaPlayer.OperationCallbacks.Add(id, callback);
+        FikaPlayer.RegisterOperationCallbackTimestamp(id);
         return id;
     }
 

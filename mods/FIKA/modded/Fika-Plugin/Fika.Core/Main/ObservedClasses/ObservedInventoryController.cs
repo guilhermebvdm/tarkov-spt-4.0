@@ -7,6 +7,7 @@ using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
 using EFT.InventoryLogic.Operations;
+using Fika.Core.Main.Patches.InventoryPatches;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 
@@ -161,17 +162,19 @@ public sealed class ObservedInventoryController : Player.PlayerInventoryControll
             lambda.inOutHandsProcess = geventArgs2 as GEventArgs17;
             if (lambda.inOutHandsProcess != null)
             {
-                if (item.GetAllParentItemsAndSelf(false).Any(lambda.method_1))
+                bool collidesViaHands =
+                    item.GetAllParentItemsAndSelf(false).Any(lambda.method_1) ||
+                    location?.Container.ParentItem.GetAllParentItemsAndSelf(false).Any(lambda.method_1) == true;
+
+                // ref: PA-01-02 — só a metade "gêmea" da mesma troca de magazine em andamento é
+                // isenta (o item que abriu o Begin pendente precisa ser, ele também, um
+                // MagazineItemClass; um saque/guarda de arma grava a própria arma como item
+                // movido e nunca satisfaz essa condição). Qualquer outra colisão via
+                // inOutHandsProcess continua bloqueada.
+                if (collidesViaHands && !IsSelfReferentialMagazineSwap(item, lambda.inOutHandsProcess))
                 {
 #if DEBUG
-                    FikaGlobals.LogError($"{item.LocalizedShortName()} failed to pass GetAllParentItemsAndSelf");
-#endif
-                    flag = true;
-                }
-                if (location?.Container.ParentItem.GetAllParentItemsAndSelf(false).Any(lambda.method_1) == true)
-                {
-#if DEBUG
-                    FikaGlobals.LogError($"{item.LocalizedShortName()} location failed to pass GetAllParentItemsAndSelf");
+                    FikaGlobals.LogError($"{item.LocalizedShortName()} failed inOutHandsProcess check (not a self-referential magazine swap)");
 #endif
                     flag = true;
                 }
@@ -203,6 +206,29 @@ public sealed class ObservedInventoryController : Player.PlayerInventoryControll
             return default;
         }
         return new GClass1568(item, location);
+    }
+
+    // ref: PA-01-01/PA-01-02 — instância (não static, precisa de "this" como o TraderControllerClass
+    // dono de List_0/InOutHandsProcessTimestampPatch). Reconhece que uma colisão com inOutHandsProcess
+    // é a própria troca de magazine 1-para-1 colidindo consigo mesma (as duas metades do swap abrem
+    // Begin/Succeed na mesma arma empunhada), e não um saque de arma real nem outra operação
+    // concorrente genuína — ver 003-magazine-swap-inplace-fix-02-spec-tech.md §1.4.
+    private bool IsSelfReferentialMagazineSwap(Item item, GEventArgs17 inOutHandsProcess)
+    {
+        if (item is not MagazineItemClass || inOutHandsProcess?.Item is not Weapon weapon)
+        {
+            return false;
+        }
+
+        if (!InOutHandsProcessTimestampPatch.TryGetPendingBegin(this, weapon, out var movedItem, out var elapsed))
+        {
+            return false;
+        }
+
+        // TODO confirmar: janela de graça calibrada por instrumentação temporária (log do
+        // elapsedSeconds real observado numa rejeição reproduzida em Headless) antes de fechar o item.
+        const float GraceWindowSeconds = 0.35f;
+        return movedItem is MagazineItemClass && elapsed <= GraceWindowSeconds;
     }
 
     public override bool CheckOverLimit(IEnumerable<Item> items, ItemAddress to, bool useItemCountInEquipment, out InteractionsHandlerClass.GClass1609 error)
@@ -290,6 +316,10 @@ public sealed class ObservedInventoryController : Player.PlayerInventoryControll
         if ((item.Parent != to || operation is FoldOperationClass) && handler.player_0.HandsController.CanExecute(operation))
         {
             _setInHandsCallbackField.SetValue(handler.player_0, handler.callback);
+            // ref: PA-01-02 — InProcess é sobrescrito aqui e nunca passa por Player.TrySetInHands,
+            // então o item efetivamente entrando nas mãos (a arma, num saque, ou o item aninhado,
+            // ex. carregador, num reload/swap) precisa ser registrado diretamente, sem Harmony.
+            InOutHandsProcessTimestampPatch.SetPendingMovedItem(item);
             RaiseInOutProcessEvents(new GEventArgs17(handler.player_0.HandsController.Item, CommandStatus.Begin, this));
             handler.player_0.HandsController.Execute(operation, handler.method_1);
             return;

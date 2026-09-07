@@ -8,7 +8,7 @@
     "plugin": {
       "name": "Fika-Plugin",
       "upstream_url": "https://github.com/project-fika/Fika-Plugin.git",
-      "version": "2.3.9",
+      "version": "2.3.14",
       "tag": "v2.3.9",
       "upstream_sha": "73ab774a97c5b608eed7ef66d02c83a0b9d703f5",
       "path": "Fika-Plugin",

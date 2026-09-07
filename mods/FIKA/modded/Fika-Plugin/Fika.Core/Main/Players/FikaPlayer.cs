@@ -66,11 +66,128 @@ public class FikaPlayer : LocalPlayer
     {
         get
         {
-            if (!_baseInventoryController.StrictSync)
+            if (_baseInventoryController?.StrictSync != true)
             {
                 return false;
             }
+
+            CleanupExpiredCallbacks();
+
             return OperationCallbacks.Count > 0 || _proceedCallbacks.Count > 0;
+        }
+    }
+
+    public void RegisterOperationCallbackTimestamp(uint id)
+    {
+        _operationCallbackTimestamps[id] = UnityEngine.Time.time;
+    }
+
+    private void CleanupExpiredCallbacks()
+    {
+        float currentTime = UnityEngine.Time.time;
+
+        if (OperationCallbacks.Count > 0)
+        {
+            List<uint> expiredOperationIds = null;
+
+            foreach (var kvp in OperationCallbacks)
+            {
+                uint id = kvp.Key;
+                if (!_operationCallbackTimestamps.TryGetValue(id, out float registeredTime))
+                {
+                    _operationCallbackTimestamps[id] = currentTime;
+                    continue;
+                }
+
+                if (currentTime - registeredTime > CallbackTimeoutSeconds)
+                {
+                    expiredOperationIds ??= [];
+                    expiredOperationIds.Add(id);
+                }
+            }
+
+            if (expiredOperationIds != null)
+            {
+                foreach (uint id in expiredOperationIds)
+                {
+                    if (OperationCallbacks.TryGetValue(id, out var callback))
+                    {
+                        OperationCallbacks.Remove(id);
+                        _operationCallbackTimestamps.Remove(id);
+                        _recentlyTimedOutOperationIds.Add(id);
+                        if (_recentlyTimedOutOperationIds.Count > 100)
+                        {
+                            _recentlyTimedOutOperationIds.Clear();
+                        }
+
+                        FikaGlobals.LogWarning($"[Fika-Watchdog] Operation callback {id} timed out após {CallbackTimeoutSeconds}s. Auto-drenando para restaurar controles.");
+                        try
+                        {
+                            callback?.Invoke(new ServerOperationStatus(EOperationStatus.Failed, "Network operation timed out"));
+                        }
+                        catch (Exception ex)
+                        {
+                            FikaGlobals.LogError($"[Fika-Watchdog] Exceção contida ao auto-drenar operation callback {id}: {ex}");
+                        }
+                    }
+                }
+            }
+        }
+        else if (_operationCallbackTimestamps.Count > 0)
+        {
+            _operationCallbackTimestamps.Clear();
+        }
+
+        if (_proceedCallbacks.Count > 0)
+        {
+            List<uint> expiredProceedIds = null;
+
+            foreach (var kvp in _proceedCallbacks)
+            {
+                uint id = kvp.Key;
+                if (!_proceedCallbackTimestamps.TryGetValue(id, out float registeredTime))
+                {
+                    _proceedCallbackTimestamps[id] = currentTime;
+                    continue;
+                }
+
+                if (currentTime - registeredTime > CallbackTimeoutSeconds)
+                {
+                    expiredProceedIds ??= [];
+                    expiredProceedIds.Add(id);
+                }
+            }
+
+            if (expiredProceedIds != null)
+            {
+                foreach (uint id in expiredProceedIds)
+                {
+                    if (_proceedCallbacks.TryGetValue(id, out var callback))
+                    {
+                        _proceedCallbacks.Remove(id);
+                        _proceedCallbackTimestamps.Remove(id);
+                        _recentlyTimedOutProceedIds.Add(id);
+                        if (_recentlyTimedOutProceedIds.Count > 100)
+                        {
+                            _recentlyTimedOutProceedIds.Clear();
+                        }
+
+                        FikaGlobals.LogWarning($"[Fika-Watchdog] Proceed callback {id} timed out após {CallbackTimeoutSeconds}s. Auto-drenando para restaurar controles.");
+                        try
+                        {
+                            callback?.Fail("Proceed network request timed out");
+                        }
+                        catch (Exception ex)
+                        {
+                            FikaGlobals.LogError($"[Fika-Watchdog] Exceção contida ao auto-drenar proceed callback {id}: {ex}");
+                        }
+                    }
+                }
+            }
+        }
+        else if (_proceedCallbackTimestamps.Count > 0)
+        {
+            _proceedCallbackTimestamps.Clear();
         }
     }
     public ClientMovementContext ClientMovementContext
@@ -130,6 +247,11 @@ public class FikaPlayer : LocalPlayer
     public ushort OperationStationaryCallbackId;
     private uint _proceedCallbackId;
     private readonly Dictionary<uint, Callback> _proceedCallbacks = [];
+    private readonly Dictionary<uint, float> _operationCallbackTimestamps = [];
+    private readonly Dictionary<uint, float> _proceedCallbackTimestamps = [];
+    private readonly HashSet<uint> _recentlyTimedOutOperationIds = [];
+    private readonly HashSet<uint> _recentlyTimedOutProceedIds = [];
+    public static float CallbackTimeoutSeconds { get; set; } = 5.0f;
     protected BaseInventoryController _baseInventoryController;
 
     private static Func<Player, SurfaceSet> _getCurrentSet;
@@ -286,6 +408,7 @@ public class FikaPlayer : LocalPlayer
         var id = GetNextAvailableId();
         var handler = new ProceedCallbackHandler(confirmAction);
         _proceedCallbacks[id] = handler.Handle;
+        _proceedCallbackTimestamps[id] = UnityEngine.Time.time;
 #if DEBUG
         FikaGlobals.LogWarning($"Got callback {id} for proceed callback");
 #endif
@@ -302,11 +425,19 @@ public class FikaPlayer : LocalPlayer
 
         if (!_proceedCallbacks.TryGetValue(callbackId, out var callback))
         {
-            FikaGlobals.LogError($"Could not get callback with id {callback}");
+            if (_recentlyTimedOutProceedIds.Remove(callbackId))
+            {
+                FikaGlobals.LogWarning($"[Fika-Watchdog] Resposta tardia de proceed com id {callbackId} recebida do servidor e ignorada (já auto-drenado por timeout).");
+            }
+            else
+            {
+                FikaGlobals.LogError($"Could not get callback with id {callbackId}");
+            }
             return;
         }
 
         _proceedCallbacks.Remove(callbackId);
+        _proceedCallbackTimestamps.Remove(callbackId);
 
 #if DEBUG
         FikaGlobals.LogInfo($"Callback was success: {success}");
@@ -1799,9 +1930,14 @@ public class FikaPlayer : LocalPlayer
             if (operationCallbackPacket.Status != EOperationStatus.Started)
             {
                 OperationCallbacks.Remove(operationCallbackPacket.CallbackId);
+                _operationCallbackTimestamps.Remove(operationCallbackPacket.CallbackId);
             }
             ServerOperationStatus status = new(operationCallbackPacket.Status, operationCallbackPacket.Error);
             callback(status);
+        }
+        else if (_recentlyTimedOutOperationIds.Remove(operationCallbackPacket.CallbackId))
+        {
+            FikaGlobals.LogWarning($"[Fika-Watchdog] Pacote tardio da operação {operationCallbackPacket.CallbackId} recebido do servidor e ignorado (já auto-drenado por timeout).");
         }
         else
         {
