@@ -19,7 +19,53 @@ namespace RedLineRestart
         private GUIStyle _customWindowStyle;
         private Texture2D _bgTexture;
 
+        private const float MessageBannerHeight = 80f;
+        private bool _bannerActive;
+        private Texture2D _msgBgTexture;
+        private GUIStyle _msgTextStyle;
+
         public bool IsButtonReady => _restartButton != null;
+
+        // Banner de mensagem/timer ocupa o topo da tela (y: 0-80). A janela de votação
+        // começa em y=20 por padrão, o que causaria sobreposição visual com o banner.
+        // Resolução: empurra a janela para baixo do banner só enquanto ela ainda estiver
+        // perto do topo — se o jogador já arrastou a janela pra outro lugar, não força de volta.
+        public void DrawServerMessageBanner(ServerMessageService service)
+        {
+            _bannerActive = service != null && service.ShowMessage;
+            if (!_bannerActive) return;
+
+            if (_msgBgTexture == null)
+            {
+                _msgBgTexture = new Texture2D(1, 1);
+                _msgBgTexture.SetPixel(0, 0, new Color(0f, 0f, 0f, 0.8f));
+                _msgBgTexture.Apply();
+            }
+
+            if (_msgTextStyle == null)
+            {
+                _msgTextStyle = new GUIStyle(GUI.skin.label)
+                {
+                    fontSize = 22,
+                    alignment = TextAnchor.MiddleCenter,
+                    fontStyle = FontStyle.Bold,
+                    wordWrap = true,
+                    richText = true
+                };
+            }
+
+            var previousBoxBg = GUI.skin.box.normal.background;
+            GUI.skin.box.normal.background = _msgBgTexture;
+            GUI.Box(new Rect(0, 0, Screen.width, MessageBannerHeight), "");
+            GUI.skin.box.normal.background = previousBoxBg;
+
+            string textoFinal = service.MessageType == "TIMER"
+                ? $"<color=yellow>ALERTA:</color> {service.DisplayContent} <color=red>{service.GetCountdownText()}</color>"
+                : $"<color=yellow>MENSAGEM DO SERVIDOR:</color> {service.DisplayContent}";
+
+            const float paddingY = 15f;
+            GUI.Label(new Rect(0, paddingY, Screen.width, MessageBannerHeight - paddingY * 2), textoFinal, _msgTextStyle);
+        }
 
         public void UpdateButtonVisuals()
         {
@@ -47,6 +93,11 @@ namespace RedLineRestart
                 return;
             }
             if (!RedLineState.ShowVoteWindow) return;
+
+            if (_bannerActive && _windowRect.y < MessageBannerHeight + 10f)
+            {
+                _windowRect.y = MessageBannerHeight + 10f;
+            }
 
             if (_customWindowStyle == null)
             {

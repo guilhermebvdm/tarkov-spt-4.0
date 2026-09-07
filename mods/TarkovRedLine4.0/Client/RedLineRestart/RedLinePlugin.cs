@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace RedLineRestart
 {
-    [BepInPlugin("com.umbigopreto.redlinerestart", "RedLine Restarter", "2.4.5")]
+    [BepInPlugin("com.umbigopreto.redlinerestart", "RedLine Restarter", "2.5.0")]
     public class RedLinePlugin : BaseUnityPlugin
     {
         private const string GistUrl = "https://gist.githubusercontent.com/rockettechnology-dev/1fe6a8a243ea568c07e46a84744dff41/raw/gistfile1.txt";
@@ -15,12 +15,27 @@ namespace RedLineRestart
         private float _nextUpdate = 0f;
         private float _nextButtonAttempt = 0f;
 
+        private ServerMessageService _serverMessage;
+        private bool _serverMessageEnabled;
+        private string _serverMessageUrl;
+        private float _serverMessageCheckInterval;
+        private float _nextMessageCheck = 0f;
+
         void Awake()
         {
             var configServerUrl = Config.Bind("General", "ServerUrl", "http://100.106.152.7:6969", "URL do Servidor SPT / Tarkov Red Line (ex: http://100.106.152.7:6969 ou http://127.0.0.1:6969)");
             RedLineState.ServerUrl = configServerUrl.Value.TrimEnd('/');
 
-            Logger.LogInfo($"[RedLine] Plugin 2.4.5 iniciado. Buscando URL atualizada via Gist...");
+            var configMsgEnabled = Config.Bind("ServerMessage", "Enabled", true, "Ativa o banner de mensagem/timer administrativo lido do Pastebin.");
+            var configMsgUrl = Config.Bind("ServerMessage", "Url", "https://pastebin.com/raw/q1CwdvV4", "URL raw do Pastebin com a mensagem/timer atual (formato MENSAGEM: ... ou TIMER: dd/MM/yyyy HH:mm:ss | ...).");
+            var configMsgInterval = Config.Bind("ServerMessage", "CheckInterval", 60f, "Intervalo em segundos entre consultas ao Pastebin.");
+
+            _serverMessageEnabled = configMsgEnabled.Value;
+            _serverMessageUrl = configMsgUrl.Value;
+            _serverMessageCheckInterval = Mathf.Max(5f, configMsgInterval.Value);
+            _serverMessage = new ServerMessageService(Logger);
+
+            Logger.LogInfo($"[RedLine] Plugin 2.5.0 iniciado. Buscando URL atualizada via Gist...");
             _ = FetchGistUrlAsync();
         }
 
@@ -47,6 +62,12 @@ namespace RedLineRestart
 
         void Update()
         {
+            if (_serverMessageEnabled && Time.time > _nextMessageCheck)
+            {
+                _nextMessageCheck = Time.time + _serverMessageCheckInterval;
+                StartCoroutine(_serverMessage.CheckMessage(_serverMessageUrl));
+            }
+
             // Se o jogo não inicializou o sistema de áudio ou UI, não faz nada (Evita Crash)
             if (!Singleton<GUISounds>.Instantiated) return;
 
@@ -81,6 +102,7 @@ namespace RedLineRestart
 
         void OnGUI()
         {
+            _ui.DrawServerMessageBanner(_serverMessage);
             _ui.DrawWindow(this);
         }
     }
