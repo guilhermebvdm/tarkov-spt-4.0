@@ -1,9 +1,46 @@
 # SPT-ContinuousLoadAmmo — Memória de Sessões
 
 ## Snapshot Delta
-- **Versão:** 1.1.8 (SPT 4.0 / EFT 0.16.9)
-- **Estado:** Documentação técnica modular completa (01 a 05 + índice), auditoria técnica profunda concluída e resolução integral de todos os achados (`AUD-01-01` a `AUD-01-06`), eliminando vazamentos de memória (RAM Leaks) entre raids, restaurando o estado do `InventoryScreen` via `__state` e otimizando o Garbage Collector com buffers zero-alloc.
-- **Pendências:** 🟢 Nenhuma pendência blocker registrada.
+- **Versão:** 1.1.12 (SPT 4.0 / EFT 0.16.9)
+- **Estado:** Guarda de interoperabilidade com o `LoadAmmoAnim` estendida para verificar tanto `LoadAmmoBundleController` ativo quanto transição engatilhada via `IsLoadAmmoAnimActiveOrPending()`. Bump para v1.1.12 e compilação Release com 0 erros/avisos.
+- **Pendências:** 🟢 Nenhuma pendência registrada.
+
+---
+
+## 2026-09-06 — Sessão 4: Harmonização de FSM de Mãos com LoadAmmoAnim e Release v1.1.12
+
+**Tema central:** Eliminação da corrida assíncrona entre o `ContinuousLoadAmmo` e o `LoadAmmoAnim` durante o início do abastecimento contínuo de munição.
+
+**Decisões-chave:**
+1. **Verificação de Transição Dinâmica (`IsLoadAmmoAnimActiveOrPending`):**
+   - Em `LoadAmmoController.cs`, criada a checagem que consulta se o `HandsController` é `LoadAmmoBundleController` ou se o estado `LoadAmmoAnimState.AnyIsOurAnimation()` está ativo via reflexão segura.
+   - Usado em `SetPlayerStateRoutine` (evitando chamar `SetEmptyHands()` enquanto o LoadAmmoAnim estiver no drop da arma), em `StopLoading` e em `StopLoadingOnHandsChange`.
+2. **Bump SemVer & Build:** Versão elevada para `1.1.12` sincronizada em `ContinuousLoadAmmo.cs`, `ContinuousLoadAmmo.csproj` e `mod.json`. Compilação Release em `mods/SPT-ContinuousLoadAmmo/builds/` com 0 erros e 0 avisos.
+
+---
+
+**Tema central:** Refinamento de interoperabilidade com o mod `Climbable Ladders` e consolidação de compatibilidade cruzada no ecossistema de mods.
+
+**Decisões-chave:**
+1. **Guarda de Escada no `LoadAmmoController`:** Em `CanLoadOutsideInventory()` e `TryQuickLoadAmmo()`, adicionada verificação dinâmica de `_player.gameObject.GetComponent("PlayerLadderController") != null`.
+2. **Prevenção de FSM Desincronizada:** Impede que o jogador inicie o carregamento contínuo ou Quick Load fora do inventário enquanto escalando escadas de mão, evitando colisões entre o desarmamento do `PlayerLadderController` e o ciclo de abastecimento.
+3. **Bump SemVer:** Versão elevada para `1.1.11` sincronizada em `ContinuousLoadAmmo.cs`, `ContinuousLoadAmmo.csproj` e `mod.json`.
+4. **Compilação Release:** Compilado via MSBuild com 0 erros e 0 avisos.
+
+---
+
+## 2026-09-05 — Sessão 2: Resolução de Concorrência na Recarga de Armas (Tecla R), Coexistência com LoadAmmoAnim, Defensivas e Release v1.1.10
+
+**Tema central:** Diagnóstico aprofundado e resolução definitiva do bug onde o jogador ficava impossibilitado de recarregar armas (tecla R) ou sofria travamento de interface ao fechar o inventário, conflito de mãos com o mod `LoadAmmoAnim` e aplicação de melhorias defensivas identificadas no Code Review 03.
+
+**Decisões-chave:**
+1. **Desbloqueio de Tecla R e Troca de Armas no InputNode:** Implementada a interceptação em `TranslateCommand` de `LoadAmmoComponent.cs` para `ECommand.ReloadWeapon`, `QuickReloadWeapon`, seletores de arma e slots rápidos 4 a 0 (`SelectFastSlot4` até `SelectFastSlot0`), cancelando o carregamento contínuo e repassando o comando nativo ao jogo (`Ignore`).
+2. **Gating Estrito e Proteção Defensiva em `InventoryScreenClosePatch`:** Restringida a anulação de `___inventoryController_0` estritamente aos momentos em que o mod está ativamente abastecendo (`controller.IsActive`), protegido por bloco `try-catch`. Em qualquer outro fechamento de inventário normal, o mod não interfere, preservando o `StopProcesses()` vanilla do EFT. Se houver ações de mãos pendentes (`HasAnyHandsActionNonLinq()`), o carregamento contínuo é cancelado.
+3. **Coexistência com `LoadAmmoAnim`:** Adicionada verificação dinâmica para o `LoadAmmoBundleController`. Se o mod de animação estiver ativo no controle das mãos, o `ContinuousLoadAmmo` não força `SetEmptyHands()` nem disputa `TrySetLastEquippedWeapon()`.
+4. **Proteção de FSM e Estado Físico:** Implementada a limpeza explícita de `ESpeedLimit.BarbedWire` e `SprintDisabled` no cancelamento por `StopLoading()` e no `Dispose()`.
+5. **Isolamento de Build:** Configurado o `Directory.Build.targets` para direcionar a saída unicamente para `mods/SPT-ContinuousLoadAmmo/builds/`.
+6. **Bump SemVer:** Versão elevada de `1.1.8` $\rightarrow$ `1.1.9` $\rightarrow$ `1.1.10` sincronizada em `ContinuousLoadAmmo.cs`, `.csproj` e `mod.json`.
+7. **Code Review Formal:** Gerado o relatório [docs/relatorio-code-review-03.md](../docs/relatorio-code-review-03.md) com 100% dos 4 achados aplicados e resolvidos. Compilação Release final executada com 0 erros e 0 avisos.
 
 ---
 

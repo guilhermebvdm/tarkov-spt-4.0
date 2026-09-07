@@ -44,11 +44,19 @@ public class MagazinePresetLoader : IDisposable
     {
         if (!PresetLoaderIsActive) return;
 
-        _loadPresetCancellationSource.Cancel();
-        _loadPresetCancellationSource.Dispose();
-        _loadPresetCancellationSource = null;
-
-        // BUG: While loading preset, dragging ammo to another magazine does not stop the previous load preset process
+        try
+        {
+            _loadPresetCancellationSource?.Cancel();
+            _loadPresetCancellationSource?.Dispose();
+        }
+        catch (Exception ex)
+        {
+            ContinuousLoadAmmo.LogSource.LogWarning($"ContinuousLoadAmmo: CancelMagPresetLoading: {ex.Message}");
+        }
+        finally
+        {
+            _loadPresetCancellationSource = null;
+        }
     }
 
     public bool IsPresetAvailableForCurrentWeapon(out MagazineBuildPresetClass preset)
@@ -109,7 +117,11 @@ public class MagazinePresetLoader : IDisposable
                     if (magazine.Count >= bottom.Count) continue;
 
                     var toLoad = Mathf.Min(bottom.Count, bottom.Count - magazine.Count);
-                    await TryLoadPresetStepAsync(availableAmmo, magazine, bottom, toLoad, token);
+                    if (!await TryLoadPresetStepAsync(availableAmmo, magazine, bottom, toLoad, token))
+                    {
+                        CancelMagPresetLoading();
+                        return;
+                    }
                 }
 
                 // Loop
@@ -125,6 +137,11 @@ public class MagazinePresetLoader : IDisposable
 
                 while (freeLoopSpace > 0)
                 {
+                    // Guards against preset.Loop being empty (or fully skipped by toSkip every
+                    // pass) — without this, freeLoopSpace never decrements and the while spins
+                    // forever on the main thread with no await in between.
+                    var loadedThisPass = false;
+
                     foreach (var loop in preset.Loop)
                     {
                         token.ThrowIfCancellationRequested();
@@ -145,9 +162,16 @@ public class MagazinePresetLoader : IDisposable
                             toSkip = 0;
                         }
                         toLoad = Mathf.Min(toLoad, freeLoopSpace);
-                        await TryLoadPresetStepAsync(availableAmmo, magazine, loop, toLoad, token);
+                        if (!await TryLoadPresetStepAsync(availableAmmo, magazine, loop, toLoad, token))
+                        {
+                            CancelMagPresetLoading();
+                            return;
+                        }
                         freeLoopSpace -= toLoad;
+                        loadedThisPass = true;
                     }
+
+                    if (!loadedThisPass) break;
                 }
 
                 // Top
@@ -158,7 +182,11 @@ public class MagazinePresetLoader : IDisposable
                     if (top is null) continue;
 
                     var toLoad = Mathf.Min(top.Count, magazine.MaxCount - magazine.Count);
-                    await TryLoadPresetStepAsync(availableAmmo, magazine, top, toLoad, token);
+                    if (!await TryLoadPresetStepAsync(availableAmmo, magazine, top, toLoad, token))
+                    {
+                        CancelMagPresetLoading();
+                        return;
+                    }
                 }
             }
         }
@@ -166,11 +194,17 @@ public class MagazinePresetLoader : IDisposable
         {
             return;
         }
+        catch (Exception ex)
+        {
+            ContinuousLoadAmmo.LogSource.LogError($"ContinuousLoadAmmo: LoadingMagPresetInternalAsync excecao: {ex}");
+            CommonUtils.DisplayNotification("Failed to load magazine preset", ENotificationIconType.Alert, true);
+        }
 
         CancelMagPresetLoading();
     }
 
-    private async Task TryLoadPresetStepAsync(
+    /// <returns>false if the ammo insert was rejected (server failure or no matching ammo without fallback) — caller must stop the preset sequence instead of assuming this step succeeded</returns>
+    private async Task<bool> TryLoadPresetStepAsync(
         List<AmmoItemClass> availableAmmo,
         MagazineItemClass magazine,
         MagazineBuildPresetClass.GClass2578 preset,
@@ -191,13 +225,13 @@ public class MagazinePresetLoader : IDisposable
                 if (fallbackAmmo is not null)
                 {
                     CommonUtils.DisplayNotification($"Loading {fallbackAmmo.LocalizedShortName()}", ENotificationIconType.Note);
-                    await _loadAmmoController.LoadMagazineAsync(fallbackAmmo, magazine, token);
+                    return await _loadAmmoController.LoadMagazineAsync(fallbackAmmo, magazine, token);
                 }
             }
             CancelMagPresetLoading();
-            return;
+            return false;
         }
-        await _loadAmmoController.LoadMagazineAsync(matchingAmmo, magazine, token, toLoad);
+        return await _loadAmmoController.LoadMagazineAsync(matchingAmmo, magazine, token, toLoad);
     }
 
     private static AmmoItemClass GetMatchingAmmo(List<AmmoItemClass> ammo, MongoID templateId, int count)

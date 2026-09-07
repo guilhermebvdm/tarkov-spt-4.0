@@ -26,16 +26,36 @@ public class InventoryScreenClosePatch : ModulePatch
         __state = ___inventoryController_0;
         if (!CommonUtils.InRaid) return;
 
-        if (___inventoryController_0 is Player.PlayerInventoryController playerInventoryController)
+        try
         {
-            // It looks like only Load/UnloadMagazine checks for process locked, this should be fine
-            playerInventoryController.SetNextProcessLocked(false);
+            // Se NÃO houver controlador ativo ou NÃO houver carregamento ativo, NÃO interferir no Close() vanilla!
+            var controller = Controllers.LoadAmmoController.Instance;
+            if (controller == null || !controller.IsActive)
+            {
+                return;
+            }
+
+            if (___inventoryController_0 is Player.PlayerInventoryController playerInventoryController)
+            {
+                // Se houver qualquer ação de mãos/arma em andamento, cancelamos o carregamento e respeitamos o StopProcesses vanilla
+                if (playerInventoryController.HasAnyHandsActionNonLinq())
+                {
+                    controller.StopLoading();
+                    return;
+                }
+
+                playerInventoryController.SetNextProcessLocked(false);
+            }
+
+            // Somente ignora StopProcesses se o carregamento contínuo estiver de fato em execução e seguro
+            ___inventoryController_0 = null;
+
+            OnInventoryClose?.Invoke();
         }
-
-        // Skip StopProcesses and SetNextProcessLocked(true) after prefix
-        ___inventoryController_0 = null;
-
-        OnInventoryClose?.Invoke();
+        catch (Exception ex)
+        {
+            ContinuousLoadAmmo.LogSource.LogError($"ContinuousLoadAmmo: Erro defensivo em InventoryScreenClosePatch.Prefix: {ex}");
+        }
     }
 
     [PatchPostfix]
