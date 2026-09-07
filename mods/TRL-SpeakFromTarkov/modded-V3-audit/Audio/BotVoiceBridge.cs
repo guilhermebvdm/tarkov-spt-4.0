@@ -92,16 +92,20 @@ namespace TRL_SpeakFromTarkov.Audio
                 ? player.PlayerBones.Head.Original.position 
                 : player.Transform.position;
 
-            // 1. Sinaliza o sensor de audição da IA em 3D (distância exata e contínua em metros)
+            // 1. Sinaliza o sensor de audição e eventos de frase da IA (100% incondicional do volume local)
             if (Singleton<BotEventHandler>.Instantiated)
             {
                 try
                 {
+                    // Notifica todos os módulos de IA nativos e mods (SAIN) que o jogador falou a frase
+                    Singleton<BotEventHandler>.Instance.SayPhrase(player, trigger);
+
+                    // Emite som no sensor acústico com distância calculada (power em metros)
                     Singleton<BotEventHandler>.Instance.PlaySound(
                         player, 
                         soundPos, 
                         power, 
-                        AISoundType.step
+                        AISoundType.gun
                     );
                 }
                 catch (Exception ex)
@@ -110,8 +114,8 @@ namespace TRL_SpeakFromTarkov.Audio
                 }
             }
 
-            // 2. Dispara a fala nativa no próprio personagem
-            float debugVolume = VoIPPlugin.BotVoiceDebugVolume != null ? VoIPPlugin.BotVoiceDebugVolume.Value : 0.5f;
+            // 2. Reprodução audível da fala nativa no próprio PMC (apenas para o ouvido local se configurado)
+            float debugVolume = VoIPPlugin.BotVoiceDebugVolume != null ? VoIPPlugin.BotVoiceDebugVolume.Value : 0.0f;
             
             if (debugVolume > 0.001f)
             {
@@ -119,7 +123,7 @@ namespace TRL_SpeakFromTarkov.Audio
                 {
                     player.Say(trigger, demand: true, 0f, (ETagStatus)0, 100, aggressive: isAggressive);
                     if (VoIPPlugin.EnableDebugLogs != null && VoIPPlugin.EnableDebugLogs.Value)
-                        VoIPPlugin.Log.LogInfo($"[SFT-BOT] Janela 250ms -> Pico RMS={peakLevel:F3} | Phrase={trigger} (Aggressive={isAggressive}) | Raio Gradual={power:F1}m | DebugVol={debugVolume * 100:F0}%");
+                        VoIPPlugin.Log.LogInfo($"[SFT-BOT] Janela 250ms -> Pico RMS={peakLevel:F3} | Phrase={trigger} (Aggressive={isAggressive}) | Raio={power:F1}m | DebugVol={debugVolume * 100:F0}%");
                 }
                 catch (Exception ex)
                 {
@@ -128,12 +132,12 @@ namespace TRL_SpeakFromTarkov.Audio
             }
             else
             {
-                // Sinal de alcance sonoro enviado à IA sem voz audível (BotVoiceDebugVolume = 0%)
+                // Sinal de voz enviado à IA sem reproduzir áudio do PMC no fone do jogador
                 if (VoIPPlugin.EnableDebugLogs != null && VoIPPlugin.EnableDebugLogs.Value)
-                    VoIPPlugin.Log.LogInfo($"[SFT-BOT] Sinal emitido silenciosamente (0%) para IA: Pico RMS={peakLevel:F3} | Phrase={trigger} | Raio Gradual={power:F1}m");
+                    VoIPPlugin.Log.LogInfo($"[SFT-BOT] Sinal de voz ({trigger}) emitido para IA (Raio={power:F1}m) | Áudio PMC local mudo (0%).");
             }
 
-            // 3. Resposta Forçada 100% Instantânea dos Bots dentro do raio 'power'
+            // 3. Resposta Forçada 100% Confiável dos Bots dentro do raio 'power'
             ForceBotResponsesInRadius(player, soundPos, power, trigger);
         }
 
@@ -171,7 +175,7 @@ namespace TRL_SpeakFromTarkov.Audio
                 int countResponding = 0;
                 foreach (BotOwner bot in botOwners)
                 {
-                    if (bot == null || bot.IsDead || bot.BotTalk == null) continue;
+                    if (bot == null || bot.IsDead) continue;
 
                     // Ignora se o perfil do bot for o próprio jogador
                     if (bot.ProfileId == player.ProfileId) continue;
@@ -191,8 +195,24 @@ namespace TRL_SpeakFromTarkov.Audio
 
                         try
                         {
-                            bot.BotTalk.Say(responsePhrase, sayImmediately: true);
-                            countResponding++;
+                            // 1. Alerta a memória do bot se estiver desprevenido
+                            if (bot.Memory != null && !bot.Memory.HaveEnemy)
+                            {
+                                bot.Memory.Spotted(byHit: false);
+                            }
+
+                            // 2. Destrava qualquer cooldown de conversa no BotTalk
+                            if (bot.BotTalk != null)
+                            {
+                                bot.BotTalk.DropNextSayPeriod();
+                            }
+
+                            // 3. Força a fala/grito de resposta direta do bot (prioridade máxima demand: true)
+                            if (bot.GetPlayer != null)
+                            {
+                                bot.GetPlayer.Say(responsePhrase, demand: true, 0f, (ETagStatus)0, 100, aggressive: true);
+                                countResponding++;
+                            }
                         }
                         catch (Exception botEx)
                         {
