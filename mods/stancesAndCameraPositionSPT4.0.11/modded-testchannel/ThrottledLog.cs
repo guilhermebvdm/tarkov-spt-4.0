@@ -60,12 +60,38 @@ namespace CameraRotationMod
                 + (suppressed > 0 ? $" (+{suppressed} falhas suprimidas nos últimos {ErrorLogIntervalMs / 1000}s)" : string.Empty));
         }
 
+        private static int _lastWarningLogTick;
+        private static int _suppressedWarnings;
+
+        /// <summary>
+        /// Warnings rate-limited: no máximo um a cada 5 s por contexto, evitando poluição de console.
+        /// </summary>
+        internal static void Warning(string context, string message)
+        {
+            var log = Plugin.Logger;
+            var now = Environment.TickCount;
+
+            if (now - _lastWarningLogTick < ErrorLogIntervalMs)
+            {
+                _suppressedWarnings++;
+                return;
+            }
+
+            _lastWarningLogTick = now;
+            var suppressed = _suppressedWarnings;
+            _suppressedWarnings = 0;
+            log?.LogWarning($"[TRL-StancesAndMobility] {context}: {message}"
+                + (suppressed > 0 ? $" (+{suppressed} warnings suprimidos nos últimos {ErrorLogIntervalMs / 1000}s)" : string.Empty));
+        }
+
         /// <summary>Reset de raid — o balde de tipos já vistos não deve atravessar partidas.</summary>
         internal static void Reset()
         {
             _tracedExceptionTypes.Clear();
             _suppressedErrors = 0;
             _lastErrorLogTick = 0;
+            _suppressedWarnings = 0;
+            _lastWarningLogTick = 0;
         }
     }
 }

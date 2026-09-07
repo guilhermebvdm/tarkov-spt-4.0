@@ -80,9 +80,11 @@ namespace CameraRotationMod.Networking
                 // Formato legado (≤2.10.0): registrado só para RECEPÇÃO, para continuar entendendo
                 // peers ainda não atualizados. Nunca é enviado.
                 currentManager.RegisterPacket<StanceSyncPacket>(OnStanceSyncPacketReceivedLegacy);
+                // Sync de estado de câmara: enviado pelo convidado, aplicado pelo host.
+                currentManager.RegisterPacket<ChamberStateSyncPacket>(OnChamberStateSyncPacketReceived);
 
                 _lastRegisteredNetworkManager = currentManager;
-                _logger?.LogInfo($"[TRL-StancesAndMobility] Registered StanceSyncPacketV2 (+legacy) on new IFikaNetworkManager instance ({currentManager.GetType().Name}).");
+                _logger?.LogInfo($"[TRL-StancesAndMobility] Registered StanceSyncPacketV2 (+legacy+chamber) on new IFikaNetworkManager instance ({currentManager.GetType().Name}).");
             }
             catch (Exception ex)
             {
@@ -118,6 +120,43 @@ namespace CameraRotationMod.Networking
             catch (Exception ex)
             {
                 LogErrorThrottled("Error sending StanceSyncPacketV2", ex);
+            }
+        }
+
+        /// <summary>
+        /// Enviado pelo convidado FIKA quando a câmara de sua arma muda de estado via ação manual
+        /// (RechamberRound ou bolt action manual). Só envia se for cliente FIKA — o host é
+        /// autoritátivo e não precisa notificar ninguém.
+        /// </summary>
+        public static void SendChamberState(string profileId, string weaponId, bool chamberFilled)
+        {
+            EnsurePacketsRegistered();
+            if (_lastRegisteredNetworkManager == null) return;
+
+            try
+            {
+                // Só envia se for cliente (convidado) — host gerencia o próprio inventário
+                if (!Fika.Core.Main.Utils.FikaBackendUtils.IsClient) return;
+            }
+            catch { return; } // FIKA não disponível — sessão solo
+
+            var packet = new ChamberStateSyncPacket
+            {
+                ProfileId = profileId,
+                WeaponId = weaponId,
+                ChamberFilled = chamberFilled
+            };
+
+            try
+            {
+                // ReliableOrdered: garantia de entrega e ordem — perda do pacote causaria
+                // inventário permanentemente inconsistente no host.
+                _lastRegisteredNetworkManager.SendData(ref packet, Fika.Core.Networking.LiteNetLib.DeliveryMethod.ReliableOrdered, true);
+                _logger?.LogInfo($"[TRL-StancesAndMobility] ChamberStateSyncPacket enviado: weapon={weaponId}, filled={chamberFilled}");
+            }
+            catch (Exception ex)
+            {
+                LogErrorThrottled("SendChamberState", ex);
             }
         }
 
@@ -164,6 +203,64 @@ namespace CameraRotationMod.Networking
             catch (Exception ex)
             {
                 LogErrorThrottled($"Error processing stance packet ({context})", ex);
+            }
+        }
+
+        /// <summary>
+        /// Recebido pelo Host: aplica PopTo (mag→chamber) para o jogador remoto identificado por
+        /// ProfileId, tornando o estado de inventário autoritátivo. Executado na thread principal
+        /// via PollEvents() no Update() do FikaServer.
+        /// </summary>
+        private static void OnChamberStateSyncPacketReceived(ChamberStateSyncPacket packet)
+        {
+            try
+            {
+                if (!Singleton<EFT.GameWorld>.Instantiated) return;
+                if (_lastRegisteredNetworkManager == null) return;
+                if (string.IsNullOrEmpty(packet.ProfileId) || string.IsNullOrEmpty(packet.WeaponId)) return;
+
+                // Apenas o host processa — convidados ignoram (evita ecos)
+                try { if (!Fika.Core.Main.Utils.FikaBackendUtils.IsServer) return; }
+                catch { return; }
+
+                // Localizar jogador remoto: ObservedPlayers primeiro, fallback AllAlivePlayersList
+                var gameWorld = Singleton<EFT.GameWorld>.Instance;
+                Player targetPlayer = _lastRegisteredNetworkManager.ObservedPlayers?
+                    .FirstOrDefault(p => p != null && p.ProfileId == packet.ProfileId)
+                    ?? gameWorld?.AllAlivePlayersList?
+                        .FirstOrDefault(p => p != null && p.ProfileId == packet.ProfileId);
+
+                if (targetPlayer == null)
+                {
+                    _logger?.LogWarning($"[TRL-StancesAndMobility] ChamberSync: jogador {packet.ProfileId} não encontrado.");
+                    return;
+                }
+
+                var fc = targetPlayer.HandsController as EFT.Player.FirearmController;
+                if (fc == null || fc.Weapon == null) return;
+
+                // Verifica que a arma é a correta (evita aplicar em troca rápida de arma)
+                if (fc.Weapon.Id != packet.WeaponId) return;
+
+                if (packet.ChamberFilled && fc.Weapon.ChamberAmmoCount == 0)
+                {
+                    var mag = fc.Weapon.GetCurrentMagazine();
+                    if (mag != null && mag.Count > 0)
+                    {
+                        var result = mag.Cartridges.PopTo(
+                            targetPlayer.InventoryController,
+                            fc.Item.Chambers[0].CreateItemAddress());
+
+                        if (result.Value != null)
+                            _logger?.LogInfo($"[TRL-StancesAndMobility] Host aplicou câmara para {targetPlayer.Profile?.Nickname ?? packet.ProfileId}.");
+                        else
+                            _logger?.LogWarning($"[TRL-StancesAndMobility] Host falhou ao aplicar câmara para {targetPlayer.Profile?.Nickname ?? packet.ProfileId}: {result.Error}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogErrorThrottled("OnChamberStateSyncPacketReceived", ex);
             }
         }
     }

@@ -159,13 +159,14 @@ namespace CameraRotationMod
             _wasAimingGlobal = isAiming;
 
             bool isSprinting = gameWorld?.MainPlayer?.IsSprintEnabled == true;
+            bool isOnLadder = gameWorld?.MainPlayer?.gameObject?.GetComponent("PlayerLadderController") != null;
 
-            if (isNativeMounting || isInProne || isStationary)
+            if (isNativeMounting || isInProne || isStationary || isOnLadder)
             {
-                // Se deitou, apoiou (bipé) ou entrou em arma montada, quebra a Action Stance e trava controles
+                // Se deitou, apoiou (bipé), entrou em arma montada ou subiu em escada (Climbable Ladders), quebra a Action Stance e trava controles
                 if (_isActionStanceActive) EndActionStance(forceCancel: true);
 
-                // Forçar Stance 0 (item 013: inclui arma montada do cenário — evita desalinhamento visual)
+                // Forçar Stance 0 (item 013: inclui arma montada do cenário e escadas — evita desalinhamento visual)
                 if (CurrentStance != Stance.Default)
                 {
                     SetStance(Stance.Default);
@@ -375,10 +376,6 @@ namespace CameraRotationMod
             if (!forceCancel && (Time.time - _actionStanceStartTime < 0.3f)) return;
 
             _isActionStanceActive = false;
-
-            // Reseta o estado do manual chambering para que o próximo tiro/operação de engatilhamento manual funcione normalmente
-            Patches.ManualChamberingState.CanLoadChamber = true;
-            Patches.ManualChamberingState.BlockChambering = false;
 
             // Se forceCancel for true (ex: começou a correr no meio do reload),
             // a própria lógica de sprint ou outras resetam a stance, então não voltamos para previousStance forçadamente

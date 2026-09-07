@@ -20,7 +20,7 @@ public enum ScrollMode
     Linear,
 }
 
-[BepInPlugin("com.trl.stancesandmobility", "TRL-StancesAndMobility", "2.17.2")]
+[BepInPlugin("com.trl.stancesandmobility", "TRL-StancesAndMobility", "2.19.16")]
 public class Plugin : BaseUnityPlugin
 {
     public static Plugin Instance { get; private set; }
@@ -217,10 +217,12 @@ public class Plugin : BaseUnityPlugin
     // Action Stance Settings (Item 008)
     public static ConfigEntry<bool> _EnableActionStanceSwap;
 
-    // Manual Chambering (Item 010)
+    // Manual Chambering & Bolt Action (Item 010)
     public static ConfigEntry<bool> _EnableManualChambering;
     public static ConfigEntry<bool> _ManualChamberingOnRaidStart;
     public static ConfigEntry<bool> _ManualChamberingOnReload;
+    public static ConfigEntry<bool> _EnableManualBoltAction;
+    public static ConfigEntry<bool> _EnableManualPumpAction;
 
     // Weapon Inspection (Item 019)
     public static ConfigEntry<bool> _ShowChamberAmmoOnCheck;
@@ -267,20 +269,20 @@ public class Plugin : BaseUnityPlugin
     private void BindAllConfig()
     {
         // ========================================
-        // MANUAL CHAMBERING
+        // MANUAL CHAMBERING & BOLT ACTION
         // ========================================
         _EnableManualChambering = Config.Bind(
             "Manual Chambering",
             "Enable Manual Chambering",
-            true,
-            new ConfigDescription("Master toggle for Manual Chambering. Off = vanilla behavior in ALL scenarios (safe kill-switch). Rack the bolt with the native 'Chamber/Unload' key when the chamber is empty and there is ammo in the magazine.\n\nInterruptor mestre do Manual Chambering. Desligado = comportamento vanilla em TODOS os cenários (kill-switch seguro). Puxe o ferrolho com a tecla nativa 'Chamber/Unload' quando a câmara estiver vazia e houver munição no carregador.",
+            false,
+            new ConfigDescription("Master toggle for Manual Chambering. Off = vanilla behavior in ALL scenarios (safe kill-switch). Rack the bolt with the native 'Chamber/Unload' key (Shift + T) when the chamber is empty and there is ammo in the magazine.\n\nInterruptor mestre do Manual Chambering. Desligado = comportamento vanilla em TODOS os cenários (kill-switch seguro). Puxe o ferrolho com a tecla nativa 'Chamber/Unload' (Shift + T) quando a câmara estiver vazia e houver munição no carregador.",
             null,
             new ConfigurationManagerAttributes { Order = 70 }));
 
         _ManualChamberingOnRaidStart = Config.Bind(
             "Manual Chambering",
             "Manual Chambering On Raid Start",
-            true,
+            false,
             new ConfigDescription(
                 "When enabled, a weapon that starts the raid with an empty chamber does NOT auto-load the first round on spawn — rack the bolt manually. Off = vanilla at raid start. Takes effect NEXT RAID.\n\nQuando ativado, a arma que inicia a raid com a câmara vazia NÃO carrega a primeira bala automaticamente no spawn — puxe o ferrolho manualmente. Desligado = vanilla no início da raid. Efetivo na PRÓXIMA RAID.",
                 null,
@@ -289,11 +291,29 @@ public class Plugin : BaseUnityPlugin
         _ManualChamberingOnReload = Config.Bind(
             "Manual Chambering",
             "Manual Chambering On Reload",
-            true,
+            false,
             new ConfigDescription(
                 "When enabled, reloading with an empty chamber does NOT auto-load the first round after inserting the magazine — rack the bolt manually. Off = vanilla on reload. Real time.\n\nQuando ativado, recarregar com a câmara vazia NÃO carrega automaticamente a primeira bala após inserir o carregador — puxe o ferrolho manualmente. Desligado = vanilla no reload. Tempo real.",
                 null,
                 new ConfigurationManagerAttributes { Order = 68 }));
+
+        _EnableManualBoltAction = Config.Bind(
+            "Manual Chambering",
+            "Enable Manual Bolt Action",
+            false,
+            new ConfigDescription(
+                "When enabled, firing bolt-action rifles (Mosin, SV-98, DVL-10, M700, T-5000, etc.) will NOT cycle the bolt automatically upon releasing the trigger. Cycle the bolt manually using the Chamber key (Shift + T).\n\nQuando ativado, disparar rifles de ferrolho (Mosin, SV-98, DVL-10, M700, T-5000, etc.) NÃO ciclará o ferrolho automaticamente ao soltar o gatilho. Cicle o ferrolho manualmente usando o comando de Chamber (Shift + T).",
+                null,
+                new ConfigurationManagerAttributes { Order = 67 }));
+
+        _EnableManualPumpAction = Config.Bind(
+            "Manual Chambering",
+            "Enable Manual Pump Action",
+            false,
+            new ConfigDescription(
+                "When enabled, firing pump-action shotguns (Remington 870, MP-133, KS-23M) will NOT pump the action automatically after firing. Pump the action manually using the Chamber key (Shift + T).\n\nQuando ativado, disparar escopetas de bomba (Remington 870, MP-133, KS-23M) NÃO ciclará a bomba automaticamente após o disparo. Bombeie manualmente usando o comando de Chamber (Shift + T).",
+                null,
+                new ConfigurationManagerAttributes { Order = 66 }));
 
         // ========================================
         // WEAPON INSPECTION (Item 019)
@@ -1322,12 +1342,28 @@ public class Plugin : BaseUnityPlugin
         SafeEnable("ActionStanceOnIdlePatch", () => new Patches.ActionStanceOnIdlePatch());
         SafeEnable("ActionStanceCheckFireModePatch", () => new Patches.ActionStanceCheckFireModePatch());
 
-        // Item 010: Manual Chambering (StartEquipWeapPatch desativado — auto-chambering gerenciado nativamente via SetAmmoCompatiblePatch)
+        // Item 010: Manual Chambering & Bolt Action
+        SafeEnable("StartEquipWeapPatch", () => new Patches.StartEquipWeapPatch());
+        SafeEnable("StartEquipResetPatch", () => new Patches.StartEquipResetPatch());
+        SafeEnable("ReloadExternalMagChamberPatch", () => new Patches.ReloadExternalMagChamberPatch());
         SafeEnable("StartReloadResetPatch", () => new Patches.StartReloadResetPatch());
-        SafeEnable("SetAmmoCompatiblePatch", () => new Patches.SetAmmoCompatiblePatch());
-        SafeEnable("SetAmmoOnMagPatch", () => new Patches.SetAmmoOnMagPatch());
-        SafeEnable("PreChamberLoadPatch", () => new Patches.PreChamberLoadPatch());
+        SafeEnable("IdleStartEventPatch", () => new Patches.IdleStartEventPatch());
+        SafeEnable("ReloadIdleStartEventPatch", () => new Patches.ReloadIdleStartEventPatch());
+        SafeEnable("ReloadResetPatch", () => new Patches.ReloadResetPatch());
+        SafeEnable("ManualBoltActionPatch", () => new Patches.ManualBoltActionPatch());
+        SafeEnable("ManualBoltActionStartPatch", () => new Patches.ManualBoltActionStartPatch());
+        SafeEnable("ManualBoltActionNetPatch", () => new Patches.ManualBoltActionNetPatch());
         SafeEnable("ManualChamberingInputPatch", () => new Patches.ManualChamberingInputPatch());
+        SafeEnable("ChamberCheckModelCleanupPatch", () => new Patches.ChamberCheckModelCleanupPatch());
+        SafeEnable("ChamberUnloadModelCleanupPatch", () => new Patches.ChamberUnloadModelCleanupPatch());
+        SafeEnable("WeaponBoltActionGetterPatch", () => new Patches.WeaponBoltActionGetterPatch());
+        SafeEnable("DryFireFeedbackPatch", () => new Patches.DryFireFeedbackPatch());
+        SafeEnable("CheckChamberArmPatch", () => new Patches.CheckChamberArmPatch());
+        SafeEnable("RechamberOperationEmptyMagFixPatch", () => new Patches.RechamberOperationEmptyMagFixPatch());
+        SafeEnable("InstallMagChamberPatch", () => new Patches.InstallMagChamberPatch());
+        SafeEnable("InstallMagStartPatch", () => new Patches.InstallMagStartPatch());
+        SafeEnable("InstallMagInsertedPatch", () => new Patches.InstallMagInsertedPatch());
+        SafeEnable("InstallMagResetPatch", () => new Patches.InstallMagResetPatch());
 
         // Item 019: Chamber Check Ammo UI
         SafeEnable("ChamberCheckAmmoPatch", () => new Patches.ChamberCheckAmmoPatch());

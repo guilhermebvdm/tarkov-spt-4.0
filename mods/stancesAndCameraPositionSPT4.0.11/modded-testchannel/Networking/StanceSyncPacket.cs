@@ -109,4 +109,52 @@ namespace CameraRotationMod.Networking
             }
         }
     }
+
+    /// <summary>
+    /// Enviado pelo convidado FIKA quando a câmara de sua arma muda de estado via ação manual
+    /// (RechamberRound ou bolt action). O Host recebe, localiza o jogador remoto e aplica a
+    /// operação de inventário autoritativa (PopTo mag→chamber), sincronizando o estado entre peers
+    /// independente de qual config local cada jogador tem para ManualChambering.
+    ///
+    /// Usa o mesmo envelope PutBytesWithLength do StanceSyncPacketV2 para não desalinhar o
+    /// NetDataReader do LiteNetLib caso o layout evolua.
+    /// </summary>
+    public struct ChamberStateSyncPacket : INetSerializable
+    {
+        public string ProfileId;
+        public string WeaponId;    // Weapon.Id — identifica qual arma foi chambeada
+        public bool ChamberFilled; // true = bala entrou na câmara; false = câmara esvaziada
+
+        [ThreadStatic] private static NetDataWriter _innerWriter;
+
+        public void Serialize(NetDataWriter writer)
+        {
+            var inner = _innerWriter ??= new NetDataWriter(true, 64);
+            inner.Reset();
+            inner.Put(ProfileId ?? string.Empty);
+            inner.Put(WeaponId ?? string.Empty);
+            inner.Put(ChamberFilled);
+            writer.PutBytesWithLength(inner.Data, 0, checked((ushort)inner.Length));
+        }
+
+        public void Deserialize(NetDataReader reader)
+        {
+            ProfileId = string.Empty;
+            WeaponId = string.Empty;
+            ChamberFilled = false;
+
+            if (!reader.TryGetBytesWithLength(out var payload) || payload == null) return;
+            try
+            {
+                var inner = new NetDataReader(payload);
+                if (!inner.TryGetString(out ProfileId)) return;
+                if (!inner.TryGetString(out WeaponId)) return;
+                if (!inner.TryGetBool(out ChamberFilled)) return;
+            }
+            catch (Exception ex)
+            {
+                FikaSyncManager.LogErrorThrottled("ChamberStateSyncPacket.Deserialize", ex);
+            }
+        }
+    }
 }

@@ -50,7 +50,8 @@ namespace CameraRotationMod.Networking
             Transform wra = bones == null ? null : bones.Weapon_Root_Anim;
             if (wra == null) return;
 
-            bool inStance = _stance > 0 && !(_observedPlayer != null && _observedPlayer.IsInPronePose);
+            bool isOnLadder = _observedPlayer != null && _observedPlayer.gameObject.GetComponent("ObservedPlayerLadderController") != null;
+            bool inStance = _stance > 0 && !(_observedPlayer != null && _observedPlayer.IsInPronePose) && !isOnLadder;
             Vector3 targetEuler = inStance ? StanceManager.GetTargetRotation((Stance)_stance, _isAiming) : Vector3.zero;
             Vector3 targetPos = inStance ? StanceManager.GetTargetPosition((Stance)_stance, _isAiming) : Vector3.zero;
 

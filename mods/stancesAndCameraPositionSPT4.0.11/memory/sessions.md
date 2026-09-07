@@ -1097,3 +1097,29 @@ mod no SPT Forge** — o que exigiu criar o command e a skill que faltavam no ha
 **Atividade cronológica:**
 1. Análise do envio de postura de braços na visão em 3ª pessoa (`ObservedPlayer`).
 2. Criação do `ROADMAP.md` formalizando a arquitetura do Canal 3 Compartilhado TRL com Magic Header `TRLS`.
+
+---
+
+## 2026-09-05 19:15 (GMT-3) — Sessão 13: v2.19.12→v2.19.13 (Compatibilidade com Climbable Ladders e Reset de Stance)
+
+**Tema central:** Interoperabilidade com o mod `Climbable Ladders`, neutralizando desalinhamentos de postura e de câmera quando o jogador sobe/desce escadas.
+
+**Decisões-chave:**
+- **v2.19.13:** Adicionada guarda em `StanceManager.cs` (`Update()`) verificando dinamicamente `gameWorld?.MainPlayer?.gameObject?.GetComponent("PlayerLadderController") != null`.
+- Quando em escada, quebra instantaneamente qualquer `ActionStance` ativa (`EndActionStance(forceCancel: true)`) e reseta a postura para `Stance.Default` (0), travando qualquer nova transição até o jogador sair da escada.
+- **Desacoplamento Limpo:** Verificação 100% via componente Unity sem dependência direta de compilação com a DLL do Climbable Ladders.
+- Compilação limpa com 0 avisos e 0 erros (`TRL-StancesAndMobility.dll`).
+
+---
+
+## 2026-09-05 19:22 (GMT-3) — Sessão 14: v2.19.13→v2.19.14 (Proteção de Postura para ObservedPlayer em Escadas Coop)
+
+**Tema central:** Interoperabilidade do `ObservedStanceAnimator` com o `Climbable Ladders` no multiplayer cooperativo (FIKA).
+
+**Decisões-chave:**
+- **v2.19.14:** Adicionada checagem defensiva em `ObservedStanceAnimator.ApplyToWeaponRoot(PlayerBones bones)` para companheiros de equipe em 3ª pessoa (`ObservedPlayer`):
+  `bool isOnLadder = _observedPlayer != null && _observedPlayer.gameObject.GetComponent("ObservedPlayerLadderController") != null;`
+- Garante que `inStance` seja suprimido (`false`) quando o jogador observado estiver em escadas, impedindo que o root da arma e a cinemática de braços sofram distorções aditivas enquanto ele sobe/desce barras na visão dos outros jogadores.
+- Compilação limpa com 0 avisos e 0 erros (`TRL-StancesAndMobility.dll`).
+
+
