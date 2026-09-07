@@ -1,0 +1,47 @@
+<Project>
+  <PropertyGroup>
+    <Version>5.3.23</Version>
+    <SPTPath Condition="'$(SPTPath)' == ''">E:\Tarkov Red Line</SPTPath>
+    <FikaPath Condition="'$(FikaPath)' == ''">$(MSBuildThisFileDirectory)..\..\FIKA\modded\Fika-Plugin\Fika.Core\bin\Release\netstandard2.1</FikaPath>
+    <AssemblySearchPaths>
+      $(SPTPath)\EscapeFromTarkov_Data\Managed;
+      $(SPTPath)\BepInEx\plugins\spt;
+      $(SPTPath)\BepInEx\plugins\spt\ConfigurationManager;
+      $(FikaPath);
+      $(AssemblySearchPaths)
+    </AssemblySearchPaths>
+  </PropertyGroup>
+
+  <Import Project="Shared.props.user" Condition="Exists('Shared.props.user')" />
+
+  <ItemGroup>
+    <DeployTarget Include="LocalBuild">
+      <Path>$(MSBuildThisFileDirectory)..\builds</Path>
+    </DeployTarget>
+  </ItemGroup>
+
+  <Target Name="SPTClientDeploy" AfterTargets="PostBuildEvent" Condition="'$(SPTModType)'=='Client'">
+    <Exec
+      Command='
+        if not exist "%(DeployTarget.Path)" mkdir "%(DeployTarget.Path)"
+        xcopy /F /Y "$(TargetPath)" "%(DeployTarget.Path)\"
+
+        if $(ConfigurationName) == Debug (
+          xcopy /F /Y "$(ProjectDir)$(OutDir)$(TargetName).pdb" "%(DeployTarget.Path)\"
+        )'
+    />
+  </Target>
+
+  <Target Name="SPTServerDeploy" AfterTargets="PostBuildEvent" Condition="'$(SPTModType)'=='Server'">
+    <Exec
+      Command='
+        if not exist "%(DeployTarget.Path)" mkdir "%(DeployTarget.Path)"
+        xcopy /F /Y "$(TargetPath)" "%(DeployTarget.Path)\"
+
+        if $(ConfigurationName) == Debug (
+          xcopy /F /Y "$(ProjectDir)$(OutDir)$(TargetName).pdb" "%(DeployTarget.Path)\"
+        )'
+    />
+  </Target>
+
+</Project>

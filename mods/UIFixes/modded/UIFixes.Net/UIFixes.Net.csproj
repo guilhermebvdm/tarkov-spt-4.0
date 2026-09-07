@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\Shared.props" />
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <AssemblyName>Tyfon.UIFixes.Net</AssemblyName>
+    <SPTModType>Client</SPTModType>
+    <LangVersion>latest</LangVersion>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <Configurations>Debug;Release</Configurations>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="Fika.Core">
+      <HintPath>$(FikaPath)\Fika.Core.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

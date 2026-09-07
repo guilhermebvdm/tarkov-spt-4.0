@@ -1,0 +1,12 @@
+{
+  "name": "UIFixes",
+  "upstream_url": "https://github.com/tyfon7/UIFixes.git",
+  "upstream_sha": "4ac761ba09c44a2314119a6ef8106b0f0439355a",
+  "upstream_branch": "v5.3.11",
+  "forge_url": "https://github.com/tyfon7/UIFixes/releases/tag/v5.3.11",
+  "license": "MIT",
+  "version_base": "5.3.11",
+  "version": "5.3.23",
+  "spt_version": "4.0.13",
+  "created_at": "2026-09-04T23:25:50Z"
+}
