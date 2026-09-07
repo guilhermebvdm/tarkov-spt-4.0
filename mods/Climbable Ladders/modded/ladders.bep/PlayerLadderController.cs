@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -52,6 +53,7 @@ namespace tarkin.ladders.bep
         private float rollVelocity = 0f;
         private const float RollSpeed = 333f;
         private const float RollDeceleration = 0.35f;
+        private float cachedInventoryWeightFactor = 0f;
 
         private bool IsBarMode => ladder.RungCount == 1;
 
@@ -79,7 +81,13 @@ namespace tarkin.ladders.bep
 
             player.MovementContext.IsAxesIgnored = true;
 
-            player.HideWeapon(); // sets IsInBufferZone = true
+            (player.HandsController as IFirearmHandsController)?.SetTriggerPressed(false);
+
+            // Se houver interação prévia em andamento (ex: cura, recarga), avança antes de iniciar a transição
+            if (player.HandsController != null && player.HandsController.IsInInteraction())
+            {
+                try { player.FastForwardCurrentOperations(); } catch { }
+            }
 
             player.MovementContext.SetPoseLevel(1f);
 
@@ -95,7 +103,7 @@ namespace tarkin.ladders.bep
 
             Patch_Physical_CanClimb.OverrideCanClimb = true;
             Patch_Physical_CanVault.OverrideCanVault = true;
-            Patch_ObstacleCalculatorModel_DistanceToMainObstacle.OverrideVaultObstacleDistance = true;
+            cachedInventoryWeightFactor = Mathf.Clamp01(Mathf.InverseLerp(20, 60, player.InventoryController?.TotalWeight() ?? 0f));
 
             player.OnPlayerDead += OnPlayerDead;
 
@@ -180,6 +188,12 @@ namespace tarkin.ladders.bep
                 player.MovementContext.InteractionParameters = interactionParameters;
 
 
+                // ref: CR-01-01 Garante que desarmamento anterior foi completado antes de assumir o ApproachState
+                if (player.HandsController != null && player.HandsController.IsInInteraction())
+                {
+                    try { player.FastForwardCurrentOperations(); } catch { }
+                }
+
                 ApproachState approachStateClass = null;
                 IPlayerStateContainerBehaviour[] getInitedMovementState = player.MovementContext.GetInitedMovementState;
                 for (int i = 0; i < getInitedMovementState.Length; i++)
@@ -203,9 +217,25 @@ namespace tarkin.ladders.bep
 
                 player.MovementContext.ExitOverridenState();
 
-                while (player.HandsController.IsInInteraction())
+                // O jogador está posicionado na escada e fora do ApproachState (StateLocksInventory liberado).
+                // Inicia o desarmamento limpo e nativo (padrão BTR).
+                player.HideWeapon();
+
+                float waitEmptyTimer = 0f;
+                while (!player.HandsIsEmpty)
                 {
                     cToken.ThrowIfCancellationRequested();
+                    waitEmptyTimer += Time.deltaTime;
+                    if (waitEmptyTimer > 1.2f)
+                    {
+                        try { player.FastForwardCurrentOperations(); } catch { }
+                    }
+                    if (waitEmptyTimer > 1.8f)
+                    {
+                        Plugin.Logger.LogWarning("[PlayerLadderController] Desarmamento excedeu 1.8s, acionando ForceResetToEmptyHands defensivo...");
+                        ForceResetToEmptyHands(player);
+                        break;
+                    }
                     await Task.Yield();
                 }
 
@@ -217,11 +247,6 @@ namespace tarkin.ladders.bep
                     await Task.Yield();
                 }
 
-                while (!player.HandsIsEmpty)
-                {
-                    cToken.ThrowIfCancellationRequested();
-                    await Task.Yield();
-                }
                 player.ChangeSpeed(1000);
             }
             catch (OperationCanceledException)
@@ -308,7 +333,7 @@ namespace tarkin.ladders.bep
             float rungPhase = (currentHeight % ladder.RungSpacing) / ladder.RungSpacing;
             float rungSpeedFactor = 1f - RungSpeedVariation * Mathf.Cos(rungPhase * Mathf.PI * 2f);
 
-            float inventoryWeightFactor = Mathf.Clamp01(Mathf.InverseLerp(20, 60, player.InventoryController.TotalWeight()));
+            float inventoryWeightFactor = cachedInventoryWeightFactor;
 
             bool isMoving = Mathf.Abs(inputDir) > 0.05f;
             float drainRate = isMoving ? ClimbStaminaDrainRate * Mathf.Lerp(1f, 2f, inventoryWeightFactor) : HoldStaminaDrainRate;
@@ -363,11 +388,15 @@ namespace tarkin.ladders.bep
             player.InputDirection = new Vector2(0, 1f); // checked separately
             player.MovementContext.MovementDirection_1 = new Vector2(0, 1f); // checked separately (not using public setter because that does something to animator)
 
-            if (player.MovementContext.TryVaulting())
+            try
             {
-                return true;
+                Patch_ObstacleCalculatorModel_DistanceToMainObstacle.OverrideVaultObstacleDistance = true;
+                return player.MovementContext.TryVaulting();
             }
-            return false;
+            finally
+            {
+                Patch_ObstacleCalculatorModel_DistanceToMainObstacle.OverrideVaultObstacleDistance = false;
+            }
         }
 
         bool TryExit(float currentHeight, float moveDir)
@@ -428,6 +457,82 @@ namespace tarkin.ladders.bep
             }
         }
 
+        private static void ForceResetToEmptyHands(Player player)
+        {
+            if (player == null) return;
+            try
+            {
+                if (player.HandsController != null && !(player.HandsController is Player.EmptyHandsController))
+                {
+                    player.DestroyController();
+                }
+
+                if (player.InventoryController is TraderControllerClass traderController && traderController.List_0 != null && traderController.List_0.Count > 0)
+                {
+                    var stuckEvents = traderController.List_0.Where(x => x is GEventArgs10 || x is GEventArgs9).ToArray();
+                    foreach (var evt in stuckEvents)
+                    {
+                        try { traderController.RemoveActiveEvent(evt); } catch { }
+                    }
+                }
+
+                player.ProcessStatus = Player.EProcessStatus.None;
+
+                if (!player.HandsIsEmpty)
+                {
+                    try
+                    {
+                        player.SetEmptyHands(null);
+                    }
+                    catch (Exception ex)
+                    {
+                        Plugin.Logger.LogWarning($"[PlayerLadderController] SetEmptyHands on ForceReset: {ex.Message}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Plugin.Logger.LogWarning($"[PlayerLadderController] ForceResetToEmptyHands: {ex.Message}");
+            }
+        }
+
+        private static void EnsureHandsReadyForEquip(Player player)
+        {
+            if (player == null) return;
+
+            try
+            {
+                // 1. Avança qualquer estado pendente do controller de mãos atual
+                try { player.FastForwardCurrentOperations(); } catch { }
+
+                // 2. Limpa quaisquer eventos travados de troca de arma na lista ativa do InventoryController
+                if (player.InventoryController is TraderControllerClass traderController && traderController.List_0 != null && traderController.List_0.Count > 0)
+                {
+                    var stuckEvents = traderController.List_0.Where(x => x is GEventArgs10 || x is GEventArgs9).ToArray();
+                    if (stuckEvents.Length > 0)
+                    {
+                        Plugin.Logger.LogWarning($"[PlayerLadderController] Limpando {stuckEvents.Length} evento(s) pendente(s) de inventário antes de equipar.");
+                        foreach (var evt in stuckEvents)
+                        {
+                            try { traderController.RemoveActiveEvent(evt); } catch { }
+                        }
+                    }
+                }
+
+                // 3. Normaliza o status de processo do jogador
+                // Se o ProcessStatus estiver preso em Scheduled ou Internal, o EFT rejeita novos comandos de arma
+                if (player.ProcessStatus != Player.EProcessStatus.None)
+                {
+                    Plugin.Logger.LogWarning($"[PlayerLadderController] Normalizando ProcessStatus ({player.ProcessStatus} -> None).");
+                    player.ProcessStatus = Player.EProcessStatus.None;
+                }
+            }
+            catch (Exception ex)
+            {
+                Plugin.Logger.LogWarning($"[PlayerLadderController] EnsureHandsReadyForEquip: {ex.Message}");
+            }
+        }
+
         private static void SafeRestoreWeapon(Player player)
         {
             if (player == null || player.HealthController == null || !player.HealthController.IsAlive)
@@ -441,28 +546,42 @@ namespace tarkin.ladders.bep
             float timeout = 3.0f;
             float elapsed = 0f;
 
-            // ref: AUD-01-09 Aguarda o término de qualquer vaulting, desarmamento prévio (HandsIsEmpty) e animações pendentes
+            // Aguarda o término de qualquer vaulting ou interação em andamento
             while (player != null && elapsed < timeout)
             {
                 bool isVaulting = player.MovementContext != null && player.MovementContext.PlayerAnimatorGetIsVaulting();
                 bool isHandsInteracting = player.HandsController != null && player.HandsController.IsInInteraction();
-                bool isWaitingEmptyHands = !player.HandsIsEmpty && player.IsInBufferZone;
 
-                if (!isVaulting && !isHandsInteracting && !isWaitingEmptyHands)
+                if (!isVaulting && !isHandsInteracting)
                     break;
 
                 elapsed += Time.deltaTime;
                 yield return null;
             }
 
-            // Respiro adicional de 1 frame para garantir que a fila de operações do servidor Fika processou o ack do desarmamento
+            // Respiro adicional de 1 frame para estabilização de físicas/animação
             yield return null;
 
             if (player == null || player.HealthController == null || !player.HealthController.IsAlive)
                 yield break;
 
             player.IsInBufferZone = false;
-            player.TrySetLastEquippedWeapon();
+
+            // Garante que o status do Player e os eventos do InventoryController estejam limpos antes de equipar
+            EnsureHandsReadyForEquip(player);
+
+            player.TrySetLastEquippedWeapon(true, result =>
+            {
+                if (result.Failed)
+                {
+                    Plugin.Logger.LogWarning($"[PlayerLadderController] Falha inicial ao equipar arma ({result.Error}). Tentando recuperação com SetFirstAvailableItem...");
+                    if (player != null && player.HealthController != null && player.HealthController.IsAlive)
+                    {
+                        EnsureHandsReadyForEquip(player);
+                        player.SetFirstAvailableItem(_ => { });
+                    }
+                }
+            });
         }
 
         void OnDestroy()
@@ -477,7 +596,6 @@ namespace tarkin.ladders.bep
 
             Patch_Physical_CanClimb.OverrideCanClimb = false;
             Patch_Physical_CanVault.OverrideCanVault = false;
-            Patch_ObstacleCalculatorModel_DistanceToMainObstacle.OverrideVaultObstacleDistance = false;
 
             proceduralBody?.Dispose();
 

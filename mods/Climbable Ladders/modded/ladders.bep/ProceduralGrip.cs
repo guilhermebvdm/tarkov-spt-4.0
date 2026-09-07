@@ -200,12 +200,11 @@ namespace tarkin.ladders.bep
             {
                 Finger finger = _fingers[i];
                 float curlAngle = Mathf.Lerp(finger.MinCurl, finger.MaxCurl, t);
+                Quaternion curlRotation = Quaternion.AngleAxis(curlAngle, _bendAxis);
 
-                foreach (FingerJoint joint in finger.Joints)
-                {
-                    Quaternion curlRotation = Quaternion.AngleAxis(curlAngle, _bendAxis);
-                    _fingerRotations[joint.Index] = joint.RestRotation * curlRotation;
-                }
+                if (finger.Base != null) _fingerRotations[finger.Base.Index] = finger.Base.RestRotation * curlRotation;
+                if (finger.Mid != null) _fingerRotations[finger.Mid.Index] = finger.Mid.RestRotation * curlRotation;
+                if (finger.Tip != null) _fingerRotations[finger.Tip.Index] = finger.Tip.RestRotation * curlRotation;
             }
         }
 

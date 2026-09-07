@@ -8,10 +8,56 @@ Memória cronológica de sessões de desenvolvimento, auditoria e manutenção t
 
 - **Versão:** 
   - `tarkin.ladders.shared.dll` $\rightarrow$ **1.0.4**
-  - `tarkin.ladders.bep.dll` $\rightarrow$ **1.0.5**
-  - `tarkin.ladders.fika.dll` $\rightarrow$ **1.1.1** (unificado nativamente com o `TRL-FikaSync-ClimbableLadders`)
-- **Arquitetura:** Interceptação da física do jogador via `Patch_Physical` com isolamento de instância (`MainPlayer.Physical`), controle de estado via `PlayerLadderController` com restauração assíncrona defensiva de armas (`RestoreWeaponWhenReady` aguardando `HandsIsEmpty` e término de vaulting), rig procedural de mãos com FinalIK (`ProceduralGrip`), sincronização em rede Fika em 3 camadas por `NetId` (`ObservedPlayerLadderController` / `FikaHandler`) e integração nativa com o sistema de Vaulting da BSG (`Patch_VaultingComponent`).
-- **Documentação:** Modular completa em `docs/` (6 artigos técnicos + README + Relatório de Auditoria 01 com 9 achados 100% sanados).
+  - `tarkin.ladders.bep.dll` $\rightarrow$ **1.0.7**
+  - `tarkin.ladders.fika.dll` $\rightarrow$ **1.1.3** (compatibilidade nativa com FIKA modded v2.3.11)
+- **Arquitetura:** Interceptação da física do jogador via `Patch_Physical` com isolamento de instância (`MainPlayer.Physical`), controle de estado via `PlayerLadderController` com restauração assíncrona defensiva de armas (`RestoreWeaponWhenReady`), ciclo de vida de cenas Release corrigido (`LaddersLoader`), rig procedural de mãos com FinalIK (`ProceduralGrip`) com alocação zero no hot path, sincronização em rede Fika nativa sem reflection (`IFikaNetworkManager.UnregisterPacket<T>()`), contenção de flags de vaulting com `try/finally` e registro estático com teardown entre raids (`Ladder.ClearRegistry()`).
+- **Documentação:** Modular completa em `docs/` (6 artigos técnicos + README + Relatórios de Auditoria 01 e 02 + Relatório de Code Review 02).
+
+---
+
+## 2026-09-03 (GMT-3) — Sessão 4: Resolução dos Achados AUD-02-01 a AUD-02-07 e Code Review 02
+
+- **Implementação dos Achados da Auditoria Técnica 02 (`/code-mod`)**:
+  - **`AUD-02-01` & `AUD-02-06` (Cenas e Registry)**:
+    - Em `LaddersLoader.cs`, substituído `#elif RELEASE` por `#else` garantindo descarregamento assíncrono de cenas aditivas em Release (`SceneManager.UnloadSceneAsync`).
+    - Adicionado método estático `Ladder.ClearRegistry()` invocado em `LaddersLoader.Unload()`.
+  - **`AUD-02-02` (Transform)**:
+    - Em `ProxyTransformModifierByPath.cs`, gravado `localPosition` e `localRotation` na captura para garantir simetria exata na restauração de objetos de cena.
+  - **`AUD-02-03` (Zero-Alloc Hot Path)**:
+    - Em `ProceduralGrip.cs`, `SetCurl` modificado para aplicar rotações diretamente em `finger.Base`, `Mid` e `Tip`, eliminando 10 alocações de `IEnumerator` por frame no `LateUpdate()`.
+  - **`AUD-02-04` & `AUD-02-05` (Vaulting e CPU)**:
+    - Em `PlayerLadderController.cs`, `OverrideVaultObstacleDistance` isolado com `try / finally` exclusivamente dentro de `TryVaultingFakeForwardInput()`, removendo ativação contínua em `Init()` e `OnDestroy()`.
+    - Cache do fator de peso `cachedInventoryWeightFactor` no `Init()`, eliminando chamadas recursivas a `InventoryController.TotalWeight()` a cada frame em `Update()`.
+  - **`AUD-02-07` & Modernização FIKA Modded**:
+    - Em `FikaHandler.cs`, proteção contra `InvalidOperationException` em `AllPlayersEverExisted` via `try / catch`.
+    - Substituída Reflection sobre `_packetProcessor` pelo método oficial `manager.UnregisterPacket<T>()` nativo do FIKA modded v2.3.11.
+  - **Versionamento SemVer (Gemini)**:
+    - `tarkin.ladders.bep`: `1.0.6` $\rightarrow$ `1.0.7` (`Plugin.cs` e `.csproj`).
+    - `tarkin.ladders.fika`: `1.1.2` $\rightarrow$ `1.1.3` (`Plugin.cs`, `.csproj` e dependência `com.tarkin.ladders` atualizada para `"1.0.7"`).
+  - **Build & Compilação**:
+    - Compilação da Solution em `Release` com **0 erros e 0 avisos** (isolamento estrito preservado).
+- **Code Review Crítico (`/code-review`)**:
+  - Relatório formal gerado em `docs/relatorio-code-review-02.md`: **0 Bloqueadores**, **0 Fortes**, **0 Médios**, **0 Menores** — **Aprovado para Produção**.
+
+---
+
+## 2026-09-03 (GMT-3) — Sessão 3: Fix do Bug de "Busy Hands" na Primeira Subida da Raid (CR-01-01 a CR-01-03)
+
+- **Correção da Dessincronização da FSM de Mãos (`/code-mod`)**:
+  - **`CR-01-01` (Prevenção no Frame Zero & Transição)**:
+    - No `Init()`, solta gatilho residual (`SetTriggerPressed(false)`), executa `player.HideWeapon()` e dispara imediatamente `player.FastForwardCurrentOperations()`.
+    - No `Transition()`, garante avanço prévio antes de aplicar o `ApproachState` no `MovementContext`, prevenindo que a sobreposição de animators engula o evento de animação de coldre da arma na primeira subida (cold cache).
+    - Watchdogs com teto de 0.5s nos loops assíncronos `while (player.HandsController.IsInInteraction())` e `while (!player.HandsIsEmpty)` com fallback via `FastForwardCurrentOperations()`.
+  - **`CR-01-02` (Restauração Resiliente)**:
+    - Em `RestoreWeaponWhenReady`, caso o controlador ainda acuse interação ou não seja `EmptyHandsController` após a saída da escada, força `FastForwardCurrentOperations()` antes de chamar `TrySetLastEquippedWeapon()`.
+    - Callback assíncrono com checagem de sobrevivência (`player.HealthController.IsAlive`) e retry defensivo.
+  - **`CR-01-03` (Higiene de Logs)**:
+    - Logs informativos e de depuração migrados para `Plugin.Logger.LogDebug` e `LogWarning`.
+  - **Versionamento SemVer (Gemini)**:
+    - `tarkin.ladders.bep`: `1.0.5` $\rightarrow$ `1.0.6` (`Plugin.cs` e `.csproj`).
+    - `tarkin.ladders.fika`: `1.1.1` $\rightarrow$ `1.1.2` (`Plugin.cs`, `.csproj` e BepInDependency).
+  - **Build & Compilação**:
+    - Build da solução `ladders.sln` em `Release` com **0 erros e 0 avisos** (isolamento preservado em `bin/Release/`).
 
 ---
 

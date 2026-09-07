@@ -74,8 +74,8 @@ namespace tarkin.ladders.shared
                 {
                     originalStates.Add(target, new TransformData
                     {
-                        localPos = target.transform.position,
-                        localRot = target.transform.rotation,
+                        localPos = target.transform.localPosition,
+                        localRot = target.transform.localRotation,
                         localScale = target.transform.localScale
                     });
                 }

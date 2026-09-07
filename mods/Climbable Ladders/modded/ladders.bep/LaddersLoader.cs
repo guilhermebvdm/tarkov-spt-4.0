@@ -1,9 +1,10 @@
-﻿using EFT;
+using EFT;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using tarkin.ladders.shared;
 
 namespace tarkin.ladders.bep
 {
@@ -70,12 +71,14 @@ namespace tarkin.ladders.bep
             {
 #if DEBUG
                 SceneManager.UnloadScene(scene); // unsafe apparently (unity docs say so), but required for hot reload
-#elif RELEASE
+#else
                 SceneManager.UnloadSceneAsync(scene);
 #endif
             }
             if (sceneBundle != null)
                 sceneBundle.Unload(false);
+
+            Ladder.ClearRegistry();
         }
 
         public void Dispose()

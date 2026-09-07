@@ -16,6 +16,7 @@ namespace tarkin.ladders.shared
 #endif
     {
         public static bool TryGetLadderInstanceByNetId(string netId, out Ladder ladder) => registry.TryGetValue(netId, out ladder);
+        public static void ClearRegistry() => registry.Clear();
         private static Dictionary<string, Ladder> registry = new Dictionary<string, Ladder>();
 
         public string NetId => gameObject.name;

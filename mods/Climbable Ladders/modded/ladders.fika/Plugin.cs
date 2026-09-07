@@ -5,10 +5,10 @@ using UnityEngine;
 
 namespace tarkin.ladders.fika
 {
-    [BepInPlugin("com.tarkin.ladders.fika", "tarkin.ladders.fika", "1.1.1")]
+    [BepInPlugin("com.tarkin.ladders.fika", "tarkin.ladders.fika", "1.1.3")]
     [BepInDependency("com.fika.core", BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency("com.tarkin.ladders", BepInDependency.DependencyFlags.HardDependency)]
-    [BepInDependency("com.tarkin.ladders", "1.0.5")]
+    [BepInDependency("com.tarkin.ladders", "1.0.7")]
     public class Plugin : BaseUnityPlugin
     {
         public static new ManualLogSource Logger { get; private set; }

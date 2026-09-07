@@ -1,4 +1,4 @@
-﻿using EFT;
+using EFT;
 using HarmonyLib;
 using SPT.Reflection.Patching;
 using System.Reflection;
@@ -29,7 +29,7 @@ namespace tarkin.ladders.bep
             if (ladder == null)
                 return true;
 
-            if (owner.Player.IsInBufferZone) // this is the value I'm using to determine if on ladder
+            if (owner.Player.IsInBufferZone || owner.Player.GetComponent<PlayerLadderController>() != null) // this is the value I'm using to determine if on ladder
                 return false;
 
             Vector3 playerForward = owner.Player.PlayerBones.BodyTransform.forward;

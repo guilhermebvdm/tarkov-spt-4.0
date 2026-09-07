@@ -89,16 +89,23 @@ namespace tarkin.ladders.fika
                 }
             }
 
-            // 3. Fallback: Varredura em AllPlayersEverExisted
+            // 3. Fallback: Varredura em AllPlayersEverExisted com proteção de concorrência
             var allPlayers = gameWorld.AllPlayersEverExisted;
             if (allPlayers != null)
             {
-                foreach (var p in allPlayers)
+                try
                 {
-                    if (p is FikaPlayer fp && fp.NetId == netId && !fp.IsYourPlayer)
+                    foreach (var p in allPlayers)
                     {
-                        return fp;
+                        if (p is FikaPlayer fp && fp.NetId == netId && !fp.IsYourPlayer)
+                        {
+                            return fp;
+                        }
                     }
+                }
+                catch (InvalidOperationException)
+                {
+                    // Proteção contra modificação da coleção durante spawn concorrente
                 }
             }
 
@@ -163,28 +170,16 @@ namespace tarkin.ladders.fika
 
         void UnregisterPackets(IFikaNetworkManager manager)
         {
-            NetPacketProcessor packetProcessor = GetPacketProcessor(manager);
-            if (packetProcessor == null)
-                return;
-
-            packetProcessor.RemoveSubscription<LadderStatePacket>();
-            packetProcessor.RemoveSubscription<BarAnglePacket>();
-        }
-
-        private static FieldInfo _cachedPacketProcessorField;
-
-        public static NetPacketProcessor GetPacketProcessor(IFikaNetworkManager manager = null)
-        {
-            manager ??= Singleton<IFikaNetworkManager>.Instance;
-            if (manager == null) return null;
-
-            // ref: AUD-01-05 Reflection com cache estático
-            if (_cachedPacketProcessorField == null)
+            if (manager == null) return;
+            try
             {
-                _cachedPacketProcessorField = AccessTools.Field(manager.GetType(), "_packetProcessor");
+                manager.UnregisterPacket<LadderStatePacket>();
+                manager.UnregisterPacket<BarAnglePacket>();
             }
-
-            return _cachedPacketProcessorField?.GetValue(manager) as NetPacketProcessor;
+            catch (Exception ex)
+            {
+                Plugin.Logger.LogWarning($"[FikaHandler] Erro ao desregistrar pacotes: {ex.Message}");
+            }
         }
 
         public void Dispose()

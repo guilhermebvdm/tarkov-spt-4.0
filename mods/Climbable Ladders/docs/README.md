@@ -15,6 +15,7 @@ Este diretório reúne a documentação técnica, arquitetural e funcional compl
 | [05. Patches Harmony e Integração com EFT](05-patches-harmony-e-integracao-com-eft.md) | Patches Harmony (`GetAvailableActions`, `TranslateAxes`, `CanClimb`, `CanVault`, `DistanceToMainObstacle`), integração com Vaulting e tabela de remapeamento de obfuscação. | 🟢 Vivo |
 | [06. Suporte Multiplayer Coop (Fika)](06-suporte-multiplayer-coop-fika.md) | Arquitetura de replicação de rede no Fika Core, pacotes (`LadderStatePacket`, `BarAnglePacket`), rastreador local e controlador observador remoto (`ObservedPlayerLadderController`). | 🟢 Vivo |
 | [Relatório de Auditoria Técnica de Código (Review 01)](relatorio-auditoria-codigo-01.md) | Auditoria estática detalhada, memory leaks de trackers, efeitos colaterais de flags estáticas, raycasts de física e comparação com TRL-FikaSync. | 🟢 Vivo |
+| [Relatório de Auditoria Técnica de Código (Review 02)](relatorio-auditoria-codigo-02.md) | Vazamento de cena em Release (#elif RELEASE), corrupção de coordenadas em proxy, GC pressure em dedos e efeitos colaterais em vaulting. | 🟢 Vivo |
 
 ---
 
