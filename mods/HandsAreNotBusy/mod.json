@@ -1,0 +1,11 @@
+{
+  "name": "HandsAreNotBusy",
+  "upstream_url": "https://github.com/Lacyway/HandsAreNotBusy.git",
+  "upstream_sha": "4f3616242f1671fa4f42e7881a185a9e50570f6a",
+  "upstream_branch": "1.6",
+  "forge_url": "https://github.com/Lacyway/HandsAreNotBusy/releases/tag/1.6",
+  "license": "see LICENSE.md",
+  "version_base": "1.6.0",
+  "spt_version": "4.0.13",
+  "created_at": "2026-09-04T23:26:00Z"
+}
