@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="MagCheckInterrupt/MagCheckInterrupt.csproj" />
+  <Project Path="MagCheckInterrupt.Net/MagCheckInterrupt.Net.csproj" />
+</Solution>

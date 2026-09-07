@@ -1,0 +1,45 @@
+<Project>
+  <PropertyGroup>
+    <!-- Paths -->
+    <SolutionName>"MagCheckInterrupt"</SolutionName>
+    <SPTPath Condition=" '$(SPTPath)' == '' ">$(SolutionDir)..\..\</SPTPath>
+    <FikaHeadPath Condition=" '$(FikaPath)' == '' ">$(SolutionDir)..\..\..\SPTarkov.4.00-Fika-Headless\</FikaHeadPath>
+    <FikaClientPath Condition=" '$(FikaPath)' == '' ">$(SolutionDir)..\..\..\SPTarkov.4.00-Fika-Client\</FikaClientPath>
+    <Fika>true</Fika>
+  </PropertyGroup>
+
+  <Target Name="CopyOutput" AfterTargets="Build">
+    <!-- To SPT Dir -->
+    <Copy SourceFiles="@(ModRoot)" DestinationFolder="$(SPTPath)$(DestDir)" Condition="@(ModRoot.Count) != 0" />
+    <Copy SourceFiles="@(PDB)" DestinationFolder="$(SPTPath)$(DestDir)" Condition="'$(Configuration)' == 'Debug' AND @(PDB.Count) != 0" />
+    <Copy SourceFiles="@(Config)" DestinationFolder="$(SPTPath)$(DestDir)\config\%(RecursiveDir)" Condition="@(Config.Count) != 0" />
+    <Copy SourceFiles="@(Bundles)" DestinationFolder="$(SPTPath)$(DestDir)\bundles\%(RecursiveDir)" Condition="@(Bundles.Count) != 0" />
+
+    <!-- Release -->
+    <Copy
+      SourceFiles="@(ModRoot)"
+      DestinationFolder="$(SolutionDir)Dist\$(SolutionName)\$(DestDir)"
+      Condition="'$(Configuration)' == 'Release' AND @(ModRoot.Count) != 0" />
+    <Copy
+      SourceFiles="@(Config)"
+      DestinationFolder="$(SolutionDir)Dist\$(Authors)-$(RootNamespace)\$(DestDir)\config\%(RecursiveDir)"
+      Condition="'$(Configuration)' == 'Release' AND @(Config.Count) != 0" />
+    <Copy
+      SourceFiles="@(Bundles)"
+      DestinationFolder="$(SolutionDir)Dist\$(Authors)-$(RootNamespace)\$(DestDir)\bundles\%(RecursiveDir)"
+      Condition="'$(Configuration)' == 'Release' AND @(Bundles.Count) != 0" />
+    <ZipDirectory
+      SourceDirectory="$(SolutionDir)Dist\$(SolutionName)"
+      DestinationFile="$(SolutionDir)Dist\$(Authors)-$(RootNamespace)-$(Version).zip"
+      Overwrite="true"
+      Condition="'$(Configuration)' == 'Release'" />
+  </Target>
+
+  <Target Name="CopyOutputToFika" AfterTargets="Build" Condition="'$(Fika)' == 'true'">
+    <!-- To Fika Dir -->
+    <Copy SourceFiles="@(ModRoot)" DestinationFolder="$(FikaHeadPath)$(DestDir)" Condition="@(ModRoot.Count) != 0" />
+    <Copy SourceFiles="@(ModRoot)" DestinationFolder="$(FikaClientPath)$(DestDir)" Condition="@(ModRoot.Count) != 0" />
+    <Copy SourceFiles="@(PDB)" DestinationFolder="$(FikaHeadPath)$(DestDir)" Condition="'$(Configuration)' == 'Debug' AND @(PDB.Count) != 0" />
+    <Copy SourceFiles="@(PDB)" DestinationFolder="$(FikaClientPath)$(DestDir)" Condition="'$(Configuration)' == 'Debug' AND @(PDB.Count) != 0" />
+  </Target>
+</Project>

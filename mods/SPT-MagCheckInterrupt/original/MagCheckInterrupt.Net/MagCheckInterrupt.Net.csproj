@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>preview</LangVersion>
+    <Version>1.0.2</Version>
+    <Authors>ozen</Authors>
+    <RepositoryUrl>https://github.com/ozen-m/SPT-MagCheckInterrupt</RepositoryUrl>
+    <RootNamespace>MagCheckInterrupt.Net</RootNamespace>
+    <AssemblyName>$(Authors)-$(RootNamespace)</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="Fika.Core">
+      <HintPath>..\references\Fika.Core.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <Target Name="SetOutput" AfterTargets="Build">
+    <PropertyGroup>
+      <DestDir>BepInEx\plugins\</DestDir>
+    </PropertyGroup>
+    <ItemGroup>
+      <ModRoot Include="$(TargetPath)" />
+    </ItemGroup>
+  </Target>
+</Project>
