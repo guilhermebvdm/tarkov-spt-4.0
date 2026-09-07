@@ -1,0 +1,118 @@
+//
+// Copyright (c) 2026 7Bpencil
+//
+// This source code is licensed under the MIT license found in the
+// LICENSE file in the root directory of this source tree.
+//
+
+using UnityEngine;
+
+namespace RuntimeHandle
+{
+    public class ScalePlane : HandleBase
+    {
+        private const float SIZE = 2;
+
+		private Transform _transformHandle;
+		private IScaleAxisHandle _handle;
+        private Vector3 _axis1;
+        private Vector3 _axis2;
+        private Vector3 _perp;
+		private Transform _plane;
+        private float _startOffsetLength;
+
+        private ScaleAxis _axis1Handle;
+        private ScaleAxis _axis2Handle;
+
+        public ScalePlane Initialize(
+			Transform transformHandle,
+			Transform scaleHandle,
+			IScaleAxisHandle handle,
+			ScaleAxis axis1,
+			ScaleAxis axis2,
+			Vector3 perp,
+			Color color,
+			Shader handleShader)
+        {
+			_transformHandle = transformHandle;
+			_handle = handle;
+            _axis1 = axis1.Axis;
+            _axis2 = axis2.Axis;
+            _perp = perp;
+
+            _axis1Handle = axis1;
+            _axis2Handle = axis2;
+
+            Init(handleShader, color);
+
+            transform.SetParent(scaleHandle, false);
+
+			{
+	            var o = new GameObject("Plane");
+	            o.transform.SetParent(transform, false);
+	            o.transform.localRotation = Quaternion.FromToRotation(Vector3.up, _perp);
+	            o.transform.localPosition = _axis1 + _axis2;
+	            o.AddComponent<MeshRenderer>().material = _material;
+	            o.AddComponent<MeshFilter>().mesh = MeshUtils.CreateBox(0.02f, 0.25f, 0.25f);
+	            o.AddComponent<MeshCollider>();
+				_plane = o.transform;
+			}
+
+            return this;
+        }
+
+		public override bool CanInteract(Vector3 hitPoint)
+		{
+			return true;
+		}
+
+        public override void Interact(Ray cameraRay)
+        {
+            var (position, hitPoint) = GetPlaneHitPoint(cameraRay, _transformHandle, _perp);
+            var offset = hitPoint - position;
+            var offsetLength = offset.magnitude;
+            var scale = offsetLength / _startOffsetLength;
+
+			_handle.SetScale(scale);
+
+            SetHandlesVisualScale(scale);
+        }
+
+        public override void StartInteraction(Ray cameraRay)
+        {
+            var (position, hitPoint) = GetPlaneHitPoint(cameraRay, _transformHandle, _perp);
+            var offset = hitPoint - position;
+
+            _startOffsetLength = offset.magnitude;
+			_handle.OnStartInteraction();
+
+            SetHandlesVisualScale(1);
+            SetHandlesInteractionColor();
+        }
+
+        public override void EndInteraction()
+        {
+            SetHandlesVisualScale(1);
+            SetHandlesDefaultColor();
+        }
+
+        public void SetHandlesVisualScale(float scale)
+        {
+            _plane.localPosition = (_axis1 + _axis2) * (0.5f * SIZE * scale);
+            _axis1Handle.SetHandleVisualScale(scale);
+            _axis2Handle.SetHandleVisualScale(scale);
+        }
+
+        public void SetHandlesInteractionColor()
+        {
+            _axis1Handle.SetInteractionColor();
+            _axis2Handle.SetInteractionColor();
+        }
+
+        public void SetHandlesDefaultColor()
+        {
+            _axis1Handle.SetDefaultColor();
+            _axis2Handle.SetDefaultColor();
+        }
+	}
+}
