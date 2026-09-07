@@ -3,14 +3,11 @@ using System;
 
 namespace TRLFixes
 {
-    // SoftDependency do FIKA: o FixFikaReviveRagdollPatch resolve o tipo do FIKA por NOME
-    // (AccessTools.TypeByName). Sem declarar a dependência, a ordem de carga do BepInEx é
-    // indeterminada — se este plugin subir antes do FIKA o tipo não resolve, o patch é dispensado
-    // e o log diz "FIKA nao detectado". Falha SILENCIOSA disfarçada de "FIKA não instalado", que
-    // custaria uma sessão de teste inteira. Soft = ordena a carga se presente, não exige.
-    // GUID confirmado: fika-plugin/Fika.Core/FikaPlugin.cs:40. Mesmo padrão de DiscordRaidMap e MOAR-Client.
-    [BepInPlugin("com.trl.fixes", "TRL Fixes", "1.4.0")]
-    [BepInDependency("com.fika.core", BepInDependency.DependencyFlags.SoftDependency)]
+    // TRL Fixes v1.5.0: Correções essenciais de IA, combate e estabilidade do jogo base EFT.
+    // Nota: Patches específicos do FIKA (inventário, revive, slot views, UI main thread, empty hands)
+    // foram graduados e integrados nativamente ao código-fonte do FIKA v2.3.10, eliminando
+    // double-patching e interceptações redundantes via Harmony.
+    [BepInPlugin("com.trl.fixes", "TRL Fixes", "1.5.0")]
     public class Plugin : BaseUnityPlugin
     {
         public static BepInEx.Logging.ManualLogSource Log;
@@ -18,17 +15,7 @@ namespace TRLFixes
         private void Awake()
         {
             Log = Logger;
-            Logger.LogInfo("TRL-Fixes: Carregando patches...");
-
-            try
-            {
-                new Patches.FikaInventoryDesyncSafetyPatch().Enable();
-                Logger.LogInfo("TRL-Fixes: FikaInventoryDesyncSafetyPatch ativado com sucesso.");
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError($"TRL-Fixes: Falha ao carregar FikaInventoryDesyncSafetyPatch: {ex.Message}");
-            }
+            Logger.LogInfo("TRL-Fixes: Carregando patches do jogo base e IA...");
 
             try
             {
@@ -48,16 +35,6 @@ namespace TRLFixes
             catch (Exception ex)
             {
                 Logger.LogError($"TRL-Fixes: Falha ao carregar FlashbangRadiusPatch: {ex.Message}");
-            }
-
-            try
-            {
-                new Patches.FixFikaReviveRagdollPatch().Enable();
-                Logger.LogInfo("TRL-Fixes: FixFikaReviveRagdollPatch ativado com sucesso.");
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError($"TRL-Fixes: Falha ao carregar FixFikaReviveRagdollPatch: {ex.Message}");
             }
 
             try
@@ -82,43 +59,12 @@ namespace TRLFixes
 
             try
             {
-                new Patches.FikaMainThreadUISafetyPatch().Enable();
-                Logger.LogInfo("TRL-Fixes: FikaMainThreadUISafetyPatch ativado com sucesso.");
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError($"TRL-Fixes: Falha ao carregar FikaMainThreadUISafetyPatch: {ex.Message}");
-            }
-
-            try
-            {
-                new Patches.FikaProceedEmptyHandsSafetyPatch().Enable();
-                Logger.LogInfo("TRL-Fixes: FikaProceedEmptyHandsSafetyPatch ativado com sucesso.");
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError($"TRL-Fixes: Falha ao carregar FikaProceedEmptyHandsSafetyPatch: {ex.Message}");
-            }
-
-            try
-            {
-                new Patches.FikaRefreshSlotViewsSafetyPatch().Enable();
-                Logger.LogInfo("TRL-Fixes: FikaRefreshSlotViewsSafetyPatch ativado com sucesso.");
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError($"TRL-Fixes: Falha ao carregar FikaRefreshSlotViewsSafetyPatch: {ex.Message}");
-            }
-
-            try
-            {
                 new Patches.BotMountWeaponFixPatch().Enable();
                 new Patches.GClass81ShallUseNowPatch().Enable();
                 new Patches.BotStationaryWeaponDataMethod4Patch().Enable();
                 new Patches.BotStationaryWeaponDataDropCurWeaponPatch().Enable();
-                new Patches.FikaPlayerOperateStationaryWeaponPatch().Enable();
                 new Patches.PlayerOperateStationaryWeaponPatch().Enable();
-                Logger.LogInfo("TRL-Fixes: BotMountWeaponFixPatch ativado com sucesso.");
+                Logger.LogInfo("TRL-Fixes: BotMountWeaponFixPatch (EFT Base) ativado com sucesso.");
             }
             catch (Exception ex)
             {

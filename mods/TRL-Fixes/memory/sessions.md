@@ -1,9 +1,9 @@
 # TRL-Fixes — Memória de Sessões
 
 ## Snapshot Delta
-- **Fork Ativo / Canônico:** `modded-V2-audit` (Release v1.4.0)
-- **Versão:** 1.4.0 (SPT 4.0 / FIKA)
-- **Estado:** Implementado FikaInventoryDesyncSafetyPatch em `modded-V2-audit` com reserva virtual de slots em QuickMove (prevenção de colisões concorrentes por Ctrl+Click rápido), auto-recuperação visual de grid em caso de rejeição de servidor ("is taken by another item" / GClass1543) com MainThreadDispatcher e proteção contra descarte de itens em fechamento de contêineres.
+- **Fork Ativo / Canônico:** `modded-V2-audit` (Release v1.5.0)
+- **Versão:** 1.5.0 (SPT 4.0 / EFT 0.16.9)
+- **Estado:** Desacoplados e arquivados todos os 6 patches relacionados ao FIKA (`FikaInventoryDesyncSafetyPatch`, `FixFikaReviveRagdollPatch`, `FikaProceedEmptyHandsSafetyPatch`, `FikaRefreshSlotViewsSafetyPatch`, `FikaMainThreadUISafetyPatch` e `FikaPlayerOperateStationaryWeaponPatch`), pois foram integrados e compilados nativamente no core do `FIKA modded v2.3.10`. O mod foi consolidado com foco 100% no jogo base EFT e IA, eliminando double-patching. Compilação Release com 0 Erros e 0 Avisos.
 - **Pendências:** 🟢 Nenhuma pendência blocker registrada.
 
 ---
@@ -169,3 +169,23 @@
    - Bump de versão SemVer para **v1.4.0** (`1.4.0.0`).
 3. **Validação de Build**:
    - Compilado `TRLFixes.csproj` (`TRL-Fixes.dll`) em Release com **0 Erros e 0 Avisos**.
+
+---
+
+## 2026-09-03 — Sessão 12: Desacoplamento dos Patches de FIKA e Graduação para o Core (v1.5.0)
+
+**Tema central:** Saneamento estrutural do `TRL-Fixes` para eliminar sobreposição e *double-patching* com o `FIKA modded v2.3.10`, que incorporou nativamente as 6 correções cooperativas.
+
+**Alterações Realizadas:**
+1. **Arquivamento dos Patches do FIKA:**
+   - Movidos 5 arquivos de patches exclusivos para `Patches/Deprecated-Fika/`: `FikaInventoryDesyncSafetyPatch.cs`, `FixFikaReviveRagdollPatch.cs`, `FikaMainThreadUISafetyPatch.cs`, `FikaProceedEmptyHandsSafetyPatch.cs` e `FikaRefreshSlotViewsSafetyPatch.cs`.
+   - Removido o sub-patch `FikaPlayerOperateStationaryWeaponPatch` de `BotMountWeaponFixPatch.cs` (a checagem de IA já é nativa no `FikaPlayer.cs`).
+2. **Saneamento do `Plugin.cs`:**
+   - Removidas as 6 invocações no `Awake()` e a dependência soft `[BepInDependency("com.fika.core")]`.
+   - Preservados 100% dos patches de IA, combate e estabilidade do jogo base EFT (`FlashbangBotPatch`, `FlashbangRadiusPatch`, `PickupAimingSafetyPatch`, `DynamicMapsSafetyPatch`, `BotMountWeaponFixPatch` EFT e `BotWeaponManagerSafetyPatch`).
+3. **Build e Configuração:**
+   - Atualizado `TRLFixes.csproj` com exclusão de `Patches/Deprecated-Fika/**` da compilação e bump de versão para **v1.5.0** (`1.5.0.0`).
+   - Sincronizados os fontes em `modded/` e `modded-V2-audit/`.
+   - Compilação Release finalizada com **0 Erros e 0 Avisos**.
+4. **Documentação:**
+   - Atualizados `README.md` e `CHANGELOG.md` documentando a graduação dos patches para o core do FIKA.

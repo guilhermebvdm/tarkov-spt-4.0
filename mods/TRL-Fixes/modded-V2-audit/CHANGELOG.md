@@ -2,6 +2,16 @@
 
 Versões mais recentes primeiro.
 
+## v1.5.0 (2026-09-03)
+
+### Desacoplamento e Graduação dos Patches de FIKA para o Core
+- **Graduação Nativa no `FIKA v2.3.10`**: Todos os 6 patches específicos do FIKA (`FixFikaReviveRagdollPatch`, `FikaInventoryDesyncSafetyPatch`, `FikaProceedEmptyHandsSafetyPatch`, `FikaRefreshSlotViewsSafetyPatch`, `FikaMainThreadUISafetyPatch` e `FikaPlayerOperateStationaryWeaponPatch`) foram integrados diretamente no código-fonte em C# do `Fika.Core.dll` e `FikaServer.dll`.
+- **Eliminação de Double-Patching**: No `TRL-Fixes`, esses patches foram arquivados em `Patches/Deprecated-Fika/` e excluídos do runtime e da compilação.
+- **Foco Estrito no Jogo Base e IA**: O `TRL-Fixes` agora opera de forma independente e enxuta, focado em estabilidade de inventário do EFT, patches de flashbang para IA do SAIN, proteção de menus e controle de armas estacionárias.
+- **SemVer Bump**: Atualizado para `1.5.0` (`Plugin.cs` e `TRLFixes.csproj`).
+
+---
+
 ## v1.4.0 (2026-08-31)
 
 ### Correções de Desync de Inventário, Itens Fantasmas e Quick-Move

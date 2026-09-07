@@ -5,10 +5,15 @@
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <!-- Manter em sincronia com a versão do [BepInPlugin] em Plugin.cs. Sem isto a DLL sai como 1.0.0.0 —
          e o Forge exige que todas as declarações de versão do mod batam exatamente. -->
-    <Version>1.4.0</Version>
-    <AssemblyVersion>1.4.0.0</AssemblyVersion>
-    <FileVersion>1.4.0.0</FileVersion>
+    <Version>1.5.0</Version>
+    <AssemblyVersion>1.5.0.0</AssemblyVersion>
+    <FileVersion>1.5.0.0</FileVersion>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Patches\Deprecated-Fika\**" />
+    <None Include="Patches\Deprecated-Fika\**" />
+  </ItemGroup>
 
   <ItemGroup>
     <Reference Include="Assembly-CSharp"><HintPath>References\Assembly-CSharp.dll</HintPath></Reference>
