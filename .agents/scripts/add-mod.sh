@@ -7,11 +7,15 @@ set -euo pipefail
 URL=""
 NAME=""
 FORGE=""
+TAG=""
+FORCE=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --name)  NAME="${2:-}"; shift 2 ;;
-    --forge) FORGE="${2:-}"; shift 2 ;;
+    --name)   NAME="${2:-}"; shift 2 ;;
+    --forge)  FORGE="${2:-}"; shift 2 ;;
+    --branch|--tag) TAG="${2:-}"; shift 2 ;;
+    --force)  FORCE=1; shift ;;
     -h|--help)
       sed -n '2,4p' "$0" | sed 's|^# \{0,1\}||'
       exit 0 ;;
@@ -26,6 +30,14 @@ done
 
 [[ -n "$URL" ]] || { echo "Erro: <git-url> é obrigatório" >&2; exit 1; }
 
+# Detecção automática se URL for do tipo releases/tag/<tag>
+if [[ "$URL" =~ /releases/tag/([^/]+)$ ]]; then
+  DETECTED_TAG="${BASH_REMATCH[1]}"
+  [[ -z "$TAG" ]] && TAG="$DETECTED_TAG"
+  URL="${URL%/releases/tag/*}"
+  [[ "$URL" != *.git ]] && URL="${URL}.git"
+fi
+
 # Inferir nome do repositório (basename sem .git)
 if [[ -z "$NAME" ]]; then
   NAME="$(basename "$URL" .git)"
@@ -35,15 +47,31 @@ ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 MOD_DIR="$ROOT/mods/$NAME"
 TPL="$ROOT/.agents/templates"
 
-[[ ! -e "$MOD_DIR" ]] || { echo "Erro: $MOD_DIR já existe" >&2; exit 1; }
+if [[ -e "$MOD_DIR" ]]; then
+  if [[ "$FORCE" -eq 1 ]]; then
+    echo "→ Removendo pasta existente de $MOD_DIR (--force)..."
+    rm -rf "$MOD_DIR"
+  else
+    echo "Erro: $MOD_DIR já existe. Use --force para sobrescrever." >&2
+    exit 1
+  fi
+fi
+
 [[ -f "$TPL/mod.json.tmpl" && -f "$TPL/mod-readme.md.tmpl" ]] \
   || { echo "Erro: templates ausentes em $TPL" >&2; exit 1; }
 
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 
-echo "→ Clonando $URL ..."
-git clone --depth=1 "$URL" "$TMP/clone" >/dev/null 2>&1 \
+CLONE_ARGS=("--depth=1")
+if [[ -n "$TAG" ]]; then
+  CLONE_ARGS+=("--branch" "$TAG")
+  echo "→ Clonando $URL (tag/branch: $TAG) ..."
+else
+  echo "→ Clonando $URL ..."
+fi
+
+git clone "${CLONE_ARGS[@]}" "$URL" "$TMP/clone" >/dev/null 2>&1 \
   || { echo "Erro: clone falhou ($URL)" >&2; exit 1; }
 
 SHA="$(git -C "$TMP/clone" rev-parse HEAD)"
