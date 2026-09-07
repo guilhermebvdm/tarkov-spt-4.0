@@ -2,21 +2,18 @@
 
 ## Estado atual
 
-> **Delta 2026-08-17 (Sessão 9):** ICM em **v1.13.5** no workspace [`modded-V3(review)`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-ImmersiveCombatMedicine/modded-V3%28review%29). Concluída a auditoria técnica exaustiva de 16 de 16 funcionalidades do mod (100% aprovadas e consolidadas em `revisao-geral-consolidada.md`), com formalização do [`reviews/code-review-05.md`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-ImmersiveCombatMedicine/reviews/code-review-05.md) (6 achados resolvidos, 0 bloqueadores). Principais entregas: (1) unificação arquitetural de namespaces sob `TRLImmersiveCombatMedicine.*` (`.Medical`, `.Trauma`, `.Helpers`, `.Fika`) e desambiguação de `global::Fika.Core`; (2) otimização estrita de GC (GC Alloc = 0) em loops de HUD (`BandAidUI.cs`) e validação corporal (`MedicalLogic.cs`); (3) governança de logs diagnósticos por toggles de debug no menu F12 do BepInEx (`ConfigDebugMedicLogs` e `ConfigDebugPhysicsLogs`); (4) eliminação de 10 warnings de analisador `Harmony003` com `ref DamageInfoStruct` em `HealthPatches.cs`; (5) verificação defensiva de mãos em `HandsStateGuard.cs` contra comidas/bebidas; (6) compilação limpa com 0 Erros e 0 Warnings com isolamento estrito de build.
+> **Delta 2026-09-05 (Sessão 10):** ICM em **v1.13.6** no workspace [`modded-V3(review)`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-ImmersiveCombatMedicine/modded-V3%28review%29). Estabilização de rede cooperativa no FIKA com registro antecipado de pacotes no Frame Zero (`FikaEventDispatcher.SubscribeEvent<FikaNetworkManagerCreatedEvent>`), eliminando risco de `ParseException: Undefined packet`. Interoperabilidade defensiva com `Climbable Ladders`: desalojamento e reset de voo/escada caso ocorra desmaio (`Blackout`) durante a subida de escadas de mão, permitindo que a gravidade atue e o jogador caia naturalmente ao solo. Compilação Release verde com 0 Erros e 0 Warnings.
 
-- Auditoria integral concluída: 16 relatórios detalhados (`revisao-item-01` a `revisao-item-16`) validados contra fontes canônicas (`references/eft-decompiled` EFT 0.16.9, `references/fika-plugin` FIKA 2.3.4, `references/spt-source` SPT 4.0.13).
-- Arquitetura de rede isolada em canal confiável (`ReliableUnordered` + magic header `TRLM`), eliminando conflitos de inventário no canal 0 e crashes de `ParseException`.
-- Cura e consumo com cálculo autoritativo 1:1 respeitando o saldo real do kit e regra canônica de desesterilização/cancelamento com perda de item após 1.0s.
-- GC zero-alloc garantido no loop quente de HUD/física e auditoria de memória em 2 fases via `TraumaPurge`.
-- Item 07 (Torniquetes e Necrose por Tempo) documentado e reservado para discussão/implementação dedicada posterior.
+---
 
-## Pendências
+## 2026-09-05 19:48 (GMT-3) — Sessão 10: Estabilização de Frame Zero no FIKA e Guarda de Escadas no Desmaio (v1.13.5 → v1.13.6)
 
-- [P-9.1] (aberta 2026-08-17) **VALIDAR IN-GAME a build consolidada v1.13.5 no `modded-V3(review)`** — Cenários a testar: **(1)** Curar aliado até esgotar item e validar descarte síncrono sem slot fantasma nem travamento de mãos; **(2)** Validar duração total da animação médica sem corte prematuro no 1º segundo; **(3)** Testar cancelamento de cirurgia CMS após 1.0s com consumo de 1 carga e toast de desesterilização; **(4)** Verificar menu F12 (seção "12. Debug (Dev)") com toggles `Debug Medic Logs` e `Debug Physics Logs` desligados (console limpo) e ligados (logs diagnósticos emitidos); **(5)** Verificar ausência de micro-stutters/alocações no HUD médico. 🔴 Bloqueador.
-- [P-9.2] (aberta 2026-08-17) **Definir especificação e ativação do Item 07 (Torniquetes e Necrose por Tempo)** — Estruturar chave composta `(player, bodyPart)` no `TourniquetManager` e calibrar mecânica de dano progressivo por isquemia. 🟢 Ideia.
-- [P-5.1] (aberta 2026-07-26) **VALIDAR IN-GAME a Leva 1 + os itens independentes do Trauma 2.0** — Roteiro: `docs/happy-flow-test-plan.md`. Cenários C1 (desfibrilador sem piscar), C2 (hitbox pós-revive com TRL-Fixes 002), H2 (2 pernas zeradas + analgésico), H8 (log de purga na entrada da raid). 🟡 Débito técnico.
-- [P-5.2] (aberta 2026-07-26) **Coleta de `LogOutput.log` das duas máquinas** para destravar TTL do agachar adiado (item 018) e calibragem de clamped legs. 🟡 Débito técnico.
-- [P-4.4] (aberta 2026-07-25, PARCIALMENTE FECHADA) Itens residuais do Trauma 2.0: 015 (desmaio desacoplado do Fika), 016 (ação "Acordar" x "Reviver"), 018 (TTL agachamento). 🟡 Débito técnico.
+**Tema central:** Auditoria de compatibilidade com a camada de rede do FIKA e refinamento de interoperabilidade com o mod `Climbable Ladders`.
+
+**Decisões-chave:**
+- **Registro Antecipado de Pacotes no FIKA (`BandAidNetworkHandler.cs`):** Implementada a subscrição de evento `FikaEventDispatcher.SubscribeEvent<FikaNetworkManagerCreatedEvent>(OnNetworkManagerCreated)`. Registra instantaneamente todos os pacotes (`BandAidHealPacketV2`, `BandAidShoulderTapPacketV2`, `BandAidHealCheckPacketV2`, `BandAidHealCheckResponsePacketV2`, `TraumaFaintPacketV2`, `BandAidTreatmentReportPacketV2` e stubs legados) assim que o Network Manager é criado, eliminando a janela de race condition do polling no `Update()`.
+- **Guarda de Escada no Desmaio (`HealthPatches.cs`):** Se o jogador sofrer blackout (`shouldFaint`) enquanto estiver escalando uma escada de mão (`PlayerLadderController` ativo), o componente da escada é destruído defensivamente e `MovementContext.ResetFlying()` é chamado, permitindo a queda natural ao solo pela gravidade antes de forçar `IsInPronePose = true`.
+- **Versionamento SemVer e Build:** Versão elevada para `1.13.6` em `TRL-ImmersiveCombatMedicine.csproj` e `TRLImmersiveCombatMedicinePlugin.cs`. Compilação Release validada com 0 erros e 0 avisos.
 
 ---
 

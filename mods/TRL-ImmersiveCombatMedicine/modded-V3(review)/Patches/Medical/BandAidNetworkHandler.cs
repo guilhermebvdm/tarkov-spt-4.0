@@ -46,6 +46,57 @@ namespace TRLImmersiveCombatMedicine.Medical
         }
 
         private static IFikaNetworkManager _lastRegisteredNetworkManager = null;
+        private static bool _fikaEventSubscribed = false;
+
+        public static void InitFikaEvents()
+        {
+            if (_fikaEventSubscribed) return;
+            try
+            {
+                global::Fika.Core.Modding.FikaEventDispatcher.SubscribeEvent<global::Fika.Core.Modding.Events.FikaNetworkManagerCreatedEvent>(OnNetworkManagerCreated);
+                _fikaEventSubscribed = true;
+                Logger.LogInfo("[BandAidNetworkHandler] Inscrito com sucesso no evento FikaNetworkManagerCreatedEvent (Frame Zero).");
+            }
+            catch (Exception ex)
+            {
+                Logger.LogWarning($"[BandAidNetworkHandler] Falha ao inscrever no FikaEventDispatcher: {ex.Message}");
+            }
+        }
+
+        private static void OnNetworkManagerCreated(global::Fika.Core.Modding.Events.FikaNetworkManagerCreatedEvent ev)
+        {
+            if (ev?.Manager != null)
+            {
+                RegisterPackets(ev.Manager);
+            }
+        }
+
+        public static void RegisterPackets(IFikaNetworkManager manager)
+        {
+            if (manager == null || _lastRegisteredNetworkManager == manager) return;
+
+            try
+            {
+                manager.RegisterPacket<BandAidHealPacketV2>(OnBandAidHealPacketReceived);
+                manager.RegisterPacket<BandAidShoulderTapPacketV2>(OnShoulderTapReceived);
+                manager.RegisterPacket<BandAidHealCheckPacketV2>(OnHealCheckReceived);
+                manager.RegisterPacket<BandAidHealCheckResponsePacketV2>(OnHealCheckResponseReceived);
+                manager.RegisterPacket<TraumaFaintPacketV2>(OnTraumaFaintReceived); // ref: CR-01-02
+                manager.RegisterPacket<BandAidTreatmentReportPacketV2>(OnTreatmentReportReceived); // feedback membro-alvo
+
+                // Stubs dos formatos ≤1.10.0: consomem o payload de um peer desatualizado em
+                // vez de deixá-lo sem handler — sem isso o ParseException derruba a fila de
+                // eventos do frame para TODOS os mods. Ver LegacyPacketCompat.
+                LegacyPacketCompat.Register(manager);
+
+                _lastRegisteredNetworkManager = manager;
+                Logger.LogInfo($"[BandAidNetworkHandler] Registered FIKA network packets on manager: {manager.GetType().Name}");
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"[BandAidNetworkHandler] Error registering FIKA packets: {ex}");
+            }
+        }
 
         public static void EnsurePacketsRegistered()
         {
@@ -56,31 +107,9 @@ namespace TRLImmersiveCombatMedicine.Medical
             }
 
             var currentManager = Singleton<IFikaNetworkManager>.Instance;
-            if (currentManager == null) return;
-
-            if (_lastRegisteredNetworkManager != currentManager)
+            if (currentManager != null)
             {
-                try
-                {
-                    currentManager.RegisterPacket<BandAidHealPacketV2>(OnBandAidHealPacketReceived);
-                    currentManager.RegisterPacket<BandAidShoulderTapPacketV2>(OnShoulderTapReceived);
-                    currentManager.RegisterPacket<BandAidHealCheckPacketV2>(OnHealCheckReceived);
-                    currentManager.RegisterPacket<BandAidHealCheckResponsePacketV2>(OnHealCheckResponseReceived);
-                    currentManager.RegisterPacket<TraumaFaintPacketV2>(OnTraumaFaintReceived); // ref: CR-01-02
-                    currentManager.RegisterPacket<BandAidTreatmentReportPacketV2>(OnTreatmentReportReceived); // feedback membro-alvo
-
-                    // Stubs dos formatos ≤1.10.0: consomem o payload de um peer desatualizado em
-                    // vez de deixá-lo sem handler — sem isso o ParseException derruba a fila de
-                    // eventos do frame para TODOS os mods. Ver LegacyPacketCompat.
-                    LegacyPacketCompat.Register(currentManager);
-
-                    _lastRegisteredNetworkManager = currentManager;
-                    Logger.LogInfo($"[BandAidNetworkHandler] Registered FIKA network packets on instance: {currentManager.GetType().Name}");
-                }
-                catch (Exception ex)
-                {
-                    Logger.LogError($"[BandAidNetworkHandler] Error registering FIKA packets: {ex}");
-                }
+                RegisterPackets(currentManager);
             }
         }
 

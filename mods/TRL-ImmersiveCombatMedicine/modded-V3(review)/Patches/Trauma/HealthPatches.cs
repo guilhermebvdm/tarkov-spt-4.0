@@ -121,6 +121,16 @@ namespace TRLImmersiveCombatMedicine.Trauma
                     // "tela suja" pós-consciência). O impacto visual do blackout
                     // já vem do DeathFade/FastBlur do Fika.
                     if (__instance.Physical != null) __instance.Physical.Stamina.Current = 0f;
+
+                    // Guarda de escada: se o jogador desmaiar enquanto escala (Climbable Ladders),
+                    // remove o controller para que a gravidade atue e o jogador caia ao solo naturalmente.
+                    var ladderController = __instance.gameObject.GetComponent("PlayerLadderController");
+                    if (ladderController != null)
+                    {
+                        UnityEngine.Object.Destroy(ladderController);
+                        __instance.MovementContext.ResetFlying();
+                    }
+
                     __instance.MovementContext.IsInPronePose = true;
                     if (__instance.HandsController is IFirearmHandsController firearm) firearm.SetAim(false);
 
