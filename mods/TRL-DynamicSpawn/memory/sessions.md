@@ -6,11 +6,32 @@ Memória cronológica de sessões de trabalho (timestamps em GMT-3). Cada entrad
 
 ---
 
-## Estado Atual (Snapshot ao Fim da Sessão — 2026-09-03)
+## Estado Atual (Snapshot ao Fim da Sessão — 2026-09-04)
 
-**Mod C# Client (v3.7.3) + C# Server (v3.7.3) compilados com sucesso (0 erros).**
+**Mod C# Client (v3.7.6) + C# Server (v3.7.6) compilados com sucesso (0 erros).**
 
 - **Identity**: `TRL-DynamicSpawn` (Client BepInEx DLL: `TRL-DynamicSpawn.dll`, Server C# DLL: `TRL-DynamicSpawn-Server.dll` com Web UI). Compatível com SPT 4.0.13 e EFT 0.16.9 / FIKA.
+- **Correção da Interatividade de Loot na Conversão em Mochila (`v3.7.6`)**:
+  - **Injeção de BoxCollider Sólido**: Adicionado `BoxCollider` (`0.5m x 0.5m x 0.45m`) ao `backpackVisual` da Flyye MBSS instanciada em tempo de execução, permitindo que a mira do jogador colida com o objeto.
+  - **Layer Deadbody Recurssiva**: Configurada a camada do GameObject da mochila para `LayerMaskClass.DeadbodyLayer`, tornando-a detectável pelo `GameWorld.FindInteractable(ray, int_0)`.
+  - **Detecção do Corpse**: Como `backpackVisual` é filho de `corpsePlayer.gameObject`, o EFT sobe a hierarquia via `hit.collider.GetComponentInParent<InteractableObject>()` e encontra o componente nativo `Corpse`, gerando imediatamente a ação `"Search"` / `"Lootear"`.
+  - **Snap ao Solo e Física Não-Bloqueante**: Adicionado raycast vertical para assentar a mochila perfeitamente sobre o terreno/chão e removido `rb.detectCollisions = false`, mantendo `rb.isKinematic = true` (0% de custo contínuo de CPU da física e 0 draw calls do bot morto).
+- **Evacuação Orgânica de Cultistas ao Amanhecer (`v3.7.5`)**:
+  - **Mecanismo Orgânico (`CultistDawnEvacuationWatcher`)**: Coroutine leve que roda exclusivamente caso a raid inicie à noite (22:00 às 05:59). Em raids diurnas, finaliza imediatamente (`yield break`) com zero impacto de CPU.
+  - Em raids noturnas, um heartbeat de 30s monitora a transição para 06:00. Ao amanhecer, comanda todos os cultistas vivos (`sectantPriest`, `sectantWarrior`, `sectantOni`, `sectantPrizrak`, `sectantPredvestnik`) via `bot.LeaveData.DoLeaveExternal()`.
+  - **Zero Despawn Forçado e Preservação de Combate**: Se o cultista estiver ou entrar em combate (`Class103` / `LeaveMapLayer`), a inteligência nativa do EFT prioriza o tiroteio/autodefesa; assim que o perigo cessa, a flag `WannaLeave` acumulada faz com que ele retome o caminho até a saída do mapa.
+  - **Bloqueio de Ondas Diurnas Tardias**: `DisableVanillaBossWavesPatch` bloqueia ondas nativas de cultistas caso caiam após as 06:00.
+- **Novo Padrão Default de Configurações (`v3.7.5`)**:
+  - Atualizado `config.json` e `config.default.json` com o novo template (`maxGroupSizeByMap` = 3 para assault e pmcbot, novos parâmetros de distância e bolhas para todos os mapas).
+- **Correção de Fusão e Chance Per-Zone de Snipers (`v3.7.4`)**:
+  - `_maxPersons = 1` forçado para todas as `BotZone` com `SnipeZone == true` no `SpawnPointManagerClass.smethod_1` e no início da raid. Elimina o comportamento do EFT de duplicar snipers no mesmo `ISpawnPoint` (`DuplicateIfAtLeastOne`), impedindo bots fundidos no mesmo modelo.
+  - Sorteio individual de probabilidade por zona de sniper (`InitializeSniperZonesForRaid`) baseado no `SniperChance` configurado no Painel Web.
+  - Zonas que não passam no teste de chance são bloqueadas no `ZonesLeaveController.BlockZoneFor` e filtradas em `DisableVanillaWavesPatch` e `SpawnGatePatches`, garantindo que torres/telhados fiquem vazios quando a chance falhar.
+  - Remoção da injeção cega de marksman na onda 1 do `DynamicSpawnManager`.
+- **Unificação de Spawn de Bosses e Guardas / Nomes Nativos EFT (`v3.7.4`)**:
+  - Correção da separação entre Reshala (ScavBase) e seus guardas (Dorms).
+  - Alinhamento dos nomes internos nativos do EFT (`bossBully`, `bossBoar`, `bossKojaniy`) com os nomes do painel (`bossreshala`, `bosskaban`, `bossshturman`) via mapeamento bidirecional em `AdjustVanillaBossWaves`, `HasNativeVanillaWave` e `eliteEntries`.
+  - Garantido que ondas nativas de bosses com escolta mantenham Boss e guardas na mesma zona configurada, sem spawn paralelo de boss solo.
 - **Restrição Estrita de Zonas para Bosses/Goons (`v3.7.3`)**:
   - `GetZoneFromConfig`: Se houver zonas configuradas no painel web, o sorteio é restrito exclusivamente a elas. Se nenhuma estiver disponível, o spawn é cancelado e não cai em zonas proibidas (como BigRed). O fallback para qualquer zona só ocorre se o campo de zonas estiver 100% vazio.
   - `AdjustVanillaBossWaves`: Re-inicializa `PossibleShuffledZones` e `BornZone` do `BossLocationSpawn` nativo da EFT, impedindo o motor vanilla de vazar Goons para a BigRed.
@@ -53,6 +74,33 @@ Memória cronológica de sessões de trabalho (timestamps em GMT-3). Cada entrad
 ---
 
 ## Histórico de Sessões
+
+### 2026-09-03 — Correção de Fusão de Snipers, Chance Per-Zone e Unificação de Bosses/Guardas (v3.7.4)
+
+- **Correção de Fusão de Snipers e Chance Per-Zone (`v3.7.4`)**:
+  - Resolvido o problema de excesso de snipers (6 snipers em raid na Customs) e fusão física (dois snipers gerados exatamente no mesmo `ISpawnPoint` sobrepostos).
+  - Em `SpawnPointManagerClass.smethod_1` (`Patches.cs`), forçado `_maxPersons = 1` para qualquer `BotZone` marcada como `SnipeZone == true`. Isso elimina o caminho do EFT (`DuplicateIfAtLeastOne`) que replicava o único ponto de spawn da torre para acomodar `_maxPersons > 1`.
+  - Criado `InitializeSniperZonesForRaid`: executa sorteio independente por cada zona de sniper do mapa de acordo com o `SniperChance` configurado no Painel Web (`Random.Range(1, 101) <= mapSniperChance`).
+  - Zonas reprovadas no teste de probabilidade são bloqueadas nativamente via `ZonesLeaveController.BlockZoneFor(sz, WildSpawnType.marksman)` e registradas no conjunto estático `BlockedSniperZones`.
+  - `DisableVanillaWavesPatch` agora intercepta ondas de `WildSpawnType.marksman`: cancela a onda se a zona estiver bloqueada pela probabilidade ou se já contiver um bot vivo.
+  - Em `SpawnGatePatches` (`ActivateBotsWithoutWavePatch`), adicionado bloqueio a marksman quando nenhuma zona de sniper for autorizada (`AllowedSniperZones.Count == 0`).
+  - Removida a injeção forçada de sniper na onda 1 do `DynamicSpawnManager.cs`.
+- **Unificação de Spawn de Bosses e Guardas / Mapeamento de Nomes Nativos EFT (`v3.7.4`)**:
+  - Resolvido o descompasso onde Reshala spawnava na ScavBase (Fortress) e seus guardas Zavodskoy spawnavam em Dorms.
+  - Identificada divergência nos identificadores de bosses entre o painel e o core do EFT: internamente o EFT registra Reshala como `bossBully`, Kaban como `bossBoar` e Shturman como `bossKojaniy`.
+  - Implementado mapeamento bidirecional de aliases em `AdjustVanillaBossWaves` e `HasNativeVanillaWave`: agora o mod reconhece a onda original do Boss com seus guardas e redireciona todo o esquadrão de forma atômica para a zona configurada no painel.
+  - O mod não cria mais uma entidade dinâmica solo do Boss enquanto os guardas nascem em outra zona pela onda nativa.
+  - Alinhadas as chaves em `eliteEntries` no `DynamicSpawnManager.cs` com os nomes canônicos do EFT (`bossbully`, `bossboar`, `bosskojaniy`).
+- **Aplicação do Novo Padrão de Configuração (`config.default.json` e `config.json`)**:
+  - Importado o novo conjunto canônico de configurações de `Novo padrão para usar no default/config.json` para `modded/Server/config/config.default.json` (usado pelo botão "PADRÃO" / `/resetConfig`) e `modded/Server/config/config.json` (configuração ativa do servidor).
+  - Inclui novos presets, balanceamento de elites (`exUsec`, `sectantPriest`, limites de rogues em Lighthouse), limites de grupo por mapa (`maxGroupSizeByMap`) e distribuição de facções.
+- **Code Review & Refinamento de Performance (`v3.7.4`)**:
+  - Reutilização do `ZoneCache` em `InitializeSniperZonesForRaid`, `AdjustVanillaBossWaves` e `DisableVanillaWavesPatch`, eliminando varreduras de hierarquia do Unity (`LocationScene.GetAllObjects`).
+  - Cache estático de `FieldInfo` para `_maxPersons` (`_maxPersonsField`) em conformidade com `csharp-mod-best-practices` §3.
+  - Guarda antecipada para ondas marksman com `SpawnAreaName` vazio quando `AllowedSniperZones` estiver zerado.
+  - Proteção defensiva em `IsSniperZoneAllowed` quando `AllowedSniperZones.Count == 0`.
+- **Validação de Build**:
+  - `TRL-DynamicSpawn-Client.csproj` e `TRL-DynamicSpawn-Server.csproj` compilados com **0 Erros**, **0 Avisos**.
 
 ### 2026-09-03 — Restrição Estrita de Zonas dos Goons e Snap NavMesh contra Soterramento (v3.7.3)
 

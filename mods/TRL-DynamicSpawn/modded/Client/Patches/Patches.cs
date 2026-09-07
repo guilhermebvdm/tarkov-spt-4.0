@@ -7,6 +7,7 @@ using EFT;
 using EFT.Game.Spawning;
 using EFT.UI.Matchmaker;
 using HarmonyLib;
+using TRLDynamicSpawn.Components;
 using TRLDynamicSpawn.Helpers;
 using SPT.Custom.CustomAI;
 using SPT.Reflection.Patching;
@@ -189,6 +190,8 @@ namespace TRLDynamicSpawn.Patches
             );
         }
 
+        private static readonly FieldInfo _botZoneMaxPersonsField = AccessTools.Field(typeof(BotZone), "_maxPersons");
+
         [PatchPostfix]
         static void Postfix(ref SpawnPointMarker[] __result, SpawnPointParams[] parameters)
         {
@@ -270,12 +273,8 @@ namespace TRLDynamicSpawn.Patches
 
                         BotZone RandomBotZone = GetNearestZone(snipeZones, botZoneName);
 
-                        int newVal =
-                            RandomBotZone.MaxPersons > 0 ? RandomBotZone.MaxPersons + 1 : 5;
-
-                        AccessTools
-                            .Field(typeof(BotZone), "_maxPersons")
-                            .SetValue(RandomBotZone, newVal);
+                        // Trava estrita anti-fusão de corpos: zonas de sniper devem ter _maxPersons = 1
+                        _botZoneMaxPersonsField?.SetValue(RandomBotZone, 1);
 
                         zone.BotZone = RandomBotZone;
                     }
@@ -376,7 +375,59 @@ namespace TRLDynamicSpawn.Patches
                 return false;
             }
 
-            // Permite Scav Snipers (marksman), Raiders, Rogues e outros tipos nativos passarem livremente
+            if (wave != null && wave.WildSpawnType == WildSpawnType.marksman)
+            {
+                // Se não há zonas de sniper autorizadas para esta raid (ex: chance 0% ou todas reprovadas), bloqueia imediatamente
+                if (DynamicSpawnManager.AllowedSniperZones.Count == 0)
+                {
+                    if (TRLDynamicSpawn.Helpers.Settings.enableDebugLogs.Value)
+                    {
+                        Plugin.LogSource.LogInfo($"[TRLDynamicSpawn] Blocked Vanilla Sniper Wave: no allowed sniper zones for this raid.");
+                    }
+                    __result = System.Threading.Tasks.Task.CompletedTask;
+                    return false;
+                }
+
+                // 1. Verifica se a zona de sniper alvo foi sorteada como bloqueada para esta raid
+                if (!string.IsNullOrEmpty(wave.SpawnAreaName) && DynamicSpawnManager.IsSniperZoneBlocked(wave.SpawnAreaName))
+                {
+                    if (TRLDynamicSpawn.Helpers.Settings.enableDebugLogs.Value)
+                    {
+                        Plugin.LogSource.LogInfo($"[TRLDynamicSpawn] Blocked Vanilla Sniper Wave in '{wave.SpawnAreaName}' because it was rolled as BLOCKED for this raid.");
+                    }
+                    __result = System.Threading.Tasks.Task.CompletedTask;
+                    return false;
+                }
+
+                // 2. Trava anti-duplicação: Se a zona já tiver um sniper vivo ou gerado, bloqueia ondas subsequentes para o mesmo local
+                if (!string.IsNullOrEmpty(wave.SpawnAreaName))
+                {
+                    var botsController = Comfort.Common.Singleton<IBotGame>.Instance?.BotsController;
+                    if (botsController != null)
+                    {
+                        var allZones = ZoneCache.GetAllZones();
+                        var targetZone = allZones?.FirstOrDefault(z => z != null && string.Equals(z.NameZone, wave.SpawnAreaName, StringComparison.OrdinalIgnoreCase));
+                        if (targetZone != null)
+                        {
+                            var botsInZone = botsController.Bots.GetListByZone(targetZone);
+                            if (botsInZone != null && botsInZone.Count > 0)
+                            {
+                                if (TRLDynamicSpawn.Helpers.Settings.enableDebugLogs.Value)
+                                {
+                                    Plugin.LogSource.LogInfo($"[TRLDynamicSpawn] Blocked Vanilla Sniper Wave in '{wave.SpawnAreaName}' because zone already contains a bot. Preventing duplicate snipers.");
+                                }
+                                __result = System.Threading.Tasks.Task.CompletedTask;
+                                return false;
+                            }
+                        }
+                    }
+                }
+
+                // Permite o sniper na zona aprovada
+                return true;
+            }
+
+            // Permite Raiders, Rogues e outros tipos nativos passarem livremente
             return true;
         }
     }
@@ -406,6 +457,16 @@ namespace TRLDynamicSpawn.Patches
                 if (TRLDynamicSpawn.Helpers.Settings.enableDebugLogs.Value)
                 {
                     Plugin.LogSource.LogInfo($"[TRLDynamicSpawn] Blocked Vanilla Horde Wave ({wave.BossName}) to give 100% control to DynamicSpawn.");
+                }
+                return false;
+            }
+
+            // Regra Vanilla: Bloqueia onda nativa de cultistas se o horário atual for diurno (06:00 às 21:59)
+            if (name == "sectantpriest" && !DynamicSpawnManager.IsNightTimeForCultists())
+            {
+                if (TRLDynamicSpawn.Helpers.Settings.enableDebugLogs.Value)
+                {
+                    Plugin.LogSource.LogInfo($"[TRLDynamicSpawn] Blocked Native Cultist Wave ({wave.BossName}) because raid is currently daytime.");
                 }
                 return false;
             }

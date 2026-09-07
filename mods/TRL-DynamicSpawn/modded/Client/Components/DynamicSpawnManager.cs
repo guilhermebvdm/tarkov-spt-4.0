@@ -9,6 +9,7 @@ using EFT.Game.Spawning;
 using UnityEngine;
 using TRLDynamicSpawn.Helpers;
 using EFT.Communications;
+using HarmonyLib;
 using Newtonsoft.Json;
 using SPT.Common.Http;
 using TRLDynamicSpawn.Models;
@@ -38,6 +39,7 @@ namespace TRLDynamicSpawn.Components
         private IBotCreator _botCreator;
         private BotsController _botsController;
         private Coroutine _activeWaveCoroutine;
+        private Coroutine _cultistDawnCoroutine;
         private bool _sptQueueClearedThisRaid;   // ref: AUD-01-05 — instance field: the component is re-created per raid (DynamicSpawnManagerPatch.cs:60)
         private string _cachedFikaStatus;
         private BotZone _lastSelectedZone;
@@ -55,6 +57,7 @@ namespace TRLDynamicSpawn.Components
                 _botsController.BotSpawner.OnBotCreated += OnBotCreatedSafetySnap;
             }
             StartCoroutine(FetchServerConfigAndStart());
+            _cultistDawnCoroutine = StartCoroutine(CultistDawnEvacuationWatcher());
         }
 
         private void OnDestroy()
@@ -63,15 +66,40 @@ namespace TRLDynamicSpawn.Components
             {
                 _botsController.BotSpawner.OnBotCreated -= OnBotCreatedSafetySnap;
             }
+            if (_cultistDawnCoroutine != null)
+            {
+                StopCoroutine(_cultistDawnCoroutine);
+                _cultistDawnCoroutine = null;
+            }
         }
 
         public static Dictionary<string, List<Vector3Model>> PmcSpawns = new();
         public static Dictionary<string, List<Vector3Model>> ScavSpawns = new();
 
+        public static readonly HashSet<string> AllowedSniperZones = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        public static readonly HashSet<string> BlockedSniperZones = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        public static bool IsSniperZoneBlocked(string zoneName)
+        {
+            if (string.IsNullOrEmpty(zoneName)) return false;
+            return BlockedSniperZones.Contains(zoneName);
+        }
+
+        public static bool IsSniperZoneAllowed(string zoneName)
+        {
+            if (AllowedSniperZones.Count == 0) return false;
+            if (string.IsNullOrEmpty(zoneName)) return false;
+            return AllowedSniperZones.Contains(zoneName);
+        }
+
+        private static readonly System.Reflection.FieldInfo _maxPersonsField = AccessTools.Field(typeof(BotZone), "_maxPersons");
+
         public static void ClearStaticState()
         {
             PmcSpawns.Clear();
             ScavSpawns.Clear();
+            AllowedSniperZones.Clear();
+            BlockedSniperZones.Clear();
             IsGeneratingDynamicWave = false;
             IsWarmupActive = true;
             RaidInitialElitesSpawned = false;
@@ -198,6 +226,9 @@ namespace TRLDynamicSpawn.Components
 
                 // Ajusta as waves de boss originais do vanilla baseado nas configurações recebidas do servidor
                 AdjustVanillaBossWaves();
+
+                // Inicializa e sorteia individualmente cada zona de sniper física da raid
+                InitializeSniperZonesForRaid(GetCurrentMapName());
             }
             catch (Exception ex)
             {
@@ -297,6 +328,8 @@ namespace TRLDynamicSpawn.Components
             IsGeneratingDynamicWave = false;
             IsWarmupActive = false;
             RaidInitialElitesSpawned = false;
+            AllowedSniperZones.Clear();
+            BlockedSniperZones.Clear();
             if (Instance == null) return;
             if (Instance._botsController?.BotSpawner != null)
             {
@@ -661,9 +694,9 @@ namespace TRLDynamicSpawn.Components
                     (eliteConfig.BossGluhar, WildSpawnType.bossGluhar, "bossgluhar"),
                     (eliteConfig.BossSanitar, WildSpawnType.bossSanitar, "bosssanitar"),
                     (eliteConfig.BossKolontay, WildSpawnType.bossKolontay, "bosskolontay"),
-                    (eliteConfig.BossReshala, WildSpawnType.bossBully, "bossreshala"),
-                    (eliteConfig.BossKaban, WildSpawnType.bossBoar, "bosskaban"),
-                    (eliteConfig.BossShturman, WildSpawnType.bossKojaniy, "bossshturman"),
+                    (eliteConfig.BossReshala, WildSpawnType.bossBully, "bossbully"),
+                    (eliteConfig.BossKaban, WildSpawnType.bossBoar, "bossboar"),
+                    (eliteConfig.BossShturman, WildSpawnType.bossKojaniy, "bosskojaniy"),
                     (eliteConfig.BossPartisan, WildSpawnType.bossPartisan, "bosspartisan"),
                     (eliteConfig.BossGifter, WildSpawnType.gifter, "gifter")
                 };
@@ -873,24 +906,6 @@ namespace TRLDynamicSpawn.Components
 
                 GenerateAndEnqueueGroups(WildSpawnType.pmcUSEC, pmcDiff, usecSlots, eliteConfig?.Usec);
                 GenerateAndEnqueueGroups(WildSpawnType.pmcBEAR, pmcDiff, bearSlots, eliteConfig?.Bear);
-                
-                int sniperCount = 0;
-                var currentMapSettings = MapNameHelper.GetMapSettings(_serverConfig, mapName);
-                int mapSniperChance = currentMapSettings != null ? currentMapSettings.SniperChance : 30;
-                if (isFirstWave && UnityEngine.Random.Range(1, 101) <= mapSniperChance && normalScavSlots > 0)
-                {
-                    sniperCount = 1;
-                    normalScavSlots -= 1;
-                    var sniperGroup = new SpawnGroupData
-                    {
-                        Role = WildSpawnType.marksman,
-                        Difficulty = scavDiff,
-                        GroupSize = sniperCount,
-                        Info = null
-                    };
-                    spawnList.Add(new Tuple<SpawnGroupData, BotZone>(sniperGroup, null));
-                }
-
                 GenerateAndEnqueueGroups(WildSpawnType.assault, scavDiff, normalScavSlots, eliteConfig?.Scav);
                 GenerateAndEnqueueGroups(WildSpawnType.assault, scavDiff, pScavSlots, eliteConfig?.Scav);
             }
@@ -977,22 +992,9 @@ namespace TRLDynamicSpawn.Components
                         {
                             var sz = snipeZones[zIdx];
                             if (sz == null) continue;
+                            if (IsSniperZoneBlocked(sz.NameZone)) continue;
                             var botsInZone = _botsController.Bots.GetListByZone(sz);
-                            bool hasAliveSniper = false;
-                            if (botsInZone != null)
-                            {
-                                for (int bIdx = 0; bIdx < botsInZone.Count; bIdx++)
-                                {
-                                    var b = botsInZone[bIdx];
-                                    if (b != null && b.HealthController != null && b.HealthController.IsAlive &&
-                                        b.Profile?.Info?.Settings != null && SpawnPointHelper.IsSniperRole(b.Profile.Info.Settings.Role))
-                                    {
-                                        hasAliveSniper = true;
-                                        break;
-                                    }
-                                }
-                            }
-                            if (!hasAliveSniper)
+                            if (botsInZone == null || botsInZone.Count == 0)
                             {
                                 validSnipeZones.Add(sz);
                             }
@@ -1381,6 +1383,51 @@ namespace TRLDynamicSpawn.Components
             }
         }
 
+        private void InitializeSniperZonesForRaid(string mapName)
+        {
+            AllowedSniperZones.Clear();
+            BlockedSniperZones.Clear();
+
+            try
+            {
+                var currentMapSettings = MapNameHelper.GetMapSettings(_serverConfig, mapName);
+                int mapSniperChance = currentMapSettings != null ? currentMapSettings.SniperChance : 30;
+
+                var snipeZones = ZoneCache.GetSniperZones();
+                if (snipeZones == null || snipeZones.Count == 0) return;
+
+                Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Initializing {snipeZones.Count} physical sniper zones on {mapName} with SniperChance={mapSniperChance}%...");
+
+                foreach (var sz in snipeZones)
+                {
+                    if (sz == null) continue;
+
+                    // Trava estrita anti-fusão de corpos: cravando 1 bot máximo por zona de sniper
+                    _maxPersonsField?.SetValue(sz, 1);
+
+                    // Sorteio individual para cada torre / ponto de sniper do mapa
+                    bool allowed = UnityEngine.Random.Range(1, 101) <= mapSniperChance;
+                    if (allowed)
+                    {
+                        AllowedSniperZones.Add(sz.NameZone);
+                        Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Sniper Zone '{sz.NameZone}': ALLOWED (Passed {mapSniperChance}% chance roll). MaxPersons=1.");
+                    }
+                    else
+                    {
+                        BlockedSniperZones.Add(sz.NameZone);
+                        Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Sniper Zone '{sz.NameZone}': BLOCKED (Failed {mapSniperChance}% chance roll).");
+
+                        // Bloqueia a zona no controlador nativo de zonas da EFT
+                        _botsController?.ZonesLeaveController?.BlockZoneFor(sz, WildSpawnType.marksman);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Plugin.LogSource.LogError($"[TRL-DynamicSpawn] Error in InitializeSniperZonesForRaid: {ex.Message}\n{ex.StackTrace}");
+            }
+        }
+
         private void AdjustVanillaBossWaves()
         {
             try
@@ -1413,9 +1460,9 @@ namespace TRLDynamicSpawn.Components
                     else if (bossNameLower == "bossgluhar") bossInfo = _serverConfig?.EliteConfig?.BossGluhar;
                     else if (bossNameLower == "bosssanitar") bossInfo = _serverConfig?.EliteConfig?.BossSanitar;
                     else if (bossNameLower == "bosskolontay") bossInfo = _serverConfig?.EliteConfig?.BossKolontay;
-                    else if (bossNameLower == "bossreshala") bossInfo = _serverConfig?.EliteConfig?.BossReshala;
-                    else if (bossNameLower == "bosskaban") bossInfo = _serverConfig?.EliteConfig?.BossKaban;
-                    else if (bossNameLower == "bossshturman") bossInfo = _serverConfig?.EliteConfig?.BossShturman;
+                    else if (bossNameLower == "bossreshala" || bossNameLower == "bossbully") bossInfo = _serverConfig?.EliteConfig?.BossReshala;
+                    else if (bossNameLower == "bosskaban" || bossNameLower == "bossboar") bossInfo = _serverConfig?.EliteConfig?.BossKaban;
+                    else if (bossNameLower == "bossshturman" || bossNameLower == "bosskojaniy") bossInfo = _serverConfig?.EliteConfig?.BossShturman;
                     else if (bossNameLower == "bosspartisan") bossInfo = _serverConfig?.EliteConfig?.BossPartisan;
                     else if (bossNameLower == "pmcbot") bossInfo = _serverConfig?.EliteConfig?.Raiders;
                     else if (bossNameLower == "arenafighterevent") bossInfo = _serverConfig?.EliteConfig?.Bloodhounds;
@@ -1441,7 +1488,7 @@ namespace TRLDynamicSpawn.Components
                         {
                             wave.BossZone = spawnZones;
                             var configuredZoneNames = spawnZones.Split(',').Select(z => z.Trim()).Where(z => !string.IsNullOrEmpty(z)).ToArray();
-                            var allZones = LocationScene.GetAllObjects<BotZone>();
+                            var allZones = ZoneCache.GetAllZones();
                             if (allZones != null && configuredZoneNames.Length > 0)
                             {
                                 var matchingBotZones = allZones.Where(z => z != null && configuredZoneNames.Any(cz => string.Equals(cz, z.NameZone, StringComparison.OrdinalIgnoreCase))).ToList();
@@ -1469,10 +1516,21 @@ namespace TRLDynamicSpawn.Components
             if (game == null || game.BossSpawnScenario == null || game.BossSpawnScenario.BossSpawnWaves == null)
                 return false;
 
-            return game.BossSpawnScenario.BossSpawnWaves.Any(w => w != null && w.BossName != null && w.BossName.ToLower() == bossNameLower);
+            return game.BossSpawnScenario.BossSpawnWaves.Any(w =>
+            {
+                if (w == null || w.BossName == null) return false;
+                string wName = w.BossName.ToLower();
+                if (wName == bossNameLower) return true;
+
+                if ((bossNameLower == "bossbully" || bossNameLower == "bossreshala") && (wName == "bossbully" || wName == "bossreshala")) return true;
+                if ((bossNameLower == "bossboar" || bossNameLower == "bosskaban") && (wName == "bossboar" || wName == "bosskaban")) return true;
+                if ((bossNameLower == "bosskojaniy" || bossNameLower == "bossshturman") && (wName == "bosskojaniy" || wName == "bossshturman")) return true;
+
+                return false;
+            });
         }
 
-        private bool IsNightTimeForCultists()
+        public static bool IsNightTimeForCultists()
         {
             try
             {
@@ -1488,6 +1546,64 @@ namespace TRLDynamicSpawn.Components
             catch
             {
                 return true;
+            }
+        }
+
+        private IEnumerator CultistDawnEvacuationWatcher()
+        {
+            // Se a raid já iniciou em horário diurno, cultistas nunca spawnam e a rotina encerra imediatamente sem custo de CPU
+            if (!IsNightTimeForCultists())
+            {
+                Plugin.LogSource.LogInfo("[TRL-DynamicSpawn] Raid started in daytime. Cultist dawn evacuation watcher completed (no-op).");
+                yield break;
+            }
+
+            Plugin.LogSource.LogInfo("[TRL-DynamicSpawn] Night raid detected. Cultist dawn evacuation watcher active (heartbeat: 30s)...");
+
+            while (true)
+            {
+                yield return new WaitForSeconds(30f);
+
+                // Ao amanhecer (06:00 às 21:59)
+                if (!IsNightTimeForCultists())
+                {
+                    Plugin.LogSource.LogInfo("[TRL-DynamicSpawn] Dawn reached (06:00). Initiating organic evacuation for all alive cultists...");
+
+                    try
+                    {
+                        var botOwners = _botsController?.Bots?.BotOwners;
+                        if (botOwners != null)
+                        {
+                            int cultistCount = 0;
+                            foreach (var bot in botOwners)
+                            {
+                                if (bot == null || bot.Profile?.Info?.Settings == null) continue;
+
+                                if (SpawnPointHelper.IsCultistRole(bot.Profile.Info.Settings.Role))
+                                {
+                                    if (bot.HealthController != null && bot.HealthController.IsAlive &&
+                                        bot.LeaveData != null && !bot.LeaveData.WannaLeave)
+                                    {
+                                        bot.LeaveData.DoLeaveExternal();
+                                        cultistCount++;
+                                        Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Ordered cultist {bot.Profile.Info.Settings.Role} ('{bot.Profile.Nickname}') to extract from map.");
+                                    }
+                                }
+                            }
+                            Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Successfully commanded {cultistCount} cultist(s) to extract organically.");
+                        }
+
+                        // Atualiza as travas de zonas nativas de cultistas na engine EFT
+                        _botsController?.ZonesLeaveController?.RunScenarionTimeChecks();
+                    }
+                    catch (Exception ex)
+                    {
+                        Plugin.LogSource.LogError($"[TRL-DynamicSpawn] Error in CultistDawnEvacuationWatcher: {ex.Message}\n{ex.StackTrace}");
+                    }
+
+                    // Encerra permanentemente pelo restante da raid
+                    yield break;
+                }
             }
         }
 

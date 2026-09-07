@@ -287,7 +287,6 @@ namespace TRLDynamicSpawn.Components
                     rb.velocity = Vector3.zero;
                     rb.angularVelocity = Vector3.zero;
                     rb.isKinematic = true;
-                    rb.detectCollisions = false;
                 }
             }
 
@@ -330,10 +329,16 @@ namespace TRLDynamicSpawn.Components
                     backpackPos = corpsePlayer.PlayerBones.Spine3.Original.position;
                 }
 
+                // Snap vertical no terreno para apoiar a mochila perfeitamente sobre a superfície
+                if (Physics.Raycast(backpackPos + Vector3.up * 0.5f, Vector3.down, out var groundHit, 2.0f, LayerMaskClass.HighPolyWithTerrainMask))
+                {
+                    backpackPos = groundHit.point + Vector3.up * 0.05f;
+                }
+
                 GameObject mbssPrefab = GetMbssBackpackPrefab();
                 if (mbssPrefab != null)
                 {
-                    GameObject backpackVisual = UnityEngine.Object.Instantiate(mbssPrefab, backpackPos, Quaternion.identity);
+                    GameObject backpackVisual = UnityEngine.Object.Instantiate(mbssPrefab, backpackPos, Quaternion.Euler(0f, corpsePlayer.Transform.eulerAngles.y, 0f));
                     backpackVisual.transform.SetParent(corpsePlayer.gameObject.transform, true);
 
                     // Garantir que os renderers da mochila instanciada estejam visíveis
@@ -347,12 +352,27 @@ namespace TRLDynamicSpawn.Components
                         }
                     }
 
-                    // Remover rigidbodies/colliders extras do prefab visual para não colidir com o bot
+                    // Remover rigidbodies e colliders pré-existentes do prefab para evitar duplicações/conflitos
                     var visualRbs = backpackVisual.GetComponentsInChildren<Rigidbody>();
                     foreach (var vrb in visualRbs)
                     {
                         if (vrb != null) UnityEngine.Object.Destroy(vrb);
                     }
+                    var oldCols = backpackVisual.GetComponentsInChildren<Collider>();
+                    foreach (var c in oldCols)
+                    {
+                        if (c != null) UnityEngine.Object.Destroy(c);
+                    }
+
+                    // Adicionar BoxCollider sólido dimensionado para a mochila responder ao raycast de interação do EFT
+                    var boxCollider = backpackVisual.AddComponent<BoxCollider>();
+                    boxCollider.size = new Vector3(0.5f, 0.5f, 0.45f);
+                    boxCollider.center = new Vector3(0f, 0.25f, 0f);
+                    boxCollider.isTrigger = false;
+
+                    // Setar a layer para Deadbody (LayerMaskClass.DeadbodyLayer) para ser detectado por GameWorld.FindInteractable
+                    int deadbodyLayer = LayerMaskClass.DeadbodyLayer;
+                    TransformHelperClass.SetLayersRecursively(backpackVisual, deadbodyLayer);
 
                     tracked.SpawnedBackpackVisual = backpackVisual;
                 }

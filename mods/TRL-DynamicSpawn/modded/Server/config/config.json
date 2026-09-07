@@ -1,5 +1,497 @@
 {
-  "activePreset": "Balanced",
+  "factionDistribution": "Balanced",
+  "activePreset": "balanced",
+  "presets": {
+    "high_end": {
+      "name": "Full Map / Open World (High-End)",
+      "enableSpawnBubble": false,
+      "enableTeleport": false,
+      "mapConfigs": {
+        "bigmap": {
+          "secondsBetweenWaves": 900,
+          "sniperChance": 30,
+          "safeZoneDistance": 100,
+          "enableDespawn": true,
+          "despawnPMCs": false,
+          "despawnDistance": 550,
+          "despawnInterval": 45,
+          "spawnBubbleDistance": 550,
+          "enableSpawnBubble": true,
+          "teleportMinDistance": 100
+        },
+        "labyrinth": {
+          "secondsBetweenWaves": 900,
+          "sniperChance": 0,
+          "safeZoneDistance": 40,
+          "enableDespawn": false,
+          "despawnPMCs": false,
+          "despawnDistance": 600,
+          "despawnInterval": 20,
+          "spawnBubbleDistance": 600,
+          "enableSpawnBubble": false,
+          "teleportMinDistance": 100
+        },
+        "factory4_day": {
+          "secondsBetweenWaves": 900,
+          "sniperChance": 0,
+          "safeZoneDistance": 40,
+          "enableDespawn": false,
+          "despawnPMCs": false,
+          "despawnDistance": 600,
+          "despawnInterval": 20,
+          "spawnBubbleDistance": 600,
+          "enableSpawnBubble": false,
+          "teleportMinDistance": 100
+        },
+        "factory4_night": {
+          "secondsBetweenWaves": 900,
+          "sniperChance": 0,
+          "safeZoneDistance": 40,
+          "enableDespawn": false,
+          "despawnPMCs": false,
+          "despawnDistance": 600,
+          "despawnInterval": 20,
+          "spawnBubbleDistance": 600,
+          "enableSpawnBubble": false,
+          "teleportMinDistance": 100
+        },
+        "interchange": {
+          "secondsBetweenWaves": 900,
+          "sniperChance": 30,
+          "safeZoneDistance": 100,
+          "enableDespawn": false,
+          "despawnPMCs": false,
+          "despawnDistance": 600,
+          "despawnInterval": 20,
+          "spawnBubbleDistance": 600,
+          "enableSpawnBubble": false,
+          "teleportMinDistance": 100
+        },
+        "laboratory": {
+          "secondsBetweenWaves": 900,
+          "sniperChance": 30,
+          "safeZoneDistance": 70,
+          "enableDespawn": false,
+          "despawnPMCs": false,
+          "despawnDistance": 600,
+          "despawnInterval": 20,
+          "spawnBubbleDistance": 600,
+          "enableSpawnBubble": false,
+          "teleportMinDistance": 100
+        },
+        "lighthouse": {
+          "secondsBetweenWaves": 900,
+          "sniperChance": 30,
+          "safeZoneDistance": 100,
+          "enableDespawn": false,
+          "despawnPMCs": false,
+          "despawnDistance": 600,
+          "despawnInterval": 20,
+          "spawnBubbleDistance": 600,
+          "enableSpawnBubble": false,
+          "teleportMinDistance": 100
+        },
+        "rezervbase": {
+          "secondsBetweenWaves": 900,
+          "sniperChance": 30,
+          "safeZoneDistance": 70,
+          "enableDespawn": false,
+          "despawnPMCs": false,
+          "despawnDistance": 600,
+          "despawnInterval": 20,
+          "spawnBubbleDistance": 600,
+          "enableSpawnBubble": false,
+          "teleportMinDistance": 100
+        },
+        "shoreline": {
+          "secondsBetweenWaves": 900,
+          "sniperChance": 30,
+          "safeZoneDistance": 100,
+          "enableDespawn": false,
+          "despawnPMCs": false,
+          "despawnDistance": 600,
+          "despawnInterval": 20,
+          "spawnBubbleDistance": 600,
+          "enableSpawnBubble": false,
+          "teleportMinDistance": 100
+        },
+        "tarkovstreets": {
+          "secondsBetweenWaves": 900,
+          "sniperChance": 30,
+          "safeZoneDistance": 100,
+          "enableDespawn": false,
+          "despawnPMCs": false,
+          "despawnDistance": 600,
+          "despawnInterval": 20,
+          "spawnBubbleDistance": 600,
+          "enableSpawnBubble": false,
+          "teleportMinDistance": 100
+        },
+        "sandbox": {
+          "secondsBetweenWaves": 900,
+          "sniperChance": 30,
+          "safeZoneDistance": 100,
+          "enableDespawn": false,
+          "despawnPMCs": false,
+          "despawnDistance": 600,
+          "despawnInterval": 20,
+          "spawnBubbleDistance": 600,
+          "enableSpawnBubble": false,
+          "teleportMinDistance": 100
+        },
+        "sandbox_high": {
+          "secondsBetweenWaves": 900,
+          "sniperChance": 30,
+          "safeZoneDistance": 100,
+          "enableDespawn": false,
+          "despawnPMCs": false,
+          "despawnDistance": 600,
+          "despawnInterval": 20,
+          "spawnBubbleDistance": 600,
+          "enableSpawnBubble": false,
+          "teleportMinDistance": 100
+        },
+        "woods": {
+          "secondsBetweenWaves": 900,
+          "sniperChance": 30,
+          "safeZoneDistance": 100,
+          "enableDespawn": false,
+          "despawnPMCs": false,
+          "despawnDistance": 600,
+          "despawnInterval": 20,
+          "spawnBubbleDistance": 600,
+          "enableSpawnBubble": false,
+          "teleportMinDistance": 100
+        }
+      }
+    },
+    "balanced": {
+      "name": "Dynamic Bubble (Balanced)",
+      "enableSpawnBubble": true,
+      "enableTeleport": true,
+      "mapConfigs": {
+        "bigmap": {
+          "secondsBetweenWaves": 600,
+          "sniperChance": 30,
+          "safeZoneDistance": 100,
+          "enableDespawn": true,
+          "despawnPMCs": true,
+          "despawnDistance": 350,
+          "despawnInterval": 60,
+          "spawnBubbleDistance": 350,
+          "enableSpawnBubble": true,
+          "teleportMinDistance": 100
+        },
+        "factory4_day": {
+          "secondsBetweenWaves": 600,
+          "sniperChance": 0,
+          "safeZoneDistance": 40,
+          "enableDespawn": false,
+          "despawnPMCs": true,
+          "despawnDistance": 350,
+          "despawnInterval": 20,
+          "spawnBubbleDistance": 350,
+          "enableSpawnBubble": false,
+          "teleportMinDistance": 100
+        },
+        "factory4_night": {
+          "secondsBetweenWaves": 600,
+          "sniperChance": 0,
+          "safeZoneDistance": 40,
+          "enableDespawn": false,
+          "despawnPMCs": true,
+          "despawnDistance": 350,
+          "despawnInterval": 20,
+          "spawnBubbleDistance": 350,
+          "enableSpawnBubble": false,
+          "teleportMinDistance": 100
+        },
+        "interchange": {
+          "secondsBetweenWaves": 600,
+          "sniperChance": 30,
+          "safeZoneDistance": 100,
+          "enableDespawn": true,
+          "despawnPMCs": true,
+          "despawnDistance": 350,
+          "despawnInterval": 60,
+          "spawnBubbleDistance": 350,
+          "enableSpawnBubble": true,
+          "teleportMinDistance": 100
+        },
+        "laboratory": {
+          "secondsBetweenWaves": 600,
+          "sniperChance": 30,
+          "safeZoneDistance": 60,
+          "enableDespawn": false,
+          "despawnPMCs": true,
+          "despawnDistance": 350,
+          "despawnInterval": 20,
+          "spawnBubbleDistance": 350,
+          "enableSpawnBubble": false,
+          "teleportMinDistance": 100
+        },
+        "lighthouse": {
+          "secondsBetweenWaves": 600,
+          "sniperChance": 30,
+          "safeZoneDistance": 100,
+          "enableDespawn": true,
+          "despawnPMCs": true,
+          "despawnDistance": 450,
+          "despawnInterval": 60,
+          "spawnBubbleDistance": 450,
+          "enableSpawnBubble": true,
+          "teleportMinDistance": 100
+        },
+        "rezervbase": {
+          "secondsBetweenWaves": 600,
+          "sniperChance": 30,
+          "safeZoneDistance": 100,
+          "enableDespawn": true,
+          "despawnPMCs": true,
+          "despawnDistance": 350,
+          "despawnInterval": 60,
+          "spawnBubbleDistance": 350,
+          "enableSpawnBubble": true,
+          "teleportMinDistance": 100
+        },
+        "shoreline": {
+          "secondsBetweenWaves": 600,
+          "sniperChance": 30,
+          "safeZoneDistance": 100,
+          "enableDespawn": true,
+          "despawnPMCs": true,
+          "despawnDistance": 350,
+          "despawnInterval": 60,
+          "spawnBubbleDistance": 350,
+          "enableSpawnBubble": true,
+          "teleportMinDistance": 100
+        },
+        "tarkovstreets": {
+          "secondsBetweenWaves": 600,
+          "sniperChance": 30,
+          "safeZoneDistance": 100,
+          "enableDespawn": true,
+          "despawnPMCs": true,
+          "despawnDistance": 350,
+          "despawnInterval": 60,
+          "spawnBubbleDistance": 350,
+          "enableSpawnBubble": true,
+          "teleportMinDistance": 100
+        },
+        "sandbox": {
+          "secondsBetweenWaves": 600,
+          "sniperChance": 30,
+          "safeZoneDistance": 100,
+          "enableDespawn": false,
+          "despawnPMCs": true,
+          "despawnDistance": 350,
+          "despawnInterval": 60,
+          "spawnBubbleDistance": 350,
+          "enableSpawnBubble": false,
+          "teleportMinDistance": 100
+        },
+        "sandbox_high": {
+          "secondsBetweenWaves": 600,
+          "sniperChance": 30,
+          "safeZoneDistance": 100,
+          "enableDespawn": false,
+          "despawnPMCs": true,
+          "despawnDistance": 350,
+          "despawnInterval": 60,
+          "spawnBubbleDistance": 350,
+          "enableSpawnBubble": false,
+          "teleportMinDistance": 100
+        },
+        "woods": {
+          "secondsBetweenWaves": 600,
+          "sniperChance": 30,
+          "safeZoneDistance": 100,
+          "enableDespawn": true,
+          "despawnPMCs": true,
+          "despawnDistance": 400,
+          "despawnInterval": 60,
+          "spawnBubbleDistance": 400,
+          "enableSpawnBubble": true,
+          "teleportMinDistance": 100
+        },
+        "labyrinth": {
+          "secondsBetweenWaves": 600,
+          "sniperChance": 30,
+          "safeZoneDistance": 100,
+          "enableDespawn": false,
+          "despawnPMCs": true,
+          "despawnDistance": 350,
+          "despawnInterval": 60,
+          "spawnBubbleDistance": 350,
+          "enableSpawnBubble": false,
+          "teleportMinDistance": 100
+        }
+      }
+    },
+    "performance": {
+      "name": "Performance / FPS Boost (Low-End)",
+      "enableSpawnBubble": true,
+      "enableTeleport": true,
+      "mapConfigs": {
+        "bigmap": {
+          "secondsBetweenWaves": 360,
+          "sniperChance": 30,
+          "safeZoneDistance": 80,
+          "enableDespawn": true,
+          "despawnPMCs": true,
+          "despawnDistance": 250,
+          "despawnInterval": 60,
+          "spawnBubbleDistance": 250,
+          "enableSpawnBubble": true,
+          "teleportMinDistance": 80
+        },
+        "factory4_day": {
+          "secondsBetweenWaves": 360,
+          "sniperChance": 0,
+          "safeZoneDistance": 40,
+          "enableDespawn": false,
+          "despawnPMCs": true,
+          "despawnDistance": 250,
+          "despawnInterval": 60,
+          "spawnBubbleDistance": 250,
+          "enableSpawnBubble": false,
+          "teleportMinDistance": 80
+        },
+        "factory4_night": {
+          "secondsBetweenWaves": 360,
+          "sniperChance": 0,
+          "safeZoneDistance": 40,
+          "enableDespawn": false,
+          "despawnPMCs": true,
+          "despawnDistance": 250,
+          "despawnInterval": 60,
+          "spawnBubbleDistance": 250,
+          "enableSpawnBubble": false,
+          "teleportMinDistance": 80
+        },
+        "interchange": {
+          "secondsBetweenWaves": 360,
+          "sniperChance": 30,
+          "safeZoneDistance": 80,
+          "enableDespawn": true,
+          "despawnPMCs": true,
+          "despawnDistance": 250,
+          "despawnInterval": 60,
+          "spawnBubbleDistance": 250,
+          "enableSpawnBubble": true,
+          "teleportMinDistance": 80
+        },
+        "labyrinth": {
+          "secondsBetweenWaves": 360,
+          "sniperChance": 0,
+          "safeZoneDistance": 40,
+          "enableDespawn": false,
+          "despawnPMCs": true,
+          "despawnDistance": 250,
+          "despawnInterval": 60,
+          "spawnBubbleDistance": 250,
+          "enableSpawnBubble": false,
+          "teleportMinDistance": 80
+        },
+        "laboratory": {
+          "secondsBetweenWaves": 360,
+          "sniperChance": 30,
+          "safeZoneDistance": 80,
+          "enableDespawn": true,
+          "despawnPMCs": true,
+          "despawnDistance": 250,
+          "despawnInterval": 60,
+          "spawnBubbleDistance": 250,
+          "enableSpawnBubble": true,
+          "teleportMinDistance": 80
+        },
+        "lighthouse": {
+          "secondsBetweenWaves": 360,
+          "sniperChance": 30,
+          "safeZoneDistance": 80,
+          "enableDespawn": true,
+          "despawnPMCs": true,
+          "despawnDistance": 250,
+          "despawnInterval": 60,
+          "spawnBubbleDistance": 250,
+          "enableSpawnBubble": true,
+          "teleportMinDistance": 80
+        },
+        "rezervbase": {
+          "secondsBetweenWaves": 360,
+          "sniperChance": 30,
+          "safeZoneDistance": 80,
+          "enableDespawn": true,
+          "despawnPMCs": true,
+          "despawnDistance": 250,
+          "despawnInterval": 60,
+          "spawnBubbleDistance": 250,
+          "enableSpawnBubble": true,
+          "teleportMinDistance": 80
+        },
+        "shoreline": {
+          "secondsBetweenWaves": 360,
+          "sniperChance": 30,
+          "safeZoneDistance": 80,
+          "enableDespawn": true,
+          "despawnPMCs": true,
+          "despawnDistance": 250,
+          "despawnInterval": 60,
+          "spawnBubbleDistance": 250,
+          "enableSpawnBubble": true,
+          "teleportMinDistance": 80
+        },
+        "tarkovstreets": {
+          "secondsBetweenWaves": 360,
+          "sniperChance": 30,
+          "safeZoneDistance": 80,
+          "enableDespawn": true,
+          "despawnPMCs": true,
+          "despawnDistance": 250,
+          "despawnInterval": 60,
+          "spawnBubbleDistance": 250,
+          "enableSpawnBubble": true,
+          "teleportMinDistance": 80
+        },
+        "sandbox": {
+          "secondsBetweenWaves": 360,
+          "sniperChance": 30,
+          "safeZoneDistance": 80,
+          "enableDespawn": true,
+          "despawnPMCs": true,
+          "despawnDistance": 250,
+          "despawnInterval": 60,
+          "spawnBubbleDistance": 250,
+          "enableSpawnBubble": true,
+          "teleportMinDistance": 80
+        },
+        "sandbox_high": {
+          "secondsBetweenWaves": 360,
+          "sniperChance": 30,
+          "safeZoneDistance": 80,
+          "enableDespawn": true,
+          "despawnPMCs": true,
+          "despawnDistance": 250,
+          "despawnInterval": 60,
+          "spawnBubbleDistance": 250,
+          "enableSpawnBubble": true,
+          "teleportMinDistance": 80
+        },
+        "woods": {
+          "secondsBetweenWaves": 360,
+          "sniperChance": 30,
+          "safeZoneDistance": 80,
+          "enableDespawn": true,
+          "despawnPMCs": true,
+          "despawnDistance": 350,
+          "despawnInterval": 60,
+          "spawnBubbleDistance": 350,
+          "enableSpawnBubble": true,
+          "teleportMinDistance": 80
+        }
+      }
+    }
+  },
   "pmcDifficulty": {
     "easy": 10,
     "normal": 50,
@@ -40,8 +532,7 @@
     "disableVanillaRogues": false,
     "disableVanillaRaiders": false,
     "lighthouseRogueZoneFilter": true,
-    "lighthouseRogueMaxCount": -1,
-
+    "lighthouseRogueMaxCount": 8,
     "bossKnight": {
       "enable": true,
       "disableFollowers": false,
@@ -63,7 +554,7 @@
         "labyrinth": 0
       },
       "bossZone": {
-        "customs": "ZoneScavBase",
+        "customs": "ZoneScavBase,ZoneOldAZS",
         "factory4_day": "",
         "factory4_night": "",
         "interchange": "",
@@ -76,6 +567,21 @@
         "tarkovstreets": "",
         "woods": "ZoneScavBase2",
         "labyrinth": ""
+      },
+      "maxGroupSizeByMap": {
+        "customs": 3,
+        "factory4_day": 3,
+        "factory4_night": 3,
+        "interchange": 3,
+        "laboratory": 3,
+        "lighthouse": 3,
+        "rezervbase": 3,
+        "sandbox": 3,
+        "sandbox_high": 3,
+        "shoreline": 3,
+        "tarkovstreets": 3,
+        "woods": 3,
+        "labyrinth": 0
       }
     },
     "bossTagilla": {
@@ -112,6 +618,21 @@
         "tarkovstreets": "",
         "woods": "",
         "labyrinth": ""
+      },
+      "maxGroupSizeByMap": {
+        "customs": 3,
+        "factory4_day": 3,
+        "factory4_night": 3,
+        "interchange": 3,
+        "laboratory": 3,
+        "lighthouse": 3,
+        "rezervbase": 3,
+        "sandbox": 3,
+        "sandbox_high": 3,
+        "shoreline": 3,
+        "tarkovstreets": 3,
+        "woods": 3,
+        "labyrinth": 0
       }
     },
     "bossKilla": {
@@ -148,6 +669,21 @@
         "tarkovstreets": "",
         "woods": "",
         "labyrinth": ""
+      },
+      "maxGroupSizeByMap": {
+        "customs": 3,
+        "factory4_day": 3,
+        "factory4_night": 3,
+        "interchange": 3,
+        "laboratory": 3,
+        "lighthouse": 3,
+        "rezervbase": 3,
+        "sandbox": 3,
+        "sandbox_high": 3,
+        "shoreline": 3,
+        "tarkovstreets": 3,
+        "woods": 3,
+        "labyrinth": 0
       }
     },
     "bossZryachiy": {
@@ -184,6 +720,21 @@
         "tarkovstreets": "",
         "woods": "",
         "labyrinth": ""
+      },
+      "maxGroupSizeByMap": {
+        "customs": 3,
+        "factory4_day": 3,
+        "factory4_night": 3,
+        "interchange": 3,
+        "laboratory": 3,
+        "lighthouse": 3,
+        "rezervbase": 3,
+        "sandbox": 3,
+        "sandbox_high": 3,
+        "shoreline": 3,
+        "tarkovstreets": 3,
+        "woods": 3,
+        "labyrinth": 0
       }
     },
     "bossGluhar": {
@@ -220,6 +771,21 @@
         "tarkovstreets": "",
         "woods": "",
         "labyrinth": ""
+      },
+      "maxGroupSizeByMap": {
+        "customs": 3,
+        "factory4_day": 3,
+        "factory4_night": 3,
+        "interchange": 3,
+        "laboratory": 3,
+        "lighthouse": 3,
+        "rezervbase": 3,
+        "sandbox": 3,
+        "sandbox_high": 3,
+        "shoreline": 3,
+        "tarkovstreets": 3,
+        "woods": 3,
+        "labyrinth": 0
       }
     },
     "bossSanitar": {
@@ -256,6 +822,21 @@
         "tarkovstreets": "",
         "woods": "",
         "labyrinth": ""
+      },
+      "maxGroupSizeByMap": {
+        "customs": 3,
+        "factory4_day": 3,
+        "factory4_night": 3,
+        "interchange": 3,
+        "laboratory": 3,
+        "lighthouse": 3,
+        "rezervbase": 3,
+        "sandbox": 3,
+        "sandbox_high": 3,
+        "shoreline": 3,
+        "tarkovstreets": 3,
+        "woods": 3,
+        "labyrinth": 0
       }
     },
     "bossKolontay": {
@@ -271,8 +852,8 @@
         "laboratory": 0,
         "lighthouse": 0,
         "rezervbase": 0,
-        "sandbox": 30,
-        "sandbox_high": 0,
+        "sandbox": 0,
+        "sandbox_high": 30,
         "shoreline": 0,
         "tarkovstreets": 30,
         "woods": 0,
@@ -286,12 +867,27 @@
         "laboratory": "",
         "lighthouse": "",
         "rezervbase": "",
-        "sandbox": "ZoneSandbox",
-        "sandbox_high": "",
+        "sandbox": "",
+        "sandbox_high": "ZoneSandbox",
         "shoreline": "",
         "tarkovstreets": "ZoneClimova,ZoneMvd",
         "woods": "",
         "labyrinth": ""
+      },
+      "maxGroupSizeByMap": {
+        "customs": 3,
+        "factory4_day": 3,
+        "factory4_night": 3,
+        "interchange": 3,
+        "laboratory": 3,
+        "lighthouse": 3,
+        "rezervbase": 3,
+        "sandbox": 3,
+        "sandbox_high": 3,
+        "shoreline": 3,
+        "tarkovstreets": 3,
+        "woods": 3,
+        "labyrinth": 0
       }
     },
     "bossReshala": {
@@ -328,6 +924,21 @@
         "tarkovstreets": "",
         "woods": "",
         "labyrinth": ""
+      },
+      "maxGroupSizeByMap": {
+        "customs": 3,
+        "factory4_day": 3,
+        "factory4_night": 3,
+        "interchange": 3,
+        "laboratory": 3,
+        "lighthouse": 3,
+        "rezervbase": 3,
+        "sandbox": 3,
+        "sandbox_high": 3,
+        "shoreline": 3,
+        "tarkovstreets": 3,
+        "woods": 3,
+        "labyrinth": 0
       }
     },
     "bossKaban": {
@@ -364,6 +975,21 @@
         "tarkovstreets": "ZoneCarShowroom",
         "woods": "",
         "labyrinth": ""
+      },
+      "maxGroupSizeByMap": {
+        "customs": 3,
+        "factory4_day": 3,
+        "factory4_night": 3,
+        "interchange": 3,
+        "laboratory": 3,
+        "lighthouse": 3,
+        "rezervbase": 3,
+        "sandbox": 3,
+        "sandbox_high": 3,
+        "shoreline": 3,
+        "tarkovstreets": 3,
+        "woods": 3,
+        "labyrinth": 0
       }
     },
     "bossShturman": {
@@ -400,6 +1026,21 @@
         "tarkovstreets": "",
         "woods": "ZoneWoodCutter",
         "labyrinth": ""
+      },
+      "maxGroupSizeByMap": {
+        "customs": 3,
+        "factory4_day": 3,
+        "factory4_night": 3,
+        "interchange": 3,
+        "laboratory": 3,
+        "lighthouse": 3,
+        "rezervbase": 3,
+        "sandbox": 3,
+        "sandbox_high": 3,
+        "shoreline": 3,
+        "tarkovstreets": 3,
+        "woods": 3,
+        "labyrinth": 0
       }
     },
     "bossPartisan": {
@@ -436,6 +1077,21 @@
         "tarkovstreets": "",
         "woods": "",
         "labyrinth": ""
+      },
+      "maxGroupSizeByMap": {
+        "customs": 3,
+        "factory4_day": 3,
+        "factory4_night": 3,
+        "interchange": 3,
+        "laboratory": 3,
+        "lighthouse": 3,
+        "rezervbase": 3,
+        "sandbox": 3,
+        "sandbox_high": 3,
+        "shoreline": 3,
+        "tarkovstreets": 3,
+        "woods": 3,
+        "labyrinth": 0
       }
     },
     "pmcBot": {
@@ -472,6 +1128,21 @@
         "tarkovstreets": "",
         "woods": "",
         "labyrinth": ""
+      },
+      "maxGroupSizeByMap": {
+        "customs": 3,
+        "factory4_day": 3,
+        "factory4_night": 3,
+        "interchange": 3,
+        "laboratory": 3,
+        "lighthouse": 3,
+        "rezervbase": 3,
+        "sandbox": 3,
+        "sandbox_high": 3,
+        "shoreline": 3,
+        "tarkovstreets": 3,
+        "woods": 3,
+        "labyrinth": 0
       }
     },
     "exUsec": {
@@ -480,7 +1151,7 @@
       "groupChance": 30,
       "maxGroupSize": 3,
       "spawnChance": {
-        "customs": 0,
+        "customs": 30,
         "factory4_day": 0,
         "factory4_night": 0,
         "interchange": 0,
@@ -491,11 +1162,11 @@
         "sandbox_high": 0,
         "shoreline": 0,
         "tarkovstreets": 0,
-        "woods": 0,
+        "woods": 30,
         "labyrinth": 0
       },
       "bossZone": {
-        "customs": "",
+        "customs": "ZoneScavBase",
         "factory4_day": "",
         "factory4_night": "",
         "interchange": "",
@@ -506,8 +1177,23 @@
         "sandbox_high": "",
         "shoreline": "",
         "tarkovstreets": "",
-        "woods": "",
+        "woods": "ZoneMiniHouse",
         "labyrinth": ""
+      },
+      "maxGroupSizeByMap": {
+        "customs": 4,
+        "factory4_day": 1,
+        "factory4_night": 1,
+        "interchange": 1,
+        "laboratory": 1,
+        "lighthouse": 1,
+        "rezervbase": 1,
+        "sandbox": 1,
+        "sandbox_high": 1,
+        "shoreline": 1,
+        "tarkovstreets": 1,
+        "woods": 4,
+        "labyrinth": 0
       }
     },
     "arenaFighterEvent": {
@@ -544,6 +1230,21 @@
         "tarkovstreets": "",
         "woods": "ZoneMiniHouse,ZoneClearVill,ZoneRoad,ZoneBrokenVill,ZoneScavBase2",
         "labyrinth": ""
+      },
+      "maxGroupSizeByMap": {
+        "customs": 3,
+        "factory4_day": 3,
+        "factory4_night": 3,
+        "interchange": 3,
+        "laboratory": 3,
+        "lighthouse": 3,
+        "rezervbase": 3,
+        "sandbox": 3,
+        "sandbox_high": 3,
+        "shoreline": 3,
+        "tarkovstreets": 3,
+        "woods": 3,
+        "labyrinth": 0
       }
     },
     "sectantPriest": {
@@ -559,8 +1260,8 @@
         "laboratory": 0,
         "lighthouse": 0,
         "rezervbase": 0,
-        "sandbox": 44,
-        "sandbox_high": 0,
+        "sandbox": 0,
+        "sandbox_high": 44,
         "shoreline": 15,
         "tarkovstreets": 0,
         "woods": 15,
@@ -574,12 +1275,27 @@
         "laboratory": "",
         "lighthouse": "",
         "rezervbase": "",
-        "sandbox": "ZoneSandbox",
-        "sandbox_high": "",
+        "sandbox": "",
+        "sandbox_high": "ZoneSandbox",
         "shoreline": "ZoneSanatorium1,ZoneSanatorium2,ZoneForestSpawn",
         "tarkovstreets": "",
         "woods": "ZoneMiniHouse,ZoneBrokenVill",
         "labyrinth": ""
+      },
+      "maxGroupSizeByMap": {
+        "customs": 3,
+        "factory4_day": 3,
+        "factory4_night": 3,
+        "interchange": 3,
+        "laboratory": 3,
+        "lighthouse": 3,
+        "rezervbase": 3,
+        "sandbox": 3,
+        "sandbox_high": 3,
+        "shoreline": 3,
+        "tarkovstreets": 3,
+        "woods": 3,
+        "labyrinth": 0
       }
     },
     "gifter": {
@@ -616,6 +1332,21 @@
         "tarkovstreets": "",
         "woods": "",
         "labyrinth": ""
+      },
+      "maxGroupSizeByMap": {
+        "customs": 3,
+        "factory4_day": 3,
+        "factory4_night": 3,
+        "interchange": 3,
+        "laboratory": 3,
+        "lighthouse": 3,
+        "rezervbase": 3,
+        "sandbox": 3,
+        "sandbox_high": 3,
+        "shoreline": 3,
+        "tarkovstreets": 3,
+        "woods": 3,
+        "labyrinth": 0
       }
     },
     "sptBear": {
@@ -652,6 +1383,21 @@
         "tarkovstreets": "",
         "woods": "",
         "labyrinth": ""
+      },
+      "maxGroupSizeByMap": {
+        "customs": 3,
+        "factory4_day": 3,
+        "factory4_night": 3,
+        "interchange": 3,
+        "laboratory": 3,
+        "lighthouse": 3,
+        "rezervbase": 3,
+        "sandbox": 3,
+        "sandbox_high": 3,
+        "shoreline": 3,
+        "tarkovstreets": 3,
+        "woods": 3,
+        "labyrinth": 0
       }
     },
     "sptUsec": {
@@ -688,6 +1434,21 @@
         "tarkovstreets": "",
         "woods": "",
         "labyrinth": ""
+      },
+      "maxGroupSizeByMap": {
+        "customs": 3,
+        "factory4_day": 3,
+        "factory4_night": 3,
+        "interchange": 3,
+        "laboratory": 3,
+        "lighthouse": 3,
+        "rezervbase": 3,
+        "sandbox": 3,
+        "sandbox_high": 3,
+        "shoreline": 3,
+        "tarkovstreets": 3,
+        "woods": 3,
+        "labyrinth": 0
       }
     },
     "assault": {
@@ -724,6 +1485,21 @@
         "tarkovstreets": "",
         "woods": "",
         "labyrinth": ""
+      },
+      "maxGroupSizeByMap": {
+        "customs": 3,
+        "factory4_day": 3,
+        "factory4_night": 3,
+        "interchange": 3,
+        "laboratory": 3,
+        "lighthouse": 3,
+        "rezervbase": 3,
+        "sandbox": 3,
+        "sandbox_high": 3,
+        "shoreline": 3,
+        "tarkovstreets": 3,
+        "woods": 3,
+        "labyrinth": 0
       }
     }
   },
@@ -737,157 +1513,157 @@
     "bigmap": {
       "secondsBetweenWaves": 600,
       "sniperChance": 30,
-      "safeZoneDistance": 60,
-      "enableDespawn": true,
-      "despawnPMCs": true,
-      "despawnDistance": 300,
-      "despawnInterval": 60,
-      "spawnBubbleDistance": 300,
-      "enableSpawnBubble": true,
-      "teleportMinDistance": 60
-    },
-    "factory4_day": {
-      "secondsBetweenWaves": 360,
-      "sniperChance": 30,
-      "safeZoneDistance": 50,
-      "enableDespawn": false,
-      "despawnPMCs": false,
-      "despawnDistance": 300,
-      "despawnInterval": 20,
-      "spawnBubbleDistance": 300,
-      "enableSpawnBubble": false,
-      "teleportMinDistance": 100
-    },
-    "factory4_night": {
-      "secondsBetweenWaves": 360,
-      "sniperChance": 30,
-      "safeZoneDistance": 50,
-      "enableDespawn": false,
-      "despawnPMCs": false,
-      "despawnDistance": 300,
-      "despawnInterval": 20,
-      "spawnBubbleDistance": 300,
-      "enableSpawnBubble": false,
-      "teleportMinDistance": 100
-    },
-    "interchange": {
-      "secondsBetweenWaves": 600,
-      "sniperChance": 30,
-      "safeZoneDistance": 60,
+      "safeZoneDistance": 100,
       "enableDespawn": true,
       "despawnPMCs": true,
       "despawnDistance": 350,
       "despawnInterval": 60,
-      "spawnBubbleDistance": 300,
+      "spawnBubbleDistance": 350,
       "enableSpawnBubble": true,
-      "teleportMinDistance": 60
+      "teleportMinDistance": 100
     },
-    "laboratory": {
-      "secondsBetweenWaves": 600,
-      "sniperChance": 30,
-      "safeZoneDistance": 60,
+    "factory4_day": {
+      "secondsBetweenWaves": 900,
+      "sniperChance": 0,
+      "safeZoneDistance": 40,
       "enableDespawn": false,
       "despawnPMCs": false,
-      "despawnDistance": 300,
+      "despawnDistance": 600,
       "despawnInterval": 20,
-      "spawnBubbleDistance": 300,
+      "spawnBubbleDistance": 600,
+      "enableSpawnBubble": false,
+      "teleportMinDistance": 100
+    },
+    "factory4_night": {
+      "secondsBetweenWaves": 900,
+      "sniperChance": 0,
+      "safeZoneDistance": 40,
+      "enableDespawn": false,
+      "despawnPMCs": false,
+      "despawnDistance": 600,
+      "despawnInterval": 20,
+      "spawnBubbleDistance": 600,
+      "enableSpawnBubble": false,
+      "teleportMinDistance": 100
+    },
+    "interchange": {
+      "secondsBetweenWaves": 900,
+      "sniperChance": 30,
+      "safeZoneDistance": 100,
+      "enableDespawn": false,
+      "despawnPMCs": false,
+      "despawnDistance": 600,
+      "despawnInterval": 20,
+      "spawnBubbleDistance": 600,
+      "enableSpawnBubble": false,
+      "teleportMinDistance": 100
+    },
+    "laboratory": {
+      "secondsBetweenWaves": 900,
+      "sniperChance": 30,
+      "safeZoneDistance": 70,
+      "enableDespawn": false,
+      "despawnPMCs": false,
+      "despawnDistance": 600,
+      "despawnInterval": 20,
+      "spawnBubbleDistance": 600,
       "enableSpawnBubble": false,
       "teleportMinDistance": 100
     },
     "lighthouse": {
-      "secondsBetweenWaves": 600,
+      "secondsBetweenWaves": 900,
       "sniperChance": 30,
-      "safeZoneDistance": 70,
-      "enableDespawn": true,
-      "despawnPMCs": true,
-      "despawnDistance": 400,
-      "despawnInterval": 60,
-      "spawnBubbleDistance": 300,
-      "enableSpawnBubble": true,
-      "teleportMinDistance": 70
-    },
-    "rezervbase": {
-      "secondsBetweenWaves": 600,
-      "sniperChance": 30,
-      "safeZoneDistance": 60,
-      "enableDespawn": true,
-      "despawnPMCs": true,
-      "despawnDistance": 300,
-      "despawnInterval": 60,
-      "spawnBubbleDistance": 300,
-      "enableSpawnBubble": true,
-      "teleportMinDistance": 60
-    },
-    "shoreline": {
-      "secondsBetweenWaves": 600,
-      "sniperChance": 30,
-      "safeZoneDistance": 70,
-      "enableDespawn": true,
-      "despawnPMCs": true,
-      "despawnDistance": 300,
-      "despawnInterval": 60,
-      "spawnBubbleDistance": 300,
-      "enableSpawnBubble": true,
-      "teleportMinDistance": 70
-    },
-    "tarkovstreets": {
-      "secondsBetweenWaves": 600,
-      "sniperChance": 30,
-      "safeZoneDistance": 70,
-      "enableDespawn": true,
-      "despawnPMCs": true,
-      "despawnDistance": 400,
-      "despawnInterval": 60,
-      "spawnBubbleDistance": 300,
-      "enableSpawnBubble": true,
-      "teleportMinDistance": 70
-    },
-    "sandbox": {
-      "secondsBetweenWaves": 600,
-      "sniperChance": 30,
-      "safeZoneDistance": 60,
-      "enableDespawn": true,
-      "despawnPMCs": true,
-      "despawnDistance": 300,
-      "despawnInterval": 60,
-      "spawnBubbleDistance": 300,
-      "enableSpawnBubble": true,
-      "teleportMinDistance": 60
-    },
-    "sandbox_high": {
-      "secondsBetweenWaves": 600,
-      "sniperChance": 30,
-      "safeZoneDistance": 60,
-      "enableDespawn": true,
-      "despawnPMCs": true,
-      "despawnDistance": 300,
-      "despawnInterval": 60,
-      "spawnBubbleDistance": 300,
-      "enableSpawnBubble": true,
-      "teleportMinDistance": 60
-    },
-    "woods": {
-      "secondsBetweenWaves": 600,
-      "sniperChance": 30,
-      "safeZoneDistance": 70,
-      "enableDespawn": true,
-      "despawnPMCs": true,
-      "despawnDistance": 400,
-      "despawnInterval": 60,
-      "spawnBubbleDistance": 300,
-      "enableSpawnBubble": true,
-      "teleportMinDistance": 70
-    },
-    "labyrinth": {
-      "secondsBetweenWaves": 600,
-      "sniperChance": 30,
-      "safeZoneDistance": 50,
+      "safeZoneDistance": 100,
       "enableDespawn": false,
       "despawnPMCs": false,
-      "despawnDistance": 300,
+      "despawnDistance": 600,
       "despawnInterval": 20,
-      "spawnBubbleDistance": 300,
-      "enableSpawnBubble": true,
+      "spawnBubbleDistance": 600,
+      "enableSpawnBubble": false,
+      "teleportMinDistance": 100
+    },
+    "rezervbase": {
+      "secondsBetweenWaves": 900,
+      "sniperChance": 30,
+      "safeZoneDistance": 70,
+      "enableDespawn": false,
+      "despawnPMCs": false,
+      "despawnDistance": 600,
+      "despawnInterval": 20,
+      "spawnBubbleDistance": 600,
+      "enableSpawnBubble": false,
+      "teleportMinDistance": 100
+    },
+    "shoreline": {
+      "secondsBetweenWaves": 900,
+      "sniperChance": 30,
+      "safeZoneDistance": 100,
+      "enableDespawn": false,
+      "despawnPMCs": false,
+      "despawnDistance": 600,
+      "despawnInterval": 20,
+      "spawnBubbleDistance": 600,
+      "enableSpawnBubble": false,
+      "teleportMinDistance": 100
+    },
+    "tarkovstreets": {
+      "secondsBetweenWaves": 900,
+      "sniperChance": 30,
+      "safeZoneDistance": 100,
+      "enableDespawn": false,
+      "despawnPMCs": false,
+      "despawnDistance": 600,
+      "despawnInterval": 20,
+      "spawnBubbleDistance": 600,
+      "enableSpawnBubble": false,
+      "teleportMinDistance": 100
+    },
+    "sandbox": {
+      "secondsBetweenWaves": 900,
+      "sniperChance": 30,
+      "safeZoneDistance": 100,
+      "enableDespawn": false,
+      "despawnPMCs": false,
+      "despawnDistance": 600,
+      "despawnInterval": 20,
+      "spawnBubbleDistance": 600,
+      "enableSpawnBubble": false,
+      "teleportMinDistance": 100
+    },
+    "sandbox_high": {
+      "secondsBetweenWaves": 900,
+      "sniperChance": 30,
+      "safeZoneDistance": 100,
+      "enableDespawn": false,
+      "despawnPMCs": false,
+      "despawnDistance": 600,
+      "despawnInterval": 20,
+      "spawnBubbleDistance": 600,
+      "enableSpawnBubble": false,
+      "teleportMinDistance": 100
+    },
+    "woods": {
+      "secondsBetweenWaves": 900,
+      "sniperChance": 30,
+      "safeZoneDistance": 100,
+      "enableDespawn": false,
+      "despawnPMCs": false,
+      "despawnDistance": 600,
+      "despawnInterval": 20,
+      "spawnBubbleDistance": 600,
+      "enableSpawnBubble": false,
+      "teleportMinDistance": 100
+    },
+    "labyrinth": {
+      "secondsBetweenWaves": 900,
+      "sniperChance": 0,
+      "safeZoneDistance": 40,
+      "enableDespawn": false,
+      "despawnPMCs": false,
+      "despawnDistance": 600,
+      "despawnInterval": 20,
+      "spawnBubbleDistance": 600,
+      "enableSpawnBubble": false,
       "teleportMinDistance": 100
     }
   }
