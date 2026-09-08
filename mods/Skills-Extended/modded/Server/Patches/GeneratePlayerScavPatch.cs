@@ -24,62 +24,62 @@ public class GeneratePlayerScavPatch : AbstractPatch
     private static readonly RandomUtil RandomUtil = ServiceLocator.ServiceProvider.GetRequiredService<RandomUtil>();
     private static readonly SkillUtil SkillUtil = ServiceLocator.ServiceProvider.GetRequiredService<SkillUtil>();
     private static readonly ISptLogger<SkillsExtendedPatch> Logger = ServiceLocator.ServiceProvider.GetRequiredService<ISptLogger<SkillsExtendedPatch>>();
-    
-    private static bool _generateAsCultist;
-    
+
     protected override MethodBase? GetTargetMethod()
     {
         return AccessTools.Method(typeof(BotGenerator), "GeneratePlayerScav");
     }
 
+    // ref: AUD-01-06 — __state do Harmony em vez de campo static, elimina a race condition entre
+    // requisições concorrentes (ex.: dois jogadores gerando scav quase ao mesmo tempo em coop Fika).
     [PatchPrefix]
-    public static void Prefix(MongoId sessionId, ref string role)
+    public static void Prefix(MongoId sessionId, ref string role, out bool __state)
     {
+        __state = false;
+
         if (!ConfigController.SkillsConfig.ShadowConnections.Enabled)
         {
             return;
         }
-        
+
         if (!SkillUtil.TryGetSkillLevel(sessionId, SkillTypes.Shadowconnections, out var level))
         {
             return;
         }
 
         var chanceConfig = ConfigController.SkillsConfig.ShadowConnections.ScavGenerateAsCultistChance * level;
-        
-        _generateAsCultist = RandomUtil.GetChance100(chanceConfig);
-        if (!_generateAsCultist)
+
+        __state = RandomUtil.GetChance100(chanceConfig);
+        if (!__state)
         {
             return;
         }
-        
+
         Logger.Info("[Skills Extended] Replacing scav as cultist");
         role = "sectantWarrior";
     }
 
     [PatchPostfix]
-    public static void Postfix(PmcData __result)
+    public static void Postfix(PmcData __result, bool __state)
     {
         if (!ConfigController.SkillsConfig.ShadowConnections.Enabled)
         {
             return;
         }
-        
-        if (!_generateAsCultist)
+
+        if (!__state)
         {
             return;
         }
-        
+
         if (!DatabaseService.GetBots().Types.TryGetValue("sectantwarrior", out var bot))
         {
             Console.WriteLine("[Skills Extended] Failed to find sectantWarrior");
             return;
         }
-        
+
         SetAppearance(__result, bot!);
         SetHealth(__result, bot!);
-
-        _generateAsCultist = false;
     }
 
     private static void SetAppearance(PmcData botBase, BotType botTemplate)

@@ -4,11 +4,32 @@ using EFT.Interactive;
 using System;
 using System.Linq;
 using SkillsExtended.Skills.LockPicking.Actions;
+using UnityEngine;
 
 namespace SkillsExtended.Skills.LockPicking;
 
 public static class WorldInteractionUtils
 {
+    // ref: AUD-01-21 — memoiza a checagem de inventário (a parte cara), não os handlers (que
+    // precisam ficar frescos por chamada, pois guardam o `owner` — cachear por porta ignorando o
+    // owner seria inseguro em coop: dois jogadores olhando a mesma porta reusariam o delegate do
+    // primeiro). GetLockPicksInInventory() já resolve sempre o MainPlayer local internamente,
+    // independente do `owner` passado, então a memoização por-frame vale pra qualquer chamada.
+    private static int _lockPicksCacheFrame = -1;
+    private static bool _lockPicksCacheValue;
+
+    private static bool HasLockPicksThisFrame()
+    {
+        var frame = Time.frameCount;
+        if (frame != _lockPicksCacheFrame)
+        {
+            _lockPicksCacheFrame = frame;
+            _lockPicksCacheValue = LockPickingHelpers.GetLockPicksInInventory().Any();
+        }
+
+        return _lockPicksCacheValue;
+    }
+
     public static bool IsBotInteraction(GamePlayerOwner owner)
     {
         if (owner is null)
@@ -47,7 +68,7 @@ public static class WorldInteractionUtils
         ActionsTypesClass validAction = new()
         {
             Name = "Pick lock",
-            Disabled = !interactiveObject.Operatable && !LockPickingHelpers.GetLockPicksInInventory().Any()
+            Disabled = !interactiveObject.Operatable && !HasLockPicksThisFrame()
         };
 
         validAction.Action = lockPickInteraction.TryPickLock;

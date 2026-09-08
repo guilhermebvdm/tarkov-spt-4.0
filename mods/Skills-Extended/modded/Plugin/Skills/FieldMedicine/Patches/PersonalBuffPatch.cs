@@ -21,7 +21,10 @@ internal class PersonalBuffPatch : ModulePatch
         {
             return;
         }
-        
-        skills.SkillManagerExtended.AdjustStimulatorBuff((InjectorBuff)__result.Clone());
+
+        // ref: AUD-01-20 — antes clonava e descartava o clone; o ajuste nunca chegava a valer pro
+        // __result de fato retornado (bug funcional, não só alocação evitável — ver
+        // 004-...-02-spec-tech.md §0/§1.5).
+        skills.SkillManagerExtended.AdjustStimulatorBuff(__result);
     }
 }

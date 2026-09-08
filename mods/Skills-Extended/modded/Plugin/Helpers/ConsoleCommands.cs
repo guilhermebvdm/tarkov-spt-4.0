@@ -38,7 +38,8 @@ internal static class ConsoleCommands
     private static void GetAllWeaponIDsInInventory()
     {
         var side = GameUtils.IsScav() ? EPlayerSide.Savage : EPlayerSide.Usec;
-        var weapons = GameUtils.GetProfile(side)?.Inventory?.AllRealPlayerItems.Where(x => x is Weapon);
+        // ref: AUD-01-18 — a cadeia ?. propaga null se Inventory for null; foreach sobre null lançava NRE.
+        var weapons = GameUtils.GetProfile(side)?.Inventory?.AllRealPlayerItems.Where(x => x is Weapon) ?? [];
 
         foreach (var weapon in weapons)
         {
@@ -58,6 +59,9 @@ internal static class ConsoleCommands
 
     private static void DoDamage()
     {
+        // ref: AUD-01-18 — mesmo guard já usado corretamente em ResetDoorLocks (acima) neste arquivo.
+        if (!Singleton<GameWorld>.Instantiated) return;
+
         var player = Singleton<GameWorld>.Instance.MainPlayer;
         var Blunt = new DamageInfoStruct();
 
@@ -71,6 +75,8 @@ internal static class ConsoleCommands
 
     private static void DoDie()
     {
+        if (!Singleton<GameWorld>.Instantiated) return;
+
         var player = Singleton<GameWorld>.Instance.MainPlayer;
         var Blunt = new DamageInfoStruct();
 
@@ -84,6 +90,8 @@ internal static class ConsoleCommands
 
     private static void DoFracture()
     {
+        if (!Singleton<GameWorld>.Instantiated) return;
+
         var player = Singleton<GameWorld>.Instance.MainPlayer;
 
         if (!player)

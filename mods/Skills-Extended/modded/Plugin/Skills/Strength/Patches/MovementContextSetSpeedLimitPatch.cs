@@ -18,15 +18,29 @@ public class MovementContextSetSpeedLimitPatch : ModulePatch
 	}
 
 	[PatchPrefix]
-	public static bool Prefix(MovementContext __instance)
+	public static bool Prefix(MovementContext __instance, Player ____player)
+		// ____player = campo privado `_player` de MovementContext (Assembly-CSharp/EFT/MovementContext.cs:157),
+		// mesma convenção já usada em Plugin/Skills/FirstAid/Patches/CanWalkPatch.cs.
 	{
 		var skillData = SkillsExtendedPlugin.SkillData;
 		if (!skillData.Strength.Enabled)
 		{
 			return true;
 		}
-		
-		var skillMgrExt = GameUtils.GetSkillManager()!.SkillManagerExtended;
+
+		// ref: AUD-01-02 — só aplica a skill do jogador local a movimento do próprio jogador local.
+		if (____player == null || !____player.IsYourPlayer)
+		{
+			return true; // não é o jogador local — deixa o método nativo (MovementContext.method_0) rodar
+		}
+
+		var skillManager = GameUtils.GetSkillManager();
+		if (skillManager == null)
+		{
+			return true;
+		}
+
+		var skillMgrExt = skillManager.SkillManagerExtended;
 
 		MovementContext.Struct333 gStruct;
 		gStruct.movementContext_0 = __instance;

@@ -29,13 +29,21 @@ public class GetBarterPricePatch : ModulePatch
         {
             return;
         }
-        
+
+        // ref: AUD-01-11 — captura e checa null antes do loop, em vez de GetSkillManager()! dentro dele
+        // (a tela de trader pode abrir em estados de transição onde o SkillManager legitimamente é null).
+        var skillManager = GameUtils.GetSkillManager();
+        if (skillManager == null)
+        {
+            return;
+        }
+
         var scheme = __instance.GetSchemeForItem(items[0]);
         if (scheme is null)
         {
             return;
         }
-        
+
         float price = 0;
         foreach (var item in items)
         {
@@ -44,21 +52,21 @@ public class GetBarterPricePatch : ModulePatch
             {
                 continue;
             }
-            
+
             var num2 = Mathf.Ceil((float)barterScheme.Sum(TraderAssortmentControllerClass.Class2058.class2058_0.method_0));
-            var bonus = 1f - GameUtils.GetSkillManager()!.SkillManagerExtended.SilentOpsSilencerCostRedBuff;
+            var bonus = 1f - skillManager.SkillManagerExtended.SilentOpsSilencerCostRedBuff;
 
             // Silencer Type
             if (item is SilencerItemClass)
             {
                 num2 *= bonus;
             }
-            
+
             price += num2;
         }
 
         Selecteditem = __instance.SelectedItem;
-        
+
         __result = new TraderClass.GStruct300(scheme[0][0]._tpl, (int)Mathf.Ceil(price));
     }
 }
@@ -79,8 +87,15 @@ public class RequiredItemsCountPatch : ModulePatch
         {
             return;
         }
-        
-        var bonus = 1f - GameUtils.GetSkillManager()!.SkillManagerExtended.SilentOpsSilencerCostRedBuff;
+
+        // ref: AUD-01-11 — mesmo guard do GetBarterPricePatch.Postfix acima.
+        var skillManager = GameUtils.GetSkillManager();
+        if (skillManager == null)
+        {
+            return;
+        }
+
+        var bonus = 1f - skillManager.SkillManagerExtended.SilentOpsSilencerCostRedBuff;
 
         __result = (int)Mathf.Ceil(__result * bonus);
     }

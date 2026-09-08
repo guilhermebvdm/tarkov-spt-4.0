@@ -13,8 +13,6 @@ namespace SkillsExtended.Skills.SilentOps.Patches;
 
 public class DoorSoundPatch : ModulePatch
 {
-    private static SkillManager SkillManager => GameUtils.GetSkillManager();
-    
     protected override MethodBase GetTargetMethod()
     {
         return AccessTools.Method(typeof(WorldInteractiveObject), nameof(WorldInteractiveObject.PlaySound));
@@ -28,52 +26,65 @@ public class DoorSoundPatch : ModulePatch
         {
             return true;
         }
-        
+
+        // ref: AUD-01-01 — só aplica o bônus quando a interação em andamento é do jogador local.
+        // Sem dado (porta não rastreada por DoorInteractionTrackerPatch) = fail-safe pro som nativo.
+        if (!DoorInteractionTrackerPatch.LastInteractionIsLocal.TryGetValue(__instance.Id, out var isLocal) || !isLocal)
+        {
+            return true;
+        }
+
+        var skillManager = GameUtils.GetSkillManager();
+        if (skillManager == null)
+        {
+            return true;
+        }
+
         if (__instance.OpenSound.Length != 0 && state == EDoorState.Open)
         {
-            PlayDoorOpenSound(__instance);
+            PlayDoorOpenSound(__instance, skillManager);
         }
 
         if (__instance.SqueakSound.Length != 0)
         {
-            PlayDoorSqueakSound(__instance);
+            PlayDoorSqueakSound(__instance, skillManager);
         }
 
         return false;
     }
 
-    private static void PlayDoorOpenSound(WorldInteractiveObject door)
+    private static void PlayDoorOpenSound(WorldInteractiveObject door, SkillManager skillManager)
     {
         var openSound = door.OpenSound[Random.Range(0, door.OpenSound.Length)];
-        var bonus = 1f - SkillManager.SkillManagerExtended.SilentOpsReduceVolumeBuff;
-        
+        var bonus = 1f - skillManager.SkillManagerExtended.SilentOpsReduceVolumeBuff;
+
         if (openSound)
         {
             Singleton<BetterAudio>.Instance.PlayAtPoint(
-                door.transform.position, 
-                openSound, 
-                CameraClass.Instance.Distance(door.transform.position), 
-                BetterAudio.AudioSourceGroupType.Collisions, 
-                35, 
-                Random.Range(0.8f * bonus, 1f * bonus), 
+                door.transform.position,
+                openSound,
+                CameraClass.Instance.Distance(door.transform.position),
+                BetterAudio.AudioSourceGroupType.Collisions,
+                35,
+                Random.Range(0.8f * bonus, 1f * bonus),
                 EOcclusionTest.Fast);
         }
     }
-    
-    private static void PlayDoorSqueakSound(WorldInteractiveObject door)
+
+    private static void PlayDoorSqueakSound(WorldInteractiveObject door, SkillManager skillManager)
     {
         var squeakSound = door.SqueakSound[Random.Range(0, door.SqueakSound.Length)];
-        var bonus = 1f - SkillManager.SkillManagerExtended.SilentOpsReduceVolumeBuff;    
-        
+        var bonus = 1f - skillManager.SkillManagerExtended.SilentOpsReduceVolumeBuff;
+
         if (squeakSound)
         {
             Singleton<BetterAudio>.Instance.PlayAtPoint(
-                door.transform.position, 
-                squeakSound, 
-                CameraClass.Instance.Distance(door.transform.position), 
-                BetterAudio.AudioSourceGroupType.Collisions, 
-                35, 
-                Random.Range(0.8f * bonus, 1f * bonus), 
+                door.transform.position,
+                squeakSound,
+                CameraClass.Instance.Distance(door.transform.position),
+                BetterAudio.AudioSourceGroupType.Collisions,
+                35,
+                Random.Range(0.8f * bonus, 1f * bonus),
                 EOcclusionTest.Fast);
         }
     }

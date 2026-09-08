@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using EFT;
 using HarmonyLib;
 using SkillsExtended.Config.Skills;
@@ -11,7 +12,21 @@ public class ProneMoveStatePatch : ModulePatch
 {
     private static FieldInfo _playerField;
     private static ProneMovementData ProneData => SkillsExtendedPlugin.SkillData.ProneMovement;
-    
+
+    // ref: AUD-01-19 — cacheia o delegate; só recria quando o Player mudar (ex.: nova raid), em vez
+    // de alocar uma closure nova a cada quadro de bruços.
+    private static Player _cachedPlayer;
+    private static Action _cachedProneAction;
+
+    // ref: CR-01-01 (004 code-review 01) — chamado por OnGameEndedPatch (OnGameStarted.cs) no
+    // Postfix de GameWorld.OnDestroy, pra não reter o Player da raid anterior até a próxima raid
+    // sobrescrever o cache.
+    internal static void ClearCachedAction()
+    {
+        _cachedPlayer = null;
+        _cachedProneAction = null;
+    }
+
     protected override MethodBase GetTargetMethod()
     {
         _playerField = AccessTools.Field(typeof(MovementContext), "_player");
@@ -24,7 +39,7 @@ public class ProneMoveStatePatch : ModulePatch
     {
         if (!ProneData.Enabled) return true;
         if (__instance.CurrentState is not ProneMoveStateClass) return true;
-        
+
         var player = (Player)_playerField.GetValue(__instance);
 
         if (!player.IsYourPlayer) return true;
@@ -36,14 +51,20 @@ public class ProneMoveStatePatch : ModulePatch
         Logger.LogDebug($"Original Prone Speed: {speed}");
         Logger.LogDebug($"Updated Prone Speed: {speed * bonus}");
 #endif
-        
+
         if (!player.Skills.ProneMovement.IsEliteLevel)
         {
-            player.ExecuteSkill(() => player.Skills.ProneAction.Complete(ProneData.XpPerAction));
+            if (!ReferenceEquals(player, _cachedPlayer))
+            {
+                _cachedPlayer = player;
+                _cachedProneAction = () => player.Skills.ProneAction.Complete(ProneData.XpPerAction);
+            }
+
+            player.ExecuteSkill(_cachedProneAction);
         }
-        
+
         __result = Mathf.Clamp(speed * bonus, 0f, __instance.StateSpeedLimit * bonus);
-        
+
         return false;
     }
 }
