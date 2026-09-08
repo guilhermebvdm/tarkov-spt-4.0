@@ -40,9 +40,12 @@
 **Rodada 01 (2026-09-06):** 1 achado aplicado, 0 rejeitados.
 - **CR-01-01** (🟢, Legibilidade): `ReloadInPlacePatches.cs:199-202` — comentário inline reescrito no formato canônico `// ref: CR-01-01 — ...`.
 
+**Fix 01 (2026-09-08):** ver [001-reload-swap-sem-espaco-06-fix-01.md](001-reload-swap-sem-espaco-06-fix-01.md) — descoberto que o cenário "0% de espaço livre em qualquer lugar" nunca funcionava mesmo com o fallback CR-01-01, porque o motor nativo (`GClass2006.Run`) colide consigo mesmo ao mover o carregador antigo pra vaga que o novo ainda ocupa. Corrigido com `InteractionsHandlerClass.Swap` atômico (bypassando `ReloadMag` nativo nesse caso específico) + replicação manual de `RemoveLeftHandItem(3f)`/`ForceStopInteractions()` pra preservar a animação/tempo de "recarga penalizada". Validado in-game em Fika Host + Headless, sem `GClass1561`. Versão final: `5.3.26`.
+
 ## Histórico
 
 | Data | Evento |
 | --- | --- |
 | 2026-09-06 | Build concluído via `/code-mod` |
 | 2026-09-06 | Aplicação de 1 achado de code-review 01 via `/apply-code-review` — ID: CR-01-01 |
+| 2026-09-08 | Fix 01 aplicado — swap atômico pro caso "0% de espaço livre" + pacing de animação. Versão `5.3.24` → `5.3.26` |
