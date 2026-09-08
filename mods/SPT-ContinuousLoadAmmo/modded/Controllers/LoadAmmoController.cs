@@ -140,6 +140,11 @@ public class LoadAmmoController : IDisposable
     {
         try
         {
+            // InventoryScreen.Close() locks PlayerInventoryController's "next process" flag and only
+            // InventoryScreen.Show() clears it — vanilla assumes LoadMagazine is only ever invoked from
+            // an open inventory. Since this call happens with the inventory closed, force-clear it first,
+            // otherwise it stays stuck locked from the last time the player closed their inventory.
+            PlayerInventoryController.SetNextProcessLocked(false);
             var result = await PlayerInventoryController.LoadMagazine(ammo, magazine, loadCount, false);
             if (result.Failed)
             {
@@ -162,6 +167,9 @@ public class LoadAmmoController : IDisposable
             token.ThrowIfCancellationRequested();
             await Task.Yield();
         }
+        // See the matching comment in LoadMagazineFireAndForgetAsync — closing the inventory
+        // re-locks this flag and nothing else clears it before an outside-inventory call.
+        PlayerInventoryController.SetNextProcessLocked(false);
         var result = await PlayerInventoryController.LoadMagazine(ammo, magazine, loadCount, false);
         if (result.Failed)
         {

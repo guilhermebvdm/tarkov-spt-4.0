@@ -1,9 +1,35 @@
 # SPT-ContinuousLoadAmmo — Memória de Sessões
 
 ## Snapshot Delta
-- **Versão:** 1.1.12 (SPT 4.0 / EFT 0.16.9)
-- **Estado:** Guarda de interoperabilidade com o `LoadAmmoAnim` estendida para verificar tanto `LoadAmmoBundleController` ativo quanto transição engatilhada via `IsLoadAmmoAnimActiveOrPending()`. Bump para v1.1.12 e compilação Release com 0 erros/avisos.
+- **Versão:** 1.1.15 (SPT 4.0 / EFT 0.16.9)
+- **Estado:** Dois bugs reais do Quick Load "fora do inventário" corrigidos e validados in-raid: (1) carregadores instalados em armas reserva eram selecionáveis pela busca e sempre falhavam; (2) `PlayerInventoryController.SetNextProcessLocked` ficava travado (`true`) após qualquer fechamento de inventário sem carregamento ativo, quebrando o atalho pelo resto da raid. Logging de falha agora expõe `FailedResult.Error` real em vez do nome do tipo.
 - **Pendências:** 🟢 Nenhuma pendência registrada.
+
+---
+
+## 2026-09-08 03:01 (GMT-3) — Sessão 5: Dois bugs reais no Quick Load fora do inventário (v1.1.13 → v1.1.15)
+
+**Tema central:** Usuário reportou que o atalho de Quick Load (tecla remapeada de K para H) falhava com `Comfort.Common.FailedResult` no console, enquanto o drag-and-drop manual de munição funcionava normalmente.
+
+**Decisões-chave:**
+- **Diagnóstico via decompiled source, não suposição:** traçamos a chamada real de `PlayerInventoryController.LoadMagazine` no jogo (`references/eft-decompiled/Assembly-CSharp/EFT/Player.cs:1250`) em vez de tentar fixes especulativos.
+- **Logging melhorado primeiro:** `result.ToString()` numa falha só retornava o nome do tipo, sem detalhe. Criado `DescribeFailure()` ([LoadAmmoController.cs](../modded/Controllers/LoadAmmoController.cs)) que faz cast para `FailedResult` e expõe `.Error` — foi isso que revelou a causa real do bug #2 depois que o fix do bug #1 não resolveu o sintoma completo.
+- **Bug #1 — carregador instalado em arma:** `GetMagazineForAmmo()` não excluía carregadores já instalados dentro de uma arma (ex.: pistola reserva no coldre, arma secundária na mochila). `MagazineItemClass.Apply()` (usado com `ignoreRestrictions:false`) rejeita incondicionalmente qualquer carregador cujo `Parent.Container is Slot`, antes de checar `weapon.SupportsInternalReload` (`MagazineItemClass.cs:479`). O drag-and-drop nativo não bate nisso porque a UI do jogo roteia ammo-sobre-mag-instalada para `LoadWeaponWithAmmo`, uma API diferente (`SlotView.cs:822`, `GridView.cs:904`) — o mod só chama `LoadMagazine`. Fix: `IsLoadableOutsideWeapon()` exclui esses carregadores da busca.
+- **Bug #2 — trava "Next process is locked" (causa dominante do sintoma reportado):** `InventoryScreen.Close()` chama `SetNextProcessLocked(status: true)`, e só `InventoryScreen.Show()` desfaz isso (`InventoryScreen.cs:529,668`). O mod só desbloqueava esse flag em dois pontos pontuais (construtor do `LoadAmmoController`; `InventoryScreenClosePatch`, só se já houvesse carregamento ativo) — qualquer abre/fecha de inventário sem carregamento ativo deixava o flag travado pelo resto da raid, quebrando o atalho (que roda com inventário fechado, por definição) enquanto o drag-and-drop (inventário aberto) continuava funcionando. Fix: `PlayerInventoryController.SetNextProcessLocked(false)` chamado explicitamente logo antes de cada `LoadMagazine` real, em `LoadMagazineFireAndForgetAsync` e `LoadMagazineAsync`.
+- **Bump em duas etapas:** v1.1.13 → v1.1.14 (bug #1 + logging), depois v1.1.14 → v1.1.15 (bug #2, só achado depois que o logging melhorado revelou a mensagem real "Next process is locked."). Compilado e instalado via `/compile-mod` em `E:/Tarkov Red Line/BepInEx/plugins/SPT-ContinuousLoadAmmo/`. Validado in-raid pelo usuário.
+
+**Lições / hipóteses descartadas:**
+- O fix do bug #1 parecia suficiente para explicar o sintoma completo, mas resolveu só uma fatia do problema — a causa dominante (bug #2) só apareceu depois que o log passou a expor `FailedResult.Error` em vez do nome do tipo. Lição: ao investigar uma falha de `IResult`/`Comfort.Common`, melhorar o log para expor `.Error` ANTES de tentar confirmar hipóteses — evita basear o diagnóstico em suposição quando o dado real está a uma linha de distância.
+- Confirmado por leitura direta do decompiled: nem toda ação que parece equivalente ao drag-and-drop usa o mesmo caminho de código no jogo — a UI nativa tem atalhos especiais (aqui, `LoadWeaponWithAmmo`) que mods chamando a API "genérica" (`LoadMagazine`) não recebem de graça.
+
+**Atividade cronológica:**
+1. Usuário reportou atalho H falhando com `Comfort.Common.FailedResult`; investigação via decompiled source identificou dois pontos de checagem em `Player.LoadMagazine` (restrição de Slot em `Apply`, depois `Bool_2` em `method_30`).
+2. Aplicado fix #1 (exclusão de carregadores instalados) + logging melhorado; build+install via `/compile-mod` → v1.1.14.
+3. Usuário testou; novo erro apareceu ("Next process is locked.") — graças ao logging melhorado, a causa real ficou visível imediatamente, sem nova rodada de investigação às cegas.
+4. Aplicado fix #2 (força `SetNextProcessLocked(false)` antes de cada `LoadMagazine`); build+install via `/compile-mod` → v1.1.15.
+5. Usuário confirmou funcionamento em raid.
+
+**Pendências abertas nesta sessão:** nenhuma.
 
 ---
 
