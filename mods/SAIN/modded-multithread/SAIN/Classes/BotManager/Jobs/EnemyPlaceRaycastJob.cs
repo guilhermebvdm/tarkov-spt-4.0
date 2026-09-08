@@ -175,7 +175,11 @@ public class EnemyPlaceRaycastJob : BotManagerBase
             for (int i = 0; i < Count; i++)
             {
                 EnemyPlace Place = PlacesToCheck[i];
-                if (Place != null)
+
+                // ref: bugfix - Owner (bot) pode ter sido destruido durante o yield return
+                // null em que o raycast batch ficou em voo; Unity retorna "fake null" nesse
+                // caso, entao o check e seguro mesmo antes da destruicao nativa no fim do frame.
+                if (Place != null && Place.PlaceData.Owner != null)
                 {
                     RaycastHit Hit = hits[i];
                     Place.SetDistances(distToBot[i], distToEnemy[i], Place.PlaceData.Owner);

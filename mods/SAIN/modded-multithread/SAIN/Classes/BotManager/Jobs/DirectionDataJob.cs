@@ -66,7 +66,11 @@ public struct PlayerTickData(PlayerComponent inOwner)
 
     public void ReadData()
     {
-        for (int i = 0; i < OtherPlayerDirectionData.Length; i++)
+        // ref: bugfix - OtherPlayerData pode ter sido limpo por Dispose() de outro player
+        // (morte/despawn/extracao) enquanto este job estava em voo por 1 frame; revalidar
+        // contra o tamanho atual da lista evita ArgumentOutOfRangeException em List.get_Item.
+        int count = Mathf.Min(OtherPlayerDirectionData.Length, OtherPlayerData.Count);
+        for (int i = 0; i < count; i++)
         {
             OtherPlayerData[i].DistanceData.SetPlayerDirectionData(OtherPlayerDirectionData[i]);
         }
@@ -204,6 +208,16 @@ public class DirectionDataJob : BotManagerBase
                 for (int i = 0; i < jobCount; i++)
                 {
                     PlayerTickData data = outputSlice[i];
+
+                    // ref: bugfix - dono do dado pode ter sido destruido (morte/despawn/extracao)
+                    // durante o yield return null em que o job ficou em voo; Unity retorna
+                    // "fake null" apos Destroy(), entao este check e seguro mesmo antes da
+                    // destruicao nativa acontecer no fim do frame.
+                    if (data.currentOwner == null)
+                    {
+                        continue;
+                    }
+
                     data.ReadData();
                     data.currentOwner.SetTickData(data);
                 }

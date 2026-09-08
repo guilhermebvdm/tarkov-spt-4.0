@@ -211,6 +211,18 @@ public class VisionRaycastJob : BotManagerBase
         for (int i = 0; i < enemyCount; i++)
         {
             var enemy = _enemies[i];
+
+            // ref: bugfix - Bot pode ter sido destruido durante o yield return null em que o
+            // raycast batch ficou em voo; Unity retorna "fake null" nesse caso. Ainda assim
+            // avancamos hits/colliderTypeCount na mesma quantidade fixa por enemy usada em
+            // CreateCommands, para nao desalinhar os indices do proximo enemy no loop.
+            if (enemy.Bot == null)
+            {
+                colliderTypeCount += partCount;
+                hits += partCount * RAYCAST_CHECKS;
+                continue;
+            }
+
             var parts = enemy.Vision.EnemyParts.PartsArray;
             for (int j = 0; j < partCount; j++)
             {
