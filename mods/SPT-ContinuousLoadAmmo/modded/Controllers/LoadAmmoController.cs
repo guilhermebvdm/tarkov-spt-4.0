@@ -143,7 +143,7 @@ public class LoadAmmoController : IDisposable
             var result = await PlayerInventoryController.LoadMagazine(ammo, magazine, loadCount, false);
             if (result.Failed)
             {
-                ContinuousLoadAmmo.LogSource.LogWarning($"ContinuousLoadAmmo: LoadMagazine falhou: {result}");
+                ContinuousLoadAmmo.LogSource.LogWarning($"ContinuousLoadAmmo: LoadMagazine falhou: {DescribeFailure(result)}");
                 CommonUtils.DisplayNotification("Failed to load ammo, try again", ENotificationIconType.Alert, true);
             }
         }
@@ -165,9 +165,16 @@ public class LoadAmmoController : IDisposable
         var result = await PlayerInventoryController.LoadMagazine(ammo, magazine, loadCount, false);
         if (result.Failed)
         {
-            ContinuousLoadAmmo.LogSource.LogWarning($"ContinuousLoadAmmo: LoadMagazineAsync falhou: {result}");
+            ContinuousLoadAmmo.LogSource.LogWarning($"ContinuousLoadAmmo: LoadMagazineAsync falhou: {DescribeFailure(result)}");
         }
         return !result.Failed;
+    }
+
+    // IResult.ToString() on a failure is just the type name ("Comfort.Common.FailedResult") with no
+    // detail — FailedResult carries the actual reason in its Error field, so surface that instead.
+    private static string DescribeFailure(IResult result)
+    {
+        return result is FailedResult failed ? failed.Error : result.ToString();
     }
 
     private readonly List<MagazineItemClass> _reachableMagazinesScratch = [];
@@ -186,7 +193,7 @@ public class LoadAmmoController : IDisposable
             PlayerInventoryController.GetAcceptableItemsNonAlloc(
                 ReachableSlots,
                 _reachableMagazinesScratch,
-                (mag) => PlayerInventoryController.Examined(mag) && mag.Count != mag.MaxCount && mag.CheckCompatibility(ammo),
+                (mag) => PlayerInventoryController.Examined(mag) && mag.Count != mag.MaxCount && mag.CheckCompatibility(ammo) && IsLoadableOutsideWeapon(mag),
                 ContainerPredicate
             );
         }
@@ -195,7 +202,7 @@ public class LoadAmmoController : IDisposable
             // Can be recursive
             GetReachableItems(
                 _reachableMagazinesScratch,
-                (mag) => PlayerInventoryController.Examined(mag) && mag.Count != mag.MaxCount && mag.CheckCompatibility(ammo)
+                (mag) => PlayerInventoryController.Examined(mag) && mag.Count != mag.MaxCount && mag.CheckCompatibility(ammo) && IsLoadableOutsideWeapon(mag)
             );
         }
         if (_reachableMagazinesScratch.Count <= 0) return false;
@@ -209,6 +216,19 @@ public class LoadAmmoController : IDisposable
         // Mag with most amount
         foundMagazine = _reachableMagazinesScratch[0];
         return true;
+    }
+
+    /// <summary>
+    /// PlayerInventoryController.LoadMagazine always calls the restricted MagazineItemClass.Apply,
+    /// which unconditionally rejects any magazine currently installed in a weapon slot (Parent.Container
+    /// is Slot) before even checking weapon.SupportsInternalReload. The vanilla UI avoids this by routing
+    /// ammo dropped on an installed magazine through LoadWeaponWithAmmo instead of LoadMagazine, but this
+    /// mod only ever calls LoadMagazine, so an installed magazine (eg. a spare weapon holstered in a rig
+    /// or backpack) must be excluded from the reachable search rather than attempted and silently failed.
+    /// </summary>
+    private static bool IsLoadableOutsideWeapon(MagazineItemClass mag)
+    {
+        return mag.Parent?.Container is not Slot;
     }
 
     private readonly List<AmmoItemClass> _reachableAmmoScratch = [];
