@@ -316,6 +316,29 @@ namespace Manimal.LoadAmmoAnim.Patches
                 Plugin.LogSource?.LogError(
                     $"[LoadAmmoAnim] CreateAndSpawnBundleController threw: {ex}");
                 session.IsOurAnimation = false;
+
+                // Player.SpawnController assigns HandsController before running the item's own
+                // Spawn/animator setup — a third-party Harmony patch throwing partway through
+                // that setup (eg. a compat gap in another mod) can leave the player's hands
+                // stuck on a half-initialized LoadAmmoBundleController with no weapon and no
+                // AnimLoop running to ever tear it down. Recover here instead of soft-locking.
+                try
+                {
+                    if (player?.HandsController is LoadAmmoBundleController)
+                    {
+                        player.DestroyController();
+                    }
+                }
+                catch (Exception cleanupEx)
+                {
+                    Plugin.LogSource?.LogError(
+                        $"[LoadAmmoAnim] cleanup after failed spawn threw: {cleanupEx.Message}");
+                }
+
+                if (player != null && player.HandsIsEmpty)
+                {
+                    player.TrySetLastEquippedWeapon();
+                }
             }
         }
 
