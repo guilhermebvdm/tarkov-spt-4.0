@@ -140,6 +140,14 @@ internal sealed class ObservedMedsController : Player.MedsController
             _observedMedsController.FirearmsAnimator.SetAnimationVariant(_animation);
             _observedMedsController._fikaPlayer.HealthController.EffectRemovedEvent += HealthController_EffectRemovedEvent;
             _observedMedsController.OnOutUseEvent += ObservedMedsController_OnOutUseEvent;
+
+            // Item 005 — hook genérico de velocidade (nenhum multiplicador nativo é setado nesta 1ª parte do
+            // corpo hoje; um mod consumidor pode acelerar/desacelerar mesmo assim via ObservedMedsSpeedHook).
+            var extraStart = ObservedMedsSpeedHook.ResolveExtra(_observedMedsController._fikaPlayer, _observedMedsController.Item);
+            if (extraStart != 1f)
+            {
+                _observedMedsController.FirearmsAnimator?.SetUseTimeMultiplier(extraStart);
+            }
         }
 
         public void ObservedMedsController_OnOutUseEvent()
@@ -180,7 +188,10 @@ internal sealed class ObservedMedsController : Player.MedsController
                 }
 
                 var mult = _observedMedsController._fikaPlayer.Skills.SurgerySpeed.Value / 100f;
-                animator.SetUseTimeMultiplier(1f + mult);
+
+                // Item 005 — hook genérico compõe POR CIMA do cálculo nativo (skill Cirurgia).
+                var extra = ObservedMedsSpeedHook.ResolveExtra(_observedMedsController._fikaPlayer, _observedMedsController.Item);
+                animator.SetUseTimeMultiplier((1f + mult) * extra);
 
                 _animation++;
                 var variant = 0;

@@ -2,28 +2,108 @@
 
 ## Estado atual
 
-> **Delta 2026-09-06 (Sessão 3):** Corrigida a rejeição `GClass1561` (`PlayerIsBusyError`) no swap de magazine 1-para-1 em arma empunhada via drag-and-drop em partidas coop com Headless dedicado (item de backlog `003-magazine-swap-inplace-fix`). Causa raiz: a própria troca de carregador colide consigo mesma no motor do EFT (não é concorrência real nem stub incompleto). Fix cirúrgico em `ObservedInventoryController.CheckItemAction` + novo patch de correlação `InOutHandsProcessTimestampPatch`. `Fika.Core.dll` v2.3.14, validado in-game pelo usuário — bug alvo não reaparece.
+> **Delta 2026-09-10 (Sessão 6):** Auditoria de código 01 registrada em `docs/relatorio-auditoria-codigo-01.md` e elaboração de spec técnica para o item `006-colisao-maos-item-nao-carregador`. Item 006 está **PAUSADO** aguardando teste do usuário em raid real (com Debug+log) para confirmar se a causa assumida do bug `ContinuousLoadAmmo` está correta antes de implementar.
 >
-> **Delta 2026-09-03 (Sessão 2):** Implementação e validação do item `001-drop-backpack-sync-fix` (v2.3.11). Correção da trava e desync de descarte rápido de mochila ("ZZ" / `DropBackpack`) em instâncias de Headless/Host coop via patch Harmony `ObservedPlayer_DropBackpackSafety_Patch` em `Player.TryRemoveFromHands`. Atualização de `Fika.Core.dll` para v2.3.11 e recompilação de `Fika.Headless.dll` com 0 erros/avisos.
+> **Delta 2026-09-09 (Sessão 5):** Item `005-hook-velocidade-cura-observada` implementado: criação de `ObservedMedsSpeedHook.cs` exportando o delegate público `Func<Player, Item, float> ExtraSpeedMultiplier` para consumo de outros mods (`CustomClasses/090`), e integração em `ObservedMedsController.cs`. Bump SemVer para v2.3.16 em `FikaPlugin.cs` e `mod.json`. Compilação/instalação no jogo não realizada a pedido do usuário (restrita ao repo). Validação in-game pendente (P-5.1).
 >
-> **Delta 2026-09-02 (Sessão 1):** FIKA modded compilado com 0 Erros em todos os 4 módulos do ecossistema ([`mods/FIKA/modded/`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/FIKA/modded/)). Concluído o ciclo de engenharia composto por: (1) Auditoria Diagnóstica da base original; (2) Fase B de Correções Cirúrgicas com integração dos patches do `TRL-Fixes` (#1 a #6); (3) Re-Auditoria Técnica Profunda; (4) Aplicação da 2ª Rodada de Refino; (5) Planejamento arquitetural no `docs/ROADMAP.md`; (6) Especificação de infraestrutura dedicada Headless; (7) 100% de contratos públicos preservados.
-
-- **Módulos Compilados e Versionados:**
-  - `Fika.Core.dll` (v2.3.11 — .NET Standard 2.1) $\rightarrow$ 🟢 0 erros / 0 avisos
-  - `FikaServer.dll` (v2.3.6 — .NET 9.0) $\rightarrow$ 🟢 0 erros
-  - `Fika.Headless.dll` (v1.4.16 — .NET Standard 2.1) $\rightarrow$ 🟢 0 erros / 0 avisos
-  - `Fika.Headless.AssetNuker.dll` (v1.4.16 — .NET 9.0 win-x64) $\rightarrow$ 🟢 0 erros / 0 avisos
-- **Documentação Técnica Integral:** Backlog formal iniciado (`001-drop-backpack-sync-fix`), 24 relatórios modulares e Roadmap preservados.
-
----
+> **Delta 2026-09-08 (Sessão 4):** Ciclo completo de backlog (spec → review-spec → spec técnica → review técnica → `/code-mod` → `/code-review` → `/apply-code-review`) para o item `004-colisao-cura-swap-magazine`. Causa raiz: `IsSelfReferentialMagazineSwap` (fix do item 003) só tolerava a colisão `inOutHandsProcess` quando o item que abriu o `Begin` pendente era outro `MagazineItemClass` — arma reequipada ao fim de uma cura (`TRL-ImmersiveCombatMedicine`, `method_9`/`ForceFinishAnimation`) abre esse `Begin` com o item de cura, não um carregador, então o swap de carregador seguinte era rejeitado com `GClass1561` de verdade, travando a mão do jogador. Fix: renomear para `IsSelfReferentialHandsTransition` e generalizar a condição de `movedItem is MagazineItemClass` para `movedItem != null && movedItem != weapon` — tolera qualquer transição de mãos recente do mesmo jogador na mesma arma (cura, granada, faca, reanimação), preservando o bloqueio de um saque/guarda real da própria arma. Nenhum novo Harmony patch: reaproveita 100% a infraestrutura `InOutHandsProcessTimestampPatch` do item 003. `Fika.Core.dll` v2.3.15 — **build e validação in-game ainda pendentes** (ver P-4.1).
 
 ## Pendências
 
+- [P-6.1] (aberta 2026-09-10) **Testar em raid real com Debug+log a causa raiz de mãos travadas no `ContinuousLoadAmmo` (item 006)** — Verificar se a transição de mãos recente no `inOutHandsProcess` realmente causa o erro `"Default Inventory is currently being modified"` ao equipar arma pós-carregamento contínuo. 🔴 Bloqueador (item pausado aguardando evidência empírica).
+- [P-5.1] (aberta 2026-09-09) **Compilar e validar in-game o hook de velocidade de cura observada (item 005, v2.3.16)** — Testar em coop Fika com `CustomClasses` (item 090): confirmar que a velocidade extra de cirurgia/cura de aliado é repassada e renderizada suavemente para o jogador observador. 🟡 Validação in-game.
+- [P-4.1] (aberta 2026-09-08) **VALIDAR IN-GAME o item `004-colisao-cura-swap-magazine`** — checklist completo em `004-colisao-cura-swap-magazine-02-spec-tech.md` §8: cenário principal (cura → swap de carregador), self-heal, sequência repetida/múltiplos aliados, checagem do observador (jogador B), e o teste **bloqueador** de que um saque de arma real continua sendo rejeitado (incerteza de análise estática documentada na spec técnica §1.3/§7 — só o teste in-game fecha com certeza). 🟡 Validação in-game (AP-06).
+- [P-3.1] (aberta 2026-09-06) **Calibrar `GraceWindowSeconds`** — hoje fixo em `0.35f` (marcado `TODO confirmar` no código) em `ObservedInventoryController.cs`. Precisa de instrumentação temporária (log de `elapsedSeconds` real) em sessão Headless de verdade antes de considerar definitivo. Desde a Sessão 4, essa mesma constante é reaproveitada por `IsSelfReferentialHandsTransition` (item 004) — recalibrar afeta os dois. 🟡 Débito técnico.
+- [P-3.2] (aberta 2026-09-06) **Trilha B do item 003** — limpar `FikaActiveWeaponMagSwapPatch` em `mods/UIFixes/modded/src/Patches/SwapPatches.cs:891-924` (patch no alvo errado — `TraderControllerClass.CheckItemAction` do lado cliente — hoje inofensivo mas inútil pro Headless). Cross-ref: `mods/UIFixes/memory/sessions.md` P-8.1. 🟢 Ideia / limpeza.
 - [P-1.1] (aberta 2026-09-02) **VALIDAR IN-GAME a suite completa modded do FIKA** — Cenários a testar em sessão multiplayer: **(1)** Conexão cliente-servidor e movimentação sem jitter; **(2)** Mecânica de reviver verificando hitboxes pós-revive (TRL-Fixes #1); **(3)** Movimentação rápida de inventário com `Ctrl+Click` para validar auto-recuperação (TRL-Fixes #2); **(4)** Equipar arma com trilhos múltiplos tácticos (TRL-Fixes #4); **(5)** Entrada de bots em metralhadoras/lança-granadas montadas (TRL-Fixes #6); **(6)** Transição e retorno ao menu principal monitorando descarte de memória RAM; **(7)** [NOVO] Descarte rápido de mochila com "ZZ" e re-coleta no chão em raid multiplayer com Headless (Item 001). 🟡 Validação in-game.
 - [P-1.2] (aberta 2026-09-02) **Implementação da Correção de Desync no Reconect (Ghost Body)** — Re-binding atômico de `ObservedPlayer` e reset de interpolação no Host conforme [`docs/ROADMAP.md`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/FIKA/docs/ROADMAP.md) §1. 🟢 Feature / Fix.
 - [P-1.3] (aberta 2026-09-02) **Implementação do Sistema de Senha Temporária para Raids** — Integração de validação de hash de senha no `FikaServer` e modal de input no `MatchMakerUIScript.cs` conforme [`docs/ROADMAP.md`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/FIKA/docs/ROADMAP.md) §3. 🟢 Feature.
-- [P-3.1] (aberta 2026-09-06) **Calibrar `GraceWindowSeconds`** — hoje fixo em `0.35f` (marcado `TODO confirmar` no código) em `ObservedInventoryController.cs`. Precisa de instrumentação temporária (log de `elapsedSeconds` real) em sessão Headless de verdade antes de considerar definitivo. 🟡 Débito técnico.
-- [P-3.2] (aberta 2026-09-06) **Trilha B do item 003** — limpar `FikaActiveWeaponMagSwapPatch` em `mods/UIFixes/modded/src/Patches/SwapPatches.cs:891-924` (patch no alvo errado — `TraderControllerClass.CheckItemAction` do lado cliente — hoje inofensivo mas inútil pro Headless). Cross-ref: `mods/UIFixes/memory/sessions.md` P-8.1. 🟢 Ideia / limpeza.
+
+---
+
+## 2026-09-10 20:15 (GMT-3) — Sessão 6: Auditoria de Código 01 e Especificação do Item 006 (PAUSADO para teste in-game)
+
+**Tema central:** Auditoria estática de código no fork do Fika (`docs/relatorio-auditoria-codigo-01.md`), identificação de achados (AUD-01-01 a AUD-01-04) e ciclo de especificação até review técnica 01 do item 006 — porém trabalho colocado em **PAUSA** antes de codar para validação empírica.
+
+**Decisões-chave:**
+- **Auditoria de Código 01 formalizada (`docs/relatorio-auditoria-codigo-01.md`):** Mapeados 4 achados no Fika: AUD-01-01 (log silencioso de exceções de inventário), AUD-01-02 (tratamento de pacotes desconhecidos no NetPacketProcessor), AUD-01-03 (timeout de inventário), AUD-01-04 (catch vazio em ClientInventoryOperationHandler).
+- **Item 006 pausado para validação em raid real:** O item 006 visa resolver a trava de mãos `"Default Inventory is currently being modified"` ao equipar arma/faca/granada logo após `SPT-ContinuousLoadAmmo` ou curar aliado. A spec técnica 01 foi elaborada e revisada (`03-spec-tech-review-01.md`), mas a decisão consciente é **NÃO codar nem assumir a causa raiz como confirmada** até que o usuário teste em raid real com Debug+log ativo para coletar o stack trace e o estado do `inOutHandsProcess`.
+
+**Lições / hipóteses descartadas:**
+- *Não antecipar código sem prova empírica:* A causa assumida para o conflito com `SPT-ContinuousLoadAmmo` é plausível em teoria, mas como envolve interação com outro mod em runtime de rede, implementar patches complexos sem telemetria real pode mascarar outro problema (AP-06 / AP-09).
+
+**Atividade cronológica:**
+1. Auditoria diagnóstica de código realizada e consolidada em `docs/relatorio-auditoria-codigo-01.md`.
+2. Criação do item 006: spec funcional (`01-spec.md`) e spec técnica (`02-spec-tech.md`).
+3. Review técnica 01 (`03-spec-tech-review-01.md`) realizada.
+4. Item colocado em pausa deliberada aguardando dados de teste in-game do usuário.
+
+**Pendências abertas nesta sessão:**
+- [P-6.1] (aberta 2026-09-10) 🔴 Testar em raid real com Debug+log a causa raiz de mãos travadas no `ContinuousLoadAmmo` (item 006).
+
+**Cross-refs:**
+- Artefatos do item: `mods/FIKA/backlog/006-colisao-maos-item-nao-carregador/`.
+- Relatório de auditoria: `mods/FIKA/docs/relatorio-auditoria-codigo-01.md`.
+
+---
+
+## 2026-09-09 00:30 (GMT-3) — Sessão 5: Hook Genérico de Velocidade de Cura Observada (item 005, v2.3.15 → v2.3.16)
+
+**Tema central:** Ciclo completo de backlog (spec funcional → review-spec → spec técnica → review técnica 01 → `/code-mod` → `/code-review` 01 → `/apply-code-review`) do item 005 — criação de um ponto de extensão genérico e desacoplado no `ObservedMedsController` para permitir que mods externos (`CustomClasses`, item 090) multipliquem a velocidade da animação de cura replicada em peers remotos.
+
+**Decisões-chave:**
+- **Hook genérico e desacoplado (`ObservedMedsSpeedHook.cs`):** Criação da classe pública com `public static Func<Player, Item, float>? ExtraSpeedMultiplier`. O Fika não referencia nenhum mod externo; qualquer mod consumidor assina o delegate para compor multiplicadores de classe/perk (PA-01-01).
+- **Tratamento defensivo (`ResolveExtra`):** Valida `player` e `item` não-nulos antes de invocar o delegate (PA-01-02), embrulha em try/catch fail-open (retorna 1.0f em caso de erro), e valida que o retorno é número finito e positivo.
+- **Intervenção em dois pontos de `ObservedMedsController.cs`:** (1) `ObservedStart`: aplica o multiplicador na 1ª parte do corpo (antes ausente de multiplicador nativo); (2) `HealthController_EffectRemovedEvent`: compõe o multiplicador do hook sobre a fórmula vanilla da skill Cirurgia: `(1f + mult) * extra`.
+- **Versionamento e alinhamento SemVer:** Versão do plugin elevada de `2.3.15` para `2.3.16` em `FikaPlugin.cs` e alinhada em `mod.json` (CR-01-01). Código compilável, sem `/compile-mod` para o jogo conforme diretriz do usuário.
+
+**Lições / hipóteses descartadas:**
+- *Impossibilidade de ajustar velocidade sem hook nativo:* No vanilla e no Fika upstream, `ObservedMedsController` é privado e recalcula a velocidade apenas pela skill de cirurgia; proxies de rede não têm `ActiveHealthController`. Um hook estático no próprio Fika é a solução mais elegante e de zero overhead (evita transpilers e reflexão por frame).
+
+**Atividade cronológica:**
+1. Mapeamento do problema a partir da demanda de replicação do `CustomClasses` (item 090).
+2. Ciclo de spec funcional (`01-spec.md`), técnica (`02-spec-tech.md`) e review técnica (`03-spec-tech-review-01.md` com 4 achados PA-01-01 a PA-01-04 resolvidos).
+3. Implementação via `/code-mod`: criação de `ObservedMedsSpeedHook.cs`, edição cirúrgica em `ObservedMedsController.cs` e bump para `2.3.16`.
+4. Code review 01 identificou 2 achados (CR-01-01 alinhamento de `mod.json`, CR-01-02 aviso XML sobre main thread), aplicados via `/apply-code-review`.
+5. As-built (`05-asbuild.md`) gerado. Build e validação in-game pendentes.
+
+**Pendências abertas nesta sessão:**
+- [P-5.1] (aberta 2026-09-09) 🟡 Compilar e validar in-game o hook de velocidade de cura observada (item 005, v2.3.16).
+
+**Cross-refs:**
+- Consumidor primário: `mods/CustomClasses/backlog/090-velocidade-cura-nao-replica/` (`ClassMedicReplicationHook.cs`).
+- Artefatos do item: `mods/FIKA/backlog/005-hook-velocidade-cura-observada/`.
+
+---
+
+## 2026-09-08 19:28 (GMT-3) — Sessão 4: Generalização do fix 003 para colisão com transição de mãos não-magazine — item 004-colisao-cura-swap-magazine
+
+**Tema central:** Fechar a lacuna do fix `003` (`IsSelfReferentialMagazineSwap`), que só tolerava a colisão `inOutHandsProcess` quando a metade "gêmea" era outro carregador — deixando qualquer OUTRA ação que reequipe a arma (cura, e por extensão granada/faca/reanimação) travar o swap de carregador seguinte.
+
+**Decisões-chave:**
+- [Causa raiz reconfirmada por leitura direta, não só herdada da memória cross-mod]: `TRLImmersiveCombatMedicine` finaliza toda cura chamando `MedicHealPatch.ForceFinishAnimation()` (`BandAidController.cs:625` do próprio mod), que invoca via reflexão `method_9` de `Player.MedsController.ObservedMedsControllerClass` (`Player.cs:19640-19660`) — o cleanup nativo que devolve a arma às mãos do médico. Esse reequipe abre um `Begin`/`GEventArgs17` na arma via `TrySetInHands`/`HandleInProcess`, com `movedItem` = o item de cura (não um carregador) — exatamente o caso que `IsSelfReferentialMagazineSwap` (item 003) não cobria. Ref: `004-colisao-cura-swap-magazine-02-spec-tech.md` §1.1.
+- [Fix generaliza sem tocar a infraestrutura de correlação]: `InOutHandsProcessTimestampPatch` (item 003) já captura genericamente qualquer item que abriu o `Begin` — a lacuna estava só na condição consumidora. Renomeado `IsSelfReferentialMagazineSwap` → `IsSelfReferentialHandsTransition`; condição trocada de `movedItem is MagazineItemClass` para `movedItem != null && movedItem != weapon`. Nenhum novo Harmony patch, nenhuma mudança em `InOutHandsProcessTimestampPatch.cs`. Ref: `ObservedInventoryController.cs:211-237`.
+- [Insight arquitetural sobre o "cenário protegido"]: leitura de `Player.TryRemoveFromHands` (`Player.cs:32223-32263`) mostrou que um saque/guarda REAL da arma já equipada nunca levanta `Begin`/`Succeed` — desvia para `SetControllerInsteadRemovedOne` (`Player.cs:32242`) antes disso. Ou seja, `movedItem == weapon` só pode acontecer (se acontecer) pelo lado "entrar nas mãos" (`TrySetInHands`/`HandleInProcess`), nunca por `TryRemoveFromHands`. Essa assimetria é o motivo de manter `movedItem != weapon` como critério de bloqueio residual, em vez de simplesmente remover a checagem inteira. Documentado como incerteza (não certeza) na spec técnica §1.3/§7, com item de validação in-game **bloqueador** dedicado no §8 — útil pra qualquer bug futuro nesse mesmo pipeline de mãos.
+- [Proteção cross-player já é estrutural, não precisa de novo código]: `TryGetPendingBegin` é escopado por `TraderControllerClass` (uma instância por jogador) — generalizar `movedItem` aceito não introduz nenhum risco de tolerar colisão entre jogadores diferentes, essa proteção nunca dependeu do tipo de `movedItem`.
+
+**Lições / hipóteses descartadas:**
+- Hipótese "é preciso um bypass específico por tipo de item de cura" (replicar o padrão restrito do item 003 caso a caso) descartada — não escala e é o mesmo erro de design que originou este item; a spec funcional já generaliza o corner case para qualquer ação (granada, faca, reanimação).
+- Hipótese "dá pra provar 100% por leitura estática que `movedItem == weapon` nunca ocorre" descartada como certeza — só é garantidamente falso pelo lado `TryRemoveFromHands` (comportamento hard-coded no método); pelo lado `TrySetInHands`/`HandleInProcess` não há como confirmar sem reproduzir em raid. Registrado como incerteza explícita em vez de afirmado sem prova (AP-09).
+
+**Atividade cronológica:**
+1. Ciclo completo de backlog (spec funcional → review-spec → spec técnica → review técnica 01 → `/code-mod` → `/code-review` 01 → `/apply-code-review`) pro item `004-colisao-cura-swap-magazine`.
+2. Review técnica 01: 3 pontos (1🟡/2🟢) — 2 itens de validação in-game adicionados ao checklist (sequência repetida/múltiplos aliados; checagem do observador B) e 1 ajuste de convenção de comentário (ID curto em vez de path completo). Todos aceitos e resolvidos antes do `/code-mod`.
+3. Code review 01: 1 achado (🟡) — a correção do ajuste de convenção do ponto anterior foi aplicada em 2 de 3 comentários no código real, não nos 3; aplicado via `/apply-code-review` (CR-01-01).
+4. `Fika.Core.dll` bump de versão pra `2.3.15` (`FikaPlugin.cs` + `mod.json`) — **build efetivo (`dotnet build`) e validação in-game ainda não executados nesta sessão** (usuário instruiu não rodar `/compile-mod`, que instala automaticamente no jogo).
+
+**Pendências abertas nesta sessão:**
+- [P-4.1] Validar in-game o item 004 (checklist completo na spec técnica §8, incluindo o teste bloqueador do saque de arma real). Categoria: 🟡 validação in-game (AP-06).
+
+**Cross-refs:**
+- Diagnóstico original da causa raiz: `mods/UIFixes/memory/sessions.md` Sessão 9b (2026-09-08) — resolve/fecha a pendência `P-9.3` registrada lá ("acompanhar até ter spec/fix"); fix agora implementado, validação in-game rastreada aqui em `P-4.1`.
+- Mesma família de proteção do item `003` (Sessão 3 acima) — `inOutHandsProcess`/`GClass1561`, generalização direta do mecanismo de correlação criado naquela sessão.
+
+---
 
 ## 2026-09-06 23:34 (GMT-3) — Sessão 3: Fix da rejeição GClass1561 no swap de magazine in-place (Headless) — item 003-magazine-swap-inplace-fix
 

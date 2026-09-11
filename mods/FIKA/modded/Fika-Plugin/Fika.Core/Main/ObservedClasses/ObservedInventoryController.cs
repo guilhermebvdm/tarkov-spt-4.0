@@ -166,15 +166,15 @@ public sealed class ObservedInventoryController : Player.PlayerInventoryControll
                     item.GetAllParentItemsAndSelf(false).Any(lambda.method_1) ||
                     location?.Container.ParentItem.GetAllParentItemsAndSelf(false).Any(lambda.method_1) == true;
 
-                // ref: PA-01-02 — só a metade "gêmea" da mesma troca de magazine em andamento é
-                // isenta (o item que abriu o Begin pendente precisa ser, ele também, um
-                // MagazineItemClass; um saque/guarda de arma grava a própria arma como item
-                // movido e nunca satisfaz essa condição). Qualquer outra colisão via
+                // ref: item 004 (colisão cura + swap magazine) — generaliza o fix do item 003
+                // (PA-01-02): tolera QUALQUER transição de mãos recente na MESMA arma/MESMO
+                // jogador (carregador, item de cura, granada, faca, reanimação) que não seja,
+                // ela própria, um saque/guarda real dessa arma. Qualquer outra colisão via
                 // inOutHandsProcess continua bloqueada.
-                if (collidesViaHands && !IsSelfReferentialMagazineSwap(item, lambda.inOutHandsProcess))
+                if (collidesViaHands && !IsSelfReferentialHandsTransition(item, lambda.inOutHandsProcess))
                 {
 #if DEBUG
-                    FikaGlobals.LogError($"{item.LocalizedShortName()} failed inOutHandsProcess check (not a self-referential magazine swap)");
+                    FikaGlobals.LogError($"{item.LocalizedShortName()} failed inOutHandsProcess check (not a self-referential hands transition)");
 #endif
                     flag = true;
                 }
@@ -208,12 +208,14 @@ public sealed class ObservedInventoryController : Player.PlayerInventoryControll
         return new GClass1568(item, location);
     }
 
-    // ref: PA-01-01/PA-01-02 — instância (não static, precisa de "this" como o TraderControllerClass
-    // dono de List_0/InOutHandsProcessTimestampPatch). Reconhece que uma colisão com inOutHandsProcess
-    // é a própria troca de magazine 1-para-1 colidindo consigo mesma (as duas metades do swap abrem
-    // Begin/Succeed na mesma arma empunhada), e não um saque de arma real nem outra operação
-    // concorrente genuína — ver 003-magazine-swap-inplace-fix-02-spec-tech.md §1.4.
-    private bool IsSelfReferentialMagazineSwap(Item item, GEventArgs17 inOutHandsProcess)
+    // ref: PA-01-01/PA-01-02 (item 003) + item 004 (colisão cura + swap magazine, generalização) —
+    // instância (não static, precisa de "this" como o TraderControllerClass dono de List_0/
+    // InOutHandsProcessTimestampPatch). Reconhece que uma colisão com inOutHandsProcess é uma
+    // transição de mãos recente e legítima do MESMO jogador na MESMA arma (troca de carregador,
+    // arma reequipada após cura/granada/faca/reanimação) — e não um saque/guarda real dessa arma
+    // nem concorrência de outro jogador (impossível aqui: TryGetPendingBegin já é escopado por
+    // TraderControllerClass = por jogador). Ver spec técnica do item 004 §1.3. // ref: CR-01-01
+    private bool IsSelfReferentialHandsTransition(Item item, GEventArgs17 inOutHandsProcess)
     {
         if (item is not MagazineItemClass || inOutHandsProcess?.Item is not Weapon weapon)
         {
@@ -225,10 +227,13 @@ public sealed class ObservedInventoryController : Player.PlayerInventoryControll
             return false;
         }
 
-        // TODO confirmar: janela de graça calibrada por instrumentação temporária (log do
-        // elapsedSeconds real observado numa rejeição reproduzida em Headless) antes de fechar o item.
+        // TODO confirmar (P-3.1, herdada do item 003): janela de graça calibrada por
+        // instrumentação temporária antes de fechar o item.
         const float GraceWindowSeconds = 0.35f;
-        return movedItem is MagazineItemClass && elapsed <= GraceWindowSeconds;
+
+        // movedItem == weapon é o único cenário que deve continuar bloqueado: um saque/guarda
+        // real desta MESMA arma em voo (ver spec técnica do item 004 §1.3).
+        return movedItem != null && movedItem != weapon && elapsed <= GraceWindowSeconds;
     }
 
     public override bool CheckOverLimit(IEnumerable<Item> items, ItemAddress to, bool useItemCountInEquipment, out InteractionsHandlerClass.GClass1609 error)
