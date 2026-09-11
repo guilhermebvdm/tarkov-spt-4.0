@@ -471,7 +471,11 @@ namespace TRLImmersiveCombatMedicine.Medical
         }
 
         /// <summary>Chamado pelo handler do TreatmentReport (custo autoritativo do paciente).</summary>
-        public static void ResolvePendingConsumeFromReport(string patientId, string templateId, float cost)
+        // ref: CR-01-01 — retorna bool (true = achou e consumiu a entrada pendente) para que
+        // callers (ex.: crédito de XP em BandAidNetworkHandler) possam se gatear na MESMA
+        // guarda de idempotência: um report duplicado/reenviado não encontra mais a entrada
+        // (já removida na 1ª chamada) e não deve repetir NENHUM efeito colateral, não só o consumo.
+        public static bool ResolvePendingConsumeFromReport(string patientId, string templateId, float cost)
         {
             for (int i = 0; i < _pendingConsumes.Count; i++)
             {
@@ -481,10 +485,11 @@ namespace TRLImmersiveCombatMedicine.Medical
                     _pendingConsumes.RemoveAt(i);
                     Logger.LogInfo($"[CR-05] Consumo pelo report: custo real {cost:F1} (fallback seria {p.FallbackCost:F1}).");
                     ConsumeSafe(p.Doctor, p.Item, UnityEngine.Mathf.Max(0f, cost), isRemotePatient: true);
-                    return;
+                    return true;
                 }
             }
             Logger.LogInfo("[CR-05] Report sem consumo pendente correspondente (já resolvido por timeout?).");
+            return false;
         }
 
         /// <summary>Tick do BandAidController: pendentes expirados consomem o fallback.</summary>

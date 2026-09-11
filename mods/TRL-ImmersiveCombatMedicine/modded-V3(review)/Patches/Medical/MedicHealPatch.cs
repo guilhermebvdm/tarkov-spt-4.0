@@ -39,6 +39,12 @@ namespace TRLImmersiveCombatMedicine.Medical
         private static object _currentObservedMedsControllerClass = null;
         private static IHealthController _subscribedPatientHc = null;
 
+        // 022 — XP de HP restaurado (ExpForHeal), acumulado em FLOAT durante toda a operação de
+        // cura atual e truncado para int UMA ÚNICA VEZ em CleanupPatientSubscription. Truncar por
+        // tick perderia quase todo o XP em curas graduais pequenas (mesmo padrão do vanilla,
+        // ref: Assembly-CSharp/GClass2266.cs:256-264, method_1 — acumula em Float_0, trunca 1x).
+        private static float _pendingHealthXp = 0f;
+
         // Fix Salewa (sessão 2026-07-12): quando o DoMedEffect redirecionado ao paciente
         // retorna não-null, o MedEffect NATIVO já cura HP ao longo do tempo, remove
         // bleeds/fraturas no Residue() e consome HpResource do item. O HealRoutine
@@ -101,6 +107,46 @@ namespace TRLImmersiveCombatMedicine.Medical
             _method9Cached = AccessTools.Method(class1172, "method_9");
             Logger.LogInfo($"MedicHealPatch alvo: {method.DeclaringType.FullName}.{method.Name}");
             return method;
+        }
+
+        // 022 — mecanismo 1 (HealExperience por efeito curável). Dispara 1x por efeito
+        // realmente resolvido (Bleeding/Fracture/Intoxication/Pain), dentro de MedEffect.Residue()
+        // no paciente. ref: Assembly-CSharp/EFT.HealthSystem/IHealthController.cs:64 (HealerDoneEvent)
+        // ref: Assembly-CSharp/GInterface326.cs (IExperienceHealthEffect.HealExperience)
+        private static void OnPatientHealerDone(IEffect effect)
+        {
+            try
+            {
+                int amount = (effect as GInterface326)?.HealExperience ?? 0;
+                if (amount <= 0) return;
+
+                var doctor = Comfort.Common.Singleton<GameWorld>.Instance?.MainPlayer;
+                HealXpCredit.CreditHealXp(doctor, amount);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogWarning($"OnPatientHealerDone: {ex.Message}");
+            }
+        }
+
+        // 022 — mecanismo 2 (ExpForHeal por HP restaurado). Só ACUMULA — o crédito real
+        // (truncado 1x) acontece em CleanupPatientSubscription, ao fim da operação de cura.
+        // ref: Assembly-CSharp/EFT.HealthSystem/IHealthController.cs:50 (HealthChangedEvent)
+        // ref: Assembly-CSharp/EFT.HealthSystem/ActiveHealthController.cs:3933-3954 (ChangeHealth)
+        private static void OnPatientHealthChanged(EBodyPart bodyPart, float diff, DamageInfoStruct damageInfo)
+        {
+            if (diff <= 0f) return; // diff negativo = dano, não cura — não conta pra XP
+
+            try
+            {
+                // ref: Assembly-CSharp/BackendConfigSettingsClass.cs:2258,642,531 (Experience.Heal.ExpForHeal)
+                float expForHeal = Comfort.Common.Singleton<BackendConfigSettingsClass>.Instance.Experience.Heal.ExpForHeal;
+                _pendingHealthXp += expForHeal * diff;
+            }
+            catch (Exception ex)
+            {
+                Logger.LogWarning($"OnPatientHealthChanged: {ex.Message}");
+            }
         }
 
         private static void OnPatientEffectRemoved(IEffect effect)
@@ -196,9 +242,25 @@ namespace TRLImmersiveCombatMedicine.Medical
             if (_subscribedPatientHc != null)
             {
                 _subscribedPatientHc.EffectRemovedEvent -= OnPatientEffectRemoved;
+                _subscribedPatientHc.HealerDoneEvent -= OnPatientHealerDone;       // 022
+                _subscribedPatientHc.HealthChangedEvent -= OnPatientHealthChanged; // 022
                 _subscribedPatientHc = null;
             }
             // NÃO limpar _currentObservedMedsControllerClass aqui — pode ser necessário para ForceFinishAnimation
+
+            // 022 — trunca UMA VEZ o XP de HP acumulado na operação que está terminando
+            // (mesmo padrão do vanilla method_1, GClass2266.cs:256-264: acumula em float,
+            // trunca 1x). Fora do guard acima de propósito — roda mesmo em double-cleanup.
+            if (_pendingHealthXp > 0f)
+            {
+                int flushed = (int)_pendingHealthXp;
+                if (flushed > 0)
+                {
+                    var doctor = Comfort.Common.Singleton<GameWorld>.Instance?.MainPlayer;
+                    HealXpCredit.CreditHealXp(doctor, flushed);
+                }
+                _pendingHealthXp = 0f;
+            }
         }
 
         /// <summary>
@@ -414,6 +476,9 @@ namespace TRLImmersiveCombatMedicine.Medical
                 _currentObservedMedsControllerClass = __instance;
                 _subscribedPatientHc = CurrentPatient.HealthController;
                 _subscribedPatientHc.EffectRemovedEvent += OnPatientEffectRemoved;
+                _subscribedPatientHc.HealerDoneEvent += OnPatientHealerDone;       // 022 — XP de efeito
+                _subscribedPatientHc.HealthChangedEvent += OnPatientHealthChanged; // 022 — XP de HP
+                _pendingHealthXp = 0f; // 022 — nova operação de cura começa do zero
 
                 // Replicar "else" do method_5 original
                 float num = doctor.Skills.SurgerySpeed.Value / 100f;

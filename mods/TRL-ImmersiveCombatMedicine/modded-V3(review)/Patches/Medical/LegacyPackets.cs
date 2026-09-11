@@ -36,6 +36,11 @@ namespace TRLImmersiveCombatMedicine.Medical
             manager.RegisterPacket<BandAidHealCheckResponsePacket>(_ => WarnOnce("BandAidHealCheckResponsePacket"));
             manager.RegisterPacket<TraumaFaintPacket>(_ => WarnOnce("TraumaFaintPacket"));
             manager.RegisterPacket<BandAidTreatmentReportPacket>(_ => WarnOnce("BandAidTreatmentReportPacket"));
+            // ref: CR-01-02 — nota própria: este formato é ≥1.11.0 (V2, com envelope), aposentado
+            // só agora na 1.14.0 pela V3 (campo XpAwarded) — não é o mesmo caso ≤1.10.0 dos demais.
+            manager.RegisterPacket<BandAidTreatmentReportPacketV2>(_ => WarnOnce(
+                "BandAidTreatmentReportPacketV2",
+                "(formato retirado na 1.14.0 — não confundir com o legado ≤1.10.0 acima; peer precisa só atualizar até a 1.14.0.)"));
         }
 
         private static void WarnOnce(string packetName)
@@ -43,6 +48,13 @@ namespace TRLImmersiveCombatMedicine.Medical
             if (_warned) return;
             _warned = true;
             BandAidNetworkHandler.LogVersionMismatch(packetName);
+        }
+
+        private static void WarnOnce(string packetName, string extraNote)
+        {
+            if (_warned) return;
+            _warned = true;
+            BandAidNetworkHandler.LogVersionMismatch(packetName, extraNote);
         }
     }
 
@@ -134,6 +146,21 @@ namespace TRLImmersiveCombatMedicine.Medical
             if (!reader.TryGetByte(out _)) return;     // BodyPart
             if (!reader.TryGetFloat(out _)) return;    // HealedAmount
             if (!reader.TryGetFloat(out _)) return;    // CostAmount
+        }
+    }
+
+    /// <summary>
+    /// 022 — formato aposentado pela V3 (BandAidTreatmentReportPacketV3 ganhou o campo
+    /// XpAwarded). Diferente dos stubs acima, o V2 já usava o envelope de comprimento
+    /// (TryOpen), então o descarte reaproveita PacketEnvelope em vez de ler campo a campo.
+    /// </summary>
+    public struct BandAidTreatmentReportPacketV2 : INetSerializable
+    {
+        public void Serialize(NetDataWriter writer) { }
+
+        public void Deserialize(NetDataReader reader)
+        {
+            PacketEnvelope.TryOpen(reader, out _); // descarta o corpo, não processa
         }
     }
 }

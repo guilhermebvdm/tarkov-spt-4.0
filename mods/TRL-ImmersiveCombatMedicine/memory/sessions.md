@@ -2,7 +2,45 @@
 
 ## Estado atual
 
-> **Delta 2026-09-05 (Sessão 10):** ICM em **v1.13.6** no workspace [`modded-V3(review)`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-ImmersiveCombatMedicine/modded-V3%28review%29). Estabilização de rede cooperativa no FIKA com registro antecipado de pacotes no Frame Zero (`FikaEventDispatcher.SubscribeEvent<FikaNetworkManagerCreatedEvent>`), eliminando risco de `ParseException: Undefined packet`. Interoperabilidade defensiva com `Climbable Ladders`: desalojamento e reset de voo/escada caso ocorra desmaio (`Blackout`) durante a subida de escadas de mão, permitindo que a gravidade atue e o jogador caia naturalmente ao solo. Compilação Release verde com 0 Erros e 0 Warnings.
+> **Delta 2026-09-09 (Sessão 11):** ICM em **v1.14.0** no workspace [`modded-V3(review)`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-ImmersiveCombatMedicine/modded-V3%28review%29). Entrega do item de backlog `022-medico-xp-cura-aliado`: o médico agora é creditado com XP ao curar aliados em raid (efeito tratado via `HealExperience` e HP restaurado via `ExpForHeal`) tanto em paciente local quanto remoto cooperativo via `BandAidTreatmentReportPacketV3`. Stub legado `BandAidTreatmentReportPacketV2` adicionado em `LegacyPackets.cs` para evitar desync de versões anteriores. Compilação Release verde com 0 Erros e 0 Warnings na pasta local `builds/client/` (sem cópia para a pasta do jogo). Validação in-game pendente (P-11.1).
+
+## Pendências
+
+- [P-11.1] (aberta 2026-09-09) **Validar in-game o crédito de XP de cura de aliado (Item 022, v1.14.0)** — Cenários a testar: (1) Médico curando aliado local (bot) com sangramento/fratura/dor e conferir ganho de XP idêntico à autocura; (2) Cura de HP via MedKit creditando XP de HP mesmo sem efeito resolvido; (3) Mesmos testes em rede cooperativa com peer remoto (Caminho B); (4) Confirmar que autocura do médico não duplica XP e paciente aliado não ganha XP indevido; (5) Confirmar que peer em versão anterior não trava a fila de rede (stub V2 descarta sem erro). 🟡 Validação in-game.
+- [P-9.1] (aberta 2026-08-17) **VALIDAR IN-GAME a build consolidada v1.13.5 no `modded-V3(review)`** — Cenários residuais de trauma/cirurgia e menus F12. 🟡 Validação in-game.
+- [P-9.2] (aberta 2026-08-17) **Definir especificação e ativação do Item 07 (Torniquetes e Necrose por Tempo)** — Estruturar chave composta `(player, bodyPart)` no `TourniquetManager`. 🟢 Ideia.
+
+---
+
+## 2026-09-09 22:36 (GMT-3) — Sessão 11: Médico Ganha XP ao Curar Aliado (item 022, v1.13.6 → v1.14.0)
+
+**Tema central:** Ciclo completo de desenvolvimento (`/create-spec` → `/review-spec` → `/create-technical-spec` → `/review-technical-spec` [2 rodadas] → `/code-mod` → `/code-review` 01 → `/apply-code-review`) do item 022 — concessão de experiência (XP) médica legítima ao curar aliados (paciente local e remoto no Fika).
+
+**Decisões-chave:**
+- **Crédito de XP unificado (`Helpers/HealXpCredit.cs`):** Criação do helper `CreditHealXp(Player doctor, int amount)` que centraliza as chamadas vanilla `ExperienceGained`, `AddInt(ExpHeal)` e `ShowStatNotification`, garantindo consistência entre cura local e remota (PA-01-05).
+- **Escopo ampliado para incluir XP de HP restaurado:** Por decisão técnica (PA-01-01), além do XP fixo por remoção de efeito (`HealExperience`), o médico recebe XP proporcional ao HP recuperado (`ExpForHeal`), igual ao comportamento vanilla de autocura.
+- **Caminho A — Paciente Local (`MedicHealPatch.cs`):** Adicionada subscrição a `HealerDoneEvent` (para efeitos) e `HealthChangedEvent` (para acumular XP de HP em `_pendingHealthXp`), com flush atômico truncado no encerramento da aplicação (`CleanupPatientSubscription`).
+- **Caminho B — Paciente Remoto e Wire Format V3 (`BandAidNetworkHandler.cs`, `BandAidTreatmentReportPacket.cs`):** Pacote de report renomeado para `BandAidTreatmentReportPacketV3` com novo campo `XpAwarded`. O paciente remoto calcula o XP total em `ApplyFullTreatmentLocally` usando `FindEffectForRead` e transmite no report; o médico credita o XP recebido ao confirmar o consumo (`consumed == true`, CR-01-01).
+- **Compatibilidade defensiva de rede (AP-11):** Adicionado stub `BandAidTreatmentReportPacketV2` em `LegacyPackets.cs` registrado no `LegacyPacketCompat` para descartar graciosamente pacotes de peers em versões antigas sem estourar `ParseException` nem travar a fila de eventos.
+- **Versionamento SemVer e Build:** Versão elevada para `1.14.0` (mudança de protocolo de rede) em `TRL-ImmersiveCombatMedicine.csproj` e `TRLImmersiveCombatMedicinePlugin.cs`. Compilação Release validada com 0 erros e 0 avisos em `builds/client/` (sem tocar na pasta do jogo, respeitando a diretriz do usuário).
+
+**Lições / hipóteses descartadas:**
+- *Dupla reflexão eliminada:* `HasEffect` seguido de leitura de propriedade de efeito no paciente causava redundância; refatorado em `FindEffectForRead` que resolve em 1 única chamada por efeito.
+- *Risco de replay/duplicação de XP fechado (CR-01-01):* `ResolvePendingConsumeFromReport` agora retorna `bool`; o crédito de XP só é disparado se a requisição pendente foi de fato encontrada e consumida, impedindo ganho de XP duplicado por retransmissão de rede.
+
+**Atividade cronológica:**
+1. Elaboração da spec funcional (`01-spec.md`), técnica (`02-spec-tech.md`) e 2 rodadas de review técnica (`03-spec-tech-review-01.md` e `-02.md`).
+2. Implementação via `/code-mod`: criação de `HealXpCredit.cs`, atualização de `MedicHealPatch.cs`, `BandAidNetworkHandler.cs`, `BandAidTreatmentReportPacket.cs`, `LegacyPackets.cs` e bump para `1.14.0`.
+3. Verificação de pacotes via `node scripts/check-packet-hashes.js` (0 colisões de CRC-16 no protocolo V3).
+4. Code review 01 identificou 2 achados (CR-01-01 retorno booleano anti-replay, CR-01-02 log defensivo de mismatch), aplicados via `/apply-code-review`.
+5. Recompilação Release com 0 erros/avisos. As-built (`05-asbuild.md`) gerado.
+
+**Pendências abertas nesta sessão:**
+- [P-11.1] (aberta 2026-09-09) 🟡 Validar in-game o crédito de XP de cura de aliado (Item 022, v1.14.0).
+
+**Cross-refs:**
+- Item de backlog: `mods/TRL-ImmersiveCombatMedicine/backlog/022-medico-xp-cura-aliado/`.
+- Conecta com as regras de médico do `CustomClasses` (item 072/090).
 
 ---
 

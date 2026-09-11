@@ -82,7 +82,7 @@ namespace TRLImmersiveCombatMedicine.Medical
                 manager.RegisterPacket<BandAidHealCheckPacketV2>(OnHealCheckReceived);
                 manager.RegisterPacket<BandAidHealCheckResponsePacketV2>(OnHealCheckResponseReceived);
                 manager.RegisterPacket<TraumaFaintPacketV2>(OnTraumaFaintReceived); // ref: CR-01-02
-                manager.RegisterPacket<BandAidTreatmentReportPacketV2>(OnTreatmentReportReceived); // feedback membro-alvo
+                manager.RegisterPacket<BandAidTreatmentReportPacketV3>(OnTreatmentReportReceived); // feedback membro-alvo + XP (022)
 
                 // Stubs dos formatos ≤1.10.0: consomem o payload de um peer desatualizado em
                 // vez de deixá-lo sem handler — sem isso o ParseException derruba a fila de
@@ -125,6 +125,19 @@ namespace TRLImmersiveCombatMedicine.Medical
                 $"[BandAidNetworkHandler] Recebido '{packetName}' no formato ≤1.10.0: há peer com " +
                 "versão anterior do mod na raid. As interações médicas com esse jogador não vão " +
                 "funcionar até que ele atualize (o formato de pacote mudou na 1.11.0).");
+        }
+
+        /// <summary>
+        /// ref: CR-01-02 — variante pra formatos aposentados MAIS RECENTES que ≤1.10.0 (ex.: o
+        /// próprio V2 do report de tratamento, retirado na 1.14.0). Evita que o texto genérico
+        /// acima ("≤1.10.0"/"mudou na 1.11.0") vire log factualmente incorreto pra esse peer.
+        /// </summary>
+        internal static void LogVersionMismatch(string packetName, string extraNote)
+        {
+            Logger.LogWarning(
+                $"[BandAidNetworkHandler] Recebido '{packetName}' num formato aposentado: há peer com " +
+                $"versão anterior do mod na raid. As interações médicas com esse jogador não vão " +
+                $"funcionar até que ele atualize. {extraNote}");
         }
 
         // Throttle de log: se a falha for sistemática (peer com layout divergente), logar por
@@ -468,7 +481,10 @@ namespace TRLImmersiveCombatMedicine.Medical
                 surgeryPenalty = CustomClassesBridge.AdjustSurgeryPenalty(doctor076, surgeryPenalty);
                 ApplySurgeryFromNetwork(hc, surgeryPart, surgeryPenalty);
                 Logger.LogInfo($"Cirurgia aplicada pelo paciente em {surgeryPart} (via rede).");
-                SendTreatmentReport(packet, surgeryPart, 0f, 1f); // cirurgia consome 1 uso
+                // 022 — cirurgia não gera XP nem no vanilla: RestoreBodyPart não passa por
+                // ChangeHealth (sem HealthChangedEvent) e o HealerDoneEvent do branch
+                // DestroyedPart é invocado com efeito null (ActiveHealthController.Residue()).
+                SendTreatmentReport(packet, surgeryPart, 0f, 1f, 0); // cirurgia consome 1 uso, 0 XP
                 return;
             }
 
@@ -496,21 +512,36 @@ namespace TRLImmersiveCombatMedicine.Medical
             // ref: CR-05 — registrar o que foi DE FATO removido para cobrar o custo
             // real por efeito (tabela vanilla do ItemDatabase: Salewa HeavyBleed=175,
             // IFAK=210, Grizzly Fracture=50 etc.) no item do MÉDICO via report.
-            bool hadHeavy = HasEffect(activeHc, target, _heavyBleedType);
-            bool hadLight = HasEffect(activeHc, target, _lightBleedType);
-            bool hadFracture = HasEffect(activeHc, target, _fractureType);
+            // 022 — FindEffectForRead substitui HasEffect: a MESMA instância serve pra
+            // saber "existe?" (!= null) e pra ler HealExperience — 1 reflection por efeito,
+            // não 2. Usa os tipos "de leitura" (_heavyBleedType etc.), não os "de remoção".
+            var heavyEffect = FindEffectForRead(activeHc, target, _heavyBleedType);
+            var lightEffect = FindEffectForRead(activeHc, target, _lightBleedType);
+            var fractureEffect = FindEffectForRead(activeHc, target, _fractureType);
             float effectCost = 0f;
+            int xpAwarded = 0;
 
-            // ref: CR-04-20 — custo só quando a remoção de fato executou
-            if ((stats.StopsHeavyBleed || stats.StopsAllBleeds) && hadHeavy &&
+            // ref: CR-04-20 — custo só quando a remoção de fato executou.
+            // 022 — XP (mecanismo 1, HealExperience) só é somado junto com o custo, ou
+            // seja, só quando o efeito É de fato removido — nunca por tentativa falha.
+            if ((stats.StopsHeavyBleed || stats.StopsAllBleeds) && heavyEffect != null &&
                 RemoveEffectNative(hc, target, _heavyBleedConcreteType, "HeavyBleeding"))
+            {
                 effectCost += stats.HeavyBleedCost;
-            if ((stats.StopsLightBleed || stats.StopsAllBleeds) && hadLight &&
+                xpAwarded += (heavyEffect as GInterface326)?.HealExperience ?? 0;
+            }
+            if ((stats.StopsLightBleed || stats.StopsAllBleeds) && lightEffect != null &&
                 RemoveEffectNative(hc, target, _lightBleedConcreteType, "LightBleeding"))
+            {
                 effectCost += stats.LightBleedCost;
-            if (stats.FixesFracture && hadFracture &&
+                xpAwarded += (lightEffect as GInterface326)?.HealExperience ?? 0;
+            }
+            if (stats.FixesFracture && fractureEffect != null &&
                 RemoveEffectNative(hc, target, _fractureConcreteType, "Fracture"))
+            {
                 effectCost += stats.FractureCost;
+                xpAwarded += (fractureEffect as GInterface326)?.HealExperience ?? 0;
+            }
 
             // HP — proporção 1:1 rigorosa do EFT vanilla respeitando o saldo real do médico
             float healedTotal = 0f;
@@ -525,6 +556,13 @@ namespace TRLImmersiveCombatMedicine.Medical
                 {
                     activeHc.ChangeHealth(target, heal, default(DamageInfoStruct));
                     healedTotal = heal;
+
+                    // 022 — mecanismo 2 (ExpForHeal por HP restaurado). Trunca 1x por
+                    // aplicação de tratamento em rede (mesma granularidade "por operação"
+                    // do Caminho A — não é por-raid como o vanilla, ver 02-spec-tech §7).
+                    float expForHeal = Singleton<BackendConfigSettingsClass>.Instance.Experience.Heal.ExpForHeal;
+                    xpAwarded += (int)(expForHeal * heal);
+
                     Logger.LogInfo($"HP +{heal:F1} em {target} pelo paciente (via rede | Disp:{availableForHp:F1}).");
                 }
             }
@@ -536,8 +574,8 @@ namespace TRLImmersiveCombatMedicine.Medical
                 : 1f;
             Logger.LogInfo($"[CR-05] Custo real do tratamento: {totalCost:F1} (HP {healedTotal:F1} + efeitos {effectCost:F0}).");
 
-            // Report ao médico: membro real + HP curado + custo autoritativo
-            SendTreatmentReport(packet, target, healedTotal, totalCost);
+            // Report ao médico: membro real + HP curado + custo autoritativo + XP (022)
+            SendTreatmentReport(packet, target, healedTotal, totalCost, xpAwarded);
 
             // ref: CR-02 — a notificação é do PACIENTE humano; quando o host aplica em
             // nome de um BOT (CR-01-01), o toast não pode aparecer para o host.
@@ -600,19 +638,27 @@ namespace TRLImmersiveCombatMedicine.Medical
 
         private static bool HasEffect(ActiveHealthController activeHc, EBodyPart bodyPart, Type effectType)
         {
-            if (effectType == null) return false;
+            return FindEffectForRead(activeHc, bodyPart, effectType) != null;
+        }
+
+        /// <summary>
+        /// 022 — reflection de leitura unificada: usada tanto pra checar existência (bool via
+        /// != null, ver <see cref="HasEffect"/>) quanto pra ler HealExperience (GInterface326)
+        /// antes de RemoveEffectNative — uma única chamada de FindActiveEffect por efeito,
+        /// não duas (fecha PA-01-02 da review técnica 01). Usar os tipos "de leitura"
+        /// (_heavyBleedType/_lightBleedType/_fractureType), não os "concretos" de remoção.
+        /// ref: Assembly-CSharp/GInterface326.cs (IExperienceHealthEffect.HealExperience)
+        /// </summary>
+        private static IEffect FindEffectForRead(ActiveHealthController activeHc, EBodyPart bodyPart, Type effectType)
+        {
+            if (effectType == null) return null;
             try
             {
                 var findMethod = typeof(ActiveHealthController).GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
                     .FirstOrDefault(m => m.Name == "FindActiveEffect" && m.IsGenericMethod && m.GetParameters().Length == 1);
-                if (findMethod != null)
-                {
-                    var genericFind = findMethod.MakeGenericMethod(effectType);
-                    return genericFind.Invoke(activeHc, new object[] { bodyPart }) != null;
-                }
+                return findMethod?.MakeGenericMethod(effectType).Invoke(activeHc, new object[] { bodyPart }) as IEffect;
             }
-            catch { }
-            return false;
+            catch { return null; }
         }
 
         private static EBodyPart GetBlackedPart(IHealthController hc)
@@ -877,24 +923,25 @@ namespace TRLImmersiveCombatMedicine.Medical
         // Feedback membro-alvo (report PACIENTE → MÉDICO)
         // ============================================================
 
-        /// <summary>Paciente (ou dono do bot) reporta ao médico o membro tratado e o custo real.</summary>
-        private static void SendTreatmentReport(BandAidHealPacketV2 source, EBodyPart part, float healed, float cost)
+        /// <summary>Paciente (ou dono do bot) reporta ao médico o membro tratado, o custo real e o XP a creditar (022).</summary>
+        private static void SendTreatmentReport(BandAidHealPacketV2 source, EBodyPart part, float healed, float cost, int xpAwarded)
         {
             EnsurePacketsRegistered();
             if (_lastRegisteredNetworkManager == null) return;
-            var report = new BandAidTreatmentReportPacketV2
+            var report = new BandAidTreatmentReportPacketV3
             {
                 DoctorProfileId = source.DoctorProfileId,
                 PatientProfileId = source.PatientProfileId,
                 ItemTemplateId = source.ItemTemplateId,
                 BodyPart = (byte)part,
                 HealedAmount = healed,
-                CostAmount = cost
+                CostAmount = cost,
+                XpAwarded = xpAwarded
             };
             SendPacket(ref report, "TreatmentReport");
         }
 
-        private static void OnTreatmentReportReceived(BandAidTreatmentReportPacketV2 packet)
+        private static void OnTreatmentReportReceived(BandAidTreatmentReportPacketV3 packet)
         {
             try
             {
@@ -922,7 +969,19 @@ namespace TRLImmersiveCombatMedicine.Medical
                 // ref: CR-05 — CONSUMO AUTORITATIVO: debitar o item do médico com o custo
                 // real reportado pelo paciente. Roda ANTES do gate de HUD (o consumo vale
                 // mesmo com o examinador fechado).
-                MedicalLogic.ResolvePendingConsumeFromReport(packet.PatientProfileId, packet.ItemTemplateId, packet.CostAmount);
+                // ref: CR-01-01 — o bool de retorno é a MESMA guarda de idempotência usada
+                // pra gatear o crédito de XP: um report duplicado/reenviado não encontra mais
+                // a entrada pendente (já removida na 1ª chamada) e `consumed` vem false — nem
+                // o item é debitado de novo, nem o médico é creditado de novo.
+                bool consumed = MedicalLogic.ResolvePendingConsumeFromReport(packet.PatientProfileId, packet.ItemTemplateId, packet.CostAmount);
+
+                // 022 — crédito de XP ao médico (HealExperience por efeito + ExpForHeal por HP,
+                // já somados pelo paciente em ApplyFullTreatmentLocally). Só credita na 1ª
+                // entrega genuína do report (consumed == true) — nunca num reenvio/duplicata.
+                if (consumed)
+                {
+                    HealXpCredit.CreditHealXp(mainPlayer, packet.XpAwarded);
+                }
 
                 // ref: CR-03 — identidade do report (mesmo padrão do G-5): só pintar o HUD
                 // se o report é do PACIENTE atualmente examinado; report atrasado de outro
