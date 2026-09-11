@@ -9,9 +9,9 @@
 
     <!-- Manter em sincronia com a versão do [BepInPlugin] em Plugin.cs — é ela que o
          BepInEx mostra no F12 e nos logs. -->
-    <Version>2.19.16</Version>
-    <AssemblyVersion>2.19.16.0</AssemblyVersion>
-    <FileVersion>2.19.16.0</FileVersion>
+    <Version>2.23.7</Version>
+    <AssemblyVersion>2.23.7.0</AssemblyVersion>
+    <FileVersion>2.23.7.0</FileVersion>
   </PropertyGroup>
 
   <!--

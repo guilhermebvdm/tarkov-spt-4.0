@@ -178,8 +178,15 @@ namespace CameraRotationMod
             {
                 if (_isActionStanceActive) EndActionStance(forceCancel: true);
                 // item 013 (fix-01): NÃO forçar Stance 0 ao correr. A corrida acontece inteiramente na
-                // stance atual (0/1/2/3), sem qualquer transição ou "flash" pela Stance 0. TacSprint normal.
-                return; // Trava as hotkeys normais durante o sprint
+                // stance atual (0/1/2/3), sem qualquer transição ou "flash" pela Stance 0.
+                //
+                // Bug real 2026-09-09: este `return` (removido) travava TODAS as hotkeys de Stance
+                // durante qualquer sprint — inclusive o crouch-run (item 018), que liga a mesma flag
+                // IsSprintEnabled/Physical.Sprinting enquanto ainda agachado, pra acionar o dreno nativo
+                // de stamina. Esse bloqueio pra sprint em pé já foi removido a pedido do usuário no
+                // guard equivalente de HandleStanceHotkeys() — mantê-lo aqui, num nível mais alto,
+                // reintroduzia o mesmo bloqueio por outra porta. Removido por completo: trocar de
+                // Stance agora funciona normalmente durante qualquer sprint (em pé ou crouch-run).
             }
 
             // Action Stance: o término é detectado via ActionStanceOnIdlePatch (OnIdleStartEvent).
@@ -293,7 +300,9 @@ namespace CameraRotationMod
             var gw = GetCachedGameWorld();
             if (gw?.MainPlayer == null) return false;
             if (!HandsStateGuard.CanChangeStance(gw.MainPlayer)) return false;                // guard de mãos / medicina / transição
-            if (gw.MainPlayer.IsSprintEnabled) return false;                                  // bloqueio sprint
+            // Bloqueio de sprint removido a pedido do usuário (2026-09-09) — não fazia mais sentido
+            // mantê-lo (o item 018/crouch-run já tinha exposto que a regra original era frágil demais
+            // pra distinguir sprint em pé de sprint agachado pela mesma flag nativa IsSprintEnabled).
             if (gw.MainPlayer.ProceduralWeaponAnimation?.IsAiming == true) return false;      // ignora em ADS
             if (gw.MainPlayer.IsInPronePose) return false;                                    // bloqueio prone
 
@@ -863,6 +872,14 @@ namespace CameraRotationMod
             Patches.ApplyComplexRotationPatch.ResetMetrics(); // item 017 (F0) — régua de transição
             Patches.ApplyComplexRotationPatch.ResetWaypoint(); // item 017 (F1) — waypoint + gate de aim-speed
             Patches.AdsSpeedCompressionPatch.Reset(); // item 017 (F3) — compressão de ADS-speed
+
+            // Item 018 — correr agachado / rastejar rápido: flags estáticas de tecla segurada, rampa
+            // de velocidade, animação de sprint forçada, piso de postura e sobretaxa de stamina.
+            Patches.CrouchRunEnableSprintPatch.ResetState();
+            Patches.CrouchRunMaxSpeedPatch.ResetState();
+            Patches.ProneRunSprintIntent.ResetState();
+            Patches.ProneRunMaxSpeedPatch.ResetState();
+            Patches.ProneRunSpeedDriverPatch.ResetState();
 
             _isTacSprintActive = false;
             _wasAiming = false;

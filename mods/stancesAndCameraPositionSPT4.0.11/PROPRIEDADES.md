@@ -66,6 +66,21 @@
 | Stance Kick Intensity (Toward the Chest) | float | `-0.05` | -0.3 – 0.3 | Quanto a arma recua contra o peito ao trocar de postura ou mirar (ADS). Negativo puxa a arma em sua direção. |
 | ADS Kick Delay (In) | float | `0.15` | 0 – 2 | Atraso (s) antes de aplicar o kick ao entrar em ADS. Sincroniza o kick com o fim da animação de mira. |
 | Stance Overshoot Damping (Lower Means More Bounce) | float | `12.0` | 1 – 30.0 | Amortecimento da física de mola. Menor = mais overshoot/quicada. Padrão 12. |
+| Straighten Weapon On Canted Sights | bool | `false` | — | Quando ativado, mantém a arma sempre reta ao mirar com uma mira em trilho lateral (canted/off-axis), ignorando o tombamento nativo dela. Desativado (padrão) preserva o tombamento nativo, como no vanilla. (Origem: item 021 do backlog.) |
+
+### Crouch & Prone Sprint
+
+| Propriedade (EN) | Tipo | Padrão | Faixa | Descrição |
+|---|---|---|---|---|
+| Enable Crouch Run | bool | `false` | — | Segurar a tecla de correr agachado mantém o personagem agachado e aumenta a velocidade, em vez de levantá-lo. Desativado por padrão. |
+| Crouch Run Speed Multiplier | float | `1.25` | 1.0 – 2.0 | Multiplicador de velocidade ao correr agachado. |
+| Crouch Run Stamina Surcharge | float | `0.0` | 0 – 30 | Dreno extra de stamina (por segundo) ao correr agachado, somado ao dreno nativo de sprint (que já se aplica sozinho). `0` = sem sobretaxa, só o dreno nativo. |
+| Enable Prone Run | bool | `false` | — | Segurar a tecla de correr rastejando acelera o rastejo além do teto atual, sem alterar a postura. Desativado por padrão. |
+| Prone Run Speed Multiplier | float | `1.25` | 1.0 – 2.0 | Multiplicador de velocidade ao rastejar com a tecla de correr segurada. |
+| Prone Run Stamina Surcharge | float | `8.0` | 0 – 30 | Dreno extra de stamina (por segundo) ao rastejar acelerado. Mantida porque o rastejo acelerado NÃO aciona o dreno nativo de sprint (confirmado no Assembly) — sem esta prop, o prone-run seria de graça. |
+| Prone Run Min Speed Floor | float | `0.4` | 0.1 – 1.0 | Multiplicador mínimo de playback do Animator em prone, mesmo se o scroll wheel nativo reduzir a velocidade além disso. Sem piso, o Animator inteiro (não só o rastejo) entra em câmera lenta absurda. `1.0` desativa qualquer redução. |
+
+⚠️ Conhecido: nenhuma das props acima trava o crouch/prone-run durante ADS ou com a arma montada, e o teto de velocidade é limitado só pela faixa do slider (1.0–2.0×), não por um clamp contra a velocidade real de sprint em pé. (Origem: item 018 do backlog — ver checklist da spec técnica.)
 
 ### Camera Position
 

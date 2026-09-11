@@ -82,6 +82,8 @@ namespace CameraRotationMod.Networking
                 currentManager.RegisterPacket<StanceSyncPacket>(OnStanceSyncPacketReceivedLegacy);
                 // Sync de estado de câmara: enviado pelo convidado, aplicado pelo host.
                 currentManager.RegisterPacket<ChamberStateSyncPacket>(OnChamberStateSyncPacketReceived);
+                // Item 018: sync do Animator.speed do prone-run (visual-only, ver ProneRunSpeedSyncPacket).
+                currentManager.RegisterPacket<ProneRunSpeedSyncPacket>(OnProneRunSpeedSyncPacketReceived);
 
                 _lastRegisteredNetworkManager = currentManager;
                 _logger?.LogInfo($"[TRL-StancesAndMobility] Registered StanceSyncPacketV2 (+legacy+chamber) on new IFikaNetworkManager instance ({currentManager.GetType().Name}).");
@@ -157,6 +159,66 @@ namespace CameraRotationMod.Networking
             catch (Exception ex)
             {
                 LogErrorThrottled("SendChamberState", ex);
+            }
+        }
+
+        /// <summary>
+        /// Item 018 — envia o multiplicador de Animator.speed do prone-run local pros peers. Chamado
+        /// todo frame por ProneRunSpeedDriverPatch enquanto prone+movendo com a feature ligada; o
+        /// throttle (só reenviar em mudança perceptível ou keepalive periódico) é responsabilidade do
+        /// CALLER (ver ProneRunSpeedDriverPatch._lastSyncedSpeed/_lastSyncTime) — este método sempre
+        /// envia o que recebe, sem filtro, pra não duplicar estado de throttle em dois lugares.
+        /// </summary>
+        public static void SendProneRunSpeed(string profileId, float animatorSpeed)
+        {
+            EnsurePacketsRegistered();
+            if (_lastRegisteredNetworkManager == null) return;
+            if (string.IsNullOrEmpty(profileId)) return;
+
+            var packet = new ProneRunSpeedSyncPacket
+            {
+                ProfileId = profileId,
+                AnimatorSpeed = animatorSpeed
+            };
+
+            try
+            {
+                // ReliableUnordered: cada envio já representa uma mudança perceptível (o caller
+                // throttla por delta/keepalive) — não é um stream contínuo tipo posição, então vale a
+                // pena garantir entrega em vez de descartar como um Unreliable normal faria.
+                _lastRegisteredNetworkManager.SendData(ref packet, Fika.Core.Networking.LiteNetLib.DeliveryMethod.ReliableUnordered, true);
+            }
+            catch (Exception ex)
+            {
+                LogErrorThrottled("Error sending ProneRunSpeedSyncPacket", ex);
+            }
+        }
+
+        /// <summary>
+        /// Aplica direto no MovementContext do jogador observado — PlayerAnimatorSetSprintToIdleSpeed
+        /// não é sobrescrito por ObservedMovementContext (ref: Fika.Core/Main/ObservedClasses/
+        /// ObservedMovementContext.cs), então a implementação base (Animator_1.speed = value) escala o
+        /// playback do Animator PRÓPRIO do observado — sem precisar de um MonoBehaviour dedicado
+        /// (diferente do ObservedStanceAnimator, que faz spring-lerp contínuo; aqui é só um valor que
+        /// fica setado até o próximo pacote, sem decaimento por frame).
+        /// </summary>
+        private static void OnProneRunSpeedSyncPacketReceived(ProneRunSpeedSyncPacket packet)
+        {
+            try
+            {
+                if (!Singleton<EFT.GameWorld>.Instantiated) return;
+                if (_lastRegisteredNetworkManager == null) return;
+                if (string.IsNullOrEmpty(packet.ProfileId)) return;
+
+                var observedPlayer = _lastRegisteredNetworkManager.ObservedPlayers?
+                    .FirstOrDefault(p => p != null && p.ProfileId == packet.ProfileId);
+                if (observedPlayer == null || observedPlayer.MovementContext == null) return;
+
+                observedPlayer.MovementContext.PlayerAnimatorSetSprintToIdleSpeed(packet.AnimatorSpeed);
+            }
+            catch (Exception ex)
+            {
+                LogErrorThrottled("OnProneRunSpeedSyncPacketReceived", ex);
             }
         }
 
