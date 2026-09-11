@@ -2,19 +2,99 @@
 
 ## Estado atual
 
-> **Delta 2026-09-02 (Sessão 1):** Fundação da estrutura canônica do novo mod [`TRL-WeatherSync`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-WeatherSync/). Concluída a fase de concepção, investigação dos mecanismos de clima/estações do EFT/FIKA e consolidação profunda do [`ROADMAP.md`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-WeatherSync/ROADMAP.md) contendo: (1) Mapeamento exaustivo das 6 sub-fases nativas das estações do EFT (`SpringEarly` com `SpringSnowFactor`, `Spring`, `Summer`, `Storm`, `Autumn`, `AutumnLate`, `Winter` e `WinterStorm`); (2) Controle cronológico via `server/config.json` calibrado para 1 semana real (7 dias UTC) por fase com exatidão matemática; (3) Módulo de Otimização Extrema de Desempenho para Neve e Chuva (corte de partículas de 65k para 4k/8k, bypass do CommandBuffer HDR `SNOW_GLITTERS` e culling de neve em miras óticas `OpticCameraManager.Camera`); (4) Arquitetura de sincronização contínua em raid (`TrlWeatherSyncPacket`); (5) Integração de sensores de IA do SAIN com tempestades.
-
-- **Status de Desenvolvimento:** 🔵 Planejamento e Roadmap arquitetural concluídos.
-- **Versão:** v1.0.0 (Base inicial).
+- **Item 001 (Sincronização Contínua de Clima em Raid) fechado no papel e compilado:** spec, review, code review (3/3 aplicados) e as-built prontos. Código em `modded/Client/`, versão `1.1.1` (bump por causa da reestruturação), 0 avisos/erros. Falta só validação in-game (P-2.4).
+- **Item 002 (Gerenciador Ciclo Natural Estações) codado, revisado e compilado (2026-09-11):** spec, review técnica 01 (5/5 resolvidos), code review 01 (3/3 aplicados) e as-built prontos. Código 100% server-side em `modded/Server/` (6 arquivos, DI `IOnLoad`/`IOnUpdate`, sem Harmony) — escreve direto em `WeatherConfig.OverrideSeason`/`WeatherPresetWeight`, versão `1.0.2`, 0 erros/0 avisos. Config instalado fica em `SPT/user/mods/TRL-WeatherSync/Config/season-cycle.json` (path simplificado a pedido do usuário — sem `Resources/`, pasta singular `Config/` não `Configs/`). **Bug real achado e corrigido no code review (CR-01-01):** `SeasonCycleUpdater` sem `TypePriority` explícita podia rodar DEPOIS de `GameCallbacks` (`OnLoadOrder.GameCallbacks=300000`), que dispara `PostDbLoadService` pré-gerando e cacheando a previsão de clima no boot — sem a prioridade certa, a(s) primeira(s) raid(s) após cada restart do SPT Server usavam a estação real do calendário, não a do ciclo do mod. Corrigido com `TypePriority = OnLoadOrder.Database` (200000). Build corrigido está só em `mods/TRL-WeatherSync/builds/` — falta copiar manualmente pro install real (P-2.4) antes de validar em raid.
+- **`modded/` reestruturado** em `modded/Client/` (item 001, BepInEx) + `modded/Server/` (item 002, C# puro) — segue a convenção já usada em Skills-Extended/CustomClasses.
+- **`/compile-mod` já suporta `server-csharp`** (descoberto 2026-09-11 — a doc `docs/technical/spt4-mod-creation.md:142` que dizia "ainda não suportado" está desatualizada). O script instala AMBOS os lados automaticamente quando `.spt-path` é válido — sem flag pra pular.
+- **Modelo de 3 papéis** (`Source`/`Relay`/`Receiver`, item 001) desacopla autoridade de clima de `FikaBackendUtils.IsServer`, resolvendo o caso Fika-Headless (P-2.2, resolvida).
+- **Tempestade sincronizada** (item 001): só o INÍCIO é sincronizado. O FIM não é forçado — dois state machines (`Class444` + `RainController`) precisariam reverter, sem caminho de saída confirmado (P-2.1, aberta).
+- **Estação fixa não trava o clima** (item 002, decisão do usuário 2026-09-10): quando `fixedSeason` está ativo, a estética (folhagem/neve) trava, mas os pesos de sol/chuva/neve continuam seguindo o ciclo natural — `SeasonCycleUpdater.Apply()` sobrescreve a entrada da estação fixa com os pesos da estação cíclica corrente a cada tick.
+- **Preferência permanente do usuário:** nenhum compile deste mod (client ou server) deve instalar automaticamente na pasta real do jogo/servidor — ver `feedback_compile_mod_install.md` (memória pessoal) pra técnica exata (`--spt-path` inválido cobre os dois lados). **Vacilo real 2026-09-11:** esqueci de aplicar a técnica numa compilação e o script instalou os dois `.dll` direto em `E:/Tarkov Red Line`; usuário, avisado, deixou como estava dessa vez. **Corrigido na recompilação seguinte, mesma sessão:** `--spt-path <inválido> --allow-same-version` (o `--allow-same-version` porque só o server mudou de versão nessa rodada — client ficou em 1.1.1) confirmado via timestamp que não escreveu nada novo no install real. Técnica validada, P-2.5 fechada.
+- Ainda sem `original/` — mod não é port, é criação original do repo.
 
 ---
 
 ## Pendências
 
-- [P-1.1] (aberta 2026-09-02) **Definição da stack de compilação (Client BepInEx C# vs Server)** — Estruturar a solução `.csproj` para BepInEx 5 (.NET Standard 2.1) em `modded/` e vincular referências locais do SPT. 🟢 Arquitetura.
-- [P-1.2] (aberta 2026-09-02) **Implementação do Pacote de Rede `TrlWeatherSyncPacket`** — Criação dos serializers LiteNetLib compactados para transmissão de chuva, neblina, nuvens, vento e temperatura. 🟢 Networking.
-- [P-1.3] (aberta 2026-09-02) **Implementação do Gestor de Estações Naturais e Sub-Fases** — Ciclo cronológico astronômico automático com modos Calendário Real (1 semana por fase via UTC), Rotação por Raids e Estação Fixa. 🟢 Feature.
-- [P-1.4] (aberta 2026-09-02) **Implementação dos Patches de Otimização de Neve e Chuva** — Harmony patches em `SnowFlakes.cs` (redução de malhas de partículas) e `SnowWetRenderer.cs` (culling em miras óticas e bypass de CommandBuffer HDR). 🟢 Performance.
+- [P-2.4] (aberta 2026-09-11) **Validação in-game dos itens 001 e 002** — nenhum dos dois foi testado numa raid real ainda, só compilação confirmada. Item 001: raid Headless, raid Host normal, reconexão em tempestade, raid1→raid2, início de tempestade sincronizado. Item 002: estação aplicada corretamente por raid, consistência entre peers FIKA com o mesmo `season-cycle.json`, modo estação fixa (estética trava, clima não), e em especial validar o fix de `CR-01-01` (season certa logo após restart do SPT Server). **Atenção:** os `.dll` que estão na instalação real do usuário (`E:/Tarkov Red Line`, escritos sem querer em 2026-09-11 antes do code-review) são a versão **pré-fix** (server `1.0.0`, sem `CR-01-01`/02/03) — as versões corrigidas (`1.0.1`) ficaram só em `mods/TRL-WeatherSync/builds/` na recompilação seguinte (com `--spt-path` inválido de propósito). Usuário precisa copiar manualmente os `.dll` de `builds/` pra testar o fix de verdade. 🟡 Bloqueia considerar qualquer um dos dois itens "pronto pra uso".
+- ~~[P-2.5]~~ **Resolvida 2026-09-11:** `--spt-path <inválido> --allow-same-version` confirmado (via timestamp dos arquivos no install real) que não escreve nada em `E:/Tarkov Red Line`. Continua valendo pra sempre usar essa técnica em `/compile-mod TRL-WeatherSync` — registrado em `feedback_compile_mod_install.md` (memória pessoal), não é mais pendência aberta, é procedimento padrão.
+- [P-2.1] (aberta 2026-09-10, ampliada 2026-09-10) **Sincronizar o FIM de uma tempestade forçada (item 001)** — o único caminho encontrado (`Class443.Controller.HandleReconnect(ESeasonStatus.Storm, ...)`, `Class443.cs:28`/`GInterface29.cs:17`) só tem evidência de funcionar para ENTRAR em `Storm`; não há confirmação de que funcione para SAIR (`Class451`/`Class452` parecem herdar um `HandleReconnect` no-op da base `Class445`, `Class444.cs:94-98`). Existe um SEGUNDO state machine (`RainController`/`ERainControllerStatus.WinterStorm`) que também precisa ser revertido — `Class451`/`Class452` chamam `RainController.method_8()`/`method_9()` diretamente (`Class444.cs:440/464`). Nenhum dos dois caminhos de saída foi encontrado ainda. **Decisão atual:** não forçar o fim — cada jogador sai da tempestade pelo tempo nativo do próprio jogo. Retomar quando quiser sincronizar o fim de verdade. 🟡 Investigação — pedido explícito do usuário pra não esquecer.
+- [P-1.4] (aberta 2026-09-02) **Implementação dos Patches de Otimização de Neve e Chuva** — Harmony patches em `SnowFlakes.cs` (redução de malhas de partículas) e `SnowWetRenderer.cs` (culling em miras óticas e bypass de CommandBuffer HDR). Citações validadas (`SnowFlakes.cs:24` `int_1 = 16383` × 4 materiais ≈ 65.532; `SnowFlakes.cs:190`; `SnowWetRenderer.cs:322` e `:350`). 🟢 Performance, ainda não iniciada.
+
+---
+
+## 2026-09-11 02:00 (GMT-3) — Sessão 4: Item 002 completo (spec técnica → review → código, 100% server-side)
+
+**Tema central:** Levar o item 002 (Gerenciador Ciclo Natural Estações) da spec funcional já pronta (criada no fim da Sessão 3) até implementado e revisado — descoberta central: o item inteiro cabe no servidor, sem nenhum código de cliente.
+
+**Decisões-chave:**
+- [Item é 100% server-side]: `SeasonalEventService.GetActiveWeatherSeason()` (`SeasonalEventService.cs:307-312`) já checa `WeatherConfig.OverrideSeason` antes do calendário real — bastou escrever nesse campo (+ `WeatherPresetWeight`) via um componente `IOnLoad`/`IOnUpdate` injetado com `ConfigServer`. A estação chega ao client pelo handshake nativo que o item 001 já documentou (`_backendSession.WeatherRequest()`), sem nada pra sincronizar em raid.
+- [Precedente real usado como referência]: `mods/Skills-Extended/modded/Server/` (padrão `IOnLoad`+`ConfigController` lendo `.json` de `Resources/Configs/`) e `mods/CustomClasses/modded/Server/` confirmaram que a convenção `modded/Client/`+`modded/Server/` já funciona no repo — usada como base do design em vez de inventar um padrão novo.
+- [Estação fixa não trava o clima]: correção do usuário sobre um achado de review (PA-01-04) — "estação fixa" trava só a estética/sub-fase nativa (folhagem, neve acumulada), NÃO a chance de sol/chuva/neve. `SeasonCycleUpdater.Apply()` foi redesenhado pra sempre calcular a estação cíclica em paralelo e sobrescrever os pesos da estação fixa com os da estação cíclica corrente a cada tick.
+- [Risco crítico achado na review, não na spec]: `App.cs:68-71` (boot do servidor SPT) não embrulha `IOnLoad.OnLoad()` em try/catch — uma exceção não tratada em qualquer mod (inclusive o nosso) pode abortar o boot do servidor inteiro. PA-01-01 (🔴 bloqueador) corrigido com try/catch + null-guard nos dois componentes novos.
+- [Reestruturação `modded/` aprovada]: usuário aprovou mover os arquivos client do item 001 pra `modded/Client/`, liberando `modded/Server/` pro item novo — confirmado via `AskUserQuestion`, `dotnet build` validou que nada quebrou.
+- [Build manual até o `/compile-mod` suportar server-csharp]: usuário optou por build manual (`dotnet build`) em vez de pedir extensão do script — decisão explícita, não pedir a extensão sem o usuário voltar a pedir (P-2.5).
+
+**Lições / hipóteses descartadas:**
+- **Suposição de ordem de `IOnLoad` não provada**: o stub original assumia que `TypePriority = OnLoadOrder.PreSptModLoader` garantia que o `SeasonCycleConfigController` carregasse antes do `SeasonCycleUpdater` — mas `App.cs:68` não expõe, no código vendorizado deste repo, nenhuma ordenação por prioridade (ela viveria dentro do pacote `SPTarkov.DI`, não vendorizado). Resolvido com defensividade (null-guard) em vez de confiar na suposição.
+- **`AbstractModMetadata` tem mais membros abstratos do que o stub assumia**: `Contributors`/`Incompatibilities`/`ModDependencies`/`Url`/`IsBundleMod` são abstratos apesar de nullable — só descoberto rodando `dotnet build` e lendo o erro `CS0534`. Lição: mesmo copiando um precedente real (Skills-Extended), só a compilação prova a superfície completa de uma classe externa não vendorizada.
+- **`JsonUtil` do servidor rejeita chaves JSON desconhecidas**: `UnmappedMemberHandling.Disallow` (`JsonUtil.cs:24`) — um campo `_comment` de documentação no `.json` teria quebrado o deserializer silenciosamente (capturado pelo try/catch da PA-01-01, mas o mod inteiro pararia de funcionar). `ReadCommentHandling.Skip` (`JsonUtil.cs:20`) confirma que comentários `//` de linha são o jeito correto de documentar o `.json`.
+
+**Atividade cronológica (resumo — detalhe nos artefatos):**
+1. `/create-technical-spec` — pesquisa confirmou o design 100% server-side; `02-spec-tech.md` criada citando `WeatherConfig.cs`, `SeasonalEventService.cs`, `WeatherGenerator.cs`, `ConfigServer.cs`, `WeatherController.cs`, `App.cs`, `HostGameController.cs`/`ClientGameController.cs` (laboratory/labyrinth).
+2. `/review-technical-spec` — 5 achados (1🔴/2🟡/2🟢); usuário resolveu todos numa resposta só, incluindo a correção de design da PA-01-04.
+3. `AskUserQuestion` — duas decisões: reestruturar `modded/` (sim) e build manual vs. estender `/compile-mod` (manual).
+4. `/code-mod` — `modded/` reestruturado, 6 arquivos novos em `modded/Server/`, `dotnet build` validado nos dois lados (client após mover, server novo), 3 ajustes descobertos durante o build documentados no as-built.
+
+**Pendências abertas nesta sessão:** ver bloco "Pendências" no topo (P-2.4 nova — validação in-game dos dois itens; P-2.5 nova — tooling `/compile-mod`; P-2.1/P-1.4 já existiam, sem mudança de conteúdo).
+
+**Cross-refs:** resolve P-2.3 (aberta na Sessão 3) e P-1.3 (aberta na Sessão 1) — feature implementada, detalhe nos artefatos de `backlog/002-gerenciador-ciclo-natural-estacoes/`, não duplicado aqui.
+
+---
+
+## 2026-09-10 (GMT-3) — Sessão 3: Item 001 completo (backlog → spec → código → review → fix → compile)
+
+**Tema central:** Levar o item 001 (Sincronização Contínua de Clima em Raid) do zero até implementado, revisado e compilado — ciclo completo de backlog do repo, mais duas investigações extras pedidas pelo usuário (papel de clima em raid Headless; se "tempestade" é distinto de chuva forte).
+
+**Decisões-chave:**
+- [Modelo de 3 papéis resolve o caso Headless]: `FikaBackendUtils.IsHeadless`/`IsHeadlessGame`/`IsHeadlessRequester` já existem no FIKA e bastam pra desacoplar "autoridade de clima" de "Host de rede" — não precisou inventar handshake de eleição. Ideia do usuário ("host-convidado"). Ref: `001-...-02-spec-tech.md` §1.1.
+- [Bug crítico achado e corrigido: escala Rain/Wind]: `IWeatherCurve.Rain`/`Wind` (lido no Host) vêm normalizados 0-1; `WeatherClass.Rain`/`Wind` (o que `SetWeatherForce` espera) precisa estar em 1-5 — sem `Mathf.Lerp(1f, 5f, ...)` antes de transmitir, todo clima sincronizado caía pra zero silenciosamente. Achado em `/code-review` (CR-01-01), não em spec — lição: mesmo com toda a spec técnica revisada 2x, um bug de unidade só apareceu lendo o código implementado contra o Assembly de novo.
+- [Tempestade sincroniza só o início, não o fim]: decisão consciente do usuário depois de descobrir que forçar o fim exige reverter DOIS state machines (`Class444` + `RainController`), nenhum caminho de saída confirmado ainda (P-2.1). Política de início: sorteio contra `IWeatherCurve.LightningThunderProbability` + cooldown configurável (`WeatherSyncSession.RollForStorm`).
+- [Preferência de instalação confirmada de novo]: `/compile-mod` neste mod nunca instala automaticamente — usuário reforçou isso preventivamente antes mesmo de eu rodar o comando. Memória pessoal do usuário (`feedback_compile_mod_install.md`) atualizada com a técnica usada (referências pré-populadas manualmente + `--spt-path` inválido de propósito).
+
+**Lições / hipóteses descartadas:**
+- **Autocorreção:** a alegação da Sessão 2 de que `ERainControllerStatus` não existe estava errada — existe aninhado dentro de `RainController` (`RainController.cs:19-29`), não como tipo de topo de arquivo. A nevasca de inverno (`WinterStorm`) é real, e se conecta ao `ESeasonStatus.Storm` de `Class444` via `RainController.method_8()`/`method_9()`. Motivada por pergunta do usuário ("será que tempestade é chuva nível 5?") — hipótese em si não confirmada (não há checagem direta de limiar no código lido), mas a investigação valeu a pena mesmo assim.
+- Hipótese "chuva nível 5 = tempestade direto" — não confirmada por código; tratada como correlação plausível (via `LightningThunderProbability`, que deriva de `Cloudiness`), não uma regra direta encontrada.
+
+**Atividade cronológica (resumo — detalhe nos artefatos):**
+1. `/add-backlog-item` → `/create-spec` → `/review-spec` → `/create-technical-spec` → `/review-technical-spec` (2 rodadas, 8 pontos, todos resolvidos) → `/code-mod` (6 arquivos criados).
+2. Investigação extra: papel de clima em raid Headless (pergunta do usuário) → modelo de 3 papéis adicionado à spec técnica, autorrevisão achou e corrigiu um bug próprio (eco do Relay causaria `ParseException` no Source).
+3. `/compile-mod` (1ª vez, v1.0.0, sem instalar no jogo) → `/code-review` (achou CR-01-01 crítico + CR-01-02/03) → `/apply-code-review` (CR-01-01) → recompile (v1.0.1).
+4. Investigação extra: autocorreção do `ERainControllerStatus` + dados reais de `weather.json` do servidor (pesos de clima por estação, datas de calendário).
+5. Decisão do usuário sobre CR-01-02 (só início, não fim) → implementado `RollForStorm` + CR-01-03 (precompute) → recompile (v1.1.0). Rodada 01 de code-review fechada (3/3).
+
+**Pendências abertas nesta sessão:** ver bloco "Pendências" no topo (P-2.3, P-2.1 ampliada aqui; P-1.3/P-1.4 já existiam, sem mudança de conteúdo).
+
+**Cross-refs:** resolve P-2.2 (aberta na Sessão 2) e P-1.1/P-1.2/P-1.2.1/P-1.2.2/P-1.2.3 (abertas nas Sessões 1/2) — todas ✅, detalhe nos commits/artefatos de `backlog/001-sincronizacao-continua-clima-raid/`, não duplicado aqui.
+
+---
+
+## 2026-09-10 (GMT-3) — Sessão 2: Pesquisa de Handshake FIKA e API Real de Clima/Estações (correção do Roadmap)
+
+**Tema central:** Antes de começar a codar, verificar se o `ROADMAP.md` tinha base suficiente em código real — resultado: a parte de otimização de neve/chuva (§4) já tinha citações reais e conferiu; a parte de rede/handshake do FIKA (§5/§6) e o mapeamento de sub-fases de estação (§2) tinham lacunas ou alegações não verificadas. Sessão de leitura pura (sem código escrito), relatório completo em [`docs/investigacao-fika-eft-2026-09-10.md`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TRL-WeatherSync/docs/investigacao-fika-eft-2026-09-10.md).
+
+**Decisões-chave:**
+- [Correção — depois refutada na Sessão 3]: `ERainControllerStatus` não existe no assembly decompilado. **Isso estava errado — ver autocorreção na Sessão 3.** Mantido aqui por imutabilidade (§8 memory-curation); não editar retroativamente.
+- [Storm é evento de servidor, não fase agendada]: `ESeasonStatus.Storm` (`Class451`/`Class452`) só é alcançado via `StormStartedEvent : SyncEventFromServer` (payload vazio), escutado por `Class444.method_1` e propagado pelo estado atual (`StormStarted(visual)`). Isso não entra no `cycleOrder` do `server/config.json` — é candidato a ser sincronizado como evento de rede (`ThunderEventTrigger`), não como fase do calendário.
+- [Handshake de clima do FIKA confirmado]: `ClientGameController.GetWeather()` (`ClientGameController.cs:147-165`) envia `RequestPacket{Type=Weather}` uma única vez no loading screen e faz polling até `WeatherReady`; `WeatherController.Instance.method_0(WeatherClasses)` é o ponto real de aplicação, usado tanto pelo Host (`HostGameController.cs:384/542`) quanto pelo Client (`ClientGameController.cs:139`). Confirma o diagnóstico original do Roadmap §1 sem alterações.
+- [Padrão de broadcast periódico já existe no FIKA]: `FikaServer.cs` já implementa exatamente o padrão necessário para `TrlWeatherSyncPacket` — accumulator `_sendThreshold` em `Update()` disparando `SendData(ref packet, DeliveryMethod.Unreliable)` em broadcast (usado hoje para FPS via `StatisticsPacket`). Virou o template de implementação (usado na Sessão 3).
+- [Chuva normal não tem o problema da tempestade]: `WeatherCurve.RainCurve` é dado contínuo interpolado, sem decisão local — diferente de `Storm`. Premissa do Roadmap original sobre "RainRandomness = geradores de ruído da Unity" não se sustentou: é só um nome de legado pro campo `rain_intensity` do servidor, não consumido pela curva.
+- [Servidor SPT não tem conceito de "Storm"]: só 3 presets (`SUNNY`/`RAINY`/`CLOUDY`). `RaidWeatherService` é singleton por processo — cada FIKA player gera sua própria previsão com RNG isolado, motivo do handshake único existir.
+- [Arquitetura de registro de pacote sem alterar o FIKA]: `RegisterPacket<T>` é público, parte do contrato `IFikaNetworkManager` — consumível direto do plugin externo, sem Harmony patch nos internals nem fork.
+- [`SetWeatherForce` faz a interpolação suave nativa]: usado na Sessão 3 em vez de Lerp manual.
+
+**Lições / hipóteses descartadas:**
+- Ver autocorreção do `ERainControllerStatus` na Sessão 3 — a lição desta sessão (`ERainControllerStatus` não existe) foi refutada por evidência nova.
 
 ---
 
@@ -27,7 +107,7 @@
   - Primavera: `SpringEarly` (degelo de neve residual) e `Spring` (plena e florida).
   - Verão: `Summer` (ensolarado) e `Storm` (tempestades tropicais).
   - Outono: `Autumn` (folhas douradas) e `AutumnLate` (árvores secas sem folhas, solo gélido).
-  - Inverno: `Winter` (neve estável) e `WinterStorm` (nevasca violenta com vento horizontal).
+  - Inverno: `Winter` (neve estável) e `WinterStorm` (nevasca violenta com vento horizontal) — **confirmado real na Sessão 3**, depois de ter sido descartado por engano na Sessão 2.
 - [Controle de Tempo via Servidor]: Definição de controle determinístico por timestamp UTC no `server/config.json`, com adoção oficial da **Opção A** (1 semana real de 7 dias por estação macro, totalizando 4 semanas / 28 dias reais para o ciclo anual completo, com 3,5 dias em sub-fases de transição na Primavera e Outono). Imune ao `TimeFactor` (~7x) da partida.
 - [Otimização de Neve e Chuva]:
   - Constatado que a chuva/neve segue a câmera do jogador a 10m (`RainFollow.cs`).

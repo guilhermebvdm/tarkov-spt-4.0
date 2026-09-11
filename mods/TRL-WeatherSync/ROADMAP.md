@@ -43,6 +43,7 @@ A ordem cronológica astronômica implementada pelo mod conecta todas as fases e
    * *Visual:* Folhagem densa, árvores carregadas de folhas verdes, iluminação solar brilhante (`TOD_Sky`), noites curtas e alta visibilidade geral.
 2. **⛈️ Tempestade de Verão (`ESeasonStatus.Storm` / `Class451`):**
    * *Visual:* Pancadas de chuva torrencial repentinas com trovoadas intensas, ventos fortes e retorno rápido ao sol limpo.
+   * *Mecânica confirmada:* `Storm` **não é selecionável diretamente** via `ESeason` (não existe nos 6 valores do enum) — é alcançado em runtime por um evento global do servidor (`StormStartedEvent : SyncEventFromServer`, payload vazio) que qualquer estado de estação (`Class446/447/448/449/450/453`) escuta via `StormStarted(visual)` e transiciona para `Class451`. Não entra no `cycleOrder` do `server/config.json` (§3.2) — é um evento a ser disparado/sincronizado pelo motor de rede (§5), não uma fase agendada por data. Ver [`docs/investigacao-fika-eft-2026-09-10.md`](docs/investigacao-fika-eft-2026-09-10.md#c2-class444--controlador-de-estações-rótulo-comunitário-seasonscontroller-não-confirmado-oficialmente).
 
 #### C. 🍂 Outono (Autumn) — 2 Fases Nativas:
 1. **🍂 Outono Dourado (`ESeason.Autumn` / `Class449`):**
@@ -51,11 +52,13 @@ A ordem cronológica astronômica implementada pelo mod conecta todas as fases e
 2. **🍂 Outono Tardio / Pré-Gelo (`ESeason.AutumnLate` / `Class450`):**
    * *Visual:* Árvores completamente despidas de folhas (galhos secos e retorcidos), vegetação rasteira morta em tons marrons/cinzentos, poças de lama endurecendo com o frio, prenúncio de geada e ar gélido.
 
-#### D. ❄️ Inverno (Winter) — 2 Fases / Modos:
+#### D. ❄️ Inverno (Winter) — 1 fase de calendário + 1 evento de nevasca confirmados:
 1. **❄️ Inverno Nevado (`ESeason.Winter` / `Class453`):**
    * *Visual:* Cobertura espessa de neve branca em todo o terreno e vegetação, lagos/poças com superfícies congeladas, iluminação fria e vapor saindo da respiração do personagem.
-2. **🌨️ Nevasca / Tempestade de Neve (`ERainControllerStatus.WinterStorm` / `Class456`):**
-   * *Visual:* Ventania uivante com neve horizontal em alta velocidade (`StormSideSpeed`), visibilidade drasticamente reduzida (efeito *Whiteout*), forçando combate a curta distância e uso de equipamentos térmicos.
+2. **🌨️ Nevasca (`RainController.ERainControllerStatus.WinterStorm` / `Class677` em `RainController.cs`):**
+   * *Visual:* `SnowFlakes.StormFactor = 1f` (vento horizontal de neve, `StormSideSpeed`) + `SnowWetRenderer.StormEnabled = true`. **Reconfirmado em 2026-09-10** (ver correção abaixo) — existe de verdade, só que num lugar diferente do que o Roadmap original apontava.
+
+> ✅ **Correção da correção (investigação 2026-09-10, sessão de continuação — ver [`docs/investigacao-fika-eft-2026-09-10.md`](docs/investigacao-fika-eft-2026-09-10.md) seção H):** a correção anterior deste Roadmap (mesma data, sessão inicial) estava **errada**. `ERainControllerStatus` **existe sim** — só que é um `enum` **aninhado dentro da classe `RainController`** (`RainController.cs:19-29`, não um tipo de topo de arquivo), por isso a busca original não achou (grafo/arquivo por nome não cobre tipos aninhados do mesmo jeito). Valores reais: `Summer, WinterStorm, WinterStormReconnect, Winter, Spring, SpringEarly, Autumn, AutumnLate`. `WinterStorm` (`Class677`) ativa exatamente o `StormFactor`/`StormSideSpeed` que o Roadmap original descrevia. **Confirmado o elo entre os dois sistemas:** quando `Class444` entra em `ESeasonStatus.Storm` (`Class451`/`Class452`), ele chama `RainController.method_8()`/`method_9()` (`Class444.cs:440`/`464`), que por sua vez transiciona o `RainController` pra `WinterStorm`/`WinterStormReconnect` (`RainController.cs:268-280`) — **são duas metades do mesmo evento de tempestade**, uma cuidando da lógica de jogo (`Class444`) e outra do visual de chuva/neve (`RainController`). O nome "WinterStorm" é usado mesmo quando a tempestade acontece no contexto de Verão (`Class451`'s `ESeason.Summer`) — aparentemente o motor de neve é reaproveitado como efeito visual genérico de tempestade, não só de inverno. Ainda **não confirmado**: se existe uma checagem direta tipo "se chuva/nuvem passar de X, dispara tempestade" — o disparo continua sendo via `StormStartedEvent` (evento discreto), não uma fórmula contínua encontrada no código lido até agora.
 
 ---
 
@@ -137,8 +140,19 @@ $$\text{semanaAtual} = \left\lfloor \frac{\text{tempoDecorridoSegundos}}{\text{s
 
 ## 5. Motor de Sincronização Contínua em Raid (Real-Time Weather Sync)
 
+> Base de código real levantada em 2026-09-10 (ver [`docs/investigacao-fika-eft-2026-09-10.md`](docs/investigacao-fika-eft-2026-09-10.md), seções A e B) — as citações abaixo substituem a versão anterior, que não tinha nenhum arquivo real referenciado.
+
 ### 5.1. Arquitetura Host-Authoritative
-* O Host ou Servidor Headless emite a cada **10 a 15 segundos** um pacote compacto (`TrlWeatherSyncPacket` < 32 bytes):
+
+**O handshake atual (1x por raid):** `ClientGameController.GetWeather()` (`mods\FIKA\modded\Fika-Plugin\Fika.Core\Main\GameMode\ClientGameController.cs:147-165`) envia um `RequestPacket { Type = ERequestSubPacketType.Weather }` ao Host e faz polling a cada 1s até `WeatherReady`. O Host responde em `RequestSubPackets.WeatherRequest.HandleRequest` (`Networking\Packets\World\RequestSubPackets.cs:113-131`) com o `WeatherClasses` atual. Isso só acontece uma vez, no loading screen — é a causa raiz do desync (confirmado, não é mais suposição).
+
+**O modelo certo para sync contínuo já existe no FIKA, só que para FPS do servidor** — é o template a seguir:
+* `FikaServer.cs:138/170` — accumulator `_sendThreshold = 2f` (segundos).
+* `FikaServer.cs:546-570` — `Update()` acumula `Time.unscaledDeltaTime` e dispara o envio quando ultrapassa o threshold.
+* `FikaServer.cs:572-583` — monta o pacote e chama `SendData(ref packet, DeliveryMethod.Unreliable)` **sem peer** = broadcast para todos os clients.
+* `Networking\Packets\Backend\StatisticsPacket.cs` — exemplo mínimo de `struct : INetSerializable` compacto.
+
+`TrlWeatherSyncPacket` deve replicar esse padrão exato (accumulator configurável 10-15s, `struct : INetSerializable`, `DeliveryMethod.Unreliable` — tolerante a perda pontual, o próximo pacote corrige) com os campos:
   * `RainIntensity` (0.0 a 1.0)
   * `Cloudness` (0.0 a 1.0)
   * `WindSpeed` & `WindDirection` (Vector2 compacto)
@@ -146,15 +160,21 @@ $$\text{semanaAtual} = \left\lfloor \frac{\text{tempoDecorridoSegundos}}{\text{s
   * `Temperature` & `AtmosphericPressure`
   * `ThunderEventTrigger` (disparo síncrono de trovão/relâmpago)
 
+**Por que `ThunderEventTrigger` precisa ser um evento explícito, não uma leitura local (confirmado 2026-09-10, ver [`docs/investigacao-fika-eft-2026-09-10.md`](docs/investigacao-fika-eft-2026-09-10.md#f-onde-o-servidor-decide-uma-tempestade--resolvido-p-122-com-uma-descoberta-importante), seção F):** conferido em `references\spt-source\Libraries\SPTarkov.Server.Core\Models\Spt\Config\WeatherConfig.cs:72-77` — o **servidor SPT só tem 3 presets de clima (`SUNNY`, `RAINY`, `CLOUDY`), não existe `STORM` no servidor**. `ESeasonStatus.Storm` é decidido inteiramente do lado do cliente EFT, muito provavelmente por um sorteio de probabilidade local (`IWeatherCurve.LightningThunderProbability`, `InverseLerp(0.5, 1, Cloudiness)`) — o call site exato não foi localizado (assembly ofuscado), mas o bastante já ficou claro: **mesmo que todos os clientes recebam a mesma curva de clima, se a decisão de "agora é tempestade" envolve qualquer sorteio local, cada máquina pode concluir coisas diferentes nos mesmos dados**. Por isso o Host precisa decidir e empurrar a decisão pronta (`ThunderEventTrigger = true/false`), nunca deixar cada cliente sortear sozinho.
+
+**Ponto de aplicação no cliente — RESOLVIDO (investigação 2026-09-10):** usar **`WeatherController.Instance.SetWeatherForce(WeatherClass end)`** (`WeatherController.cs:120`), não `method_0()`. Lendo `EFT.Weather.WeatherCurve.cs` inteiro: `method_0()` troca a curva inteira do zero (usado hoje só no handshake único do FIKA), enquanto `SetWeatherForce` monta uma curva nova a partir dos **valores instantâneos atuais** (Rain/Wind/Fog/Cloudiness/Temperature "de agora") até o `WeatherClass end` informado, com `end.Time` definindo o prazo da transição. **É literalmente a interpolação suave nativa da Unity (`AnimationCurve`) que o §5.2 abaixo planejava reimplementar manualmente** — não precisa de loop de `Mathf.Lerp` por frame no código do mod. Ressalva: o construtor de `SetWeatherForce` chama incondicionalmente `SetHalloweenWind(45, ...)` (nome sugere código originalmente escrito só para o evento de Halloween) — validar em raid real se isso não introduz um comportamento de vento estranho fora de outubro.
+
+**Arquitetura de registro do pacote — RESOLVIDO, sem necessidade de alterar o FIKA:** `RegisterPacket<T>` é **público** em `FikaClient.cs:580` e `FikaServer.cs:968`, e faz parte do contrato público `IFikaNetworkManager` (`Networking\IFikaNetworkManager.cs:129`) — é uma API de extensão oficialmente exposta pelo FIKA para mods de terceiros, não um detalhe interno. O TRL-WeatherSync só precisa: (1) aguardar `Singleton<FikaClient>.Instantiated`/`Singleton<FikaServer>.Instantiated` no `Awake()` do próprio plugin BepInEx; (2) chamar `RegisterPacket<TrlWeatherSyncPacket>(handler)` normalmente; (3) implementar o accumulator de broadcast (`_sendThreshold`/`Update()`, ver acima) **dentro do próprio mod**, não editando `FikaServer.cs`. Zero Harmony patch nos internals do FIKA, zero reflection, zero fork — o mod funciona sobre um FIKA stock, compatível com publicação pública.
+
 ### 5.2. Interpolação Suave nos Clientes (Anti-Snap)
-* O cliente aplica amortecimento linear (`Mathf.Lerp` em 2-3s) nos parâmetros recebidos, garantindo que o início ou término de chuvas e variações de neblina ocorram de maneira imperceptível e natural.
+* ~~O cliente aplica amortecimento linear (`Mathf.Lerp` em 2-3s) nos parâmetros recebidos~~ — **superado pela solução nativa em §5.1**: cada pacote recebido vira uma chamada a `SetWeatherForce(weatherClassAlvo)` com `weatherClassAlvo.Time = agora + 2-3s`, e o próprio `WeatherCurve`/`AnimationCurve` da Unity faz a transição suave. Nenhum handler existente do FIKA faz Lerp manual hoje (`FikaClient.Callbacks.cs:749-752`, o handler de `StatisticsPacket`, só atribui o valor bruto) — mas para o TRL-WeatherSync isso deixou de ser necessário.
 
 ---
 
 ## 6. Correção do Handshake Pré-Raid (Loading Screen)
 
-* **Saneamento de `TimeAndWeatherSettings`:** Repasse integral de `CloudinessType`, `RainType`, `WindType` e `FogType` do Host para o `CoopGame.Create` do cliente antes da inicialização do `LocalGame`.
-* **Proteção contra Condição de Corrida de `WeatherReady`:** O cliente só destrava o carregamento quando o array completo de `WeatherClasses` estiver confirmado e aplicado em `WeatherController.Instance.method_0()`.
+* **Saneamento de `TimeAndWeatherSettings`:** `CoopGame.cs:86` já recebe `TimeAndWeatherSettings timeAndWeather` como parâmetro na criação da raid. `HostGameController.SetupCustomWeather(TimeAndWeatherSettings timeAndWeather)` (`HostGameController.cs:364-385`) é o método real que converte `CloudinessType`/`RainType`/`WindType`/`FogType` em `WeatherClass` e aplica via `WeatherController.Instance.method_0(...)` (linha 384) — não é preciso "inventar" esse repasse, ele já existe; a questão é garantir que o valor sincronizado continuamente pelo TRL-WeatherSync não seja sobrescrito por essa rotina em reconexões.
+* **Proteção contra Condição de Corrida de `WeatherReady`:** confirmado em `ClientGameController.GetWeather()` (`ClientGameController.cs:147-165`) — o cliente já faz esse polling (`while (!WeatherReady)`, reenvio a cada 1s) antes de continuar o carregamento. O TRL-WeatherSync não precisa reimplementar essa proteção, só não pode quebrá-la ao interceptar o pacote `Weather`.
 
 ---
 
