@@ -13,6 +13,7 @@ namespace CustomClasses.Client;
 [BepInPlugin("customclasses.mdj.client", "CustomClasses", "0.16.9")]
 [BepInDependency("com.SPT.core", "4.0.0")]
 [BepInDependency("me.sol.sain", BepInDependency.DependencyFlags.SoftDependency)]   // (050.4 SAIN) carrega após o SAIN se presente
+[BepInDependency("com.fika.core", BepInDependency.DependencyFlags.SoftDependency)]   // (090) garante ordem de carga p/ o hook ObservedMedsSpeedHook (FIKA/005)
 public class Plugin : BaseUnityPlugin
 {
     internal static Plugin? Instance;   // item 012: host de coroutine (BaseUnityPlugin é MonoBehaviour)
@@ -265,6 +266,14 @@ public class Plugin : BaseUnityPlugin
         }
         // 079: MobileSurgeryPatch REMOVIDO (o Médico não anda mais em cirurgia).
         new SurgeryPenaltyPatch().Enable();                 // (076) 🔧 Médico — cirurgia sem cortar HP máx (auto; ally via ICM)
+        try
+        {
+            ClassMedicReplicationHook.Register();           // (090) assina o hook genérico do FIKA (item 005) — auto-cura + cura de aliado
+        }
+        catch (System.Exception ex)
+        {
+            Log.LogWarning($"[CustomClasses] (090) hook de replicação de velocidade (Fika) não registrado: {ex.Message}");
+        }
         try
         {
             new ChangeEnergyPatch().Enable();               // (050.3) 🔻 Tanque — fome drena ×1.3 (Heavy Frame)
