@@ -8,6 +8,7 @@
 | Propriedade | Tradução (pt-BR) | Tipo | Padrão | Tooltip (pt-BR) |
 |---|---|---|---|---|
 | Dismemberment Enabled | Habilitar Desmembramento | `bool` | `true` | Desativa literalmente TUDO relacionado a desmembramento. |
+| Drop Headwear/Eyewear On Head Dismemberment | Derrubar Capacete/Óculos no Desmembramento de Cabeça | `bool` | `true` | Derruba capacete e óculos com 100% de chance quando a cabeça é efetivamente desmembrada. Gatilho distinto da chance configurável de "Helmet Knock Off Chance" (que continua funcionando como antes). |
 
 ## Blood
 
@@ -55,6 +56,7 @@
 | Propriedade | Tradução (pt-BR) | Tipo | Padrão | Tooltip (pt-BR) |
 |---|---|---|---|---|
 | Shoot off Helmets | Arrancar Capacete com Tiros | `bool` | `true` | Permite soltar capacetes com impactos na cabeça. |
+| Drop Weapon On Death | Derrubar Arma na Morte | `bool` | `true` | Solta a arma em mãos (exceto faca) como item avulso ao morrer, em vez de deixá-la presa ao cadáver. |
 | Helmet Knock Off Chance | Chance de Arrancar Capacete (%) | `float` | `15.0` | Probabilidade percentual do capacete voar ao levar tiro. |
 | Duration for anim swap | Duração da Troca de Animação | `float` | `1.0` | Duração do blend da animação de morte. |
 | Duration for Mapping Weight swap | Duração do Peso do Mapeamento | `float` | `1.0` | Transição do peso de ragdoll ativo. |

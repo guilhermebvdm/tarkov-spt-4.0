@@ -68,6 +68,14 @@ public class LimbKillPatch : ModulePatch
 		if (!isDead)
 		{
 			if (!player.IsAI || !VisceralEntry.AllPlayersHaveVisceralCombat) return;
+
+			// Boss e escolta nunca entram no desmembramento de perna em vivos (rastejo/agonia) —
+			// só bots comuns. Pós-morte (isDead == true, mais abaixo neste mesmo método) continua
+			// liberado geral, sem essa restrição.
+			// ref: Assembly-CSharp/BotSettingsRepoClass.cs:555-559 — WildSpawnType.IsBossOrFollower()
+			// (data-driven no próprio jogo; nenhuma lista de boss mantida pelo mod).
+			WildSpawnType? role = player.Profile?.Info?.Settings?.Role;
+			if (role.HasValue && role.Value.IsBossOrFollower()) return;
 		}
 
 		// --- 2. PuppetMaster: agony interruption ---
@@ -182,10 +190,10 @@ public class LimbKillPatch : ModulePatch
 			}
 			else if (rbLow.Contains("humanhead") || rbLow.Contains("humanskull"))
 			{
-				// Post-mortem head dismemberment using identical bone/cap parameters to KillPatch case 0.
+				// Post-mortem head detection. capAsset não é usado pra cabeça (backlog 004:
+				// ResolveHeadOutcome/DismemberLimb/BurstHead decidem Head_1/2/3 mais abaixo).
 				dismemberPart = (EBodyPart)0;
 				boneName = "head";
-				capAsset = $"Head_{UnityEngine.Random.Range(1, 4)}";
 				extraAssets = Array.Empty<string>();
 			}
 		}
@@ -222,19 +230,43 @@ public class LimbKillPatch : ModulePatch
 			return;
 		}
 
-		// --- Dead corpses branch (uses caliber chance table) ---
-		float chance = 0.5f;
-		if (shot.Ammo is AmmoItemClass ammo && !string.IsNullOrEmpty(ammo.Caliber))
+		// --- Dead corpses branch ---
+		// ref: backlog 004 — chance por parte do corpo via ResolveDismemberChance/
+		// ResolveHeadOutcome, em vez da tabela plana por calibre de antes. AmmoItemClass.Name
+		// (herdado de Item.cs:392) é a chave de LOCALIZAÇÃO, não o nome interno — usa
+		// ammo.AmmoTemplate.Name (o campo cru do template, igual a AmmoTemplate.Name em
+		// KillPatch.Postfix) pra bater com as chaves de dismember_exceptions.
+		string ammoName = null;
+		int projectileCount = 1;
+		float bulletMassGram = 0f;
+		float initialSpeed = 0f;
+		string caliberStr = null;
+		if (shot.Ammo is AmmoItemClass ammo)
 		{
-			string calStr = ammo.Caliber;
-			string cleanCalStr = calStr.StartsWith("Caliber") ? calStr.Substring(7) : calStr;
-			if (VisceralCombat.Combined.Patches.KillPatch.calibers.TryGetValue(calStr, out float foundChance) ||
-			    VisceralCombat.Combined.Patches.KillPatch.calibers.TryGetValue(cleanCalStr, out foundChance))
-			{
-				chance = foundChance;
-			}
+			ammoName = ammo.AmmoTemplate?.Name;
+			projectileCount = ammo.ProjectileCount;
+			bulletMassGram = ammo.BulletMassGram;
+			initialSpeed = ammo.InitialSpeed;
+			caliberStr = ammo.Caliber; // já sem prefixo "Caliber" (AmmoItemClass.cs:32) — ResolveDismemberChance normaliza de qualquer forma
 		}
 
+		if (dismemberPart.Value == (EBodyPart)0)
+		{
+			VisceralCombat.Combined.Patches.KillPatch.HeadDismemberOutcome headOutcome =
+				VisceralCombat.Combined.Patches.KillPatch.ResolveHeadOutcome(caliberStr, ammoName, projectileCount, bulletMassGram, initialSpeed, player.Id, shot.FireIndex);
+			if (headOutcome == VisceralCombat.Combined.Patches.KillPatch.HeadDismemberOutcome.HeadOff)
+			{
+				Transform[] dummyLimbs;
+				VisceralCombat.Combined.Patches.KillPatch.DismemberLimb(player, shot.Direction, dismemberPart.Value, boneName, "Head_3", extraAssets, out dummyLimbs);
+			}
+			else if (headOutcome == VisceralCombat.Combined.Patches.KillPatch.HeadDismemberOutcome.HeadBurst)
+			{
+				VisceralCombat.Combined.Patches.KillPatch.BurstHead(player, shot.Direction);
+			}
+			return;
+		}
+
+		float chance = VisceralCombat.Combined.Patches.KillPatch.ResolveDismemberChance(caliberStr, ammoName, projectileCount, bulletMassGram, initialSpeed, dismemberPart.Value, player.Id, shot.FireIndex);
 		if (UnityEngine.Random.value <= chance)
 		{
 			Transform[] dummyLimbs;

@@ -1,9 +1,109 @@
 # Visceral Combat — Memória de Sessões
 
 ## Snapshot Delta
-- **Versão:** 3.9.10 (SPT 4.0 / FIKA 2.2.6)
-- **Estado:** Compilação 100% limpa em C# 12 (0 erros). Arquitetura de Wake on Hit implementada para cadáveres em repouso cinemático (0% CPU). Eliminação de travamentos de CPU em granadas (deduplicação de corpos e rigidbodies). Proteção de `SupportRigidbody` contra duplicações na lista do EFT. Ancoragem de esguichos e jatos arteriais ao osso físico em movimento. Eliminação de tropeços/deslizes involuntários do PMC ao tomar tiro (proteção de entidades vivas em `BodiesImpulsePatch`). Intangibilidade de partículas de sangue em personagens (`ConfigureBloodParticleCollision`). Emissão de poças reais de ambiente no chão (`EmitBloodOnEnvironment` a 0.15s). Eliminação do teleporte em pé de bots deitados (substituição por `Flail_Loop` no chão e ragdoll natural).
-- **Pendências:** 🟢 Nenhuma pendência aberta.
+- **Versão:** 3.9.13 (SPT 4.0 / FIKA 2.2.6)
+- **Estado:** Item `002` (drop de arma/capacete/óculos) e item `003` (Boss/escolta vivos nunca desmembram a perna) implementados e compilados, aguardando validação in-game/coop. Item `004` (reformulação completa da chance de desmembramento) implementado: `KillPatch.cs`/`LimbKillPatch.cs` agora decidem chance por **parte do corpo** (braço/perna/cabeça-arranca/cabeça-estourar) via 3 mecanismos com precedência — (C) exceção por munição individual, (A) soma dinâmica de momento pra munição multi-projétil (calibre 12/20, parte do 23x75), (B) tabela por calibre — em vez do valor único por calibre de antes. Cabeça ganhou um segundo efeito, "estourar" (`BurstHead`, novo — cabeça real permanece, só sobrepõe `Head_1`/`Head_2`; `Head_3` continua sendo "arranca"/sem cabeça). `VD_Calibers.json` reescrito com o schema novo (29 calibres da planilha do usuário + exceções Barrikada/Zvezda do 23x75 + thresholds placeholder do mecanismo A). Planilha de referência em `mods/VisceralCombat/docs/municoes-tabela-completa.xlsx`.
+- **Pendências:** 🔴 1 · 🟡 4 · 🟠 1 (ver abaixo).
+
+## Pendências / próximos passos conhecidos
+- [P-7.1] (aberta 2026-09-09) 🔴 Item 002 não foi validado in-game nem em coop. Teste **decisivo**: client morre com arma em mãos enquanto host observa — decide se o gate `FikaBackendUtils.IsServer` no host aplicado sobre o `InventoryController` de um `ObservedPlayer` remoto replica corretamente via canal nativo de inventário do EFT/Fika. Ver `mods/VisceralCombat/backlog/002-drop-arma-capacete-oculos-cabeca/002-drop-arma-capacete-oculos-cabeca-02-spec-tech.md` §7/§8. Se falhar, o item volta para `/create-technical-spec`.
+- [P-7.2] (aberta 2026-09-09) 🟡 Validação solo básica do item 002 (bot com arma/faca em mãos; desmembramento de cabeça na morte e pós-morte; hit de cabeça sem desmembrar não duplica) ainda não feita.
+- [P-7.3] (aberta 2026-09-09) 🟡 Débito técnico pré-existente descoberto durante a auditoria Fika do item 002: os pacotes próprios do mod (`DismembermentPacket`, `LivingDismembermentPacket`, `RagdollSyncPacket`) não seguem `docs/technical/fika-packet-desync-prevention-plan.md` — serializam com `Put`/`Get*` crus, sem envelope de comprimento, sem `TryGet*`, sem flag `Valid`. O mod nunca esteve no inventário auditado do guia (auditoria de 2026-07-26 cobriu 6 mods, VisceralCombat não incluído — guia desatualizado). Candidato a item de backlog de auditoria/fix separado (categoria AP-11).
+- [P-8.1] (aberta 2026-09-10) 🟡 Item 003 (Boss/escolta vivo não desmembra a perna) não foi validado in-game — precisa de raid com boss pra confirmar (Killa/Reshala/etc. + um seguidor), além do teste de regressão (Scav comum continua desmembrando normal).
+- [P-8.2] (aberta 2026-09-10) 🟠 `CR-01-01` do item 004 — `KillPatch.Postfix` e `LimbKillPatch.ProcessLimbKill` podem processar o mesmo pellet independentemente em corpos já mortos; se confirmado, o acumulador de momento do mecanismo A conta em dobro (chance mais alta que a curva calibrada prevê, não é crash). Precisa de validação em jogo ou de uma guarda de idempotência no acumulador. Ver `mods/VisceralCombat/backlog/004-reformular-chance-desmembramento-calibre/004-reformular-chance-desmembramento-calibre-04-code-review-01.md`.
+- [P-8.3] (aberta 2026-09-10) 🟡 Item 004: thresholds do mecanismo A (`momentum_min_ns`/`momentum_max_ns`/`head_burst_multiplier` em `VD_Calibers.json`) são placeholders (3.0/15.0/1.5), não calibrados. Ajustar com teste em jogo (calibre 12 buckshot no mesmo membro).
+
+---
+
+## 2026-09-10 12:51 (GMT-3) — Sessão 2026-09-10 (Sessão 8b): Reformulação Completa da Chance de Desmembramento (item 004) — 3 Mecanismos + Efeito "Cabeça Estourada"
+
+**Tema central:** Ciclo SDD completo do item 004 — reformular a chance de desmembramento pra ser por parte do corpo (braço/perna/cabeça-arranca/cabeça-estourar), calibrada por calibre com base na planilha do usuário, mais um novo efeito visual de cabeça "estourada" distinto do "arranca" existente.
+
+**Decisões-chave:**
+- **3 mecanismos com precedência C→A→B→0** (`KillPatch.ResolveDismemberChance`/`ResolveHeadOutcome`): (C) exceção por munição individual (`ammo.Name`/`ammo.AmmoTemplate.Name`, chave = nome interno tipo `patron_23x75_barricade`); (A) soma dinâmica de momento (N·s) pra munição `ProjectileCount > 1`, agrupada por `(player, FireIndex, parte do corpo)` — reusa o padrão de agrupamento já existente do desmembramento de perna em vivos, mas **acumulando** em vez de deduplicar; (B) tabela por calibre (a antiga, agora com 4 valores em vez de 1); fallback final = 0 (nunca mais um default alto tipo o `0.5f` de antes).
+- **Cabeça ganhou 2 rolagens independentes:** "arranca" (`Head_3`, remoção completa, pipeline `DismemberLimb` existente) e "estourar" (`Head_1`/`Head_2`, novo método `BurstHead` — cabeça real **não** é escondida/encolhida, só sobrepõe o prop e aplica sangue/drop de equipamento). Mapeamento confirmado pelo usuário via AssetStudio (não pela leitura de código).
+- **`VD_Calibers.json` reescrito**, gerado programaticamente a partir da planilha `municoes-tabela-completa.xlsx` (29 calibres com valores manuais do usuário) + lista de exceção pequena (Barrikada/Zvezda do 23x75 — os únicos membros de projétil único desse calibre, já que Shrapnel-10/25/Volna-R e o restante caem automaticamente no mecanismo A) + bloco de curva do mecanismo A (thresholds ainda placeholder).
+- **Thresholds do mecanismo A movidos pro JSON** em vez de constante hardcoded (`PA-01-03` da review técnica) — dá pra recalibrar sem recompilar.
+
+**Lições / hipóteses descartadas:**
+- **Bug pré-existente real encontrado durante a implementação:** `AmmoTemplate.Caliber` mantém o prefixo `"Caliber"` (`"Caliber556x45NATO"`), mas `AmmoItemClass.Caliber` (`AmmoItemClass.cs:32`) já vem **sem** o prefixo. O código antigo de `LimbKillPatch.cs` tentava as duas formas de busca mas nunca batia com as chaves da tabela (que tinham o prefixo) — a chance de desmembramento pós-morte por bala provavelmente **sempre caiu no default `0.5f`** desde que essa lógica foi escrita, nunca usou os valores calibrados por calibre. Corrigido com `KillPatch.NormalizeCaliber` aplicado nos dois pontos de consumo.
+- **`AmmoItemClass.Name` não é o nome interno** — é `Item.Name => Template.NameLocalizationKey` (chave de localização). O nome interno real (`"patron_23x75_barricade"`) precisa de `ammo.AmmoTemplate.Name` (indo pelo template). Hipótese inicial (usar `ammo.Name` direto) teria quebrado silenciosamente o mecanismo C vindo do `LimbKillPatch` (nunca acharia as exceções).
+- **`SkeletonRootJoint` não é `Transform`** — é `Diz.Skinning.Skeleton` (só serve pro `Skin.Init()`). Pra ancorar efeitos de sangue em `BurstHead`, usar `player.PlayerBones.Head.Original` (o bone real da cabeça) é mais preciso, e resolveu de quebra o `TODO confirmar` que a spec técnica tinha deixado em aberto.
+- **Achado de code-review não resolvido (`CR-01-01`, 🟠):** `KillPatch.Postfix` (via `ApplyDamageInfo`) e `LimbKillPatch.ProcessLimbKill` (via `BallisticsCalculator.Shoot`) parecem ser dois caminhos independentes que podem processar o **mesmo pellet físico** num corpo já morto — no código antigo isso era inofensivo pra `DismemberLimb` (guarda de idempotência por escala já existente), mas o acumulador de momento novo não tem essa guarda, então pode contar o mesmo pellet duas vezes se os dois caminhos realmente disparam pro mesmo evento. Não resolvido nesta sessão — registrado como pendência (`[P-8.2]`), precisa de validação em jogo antes de decidir se vale a pena adicionar a guarda.
+
+**Atividade cronológica:**
+1. Usuário terminou de calibrar a tabela B (4 colunas por parte do corpo, 31 calibres) na planilha e confirmou visualmente no AssetStudio que `Head_3` = arranca, `Head_1`/`Head_2` = estourar.
+2. Criado item 004: spec funcional → review (2 corner cases amarrados a condições) → spec técnica (achado + corrigido: contagem dupla de momento na cabeça; achado + confirmado: `damageInfo.FireIndex` disponível) → review técnica (0 bloqueadores, thresholds movidos pro JSON).
+3. Gerado `VD_Calibers.json` novo programaticamente a partir da planilha + exceções + curva.
+4. Implementado em `KillPatch.cs`/`LimbKillPatch.cs`/`GameStartedPatch.cs`/`VisceralEntry.cs` — 4 bugs reais encontrados e corrigidos durante a implementação (ver Lições acima), incluindo um bug pré-existente de normalização de calibre.
+5. Compilado com sucesso (versão 3.9.13). Code review: 1 achado 🟠 (`CR-01-01`), não aplicado nesta rodada — registrado como pendência pra decisão informada (validar em jogo vs. adicionar guarda de idempotência).
+
+**Pendências abertas nesta sessão:**
+- Ver bloco "Pendências / próximos passos conhecidos" no topo — [P-8.2] 🟠, [P-8.3] 🟡.
+
+**Cross-refs:**
+- Artefatos completos: `mods/VisceralCombat/backlog/004-reformular-chance-desmembramento-calibre/`.
+- Continuação direta da Sessão 8 (mesmo dia, mesmo fio de trabalho — calibre/desmembramento).
+
+---
+
+## 2026-09-10 00:30 (GMT-3) — Sessão 2026-09-10 (Sessão 8): Boss/Escolta Imunes ao Desmembramento em Vivos (item 003) + Investigação de Assets de Cabeça + Planilha de Munições
+
+**Tema central:** Ciclo SDD completo do item 003 (Boss/escolta vivos nunca desmembram a perna) + investigação exploratória sobre o sistema de chance de desmembramento por calibre (preparando uma revisão futura da fórmula) e sobre os assets 3D de cabeça decepada.
+
+**Decisões-chave:**
+- **Item 003 implementado:** guarda adicionada em [`LimbKillPatch.cs:66-79`](../../modded/VisceralCombat/VisceralCombat.Ragdolls.Patches/LimbKillPatch.cs#L66-L79) — dentro do ramo `!isDead` já existente, checa `player.Profile?.Info?.Settings?.Role` e retorna cedo se `WildSpawnType.IsBossOrFollower()` for verdadeiro (`BotSettingsRepoClass.cs:555-559`). Decisão de usar a extension method nativa do jogo em vez de lista própria de bosses no mod — evita dívida de manutenção a cada boss novo. Pós-morte não é afetado (Boss morto desmembra normal). Code review: 0 achados.
+- **Achado — chance de desmembramento é tabela estática, não fórmula física:** `KillPatch.calibers` (`% dismember_calibers` em `VD_Calibers.json`) é uma tabela hand-tuned por calibre, não usa momento (N·s). A fórmula `p = m·v` que existe no código (`IsHeavyCaliberNoAgony`) serve só pra decidir se pula a animação de agonia num hit fatal — sistema totalmente separado da chance de desmembrar.
+- **Achado — `IsHeavyCaliberNoAgony` mal calcularia buckshot se reaproveitada como está:** ela já trata calibre 12 balote (`ProjectileCount<=1`) como pesado, mas chumbo de espalhamento (`ProjectileCount>1`) cairia no momento de **um** chumbinho isolado (~1-1.4 N·s, abaixo do threshold de 5.0 N·s) — subestimaria o poder real do disparo. Qualquer fórmula nova precisa somar os chumbinhos do mesmo `FireIndex` (padrão já usado em `LimbKillPatch` pro desmembramento de perna em vivos) em vez de avaliar isolado.
+- **Achado — `bleed_calibers`/`BleedPatch` é 100% cosmético:** só escolhe partícula de sangue (VFX), não toca `HealthController` nem dano de sangramento real. O único sangramento real que o mod aplica é o `20f HP/s` fixo do `LivingDismembermentController` (perna decepada em vivo), que não depende de calibre.
+- **Assets de cabeça:** `gorecaps.bundle` tem 3 prefabs `Head_1/2/3` usados pelo código, mas o bundle contém MAIS assets que o código nunca referencia por nome: `gore_neck_cap01/03` (pescoço sem cabeça) e `head_exploded01/02` (variante "estourada", nunca ligada no C#). Achado por `grep` bruto nas strings do `.bundle` — indício (não confirmado visualmente) de que `Head_3` é a variante sem cabeça, já que só ela tem textura temática de "Neck" em vez de "Brain/Eye/Teeth" como `Head_1`/`Head_2`.
+
+**Lições / hipóteses descartadas:**
+- Nenhuma lição nova de causa raiz — sessão de investigação + 1 fix pequeno e limpo (sem retrabalho).
+
+**Atividade cronológica:**
+1. Levantada a tabela `VD_Calibers.json` completa (22 calibres cobertos) e confrontada com a fórmula de momento já existente no código — identificado o desconexo entre os dois sistemas.
+2. Investigados os assets `gorecaps.bundle` via `grep` nas strings binárias — orientado o usuário a usar AssetStudio pra confirmar visualmente.
+3. Gerada `mods/VisceralCombat/docs/municoes-tabela-completa.xlsx` (openpyxl) a partir do banco real do servidor SPT (`references/spt-source/.../templates/items.json`, 210 munições/31 calibres) cruzado com `VD_Calibers.json` — achado: `.50 BMG` (127x99) ausente das duas tabelas do mod.
+4. Confirmada ausência de qualquer proteção pra Boss no desmembramento em vivos (`grep` "Boss"/"WildSpawnType" no mod → 0 ocorrências) e localizada a API canônica `WildSpawnType.IsBossOrFollower()`.
+5. Ciclo completo do item 003: spec funcional → review (1 corner case) → spec técnica (verificação de tipos `Profile.Info.Settings.Role` linha a linha) → review técnica (0 bloqueadores) → código → build → code review (0 achados).
+
+**Pendências abertas nesta sessão:**
+- [P-8.1] 🟡 — ver bloco "Pendências / próximos passos conhecidos" no topo.
+
+**Cross-refs:**
+- Artefatos do item 003: `mods/VisceralCombat/backlog/003-bloquear-desmembramento-boss-vivo/`.
+- Planilha de referência: `mods/VisceralCombat/docs/municoes-tabela-completa.xlsx` (não é artefato de backlog — material de apoio pra decisão futura de calibre/momento).
+
+---
+
+## 2026-09-09 23:02 (GMT-3) — Sessão 2026-09-09 (Sessão 7): Drop de Arma na Morte + Capacete/Óculos no Desmembramento de Cabeça (item 002) + Auditoria Fika
+
+**Tema central:** Ciclo SDD completo (`/add-backlog-item` → `/code-review`) do item 002 — dropar a arma em mãos (exceto faca) na morte, dropar capacete+óculos a 100% no desmembramento real de cabeça (distinto do `ShootOffHelmetPatch` já existente), e auditar sincronismo Fika de ambos.
+
+**Decisões-chave:**
+- **Ponto de patch da arma — `Player.DropItemDead`, não `CreateCorpsePatch`/`CreateBSGRagdollPatch`:** investigação no Assembly revelou que o vanilla **já** intercepta o item em mãos na morte (`Player.OnDead` → `method_98` → `DropItemDead`, [Player.cs:30539/30681/30686](../../../references/eft-decompiled/Assembly-CSharp/EFT/Player.cs)), mas só faz um fling cosmético (`AttachWeapon`, item continua no cadáver) — não um drop real. `WeaponDropOnDeathPatch` (novo) faz Prefix nesse método vanilla e chama `ThrowItem` (mesmo padrão de `ShootOffHelmetPatch.cs:41-44`) quando não é faca. Ver `002-...-02-spec-tech.md` §0.
+- **Ponto de patch do capacete/óculos — dentro de `KillPatch.DismemberLimb`, fora do `foreach` de transforms:** os 3 gatilhos reais de desmembramento de cabeça (`KillPatch.Postfix` caso 0, `LimbKillPatch.ProcessLimbKill` estratégias A/B) convergem nesse método único. Correção pós-review (`PA-01-01`, 🔴): o ponto de inserção precisa ficar **fora** do `foreach (Transform val in array)` (`KillPatch.cs:230-448`), senão dispararia 1x por transform casado em vez de 1x por evento.
+- **Gate de autoridade de rede — `FikaBackendUtils.IsServer || IsSinglePlayer`, sem gate de paridade:** decisão do usuário (via pergunta direta) de **não** condicionar os novos drops ao `AllPlayersHaveVisceralCombat` (usado só pelo desmembramento de perna em bots vivos, item 001) — precedente do mod é incondicional (nem o desmembramento de cabeça pós-morte nem o `ShootOffHelmetPatch` checam esse gate).
+- **Detecção de faca — `item is KnifeItemClass`, não `GetItemComponent<KnifeComponent>()`:** ver Lições abaixo.
+
+**Lições / hipóteses descartadas:**
+- *"A arma não cai hoje porque ninguém implementou isso"* — falso. O vanilla já dropa fisicamente a arma (`Player.cs:26802-26855 DropItemDead` → `Corpse.Ragdoll.AttachWeapon`), só que como efeito cosmético (arma balança presa ao cadáver via rigidbody), não como remoção real do inventário. Confundir "solta visualmente" com "vira item independente no mundo" teria levado a duplicar lógica desnecessariamente se não investigado a fundo primeiro.
+- *`Item.GetItemComponent<KnifeComponent>()` seria seguro por ser exatamente o teste que o vanilla usa (`Player.cs:26848`)* — citação correta no `.cs` do dump, mas o `dotnet build` real falhou (`CS0311`/`CS0012`): `IItemComponent` vive num assembly (`ItemComponent.Types`) não referenciado por `VisceralCombat.csproj`. Caso real de AP-09 — recon/leitura do dump correto ≠ compila no projeto. Corrigido para `item is KnifeItemClass` (`KnifeItemClass.cs:7`, mesmo assembly `Assembly-CSharp`), sem mudar o resultado.
+- *Achado de auditoria (não uma hipótese testada, mas relevante registrar):* os pacotes de rede já existentes do mod (`DismembermentPacket`, `LivingDismembermentPacket`, `RagdollSyncPacket`) **não seguem** `docs/technical/fika-packet-desync-prevention-plan.md` (sem envelope, sem `TryGet*`, sem `Valid`) — dívida pré-existente, não introduzida por este item (item 002 não criou pacote novo — replica pela operação nativa de inventário). Ver [P-7.3].
+
+**Atividade cronológica:**
+1. Investigado Assembly-CSharp (`Player.cs`, `TraderControllerClass.cs`, `EquipmentSlot.cs`, `Corpse.cs`) e código do mod (`KillPatch.cs`, `LimbKillPatch.cs`, `ShootOffHelmetPatch.cs`, pacotes Fika) — spec técnica com 9 refs verificadas ao dump.
+2. `/review-technical-spec` rodada 01: 1 🔴 (ponto de inserção errado) + 2 🟡 (efeito de pular `DropItemDead` sobre `Corpse.SetItemInHandsLootedCallback`; autoridade de rede do item 1 sem precedente) + 1 🟢. Todos os 4 resolvidos por investigação adicional (leitura de `Corpse.cs`, `Player_OnDead_Patch.cs`/`ObservedPlayer.cs` do FIKA) antes do `/code-mod` — nenhum ficou pendente.
+3. `/code-mod`: criado `WeaponDropOnDeathPatch.cs`, modificado `KillPatch.cs` (`DropHeadEquipment`) e `VisceralEntry.cs` (2 `ConfigEntry`, registro do patch, versão 3.9.10→3.9.11). `dotnet build` revelou o erro de assembly do `KnifeComponent` (ver Lições) — corrigido antes de prosseguir.
+4. `/code-review` rodada 01: 1 🟡 (bug latente — `WeaponDropOnDeathPatch` podia descartar a arma silenciosamente se o cast pra `TraderControllerClass` falhasse) + 1 🟢. Ambos aplicados via `/apply-code-review` — rebuild confirmado.
+5. `PROPRIEDADES.md` e `mod-backlog.md` atualizados; `05-asbuild.md` gerado e mantido com as 2 rodadas de correção.
+
+**Pendências abertas nesta sessão:**
+- Ver bloco "Pendências / próximos passos conhecidos" no topo — [P-7.1] 🔴, [P-7.2] 🟡, [P-7.3] 🟡.
+
+**Cross-refs:**
+- Artefatos completos: `mods/VisceralCombat/backlog/002-drop-arma-capacete-oculos-cabeca/` (spec funcional, spec técnica, review técnica 01, code review 01, as-built).
 
 ---
 

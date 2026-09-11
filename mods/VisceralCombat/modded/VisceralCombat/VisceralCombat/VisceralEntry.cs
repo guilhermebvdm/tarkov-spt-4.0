@@ -28,7 +28,7 @@ using VisceralCombat.Ragdolls.Patches;
 
 namespace VisceralCombat;
 
-[BepInPlugin("com.servph.VisceralCombat", "Visceral Combat", "3.9.10")]
+[BepInPlugin("com.servph.VisceralCombat", "Visceral Combat", "3.9.13")]
 /// <remarks>
 /// GUID used for FIKA mod-presence checks. Must match BepInPlugin first arg.
 /// </remarks>
@@ -102,6 +102,8 @@ public class VisceralEntry : BaseUnityPlugin
 
 	public ConfigEntry<bool> EnableDismemberment { get; set; }
 
+	public ConfigEntry<bool> DropHeadEquipmentOnDismemberment { get; set; }
+
 	public ConfigEntry<bool> EnableBloodEffects { get; set; }
 
 	public ConfigEntry<float> BloodSplatterSize { get; set; }
@@ -131,6 +133,8 @@ public class VisceralEntry : BaseUnityPlugin
 	public ConfigEntry<bool> ItemForce { get; set; }
 
 	public ConfigEntry<bool> ShootHelmetOff { get; set; }
+
+	public ConfigEntry<bool> DropWeaponOnDeath { get; set; }
 
 	public ConfigEntry<bool> IsSlingingEnabled { get; set; }
 
@@ -183,6 +187,7 @@ public class VisceralEntry : BaseUnityPlugin
 				Order = 3
 			}
 		}));
+		DropHeadEquipmentOnDismemberment = ((BaseUnityPlugin)this).Config.Bind<bool>("Dismemberment", "Drop Headwear/Eyewear On Head Dismemberment", true, "Derruba capacete e oculos com 100% de chance quando a cabeca e efetivamente desmembrada. Gatilho distinto da chance configuravel de 'Helmet Knock Off Chance' (que continua funcionando como antes).");
 		EnableBloodEffects = ((BaseUnityPlugin)this).Config.Bind<bool>("Blood", "Blood Effects Enabled", true, new ConfigDescription("Disables literally EVERYTHING for blood.", (AcceptableValueBase)null, new object[1]
 		{
 			new ConfigurationManagerAttributes
@@ -268,6 +273,7 @@ public class VisceralEntry : BaseUnityPlugin
 		GrenadeExplIntensity = ((BaseUnityPlugin)this).Config.Bind<float>("Ragdolls | Ragdoll Phsyical Properties", "Grenade Intensity", 190f, "How much force is applied to a grenade explosion. This is also dependent on caliber. Default is 190");
 		BodyCollision = ((BaseUnityPlugin)this).Config.Bind<bool>("Ragdolls | Ragdoll Phsyical Properties", "Player Body Collision", false, "Allows you to step on bodies. You can potentially get stuck on them once in awhile for brief moments. Turn this off if you do not like it.");
 		ShootHelmetOff = ((BaseUnityPlugin)this).Config.Bind<bool>("Ragdolls | Character Properties", "Shoot off Helmets", true, (ConfigDescription)null);
+		DropWeaponOnDeath = ((BaseUnityPlugin)this).Config.Bind<bool>("Ragdolls | Character Properties", "Drop Weapon On Death", true, "Solta a arma em maos (exceto faca) como item avulso ao morrer, em vez de deixa-la presa ao cadaver.");
 		HelmetShootOffChance = ((BaseUnityPlugin)this).Config.Bind<float>("Ragdolls | Character Properties", "Helmet Knock Off Chance", 15f, (ConfigDescription)null);
 		AnimSwapDuration = ((BaseUnityPlugin)this).Config.Bind<float>("Ragdolls | Character Properties", "Duration for anim swap", 1f, (ConfigDescription)null);
 		MappingWeightDuration = ((BaseUnityPlugin)this).Config.Bind<float>("Ragdolls | Character Properties", "Duration for Mapping Weight swap", 1f, (ConfigDescription)null);
@@ -285,6 +291,7 @@ public class VisceralEntry : BaseUnityPlugin
 		((ModulePatch)new VisceralCombat.Ragdolls.Patches.GameStartedPatch()).Enable();
 		((ModulePatch)new PhysicalItemsPatch()).Enable();
 		((ModulePatch)new ShootOffHelmetPatch()).Enable();
+		((ModulePatch)new WeaponDropOnDeathPatch()).Enable();
 		((ModulePatch)new AttachWeaponPatch()).Enable();
 		((ModulePatch)new PlayerInitPatch()).Enable();
 		((ModulePatch)new LimbKillPatch()).Enable();
@@ -393,6 +400,14 @@ public class VisceralEntry : BaseUnityPlugin
 		Player targetPlayer = RagdollHelperClass.FindPlayerByNetId(packet.playerID);
 		if (targetPlayer != null && !RagdollHelperClass.IsPlayerDowned(targetPlayer))
 		{
+			// ref: backlog 004 — "head_burst" é um resultado distinto de desmembramento normal
+			// (cabeça permanece, só sobrepõe Head_1/2) — precisa despachar pra BurstHead em vez
+			// de DismemberLimb, senão o peer remoto encolheria a cabeça real por engano.
+			if (packet.bone == "head_burst")
+			{
+				KillPatch.BurstHead(targetPlayer, packet.Direction, isFromNetwork: true);
+				return;
+			}
 			Transform[] affectedLimbs = null;
 			KillPatch.DismemberLimb(targetPlayer, packet.Direction, packet.bodyPartType, packet.bone, packet.capAssetName, packet.assetNames, out affectedLimbs, isFromNetwork: true);
 		}
@@ -491,11 +506,34 @@ public class VisceralEntry : BaseUnityPlugin
 		{
 			if (item.ContainsKey("dismember_calibers"))
 			{
-				Dictionary<string, float> dictionary = JsonConvert.DeserializeObject<Dictionary<string, float>>(item["dismember_calibers"].ToString());
-				foreach (KeyValuePair<string, float> item2 in dictionary)
+				// ref: backlog 004 — schema aninhado (4 valores por parte do corpo em vez de
+				// 1 valor por calibre). Chave normalizada (sem prefixo "Caliber") pra bater com
+				// KillPatch.NormalizeCaliber, chamado pelos dois pontos de consumo (KillPatch.cs
+				// usa AmmoTemplate.Caliber com prefixo; LimbKillPatch.cs usa AmmoItemClass.Caliber
+				// sem prefixo).
+				Dictionary<string, Dictionary<string, float>> dictionary = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, float>>>(item["dismember_calibers"].ToString());
+				foreach (KeyValuePair<string, Dictionary<string, float>> item2 in dictionary)
 				{
-					KillPatch.calibers[item2.Key] = item2.Value;
+					KillPatch.calibers[KillPatch.NormalizeCaliber(item2.Key)] = ParseDismemberChances(item2.Value);
 				}
+			}
+			if (item.ContainsKey("dismember_exceptions"))
+			{
+				// Mecanismo (C) — exceção por munição individual, chave = nome interno do
+				// template (AmmoTemplate.Name / AmmoItemClass.AmmoTemplate.Name).
+				Dictionary<string, Dictionary<string, float>> dictionary = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, float>>>(item["dismember_exceptions"].ToString());
+				foreach (KeyValuePair<string, Dictionary<string, float>> item2 in dictionary)
+				{
+					KillPatch.caliberExceptions[item2.Key] = ParseDismemberChances(item2.Value);
+				}
+			}
+			if (item.ContainsKey("dismember_multiprojectile_curve"))
+			{
+				// Mecanismo (A) — limiares de momento (N.s) e multiplicador de "estourar".
+				Dictionary<string, float> curve = JsonConvert.DeserializeObject<Dictionary<string, float>>(item["dismember_multiprojectile_curve"].ToString());
+				if (curve.TryGetValue("momentum_min_ns", out float momentumMin)) KillPatch.MultiProjectileMomentumMin = momentumMin;
+				if (curve.TryGetValue("momentum_max_ns", out float momentumMax)) KillPatch.MultiProjectileMomentumMax = momentumMax;
+				if (curve.TryGetValue("head_burst_multiplier", out float burstMult)) KillPatch.HeadBurstMultiplier = burstMult;
 			}
 			if (item.ContainsKey("bleed_calibers"))
 			{
@@ -528,5 +566,16 @@ public class VisceralEntry : BaseUnityPlugin
 		{
 			QuickLogger.Log(ELogType.Log, "Calibers Found & Added.");
 		}
+	}
+
+	private static KillPatch.DismemberChances ParseDismemberChances(Dictionary<string, float> raw)
+	{
+		KillPatch.DismemberChances chances = default;
+		if (raw == null) return chances;
+		if (raw.TryGetValue("arm", out float arm)) chances.Arm = arm;
+		if (raw.TryGetValue("leg", out float leg)) chances.Leg = leg;
+		if (raw.TryGetValue("head_off", out float headOff)) chances.HeadOff = headOff;
+		if (raw.TryGetValue("head_burst", out float headBurst)) chances.HeadBurst = headBurst;
+		return chances;
 	}
 }

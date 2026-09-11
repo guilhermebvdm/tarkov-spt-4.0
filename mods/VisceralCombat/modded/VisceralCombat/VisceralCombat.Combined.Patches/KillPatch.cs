@@ -26,7 +26,170 @@ namespace VisceralCombat.Combined.Patches;
 
 public class KillPatch : ModulePatch
 {
-	public static Dictionary<string, float> calibers = new Dictionary<string, float>();
+	// ref: backlog 004 — reformulação da chance de desmembramento por calibre e parte do
+	// corpo. Substitui o Dictionary<string, float> plano (1 chance por calibre, igual pra
+	// qualquer parte do corpo) por 3 mecanismos com precedência C -> A -> B -> 0:
+	//   (C) caliberExceptions — exceção por munição individual (ammo.Name), pra casos de
+	//       projétil único que não devem herdar o valor genérico do calibre (ex.: slug de
+	//       23x75 "Barrikada" vs o flashbang "Zvezda" do mesmo calibre).
+	//   (A) multi-projétil dinâmico — se a munição tiver mais de 1 projétil (chumbo/buckshot),
+	//       soma o momento (N.s) de cada pellet que acerta a mesma parte do corpo no mesmo
+	//       disparo (agrupado por FireIndex, mesmo padrão de _evaluatedLivingVolleys abaixo)
+	//       e converte pra uma chance 0-1 via interpolação linear entre 2 limiares.
+	//   (B) calibers — tabela por calibre (o antigo comportamento), agora com 4 valores por
+	//       calibre (braço/perna/cabeça-arranca/cabeça-estourar) em vez de 1.
+	public struct DismemberChances
+	{
+		public float Arm;
+		public float Leg;
+		public float HeadOff;
+		public float HeadBurst;
+	}
+
+	public static Dictionary<string, DismemberChances> calibers = new Dictionary<string, DismemberChances>();
+	public static Dictionary<string, DismemberChances> caliberExceptions = new Dictionary<string, DismemberChances>();
+
+	// Lidos de VD_Calibers.json ("dismember_multiprojectile_curve") via ParseDismembermentJson.
+	// Defaults abaixo só valem se a chave não existir no JSON.
+	public static float MultiProjectileMomentumMin = 3.0f;
+	public static float MultiProjectileMomentumMax = 15.0f;
+	public static float HeadBurstMultiplier = 1.5f;
+
+	// Acumulador do mecanismo (A) — chave: (player.Id, FireIndex, bodyPart). Todos os pellets
+	// de um disparo de espingarda compartilham o mesmo FireIndex (ref: Assembly-CSharp/
+	// EFT.Ballistics/BallisticsCalculator.cs:163-167), então cada pellet processado soma seu
+	// momento aqui até cruzar o limiar — sem precisar coordenar "quando o disparo terminou".
+	private static readonly Dictionary<long, float> _multiProjectileMomentum = new Dictionary<long, float>();
+
+	public static void ClearMultiProjectileMomentum()
+	{
+		_multiProjectileMomentum.Clear();
+	}
+
+	private static long MakeMomentumKey(int playerId, int fireIndex, EBodyPart bodyPart)
+	{
+		return ((long)playerId << 40) | ((long)fireIndex << 8) | (byte)bodyPart;
+	}
+
+	/// <summary>Remove o prefixo "Caliber" se presente — AmmoTemplate.Caliber mantém o
+	/// prefixo ("Caliber556x45NATO"), mas AmmoItemClass.Caliber já vem sem ele
+	/// ("556x45NATO", ver AmmoItemClass.cs:32). Normalizar aqui garante que os dois
+	/// caminhos (KillPatch.Postfix usa AmmoTemplate; LimbKillPatch usa AmmoItemClass)
+	/// batam com a mesma chave no dicionário.</summary>
+	internal static string NormalizeCaliber(string caliber)
+	{
+		if (string.IsNullOrEmpty(caliber)) return caliber;
+		return caliber.StartsWith("Caliber") ? caliber.Substring(7) : caliber;
+	}
+
+	/// <summary>Soma o momento (N.s) de um pellet no acumulador e retorna o total até agora.
+	/// Chamar EXATAMENTE UMA VEZ por (pellet, parte do corpo) — para cabeça, ResolveHeadOutcome
+	/// já garante isso lendo o valor uma única vez e derivando as duas chances dele.</summary>
+	private static float AccumulateMultiProjectileMomentum(float bulletMassGram, float initialSpeed, int playerId, int fireIndex, EBodyPart bodyPart)
+	{
+		float massKg = (bulletMassGram > 0f) ? (bulletMassGram / 1000f) : 0f;
+		float speed = (initialSpeed > 0f) ? initialSpeed : 0f;
+		float pelletMomentum = massKg * speed;
+
+		long key = MakeMomentumKey(playerId, fireIndex, bodyPart);
+		float accumulated = _multiProjectileMomentum.TryGetValue(key, out float existing) ? existing + pelletMomentum : pelletMomentum;
+		_multiProjectileMomentum[key] = accumulated;
+
+		if (_multiProjectileMomentum.Count > 2000) _multiProjectileMomentum.Clear(); // guarda de segurança, mesmo padrão de _evaluatedLivingVolleys
+
+		return accumulated;
+	}
+
+	private static float MomentumToChance(float accumulated)
+	{
+		if (accumulated <= MultiProjectileMomentumMin) return 0f;
+		if (accumulated >= MultiProjectileMomentumMax) return 1f;
+		return (accumulated - MultiProjectileMomentumMin) / (MultiProjectileMomentumMax - MultiProjectileMomentumMin);
+	}
+
+	private static float SelectByBodyPart(DismemberChances c, EBodyPart bodyPart)
+	{
+		switch ((int)bodyPart)
+		{
+			case 3:
+			case 4:
+				return c.Arm;
+			case 5:
+			case 6:
+				return c.Leg;
+			default:
+				return c.HeadOff; // Head (0) tratado à parte por ResolveHeadOutcome — nunca chega aqui na prática
+		}
+	}
+
+	/// <summary>Resolve a chance de desmembrar braço/perna. NÃO usar para cabeça — ver
+	/// ResolveHeadOutcome (cabeça tem 2 rolagens independentes: arranca/estourar).</summary>
+	internal static float ResolveDismemberChance(string caliber, string ammoName, int projectileCount, float bulletMassGram, float initialSpeed, EBodyPart bodyPart, int playerId, int fireIndex)
+	{
+		// (C) Exceção por munição — checada primeiro, nome exato do template.
+		if (!string.IsNullOrEmpty(ammoName) && caliberExceptions.TryGetValue(ammoName, out DismemberChances exc))
+		{
+			return SelectByBodyPart(exc, bodyPart);
+		}
+
+		// (A) Multi-projétil dinâmico — soma o momento dos pellets do mesmo disparo/parte do corpo.
+		if (projectileCount > 1)
+		{
+			float accumulated = AccumulateMultiProjectileMomentum(bulletMassGram, initialSpeed, playerId, fireIndex, bodyPart);
+			return MomentumToChance(accumulated);
+		}
+
+		// (B) Tabela por calibre — fallback pra projétil único sem exceção.
+		string normalizedCaliber = NormalizeCaliber(caliber);
+		if (!string.IsNullOrEmpty(normalizedCaliber) && calibers.TryGetValue(normalizedCaliber, out DismemberChances cal))
+		{
+			return SelectByBodyPart(cal, bodyPart);
+		}
+
+		return 0f; // fallback final: nunca um default alto (corrige o 0.5f implícito de antes)
+	}
+
+	public enum HeadDismemberOutcome { None, HeadOff, HeadBurst }
+
+	/// <summary>Cabeça é uma decisão de 2 rolagens independentes: primeiro "arranca" (Head_3,
+	/// remoção completa via DismemberLimb), se não vencer tenta "estourar" (Head_1/2, via
+	/// BurstHead, sem remover a cabeça real). No caso multi-projétil, o momento do pellet é
+	/// somado UMA ÚNICA VEZ (AccumulateMultiProjectileMomentum) e as duas chances derivam da
+	/// mesma leitura — nunca soma o mesmo pellet duas vezes.</summary>
+	internal static HeadDismemberOutcome ResolveHeadOutcome(string caliber, string ammoName, int projectileCount, float bulletMassGram, float initialSpeed, int playerId, int fireIndex)
+	{
+		float offChance;
+		float burstChance;
+
+		if (!string.IsNullOrEmpty(ammoName) && caliberExceptions.TryGetValue(ammoName, out DismemberChances exc))
+		{
+			offChance = exc.HeadOff;
+			burstChance = exc.HeadBurst;
+		}
+		else if (projectileCount > 1)
+		{
+			float accumulated = AccumulateMultiProjectileMomentum(bulletMassGram, initialSpeed, playerId, fireIndex, EBodyPart.Head); // UMA chamada só
+			offChance = MomentumToChance(accumulated);
+			burstChance = Mathf.Min(1f, offChance * HeadBurstMultiplier); // estourar satura mais cedo que arrancar
+		}
+		else
+		{
+			string normalizedCaliber = NormalizeCaliber(caliber);
+			if (!string.IsNullOrEmpty(normalizedCaliber) && calibers.TryGetValue(normalizedCaliber, out DismemberChances cal))
+			{
+				offChance = cal.HeadOff;
+				burstChance = cal.HeadBurst;
+			}
+			else
+			{
+				return HeadDismemberOutcome.None;
+			}
+		}
+
+		if (Random.value <= offChance) return HeadDismemberOutcome.HeadOff;
+		if (Random.value <= burstChance) return HeadDismemberOutcome.HeadBurst;
+		return HeadDismemberOutcome.None;
+	}
 
 	private static Func<Player, InventoryController> _getInventoryController = delegate(Player player)
 	{
@@ -80,15 +243,27 @@ public class KillPatch : ModulePatch
 			}
 		}
 
-		string cleanCaliber = caliber;
-		if (!string.IsNullOrEmpty(cleanCaliber) && cleanCaliber.StartsWith("Caliber"))
+		// ref: backlog 004 — chance por parte do corpo (braço/perna/cabeça-arranca/
+		// cabeça-estourar) via ResolveDismemberChance/ResolveHeadOutcome, em vez do valor
+		// único por calibre de antes. Cabeça é resolvida à parte (2 rolagens independentes,
+		// ver HeadDismemberOutcome); o resultado vira um "dismemberChance" 0 ou 1 só pra
+		// reaproveitar o mesmo gate de baixo (linha "Random.value > dismemberChance") sem
+		// duplicar a lógica de agonia/ragdoll que já existe ali.
+		string ammoName = currentAmmoTemplate?.Name;
+		int projectileCount = currentAmmoTemplate?.ProjectileCount ?? 1;
+		float bulletMassGram = currentAmmoTemplate?.BulletMassGram ?? 0f;
+		float initialSpeed = currentAmmoTemplate?.InitialSpeed ?? 0f;
+
+		HeadDismemberOutcome headOutcome = HeadDismemberOutcome.None;
+		float dismemberChance;
+		if ((int)bodyPartType == 0)
 		{
-			cleanCaliber = cleanCaliber.Substring(7);
+			headOutcome = ResolveHeadOutcome(caliber, ammoName, projectileCount, bulletMassGram, initialSpeed, __instance.Id, damageInfo.FireIndex);
+			dismemberChance = (headOutcome != HeadDismemberOutcome.None) ? 1f : 0f;
 		}
-		float dismemberChance = 0.5f; // Default to 50% if caliber cannot be checked
-		if (!string.IsNullOrEmpty(caliber) && (calibers.TryGetValue(caliber, out var chance) || (!string.IsNullOrEmpty(cleanCaliber) && calibers.TryGetValue(cleanCaliber, out chance))))
+		else
 		{
-			dismemberChance = chance;
+			dismemberChance = ResolveDismemberChance(caliber, ammoName, projectileCount, bulletMassGram, initialSpeed, bodyPartType, __instance.Id, damageInfo.FireIndex);
 		}
 
 		bool isHeavyNoAgony = IsHeavyCaliberNoAgony(caliber, currentAmmoTemplate);
@@ -154,8 +329,17 @@ public class KillPatch : ModulePatch
 				DismemberLimb(__instance, damageInfo.Direction, bodyPartType, value3, "Leg_RightCap", new string[1] { "gore_leg_torn02" }, out affectedLimbs);
 				break;
 			case 0:
-				// Head dismemberment → direct ragdoll, no agony animation.
-				DismemberLimb(__instance, damageInfo.Direction, bodyPartType, value3, $"Head_{Random.Range(1, 4)}", Array.Empty<string>(), out affectedLimbs);
+				// ref: backlog 004 — headOutcome já foi decidido acima (ResolveHeadOutcome),
+				// não rola de novo aqui. "Arranca" reusa o pipeline existente de DismemberLimb
+				// com Head_3 fixo; "estourar" usa o novo BurstHead (não remove a cabeça real).
+				if (headOutcome == HeadDismemberOutcome.HeadOff)
+				{
+					DismemberLimb(__instance, damageInfo.Direction, bodyPartType, value3, "Head_3", Array.Empty<string>(), out affectedLimbs);
+				}
+				else if (headOutcome == HeadDismemberOutcome.HeadBurst)
+				{
+					BurstHead(__instance, damageInfo.Direction);
+				}
 				break;
 			}
 
@@ -446,6 +630,12 @@ public class KillPatch : ModulePatch
 			SpawnOldVolumetricBlood(val, Direction, 1f);
 			SpawnArterialSprays(player, val, Direction, bone);
 		}
+		// Fora do foreach acima (roda uma vez por evento de desmembramento de cabeça, não uma
+		// vez por transform casado — ver spec-tech 002, PA-01-01).
+		if ((int)bodyPartType == 0)
+		{
+			DropHeadEquipment(player);
+		}
 		if (player.IsYourPlayer && (int)bodyPartType == 0)
 		{
 			if (VisceralEntry.Instance.effectContainer != null && VisceralEntry.Instance.effectContainer.blood3dFxEffects != null && VisceralEntry.Instance.effectContainer.blood3dFxEffects.Count > 0)
@@ -453,6 +643,85 @@ public class KillPatch : ModulePatch
 				VisceralEntry.Instance.effectContainer.blood3dFxEffects[0].SetActive(true);
 			}
 		}
+	}
+
+	/// <summary>
+	/// Derruba capacete e óculos com 100% de chance quando a cabeça é efetivamente
+	/// desmembrada. Gatilho distinto de VisceralCombat.Ragdolls.Patches.ShootOffHelmetPatch
+	/// (chance configurável em QUALQUER hit de cabeça, só bots) — este dispara só no evento
+	/// real de desmembramento, para bots E jogadores, e coexiste sem alterar aquele.
+	/// </summary>
+	private static void DropHeadEquipment(Player player)
+	{
+		if (VisceralEntry.Instance == null || !VisceralEntry.Instance.DropHeadEquipmentOnDismemberment.Value) return;
+		if (player == null) return;
+
+		// Mesmo gate de autoridade usado em WeaponDropOnDeathPatch (spec-tech 002 §7) — só o
+		// host (ou singleplayer) executa a remoção real; replicação via operação nativa de
+		// inventário do EFT/Fika.
+		if (!(FikaBackendUtils.IsServer || FikaBackendUtils.IsSinglePlayer)) return;
+
+		if (!(player.InventoryController is TraderControllerClass controller)) return;
+
+		// ref: VisceralCombat.Ragdolls.Patches.ShootOffHelmetPatch.cs — mesmo padrão de drop
+		Slot helmetSlot = player.Inventory?.Equipment?.GetSlot(EquipmentSlot.Headwear);
+		if (helmetSlot?.ContainedItem != null)
+		{
+			controller.ThrowItem(helmetSlot.ContainedItem, false, null);
+		}
+
+		Slot eyewearSlot = player.Inventory?.Equipment?.GetSlot(EquipmentSlot.Eyewear);
+		if (eyewearSlot?.ContainedItem != null)
+		{
+			controller.ThrowItem(eyewearSlot.ContainedItem, false, null);
+		}
+	}
+
+	/// <summary>
+	/// Cabeça "estourada" (backlog 004) — ao contrário de DismemberLimb, a cabeça real NÃO é
+	/// escondida/encolhida: só sobrepõe um dos props Head_1/Head_2 (confirmado pelo usuário
+	/// via AssetStudio: Head_3 = sem cabeça/arrancada; Head_1/Head_2 = cabeça partida/estourada,
+	/// cabeça permanece) e aciona sangue + drop de capacete/óculos (item 002), sem tocar em
+	/// scale/rigidbody/collider/joint.
+	/// </summary>
+	internal static void BurstHead(Player player, Vector3 direction, bool isFromNetwork = false)
+	{
+		if (player == null) return;
+
+		if (!isFromNetwork)
+		{
+			VisceralCombat.Combined.Classes.VisceralNetworkUtils.SendDismemberment(player, direction, EBodyPart.Head, "head_burst", $"Head_{Random.Range(1, 3)}", Array.Empty<string>());
+		}
+
+		if (VisceralEntry.Instance?.effectContainer?.goreCaps == null) return;
+
+		string capAssetName = $"Head_{Random.Range(1, 3)}"; // Head_1 ou Head_2 — Head_3 é a variante "arranca"
+		GameObject capPrefab = VisceralEntry.Instance.effectContainer.goreCaps.FirstOrDefault(cap => (Object)cap != null && ((Object)cap).name == capAssetName);
+		if ((Object)capPrefab == null)
+		{
+			QuickLogger.Log(ELogType.Warn, "Gore cap '" + capAssetName + "' not found in list.");
+			return;
+		}
+
+		GameObject instance = Object.Instantiate(capPrefab);
+		// SkeletonRootJoint (Diz.Skinning.Skeleton) é o tipo que Skin.Init espera — mesmo padrão
+		// de DismemberLimb (linha ~581 acima) pra caps de membro. Pra posicionar o efeito de
+		// sangue, usa player.PlayerBones.Head.Original (Transform real do bone da cabeça,
+		// PlayerBones.cs:97) em vez do SkeletonRootJoint — mais preciso que a raiz do esqueleto
+		// já que a cabeça real continua presente (ao contrário do membro removido em DismemberLimb).
+		Skin skin = instance.GetComponentInChildren<Skin>();
+		if ((Object)skin != null)
+		{
+			skin.Init(player.PlayerBody.SkeletonRootJoint);
+			((AbstractSkin)skin).ApplySkin();
+		}
+
+		Transform headTransform = player.PlayerBones?.Head?.Original;
+		if (headTransform == null) headTransform = player.PlayerBody.SkeletonRootJoint.transform; // fallback defensivo
+		SpawnOldVolumetricBlood(headTransform, direction, 1f);
+		SpawnArterialSprays(player, headTransform, direction, "head");
+
+		DropHeadEquipment(player); // ref: item 002 — "estourar" também derruba capacete/óculos
 	}
 
 	public static void DeathSetup(Player p, EBodyPart eBodyPart, int Chance, bool isFromNetwork = false)

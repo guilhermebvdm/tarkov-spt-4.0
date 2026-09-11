@@ -30,6 +30,7 @@ public class GameStartedPatch : ModulePatch
 		VisceralEntry.Instance.dismemberedPlayers.Clear();
 		VisceralEntry.Instance.deadPlayers.Clear();
 		VisceralCombat.Ragdolls.Patches.LimbKillPatch.ClearLivingVolleys();
+		VisceralCombat.Combined.Patches.KillPatch.ClearMultiProjectileMomentum();
 		VisceralCombat.Ragdolls.Classes.RagdollHelperClass.ClearAgonyTimers();
 		VisceralCombat.Combined.Classes.VisceralShotProcessor.ClearShots();
 		VisceralCombat.Combat.Patches.ShellCasingPatch.ClearCasings();
