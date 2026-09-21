@@ -2,6 +2,25 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/); versionamento [SemVer](https://semver.org/).
 
+## [0.13.0] — não lançado
+
+### Corrigido
+
+- **Stamina de perna, stamina de braço, fôlego e fadiga não são mais herdados da morte.** Eles não são
+  efeitos de saúde: ficam em `Player.Physical` e nenhuma limpeza de efeito os alcançava. O jogador
+  renascia com a vida cheia e o braço tremendo. Agora os três medidores são enchidos até a capacidade,
+  a fadiga é zerada, e a penalidade de uso excessivo (`Overuse`) — que faz a barra drenar mais rápido e
+  demorar a voltar — é limpa pelo mesmo caminho que o jogo usa.
+- **A detecção de desmaio do TRL-ImmersiveCombatMedicine nunca funcionou.** Ela procurava o tipo no
+  namespace `TrueTrauma`, que não existe mais no mod distribuído hoje (`TRLImmersiveCombatMedicine.Trauma`)
+  — confirmado por inspeção do arquivo instalado. Agora tenta os dois nomes.
+- **O trauma do ICM é limpo ao renascer**, por identificador do jogador. Não usa o `ResetAll()` do
+  próprio ICM de propósito: aquele apaga o estado de todos os jogadores e, em cooperativo, limparia o
+  desmaio de quem está caído do outro lado do mapa.
+- A remoção de efeitos passou a ser documentada pelo que de fato faz: ela ignora duas famílias por
+  construção — os efeitos desejáveis (analgésico, berserk, mantidos de propósito) e os permanentes.
+  Intoxicação é permanente e por isso continua saindo pelo método dedicado.
+
 ## [0.8.0] — não lançado
 
 Review completo do mod inteiro, com três lentes independentes (integração/estado · coop/Fika ·

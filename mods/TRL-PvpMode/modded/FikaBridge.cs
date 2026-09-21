@@ -111,35 +111,69 @@ namespace TarkovRedLine.PvpMode
             catch { return false; }
         }
 
+        // O tipo de estado de trauma do ICM ja foi renomeado uma vez: o namespace antigo
+        // (TrueTrauma) nao existe mais no DLL distribuido hoje, que usa
+        // TRLImmersiveCombatMedicine.Trauma. Tentamos os dois, do mais novo para o mais antigo,
+        // para nao quebrar de novo com quem estiver numa versao anterior.
+        private static readonly string[] TraumaStateTypeNames =
+        {
+            "TRLImmersiveCombatMedicine.Trauma.TraumaState",
+            "TrueTrauma.TraumaState",
+        };
+
+        private static Type _traumaStateType;
         private static FieldInfo _blackoutTimersField;
-        private static bool _blackoutResolved;
+        private static FieldInfo _isFaintedField;
+        private static FieldInfo _effectIntensityField;
+        private static readonly System.Collections.Generic.List<FieldInfo> _traumaIdCollections = new();
+        private static bool _traumaResolved;
+
+        private static void ResolveTrauma()
+        {
+            if (_traumaResolved) return;
+            _traumaResolved = true;
+
+            foreach (var name in TraumaStateTypeNames)
+            {
+                _traumaStateType = AccessTools.TypeByName(name);
+                if (_traumaStateType != null) break;
+            }
+
+            if (_traumaStateType == null)
+            {
+                Plugin.Log.LogInfo("[TRL-PvpMode] TRL-ImmersiveCombatMedicine ausente — sem tratamento de desmaio.");
+                return;
+            }
+
+            _blackoutTimersField = AccessTools.Field(_traumaStateType, "BlackoutTimers");
+            _isFaintedField = AccessTools.Field(_traumaStateType, "IsFainted");
+            _effectIntensityField = AccessTools.Field(_traumaStateType, "EffectIntensity");
+
+            // Todas as colecoes indexadas por identificador de jogador: limpamos a entrada deste
+            // jogador em cada uma, sem tocar nas dos outros.
+            foreach (var nome in new[] { "BlackoutTimers", "BlackoutStartTimes", "GraceTimers",
+                                         "VoiceCooldowns", "FaintedPlayerIds" })
+            {
+                var campo = AccessTools.Field(_traumaStateType, nome);
+                if (campo != null) _traumaIdCollections.Add(campo);
+            }
+
+            Plugin.Log.LogInfo(
+                $"[TRL-PvpMode] TRL-ImmersiveCombatMedicine detectado ({_traumaStateType.FullName}) — " +
+                $"desmaio nao aciona o modo de vidas; {_traumaIdCollections.Count} colecoes de trauma mapeadas.");
+        }
 
         /// <summary>
         /// O jogador esta desmaiado pelo TRL-ImmersiveCombatMedicine?
         ///
         /// Desmaio NAO e morte: o jogador acorda sozinho e nao gasta vida. Sem esta checagem, a
-        /// interface de renascer aparece durante o desmaio e promete algo que nao se aplica -
-        /// reportado no terceiro teste in-game.
-        ///
-        /// Resolvido por nome porque o ICM e um mod separado e opcional: sem ele, isto sempre
-        /// devolve falso e nada muda.
-        /// ref: mods/TRL-ImmersiveCombatMedicine/modded/Patches/Trauma/TraumaState.cs:21
+        /// interface de renascer aparece durante o desmaio e promete algo que nao se aplica.
         /// </summary>
         public static bool IsFaintedByCombatMedicine(string profileId)
         {
             if (string.IsNullOrEmpty(profileId)) return false;
 
-            if (!_blackoutResolved)
-            {
-                _blackoutResolved = true;
-                var type = AccessTools.TypeByName("TrueTrauma.TraumaState");
-                _blackoutTimersField = type == null ? null : AccessTools.Field(type, "BlackoutTimers");
-
-                Plugin.Log.LogInfo(_blackoutTimersField != null
-                    ? "[TRL-PvpMode] TRL-ImmersiveCombatMedicine detectado — desmaio nao vai acionar o modo de vidas."
-                    : "[TRL-PvpMode] TRL-ImmersiveCombatMedicine ausente — sem tratamento de desmaio.");
-            }
-
+            ResolveTrauma();
             if (_blackoutTimersField == null) return false;
 
             try
@@ -154,6 +188,44 @@ namespace TarkovRedLine.PvpMode
             {
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Apaga o trauma deste jogador no ICM, para ele nao renascer mancando ou meio desmaiado.
+        ///
+        /// Por identificador, nunca pelo ResetAll() do proprio ICM: aquele apaga o estado de TODOS
+        /// os jogadores, e em cooperativo isso limparia o desmaio de quem esta caido longe daqui.
+        /// </summary>
+        public static void ClearCombatMedicineTraumaFor(string profileId)
+        {
+            if (string.IsNullOrEmpty(profileId)) return;
+
+            ResolveTrauma();
+            if (_traumaStateType == null) return;
+
+            foreach (var campo in _traumaIdCollections)
+            {
+                try
+                {
+                    switch (campo.GetValue(null))
+                    {
+                        case System.Collections.Generic.Dictionary<string, float> dict:
+                            dict.Remove(profileId);
+                            break;
+                        case System.Collections.Generic.HashSet<string> set:
+                            set.Remove(profileId);
+                            break;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Plugin.Log.LogWarning($"[TRL-PvpMode] Limpar {campo.Name}: {ex.Message}");
+                }
+            }
+
+            // Estado visual do jogador local.
+            try { _isFaintedField?.SetValue(null, false); } catch { }
+            try { _effectIntensityField?.SetValue(null, 0f); } catch { }
         }
 
         private static MethodInfo _removeAllActiveEffectsMethod;
