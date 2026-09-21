@@ -2,6 +2,23 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/); versionamento [SemVer](https://semver.org/).
 
+## [0.14.0] — não lançado
+
+### Corrigido
+
+- **O teto de vida rebaixado pela cirurgia não é mais herdado no renascimento.** `RestoreBodyPart`, que
+  é o que o kit cirúrgico chama, devolve o membro destruído mas grava um teto menor. E
+  `FullRestoreBodyPart` — o que `RestoreFullHealth` usa — preenche até o teto **atual**, respeitando o
+  valor rebaixado: o jogador renascia com a perna "cheia" em 40 de 65. Agora o teto volta ao valor do
+  perfil antes de a vida ser preenchida.
+
+### Verificado, sem alteração necessária
+
+- O efeito `Wound` (a ferida que fica no membro depois de o sangramento pesado ser removido, e que
+  reabre em sangramento se o membro sofrer esforço) **já saía** na limpeza: ele implementa apenas
+  `IEffect`, sem as duas marcas que o filtro de `RemoveNegativeEffects` ignora. Confirmado no dump 4.0
+  pelo nome vindo do mapa de deofuscação 4.1.
+
 ## [0.13.0] — não lançado
 
 ### Corrigido

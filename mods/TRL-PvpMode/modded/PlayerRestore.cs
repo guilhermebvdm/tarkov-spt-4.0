@@ -1,5 +1,6 @@
 using System;
 using EFT;
+using EFT.HealthSystem;
 using UnityEngine;
 
 namespace TarkovRedLine.PvpMode
@@ -49,6 +50,11 @@ namespace TarkovRedLine.PvpMode
             var hc = player.ActiveHealthController;
             if (hc == null) return;
 
+            // ANTES de encher a vida: devolver o teto de cada membro. RestoreFullHealth preenche
+            // até o teto ATUAL, que a cirurgia rebaixou — sem este passo o membro operado volta
+            // "cheio" com o teto reduzido.
+            RestoreBodyPartCapacity(player, hc);
+
             try { hc.RestoreFullHealth(); }
             catch (Exception ex) { Plugin.Log.LogWarning($"[TRL-PvpMode] RestoreFullHealth: {ex.Message}"); }
 
@@ -62,6 +68,53 @@ namespace TarkovRedLine.PvpMode
             // ref: Assembly-CSharp/EFT.HealthSystem/ActiveHealthController.cs:3655
             try { hc.method_18(); }
             catch (Exception ex) { Plugin.Log.LogWarning($"[TRL-PvpMode] Intoxicacao: {ex.Message}"); }
+        }
+
+        /// <summary>
+        /// Devolve o teto de vida de cada membro ao valor do perfil.
+        ///
+        /// Este é o resíduo da cirurgia, e ele NÃO é um efeito de saúde — nenhuma limpeza de
+        /// efeito o alcança. <c>ActiveHealthController.RestoreBodyPart</c>, que é o que o kit
+        /// cirúrgico chama, devolve o membro destruído mas grava um teto menor:
+        /// <c>Health = new HealthValue(1, Maximum * healthPenalty)</c> (ActiveHealthController.cs:3903).
+        ///
+        /// E <c>FullRestoreBodyPart</c> preenche até o teto ATUAL
+        /// (<c>new HealthValue(Maximum, Maximum)</c>, :3916), ou seja, respeita o teto rebaixado.
+        /// Resultado: sem este passo o jogador renasce com a perna "cheia" em 40 de 65.
+        ///
+        /// O valor de referência é o do perfil, carregado no início da partida
+        /// (<c>ActiveHealthController</c> monta cada membro a partir dele, :3453). Usar o perfil e
+        /// não um número fixo mantém intacto qualquer dano permanente que o jogador já trouxe de
+        /// fora — o renascimento devolve o estado do começo da raid, não um personagem novo.
+        ///
+        /// Só aumenta, nunca reduz.
+        /// </summary>
+        private static void RestoreBodyPartCapacity(Player player, ActiveHealthController hc)
+        {
+            var bodyParts = player.Profile?.Health?.BodyParts;
+            if (bodyParts == null) return;
+
+            foreach (var entry in bodyParts)
+            {
+                try
+                {
+                    var originalMax = entry.Value?.Health?.Maximum ?? 0f;
+                    if (originalMax <= 0f) continue;
+
+                    if (!hc.Dictionary_0.TryGetValue(entry.Key, out var state) || state == null) continue;
+                    if (state.Health.Maximum >= originalMax) continue;
+
+                    Plugin.Log.LogInfo(
+                        $"[TRL-PvpMode] Teto de {entry.Key} restaurado: {state.Health.Maximum} -> {originalMax}.");
+
+                    state.IsDestroyed = false;
+                    state.Health = new HealthValue(originalMax, originalMax);
+                }
+                catch (Exception ex)
+                {
+                    Plugin.Log.LogWarning($"[TRL-PvpMode] Teto de {entry.Key}: {ex.Message}");
+                }
+            }
         }
 
         /// <summary>
