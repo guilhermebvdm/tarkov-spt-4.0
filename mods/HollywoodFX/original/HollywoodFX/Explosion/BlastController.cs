@@ -1,0 +1,188 @@
+﻿using Comfort.Common;
+using HollywoodFX.Particles;
+using HollywoodFX.Render;
+using Systems.Effects;
+using UnityEngine;
+
+namespace HollywoodFX.Explosion;
+
+public class BlastController : MonoBehaviour
+{
+    private BlastPool<ConfinedBlast> _bigBoomBlastPool;
+    private BlastPool<Blast> _smallBoomBlastPool;
+    private BlastPool<Blast> _flashbangBlastPool;
+    // private BlastPool<Blast> _bulletBlastPool;
+    
+    public void Init(Effects eftEffects)
+    {
+        Plugin.Log.LogInfo("Loading explosion prefabs");
+        var dynamicPrefab = AssetRegistry.AssetBundle.LoadAsset<GameObject>("Assets/HollywoodFX/Particles/Prefabs/HFX Explosion Dynamic.prefab");
+        // var bulletPrefab = AssetRegistry.AssetBundle.LoadAsset<GameObject>("Assets/HollywoodFX/Particles/Prefabs/HFX Explosion Bullet.prefab");
+
+        Plugin.Log.LogInfo("Creating blast pools");
+        _bigBoomBlastPool = new BlastPool<ConfinedBlast>(eftEffects, dynamicPrefab, BuildBigExplosion, 15, 20f);
+        _smallBoomBlastPool = new BlastPool<Blast>(eftEffects, dynamicPrefab, BuildSmallExplosion, 15, 20f);
+        _flashbangBlastPool = new BlastPool<Blast>(eftEffects, dynamicPrefab, BuildFlashbang, 15, 10f);
+        // _bulletBlastPool = new BlastPool<Blast>(eftEffects, bulletPrefab, BuildBullet, 15, 2.5f);
+        
+        Plugin.Log.LogInfo("Creating concussion handling");
+    }
+
+    private void Update()
+    {
+        _bigBoomBlastPool.Update();
+        _smallBoomBlastPool.Update();
+        _flashbangBlastPool.Update();
+        // _bulletBlastPool.Update();
+    }
+
+    private static ConfinedBlast BuildBigExplosion(Effects eftEffects, GameObject prefab)
+    {
+        var mainEffects = EffectBundle.LoadPrefab(eftEffects, prefab, true);
+
+        EffectBundle[] misc =
+        [
+            mainEffects["Fireball"],
+            mainEffects["Glow"],
+            mainEffects["Shockwave"],
+            ScaleDensity(mainEffects["Debris_Burning"]),
+            ScaleDensity(mainEffects["Debris_Generic"]),
+            ScaleDensity(mainEffects["Sparks_Generic"]),
+            ScaleDensity(mainEffects["Dust_Linger"]),
+        ];
+
+        return new ConfinedBlast(
+            eftEffects, 6f, Mathf.Sqrt(0.125f / Plugin.ComputeFidelity.Value),
+            misc, mainEffects["Splash_Generic"], ScaleDensity(mainEffects["Splash_Dust"]),
+            // These are pre-baked effects and we apply the density scaling here
+            ScaleDensity(mainEffects["Dyn_Trail_Sparks"]),
+            mainEffects["Dyn_Dust"]
+        );
+    }
+
+    private static Blast BuildSmallExplosion(Effects eftEffects, GameObject prefab)
+    {
+        var mainEffects = EffectBundle.LoadPrefab(eftEffects, prefab, true);
+
+        EffectBundle[] explosionEffectsUp = [];
+
+        EffectBundle[] explosionEffectsAngled =
+        [
+            mainEffects["Fireball"],
+            mainEffects["Shockwave"],
+            ScaleDensity(mainEffects["Debris_Generic"]),
+            ScaleDensity(mainEffects["Sparks_Generic"]),
+            mainEffects["Splash_Generic"],
+            mainEffects["Splash_Dust"]
+        ];
+
+        return new Blast(explosionEffectsUp, explosionEffectsAngled, 0.65f);
+    }
+    
+    private static Blast BuildFlashbang(Effects eftEffects, GameObject prefab)
+    {
+        var mainEffects = EffectBundle.LoadPrefab(eftEffects, prefab, true);
+
+        EffectBundle[] explosionEffectsUp = [];
+
+        EffectBundle[] explosionEffectsAngled =
+        [
+            mainEffects["Fireball"],
+            mainEffects["Shockwave"],
+            mainEffects["Glow"],
+            ScaleDensity(mainEffects["Sparks_Generic"]),
+            mainEffects["Splash_Dust_Light"]
+        ];
+
+        return new Blast(explosionEffectsUp, explosionEffectsAngled, 0.5f);
+    }
+
+    // private static Blast BuildBullet(Effects eftEffects, GameObject prefab)
+    // {
+    //     var mainEffects = EffectBundle.LoadPrefab(eftEffects, prefab, true);
+    //
+    //     EffectBundle[] explosionEffectsUp = [];
+    //
+    //     EffectBundle[] explosionEffectsAngled =
+    //     [
+    //         ScaleDensity(mainEffects["Fireball"]),
+    //         ScaleDensity(mainEffects["Debris_Glow"]),
+    //         ScaleDensity(mainEffects["Debris_Burning"]),
+    //         ScaleDensity(mainEffects["Debris_Generic"])
+    //     ];
+    //
+    //     return new Blast(explosionEffectsUp, explosionEffectsAngled);
+    // }
+    
+    private static EffectBundle ScaleDensity(EffectBundle effects, float scale = 1f)
+    {
+        foreach (var emitter in effects.Emitters)
+        {
+            foreach (var subSystem in emitter.Main.GetComponentsInChildren<ParticleSystem>())
+            {
+                var densityScaling = 1f;
+
+                var name = subSystem.name.ToLower();
+
+                if (name.Contains("fireball"))
+                    densityScaling = Plugin.ExplosionDensityFireball.Value;
+                else if (name.Contains("debris"))
+                    densityScaling = Plugin.ExplosionDensityDebris.Value;
+                else if (name.Contains("smoke"))
+                    densityScaling = Plugin.ExplosionDensitySmoke.Value;
+                else if (name.Contains("sparks"))
+                    densityScaling = Plugin.ExplosionDensitySparks.Value;
+                else if (name.Contains("dust"))
+                    densityScaling = Plugin.ExplosionDensityDust.Value;
+
+                densityScaling *= scale;
+
+                if (Mathf.Approximately(densityScaling, 1f))
+                    continue;
+
+                ParticleHelpers.ScaleEmissionRate(subSystem, densityScaling);
+            }
+        }
+
+        return effects;
+    }
+
+    // TODO: Replace this with specialized methods. E.g. bullet based effects (big_round) will call a specialized function, as will grenade types.
+    // This allows us to use stuff like impact kinetics and grenade IExplosiveItem.GetStrength or IExplosiveItem.MaxExplosionDistance
+    public void Emit(string id, Vector3 position, Vector3 normal)
+    {
+        // ConsoleScreen.Log($"Emitting {id}");
+        
+        if (id.StartsWith("grenade_smoke"))
+        {
+            return;
+        }
+        
+        if (id.StartsWith("big_round"))
+        {
+            return;
+            // _bulletBlastPool.Emit(position, normal);
+        }
+
+        if (id.StartsWith("Flashbang"))
+        {
+            _flashbangBlastPool.Emit(position, normal);
+            return;
+        }
+
+        if (id.StartsWith("smallgrenade"))
+        {
+            _smallBoomBlastPool.Emit(position, normal);
+        }
+        else
+        {
+            _bigBoomBlastPool.Emit(position, normal);
+        }
+
+        if (!Plugin.ConcussionEnabled.Value || Singleton<PostProcessing>.Instance == null)
+            return;
+
+        var duration = 4f * Plugin.ConcussionDuration.Value;
+        Singleton<PostProcessing>.Instance.Concussion.Apply(position, duration, 12f * Plugin.ConcussionRange.Value, duration);
+    }
+}

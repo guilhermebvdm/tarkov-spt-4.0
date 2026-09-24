@@ -1,0 +1,709 @@
+﻿using System.Collections;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using System.Reflection;
+using BepInEx;
+using BepInEx.Bootstrap;
+using BepInEx.Configuration;
+using BepInEx.Logging;
+using Comfort.Common;
+using EFT.Communications;
+using EFT.UI;
+using HollywoodFX.Explosion;
+using HollywoodFX.Lighting;
+using HollywoodFX.Muzzle.Patches;
+using HollywoodFX.Patches;
+using HollywoodFX.Render;
+using UnityEngine;
+
+namespace HollywoodFX;
+
+[BepInPlugin("com.janky.hollywoodfx", "Janky-HollywoodFX", HollywoodFXVersion)]
+[SuppressMessage("ReSharper", "HeapView.ObjectAllocation.Evident")]
+[SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
+public class Plugin : BaseUnityPlugin
+{
+    public const string MajorMinorVersion = "2.0";
+    public const string HollywoodFXVersion = $"{MajorMinorVersion}.0";
+
+    public static ManualLogSource Log;
+
+    public static ConfigEntry<float> EffectSize;
+    public static ConfigEntry<bool> TracerImpactsEnabled;
+
+    public static ConfigEntry<float> ExplosionDensityFireball;
+    public static ConfigEntry<float> ExplosionDensityDebris;
+    public static ConfigEntry<float> ExplosionDensitySparks;
+    public static ConfigEntry<float> ExplosionDensitySmoke;
+    public static ConfigEntry<float> ExplosionDensityDust;
+    public static ConfigEntry<float> ComputeFidelity;
+
+    public static ConfigEntry<bool> MuzzleEffectsEnabled;
+    public static ConfigEntry<float> MuzzleEffectJetsSize;
+    public static ConfigEntry<float> MuzzleEffectSparksSize;
+    public static ConfigEntry<float> MuzzleEffectSparksEmission;
+    public static ConfigEntry<float> MuzzleEffectSmokeSize;
+    public static ConfigEntry<float> MuzzleEffectSmokeEmission;
+    public static ConfigEntry<bool> MuzzleLightShadowEnabled;
+
+    public static ConfigEntry<bool> ScopeDofEnabled;
+    public static ConfigEntry<float> ScopeDofIntensity;
+    public static ConfigEntry<float> BattleBlurIntensity;
+    public static ConfigEntry<bool> ConcussionEnabled;
+    public static ConfigEntry<float> ConcussionDuration;
+    public static ConfigEntry<float> ConcussionRange;
+
+    public static ConfigEntry<bool> SuppressionEnabled;
+    public static ConfigEntry<float> SuppressionDuration;
+    public static ConfigEntry<float> SuppressionRange;
+
+    public static ConfigEntry<float> AmbientSimulationRange;
+    public static ConfigEntry<float> AmbientEffectDensity;
+    public static ConfigEntry<float> AmbientParticleLimit;
+    public static ConfigEntry<float> AmbientParticleLifetime;
+
+    public static ConfigEntry<bool> GoreEnabled;
+    
+    public static ConfigEntry<float> BloodSpraySize;
+    public static ConfigEntry<float> BloodSprayEmission;
+
+    public static ConfigEntry<float> BloodSquirtSize;
+    public static ConfigEntry<float> BloodSquirtEmission;
+
+    public static ConfigEntry<float> BloodBleedoutSize;
+    public static ConfigEntry<float> BloodBleedoutEmission;
+    
+    public static ConfigEntry<float> BloodFinisherSize;
+    public static ConfigEntry<float> BloodFinisherEmission;
+
+    public static ConfigEntry<bool> WoundDecalsEnabled;
+    public static ConfigEntry<float> WoundDecalsSize;
+    public static ConfigEntry<bool> BloodSplatterDecalsEnabled;
+    public static ConfigEntry<float> BloodSplatterDecalsSize;
+
+    public static ConfigEntry<bool> RagdollEnabled;
+    public static ConfigEntry<bool> RagdollCinematicEnabled;
+    public static ConfigEntry<bool> RagdollDropWeaponEnabled;
+    public static ConfigEntry<float> RagdollForceMultiplier;
+
+    public static ConfigEntry<bool> MiscDecalsEnabled;
+    public static ConfigEntry<int> MiscMaxDecalCount;
+    public static ConfigEntry<float> MiscShellLifetime;
+    public static ConfigEntry<float> MiscShellSize;
+    public static ConfigEntry<float> MiscShellVelocity;
+    public static ConfigEntry<bool> MiscShellPhysicsEnabled;
+
+    public static ConfigEntry<float> MipBias;
+
+    public static ConfigEntry<float> KineticsScaling;
+    private static ConfigEntry<bool> _michelinManEnabled;
+    private static ConfigEntry<bool> _peenEnabled;
+
+    private static ConfigEntry<bool> _loggingEnabled;
+    public static ConfigEntry<int> DebugIdx;
+
+    private static MichelinManPatch _michelinManPatch;
+
+    private void Awake()
+    {
+        Log = Logger;
+
+        AssetRegistry.LoadBundles();
+
+        _michelinManPatch = new MichelinManPatch();
+        StartCoroutine(DelayedLoad());
+    }
+
+    private IEnumerator DelayedLoad()
+    {
+        // We wait for 5 seconds to allow all the 500 shonky mods (incl. this one) an average user installs to load 
+        yield return new WaitForSeconds(5);
+
+        var visceralCombatDetected = Chainloader.PluginInfos.ContainsKey("com.servph.VisceralCombat");
+
+        var assemblyDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
+        if (assemblyDirectory != null)
+        {
+            var path = Path.Combine(assemblyDirectory, "bypass_compat_check");
+
+            if (File.Exists(path))
+            {
+                visceralCombatDetected = false;
+            }
+        }
+
+        if (visceralCombatDetected)
+        {
+            Log.LogInfo("Visceral Combat detected, disabling ragdolls");
+        }
+
+        SetupConfig(visceralCombatDetected);
+
+        // Versioning
+        var key = new ConfigDefinition("99. Internal", "ConfigVersion");
+        var description = new ConfigDescription(
+            "Do not modify.",
+            null,
+            new ConfigurationManagerAttributes { Order = 0, IsAdvanced = true }
+        );
+        
+        // Stub entry that will get whatever value is there without accidentally hiding it by a default
+        var versionConfig = Config.Bind(key, "", description);
+
+        if (versionConfig is not { Value: MajorMinorVersion })
+        {
+            Config.Clear();
+            File.WriteAllText(Config.ConfigFilePath, "");
+            Config.Reload();
+
+            SetupConfig(visceralCombatDetected);
+        
+            Log.LogInfo($"Configuration reset for version {MajorMinorVersion}.");
+        }
+        else
+        {
+            // We have to remove the stub entry so that we can replace it with the real one below
+            Config.Remove(key);
+        }
+        
+        versionConfig = Config.Bind(key, MajorMinorVersion, description);
+        versionConfig.Value = MajorMinorVersion;
+
+        // Patches
+        new GameWorldDisposePostfixPatch().Enable();
+
+        new GameWorldAwakePrefixPatch().Enable();
+        new GameWorldStartedPostfixPatch().Enable();
+        new ShotDelegateWrapperPatch().Enable();
+
+        new EffectsAwakePrefixPatch().Enable();
+        new EffectsAwakePostfixPatch().Enable();
+        new EffectsEmitPatch().Enable();
+        new TextureDecalsPainterVisCheckPatch().Enable();
+        new AmmoPoolObjectAutoDestroyPostfixPatch().Enable();
+
+        if (MiscShellPhysicsEnabled.Value && !visceralCombatDetected)
+            new ShellOnBouncePrefixPatch().Enable();
+
+        if (MuzzleEffectsEnabled.Value)
+        {
+            new FirearmControllerInitiateShotPrefixPatch().Enable();
+            new MuzzleManagerShotPrefixPatch().Enable();
+            new WeaponPrefabInitHotObjectsPostfixPatch().Enable();
+        }
+
+        new EffectsInitBlastControllerPatch().Enable();
+        new EffectsWipeDefaultExplosionSystemsPatch().Enable();
+        new EffectsEmitGrenadePatch().Enable();
+
+        new GameWorldInitConcussionPatch().Enable();
+
+        if (RagdollEnabled.Value && !visceralCombatDetected)
+        {
+            if (RagdollCinematicEnabled.Value)
+                new PlayerPoolObjectRoleModelPostfixPatch().Enable();
+
+            new RagdollStartPrefixPatch().Enable();
+            new RagdollStartPostfixPatch().Enable();
+            new PlayerRigidbodySleepHierarchyTryPutToSleepPrefixPatch().Enable();
+            new RagdollM1PostfixPatch().Enable();
+
+            if (RagdollDropWeaponEnabled.Value)
+            {
+                new AttachWeaponPostfixPatch().Enable();
+                new LootItemIsRigidBodyDonePrefixPatch().Enable();
+            }
+
+            EFTHardSettings.Instance.CorpseEnergyToSleep = -1;
+        }
+
+        if (GoreEnabled.Value && !visceralCombatDetected)
+        {
+            new PlayerOnDeadPostfixPatch().Enable();
+        }
+
+        Log.LogInfo("Initialization finished");
+
+        if (_loggingEnabled.Value)
+        {
+            Log.LogInfo("Logging enabled");
+        }
+        else
+        {
+            Log.LogInfo("Logging disabled");
+            BepInEx.Logging.Logger.Sources.Remove(Log);
+        }
+    }
+
+    private static void LoadTemplateDrawer(ConfigEntryBase entry)
+    {
+        if (GUILayout.Button("Janky's Special"))
+        {
+            ConfigurationTemplates.SetJanky(entry.ConfigFile);
+        }
+
+        if (GUILayout.Button("Potato"))
+        {
+            ConfigurationTemplates.SetPotato(entry.ConfigFile);
+        }
+
+        if (GUILayout.Button("Defaults"))
+        {
+            ConfigurationTemplates.SetDefaults(entry.ConfigFile);
+        }
+    }
+
+    private static void SelfDestructDrawer(ConfigEntryBase entry)
+    {
+        if (GUILayout.Button("Tempt Fate"))
+        {
+            Application.Quit();
+        }
+    }
+
+    private void SetupConfig(bool visceralCombatDetected)
+    {
+        const string general = "00. General";
+        const string impacts = "01. Impact Effects";
+        const string explosions = "02. Explosion FX";
+        const string muzzleEffects = "03. Muzzle Blast Effects";
+        const string battleAmbience = "04. Ambient Battle Effects (RESTART)";
+        const string goreEmission = "05. Gore Emission (RESTART)";
+        const string goreSize = "06. Gore Size";
+        const string goreDecals = "07. Gore Decals";
+        const string ragdoll = "08. Ragdoll Effects (DISABLED BY VISCERAL COMBAT)";
+        const string misc = "09. Miscellaneous Flotsam";
+        const string gfx = "10. Graphics";
+        const string whimsy = "11. Whimsy";
+        const string debug = "12. Debug";
+        
+        /*
+         * General
+         */
+        Config.Bind(general, "Load Template (RESTART)", "", new ConfigDescription(
+            "Use a preset template for the HFX settings. Requires restarting the game to ensure all the settings take effect.",
+            null,
+            new ConfigurationManagerAttributes { Order = 1, CustomDrawer = LoadTemplateDrawer }
+        ));
+
+        /*
+         * Impacts
+         */
+        EffectSize = Config.Bind(impacts, "Impact Effect Size", 0.75f, new ConfigDescription(
+            "Scales the size of impact effects.",
+            new AcceptableValueRange<float>(0.1f, 5f),
+            new ConfigurationManagerAttributes { Order = 2 }
+        ));
+
+        TracerImpactsEnabled = Config.Bind(impacts, "Enable Tracer Round Impacts", true, new ConfigDescription(
+            "Toggles special impact effects for tracer rounds.",
+            null,
+            new ConfigurationManagerAttributes { Order = 1 }
+        ));
+
+        /*
+         * Explosions
+         */
+        ExplosionDensityFireball = Config.Bind(explosions, "Fireball Density", 1f, new ConfigDescription(
+            "Adjusts the density of fireballs. Large values may have a performance impact",
+            new AcceptableValueRange<float>(0, 10f),
+            new ConfigurationManagerAttributes { Order = 6 }
+        ));
+        ExplosionDensityDebris = Config.Bind(explosions, "Debris Density", 1f, new ConfigDescription(
+            "Adjusts the density of debris and sparks. Large values may have a performance impact",
+            new AcceptableValueRange<float>(0, 10f),
+            new ConfigurationManagerAttributes { Order = 5 }
+        ));
+
+        ExplosionDensitySmoke = Config.Bind(explosions, "Smoke Density (CPU HEAVY)", 1f, new ConfigDescription(
+            "Adjusts the density of debris and sparks. Large values may have a performance impact",
+            new AcceptableValueRange<float>(0, 10f),
+            new ConfigurationManagerAttributes { Order = 4 }
+        ));
+
+        ExplosionDensitySparks = Config.Bind(explosions, "Sparks Density (CPU HEAVY)", 1f, new ConfigDescription(
+            "Adjusts the density of debris and sparks. Large values may have a performance impact",
+            new AcceptableValueRange<float>(0, 10f),
+            new ConfigurationManagerAttributes { Order = 3 }
+        ));
+
+        ExplosionDensityDust = Config.Bind(explosions, "Dust Density (CPU HEAVY)", 1f, new ConfigDescription(
+            "Adjusts the density of debris and sparks. Large values may have a performance impact",
+            new AcceptableValueRange<float>(0, 10f),
+            new ConfigurationManagerAttributes { Order = 2 }
+        ));
+
+        ComputeFidelity = Config.Bind(explosions, "Compute Fidelity (RESTART)", 1f, new ConfigDescription(
+            "Adjusts the resolution and fidelity of confinement detection and other aspects of explosions. Lower values are less CPU intensive.",
+            new AcceptableValueRange<float>(0.1f, 1f),
+            new ConfigurationManagerAttributes { Order = 1 }
+        ));
+
+        /*
+         * Muzzle Effects
+         */
+        MuzzleEffectsEnabled = Config.Bind(muzzleEffects, "Enable Muzzle Effects (RESTART)", true, new ConfigDescription(
+            "Toggles new muzzle blast effects.",
+            null,
+            new ConfigurationManagerAttributes { Order = 7 }
+        ));
+
+        MuzzleEffectJetsSize = Config.Bind(muzzleEffects, "Muzzle Jet Size", 1f, new ConfigDescription(
+            "Adjusts the size of the muzzle flame jets.",
+            new AcceptableValueRange<float>(0, 10f),
+            new ConfigurationManagerAttributes { Order = 6 }
+        ));
+
+        MuzzleEffectSparksSize = Config.Bind(muzzleEffects, "Muzzle Sparks Size", 1f, new ConfigDescription(
+            "Adjusts the size of the muzzle sparks.",
+            new AcceptableValueRange<float>(0, 10f),
+            new ConfigurationManagerAttributes { Order = 5 }
+        ));
+
+        MuzzleEffectSparksEmission = Config.Bind(muzzleEffects, "Muzzle Sparks Emission Rate (RESTART)", 1f, new ConfigDescription(
+            "Adjusts the amount of muzzle sparks generated.",
+            new AcceptableValueRange<float>(0.1f, 10f),
+            new ConfigurationManagerAttributes { Order = 4 }
+        ));
+
+        MuzzleEffectSmokeSize = Config.Bind(muzzleEffects, "Muzzle Smoke Size", 1f, new ConfigDescription(
+            "Adjusts the size of the muzzle smoke.",
+            new AcceptableValueRange<float>(0, 10f),
+            new ConfigurationManagerAttributes { Order = 3 }
+        ));
+
+        MuzzleEffectSmokeEmission = Config.Bind(muzzleEffects, "Muzzle Smoke Emission Rate (RESTART)", 1f, new ConfigDescription(
+            "Adjusts the amount of muzzle smoke generated. If you are looking to hotbox with some scavs, set it to 3 or something.",
+            new AcceptableValueRange<float>(0.1f, 10f),
+            new ConfigurationManagerAttributes { Order = 2 }
+        ));
+
+        MuzzleLightShadowEnabled = Config.Bind(muzzleEffects, "Enable Muzzle Light Shadow (RESTART)", true, new ConfigDescription(
+            "Toggles shadow casting for muzzle lights.",
+            null,
+            new ConfigurationManagerAttributes { Order = 1 }
+        ));
+
+        /*
+         * Battle Ambience
+         */
+        ScopeDofEnabled = Config.Bind(battleAmbience, "Enable Scope DoF", false, new ConfigDescription(
+            "Enable the depth of field effect when using magnifying optics.",
+            null,
+            new ConfigurationManagerAttributes { Order = 17 }
+        ));
+        ScopeDofIntensity = Config.Bind(battleAmbience, "Scope DoF Intensity", 1f, new ConfigDescription(
+            "Scales the intensity of the scope depth of field effect.",
+            new AcceptableValueRange<float>(0, 5f),
+            new ConfigurationManagerAttributes { Order = 16 }
+        ));
+        ConcussionEnabled = Config.Bind(battleAmbience, "Enable Concussion FX", true, new ConfigDescription(
+            "Toggles concussion screen effects.",
+            null,
+            new ConfigurationManagerAttributes { Order = 15 }
+        ));
+        ConcussionDuration = Config.Bind(battleAmbience, "Concussion Duration", 1f, new ConfigDescription(
+            "Scales the duration of concussion effects. Larger numbers will result in longer lasting concussion.",
+            new AcceptableValueRange<float>(0, 10f),
+            new ConfigurationManagerAttributes { Order = 14 }
+        ));
+        ConcussionRange = Config.Bind(battleAmbience, "Concussion Range", 1f, new ConfigDescription(
+            "Scales the range of concussion effects. Larger numbers will cause concussion from further away.",
+            new AcceptableValueRange<float>(0, 10f),
+            new ConfigurationManagerAttributes { Order = 13 }
+        ));
+        SuppressionEnabled = Config.Bind(battleAmbience, "Enable Suppression FX", true, new ConfigDescription(
+            "Toggles suppression screen effects.",
+            null,
+            new ConfigurationManagerAttributes { Order = 12 }
+        ));
+        SuppressionDuration = Config.Bind(battleAmbience, "Suppression Duration", 1f, new ConfigDescription(
+            "Scales the duration of concussion effects. Larger numbers will result in longer lasting concussion.",
+            new AcceptableValueRange<float>(0, 10f),
+            new ConfigurationManagerAttributes { Order = 11 }
+        ));
+        SuppressionRange = Config.Bind(battleAmbience, "Suppression Range", 1f, new ConfigDescription(
+            "Scales the range of concussion effects. Larger numbers will cause concussion from further away.",
+            new AcceptableValueRange<float>(0, 10f),
+            new ConfigurationManagerAttributes { Order = 10 }
+        ));
+        
+        BattleBlurIntensity = Config.Bind(battleAmbience, "Battle Blur Intensity", 1f, new ConfigDescription(
+            "Scales the intensity of battle blur from concussion and suppression effects.",
+            new AcceptableValueRange<float>(0, 10f),
+            new ConfigurationManagerAttributes { Order = 9 }
+        ));
+
+        AmbientSimulationRange = Config.Bind(battleAmbience, "Forced Simulation Range", 25f, new ConfigDescription(
+            "Ambient battle effects are simulated in this range around the player, even if not immediately visible. Helps create ambience from bot fights.",
+            new AcceptableValueRange<float>(0, 250f),
+            new ConfigurationManagerAttributes { Order = 4, IsAdvanced = true }
+        ));
+
+        AmbientEffectDensity = Config.Bind(battleAmbience, "Ambient Effect Emission Rate", 1f, new ConfigDescription(
+            "Adjusts the density of ambient effects. The bigger this number, the denser the smoke, debris, glitter etc...",
+            new AcceptableValueRange<float>(0.1f, 5f),
+            new ConfigurationManagerAttributes { Order = 3 }
+        ));
+
+        AmbientParticleLimit = Config.Bind(battleAmbience, "Ambient Effect Particle Limit", 1f, new ConfigDescription(
+            "Scales the internal limits on the number of active particles. Since there are different limits for different components, this scales everything proportionally.",
+            new AcceptableValueRange<float>(0.1f, 5f),
+            new ConfigurationManagerAttributes { Order = 2, IsAdvanced = true }
+        ));
+
+        AmbientParticleLifetime = Config.Bind(battleAmbience, "Ambient Effect Particle Lifetime", 1f, new ConfigDescription(
+            "Scales the internal lifetime of particles. Since there are different limits for different components, this scales everything proportionally.",
+            new AcceptableValueRange<float>(0.1f, 5f),
+            new ConfigurationManagerAttributes { Order = 1 }
+        ));
+
+        /*
+         * Gore Emission
+         */
+        GoreEnabled = Config.Bind(goreEmission, "Enable Gore Effects", true, new ConfigDescription(
+            "Toggles whether gore effects are rendered at all. When toggled off, only the default BSG blood effects will show.",
+            null,
+            new ConfigurationManagerAttributes { Order = 5 }
+        ));
+
+        BloodSprayEmission = Config.Bind(goreEmission, "Blood Spray Emission Rate", 0.5f, new ConfigDescription(
+            "Adjusts the quantity of fine blood spray particles. Reduce if you get stutters. Above 1 gets quite CPU heavy.",
+            new AcceptableValueRange<float>(0f, 5f),
+            new ConfigurationManagerAttributes { Order = 3 }
+        ));
+
+        BloodSquirtEmission = Config.Bind(goreEmission, "Squirt Emission Rate", 0.5f, new ConfigDescription(
+            "Adjusts the quantity of the blood squirt particles. Reduce if you get stutters. Above 1 gets quite CPU heavy.",
+            new AcceptableValueRange<float>(0f, 5f),
+            new ConfigurationManagerAttributes { Order = 2 }
+        ));
+
+        BloodFinisherEmission = Config.Bind(goreEmission, "Finisher Emission Rate", 0.5f, new ConfigDescription(
+            "Adjusts the quantity of particles in finisher effects. Reduce if you get stutters. Above 1 gets quite CPU heavy.",
+            new AcceptableValueRange<float>(0f, 5f),
+            new ConfigurationManagerAttributes { Order = 1 }
+        ));
+        
+        BloodBleedoutEmission = Config.Bind(goreEmission, "Arterial Bleed Emission Rate", 1f, new ConfigDescription(
+            "Adjusts the quantity of particles in arterial bleed effects. Reduce if you get stutters. Above 2 gets quite CPU heavy.",
+            new AcceptableValueRange<float>(0f, 5f),
+            new ConfigurationManagerAttributes { Order = 0 }
+        ));
+
+        /*
+         * Gore Size
+         */
+        BloodSpraySize = Config.Bind(goreSize, "Spray Size", 1f, new ConfigDescription(
+            "Adjusts the size of fine blood sprays.",
+            new AcceptableValueRange<float>(0f, 5f),
+            new ConfigurationManagerAttributes { Order = 3 }
+        ));
+
+        BloodSquirtSize = Config.Bind(goreSize, "Squirt Size", 1f, new ConfigDescription(
+            "Adjusts the size of the blood squirts.",
+            new AcceptableValueRange<float>(0f, 5f),
+            new ConfigurationManagerAttributes { Order = 2 }
+        ));
+
+        BloodFinisherSize = Config.Bind(goreSize, "Finisher Gore Size", 1f, new ConfigDescription(
+            "Adjusts the size of the gore generated by finisher shots.",
+            new AcceptableValueRange<float>(0f, 5f),
+            new ConfigurationManagerAttributes { Order = 1 }
+        ));
+
+        BloodBleedoutSize = Config.Bind(goreSize, "Arterial Bleed Size", 1f, new ConfigDescription(
+            "Adjusts the size of the gore generated by arterial bleeds.",
+            new AcceptableValueRange<float>(0f, 5f),
+            new ConfigurationManagerAttributes { Order = 0 }
+        ));
+        
+        /*
+         * Gore Decals
+         */
+        WoundDecalsEnabled = Config.Bind(goreDecals, "Wound Decals on Bodies", true, new ConfigDescription(
+            "Toggles the new blood splashes appearing on bodies. If toggled off, you'll get the barely visible EFT default wound effects. Philistine.",
+            null,
+            new ConfigurationManagerAttributes { Order = 4 }
+        ));
+
+        WoundDecalsSize = Config.Bind(goreDecals, "Wound Decal Size", 1f, new ConfigDescription(
+            "Adjusts the size of the wound decals that appear on bodies.",
+            new AcceptableValueRange<float>(0f, 5f),
+            new ConfigurationManagerAttributes { Order = 3 }
+        ));
+
+        BloodSplatterDecalsEnabled = Config.Bind(goreDecals, "Blood Splatter on Environment", true, new ConfigDescription(
+            "Toggles the new blood splashes appearing on the environment for penetrating hits. If toggled off, you'll get the shonky EFT defaults. Philistine.",
+            null,
+            new ConfigurationManagerAttributes { Order = 2 }
+        ));
+
+        BloodSplatterDecalsSize = Config.Bind(goreDecals, "Blood Splatter Decal Size", 1f, new ConfigDescription(
+            "Adjusts the size of the blood splatters on the environment.",
+            new AcceptableValueRange<float>(0f, 5f),
+            new ConfigurationManagerAttributes { Order = 1 }
+        ));
+
+        /*
+         * Ragdolls
+         */
+        bool[] ragdollAcceptableValues = visceralCombatDetected ? [false] : [false, true];
+        RagdollEnabled = Config.Bind(ragdoll, "Enable Ragdoll Effects (RESTART)", !visceralCombatDetected, new ConfigDescription(
+            "Toggles whether ragdoll effects will be enabled.",
+            new AcceptableValueList<bool>(ragdollAcceptableValues),
+            new ConfigurationManagerAttributes { Order = 4, ReadOnly = visceralCombatDetected }
+        ));
+
+        RagdollCinematicEnabled = Config.Bind(ragdoll, "Enable Cinematic Ragdolls (RESTART)", true, new ConfigDescription(
+            "Adjusts the skeletal and joint characteristics of ragdolls for a more Cinematic (TM) experience.",
+            new AcceptableValueList<bool>(ragdollAcceptableValues),
+            new ConfigurationManagerAttributes { Order = 3, ReadOnly = visceralCombatDetected }
+        ));
+
+        RagdollDropWeaponEnabled = Config.Bind(ragdoll, "Drop Weapon on Death (RESTART)", true, new ConfigDescription(
+            "Toggles the enemies dropping their weapon on death.",
+            new AcceptableValueList<bool>(ragdollAcceptableValues),
+            new ConfigurationManagerAttributes { Order = 2, ReadOnly = visceralCombatDetected }
+        ));
+
+        RagdollForceMultiplier = Config.Bind(ragdoll, "Ragdoll Force Multiplier", 1f, new ConfigDescription(
+            "Multiplies the force that is applied to ragdolls when enemies die.",
+            new AcceptableValueRange<float>(0f, 100f),
+            new ConfigurationManagerAttributes { Order = 1, ReadOnly = visceralCombatDetected }
+        ));
+
+        /*
+         * Misc
+         */
+        MiscDecalsEnabled = Config.Bind(misc, "Enable Decal Limit Adjustment (RESTART)", true, new ConfigDescription(
+            "Toggles whether to override the built-in decal limits. If you have this enabled in Visceral Combat, you can disable it here.",
+            null,
+            new ConfigurationManagerAttributes { Order = 11 }
+        ));
+
+        MiscMaxDecalCount = Config.Bind(misc, "Decal Limits (RESTART)", 2048, new ConfigDescription(
+            "Adjusts the maximum number of decals that the game will render. The vanilla number is a puny 200.",
+            new AcceptableValueRange<int>(1, 2048),
+            new ConfigurationManagerAttributes { Order = 10 }
+        ));
+
+        MiscShellLifetime = Config.Bind(misc, "Spent Shells Lifetime (seconds)", 60f, new ConfigDescription(
+            "How long do spent shells stay on the ground before despawning (game default is 1 second).",
+            new AcceptableValueRange<float>(0f, 3600f),
+            new ConfigurationManagerAttributes { Order = 8 }
+        ));
+
+        MiscShellSize = Config.Bind(misc, "Spent Shells Size", 1.5f, new ConfigDescription(
+            "Adjusts the size of spent shells multiplicatively (2 means 2x the size).",
+            new AcceptableValueRange<float>(0f, 10f),
+            new ConfigurationManagerAttributes { Order = 7 }
+        ));
+        MiscShellSize.SettingChanged += (_, _) => EFTHardSettings.Instance.Shells.radius = MiscShellSize.Value / 1000f;
+        EFTHardSettings.Instance.Shells.radius = MiscShellSize.Value / 1000f;
+
+        MiscShellVelocity = Config.Bind(misc, "Shell Ejection Velocity", 1.5f, new ConfigDescription(
+            "Adjusts the velocity of the spent shells multiplicatively (2 means 2x the speed).",
+            new AcceptableValueRange<float>(0f, 10f),
+            new ConfigurationManagerAttributes { Order = 6 }
+        ));
+        MiscShellVelocity.SettingChanged += (_, _) => EFTHardSettings.Instance.Shells.velocityMult = MiscShellVelocity.Value;
+        EFTHardSettings.Instance.Shells.velocityMult = MiscShellVelocity.Value;
+
+        MiscShellPhysicsEnabled = Config.Bind(misc, "Enhanced Shell Physics (RESTART)", true, new ConfigDescription(
+            "Toggles whether to enhance the spent shell physics, resulting in finer grained simulation of bouncing and rolling.",
+            null,
+            new ConfigurationManagerAttributes { Order = 5, IsAdvanced = true }
+        ));
+        MiscShellPhysicsEnabled.SettingChanged += (_, _) => UpdateShellPhysics();
+        UpdateShellPhysics();
+
+        /*
+         * Graphics
+         */
+        MipBias = Config.Bind(gfx, "Effect Quality Bias", 0f, new ConfigDescription(
+            "Positive values force higher quality effect textures at a distance. Numbers above 4 can have *heavy*" +
+            "VRAM impact and cause stuttering.",
+            new AcceptableValueRange<float>(-1f, 10f),
+            new ConfigurationManagerAttributes { Order = 1 }
+        ));
+        MipBias.SettingChanged += (_, _) => { Singleton<MaterialRegistry>.Instance?.SetMipBias(MipBias.Value); };
+
+        /*
+         * Whimsy
+         */
+        KineticsScaling = Config.Bind(whimsy, "Bullet Kinetics Scaling", 1f, new ConfigDescription(
+            "Scales the overall kinetic energy, impulse, etc.",
+            new AcceptableValueRange<float>(0f, 10f),
+            new ConfigurationManagerAttributes { Order = 4, IsAdvanced = true }
+        ));
+
+        _michelinManEnabled = Config.Bind(whimsy, "AcidPhantasm Michelin Man Mode", false, new ConfigDescription(
+            "Nunc est Bibendum.",
+            null,
+            new ConfigurationManagerAttributes { Order = 3 }
+        ));
+        _michelinManEnabled.SettingChanged += (_, _) =>
+        {
+            if (_michelinManEnabled.Value)
+                _michelinManPatch.Enable();
+            else
+                _michelinManPatch.Disable();
+        };
+        if (_michelinManEnabled.Value)
+            _michelinManPatch.Enable();
+        
+        Config.Bind(whimsy, "JPDARKONE Clause", "", new ConfigDescription(
+            "He was so preoccupied with whether he could, he didn't stop to think if he should.",
+            null,
+            new ConfigurationManagerAttributes { Order = 2, CustomDrawer = SelfDestructDrawer }
+        ));
+
+        _peenEnabled = Config.Bind(whimsy, "Peen", false, new ConfigDescription(
+            "Made you look.",
+            null,
+            new ConfigurationManagerAttributes { Order = 1 }
+        ));
+        _peenEnabled.SettingChanged += (_, _) => ErrorPlayerFeedback("Made you look!");
+
+        /*
+         * Deboog
+         */
+        DebugIdx = Config.Bind(debug, "Debug Index", 0, new ConfigDescription(
+            "",
+            new AcceptableValueRange<int>(0, 10),
+            new ConfigurationManagerAttributes { Order = 2 }
+        ));
+
+        _loggingEnabled = Config.Bind(debug, "Enable Debug Logging (RESTART)", false, new ConfigDescription(
+            "Duh. Requires restarting the game to take effect.",
+            null,
+            new ConfigurationManagerAttributes { Order = 1 }
+        ));
+    }
+
+    public static void ErrorPlayerFeedback(string message)
+    {
+        NotificationManagerClass.DisplayWarningNotification(message, ENotificationDurationType.Long);
+        Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ErrorMessage);
+    }
+
+    public static void UpdateShellPhysics()
+    {
+        if (MiscShellPhysicsEnabled.Value)
+        {
+            Log.LogInfo("Enabling Enhanced Shell Physics");
+            EFTHardSettings.Instance.Shells.maxCastCount = 100;
+            EFTHardSettings.Instance.Shells.deltaTimeStep = 0.15f;
+            // EFTHardSettings.Instance.Shells.bounceSpeedMult = 1.0f;
+        }
+        else
+        {
+            Log.LogInfo("Disabling Enhanced Shell Physics");
+            EFTHardSettings.Instance.Shells.maxCastCount = 10;
+            EFTHardSettings.Instance.Shells.deltaTimeStep = 0.3f;
+            // EFTHardSettings.Instance.Shells.bounceSpeedMult = 1.0f;
+        }
+    }
+}
