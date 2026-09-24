@@ -46,7 +46,7 @@ namespace Fika.Core;
 [BepInDependency("com.SPT.debugging", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after spt-debugging, that way we can disable its patches
 public class FikaPlugin : BaseUnityPlugin
 {
-    public const string FikaVersion = "2.3.16";
+    public const string FikaVersion = "2.3.21";
     public const string FikaNATPunchMasterServer = "natpunch.project-fika.com";
     public const ushort FikaNATPunchMasterPort = 6790;
 
@@ -185,6 +185,25 @@ public class FikaPlugin : BaseUnityPlugin
         // ObservedPlayer_DropBackpackSafety_Patch, é top-level).
         _patchManager.EnablePatch(new InOutHandsProcessTimestampPatch.CaptureMovedItemOnRemove());
         _patchManager.EnablePatch(new InOutHandsProcessTimestampPatch.RecordBeginSucceed());
+        _patchManager.EnablePatch(new SplitOperationDescriptorPatch());
+
+        // ref: item 006 — GetTargetMethod() de RecordHandsBookkeepingEvent pode retornar null (alvo
+        // obfuscado resolvido por predicado, sem garantia de encontrar exatamente 1 candidato — ver
+        // spec técnica §2 nota AP-09). Diferente dos patches do item 003 acima (alvo por nome real,
+        // nunca falha), aqui um Enable() com alvo null LANÇA uma exceção — sem este try/catch, isso
+        // abortaria o resto do Awake() e derrubaria o plugin inteiro por causa de um único patch
+        // defensivo.
+        try
+        {
+            _patchManager.EnablePatch(new HandsBookkeepingTimestampPatch.RecordHandsBookkeepingEvent());
+        }
+        catch (Exception ex)
+        {
+            FikaGlobals.LogError(
+                "Falha ao habilitar HandsBookkeepingTimestampPatch.RecordHandsBookkeepingEvent — " +
+                "Fix 1b do item 006 (tolerância GEventArgs9/10) fica inativo, resto do plugin segue normal: " +
+                ex.Message);
+        }
     }
 
 #if RELEASE || GOLDMASTER

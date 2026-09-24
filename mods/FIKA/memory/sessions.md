@@ -2,22 +2,129 @@
 
 ## Estado atual
 
-> **Delta 2026-09-10 (Sessão 6):** Auditoria de código 01 registrada em `docs/relatorio-auditoria-codigo-01.md` e elaboração de spec técnica para o item `006-colisao-maos-item-nao-carregador`. Item 006 está **PAUSADO** aguardando teste do usuário em raid real (com Debug+log) para confirmar se a causa assumida do bug `ContinuousLoadAmmo` está correta antes de implementar.
+> **Delta 2026-09-14 (Sessão 10):** Item `010-join-in-progress-senha-lobby-headless` totalmente implementado, compilado em Release (0 erros) e registrado no fork `mods/FIKA/modded-V2/` (`Fika.Core` v2.4.0, `FikaServer` v2.4.0, `Fika.Headless` v1.5.0). Criados `04-code-review-01.md` e `05-asbuild.md`. Conclui a pendência histórica `P-1.3`.
 >
-> **Delta 2026-09-09 (Sessão 5):** Item `005-hook-velocidade-cura-observada` implementado: criação de `ObservedMedsSpeedHook.cs` exportando o delegate público `Func<Player, Item, float> ExtraSpeedMultiplier` para consumo de outros mods (`CustomClasses/090`), e integração em `ObservedMedsController.cs`. Bump SemVer para v2.3.16 em `FikaPlugin.cs` e `mod.json`. Compilação/instalação no jogo não realizada a pedido do usuário (restrita ao repo). Validação in-game pendente (P-5.1).
+> **Delta 2026-09-13 (Sessão 9):** Item `010-join-in-progress-senha-lobby-headless` criado e formalizado no backlog (`01-spec`, `02-spec-tech`, `03-spec-tech-review-01`). Criado fork `mods/FIKA/modded-V2/` a partir de `modded/` para implementar a feature com isolamento total. Todos os arquivos de documentação e specs foram reendereçados para `modded-V2`. Endereça a pendência histórica `P-1.3`.
 >
-> **Delta 2026-09-08 (Sessão 4):** Ciclo completo de backlog (spec → review-spec → spec técnica → review técnica → `/code-mod` → `/code-review` → `/apply-code-review`) para o item `004-colisao-cura-swap-magazine`. Causa raiz: `IsSelfReferentialMagazineSwap` (fix do item 003) só tolerava a colisão `inOutHandsProcess` quando o item que abriu o `Begin` pendente era outro `MagazineItemClass` — arma reequipada ao fim de uma cura (`TRL-ImmersiveCombatMedicine`, `method_9`/`ForceFinishAnimation`) abre esse `Begin` com o item de cura, não um carregador, então o swap de carregador seguinte era rejeitado com `GClass1561` de verdade, travando a mão do jogador. Fix: renomear para `IsSelfReferentialHandsTransition` e generalizar a condição de `movedItem is MagazineItemClass` para `movedItem != null && movedItem != weapon` — tolera qualquer transição de mãos recente do mesmo jogador na mesma arma (cura, granada, faca, reanimação), preservando o bloqueio de um saque/guarda real da própria arma. Nenhum novo Harmony patch: reaproveita 100% a infraestrutura `InOutHandsProcessTimestampPatch` do item 003. `Fika.Core.dll` v2.3.15 — **build e validação in-game ainda pendentes** (ver P-4.1).
-
+> **Delta 2026-09-13 (Sessão 8):** Item `009-reconnect-ressincronizacao-corpo-inplace` implementado, compilado (v2.3.21) e validado em raid real com 3 jogadores. Resolve em definitivo a pendência `P-1.2`: corpo congelado no ponto da queda, invisibilidade por oclusão do EFT e descarte de snapshots de movimento pós-crash. Ressincronização autoritativa in-place via `ForceTeleport`, `ApplyVisibleState` e broadcast de `ClearSnapshotterPacket`. Fundação para a entrada em raid em andamento.
+>
+> **Delta 2026-09-11 (Sessão 7):** Item `006-colisao-maos-item-nao-carregador` despausado, reinvestigado e implementado.
+>
 ## Pendências
 
-- [P-6.1] (aberta 2026-09-10) **Testar em raid real com Debug+log a causa raiz de mãos travadas no `ContinuousLoadAmmo` (item 006)** — Verificar se a transição de mãos recente no `inOutHandsProcess` realmente causa o erro `"Default Inventory is currently being modified"` ao equipar arma pós-carregamento contínuo. 🔴 Bloqueador (item pausado aguardando evidência empírica).
-- [P-5.1] (aberta 2026-09-09) **Compilar e validar in-game o hook de velocidade de cura observada (item 005, v2.3.16)** — Testar em coop Fika com `CustomClasses` (item 090): confirmar que a velocidade extra de cirurgia/cura de aliado é repassada e renderizada suavemente para o jogador observador. 🟡 Validação in-game.
-- [P-4.1] (aberta 2026-09-08) **VALIDAR IN-GAME o item `004-colisao-cura-swap-magazine`** — checklist completo em `004-colisao-cura-swap-magazine-02-spec-tech.md` §8: cenário principal (cura → swap de carregador), self-heal, sequência repetida/múltiplos aliados, checagem do observador (jogador B), e o teste **bloqueador** de que um saque de arma real continua sendo rejeitado (incerteza de análise estática documentada na spec técnica §1.3/§7 — só o teste in-game fecha com certeza). 🟡 Validação in-game (AP-06).
-- [P-3.1] (aberta 2026-09-06) **Calibrar `GraceWindowSeconds`** — hoje fixo em `0.35f` (marcado `TODO confirmar` no código) em `ObservedInventoryController.cs`. Precisa de instrumentação temporária (log de `elapsedSeconds` real) em sessão Headless de verdade antes de considerar definitivo. Desde a Sessão 4, essa mesma constante é reaproveitada por `IsSelfReferentialHandsTransition` (item 004) — recalibrar afeta os dois. 🟡 Débito técnico.
-- [P-3.2] (aberta 2026-09-06) **Trilha B do item 003** — limpar `FikaActiveWeaponMagSwapPatch` em `mods/UIFixes/modded/src/Patches/SwapPatches.cs:891-924` (patch no alvo errado — `TraderControllerClass.CheckItemAction` do lado cliente — hoje inofensivo mas inútil pro Headless). Cross-ref: `mods/UIFixes/memory/sessions.md` P-8.1. 🟢 Ideia / limpeza.
-- [P-1.1] (aberta 2026-09-02) **VALIDAR IN-GAME a suite completa modded do FIKA** — Cenários a testar em sessão multiplayer: **(1)** Conexão cliente-servidor e movimentação sem jitter; **(2)** Mecânica de reviver verificando hitboxes pós-revive (TRL-Fixes #1); **(3)** Movimentação rápida de inventário com `Ctrl+Click` para validar auto-recuperação (TRL-Fixes #2); **(4)** Equipar arma com trilhos múltiplos tácticos (TRL-Fixes #4); **(5)** Entrada de bots em metralhadoras/lança-granadas montadas (TRL-Fixes #6); **(6)** Transição e retorno ao menu principal monitorando descarte de memória RAM; **(7)** [NOVO] Descarte rápido de mochila com "ZZ" e re-coleta no chão em raid multiplayer com Headless (Item 001). 🟡 Validação in-game.
-- [P-1.2] (aberta 2026-09-02) **Implementação da Correção de Desync no Reconect (Ghost Body)** — Re-binding atômico de `ObservedPlayer` e reset de interpolação no Host conforme [`docs/ROADMAP.md`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/FIKA/docs/ROADMAP.md) §1. 🟢 Feature / Fix.
-- [P-1.3] (aberta 2026-09-02) **Implementação do Sistema de Senha Temporária para Raids** — Integração de validação de hash de senha no `FikaServer` e modal de input no `MatchMakerUIScript.cs` conforme [`docs/ROADMAP.md`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/FIKA/docs/ROADMAP.md) §3. 🟢 Feature.
+- [P-10.1] **Validar in-game no fork `modded-V2` o Item 010 (Join In Progress e Senha)** — Testar criação de lobby com e sem senha (Host e Headless), invasão de raid pelo MatchMaker e pela lista de amigos do menu.
+- [P-1.3] (resolvida 2026-09-14 na Sessão 10) **Implementação de Join In Progress (Invasão) e Sistema de Senha Opcional (Host & Headless)** — Implementação completa no fork `mods/FIKA/modded-V2/` com os 3 módulos (`FikaServer` v2.4.0, `Fika.Core` v2.4.0, `Fika.Headless` v1.5.0). ✅ Resolvido.
+- [P-8.1] (resolvida 2026-09-13 na Sessão 8) **VALIDAR IN-GAME o item `009-reconnect-ressincronizacao-corpo-inplace` (v2.3.21)** — Validado com sucesso em raid real de Factory com 3 jogadores (Host Sivan, Convidado reconectado UmbigoPreto, Convidado observador Cherno). Re-ancoragem física e visibilidade sem corpo congelado nem invisibilidade confirmadas nos 3 logs. ✅ Resolvido.
+- [P-1.2] (resolvida 2026-09-13 na Sessão 8) **Implementação da Correção de Desync no Reconect (Ghost Body)** — Resolvido pelo item 009 (v2.3.21) via ressincronização in-place (`ForceTeleport`), reset defensivo de timestamp em `PlayerSnapshotter` e broadcast de `ClearSnapshotterPacket`. ✅ Resolvido.
+
+---
+
+## 2026-09-14 02:45 (GMT-3) — Sessão 10: Implementação e Compilação de Join In Progress e Senha no fork `modded-V2` (Item 010)
+
+**Tema central:** Implementação de código nos 3 submódulos do fork `modded-V2` (`Fika-Server-CSharp`, `Fika-Plugin/Fika.Core` e `Fika-Headless`), validação das compilações Release (0 erros) e formalização do as-built do Item 010.
+
+**Decisões e entregas:**
+- `FikaServer` v2.4.0: suporte a `Password` em DTOs, validação no `RaidController.HandleRaidJoin`, persistência em `MatchService` e exposição de `HasPassword` em `LocationController`.
+- `Fika.Headless` v1.5.0: consumo de `request.Password` via WebSocket e repasse a `FikaBackendUtils.CreateMatch`.
+- `Fika.Core` v2.4.0: campo de senha injetado em "CONFIGURAÇÕES DE SESSÃO" (`DediSelection`), criação do modal nativo reutilizável `JoinSessionModal`, desbloqueio do botão de invasão de raid em `MatchMakerUIScript` e `MainMenuUIScript`, liberação do pinger UDP e listener de rede em `FikaServer.cs`.
+- Todos os binários gerados exclusivamente dentro do fork `mods/FIKA/modded-V2/` sem cópia automática para o jogo.
+
+---
+
+## 2026-09-13 21:40 (GMT-3) — Sessão 9: Especificação de Join In Progress (Invasão) e Senha Opcional para Host & Headless (Item 010)
+
+**Tema central:** Formalização no backlog do sistema de entrada em raids em andamento (Join In Progress / Invasão) integrado ao controle de acesso por senha opcional para partidas cooperativas e dedicadas (FIKA Headless), com criação do fork de código `modded-V2`.
+
+**Decisões-chave:**
+- [Criação do Fork `modded-V2`]: criado `mods/FIKA/modded-V2/` a partir de `mods/FIKA/modded/` para abrigar o desenvolvimento da feature 010, mantendo `modded/` estável com a v2.3.21 do Item 009.
+- [Campo de Senha na Janela 'CONFIGURAÇÕES DE SESSÃO']: no `MatchMakerUIScript`, dentro do painel `DediSelection` (onde ficam "Usar Host Headless", a seleção de headless e o botão "INICIAR"), adicionado o campo de texto para senha opcional. Vale tanto para Host local quanto Headless.
+- [Janela Modal de Entrada Idêntica para Invasão]: criada janela modal (`JoinSessionModal`) estilizada identicamente à de "CONFIGURAÇÕES DE SESSÃO" (moldura escura, cabeçalho, botão X vermelho no canto superior direito e botão largo ENTRAR/INVADIR), acionada de forma unificada tanto pela tela de incursões (`MatchMakerUIScript`) quanto pela lista de jogadores online do menu principal (`MainMenuUIScript`).
+- [Propagação de Senha no Headless via WebSocket]: mapeado que `MatchMakerUIScript` envia `StartHeadlessRequest` via POST `/fika/raid/headless/start` -> backend empacota via WebSocket para `FikaHeadlessPlugin.cs:OnFikaStartRaid` -> `BeginFikaStartRaid` repassa para `FikaBackendUtils.CreateMatch(...)` -> partida registrada no `MatchService` como protegida, sem necessidade de arquivos externos ou configurações em disco.
+- [Desbloqueio de Invasão de Raid]: partidas com status `IN_GAME` deixam de ter botão desabilitado na UI. Botão exibe "Invadir Raid" (`UI_INVADE_RAID`). O pinger UDP responde `"fika.hello"` e o `OnConnectionRequest` aceita novas conexões para a raid ativa.
+- [Aproveitamento do Item 009]: toda a sincronização física, oclusão da malha 3D e buffers do snapshotter utilizam a infraestrutura autoritativa in-place validada no Item 009.
+- [Ciclo formal de backlog]: criados e atualizados `010-join-in-progress-senha-lobby-headless-01-spec.md`, `010-join-in-progress-senha-lobby-headless-02-spec-tech.md` e `010-join-in-progress-senha-lobby-headless-03-spec-tech-review-01.md`, todos reendereçados para `modded-V2`.
+
+---
+
+## 2026-09-13 20:45 (GMT-3) — Sessão 8: Implementação da correção definitiva do Reconnect (item 009, v2.3.20/v2.3.21)
+
+**Tema central:** Solução estrutural do dessync de Reconnect no FIKA (corpo congelado no ponto da queda e invisibilidade na nova posição), preservando integralmente o inventário e integridade do jogador em raid. Resolução da pendência histórica `P-1.2`.
+
+**Decisões-chave:**
+- [Abordagem In-Place obrigatória]: vetada qualquer destruição e recriação do `ObservedPlayer` na desconexão/reconexão. O `ObservedPlayer` no Host é a autoridade da raid para inventário coletado, danos em placas e saúde; destruí-lo causaria reset do perfil. A solução opera 100% in-place na entidade ativa.
+- [Auto-recuperação de Snapshotter]: detectado que `NetworkTimeSync.NetworkTime` usa `Time.unscaledTimeAsDouble` (tempo desde boot do processo). Um crash/restart reinicia o relógio em `~0s`, fazendo com que `PlayerSnapshotter.AddSnapshot` descarte todos os pacotes seguintes por `snapshot.RemoteTime <= newestTime`. Implementada auto-recuperação defensiva quando `snapshot.RemoteTime < newestTime - 5.0d`, invocando `Clear()` antes de reinserir.
+- [Fix da armadilha de Culling do EFT]: em `ObservedPlayer.ManualStateUpdate`, `!_cullingHandler.IsVisible` atualizava apenas `Position` (`PlayerBones.BodyTransform.position`), deixando a raiz `Transform.position` presa no ponto da queda e induzindo `LocalPlayerCullingHandlerClass` a forçar `forceRenderingOff = true`. Sincronizado `Transform.position = CurrentPlayerState.Position` sob oclusão e implementado `ForceTeleport` com `base.Teleport` e `ApplyVisibleState()`.
+- [Broadcast do pacote]: `ClearSnapshotterPacket` expandido com `Position` e `Rotation`, com retransmissão via broadcast confiável (`ReliableOrdered`) do Host para os outros clientes.
+- [Ciclo formal de backlog]: criados `01-spec.md`, `02-spec-tech.md`, `03-spec-tech-review-01.md`, `04-code-review-01.md` e `05-asbuild.md` em `mods/FIKA/backlog/009-reconnect-ressincronizacao-corpo-inplace/`. `Fika.Core.dll` bumpado para v2.3.20. Compilação Release validada com 0 erros.
+
+**Atividade cronológica:**
+1. Mapeamento das 3 causas raízes cruzando Assembly do EFT e código do FIKA.
+2. Elaboração e revisão do plano e ciclo de backlog.
+3. Implementação dos métodos e patches em `Fika.Core`.
+4. Compilação Release local com 0 erros.
+5. Formalização dos artefatos de backlog e atualização do índice canônico.
+
+**Pendências abertas nesta sessão:**
+- `P-8.1` aberta para validação in-game em sessão cooperativa.
+- `P-1.2` marcada como resolvida.
+
+---
+
+## 2026-09-11 06:08 (GMT-3) — Sessão 7b: Validação in-game bloqueadora confirmada — item 006 fechado no cenário principal
+
+**Tema central:** Fechamento do ciclo do item `006` — usuário testou o fix em raid Headless real com o build produzido na Sessão 7.
+
+**Decisões-chave:**
+- [Fix confirmado em condições reais]: usuário reproduziu o cenário exato do bug original (municiar vários carregadores em sequência via `SPT-ContinuousLoadAmmo`, incluindo cancelar no meio e esvaziar/reencher um por um) e **nenhuma trava ocorreu em nenhum ciclo**. `HandsBookkeepingGraceWindowSeconds` (2.5s) se mostrou suficiente nos testes feitos, embora continue não-calibrado por instrumentação (`P-7.2` permanece aberta).
+- [Pendência rebaixada, não fechada por completo]: `P-7.1` (validações não-bloqueadoras — concorrência genuína entre jogadores, corner case de cura, cenário `GEventArgs9`) rebaixada de 🔴 bloqueador pra 🟢 ideia/validação opcional. O item já cumpre seu objetivo principal; o resto é reforço de cobertura, não condição pra considerar o item entregue.
+
+**Lições / hipóteses descartadas:**
+- Nenhuma lição nova — sessão de confirmação/fechamento, sem descoberta técnica adicional além do que a Sessão 7 já mapeou.
+
+**Atividade cronológica:**
+1. Usuário testou em raid real e reportou sucesso completo, sem reprodução do bug.
+2. Checklist da spec técnica (`006-...-02-spec-tech.md` §8), `05-asbuild.md` e memória atualizados para refletir a validação.
+
+**Pendências abertas nesta sessão:**
+- Nenhuma nova — `P-7.1` rebaixada (ver acima), `P-7.2` (calibração da janela de graça) permanece como estava.
+
+**Cross-refs:**
+- Continuação direta da Sessão 7 (mesmo dia, mesmo item) — ver decisões-chave lá para o desenho completo do fix.
+
+---
+
+## 2026-09-11 05:45 (GMT-3) — Sessão 7: Despausa e implementação do item 006 — causa raiz real era GEventArgs9/10, não GEventArgs17
+
+**Tema central:** Resolver a pausa deixada pela Sessão 6 (`P-6.1`): confirmar ou refutar, com evidência empírica, a causa raiz assumida do bug de trava de mãos no `SPT-ContinuousLoadAmmo` — e, a partir do resultado, redesenhar e implementar o fix do item `006-colisao-maos-item-nao-carregador`.
+
+**Decisões-chave:**
+- [Hipótese original refutada por evidência empírica, não por leitura estática apenas]: usuário compilou `Fika.Core` em Debug (build local, CRC32 replicado nos dois lados — cliente e Headless — pra passar da checagem de compatibilidade de versão do FIKA, `FikaBackendUtils.cs:205`), reproduziu o bug em raid Headless real municiando vários carregadores em sequência, e capturou o log do Headless no momento exato da rejeição: `"item was same as GEventArgs2.Item" / "Flag hit, gevent was GEventArgs10"`. O log `"failed inOutHandsProcess check"` (que confirmaria a hipótese da Sessão 6) **não apareceu em nenhuma tentativa**. Ref: `006-colisao-maos-item-nao-carregador-03-spec-tech-review-01.md` PA-01-01.
+- [Causa raiz real mapeada]: `GEventArgs10` ("BeginRemoveFromHands", alias 4.1 `RemoveFromHandsEventArgs`) é levantado por `Class1312`/`method_138` (`Player.cs:32383-32393`). `FirearmController.Drop` (`Player.cs:13506-13524`) chama `method_138(weapon)` **antes** de `HideWeapon(...)` começar e só confirma **dentro** do callback de conclusão — existe uma janela real do tamanho da animação de guardar a arma. `SetEmptyHands` (usado pelo `ContinuousLoadAmmo` entre cada carregador) cai exatamente nesse caminho via `Proceed`/`Process<>`/`DropCurrentController`. `ObservedFirearmController` não sobrescreve `Drop` — o Headless roda o mesmo código, com seu próprio timer sujeito a latência de rede. Cliente local avança pro próximo carregador com base no seu próprio timing, sem saber se o Headless já confirmou o `GEventArgs10` anterior.
+- [Fix generalizado em duas partes, sem tocar a infraestrutura do item 003]: **Fix 1a** — desenho original da Sessão 6, mantido (generaliza `IsSelfReferentialHandsTransition` removendo restrição a `MagazineItemClass`; cobre o corner case cura→faca/granada/troca-de-arma, que passa por `GEventArgs17`, não pelo `GEventArgs10`). **Fix 1b** (novo) — `HandsBookkeepingTimestampPatch.cs`: Postfix em `TraderControllerClass.method_19(GEventArgs1)` (hub confirmado de Add/Remove de `List_0` pra todos os tipos de evento — `RaiseInOutProcessEvents` e `RaiseEvent(GEventArgs13)` já delegam pra ele), filtrando `GEventArgs9`/`GEventArgs10`, correlaciona `(controller, item, timestamp)` num `ConditionalWeakTable` independente. `ObservedInventoryController.CheckItemAction` ganha tolerância no bloco genérico `item == geventArgs2.Item` quando o evento colidente é um `GEventArgs9`/`GEventArgs10` recente do mesmo jogador no mesmo item — sem risco de concorrência real (`List_0` é por jogador, mesma garantia estrutural do item 003/004).
+- [3 erros auto-corrigidos durante a própria redação da spec técnica, antes de qualquer rodada de review]: (1) a janela de graça do Fix 1b foi inicialmente escrita reaproveitando `GraceWindowSeconds` (0.35f) do item 003/004 — errado, aquela constante limita a sobreposição quase instantânea de duas metades de UM swap de carregador, enquanto o Fix 1b precisa cobrir uma animação inteira de guardar arma (tipicamente > 1s); corrigido pra uma constante própria (`HandsBookkeepingGraceWindowSeconds`, 2.5f, `P-7.2`). (2) `using Fika.Core.Main.Utils;` faltando no novo arquivo de patch pro `FikaGlobals.LogError` compilar. (3) **achado mais importante**: `GetTargetMethod()` retornando `null` (o design defensivo previsto pra alvo obfuscado não encontrado) na verdade **lança uma exceção** dentro do `Enable()` do `ModulePatch` — verificado por investigação dedicada em `references/spt-source/Libraries/SPTarkov.Reflection/Patching/AbstractPatch.cs` (sucessor renomeado da mesma lib), não suposição. Registrar o patch via `_patchManager.EnablePatch(...)` sem `try/catch` no call site (o padrão usado pelos 2 patches do item 003) faria essa exceção abortar o `Awake()` inteiro do plugin. Corrigido: registro do Fix 1b em `FikaPlugin.cs` envolvido em `try/catch` próprio.
+- [Ciclo formal completo, incluindo uma 2ª rodada de review pro desenho reescrito]: como a review 01 invalidou o desenho original, a spec técnica foi inteiramente reescrita e passou por uma **nova** rodada de review (02) antes do `/code-mod` — não se assumiu "já revisado" só porque o item já tinha uma review 01 (que validava um desenho já superado). Review 02 encontrou 2 pontos menores (extrapolação não-testada de `GEventArgs9` por simetria; checklist sem variação de ritmo) — ambos resolvidos com adição de itens de validação in-game, sem mudança de código.
+
+**Lições / hipóteses descartadas:**
+- Hipótese da Sessão 6 ("`SetEmptyHands`/`TrySetLastEquippedWeapon` colidem via `GEventArgs17`/`inOutHandsProcess`, mesmo mecanismo dos itens 003/004") — descartada por evidência empírica direta (log dirigido em raid real), não só por leitura estática. Reforça a disciplina da Sessão 6 de pausar antes de codar sem confirmação: implementar o fix original teria "fechado" o item sem resolver o bug relatado.
+- Hipótese "retornar `null` de `GetTargetMethod()` é um design defensivo que falha graciosamente por si só" — descartada por investigação dedicada: falha, sim, mas lançando exceção — "gracioso" só se o call site do registro tiver `try/catch` próprio. Lição promovível: nenhum patch existente neste mod (nem em outros mods do repo, verificado por agente de busca) tinha precedente de `GetTargetMethod()` retornando `null` — é a primeira vez que esse padrão defensivo é usado no ecossistema FIKA, e ele exige proteção também no *call site* de registro, não só dentro do próprio método.
+
+**Atividade cronológica:**
+1. Usuário reportou erro real de jogo (`[HandleCallbackResponse]`) e log do Headless; investigação inicial (antes de qualquer teste dirigido) já suspeitou de conexão com o item 006 pausado.
+2. Preparado build Debug local (`dotnet build -c Debug`, sem `/compile-mod`) e confirmado por leitura de bytes que a string de diagnóstico estava de fato compilada.
+3. Usuário reportou erro de versão do FIKA ao tentar usar builds diferentes nas duas pontas (cliente Release, Headless Debug) — investigado e confirmado: checagem de CRC32 do arquivo inteiro (`FikaModHandler.cs:50`, `FikaBackendUtils.cs:205`), não a string de versão semântica. Resolvido copiando a mesma build Debug pros dois lados.
+4. Usuário reproduziu o bug em raid real e capturou o log do Headless no momento da falha — log dirigido apontou `GEventArgs10`, não `inOutHandsProcess`.
+5. Rastreamento completo do mecanismo real no Assembly (`Class1312`/`method_138`/`FirearmController.Drop`/`SetEmptyHands`/`DropCurrentController`), incluindo confirmação de que `ObservedFirearmController` não sobrescreve `Drop`.
+6. Spec técnica do item 006 reescrita do zero (Fix 1 dividido em 1a+1b); review técnica 02 rodada e resolvida.
+7. Investigação dedicada (agente em background) sobre comportamento de `ModulePatch.GetTargetMethod() == null` — achado incorporado à spec antes do `/code-mod`.
+8. `/code-mod`, `/code-review` (1 achado cosmético, aplicado), build local verificado (0 erros), `check-packet-hashes.js` limpo. `Fika.Core.dll` v2.3.17 em `mods/FIKA/builds/`.
+
+**Pendências abertas nesta sessão:**
+- [P-7.1] Validar in-game o item 006 (checklist completo, incluindo teste bloqueador de ritmo variável). Categoria: 🔴 bloqueador (AP-06).
+- [P-7.2] Calibrar `HandsBookkeepingGraceWindowSeconds` (hoje 2.5f, não medido). Categoria: 🟡 débito técnico.
+
+**Cross-refs:**
+- Resolve `P-6.1` (aberta Sessão 6, 2026-09-10).
+- Trabalho paralelo relacionado no mesmo dia: ver `mods/SPT-ContinuousLoadAmmo/` (mod gatilho do bug, não modificado nesta sessão — o fix é inteiramente do lado FIKA).
 
 ---
 

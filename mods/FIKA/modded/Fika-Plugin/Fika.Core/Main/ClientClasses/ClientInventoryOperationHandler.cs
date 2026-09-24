@@ -60,8 +60,10 @@ public sealed class ClientInventoryOperationHandler : IDisposable
                         moveOp.From?.Container?.ParentItem?.RaiseRefreshEvent(true, true);
                         moveOp.To?.Container?.ParentItem?.RaiseRefreshEvent(true, true);
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
+                        // ref: AUD-01-04 (docs/relatorio-auditoria-codigo-01.md)
+                        FikaGlobals.LogError($"{InventoryController?.ID} - RaiseRefreshEvent falhou após rejeição do servidor: {ex}");
                     }
                 }
 
@@ -111,8 +113,10 @@ public sealed class ClientInventoryOperationHandler : IDisposable
                 {
                     Operation.Dispose();
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    // ref: AUD-01-04 (docs/relatorio-auditoria-codigo-01.md)
+                    FikaGlobals.LogError($"{InventoryController?.ID} - Operation.Dispose() falhou: {Operation?.Id} - {ex}");
                 }
             }
             if (serverStatus != localStatus && localStatus.Finished())

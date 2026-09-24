@@ -1,0 +1,57 @@
+name: Build And Publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_version:
+        description: 'Release version (e.g., 1.0.0)'
+        required: true
+      build_type:
+        type: choice
+        description: The build configuration (e.g., GoldMaster)
+        required: true
+        options: 
+        - GoldMaster
+        - Release
+        - Debug
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+          cache: true
+          cache-dependency-path: 'Fika.Headless/packages.lock.json'
+
+      - name: Restore dependencies
+        run: dotnet restore Fika-Headless.slnx
+
+      - name: Build the project
+        run: dotnet build Fika.Headless/Fika.Headless.csproj --configuration ${{ inputs.build_type }} --no-restore --output output/
+
+      - name: Copy loose files
+        run: |
+          mkdir -p BepInEx/plugins/Fika
+          cp -r output/Fika.Headless.dll BepInEx/plugins/Fika
+          cp LICENSE.md BepInEx/plugins/Fika/LICENSE-HEADLESS.md
+
+      - name: Zip the build and loose files
+        run: zip -r "Fika Headless ${{ inputs.release_version }}.zip" BepInEx/plugins/Fika
+
+      - name: Create GitHub Release Draft
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "v${{ inputs.release_version }}"
+          name: "Fika Headless ${{ inputs.release_version }}"
+          draft: true
+          files: |
+            Fika Headless ${{ inputs.release_version }}.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

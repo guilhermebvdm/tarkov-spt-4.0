@@ -1,0 +1,51 @@
+﻿using System.Reflection;
+using FikaServer.Services;
+using SPTarkov.Reflection.Patching;
+using SPTarkov.Server.Core.DI;
+using SPTarkov.Server.Core.Models.Common;
+using SPTarkov.Server.Core.Models.Eft.Match;
+using SPTarkov.Server.Core.Services;
+using InsuranceService = FikaServer.Services.InsuranceService;
+
+namespace FikaServer.Overrides.Services;
+
+public class EndLocalRaidOverride : AbstractPatch
+{
+    protected override MethodBase GetTargetMethod()
+    {
+        return typeof(LocationLifecycleService)
+            .GetMethod(nameof(LocationLifecycleService.EndLocalRaid))!;
+    }
+
+    [PatchPrefix]
+    public static bool Prefix(MongoId sessionId, EndLocalRaidRequestData request)
+    {
+        var matchService = ServiceLocator.ServiceProvider.GetService<MatchService>() ?? throw new NullReferenceException("MatchService is null!");
+        var insuranceService = ServiceLocator.ServiceProvider.GetService<InsuranceService>() ?? throw new NullReferenceException("InsuranceService is null!");
+
+        // Get match id from player session id
+        var matchId = matchService.GetMatchIdByPlayer(sessionId);
+        if (matchId == null)
+        {
+            // Could not find matchId, run original
+            return true;
+        }
+
+        // Find player that exited the raid
+        var player = matchService.GetPlayerInMatch(matchId.Value, sessionId);
+
+        if (player != null)
+        {
+            insuranceService.OnEndLocalRaidRequest(sessionId, insuranceService.GetMatchId(sessionId), request);
+
+            // If the player is not a spectator, continue running EndLocalRaid
+            if (!player.IsSpectator)
+            {
+                return true;
+            }
+        }
+
+        // Stop running the method if the player is a spectator
+        return false;
+    }
+}

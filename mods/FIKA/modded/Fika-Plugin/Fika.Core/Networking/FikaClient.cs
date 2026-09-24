@@ -120,6 +120,7 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
     private NetManager _netClient;
     private CoopHandler _coopHandler;
     private ManualLogSource _logger;
+    private int _unknownPacketCount;
     private NetDataWriter _dataWriter;
     private FikaChatUIScript _fikaChat;
     private string _myProfileId;
@@ -492,12 +493,39 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
         _logger.LogError("[CLIENT] We received error " + socketErrorCode);
     }
 
+    // ref: AUD-01-02 (docs/relatorio-auditoria-codigo-01.md) + AP-11 (docs/technical/spt-antipatterns.md,
+    // "causa raiz 4" em docs/technical/fika-packet-desync-prevention-plan.md §2) — GetCallbackFromData
+    // (NetPacketProcessor.cs:83-91) lança ParseException sem barreira nenhuma até aqui quando o hash do
+    // pacote não está registrado (mod ausente no peer, ou registrado com atraso/versão diferente). Sem
+    // este catch, LiteNetManager.PollEvents (LiteNetManager.cs:1436-1441) descarta TODOS os eventos de
+    // rede já enfileirados no mesmo frame, de todos os peers — não só o pacote ruim. catch (Exception),
+    // não só ParseException: NetPacketProcessor.ReadAllPackets/ReadPacket não têm try/catch interno
+    // nenhum, então também fecha a assimetria Serialize/Deserialize de um pacote de terceiro mal
+    // implementado (Get* cru em vez de TryGet*, lança em payload truncado). Throttle de log segue o
+    // padrão exigido pelo guia canônico (§4 regra 4): stack completo na 1ª ocorrência, resumo a cada
+    // N depois, para não inundar o console num mod desatualizado enviando em alta frequência.
+    private void TryReadAllPackets(NetDataReader reader, object userData)
+    {
+        try
+        {
+            _packetProcessor.ReadAllPackets(reader, userData);
+        }
+        catch (Exception ex)
+        {
+            _unknownPacketCount++;
+            if (_unknownPacketCount == 1 || _unknownPacketCount % 50 == 0)
+            {
+                _logger.LogWarning($"[CLIENT] Dropping malformed/unknown packet (#{_unknownPacketCount} so far): {ex.Message}");
+            }
+        }
+    }
+
     public void OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber, DeliveryMethod deliveryMethod)
     {
         switch (reader.GetEnum<EPacketType>())
         {
             case EPacketType.Serializable:
-                _packetProcessor.ReadAllPackets(reader, peer);
+                TryReadAllPackets(reader, peer);
                 break;
             case EPacketType.PlayerState:
                 var remoteTime = reader.GetDouble();

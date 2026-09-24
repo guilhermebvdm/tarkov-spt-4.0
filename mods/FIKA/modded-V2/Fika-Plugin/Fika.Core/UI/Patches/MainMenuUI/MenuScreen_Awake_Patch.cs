@@ -1,0 +1,21 @@
+﻿using System.Reflection;
+using EFT.UI;
+using Fika.Core.UI.Custom;
+using SPT.Reflection.Patching;
+
+namespace Fika.Core.UI.Patches.MainMenuUI;
+
+public class MenuScreen_Awake_Patch : ModulePatch
+{
+    protected override MethodBase GetTargetMethod()
+    {
+        return typeof(MenuScreen)
+            .GetMethod(nameof(MenuScreen.Awake));
+    }
+
+    [PatchPostfix]
+    public static void Postfix(MenuScreen __instance)
+    {
+        __instance.gameObject.AddComponent<MainMenuUIScript>();
+    }
+}

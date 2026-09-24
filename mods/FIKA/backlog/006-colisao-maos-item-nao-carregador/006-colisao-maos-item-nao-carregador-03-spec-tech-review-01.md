@@ -12,14 +12,14 @@ Snapshot de `mods/FIKA/memory/sessions.md` — 2026-09-08 (Sessão 4) · pendên
 
 ## Resumo
 
-> 🔴 Bloqueadores: 1 · 🟡 Importantes: 1 · 🟢 Menores: 0 · ✅ Resolvidos: 0 · Total: 2
+> 🔴 Bloqueadores: 0 · 🟡 Importantes: 0 · 🟢 Menores: 0 · ✅ Resolvidos: 2 · Total: 2
 
 ## Índice
 
 | ID | Categoria | Impacto | Título | Status |
 |---|---|---|---|---|
-| PA-01-01 | C — Erro de Lógica | 🔴 Bloqueador | Causa raiz do bug ContinuousLoadAmmo não confirmada — `SetEmptyHands` não usa o mecanismo `GEventArgs17` que a correção assume | Pendente |
-| PA-01-02 | C — Erro de Lógica | 🟡 Importante | Airbag central captura só `ParseException`, não toda exceção que pode escapar de `ReadAllPackets` | Pendente |
+| PA-01-01 | C — Erro de Lógica | 🔴 Bloqueador | Causa raiz do bug ContinuousLoadAmmo não confirmada — `SetEmptyHands` não usa o mecanismo `GEventArgs17` que a correção assume | ✅ Resolvido (hipótese rejeitada — causa real é `GEventArgs10`, spec reescrita) |
+| PA-01-02 | C — Erro de Lógica | 🟡 Importante | Airbag central captura só `ParseException`, não toda exceção que pode escapar de `ReadAllPackets` | ✅ Resolvido |
 
 ## Categorias
 
@@ -37,7 +37,7 @@ Snapshot de `mods/FIKA/memory/sessions.md` — 2026-09-08 (Sessão 4) · pendên
 
 ## Pontos
 
-### PA-01-01 · C — Erro de Lógica · 🔴 Bloqueador
+### PA-01-01 · C — Erro de Lógica · 🔴 Bloqueador · ✅ Resolvido em 2026-09-11
 
 **Causa raiz do bug ContinuousLoadAmmo não confirmada por leitura do Assembly — `SetEmptyHands` parece não usar o pipeline `GEventArgs17` que a correção assume**
 
@@ -62,9 +62,29 @@ Enquanto isso não for resolvido, tratar a correção de §5.1 como "generaliza�
 - `[ ]` Aceitar sugestão
 - `[x]` Caminho alternativo: usuário optou pela **opção 1 (validação empírica dirigida)** — compilar `Fika.Core` em modo `Debug`, reproduzir o bug do `ContinuousLoadAmmo` numa raid Headless real, e conferir se o log `#if DEBUG` de `ObservedInventoryController.cs:176-178` aparece no momento da falha (confirma o bloco `inOutHandsProcess`) ou não (indica outro bloco de `CheckItemAction`, exigindo reabrir esta spec técnica). **Item pausado até o usuário conseguir rodar esse teste em raid** — `/code-mod` não deve prosseguir enquanto este ponto estiver pendente.
 
+**✅ Resolvido em 2026-09-11 — hipótese REJEITADA por evidência empírica direta.**
+
+**Resolução:** Usuário compilou `Fika.Core` em Debug (build local em `mods/FIKA/builds/debug-item006/`, CRC32 replicado nos dois lados — cliente e Headless — pra passar da checagem `FikaBackendUtils.cs:205`), reproduziu o bug em raid Headless real municiando vários carregadores em sequência via `SPT-ContinuousLoadAmmo`, e capturou o log do Headless no momento exato da rejeição:
+
+```
+[Error : Fika.Core] [CheckItemAction]: item was same as GEventArgs2.Item
+[Error : Fika.Core] [CheckItemAction]: Flag hit, gevent was GEventArgs10
+```
+
+O log `"failed inOutHandsProcess check"` (o que confirmaria a hipótese original) **não apareceu nenhuma vez**. O que disparou foi o bloco genérico `if (item == geventArgs2.Item)` ([`ObservedInventoryController.cs:182-188`](../../modded/Fika-Plugin/Fika.Core/Main/ObservedClasses/ObservedInventoryController.cs#L182)) contra um evento `GEventArgs10` pendente em `List_0` — **mecanismo completamente diferente** de `GEventArgs17`/`inOutHandsProcess`, que nem é tocado por esse bloco.
+
+Rastreamento do mecanismo real (`Player.cs`, lido nesta sessão):
+
+- `GEventArgs10` é levantado por `Class1312.vmethod_0()`/`vmethod_1()` ([`Player.cs:22234-22243`](../../../../references/eft-decompiled/Assembly-CSharp/EFT/Player.cs#L22234)) — `RaiseEvent(new GEventArgs10(item, status, controller))`, não `RaiseInOutProcessEvents`.
+- `Class1312` é criado e **executado imediatamente** (`Execute()` chamado dentro do próprio construtor) por `Player.method_138(Item item)` ([`Player.cs:32383-32393`](../../../../references/eft-decompiled/Assembly-CSharp/EFT/Player.cs#L32383)) — comentário do próprio jogo no fallback: `"Invalid BeginRemoveFromHands operation args"`.
+- `FirearmController.Drop(...)` ([`Player.cs:13506-13524`](../../../../references/eft-decompiled/Assembly-CSharp/EFT/Player.cs#L13506)) chama `_player.method_138(Item)` **antes** de iniciar a animação de esconder a arma (`CurrentOperation.HideWeapon(...)`), e só chama `inventoryOperation.Confirm()` **dentro do callback de conclusão** dessa animação — ou seja, existe uma janela real, do tamanho da animação de "guardar arma", em que a arma tem um `GEventArgs10` `Begin` pendente em `List_0`.
+- `SetEmptyHands(...)` (usado pelo `SPT-ContinuousLoadAmmo` pra tirar a arma da mão antes de carregar munição fora do inventário) passa pelo pipeline `Proceed`/`Process<>`/`DropCurrentController` → `HandsController.Drop(...)` → cai exatamente nesse `FirearmController.Drop`. Isso bate com a suspeita já levantada nesta review (linha 50 acima: "`DropCurrentController` chama `HandsController.Drop(...)`, que **poderia** ser onde um evento realmente é levantado por um caminho que eu não segui") — **confirmado**: é aqui, só que o evento é `GEventArgs10`, não `GEventArgs17`.
+
+**Conclusão:** a correção planejada em §5.1 da spec técnica (generalizar `IsSelfReferentialHandsTransition`) **não teria corrigido o bug relatado** — ela só age dentro do bloco `lambda.inOutHandsProcess != null`, que este cenário nunca alcança (o `flag = true` já disparou antes, no bloco genérico `item == geventArgs2.Item`). A spec técnica precisa ser **reescrita** mirando o mecanismo real (`GEventArgs10`/`method_138`/`Class1312`/`FirearmController.Drop`), não ampliada. Achado promovido de "hipótese plausível" pra "causa raiz confirmada por reprodução + log direcionado".
+
 ---
 
-### PA-01-02 · C — Erro de Lógica · 🟡 Importante
+### PA-01-02 · C — Erro de Lógica · 🟡 Importante · ✅ Resolvido em 2026-09-11
 
 **Airbag central (`TryReadAllPackets`) captura só `ParseException` — não fecha "causa raiz 4" por completo, como o achado `AUD-01-02` e a spec técnica afirmam**
 
@@ -76,5 +96,7 @@ Enquanto isso não for resolvido, tratar a correção de §5.1 como "generaliza�
 
 **Decisão:**
 - `[ ]` Pendente
-- `[ ]` Aceitar sugestão
+- `[x]` Aceitar sugestão
 - `[ ]` Caminho alternativo: _________________
+
+**Resolução:** Aplicado na reescrita da spec técnica (§5.4/5.5) — `TryReadAllPackets` agora usa `catch (Exception ex)` em vez de `catch (ParseException ex)`, com comentário explícito citando a causa raiz 5 do guia canônico.

@@ -1,8 +1,9 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<Import Project="..\Build.props" />
 
 	<PropertyGroup>
+		<Version>2.3.21</Version>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<Nullable>disable</Nullable>
 		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>

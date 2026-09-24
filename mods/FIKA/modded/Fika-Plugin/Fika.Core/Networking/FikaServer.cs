@@ -130,6 +130,7 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
     private ushort _port;
     private CoopHandler _coopHandler;
     private ManualLogSource _logger;
+    private int _unknownPacketCount;
     private int _currentNetId;
     private FikaChatUIScript _fikaChat;
     private RaidAdminUIScript _raidAdminUIScript;
@@ -931,6 +932,25 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
         Singleton<IFikaGame>.Instance.Stop(null, ExitStatus.Survived, "");
     }
 
+    // ref: AUD-01-02 (docs/relatorio-auditoria-codigo-01.md) + AP-11 (docs/technical/spt-antipatterns.md) —
+    // espelho de FikaClient.TryReadAllPackets (ver comentário lá). catch (Exception), não só
+    // ParseException: fecha tanto hash desconhecido quanto Deserialize malformado de terceiro.
+    private void TryReadAllPackets(NetDataReader reader, object userData)
+    {
+        try
+        {
+            _packetProcessor.ReadAllPackets(reader, userData);
+        }
+        catch (Exception ex)
+        {
+            _unknownPacketCount++;
+            if (_unknownPacketCount == 1 || _unknownPacketCount % 50 == 0)
+            {
+                _logger.LogWarning($"[SERVER] Dropping malformed/unknown packet (#{_unknownPacketCount} so far): {ex.Message}");
+            }
+        }
+    }
+
     public void OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber, DeliveryMethod deliveryMethod)
     {
         // check for broadcast
@@ -943,7 +963,7 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
         switch (reader.GetEnum<EPacketType>())
         {
             case EPacketType.Serializable:
-                _packetProcessor.ReadAllPackets(reader, peer);
+                TryReadAllPackets(reader, peer);
                 break;
             case EPacketType.PlayerState:
                 var remoteTime = reader.GetDouble();

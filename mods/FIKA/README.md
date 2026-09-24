@@ -19,21 +19,25 @@ O mod FIKA é estruturado em 4 pilares modulares:
 
 ---
 
-## 📁 Estrutura do Diretório
+## 📁 Estrutura do Diretório e Estratégia de Forks
 
 ```
 mods/FIKA/
-├── original/                      # Snapshot oficial intocado (referência estrita)
+├── original/                      # Snapshot oficial intocado (referência estrita upstream)
 │   ├── Fika-Plugin/               # Release v2.3.9
 │   ├── Fika-Server-CSharp/        # Release v2.3.5
 │   └── Fika-Headless/             # Release v1.4.15
-├── modded/                        # Workspace ativo para auditorias, correções e otimizações
-│   ├── Fika-Plugin/
+├── modded/                        # [PRODUÇÃO ESTÁVEL] Versão consolidada em uso ativo nas raids
+│   ├── Fika-Plugin/               # Builds estáveis (v2.3.x)
+│   ├── Fika-Server-CSharp/
+│   └── Fika-Headless/
+├── modded-V2/                     # [VALIDAÇÃO ATIVA] Branch experimental em testes de raids reais
+│   ├── Fika-Plugin/               # Features: Join In Progress, Inventário 2.4.2, Rede AoI/Threading 2.4.3
 │   ├── Fika-Server-CSharp/
 │   └── Fika-Headless/
 ├── wiki/                          # Documentação e especificações de rede/API oficiais
 ├── assets/                        # Diagramas de arquitetura e recursos visuais
-├── backlog/                       # Gestão de tarefas, issues e melhorias
+├── backlog/                       # Gestão de tarefas, issues e melhorias numeradas
 ├── builds/                        # Binários compilados isolados do mod
 ├── docs/                          # Relatórios detalhados de auditoria técnica de código
 │   ├── original/                  # Auditorias sobre a base original
@@ -45,6 +49,12 @@ mods/FIKA/
 ├── PROPRIEDADES.md                # Catálogo completo das opções BepInEx F12
 └── README.md                      # Este documento
 ```
+
+> ⚠️ **Decisão Arquitetural de Coexistência de Forks:**
+> - `modded/` permanece como o **workspace de produção estável** em uso nas sessões de jogo e deve continuar sendo mantido.
+> - `modded-V2/` é o **branch de validação ativa**, onde residem as novas grandes implementações (Join In Progress com senhas no lobby [Item 010], correções estruturais de auto-cura de slots/desync de recarga [v2.4.2], otimização de rede do host com AoI Culling e Multithreading [Item 011 / v2.4.3] e isolamento de fila de spawn de bots [Item 007]).
+> - `modded-V2/` **NÃO substitui `modded/` imediatamente**. A transição oficial só ocorrerá após validação empírica exaustiva de estabilidade em múltiplas raids reais com jogadores humanos.
+> - Todo item de backlog novo deve explicitar no seu cabeçalho `Target / Fork: modded-V2` ou `modded` para garantir rastreabilidade.
 
 ---
 

@@ -1,0 +1,24 @@
+﻿using System.Reflection;
+using EFT.UI.Ragfair;
+using Fika.Core.UI.Custom;
+using SPT.Reflection.Patching;
+
+namespace Fika.Core.UI.Patches.MainMenuUI;
+
+public class RagfairScreen_Show_Patch : ModulePatch
+{
+    protected override MethodBase GetTargetMethod()
+    {
+        return typeof(RagfairScreen)
+            .GetMethod(nameof(RagfairScreen.Show));
+    }
+
+    [PatchPostfix]
+    public static void Postfix()
+    {
+        if (MainMenuUIScript.Exist)
+        {
+            MainMenuUIScript.Instance.UpdatePresence(FikaUIGlobals.EFikaPlayerPresence.IN_FLEA);
+        }
+    }
+}

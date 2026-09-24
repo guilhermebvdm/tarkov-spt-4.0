@@ -96,51 +96,59 @@ Para viabilizar que qualquer amigo entre em uma raid que já está em andamento 
 
 ---
 
-### 3. 🔒 Sistema de Senha Temporária para Raids (Proteção de Lobbies e Sessões Abertas)
+### 3. 🔒 Sistema de Senha Temporária para Raids e Invasão em Andamento (Item 010)
 
 #### 3.1. Objetivo
-Permitir que o Host configure uma senha temporária ao criar a partida (ou durante a raid), impedindo que jogadores não autorizados ou invasores entrem na partida, especialmente em conjunto com a funcionalidade de Raids Abertas / Late-Join.
+Permitir que o Host configure uma senha opcional ao criar a partida (seja Host convencional de cliente ou via FIKA Headless), impedindo que invasores ou jogadores não autorizados entrem na partida, enquanto partidas sem senha permanecem totalmente públicas e abertas para entrada/invasão em andamento (Join In Progress).
 
-#### 3.2. Fluxo de Autenticação e Autorização
+#### 3.2. Interface e UX Unificada (Padrão "Configurações de Sessão")
+1. **Criação de Partida (Host & Headless):**
+   - O campo de senha é integrado diretamente na janela modal **"CONFIGURAÇÕES DE SESSÃO"** (`DediSelection`), ao lado da opção "Usar Host Headless" e do botão "INICIAR".
+   - Campo opcional: se deixado em branco, a raid nasce pública (`HasPassword = false`); se preenchido, a raid nasce protegida por senha (`HasPassword = true`).
+2. **Entrada de Jogadores (Pré-Raid ou Invasão em Andamento):**
+   - Ao clicar em "Entrar" ou "Invadir", abre-se uma janela modal com a mesma identidade visual de "CONFIGURAÇÕES DE SESSÃO" (moldura escura, cabeçalho, botão `X` vermelho no canto superior direito e botão de ação embaixo).
+   - Acionável por **dois pontos de entrada**:
+     - Pela **Tela de Incursões / Server Browser** (`MatchMakerUIScript`).
+     - Pelo botão de entrar na **Lista de Jogadores Online do Menu Principal** (`MainMenuUIScript`).
+   - Se a partida tiver senha, a janela solicita a digitação da senha com campo mascarado antes de liberar a conexão.
+   - Se a partida for aberta (sem senha), a janela permite confirmar a entrada/invasão direta.
+
+#### 3.3. Fluxo de Autenticação e Autorização
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Host as Host (Jogador A)
-    participant Menu as MatchMakerUI (Cliente EFT)
+    actor Host as Host / Requester
+    participant Menu as Configurações de Sessão (DediSelection)
     participant Server as FikaServer (Servidor SPT)
-    actor Client as Amigo (Jogador B)
+    actor Client as Invasor / Convidado
 
-    Host->>Menu: Cria Lobby / Raid com Senha: "alpha123"
-    Menu->>Server: HTTP POST /fika/lobby/create { isProtected: true, passwordHash }
-    Server-->>Menu: Lobby Registrado (Exibe Cadeado 🔒)
+    Host->>Menu: Abre "Configurações de Sessão", define Senha e clica em "INICIAR"
+    alt Host Headless
+        Menu->>Server: POST /fika/raid/headless/start (com Password)
+        Server->>Server: WebSocket para FikaHeadlessPlugin -> POST /fika/raid/create
+    else Host Normal
+        Menu->>Server: POST /fika/raid/create (com Password)
+    end
+    Server-->>Menu: Raid Registrada (HasPassword: true, Status: IN_GAME)
 
-    Client->>Menu: Abre Lista de Lobbies (Visualiza Lobby com 🔒)
-    Client->>Menu: Clica em "Conectar"
-    Menu->>Client: Exibe Modal: "Digite a Senha da Partida"
-    Client->>Menu: Digita "alpha123"
-    Menu->>Server: HTTP POST /fika/lobby/join { raidId, passwordInput }
+    Client->>Client: Clica em "Entrar/Invadir" (MatchMaker ou Menu Online Players)
+    Client->>Client: Abre Modal estilo "Configurações de Sessão" (com X vermelho)
+    Client->>Client: Digita a Senha e clica em "ENTRAR / INVADIR"
+    Client->>Server: POST /fika/raid/join { serverId, password }
 
     alt Senha Válida
-        Server-->>Menu: 200 OK (Autoriza Handshake UDP / NAT Punch)
-        Menu->>Host: Conexão Estabelecida
+        Server-->>Client: 200 OK (Autoriza Handshake UDP / Pinger)
+        Client->>Host: Conexão e sincronização de mundo estabelecidas
     else Senha Inválida
-        Server-->>Menu: 403 Forbidden ("Senha Incorreta")
-        Menu->>Client: Exibe Alerta de Erro na Interface
+        Server-->>Client: 403 Forbidden / Erro ("Senha Incorreta")
+        Client->>Client: Exibe alerta de senha incorreta
     end
 ```
 
-#### 3.3. Componentes de Implementação
-1. **Backend C# (`Fika-Server-CSharp`):**
-   - Inclusão dos campos `IsProtected: bool` e `PasswordHash: string` no modelo de dados de sessão de lobby.
-   - Endpoint de validação de credencial pré-conexão antes de retornar as portas UDP para o túnel NAT Punch.
-2. **Interface do Cliente (`Fika.Core/UI/`):**
-   - Adição de campo `TMP_InputField` de senha no menu de criação de lobby (`MatchMakerUIScript.cs`).
-   - Ícone indicador de cadeado 🔒 na lista de servidores disponíveis (`ListPlayer.cs`).
-   - Modal popup seguro de entrada de senha (`FikaUIGlobals.cs`).
-
-#### 3.4. Arquivos Alvo
-- [`mods/FIKA/modded/Fika-Server-CSharp/FikaServer/Controllers/LobbyController.cs`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/FIKA/modded/Fika-Server-CSharp/FikaServer/)
-- [`mods/FIKA/modded/Fika-Plugin/Fika.Core/UI/Custom/MatchMakerUIScript.cs`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/FIKA/modded/Fika-Plugin/Fika.Core/UI/Custom/MatchMakerUIScript.cs)
-- [`mods/FIKA/modded/Fika-Plugin/Fika.Core/UI/Custom/ListPlayer.cs`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/FIKA/modded/Fika-Plugin/Fika.Core/UI/Custom/ListPlayer.cs)
-- [`mods/FIKA/modded/Fika-Plugin/Fika.Core/UI/FikaUIGlobals.cs`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/FIKA/modded/Fika-Plugin/Fika.Core/UI/FikaUIGlobals.cs)
+#### 3.4. Arquivos Alvo (Fork `modded-V2`)
+- [`mods/FIKA/modded-V2/Fika-Plugin/Fika.Core/UI/Custom/MatchMakerUIScript.cs`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/FIKA/modded-V2/Fika-Plugin/Fika.Core/UI/Custom/MatchMakerUIScript.cs)
+- [`mods/FIKA/modded-V2/Fika-Plugin/Fika.Core/UI/Custom/MainMenuUIScript.cs`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/FIKA/modded-V2/Fika-Plugin/Fika.Core/UI/Custom/MainMenuUIScript.cs)
+- [`mods/FIKA/modded-V2/Fika-Headless/Fika.Headless/FikaHeadlessPlugin.cs`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/FIKA/modded-V2/Fika-Headless/Fika.Headless/FikaHeadlessPlugin.cs)
+- [`mods/FIKA/modded-V2/Fika-Server-CSharp/FikaServer/Controllers/RaidController.cs`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/FIKA/modded-V2/Fika-Server-CSharp/FikaServer/Controllers/RaidController.cs)
+- [`mods/FIKA/backlog/010-join-in-progress-senha-lobby-headless/`](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/FIKA/backlog/010-join-in-progress-senha-lobby-headless/)
