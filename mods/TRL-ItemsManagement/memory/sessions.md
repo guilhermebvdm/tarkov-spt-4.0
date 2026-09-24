@@ -10,12 +10,16 @@
 - Painel de trader redesenhado: accordion inline (sem popover flutuante, sem scroll horizontal), disable-sale (remove o item do assort real via `RemoveItemFromAssort`, validado in-game), flag de conflito flea-banido-mas-vendido-por-trader (185 itens reais encontrados) com filtro dedicado.
 - Coluna TRADER redesenhada: group-avatars (até 5 traders por linha, melhor preço primeiro), popover de hover com lista completa S/B, filtro por trader `[S]`/`[B]`.
 - 3 rodadas de code-review aplicadas no intervalo (CR-01..06 do B-5/B-6, CR-U-01..05 da UX de trader, CR-T-01..05 da coluna TRADER) — todos os achados aceitos e corrigidos, docs em `mods/TRL-ItemsManagement/docs/code-review-*.md`.
+- Item de backlog 001 (crash de flea por oferta com item corrompido em memória) entregue no código — patch em `modded/Server/Ragfair/RagfairEmptyOfferGuardPatch.cs`, ver [001-crash-flea-oferta-sem-itens-05-asbuild.md](../backlog/001-crash-flea-oferta-sem-itens/001-crash-flea-oferta-sem-itens-05-asbuild.md). **Ainda não deployado** em nenhum servidor real — o crash já foi mitigado num servidor específico via workaround manual (remoção da oferta corrompida do perfil), não pelo patch. Ver P-7.2.
 
 ## Pendências / próximos passos conhecidos
 
 - [P-1.2] (aberta 2026-07-15) `FleaCapController` não resincroniza `data/items.json` após um toggle de teto (mesmo "known interim gap" que existia pro flea-price/ban) — decisão consciente de não corrigir porque é um fix bulk/categórico (afeta categorias inteiras — Weapon Mod/Electronics — não um tpl isolado), documentado no próprio campo `note` da resposta do endpoint. Sem novidade nas sessões 2-6. Categoria: 🟢 ideia.
 - [P-6.1] (aberta 2026-07-19) Produção (100.106.152.7) segue em v1.0.2; local/repo já em v1.0.4 com audit log redesign+undo, B-4, B-5, B-6, overhaul de UX de trader e coluna TRADER em cima, nada disso deployado ainda. Categoria: 🟡 débito.
 - [P-6.2] (aberta 2026-07-19) B-5 (flea floor override) e B-6 (stock/buy-limit) só validados via API+Chrome, sem validação in-game/in-raid (mesma classe de risco residual do B-3/buyback, citada pelo próprio autor do B-5). Confirmar antes de produção. Categoria: 🟡 débito.
+- [P-7.1] (aberta 2026-09-23) Causa raiz de o que zera em runtime o primeiro item de uma oferta de dogtag na flea ainda não confirmada — suspeita do `[SVM] Server Value Modifier` (mexe em economia/valor, presente no servidor onde o bug ocorreu), não investigada a fundo por falta do código-fonte dele no repo. Categoria: 🟡 débito.
+- [P-7.2] (aberta 2026-09-23) O patch de proteção do item 001 (guard em `RagfairOfferService.GetOffers()`) foi compilado e validado localmente (`dotnet build`, 0 erros), mas nunca chegou a ser testado em produção com a versão final — o servidor onde o bug apareceu foi corrigido via remoção manual da oferta do perfil antes do deploy do patch acontecer. Categoria: 🟡 débito.
+- [P-7.3] (aberta 2026-09-23) `/compile-mod` não suporta o tipo `server-csharp` puro (só detecta `client-csharp` e `server-typescript`) — build deste mod exige `dotnet build` manual + popular `References/0Harmony.dll` à mão a partir do `.spt-path`. Categoria: 🟢 ideia (melhoria no script `/compile-mod`).
 
 ---
 
@@ -190,3 +194,40 @@
 
 **Cross-refs:**
 - Reutiliza `positionPopover()` do popover de recompensa pré-existente (DRY) — mesma disciplina de "wiring de dismissal explícito" que os modais da Sessão 2 (focus trap) e o tooltip da Sessão 5 (`--tip-shift`) já precisaram.
+
+---
+
+## 2026-09-23 00:06 (GMT-3) — Sessão 7: item 001 (crash de flea por oferta corrompida) — ciclo completo do backlog + debug ao vivo em produção
+
+**Tema central:** Diagnosticar e corrigir o crash de `/client/ragfair/find` (`NullReferenceException` em `RagfairCategoriesService.GetCategoriesFromOffers`) reportado originalmente num servidor de terceiro (amigo do usuário), passando pelo ciclo completo do backlog (spec → spec técnica → review → code-mod → code-review → apply-code-review) e depois por 3 rodadas de debug ao vivo quando o patch instalado em produção não resolveu de primeira.
+
+**Decisões-chave:**
+- Alvo do patch: `RagfairOfferService.GetOffers()`, não `RagfairCategoriesService.GetCategoriesFromOffers` (onde o crash aparecia) — é a origem comum de todos os consumidores de apresentação da flea (busca, categorias, preço médio, oferta por id, ofertas de trader) sem tocar no ciclo de expiração interno do `RagfairOfferHolder` (que chama seu próprio `GetOffers()` internamente, não via `RagfairOfferService`). Achado durante `/review-technical-spec` (PA-01-01) — a spec técnica original só cobria o caminho já observado. Ref: `001-crash-flea-oferta-sem-itens-02-spec-tech.md` §1, `-03-spec-tech-review-01.md`.
+- Harmony Postfix (não Prefix, não DI `TypeOverride`) — `GetOffers()` não é virtual e não recebe parâmetro útil pra um Prefix filtrar; mesmo idioma já usado no mod (`FleaFloorOverridePatch`).
+- A checagem de "oferta quebrada" precisou de 3 iterações até cobrir o caso real, cada uma só descoberta com o patch já rodando em produção real (75.433 ofertas): (1) `Items.Count == 0` — não bastou; (2) `Items.FirstOrDefault() is null` (cobre lista vazia OU primeiro elemento nulo numa lista não-vazia) — ainda não bastou; (3) `IsBroken` ganhou seu próprio `try/catch` pra tratar a ENTRADA da lista em si sendo `null` (não "oferta com item ruim", "a oferta não existe") — sem isso, uma exceção dentro do guard subia pro catch de fora e a lista saía sem filtro nenhum, silenciosamente.
+- Causa raiz real isolada por bisecção manual de perfis feita pelo próprio usuário (remover 50% de cada vez, testar, repetir): perfil `6aa85ddf9873311cb4fc6583.json` (nickname "Pedecabra"), oferta única de dogtag (`_id: 6ab2f70771be4c152c8487c6`). O JSON salvo em disco estava **perfeitamente válido** (item presente, estrutura de dogtag completa) — a corrupção acontece em runtime, na memória do processo, depois do boot, não no disco. Suspeita (não confirmada, sem código-fonte pra provar) de algum mod que recalcula valor/preço de dogtag na flea e zera a referência do item em vez de só atualizar o preço — candidato mais forte: `[SVM] Server Value Modifier` (P-7.1).
+- Resolução em produção foi um workaround manual, não o patch: recorte cirúrgico do bloco da oferta no JSON via script Python (busca por bracket-matching, não parse+reserialize inteiro, pra não arriscar alterar formatação/precisão de outros campos do perfil) — validado reparseando o JSON completo antes de entregar o arquivo corrigido.
+- `/compile-mod` não suporta o tipo `server-csharp` puro (detecta só `client-csharp`/`server-typescript`) — build precisou ser `dotnet build TRLItemsManagement.csproj -c Release -p:SkipDeploy=true` manual, com `References/0Harmony.dll` populado à mão a partir do `.spt-path` do repo (`E:/Tarkov Red Line/BepInEx/core/0Harmony.dll`) — sem isso o build falha por referência ausente (não é bug do código, é setup local). Ver P-7.3.
+
+**Lições / hipóteses descartadas:**
+- Cache de resposta HTTP do CompoundingPerf (`CachingHttpRouter`) foi cogitado e descartado como causa — confirmado lendo o código-fonte real (`mods/CompoundingPerf/original/Features/CachingHttpRouter.cs`): `/client/ragfair/find` não está na whitelist de paths cacheáveis, e qualquer request com corpo (a busca sempre tem) já é tratado como não-cacheável por design.
+- Restart do servidor durante uma venda ativa (hipótese do usuário) foi descartado como MECANISMO direto do crash — ofertas dinâmicas (bot/trader) são recriadas do zero a cada boot, não sobra estado "pela metade" persistente que um restart possa corromper. A intuição de que era algo ligado a um jogador específico se confirmou por outro caminho (era mesmo uma oferta de jogador — só que corrompida em runtime, não no momento do restart).
+- **O mesmo texto de exceção (`NullReferenceException`, mesmo stack trace) teve pelo menos 3 causas técnicas distintas na mesma linha de código** (`Items` vazio/nulo, `Items` não-vazio com primeiro elemento nulo, entrada da lista em si nula) — não assumir que a primeira explicação plausível pra um NRE observado é a única; a mensagem de erro não diferencia esses casos, só a inspeção direta do dado real resolve.
+- Um log de diagnóstico temporário e incondicional (roda sempre, não só quando acha o problema) foi decisivo pra confirmar que o Harmony estava de fato chamando o Postfix antes de continuar re-analisando o código estaticamente — técnica a repetir sempre que um fix "deveria funcionar" mas o sintoma persiste.
+- Tamanho do arquivo (168.960 → 169.472 bytes) e timestamp de build foram usados como prova de versão a cada rodada de deploy remoto (servidor em outro computador, sem acesso direto) — mais confiável do que confiar em mensagens de log que já existiam antes da mudança de código (ex.: "Harmony patch applied" é de julho, não prova que o `.dll` novo está rodando).
+
+**Atividade cronológica:**
+1. Diagnóstico inicial a partir do log de erro colado pelo usuário — leitura do código-fonte vendorizado (`references/spt-source/`) identificou a linha exata (`RagfairCategoriesService.cs:66`) e descartou hipóteses de geração de oferta quebrada (preset/trader) via `RagfairOfferGenerator.CreateOffer`, que já lançaria na criação se `Items` nascesse vazio.
+2. Ciclo completo de backlog rodado no mod TRL-ItemsManagement (escolhido entre as opções apresentadas ao usuário, por já cobrir tópicos de flea/trader): `/add-backlog-item` → `/create-spec` → `/review-spec` → `/create-technical-spec` → `/review-technical-spec` (achou PA-01-01, o gap de cobertura) → `/code-mod` → `/code-review` (achou CR-01-01, mais 3 acessores de `RagfairOfferHolder` sem guarda) → `/apply-code-review`.
+3. Build manual + 3 rodadas de deploy remoto num servidor de terceiro (`D:\SPT 4.0`, acesso só via arquivos copiados/PowerShell), cada uma revelando uma lacuna nova na checagem `IsBroken` (ver Decisões).
+4. Usuário isolou o perfil culpado por bisecção binária manual; leitura direta do JSON revelou a dogtag intacta, refutando a suposição original de "lista de itens vazia" como a forma de corrupção.
+5. Fix definitivo em produção aplicado como edição cirúrgica do perfil (não como deploy do patch) — flea voltou a funcionar, confirmado pelo usuário.
+6. Patch de proteção (item 001) permanece pronto e compilado, mas não deployado em produção (P-7.2).
+
+**Pendências abertas nesta sessão:**
+- [P-7.1] (aberta 2026-09-23) Causa raiz (o que zera o item da dogtag em runtime) não confirmada — suspeita do SVM. Categoria: 🟡 débito.
+- [P-7.2] (aberta 2026-09-23) Patch do item 001 não deployado em nenhum servidor real ainda. Categoria: 🟡 débito.
+- [P-7.3] (aberta 2026-09-23) `/compile-mod` não suporta `server-csharp` — build manual necessário. Categoria: 🟢 ideia.
+
+**Cross-refs:**
+- Artefatos completos do item: `mods/TRL-ItemsManagement/backlog/001-crash-flea-oferta-sem-itens/` (spec, spec técnica, review técnica, code-review, asbuild, fix-01, fix-02).
