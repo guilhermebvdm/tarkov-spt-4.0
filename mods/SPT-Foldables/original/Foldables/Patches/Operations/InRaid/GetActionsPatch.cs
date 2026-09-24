@@ -1,0 +1,99 @@
+using System.Reflection;
+using EFT;
+using EFT.InventoryLogic;
+using Foldables.Models;
+using Foldables.Utils;
+using SPT.Reflection.Patching;
+
+namespace Foldables.Patches.Operations.InRaid;
+
+/// <summary>
+/// Add actions for foldable items in raid
+/// </summary>
+public class GetActionsPatch : ModulePatch
+{
+    protected override MethodBase GetTargetMethod()
+    {
+        return typeof(GetActionsClass).GetMethod(nameof(GetActionsClass.smethod_9));
+    }
+
+    [PatchPostfix]
+    protected static void Postfix(GamePlayerOwner owner, Item rootItem, string lootItemName, ref ActionsReturnClass __result)
+    {
+        if (rootItem is not IFoldable foldableItem || !InteractionsHandlerClass.CanFold(rootItem, out var foldableComponent))
+        {
+            return;
+        }
+
+        InventoryController controller = owner.Player.InventoryController;
+        bool isExamined = controller.Examined(rootItem);
+
+        __result.Actions.Add(new ActionsTypesClass
+        {
+            Name = foldableItem.Folded ? "Unfold" : "Fold",
+            TargetName = isExamined ? lootItemName : "Unknown item".Localized(),
+            Action = () =>
+            {
+                if (owner.Player.CurrentState is not IdleStateClass)
+                {
+                    NotificationManagerClass.DisplayWarningNotification("Cannot fold the item while moving".Localized());
+                    return;
+                }
+
+                if (foldableItem.FoldingTime > 0f)
+                {
+                    // Simulate folding in raid by using PlantStateClass
+                    var foldingResult = InteractionsHandlerClass.Fold(foldableComponent, !foldableComponent.Folded, false);
+                    owner.Player.CurrentManagedState.Plant(true, false, foldableItem.FoldingTime, (successful) =>
+                    {
+                        // Might appear that the operation failed (due to delay in callback) so do not simulate
+                        if (successful)
+                        {
+                            _ = controller.TryRunNetworkTransaction(foldingResult, (_) =>
+                            {
+                                // "Take" action missing unless forced to update interactions
+                                owner.InteractionsChangedHandler();
+                            });
+                            rootItem.PlayFoldSound();
+                        }
+                        else
+                        {
+                            foldingResult.Value.RollBack();
+                        }
+                    });
+                }
+                else
+                {
+                    // No delay, use PickupStateClass
+                    rootItem.FoldItem((result) =>
+                    {
+                        if (result.Succeed)
+                        {
+                            owner.Player.CurrentManagedState.Pickup(true, () =>
+                            {
+                                owner.Player.UpdateInteractionCast();
+                                if (owner.Player.CurrentState is PickupStateClass pickupStateClass)
+                                {
+                                    pickupStateClass.Pickup(false, null);
+                                }
+                            });
+                        }
+                    });
+                }
+            },
+            Disabled = rootItem.RequiresEmptyingBeforeFold()
+        });
+
+        if (foldableItem.Folded)
+        {
+            foreach (var action in __result.Actions)
+            {
+                if (action.Name == "Search")
+                {
+                    action.Disabled = true;
+                }
+            }
+            __result.SetIsFolded(true);
+        }
+    }
+}
