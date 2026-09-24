@@ -765,35 +765,7 @@ namespace TRLDynamicSpawn.Patches
 
                         if (outsideSafe && enableLos)
                         {
-                            float losDistSq = losDist * losDist;
-                            for (int pIdx = 0; pIdx < players.Count; pIdx++)
-                            {
-                                var p = players[pIdx];
-                                Vector3 diff = checkPoint.Position - p.Position;
-                                if (diff.sqrMagnitude <= losDistSq)
-                                {
-                                    bool isVis = false;
-                                    if (p.IsYourPlayer && Camera.main != null)
-                                    {
-                                        Vector3 screenPoint = Camera.main.WorldToViewportPoint(checkPoint.Position + Vector3.up * 1f);
-                                        if (screenPoint.z > 0 && screenPoint.x >= 0 && screenPoint.x <= 1 && screenPoint.y >= 0 && screenPoint.y <= 1) isVis = true;
-                                    }
-                                    else
-                                    {
-                                        Vector3 dir = diff.normalized;
-                                        if (Vector3.Dot(p.LookDirection, dir) > 0.5f) isVis = true;
-                                    }
-                                    if (isVis)
-                                    {
-                                        Vector3 headPos = p.MainParts.ContainsKey(BodyPartType.head) ? p.MainParts[BodyPartType.head].Position : p.Position + Vector3.up * 1.5f;
-                                        if (!Physics.Linecast(headPos, checkPoint.Position + Vector3.up * 1f, LayerMaskClass.HighPolyWithTerrainMask | LayerMaskClass.PlayerStaticCollisionsMask))
-                                        {
-                                            hasLoS = true;
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
+                            hasLoS = LoSCache.CheckLoSToPlayers(checkPoint.Position, players, losDist);
                         }
                     }
 

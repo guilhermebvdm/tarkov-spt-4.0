@@ -1,5 +1,6 @@
 using BepInEx.Configuration;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace TRLDynamicSpawn.Helpers
 {
@@ -45,6 +46,21 @@ namespace TRLDynamicSpawn.Helpers
 
         public static ConfigEntry<bool> reloadServerConfig;
         public static ConfigEntry<int> initialProfilePreload;
+
+        // ref: 015-spawn-point-reviewer-debug
+        public static ConfigEntry<bool> enableSpawnPointReviewer;
+        public static ConfigEntry<KeyboardShortcut> reviewerSelectKey;
+        public static ConfigEntry<KeyboardShortcut> reviewerApproveKey;
+        public static ConfigEntry<KeyboardShortcut> reviewerRejectKey;
+        public static ConfigEntry<KeyboardShortcut> reviewerSnapKey;
+        public static ConfigEntry<KeyboardShortcut> reviewerCreateKey;
+        public static ConfigEntry<KeyboardShortcut> reviewerCopyKey;
+        public static ConfigEntry<KeyboardShortcut> reviewerResetPointKey;
+        public static ConfigEntry<KeyboardShortcut> reviewerResetMapKey;
+        public static ConfigEntry<KeyboardShortcut> reviewerElevateVanillaKey;
+        public static ConfigEntry<KeyboardShortcut> reviewerCycleTypeKey;
+        public static ConfigEntry<KeyboardShortcut> reviewerResetStatusKey;
+        public static ConfigEntry<KeyboardShortcut> reviewerDeleteKey;
 
         public static void Init(ConfigFile config)
         {
@@ -167,8 +183,37 @@ namespace TRLDynamicSpawn.Helpers
             // Minimum 5: with no PMC cache every PMC slot becomes a synchronous LoadBots(3) at spawn time.
             string poolSection = "Profile Pool (Advanced)";
             initialProfilePreload = config.Bind(poolSection, "Initial Profile Preload", 15,
-                new ConfigDescription("Standing cache level of PMC bot profiles (USEC and BEAR, normal difficulty) that the game keeps replenished during the whole raid. Higher = first wave ready sooner, more memory. Scav profiles are managed by the game (8 per difficulty).",
+                new ConfigDescription("Initial standing PMC profile cache target per faction (USEC/BEAR).",
                     new AcceptableValueRange<int>(5, 30), new ConfigurationManagerAttributes { IsAdvanced = true }));
+
+            // ref: 015-spawn-point-reviewer-debug
+            string reviewerSection = "Debug - Spawn Point Reviewer";
+            enableSpawnPointReviewer = config.Bind(reviewerSection, "Enable Spawn Point Reviewer", false,
+                new ConfigDescription("Enable 3D visual markers (ZTest Always) and free-cam review/editor for all native and MOAR spawn points."));
+            reviewerSelectKey = config.Bind(reviewerSection, "Select / Lock Target Key", new KeyboardShortcut(KeyCode.KeypadEnter),
+                new ConfigDescription("Lock/unlock currently hovered spawn point so you can fly freely around it and fine-tune its position."));
+            reviewerApproveKey = config.Bind(reviewerSection, "Approve Point Key", new KeyboardShortcut(KeyCode.Keypad1),
+                new ConfigDescription("Mark the selected spawn point as Approved (Green) and save to JSON."));
+            reviewerRejectKey = config.Bind(reviewerSection, "Reject Point Key", new KeyboardShortcut(KeyCode.Keypad0),
+                new ConfigDescription("Mark the selected spawn point as Rejected (Black) and save to JSON."));
+            reviewerResetStatusKey = config.Bind(reviewerSection, "Reset Status Key", new KeyboardShortcut(KeyCode.KeypadPeriod),
+                new ConfigDescription("Reset the selected spawn point review status back to Pending without reverting coordinates."));
+            reviewerSnapKey = config.Bind(reviewerSection, "Snap to Ground Key", new KeyboardShortcut(KeyCode.End),
+                new ConfigDescription("Perform instant vertical raycast snap to project the point perfectly onto solid ground geometry."));
+            reviewerCreateKey = config.Bind(reviewerSection, "Create Custom Point Key", new KeyboardShortcut(KeyCode.Insert),
+                new ConfigDescription("Spawn a mobile ghost marker in front of the camera to create a new custom spawn point."));
+            reviewerDeleteKey = config.Bind(reviewerSection, "Delete Point Key", new KeyboardShortcut(KeyCode.Delete),
+                new ConfigDescription("Permanently delete the selected custom spawn point (from scene and JSON), or mark native points as Rejected."));
+            reviewerCopyKey = config.Bind(reviewerSection, "Copy Point Info Key", new KeyboardShortcut(KeyCode.C, KeyCode.LeftControl),
+                new ConfigDescription("Copy selected spawn point ID, Zone and coordinates to clipboard."));
+            reviewerResetPointKey = config.Bind(reviewerSection, "Reset Selected Point Key", new KeyboardShortcut(KeyCode.Backspace),
+                new ConfigDescription("Reset selected spawn point back to its original factory coordinates and pending status."));
+            reviewerResetMapKey = config.Bind(reviewerSection, "Reset Whole Map Key", new KeyboardShortcut(KeyCode.R, KeyCode.LeftControl, KeyCode.LeftShift),
+                new ConfigDescription("Reset all spawn points on the current map back to original factory coordinates and pending status."));
+            reviewerElevateVanillaKey = config.Bind(reviewerSection, "Elevate Vanilla Spawns Key", new KeyboardShortcut(KeyCode.U, KeyCode.LeftControl),
+                new ConfigDescription("Apply safe batch elevation (+0.15m) to all native vanilla spawn points on the map."));
+            reviewerCycleTypeKey = config.Bind(reviewerSection, "Cycle Spawn Type Key", new KeyboardShortcut(KeyCode.Keypad7),
+                new ConfigDescription("Cycle spawn point category between PMC, SCAV, SNIPER, BOSS, ROGUE, RAIDER, PLAYER."));
         }
 
         public static int GetMapCap(string mapId)

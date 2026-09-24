@@ -75,6 +75,7 @@ namespace TRLDynamicSpawn.Components
 
         public static Dictionary<string, List<Vector3Model>> PmcSpawns = new();
         public static Dictionary<string, List<Vector3Model>> ScavSpawns = new();
+        public static Dictionary<string, List<Vector3Model>> SniperSpawns = new();
 
         public static readonly HashSet<string> AllowedSniperZones = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         public static readonly HashSet<string> BlockedSniperZones = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -98,12 +99,14 @@ namespace TRLDynamicSpawn.Components
         {
             PmcSpawns.Clear();
             ScavSpawns.Clear();
+            SniperSpawns.Clear();
             AllowedSniperZones.Clear();
             BlockedSniperZones.Clear();
             IsGeneratingDynamicWave = false;
             IsWarmupActive = true;
             RaidInitialElitesSpawned = false;
             ZoneCache.Clear();
+            LoSCache.Clear();
         }
         
         private IEnumerator FetchServerConfigAndStart()
@@ -197,6 +200,11 @@ namespace TRLDynamicSpawn.Components
                     {
                         string scavJson = RequestHandler.GetJson("/trldynamicspawn/getScavSpawns");
                         ScavSpawns = JsonConvert.DeserializeObject<Dictionary<string, List<Vector3Model>>>(scavJson);
+                    }
+                    if (_serverConfig.CustomSpawnsConfig.EnableCustomSniperSpawns)
+                    {
+                        string sniperJson = RequestHandler.GetJson("/trldynamicspawn/getSniperSpawns");
+                        SniperSpawns = JsonConvert.DeserializeObject<Dictionary<string, List<Vector3Model>>>(sniperJson);
                     }
                 }
 
@@ -679,6 +687,11 @@ namespace TRLDynamicSpawn.Components
             // ======================================
             // PROCESS NON-NATIVE ELITES / ROGUES / BOSSES
             // ======================================
+            // ref: CR-016-01 — item 016 (elite-nao-nativo-clona-boss). Antes deste fix, todo chefe único
+            // não-nativo (ex: Sanitar em Labs) podia sortear um "grupo" de 2-3 clones do próprio boss em
+            // vez de nascer com os guardas dele. Agora só Rogues/Raiders/Bloodhounds (grunts genéricos
+            // sem identidade única) formam grupo de clones; todo chefe único nasce sempre sozinho + N
+            // guardas dedicados (EliteFollowerMap), nunca clones dele mesmo.
             if (isFirstWave && !RaidInitialElitesSpawned && eliteConfig != null && !eliteConfig.DisableBosses)
             {
                 var eliteEntries = new (EliteLocationInfo info, WildSpawnType role, string bossName)[]
@@ -715,52 +728,64 @@ namespace TRLDynamicSpawn.Components
                     int spawnChance = GetBossChanceForMap(entry.info.SpawnChance, mapName);
                     if (spawnChance <= 0) continue;
 
-                    // Se o mapa JÁ possui uma wave vanilla nativa para este chefe/elite (ex: Rogues no Lighthouse ou Reshala no Customs),
-                    // a wave vanilla é ajustada no AdjustVanillaBossWaves() e controlada nativamente.
+                    // Se o mapa JÁ possui uma wave vanilla nativa para este chefe/elite (ex: Rogues no Lighthouse
+                    // ou Reshala no Customs), a wave vanilla é ajustada no AdjustVanillaBossWaves() e controlada
+                    // nativamente — caminho intocado por este fix.
                     if (HasNativeVanillaWave(entry.bossName)) continue;
 
-                    // Se NÃO possui wave nativa no mapa (ex: Rogues no Customs ou Ground Zero), geramos o spawn dinamicamente!
-                    if (UnityEngine.Random.Range(1, 101) <= spawnChance)
+                    // Se NÃO possui wave nativa no mapa, geramos o spawn dinamicamente.
+                    if (UnityEngine.Random.Range(1, 101) > spawnChance) continue;
+
+                    BotZone selectedZone = GetZoneFromConfig(entry.info, mapName, entry.role);
+                    bool isGruntSquad = entry.role == WildSpawnType.exUsec
+                        || entry.role == WildSpawnType.pmcBot
+                        || entry.role == WildSpawnType.arenaFighterEvent; // Bloodhounds — igual Rogue/Raiders
+
+                    if (isGruntSquad)
                     {
-                        // Regra Especial: Trio Goons (Knight, BigPipe, BirdEye)
-                        if (entry.role == WildSpawnType.bossKnight && !entry.info.DisableFollowers)
-                        {
-                            BotZone goonZone = GetZoneFromConfig(entry.info, mapName, entry.role);
-                            Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Non-Native Goon Trio Invasion: Queueing full Goon Squad (Knight, BigPipe, BirdEye) on {mapName} in zone '{goonZone?.NameZone ?? "Random"}' (Chance: {spawnChance}%)...");
-                            
-                            spawnList.Add(new Tuple<SpawnGroupData, BotZone>(new SpawnGroupData { Role = WildSpawnType.bossKnight, Difficulty = BotDifficulty.normal, GroupSize = 1, Info = entry.info }, goonZone));
-                            spawnList.Add(new Tuple<SpawnGroupData, BotZone>(new SpawnGroupData { Role = WildSpawnType.followerBigPipe, Difficulty = BotDifficulty.normal, GroupSize = 1, Info = entry.info }, goonZone));
-                            spawnList.Add(new Tuple<SpawnGroupData, BotZone>(new SpawnGroupData { Role = WildSpawnType.followerBirdEye, Difficulty = BotDifficulty.normal, GroupSize = 1, Info = entry.info }, goonZone));
-                            continue;
-                        }
+                        // Rogues/Raiders/Bloodhounds são esquadrões genéricos sem identidade única: "grupo" é
+                        // literalmente N clones do mesmo role. Quando squadSize > 1, SpawnGroupBotsCoroutine
+                        // já designa o membro 0 como líder (Boss.IamBoss) e liga o resto como seguidores via
+                        // BotsGroup/Boss.OfferSelf, com sucessão de liderança se o líder morrer durante o
+                        // escalonamento — nada disso precisa mudar aqui.
+                        int squadSize = GetBossGroupSizeForMap(entry.info, mapName);
+                        Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Non-Native Elite Invasion: Queueing squad of {squadSize}x {entry.role} ({entry.bossName}) on {mapName} in zone '{selectedZone?.NameZone ?? "Random"}' (Chance: {spawnChance}%)...");
+                        spawnList.Add(new Tuple<SpawnGroupData, BotZone>(new SpawnGroupData { Role = entry.role, Difficulty = BotDifficulty.normal, GroupSize = squadSize, Info = entry.info }, selectedZone));
+                        continue;
+                    }
 
-                        int targetGroupSize = GetBossGroupSizeForMap(entry.info, mapName);
-                        if (entry.role != WildSpawnType.exUsec && entry.role != WildSpawnType.pmcBot)
-                        {
-                            if (entry.info.GroupChance > 0 && entry.info.GroupChance < 100)
-                            {
-                                if (UnityEngine.Random.Range(1, 101) > entry.info.GroupChance)
-                                {
-                                    targetGroupSize = 1;
-                                }
-                                else
-                                {
-                                    targetGroupSize = UnityEngine.Random.Range(2, Mathf.Max(2, entry.info.MaxGroupSize) + 1);
-                                }
-                            }
-                        }
+                    // Todo chefe único nasce como 1 unidade — nunca clone. groupChance/maxGroupSize/disableFollowers
+                    // passam a decidir SE e QUANTOS guardas dedicados dele acompanham.
+                    Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Non-Native Elite Invasion: Queueing {entry.bossName} (solo boss) on {mapName} in zone '{selectedZone?.NameZone ?? "Random"}' (Chance: {spawnChance}%)...");
+                    spawnList.Add(new Tuple<SpawnGroupData, BotZone>(new SpawnGroupData { Role = entry.role, Difficulty = BotDifficulty.normal, GroupSize = 1, Info = entry.info }, selectedZone));
 
-                        BotZone selectedZone = GetZoneFromConfig(entry.info, mapName, entry.role);
-                        Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Non-Native Elite Invasion: Queueing squad of {targetGroupSize}x {entry.role} ({entry.bossName}) on {mapName} in zone '{selectedZone?.NameZone ?? "Random"}' (Chance: {spawnChance}%)...");
-                        
-                        var gData = new SpawnGroupData
+                    if (entry.info.DisableFollowers) continue;
+
+                    WildSpawnType[] followerRoles = EliteFollowerMap.GetFollowers(entry.role);
+                    if (followerRoles.Length == 0) continue;
+
+                    // GroupChance decide SE o grupo de guardas forma — não o tamanho dele. GroupChance=0
+                    // nunca forma grupo; GroupChance>=100 sempre forma no teto do mapa (determinístico, sem
+                    // sorteio de tamanho); entre 0 e 100, sorteia se forma e, se sim, sorteia o tamanho entre
+                    // 2 e o teto.
+                    int totalSquadSize = 1;
+                    if (entry.info.GroupChance > 0)
+                    {
+                        // Cap por mapa (maxGroupSizeByMap) em vez do campo flat — antes descartado pra chefes.
+                        int maxSquad = Mathf.Max(2, GetBossGroupSizeForMap(entry.info, mapName));
+                        bool groupForms = entry.info.GroupChance >= 100 || UnityEngine.Random.Range(1, 101) <= entry.info.GroupChance;
+                        if (groupForms)
                         {
-                            Role = entry.role,
-                            Difficulty = BotDifficulty.normal,
-                            GroupSize = targetGroupSize,
-                            Info = entry.info
-                        };
-                        spawnList.Add(new Tuple<SpawnGroupData, BotZone>(gData, selectedZone));
+                            totalSquadSize = entry.info.GroupChance >= 100 ? maxSquad : UnityEngine.Random.Range(2, maxSquad + 1);
+                        }
+                    }
+
+                    int guardCount = totalSquadSize - 1;
+                    for (int gIdx = 0; gIdx < guardCount; gIdx++)
+                    {
+                        WildSpawnType guardRole = followerRoles[gIdx % followerRoles.Length]; // round-robin entre tipos de guarda
+                        Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Non-Native Elite Invasion: Queueing guard {gIdx + 1}/{guardCount} ({guardRole}) for {entry.bossName} on {mapName} in zone '{selectedZone?.NameZone ?? "Random"}'...");
+                        spawnList.Add(new Tuple<SpawnGroupData, BotZone>(new SpawnGroupData { Role = guardRole, Difficulty = BotDifficulty.normal, GroupSize = 1, Info = entry.info }, selectedZone));
                     }
                 }
             }
@@ -1177,7 +1202,7 @@ namespace TRLDynamicSpawn.Components
 
             var botProfile = new BotProfileDataClass(side, role, diff, 0f, spawnParams);
 
-            // ref: AUD-02-01 — Geração atômica de esquadrão em uma única Task assíncrona
+            // ref: CR-012-01 — Geração atômica de esquadrão em uma única Task assíncrona
             var task = BotCreationDataClass.Create(botProfile, _botCreator, groupSize, _botsController.BotSpawner);
             while (!task.IsCompleted)
             {
@@ -1210,17 +1235,206 @@ namespace TRLDynamicSpawn.Components
 
             if (botResult != null && botResult.Profiles != null && botResult.Profiles.Count > 0)
             {
-                if (Settings.enableDebugLogs.Value)   // ref: AUD-01-07
-                    Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn][SPY] SQUAD ATOMIC SPAWN: {role} ({diff}) Size={botResult.Profiles.Count} in {zone.NameZone}");
-                
-                IsGeneratingDynamicWave = true;
-                try
+                // ref: CR-012-02 — Pré-Carregamento Assíncrono de Bundles (Pre-warming)
+                var poolManager = Singleton<PoolManagerClass>.Instance;
+                if (poolManager != null)
                 {
-                    _botsController.BotSpawner.TryToSpawnInZoneAndDelay(zone, botResult, false, true, null, true);
+                    var allResourceKeys = new List<ResourceKey>();
+                    for (int pIdx = 0; pIdx < botResult.Profiles.Count; pIdx++)
+                    {
+                        var p = botResult.Profiles[pIdx];
+                        if (p != null)
+                        {
+                            var paths = p.GetAllPrefabPaths(allCustomization: false);
+                            if (paths != null) allResourceKeys.AddRange(paths);
+                        }
+                    }
+
+                    if (allResourceKeys.Count > 0)
+                    {
+                        if (Settings.enableDebugLogs.Value)
+                            Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn][SPY] PRE-WARMING BUNDLES: Loading {allResourceKeys.Count} prefab keys for {role} squad ({botResult.Profiles.Count} bots)...");
+
+                        var prewarmTask = poolManager.LoadBundlesAndCreatePools(
+                            PoolManagerClass.PoolsCategory.Raid,
+                            PoolManagerClass.AssemblyType.Local,
+                            allResourceKeys.ToArray(),
+                            JobPriorityClass.General,
+                            null,
+                            PoolManagerClass.DefaultCancellationToken
+                        );
+                        while (!prewarmTask.IsCompleted)
+                        {
+                            yield return null;
+                        }
+                    }
                 }
-                finally
+
+                int squadCount = botResult.Profiles.Count;
+                if (squadCount == 1)
                 {
-                    IsGeneratingDynamicWave = false;
+                    if (Settings.enableDebugLogs.Value)
+                        Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn][SPY] SINGLE BOT SPAWN: {role} ({diff}) in {zone.NameZone}");
+
+                    IsGeneratingDynamicWave = true;
+                    try
+                    {
+                        _botsController.BotSpawner.TryToSpawnInZoneAndDelay(zone, botResult, false, true, null, true);
+                    }
+                    finally
+                    {
+                        IsGeneratingDynamicWave = false;
+                    }
+                }
+                else
+                {
+                    if (Settings.enableDebugLogs.Value)
+                        Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn][SPY] STAGGERED SQUAD SPAWN START: {role} ({diff}) Size={squadCount} in {zone.NameZone}");
+
+                    float staggerDelay = Settings.enableSmoothSpawning.Value
+                        ? Mathf.Clamp(Settings.smoothSpawningDelay.Value, 0.8f, 1.8f)
+                        : UnityEngine.Random.Range(1.2f, 1.5f);
+
+                    BotOwner leaderBot = null;
+
+                    // 1. Spawna o Membro 0 como Líder do Esquadrão
+                    var leaderCreationData = BotCreationDataClass.CreateWithoutProfile(botResult._profileData);
+                    leaderCreationData.AddProfiles(new List<Profile> { botResult.Profiles[0] });
+                    leaderCreationData.IBotCreator = _botCreator;
+                    leaderCreationData.Ginterface22_0 = _botsController.BotSpawner;
+
+                    Action<BotOwner> onLeaderCreated = (b) =>
+                    {
+                        if (b != null && b.Profile != null && b.Profile.Id == botResult.Profiles[0].Id)
+                        {
+                            leaderBot = b;
+                        }
+                    };
+
+                    _botsController.BotSpawner.OnBotCreated += onLeaderCreated;
+                    IsGeneratingDynamicWave = true;
+                    try
+                    {
+                        _botsController.BotSpawner.TryToSpawnInZoneAndDelay(zone, leaderCreationData, false, true, null, true);
+                    }
+                    finally
+                    {
+                        IsGeneratingDynamicWave = false;
+                    }
+
+                    // Aguarda o intervalo escalonado para o Líder montar malhas, ativar IA e definir IamBoss = true
+                    yield return new WaitForSeconds(staggerDelay);
+                    _botsController.BotSpawner.OnBotCreated -= onLeaderCreated;
+
+                    if (Settings.enableDebugLogs.Value && leaderBot != null)
+                        Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn][SPY] SQUAD LEADER READY: Id={leaderBot.Id}, Role={leaderBot.Profile?.Info?.Settings?.Role}, IsBoss={leaderBot.Boss.IamBoss}, State={leaderBot.BotState}");
+
+                    // 2. Spawna os Membros 1..N como Seguidores do Esquadrão
+                    for (int mIdx = 1; mIdx < squadCount; mIdx++)
+                    {
+                        var followerProfile = botResult.Profiles[mIdx];
+                        if (followerProfile == null) continue;
+
+                        var followerCreationData = BotCreationDataClass.CreateWithoutProfile(botResult._profileData);
+                        followerCreationData.AddProfiles(new List<Profile> { followerProfile });
+                        followerCreationData.IBotCreator = _botCreator;
+                        followerCreationData.Ginterface22_0 = _botsController.BotSpawner;
+
+                        // Seleciona ponto de spawn adjacente próximo ao Líder para manter o esquadrão junto
+                        List<ISpawnPoint> followerPoints = null;
+                        if (leaderBot != null && zone.SpawnPoints != null && zone.SpawnPoints.Length > 0)
+                        {
+                            ISpawnPoint bestPoint = null;
+                            float bestDistSq = float.MaxValue;
+                            Vector3 leadPos = leaderBot.Position;
+                            for (int spIdx = 0; spIdx < zone.SpawnPoints.Length; spIdx++)
+                            {
+                                var sp = zone.SpawnPoints[spIdx];
+                                if (sp == null) continue;
+                                if (SpawnPointHelper.IsSniperSpawnPoint(sp, zone)) continue;
+                                float dSq = (sp.Position - leadPos).sqrMagnitude;
+                                if (dSq < bestDistSq)
+                                {
+                                    bestDistSq = dSq;
+                                    bestPoint = sp;
+                                }
+                            }
+                            if (bestPoint != null)
+                            {
+                                followerPoints = new List<ISpawnPoint> { bestPoint };
+                            }
+                        }
+
+                        BotOwner followerBot = null;
+                        Action<BotOwner> onFollowerCreated = (b) =>
+                        {
+                            if (b != null && b.Profile != null && b.Profile.Id == followerProfile.Id)
+                            {
+                                followerBot = b;
+                            }
+                        };
+
+                        _botsController.BotSpawner.OnBotCreated += onFollowerCreated;
+                        IsGeneratingDynamicWave = true;
+                        try
+                        {
+                            _botsController.BotSpawner.TryToSpawnInZoneAndDelay(zone, followerCreationData, false, true, followerPoints, true);
+                        }
+                        finally
+                        {
+                            IsGeneratingDynamicWave = false;
+                        }
+
+                        // Aguarda o intervalo escalonado entre membros
+                        yield return new WaitForSeconds(staggerDelay);
+                        _botsController.BotSpawner.OnBotCreated -= onFollowerCreated;
+
+                        // 3. Safety Linker & Sucessão de Liderança (CR-012-04):
+                        if (followerBot != null)
+                        {
+                            try
+                            {
+                                if (leaderBot != null && leaderBot.HealthController != null && leaderBot.HealthController.IsAlive)
+                                {
+                                    if (leaderBot.BotsGroup != null && followerBot.BotsGroup != leaderBot.BotsGroup)
+                                    {
+                                        leaderBot.BotsGroup.AddMember(followerBot, onActivation: false);
+                                    }
+                                    if (!followerBot.BotFollower.HaveBoss && leaderBot.Boss.IamBoss)
+                                    {
+                                        leaderBot.Boss.OfferSelf(followerBot);
+                                    }
+                                    if (followerBot.BotFollower.HaveBoss)
+                                    {
+                                        followerBot.Tactic?.SetTactic(BotsGroup.BotCurrentTactic.Protect);
+                                    }
+                                }
+                                else
+                                {
+                                    // Sucessão de Liderança: Líder morreu ou falhou durante a janela de escalonamento.
+                                    // O seguidor atual assume a liderança do esquadrão para os próximos integrantes.
+                                    if (!followerBot.Boss.IamBoss)
+                                    {
+                                        followerBot.Boss.SetBoss(squadCount - mIdx);
+                                        leaderBot = followerBot;
+                                        if (Settings.enableDebugLogs.Value)
+                                            Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn][SPY] SQUAD LEADER SUCCESSION: Bot {followerBot.Id} inherited leadership for remaining members.");
+                                    }
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                if (Settings.enableDebugLogs.Value)
+                                    Plugin.LogSource.LogWarning($"[TRL-DynamicSpawn] Follower link warning: {ex.Message}");
+                            }
+                        }
+
+                        if (Settings.enableDebugLogs.Value && followerBot != null)
+                            Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn][SPY] SQUAD FOLLOWER SPAWNED [{mIdx}/{squadCount - 1}]: Id={followerBot.Id}, LeaderId={leaderBot?.Id ?? -1}");
+                    }
+
+                    if (Settings.enableDebugLogs.Value)
+                        Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn][SPY] STAGGERED SQUAD SPAWN COMPLETE: Size={squadCount} in {zone.NameZone}");
                 }
             }
             else
@@ -1318,6 +1532,13 @@ namespace TRLDynamicSpawn.Components
                     return false;
                 }
             }
+
+            // Checagem de LoS com cache e filtro de 150m: se algum jogador possuir linha de visão direta, a zona é recusada
+            if (enableLos && LoSCache.CheckLoSToPlayers(zonePos, players, losDist))
+            {
+                return false;
+            }
+
             return true;
         }
 
@@ -1662,6 +1883,9 @@ namespace TRLDynamicSpawn.Components
             return TRLDynamicSpawn.Helpers.Methods.GetRandomZone(_botsController?.BotSpawner);
         }
 
+        // ref: 013-estabilizacao-spawn-e-visual-cadaver — snap seguro de spawn
+        // Em geometrias de múltiplos andares e pontes de Customs, o raycast descendente amplo (3m)
+        // causava falsos positivos ou penetração no subsolo, derrubando bots no limbo.
         private void OnBotCreatedSafetySnap(BotOwner bot)
         {
             if (bot == null || bot.GetPlayer == null || bot.Transform == null) return;
@@ -1675,22 +1899,39 @@ namespace TRLDynamicSpawn.Components
                 Vector3 currentPos = bot.Transform.position;
                 Vector3 targetPos = currentPos;
 
-                // 1. Amostra a malha do NavMesh mais próxima (em um raio de 2.5m)
-                if (UnityEngine.AI.NavMesh.SamplePosition(currentPos, out UnityEngine.AI.NavMeshHit hit, 2.5f, UnityEngine.AI.NavMesh.AllAreas))
-                {
-                    targetPos = hit.position;
-                }
+                // 1. Raycast vertical estrito e curto (0.5m acima, 1.0m para baixo) no ponto de spawn original
+                // Isso detecta a superfície sólida imediata sob os pés sem saltar para pisos inferiores/subsolos
+                bool groundDetected = Physics.Raycast(
+                    currentPos + Vector3.up * 0.5f,
+                    Vector3.down,
+                    out RaycastHit rayHit,
+                    1.0f,
+                    LayerMaskClass.HighPolyWithTerrainMask | LayerMaskClass.PlayerStaticCollisionsMask
+                );
 
-                // 2. Raycast vertical de segurança para detectar a malha física do chão/asfalto
-                if (Physics.Raycast(targetPos + Vector3.up * 1.5f, Vector3.down, out RaycastHit rayHit, 3.0f, LayerMaskClass.HighPolyWithTerrainMask | LayerMaskClass.PlayerStaticCollisionsMask))
+                if (groundDetected)
                 {
-                    targetPos.y = rayHit.point.y;
-                }
+                    float deltaY = rayHit.point.y - currentPos.y;
 
-                // 3. Se houver discrepância vertical perceptível (> 0.15m de afundamento ou > 0.5m de distância), teletransporta para a superfície
-                if (Mathf.Abs(currentPos.y - targetPos.y) > 0.15f || (currentPos - targetPos).sqrMagnitude > 0.5f)
-                {
-                    bot.GetPlayer.Teleport(targetPos, true);
+                    // Se a altura física divergir mais de 0.35m da altura do ISpawnPoint original,
+                    // ABORTA: preserva a cota original da BSG para não atravessar pontes, passarelas ou caçambas.
+                    if (Mathf.Abs(deltaY) > 0.35f)
+                    {
+                        return;
+                    }
+
+                    // Se houver leve discrepância (|deltaY| >= 0.05m e <= 0.35m), alinha com a superfície física
+                    if (Mathf.Abs(deltaY) >= 0.05f)
+                    {
+                        targetPos.y = rayHit.point.y;
+
+                        // Valida se o NavMesh existe na mesma cota antes de aplicar o teleporte
+                        if (UnityEngine.AI.NavMesh.SamplePosition(targetPos, out UnityEngine.AI.NavMeshHit hit, 1.0f, UnityEngine.AI.NavMesh.AllAreas))
+                        {
+                            targetPos.y = hit.position.y;
+                            bot.GetPlayer.Teleport(targetPos, true);
+                        }
+                    }
                 }
             }
             catch (Exception ex)

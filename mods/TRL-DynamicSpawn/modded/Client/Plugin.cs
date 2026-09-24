@@ -9,20 +9,14 @@ using TRLDynamicSpawn.Patches;
 namespace TRLDynamicSpawn
 {
     [
-        BepInPlugin("TRLDynamicSpawn.settings", "TRLDynamicSpawn", "3.7.6"),
+        BepInPlugin("TRLDynamicSpawn.settings", "TRLDynamicSpawn", "3.7.25"),
         BepInDependency("com.fika.core", BepInDependency.DependencyFlags.SoftDependency)
     ]
     public class Plugin : BaseUnityPlugin
     {
         public static ManualLogSource LogSource;
 
-        // private void Awake()
-        // {
-        //     var harmony = new Harmony("com.example.botzonepatch");
-        //     harmony.PatchAll();
-        // }
-
-        private void Start()
+        private void Awake()
         {
             LogSource = Logger;
 
@@ -58,6 +52,7 @@ namespace TRLDynamicSpawn
             TRLDynamicSpawn.Components.BotDespawnManager.Enable();
             TRLDynamicSpawn.Components.TRLMapBubbleOverlay.Enable();
             TRLDynamicSpawn.Components.CorpseCleanupManager.Enable();
+            TRLDynamicSpawn.Components.SpawnPointReviewerManager.Enable(); // ref: 015-spawn-point-reviewer-debug
         }
 
         private void Update()

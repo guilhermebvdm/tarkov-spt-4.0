@@ -153,7 +153,21 @@ public record EliteConfig
     };
     [JsonProperty("pmcBot")] public EliteLocationInfo Raiders { get; set; } = new() { SpawnChance = new ValidLocationInt { Laboratory = 40 }, BossZone = new ValidLocationString { Laboratory = "BotZoneBasement,BotZoneFloor1,BotZoneFloor2" } }; // Raiders
     [JsonProperty("exUsec")] public EliteLocationInfo Rogues { get; set; } = new(); // Rogues
-    [JsonProperty("arenaFighterEvent")] public EliteLocationInfo Bloodhounds { get; set; } = new() { SpawnChance = new ValidLocationInt { Customs = 5, Woods = 5 }, BossZone = new ValidLocationString { Customs = "ZoneFactoryCenter,ZoneScavBase", Woods = "ZoneMiniHouse,ZoneClearVill,ZoneRoad,ZoneBrokenVill,ZoneScavBase2" } }; // Bloodhounds
+    [JsonProperty("arenaFighterEvent")] public EliteLocationInfo Bloodhounds { get; set; } = new()
+    {
+        SpawnChance = new ValidLocationInt { Customs = 5, Woods = 5 },
+        BossZone = new ValidLocationString { Customs = "ZoneFactoryCenter,ZoneScavBase", Woods = "ZoneMiniHouse,ZoneClearVill,ZoneRoad,ZoneBrokenVill,ZoneScavBase2" },
+        // ref: CR-016-01 — Bloodhounds vira esquadrão genérico (igual Rogue/Raiders); tamanho fixado em 4
+        // (o caminho isGruntSquad usa este teto direto, sem sortear faixa). MaxGroupSizeByMap precisa
+        // ser explícito aqui: se ficasse no default do record (3), o valor por-mapa venceria o flat.
+        MaxGroupSize = 4,
+        MaxGroupSizeByMap = new ValidLocationInt
+        {
+            Customs = 4, Factory4Day = 4, Factory4Night = 4, Interchange = 4, Laboratory = 4,
+            Lighthouse = 4, Reserve = 4, GroundZero = 4, GroundZeroHigh = 4, Shoreline = 4,
+            TarkovStreets = 4, Woods = 4
+        }
+    }; // Bloodhounds
     [JsonProperty("sectantPriest")] public EliteLocationInfo Cultists { get; set; } = new() { SpawnChance = new ValidLocationInt { Customs = 15, Factory4Night = 20, Shoreline = 15, Woods = 15, GroundZero = 44 }, BossZone = new ValidLocationString { Customs = "ZoneScavBase", Factory4Night = "BotZone", Shoreline = "ZoneSanatorium1,ZoneSanatorium2,ZoneForestSpawn", Woods = "ZoneMiniHouse,ZoneBrokenVill", GroundZero = "ZoneSandbox" } }; // Cultists
     [JsonProperty("gifter")] public EliteLocationInfo BossGifter { get; set; } = new(); // Santa
 
