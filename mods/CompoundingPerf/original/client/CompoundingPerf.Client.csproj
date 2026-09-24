@@ -1,0 +1,93 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- BepInEx 5.4 + Unity Mono runtime require net471 (server side targets net9.0). -->
+    <TargetFramework>net471</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+
+    <Version>1.3.0</Version>
+    <Authors>EchoStarz</Authors>
+    <Product>CompoundingPerf.Client</Product>
+    <Description>Client-side Harmony patches for CompoundingPerf — in-raid hot-path log suppressor and raid-state tracking.</Description>
+    <RootNamespace>CompoundingPerf.Client</RootNamespace>
+    <AssemblyName>CompoundingPerf.Client</AssemblyName>
+
+    <SptRoot Condition="'$(SptRoot)' == ''">C:\SPT</SptRoot>
+
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <!-- Dev benchmark builds: dotnet build -p:Bench=true compiles in the C6 frame-stats
+       recorder. Release packages are built WITHOUT this flag, so shipped DLLs contain
+       no per-frame recorder at all. -->
+  <PropertyGroup Condition="'$(Bench)' == 'true'">
+    <DefineConstants>$(DefineConstants);BENCH</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Compile-include shared model records from the server project. -->
+    <Compile Include="..\Models.cs" Link="Models.cs" />
+    <Compile Include="..\FrameStatsMath.cs" Link="FrameStatsMath.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- BepInEx core -->
+    <Reference Include="BepInEx">
+      <HintPath>$(SptRoot)\BepInEx\core\BepInEx.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="0Harmony">
+      <HintPath>$(SptRoot)\BepInEx\core\0Harmony.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+
+    <!-- SPT helper libraries (publicized EFT internals + reflection helpers) -->
+    <Reference Include="spt-reflection">
+      <HintPath>$(SptRoot)\BepInEx\plugins\spt\spt-reflection.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="spt-common">
+      <HintPath>$(SptRoot)\BepInEx\plugins\spt\spt-common.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+
+    <!-- EFT game assembly. -->
+    <Reference Include="Assembly-CSharp">
+      <HintPath>$(SptRoot)\EscapeFromTarkov_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Comfort">
+      <HintPath>$(SptRoot)\EscapeFromTarkov_Data\Managed\Comfort.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+
+    <!-- Unity. -->
+    <Reference Include="UnityEngine">
+      <HintPath>$(SptRoot)\EscapeFromTarkov_Data\Managed\UnityEngine.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(SptRoot)\EscapeFromTarkov_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <!-- Skip via -p:SkipDeploy=true when EFT.exe or SPT.Server is running and holding
+       the DLL memory-mapped — compile still succeeds, just no live deploy. -->
+  <Target Name="DeployToSpt" AfterTargets="PostBuildEvent" Condition="'$(SkipDeploy)' != 'true'">
+    <PropertyGroup>
+      <PluginDeployDir>$(SptRoot)\BepInEx\plugins\CompoundingPerf.Client\</PluginDeployDir>
+    </PropertyGroup>
+    <MakeDir Directories="$(PluginDeployDir)" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(PluginDeployDir)" SkipUnchangedFiles="false"
+          ContinueOnError="WarnAndContinue" />
+    <Message Text="Deployed $(TargetFileName) to $(PluginDeployDir)" Importance="high" />
+  </Target>
+
+</Project>
