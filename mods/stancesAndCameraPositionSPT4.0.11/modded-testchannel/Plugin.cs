@@ -20,7 +20,7 @@ public enum ScrollMode
     Linear,
 }
 
-[BepInPlugin("com.trl.stancesandmobility", "TRL-StancesAndMobility", "2.23.7")]
+[BepInPlugin("com.trl.stancesandmobility", "TRL-StancesAndMobility", "2.25.3")]
 public class Plugin : BaseUnityPlugin
 {
     public static Plugin Instance { get; private set; }
@@ -109,6 +109,10 @@ public class Plugin : BaseUnityPlugin
     // só pra quem quer um custo extra por cima. Removida em 2026-09-09, re-adicionada a pedido do
     // usuário no mesmo dia.
     public static ConfigEntry<float> _CrouchRunStaminaSurcharge;
+    // Pedido do usuário (2026-09-10): com a postura já perto de em pé (ex.: 0.8~0.9), o jogador espera
+    // o sprint vanilla normal (levanta e corre em pé), não o boost agachado — mesmo sem estar
+    // exatamente em PoseLevel==1. Abaixo do limiar → crouch-run; no limiar ou acima → sprint vanilla.
+    public static ConfigEntry<float> _CrouchRunPoseThreshold;
     public static ConfigEntry<bool> _EnableProneRun;
     public static ConfigEntry<float> _ProneRunSpeedMultiplier;
     // Mantida: o prone-run NÃO aciona o dreno nativo de sprint (ProneMoveStateClass.EnableSprint
@@ -245,8 +249,10 @@ public class Plugin : BaseUnityPlugin
     public static ConfigEntry<bool> _EnableManualBoltAction;
     public static ConfigEntry<bool> _EnableManualPumpAction;
 
-    // Weapon Inspection (Item 019)
+    // Weapon Inspection (Item 019 & Mag Check Delay)
     public static ConfigEntry<bool> _ShowChamberAmmoOnCheck;
+    public static ConfigEntry<bool> _EnableMagCheckDelay;
+    public static ConfigEntry<float> _MagCheckDelaySeconds;
 
     public void Awake()
     {
@@ -347,6 +353,28 @@ public class Plugin : BaseUnityPlugin
                 "When enabled, checking the chamber in-raid shows the same on-screen panel as the magazine check, telling you whether a round is chambered and which one. Vanilla shows nothing on the HUD when you check the chamber. Local only (not synced over Fika).\n\nQuando ativado, checar a câmara na raid mostra o mesmo painel do check de carregador, indicando se há bala na câmara e qual é. O vanilla não mostra nada no HUD ao checar a câmara. Só local (não sincroniza no Fika).",
                 null,
                 new ConfigurationManagerAttributes { Order = 67 }));
+
+        // ref: CR-01-02 (item 023) — tooltips corrigidos: este delay também atrasa a checagem de câmara
+        // (item 019), já que as duas convergem no mesmo EftBattleUIScreen.ShowAmmoDetails
+        // (ver backlog/023-atraso-checagem-carregador-02-spec-tech.md §1/§6). Nomes das props mantidos
+        // (renomear resetaria o valor salvo do usuário — repo-workflow-best-practices §7).
+        _EnableMagCheckDelay = Config.Bind(
+            "Weapon Inspection",
+            "Enable Magazine Check Delay",
+            true,
+            new ConfigDescription(
+                "When enabled, checking the magazine OR the chamber in-raid delays the on-screen ammo HUD by a realistic duration instead of showing instantly at frame 0. Both checks share the same panel and the same delay.\n\nQuando ativado, checar o carregador OU a câmara na raid atrasa a exibição do HUD de munição por um tempo realista em vez de mostrar instantaneamente no frame 0. As duas checagens compartilham o mesmo painel e o mesmo atraso.",
+                null,
+                new ConfigurationManagerAttributes { Order = 66 }));
+
+        _MagCheckDelaySeconds = Config.Bind(
+            "Weapon Inspection",
+            "Magazine Check Delay Seconds",
+            1.0f, // validado in-game pelo usuário (2026-09-22, item 023) — 2.0 era o valor original ad-hoc, nunca calibrado
+            new ConfigDescription(
+                "Seconds to wait before displaying the ammo status HUD during a magazine OR chamber check animation.\n\nSegundos de espera antes de exibir o HUD de situação de munição durante a animação de checagem do carregador OU da câmara.",
+                new AcceptableValueRange<float>(0.5f, 4.0f),
+                new ConfigurationManagerAttributes { Order = 65 }));
 
 
         // ========================================
@@ -545,6 +573,15 @@ public class Plugin : BaseUnityPlugin
                 "Extra stamina drain per second while crouch-running, on top of the native sprint drain (which already applies on its own). 0 = no surcharge, native drain only.\n\nDreno extra de stamina (por segundo) ao correr agachado, somado ao dreno nativo de sprint (que já se aplica sozinho). 0 = sem sobretaxa, só o dreno nativo.",
                 new AcceptableValueRange<float>(0f, 30f),
                 new ConfigurationManagerAttributes { Order = 87 }));
+
+        _CrouchRunPoseThreshold = Config.Bind(
+            CrouchProneRunSection,
+            "Crouch Run Pose Threshold",
+            0.5f,
+            new ConfigDescription(
+                "Pose level below which crouch-run applies (keeps posture, boosts speed). At or above this value, the sprint key triggers native vanilla sprint (stands up) instead — near-standing poses already look like standing to the player.\n\nNível de postura abaixo do qual o crouch-run atua (mantém a postura, acelera a velocidade). No valor ou acima, a tecla de correr aciona o sprint vanilla nativo (levanta) em vez disso — posturas quase em pé já parecem em pé pro jogador.",
+                new AcceptableValueRange<float>(0.1f, 1.0f),
+                new ConfigurationManagerAttributes { Order = 86 }));
 
         _EnableProneRun = Config.Bind(
             CrouchProneRunSection,
@@ -1502,6 +1539,7 @@ public class Plugin : BaseUnityPlugin
 
         // Item 019: Chamber Check Ammo UI
         SafeEnable("ChamberCheckAmmoPatch", () => new Patches.ChamberCheckAmmoPatch());
+        SafeEnable("MagCheckDelayPatch", () => new Patches.MagCheckDelayPatch());
         // PickupAimingSafetyPatch devolvido ao TRL-Fixes na v2.13.0 — é remendo sobre bug do jogo base
         // (trava de controles ao pegar item do chão), sem relação com posturas/mobilidade. Ver
         // mods/TRL-Fixes/docs/handoff-pickup-aiming-safety.md.

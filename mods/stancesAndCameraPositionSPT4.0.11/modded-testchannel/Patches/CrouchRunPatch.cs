@@ -43,7 +43,14 @@ namespace CameraRotationMod.Patches
                 if (player == null || !player.IsYourPlayer) return true;
 
                 if (!enabled) { SprintKeyHeld = false; return true; } // deixa o original rodar (soltar tecla)
-                if (movementContext.PoseLevel >= 1f || movementContext.IsInPronePose) { SprintKeyHeld = false; return true; } // já em pé / prone: fora de escopo
+
+                // Limiar configurável (2026-09-10, pedido do usuário): antes só considerava "já em pé"
+                // em PoseLevel==1 (totalmente em pé). Na prática, com a postura já perto de em pé (ex.:
+                // 0.8~0.9) o jogador espera o sprint vanilla normal (levantar e correr), não o boost
+                // agachado — visualmente já parece que está em pé. Abaixo do limiar, o crouch-run atua;
+                // no limiar ou acima, cai pro sprint vanilla (levanta e corre em pé).
+                float poseThreshold = Mathf.Clamp01(Plugin._CrouchRunPoseThreshold?.Value ?? 0.5f);
+                if (movementContext.PoseLevel >= poseThreshold || movementContext.IsInPronePose) { SprintKeyHeld = false; return true; } // já "em pé o suficiente" / prone: fora de escopo
                 if (movementContext.MovementDirection.y <= 0.1f) { return true; } // espelha a condição original (não é pedido de sprint pra frente)
                 if (!movementContext.CanSprint) { SprintKeyHeld = false; return true; }
 
@@ -143,8 +150,11 @@ namespace CameraRotationMod.Patches
             Player player = Traverse.Create(__instance).Field<Player>("_player").Value;
             if (player == null || !player.IsYourPlayer) return;
 
+            // Mesmo limiar configurável do Prefix acima (Plugin._CrouchRunPoseThreshold) — os dois
+            // precisam concordar sobre "o que conta como agachado o suficiente pro boost".
+            float poseThreshold = Mathf.Clamp01(Plugin._CrouchRunPoseThreshold?.Value ?? 0.5f);
             bool wantsBoost = CrouchRunEnableSprintPatch.SprintKeyHeld
-                && __instance.PoseLevel < 1f
+                && __instance.PoseLevel < poseThreshold
                 && !__instance.IsInPronePose
                 && __instance.MovementDirection.sqrMagnitude > MovementEpsilonSqr;
 

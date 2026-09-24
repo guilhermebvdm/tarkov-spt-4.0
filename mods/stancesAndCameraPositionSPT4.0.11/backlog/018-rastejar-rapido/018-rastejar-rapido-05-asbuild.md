@@ -263,6 +263,14 @@ Usuário reportou que trocar de Stance durante crouch-run ainda não funcionava,
 
 **Arquivos tocados:** `Patches/CrouchRunPatch.cs` (`_removeStaminaSurcharge` + bloco de consumo), `Plugin.cs` (`_CrouchRunStaminaSurcharge` + bind, versão `2.23.6 → 2.23.7`), `PROPRIEDADES.md`. Compilado — 0 erros/0 warnings.
 
+## ⚠️ Limiar de postura configurável pro crouch-run (2026-09-10, build 2.23.7 → 2.24.0)
+
+Usuário reportou: com `PoseLevel` em ~0.8-0.9 (não exatamente 1.0), apertar sprint esperava o sprint vanilla normal (levantar e correr em pé) — visualmente já parecia estar em pé — mas o crouch-run considerava "agachado" e aplicava o boost em vez de deixar levantar. Pedido: abaixo de um limiar (sugestão do usuário: 0.5) o crouch-run atua; no limiar ou acima, cai pro sprint vanilla normal.
+
+**Fix:** novo `ConfigEntry` `Crouch Run Pose Threshold` (padrão `0.5`, faixa `0.1–1.0`). Os dois pontos que antes hardcodavam `PoseLevel >= 1f`/`PoseLevel < 1f` (o Prefix que decide se intercepta o `EnableSprint` nativo, e o Postfix que decide `wantsBoost`) agora usam esse limiar configurável — precisam concordar entre si (mesmo cálculo em ambos os arquivos/pontos).
+
+**Arquivos tocados:** `Patches/CrouchRunPatch.cs` (2 pontos), `Plugin.cs` (`_CrouchRunPoseThreshold` + bind, versão `2.23.7 → 2.24.0`, minor — prop nova visível), `PROPRIEDADES.md`. Compilado — 0 erros/0 warnings. **Ainda não revalidado in-game.**
+
 ## Lacunas conhecidas (não implementadas nesta rodada)
 
 Deliberadamente fora do escopo desta implementação — motivo: escopo de pesquisa não coberto nas rodadas de investigação desta sessão (marcado como TODO na própria spec técnica antes do código, não descoberto tarde):

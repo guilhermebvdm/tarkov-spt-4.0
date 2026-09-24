@@ -75,6 +75,7 @@
 | Enable Crouch Run | bool | `false` | — | Segurar a tecla de correr agachado mantém o personagem agachado e aumenta a velocidade, em vez de levantá-lo. Desativado por padrão. |
 | Crouch Run Speed Multiplier | float | `1.25` | 1.0 – 2.0 | Multiplicador de velocidade ao correr agachado. |
 | Crouch Run Stamina Surcharge | float | `0.0` | 0 – 30 | Dreno extra de stamina (por segundo) ao correr agachado, somado ao dreno nativo de sprint (que já se aplica sozinho). `0` = sem sobretaxa, só o dreno nativo. |
+| Crouch Run Pose Threshold | float | `0.5` | 0.1 – 1.0 | Nível de postura abaixo do qual o crouch-run atua. No valor ou acima, a tecla de correr aciona o sprint vanilla nativo (levanta) em vez disso — posturas já perto de em pé (ex.: 0.8~0.9) parecem em pé pro jogador mesmo sem estar em 1.0. |
 | Enable Prone Run | bool | `false` | — | Segurar a tecla de correr rastejando acelera o rastejo além do teto atual, sem alterar a postura. Desativado por padrão. |
 | Prone Run Speed Multiplier | float | `1.25` | 1.0 – 2.0 | Multiplicador de velocidade ao rastejar com a tecla de correr segurada. |
 | Prone Run Stamina Surcharge | float | `8.0` | 0 – 30 | Dreno extra de stamina (por segundo) ao rastejar acelerado. Mantida porque o rastejo acelerado NÃO aciona o dreno nativo de sprint (confirmado no Assembly) — sem esta prop, o prone-run seria de graça. |
@@ -270,6 +271,19 @@ Multiplicador de stamina de braço por cenário. Semântica: **< 1 drena · 1 ma
 | Enable Manual Chambering | bool | `true` | — | Interruptor mestre. Desligado = vanilla em TODOS os cenários (kill-switch seguro). Puxe o ferrolho com a tecla nativa 'Chamber/Unload' quando a câmara estiver vazia e houver munição no carregador. |
 | Manual Chambering On Raid Start | bool | `true` | — | Arma que inicia a raid com câmara vazia NÃO carrega a 1ª bala no spawn — puxe manualmente. Efetivo na PRÓXIMA raid. |
 | Manual Chambering On Reload | bool | `true` | — | Recarregar com câmara vazia NÃO carrega a 1ª bala automaticamente após inserir o carregador — puxe manualmente. Tempo real. |
+
+### Weapon Inspection
+
+> Origem: item 019 (checagem de câmara) + item 023 (atraso na exibição). `Enable Magazine Check Delay`/
+> `Magazine Check Delay Seconds` atrasam a exibição do painel de munição pra AMBAS as checagens
+> (carregador e câmara), não só a de carregador — as duas convergem no mesmo painel (ver
+> `backlog/023-atraso-checagem-carregador/023-atraso-checagem-carregador-02-spec-tech.md`).
+
+| Propriedade (EN) | Tipo | Padrão | Faixa | Descrição |
+|---|---|---|---|---|
+| Show Chamber Ammo On Check | bool | `true` | — | Checar a câmara na raid mostra o mesmo painel do check de carregador, indicando se há bala e qual é. O vanilla não mostra nada no HUD ao checar a câmara. Só local (não sincroniza no Fika). |
+| Enable Magazine Check Delay | bool | `true` | — | Atrasa a exibição do painel de munição (carregador OU câmara) por um tempo realista, em vez de mostrar instantaneamente. |
+| Magazine Check Delay Seconds | float | `1.0` | 0.5 – 4.0 | Segundos de espera antes de exibir o painel, contados a partir do início da checagem (carregador ou câmara). Valor calibrado in-game pelo usuário (2026-09-22) — o `2.0` original nunca tinha sido testado. |
 
 ## F — Respiração, UI e debug
 
