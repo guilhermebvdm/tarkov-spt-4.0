@@ -1,0 +1,73 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net471</TargetFramework>
+		<AssemblyName>DynamicExternalResolution</AssemblyName>
+		<Version>4.0.0</Version>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<LangVersion>latest</LangVersion>
+		<RootNamespace>DynamicExternalResolution</RootNamespace>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Reference Include="0Harmony">
+			<HintPath>..\..\BepInEx\core\0Harmony.dll</HintPath>
+		</Reference>
+		<Reference Include="spt-common">
+			<HintPath>..\..\BepInEx\Plugins\spt\spt-common.dll</HintPath>
+		</Reference>
+		<Reference Include="ItemComponent.Types">
+			<HintPath>..\..\EscapeFromTarkov_Data\Managed\ItemComponent.Types.dll</HintPath>
+		</Reference>
+		<Reference Include="spt-reflection">
+			<HintPath>..\..\BepInEx\Plugins\spt\spt-reflection.dll</HintPath>
+		</Reference>
+		<Reference Include="Assembly-CSharp">
+			<HintPath>..\..\EscapeFromTarkov_Data\Managed\Assembly-CSharp.dll</HintPath>
+		</Reference>
+		<Reference Include="BepInEx">
+			<HintPath>..\..\BepInEx\core\BepInEx.dll</HintPath>
+		</Reference>
+		<Reference Include="Comfort">
+			<HintPath>..\..\EscapeFromTarkov_Data\Managed\Comfort.dll</HintPath>
+		</Reference>
+		<Reference Include="Newtonsoft.Json">
+			<HintPath>..\..\EscapeFromTarkov_Data\Managed\Newtonsoft.Json.dll</HintPath>
+		</Reference>
+		<Reference Include="Sirenix.Serialization">
+			<HintPath>..\..\EscapeFromTarkov_Data\Managed\Sirenix.Serialization.dll</HintPath>
+		</Reference>
+		<Reference Include="Unity.Postprocessing.Runtime">
+			<HintPath>..\..\EscapeFromTarkov_Data\Managed\Unity.Postprocessing.Runtime.dll</HintPath>
+		</Reference>
+		<Reference Include="Unity.TextMeshPro">
+			<HintPath>..\..\EscapeFromTarkov_Data\Managed\Unity.TextMeshPro.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine">
+			<HintPath>..\..\EscapeFromTarkov_Data\Managed\UnityEngine.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.CoreModule">
+			<HintPath>..\..\EscapeFromTarkov_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.PhysicsModule">
+			<HintPath>..\..\EscapeFromTarkov_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.UI">
+			<HintPath>..\..\EscapeFromTarkov_Data\Managed\UnityEngine.UI.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.UnityWebRequestModule">
+			<HintPath>..\..\EscapeFromTarkov_Data\Managed\UnityEngine.UnityWebRequestModule.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.UnityWebRequestTextureModule">
+			<HintPath>..\..\EscapeFromTarkov_Data\Managed\UnityEngine.UnityWebRequestTextureModule.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.UnityWebRequestWWWModule">
+			<HintPath>..\..\EscapeFromTarkov_Data\Managed\UnityEngine.UnityWebRequestWWWModule.dll</HintPath>
+		</Reference>
+	</ItemGroup>
+
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+	  <Exec Command="copy &quot;$(TargetPath)&quot; &quot;$(ProjectDir)\..\..\BepInEx\plugins\$(TargetFileName)&quot;" />
+	</Target>
+  
+</Project>

@@ -1,0 +1,11 @@
+{
+  "name": "SPT-Dynamic-External-Resolution",
+  "upstream_url": "https://github.com/Shibatsui/SPT-Dynamic-External-Resolution.git",
+  "upstream_sha": "f8a2bc7df909ecc94955eb22bff337539f129512",
+  "upstream_branch": "main",
+  "forge_url": "",
+  "license": "MIT",
+  "version_base": "4.0.0",
+  "spt_version": "4.0.13",
+  "created_at": "2026-09-15T04:59:44Z"
+}
