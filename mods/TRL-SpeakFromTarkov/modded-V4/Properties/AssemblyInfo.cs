@@ -30,5 +30,5 @@ using System.Runtime.InteropServices;
 //      Revisão
 //
 // Sincronizado com o BepInPlugin (VOIPPlugin.cs) — atualizar junto em cada bump de versão.
-[assembly: AssemblyVersion("1.6.0.0")]
-[assembly: AssemblyFileVersion("1.6.0.0")]
+[assembly: AssemblyVersion("1.6.1.0")]
+[assembly: AssemblyFileVersion("1.6.1.0")]

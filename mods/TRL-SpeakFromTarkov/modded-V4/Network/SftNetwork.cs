@@ -49,6 +49,18 @@ namespace TRL_SpeakFromTarkov.Network
         /// </summary>
         private static IFikaNetworkManager _lastRegisteredManager = null!;
 
+        /// <summary>
+        /// ProfileId → NetPeer real de quem enviou o último pacote de voz. Populado só no host,
+        /// dentro de OnReceiveVoipDataV2 (o FIKA entrega o NetPeer de quem mandou o pacote de graça
+        /// via RegisterPacket&lt;T, NetPeer&gt;). NUNCA usar FikaPlayer.NetId com GetPeerById(int) —
+        /// NetId é um id de JOGO (host=1, convidados 2,3,... — ver FikaServer.cs:207-208), e
+        /// GetPeerById(int) indexa o array interno de PEERS DE TRANSPORTE do LiteNetLib
+        /// (LiteNetManager.HashSet.cs:119-122, numerado pela ordem de conexão do socket) — os dois
+        /// espaços de números não têm relação nenhuma, e usar um no lugar do outro resolve peers
+        /// errados ou nulos por coincidência (causa real do bug de retransmissão assimétrica).
+        /// </summary>
+        private static readonly Dictionary<string, Fika.Core.Networking.LiteNetLib.NetPeer> _profileIdToPeer = new Dictionary<string, Fika.Core.Networking.LiteNetLib.NetPeer>();
+
         /// <summary>Frame de áudio aguardando envio na main thread.</summary>
         private struct PendingAudio
         {
@@ -159,7 +171,7 @@ namespace TRL_SpeakFromTarkov.Network
 
             try
             {
-                currentManager.RegisterPacket<SftAudioPacketV2>(OnReceiveVoipDataV2);
+                currentManager.RegisterPacket<SftAudioPacketV2, Fika.Core.Networking.LiteNetLib.NetPeer>(OnReceiveVoipDataV2);
                 currentManager.RegisterPacket<SftAudioPacket>(OnReceiveVoipDataLegacy);
                 currentManager.RegisterPacket<SftChannelAnnouncementPacket>(OnReceiveChannelAnnouncement);
 
@@ -285,6 +297,7 @@ namespace TRL_SpeakFromTarkov.Network
             if (!Fika.Core.Main.Utils.FikaBackendUtils.IsServer) return;
             if (!Singleton<IFikaNetworkManager>.Instantiated) return;
             if (!Singleton<GameWorld>.Instantiated) return;
+            if (_profileIdToPeer.Count == 0) return; // ninguém falou ainda nesta raid — nada a retransmitir
 
             var manager = Singleton<IFikaNetworkManager>.Instance;
             float maxHearing = VoIPPlugin.MaxHearingDistance != null ? VoIPPlugin.MaxHearingDistance.Value : 60f;
@@ -300,15 +313,15 @@ namespace TRL_SpeakFromTarkov.Network
             for (int i = 0; i < allPlayers.Count; i++)
             {
                 var candidate = allPlayers[i];
-                if (candidate == null || candidate == senderPlayer) continue;
+                if (candidate == null || ReferenceEquals(candidate, senderPlayer)) continue;
                 if (candidate.ProfileId == packet.ProfileId) continue; // nunca retransmite pro próprio remetente
 
                 float sqrDist = (candidate.Position - senderPlayer.Position).sqrMagnitude;
                 if (sqrDist > sqrMaxCull) continue; // fora de alcance — nem gasta banda de upload do host com esse peer
 
-                if (candidate is not Fika.Core.Main.Players.FikaPlayer fikaPlayer) continue; // bot ou tipo inesperado — sem peer real
-                var peer = manager.GetPeerById(fikaPlayer.NetId);
-                if (peer == null || peer == excludePeer) continue;
+                // NetPeer real cacheado por ProfileId (ver _profileIdToPeer) — nunca GetPeerById(NetId).
+                if (!_profileIdToPeer.TryGetValue(candidate.ProfileId, out var peer) || peer == null) continue;
+                if (peer == excludePeer) continue;
 
                 try
                 {
@@ -328,9 +341,18 @@ namespace TRL_SpeakFromTarkov.Network
         /// ReadAllPackets do LiteNetLib e descarta o restante do lote de pacotes daquele frame —
         /// inclusive os dos outros mods e os de movimento do FIKA.
         /// </summary>
-        private static void OnReceiveVoipDataV2(SftAudioPacketV2 packet)
+        private static void OnReceiveVoipDataV2(SftAudioPacketV2 packet, Fika.Core.Networking.LiteNetLib.NetPeer peer)
         {
             if (packet.AudioData == null) return;
+
+            // Cacheia o NetPeer real de quem mandou este pacote, por ProfileId — é o único jeito
+            // confiável de endereçar esse jogador depois em RelayVoiceToNearbyPeers (ver comentário
+            // de _profileIdToPeer). Só faz sentido manter no host; no convidado, `peer` é sempre o
+            // peer do host, guardá-lo não tem utilidade e nunca é lido.
+            if (Fika.Core.Main.Utils.FikaBackendUtils.IsServer && !string.IsNullOrEmpty(packet.ProfileId))
+            {
+                _profileIdToPeer[packet.ProfileId] = peer;
+            }
 
             // AUD-014: Canal 0 vindo de um convidado (broadcast:false, então chegou só no host)
             // — o host retransmite pelos peers dentro do alcance antes de processar a própria
@@ -342,7 +364,7 @@ namespace TRL_SpeakFromTarkov.Network
                 var senderPlayer = Singleton<GameWorld>.Instance.GetAlivePlayerByProfileID(packet.ProfileId);
                 if (senderPlayer != null)
                 {
-                    RelayVoiceToNearbyPeers(packet, senderPlayer, excludePeer: null);
+                    RelayVoiceToNearbyPeers(packet, senderPlayer, excludePeer: peer);
                 }
             }
 
@@ -618,6 +640,7 @@ namespace TRL_SpeakFromTarkov.Network
             // O gate de "fora de raid" é feito por guard clause no callback, não por desregistro.
 
             while (sendQueue.TryDequeue(out _)) { }
+            _profileIdToPeer.Clear(); // evita reter NetPeer/ProfileId de uma raid anterior
 
             foreach (var kvp in remoteSpeakers)
             {

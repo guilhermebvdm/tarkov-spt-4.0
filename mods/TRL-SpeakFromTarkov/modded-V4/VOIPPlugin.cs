@@ -8,7 +8,7 @@ using UnityEngine.SceneManagement;
 
 namespace TRL_SpeakFromTarkov
 {
-    [BepInPlugin("trl.speakfromtarkov", "TRL-SpeakFromTarkov", "1.6.0")]
+    [BepInPlugin("trl.speakfromtarkov", "TRL-SpeakFromTarkov", "1.6.1")]
     [BepInDependency("com.fika.core", BepInDependency.DependencyFlags.HardDependency)]
     public class VoIPPlugin : BaseUnityPlugin
     {
