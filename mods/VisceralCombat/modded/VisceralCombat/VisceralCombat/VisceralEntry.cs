@@ -28,7 +28,7 @@ using VisceralCombat.Ragdolls.Patches;
 
 namespace VisceralCombat;
 
-[BepInPlugin("com.servph.VisceralCombat", "Visceral Combat", "3.9.13")]
+[BepInPlugin("com.servph.VisceralCombat", "Visceral Combat", "3.12.9")]
 /// <remarks>
 /// GUID used for FIKA mod-presence checks. Must match BepInPlugin first arg.
 /// </remarks>
@@ -100,6 +100,23 @@ public class VisceralEntry : BaseUnityPlugin
 
 	public List<GameObject> BloodSFX { get; set; }
 
+	// ref: item 005 (toggle mestre) — desliga as 6 categorias visuais/gameplay pesadas de uma vez.
+	// Lido em tempo real (nunca cacheado) via IsCategoryActive(...) por ~19 patches da Camada 1 —
+	// NÃO afeta a queda de arma/capacete/óculos (Camada 2, toggle próprio) nem o núcleo
+	// anti-fantasma (Camada 3, sempre ativo) — ver 005-toggle-mestre-compat-coop-02-spec-tech.md §1.
+	public ConfigEntry<bool> VisceralCombatEnabled { get; set; }
+
+	/// <summary>
+	/// Composição "toggle mestre E categoria específica" — reduz "VisceralCombatEnabled.Value &&
+	/// Xxx.Value" repetido em ~19 patches pra uma única chamada. Lê .Value fresco a cada chamada
+	/// (nunca cacheado), pra alternar no F12 valer imediatamente no próximo evento.
+	/// </summary>
+	public bool IsCategoryActive(ConfigEntry<bool> categoryToggle)
+	{
+		return VisceralCombatEnabled != null && VisceralCombatEnabled.Value
+			&& categoryToggle != null && categoryToggle.Value;
+	}
+
 	public ConfigEntry<bool> EnableDismemberment { get; set; }
 
 	public ConfigEntry<bool> DropHeadEquipmentOnDismemberment { get; set; }
@@ -164,6 +181,10 @@ public class VisceralEntry : BaseUnityPlugin
 
 	public ConfigEntry<float> LegsForceIntensity { get; set; }
 
+	public ConfigEntry<float> CorpseKickIntensity { get; set; } // ref: item 008 — atropelar corpo
+
+	public ConfigEntry<float> ItemKickIntensity { get; set; } // ref: item 008 — atropelar item
+
 	public ConfigEntry<bool> OnlyPlayersCanActiveRagdollEnemies { get; set; }
 
 	public ConfigEntry<int> RagdollMaxDistance { get; set; }
@@ -179,6 +200,14 @@ public class VisceralEntry : BaseUnityPlugin
 		Instance = this;
 		LogSource = Logger;
 
+		// ref: item 005 — bind ANTES de qualquer outra Config.Bind, pra ficar semanticamente
+		// "primeiro" mesmo que o F12 ordene por Order (ver PROPRIEDADES.md, seção General).
+		VisceralCombatEnabled = ((BaseUnityPlugin)this).Config.Bind<bool>(
+			"General",
+			"Visceral Combat Enabled",
+			true,
+			"Liga/desliga todas as features visuais e de gameplay pesadas do mod (desmembramento, sangue, ragdoll customizado, efeitos de item fisico) de uma vez. A queda de arma e a queda de capacete/oculos continuam funcionando mesmo desligado, pra sincronizar corretamente com outros jogadores do raid que estejam com o mod ativo.");
+
 		EnableDismemberment = ((BaseUnityPlugin)this).Config.Bind<bool>("Dismemberment", "Dismemberment Enabled", true, new ConfigDescription("Disables literally EVERYTHING for dismemberment.", (AcceptableValueBase)null, new object[1]
 		{
 			new ConfigurationManagerAttributes
@@ -187,7 +216,7 @@ public class VisceralEntry : BaseUnityPlugin
 				Order = 3
 			}
 		}));
-		DropHeadEquipmentOnDismemberment = ((BaseUnityPlugin)this).Config.Bind<bool>("Dismemberment", "Drop Headwear/Eyewear On Head Dismemberment", true, "Derruba capacete e oculos com 100% de chance quando a cabeca e efetivamente desmembrada. Gatilho distinto da chance configuravel de 'Helmet Knock Off Chance' (que continua funcionando como antes).");
+		DropHeadEquipmentOnDismemberment = ((BaseUnityPlugin)this).Config.Bind<bool>("Dismemberment", "Drop Headwear/Eyewear On Head Dismemberment", true, "Derruba capacete, oculos, mascara e fone com 100% de chance quando a cabeca e efetivamente desmembrada (nome da opcao mantido por compatibilidade com o valor ja salvo, mas agora cobre os 4 itens presos na cabeca). Gatilho distinto da chance configuravel de 'Helmet Knock Off Chance' (que continua funcionando como antes).");
 		EnableBloodEffects = ((BaseUnityPlugin)this).Config.Bind<bool>("Blood", "Blood Effects Enabled", true, new ConfigDescription("Disables literally EVERYTHING for blood.", (AcceptableValueBase)null, new object[1]
 		{
 			new ConfigurationManagerAttributes
@@ -270,8 +299,8 @@ public class VisceralEntry : BaseUnityPlugin
 
 		FikaEventDispatcher.SubscribeEvent<FikaNetworkManagerCreatedEvent>((Action<FikaNetworkManagerCreatedEvent>)onFikaNetworkManagerCreatedEvent);
 		ShotIntensity = ((BaseUnityPlugin)this).Config.Bind<float>("Ragdolls | Ragdoll Phsyical Properties", "Bullet Intensity", 85f, "How much force is applied to a shot. This is also dependent on caliber. Default is 85");
-		GrenadeExplIntensity = ((BaseUnityPlugin)this).Config.Bind<float>("Ragdolls | Ragdoll Phsyical Properties", "Grenade Intensity", 190f, "How much force is applied to a grenade explosion. This is also dependent on caliber. Default is 190");
-		BodyCollision = ((BaseUnityPlugin)this).Config.Bind<bool>("Ragdolls | Ragdoll Phsyical Properties", "Player Body Collision", false, "Allows you to step on bodies. You can potentially get stuck on them once in awhile for brief moments. Turn this off if you do not like it.");
+		GrenadeExplIntensity = ((BaseUnityPlugin)this).Config.Bind<float>("Ragdolls | Ragdoll Phsyical Properties", "Grenade Intensity", 40f, "How much force is applied to a grenade explosion. This is also dependent on caliber. Default is 190");
+		BodyCollision = ((BaseUnityPlugin)this).Config.Bind<bool>("Ragdolls | Ragdoll Phsyical Properties", "Player Body Collision", true, "Allows you to step on bodies. You can potentially get stuck on them once in awhile for brief moments. Turn this off if you do not like it. Também controla se atropelar um corpo já acomodado o empurra (proporcional à sua velocidade).");
 		ShootHelmetOff = ((BaseUnityPlugin)this).Config.Bind<bool>("Ragdolls | Character Properties", "Shoot off Helmets", true, (ConfigDescription)null);
 		DropWeaponOnDeath = ((BaseUnityPlugin)this).Config.Bind<bool>("Ragdolls | Character Properties", "Drop Weapon On Death", true, "Solta a arma em maos (exceto faca) como item avulso ao morrer, em vez de deixa-la presa ao cadaver.");
 		HelmetShootOffChance = ((BaseUnityPlugin)this).Config.Bind<float>("Ragdolls | Character Properties", "Helmet Knock Off Chance", 15f, (ConfigDescription)null);
@@ -281,7 +310,7 @@ public class VisceralEntry : BaseUnityPlugin
 		DisableRagdollsAfterTime = ((BaseUnityPlugin)this).Config.Bind<bool>("Ragdolls | Performance", "Disable Active Ragdolls After Animation", true, (ConfigDescription)null);
 		OnlyPlayersCanActiveRagdollEnemies = ((BaseUnityPlugin)this).Config.Bind<bool>("Ragdolls | Performance", "Allow AI to Activate Ragdolls", false, (ConfigDescription)null);
 		RagdollMaxDistance = ((BaseUnityPlugin)this).Config.Bind<int>("Ragdolls | Performance", "Max Distance the Ragdolls can Activate at", 50, (ConfigDescription)null);
-		RagdollSleepTime = ((BaseUnityPlugin)this).Config.Bind<int>("Ragdolls | Performance", "Ragdoll Sleep Time", 4, new ConfigDescription("Time before an inactive ragdoll enters physics sleep (1-15s). Wakes back up on bullet/grenade impact.", new AcceptableValueRange<int>(1, 15)));
+		RagdollSleepTime = ((BaseUnityPlugin)this).Config.Bind<int>("Ragdolls | Performance", "Ragdoll Sleep Time", 15, new ConfigDescription("Time before an inactive ragdoll enters physics sleep (1-15s). Wakes back up on bullet/grenade impact.", new AcceptableValueRange<int>(1, 15)));
 		NeverDeleteShells = ((BaseUnityPlugin)this).Config.Bind<bool>("Combat | Visuals", "Infinite Shell Casing Lifetime", false, "Keeps active shell casings on floor longer (capped to 50)");
 		((ModulePatch)new ShellCasingPatch()).Enable();
 		((ModulePatch)new BodiesImpulsePatch()).Enable();
@@ -290,19 +319,24 @@ public class VisceralEntry : BaseUnityPlugin
 		((ModulePatch)new GrenadeItemsPatch()).Enable();
 		((ModulePatch)new VisceralCombat.Ragdolls.Patches.GameStartedPatch()).Enable();
 		((ModulePatch)new PhysicalItemsPatch()).Enable();
+		((ModulePatch)new LootItemStopPhysicsPatch()).Enable();
+		((ModulePatch)new LootItemKillCleanupPatch()).Enable();
 		((ModulePatch)new ShootOffHelmetPatch()).Enable();
-		((ModulePatch)new WeaponDropOnDeathPatch()).Enable();
+		((ModulePatch)new DeathInventoryDropPatch()).Enable();
+		((ModulePatch)new WeaponDropOnDeathSkipVanillaFlingPatch()).Enable();
 		((ModulePatch)new AttachWeaponPatch()).Enable();
 		((ModulePatch)new PlayerInitPatch()).Enable();
 		((ModulePatch)new LimbKillPatch()).Enable();
 		((ModulePatch)new CreateBSGRagdollPatch()).Enable();
 		((ModulePatch)new RagdollClassPatch()).Enable();
-		ItemForce = ((BaseUnityPlugin)this).Config.Bind<bool>("Physics | Item Physical Properties", "Item Physics", false, "If you are getting too much lag turn this off. But most capable PC's should run this fine. (Besides on SoT)");
-		objectIntensity = ((BaseUnityPlugin)this).Config.Bind<float>("Physics | Item Physical Properties", "Item Force Intensity", 0.3f, "Multiplier that determines the amount of force applied to physics objects.");
+		ItemForce = ((BaseUnityPlugin)this).Config.Bind<bool>("Physics | Item Physical Properties", "Item Physics", true, "If you are getting too much lag turn this off. But most capable PC's should run this fine. (Besides on SoT) Também controla se atropelar um item largado o empurra (proporcional à sua velocidade).");
+		objectIntensity = ((BaseUnityPlugin)this).Config.Bind<float>("Physics | Item Physical Properties", "Item Force Intensity", 10f, "Multiplier that determines the amount of force applied to physics objects.");
+		ItemKickIntensity = ((BaseUnityPlugin)this).Config.Bind<float>("Physics | Item Physical Properties", "Item Kick Intensity", 1.5f, "Multiplicador de força ao atropelar/chutar um item largado (contato físico do personagem, sem precisar de tiro). Independente de 'Item Force Intensity', que é só pra impacto de bala.");
 		headForceIntensity = ((BaseUnityPlugin)this).Config.Bind<float>("Ragdolls | Ragdoll Physical Properties", "Head Impulse Intensity", 1.0f, "Multiplier for head shot force.");
 		TorsoForceIntensity = ((BaseUnityPlugin)this).Config.Bind<float>("Ragdolls | Ragdoll Physical Properties", "Torso Impulse Intensity", 1.0f, "Multiplier for torso shot force.");
 		ArmsForceIntensity = ((BaseUnityPlugin)this).Config.Bind<float>("Ragdolls | Ragdoll Physical Properties", "Arms Impulse Intensity", 1.0f, "Multiplier for arms shot force.");
 		LegsForceIntensity = ((BaseUnityPlugin)this).Config.Bind<float>("Ragdolls | Ragdoll Physical Properties", "Legs Impulse Intensity", 1.0f, "Multiplier for legs shot force.");
+		CorpseKickIntensity = ((BaseUnityPlugin)this).Config.Bind<float>("Ragdolls | Ragdoll Physical Properties", "Corpse Kick Intensity", 0.5f, "Multiplicador de força ao atropelar/chutar um corpo (contato físico do personagem, sem precisar de tiro). Independente dos multiplicadores de impacto de bala por parte do corpo.");
 	}
 
 	private void onFikaNetworkManagerCreatedEvent(FikaNetworkManagerCreatedEvent @event)
@@ -400,14 +434,9 @@ public class VisceralEntry : BaseUnityPlugin
 		Player targetPlayer = RagdollHelperClass.FindPlayerByNetId(packet.playerID);
 		if (targetPlayer != null && !RagdollHelperClass.IsPlayerDowned(targetPlayer))
 		{
-			// ref: backlog 004 — "head_burst" é um resultado distinto de desmembramento normal
-			// (cabeça permanece, só sobrepõe Head_1/2) — precisa despachar pra BurstHead em vez
-			// de DismemberLimb, senão o peer remoto encolheria a cabeça real por engano.
-			if (packet.bone == "head_burst")
-			{
-				KillPatch.BurstHead(targetPlayer, packet.Direction, isFromNetwork: true);
-				return;
-			}
+			// ref: CR-HEAD-DUP-01 — "estourar" e "arranca" usam o mesmo DismemberLimb (só o
+			// capAssetName do pacote muda entre Head_1/2/3), então não precisa de despacho
+			// especial aqui — o replay padrão já cobre os dois casos.
 			Transform[] affectedLimbs = null;
 			KillPatch.DismemberLimb(targetPlayer, packet.Direction, packet.bodyPartType, packet.bone, packet.capAssetName, packet.assetNames, out affectedLimbs, isFromNetwork: true);
 		}

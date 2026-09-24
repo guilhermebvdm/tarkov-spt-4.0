@@ -84,8 +84,8 @@ public static class RagdollHelperClass
 	}
 
 	/// <summary>
-	/// Finds any Player (human player or AI bot) in the active raid matching the given netId (player.Id).
-	/// Valid across both Host and Client in FIKA coop sessions.
+	/// Finds any Player (human player or AI bot) in the active raid matching the given netId.
+	/// Checks both Player.Id and FikaPlayer.NetId to ensure resolution on both Host and Clients in FIKA coop.
 	/// </summary>
 	public static Player FindPlayerByNetId(int netId)
 	{
@@ -96,9 +96,16 @@ public static class RagdollHelperClass
 		{
 			foreach (var iPlayer in allPlayers)
 			{
-				if (iPlayer is Player p && p.Id == netId)
+				if (iPlayer is Player p)
 				{
-					return p;
+					if (p.Id == netId)
+					{
+						return p;
+					}
+					if (p is Fika.Core.Main.Players.FikaPlayer fp && fp.NetId == netId)
+					{
+						return p;
+					}
 				}
 			}
 		}
@@ -572,7 +579,7 @@ public static class RagdollHelperClass
 	{
 		if (VisceralEntry.Instance == null || !Comfort.Common.Singleton<Systems.Effects.Effects>.Instantiated) return;
 
-		bool enabled = VisceralEntry.Instance.EnableImpactBloodCloud != null ? VisceralEntry.Instance.EnableImpactBloodCloud.Value : true;
+		bool enabled = VisceralEntry.Instance.EnableImpactBloodCloud != null ? VisceralEntry.Instance.IsCategoryActive(VisceralEntry.Instance.EnableImpactBloodCloud) : true; // ref: item 005
 		int particleCount = VisceralEntry.Instance.ImpactBloodCloudParticleCount != null ? VisceralEntry.Instance.ImpactBloodCloudParticleCount.Value : 10;
 		float scaleMult = VisceralEntry.Instance.ImpactBloodCloudScale != null ? VisceralEntry.Instance.ImpactBloodCloudScale.Value : 1.0f;
 

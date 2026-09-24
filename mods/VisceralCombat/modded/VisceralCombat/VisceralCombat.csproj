@@ -3,7 +3,7 @@
     <AssemblyName>VisceralCombat</AssemblyName>
     <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <Version>3.9.10</Version>
+    <Version>3.12.9</Version>
   </PropertyGroup>
   <PropertyGroup>
     <LangVersion>12.0</LangVersion>
@@ -33,5 +33,6 @@
     <Reference Include="nexus-bundleloader"><HintPath>References\nexus-bundleloader.dll</HintPath></Reference>
     <Reference Include="AnimationSystem.Types"><HintPath>References\AnimationSystem.Types.dll</HintPath></Reference>
     <Reference Include="Sirenix.Serialization"><HintPath>References\Sirenix.Serialization.dll</HintPath></Reference>
+    <Reference Include="DissonanceVoip"><HintPath>References\DissonanceVoip.dll</HintPath></Reference>
   </ItemGroup>
 </Project>

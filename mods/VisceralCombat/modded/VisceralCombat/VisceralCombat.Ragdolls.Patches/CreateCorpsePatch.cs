@@ -29,6 +29,9 @@ public class CreateCorpsePatch : ModulePatch
 	[PatchPostfix]
 	private static void Postfix(Player __instance)
 	{
+		// ref: item 005 (§5.5)
+		if (VisceralEntry.Instance == null || !VisceralEntry.Instance.VisceralCombatEnabled.Value) return;
+
 		foreach (Transform item in Utils.EnumerateHierarchyCore(__instance.Transform.Original))
 		{
 			if (shitColliders.Contains(((Object)item).name) && __instance.IsAI)

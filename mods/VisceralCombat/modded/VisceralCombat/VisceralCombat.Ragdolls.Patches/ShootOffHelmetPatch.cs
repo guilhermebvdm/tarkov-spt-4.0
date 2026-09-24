@@ -2,6 +2,7 @@ using System;
 using System.Reflection;
 using EFT;
 using EFT.InventoryLogic;
+using Fika.Core.Main.Utils;
 using SPT.Reflection.Patching;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -18,7 +19,14 @@ public class ShootOffHelmetPatch : ModulePatch
 	[PatchPostfix]
 	private static void Postfix(Player __instance, DamageInfoStruct damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, float absorbed)
 	{
-		if (VisceralEntry.Instance == null || !VisceralEntry.Instance.ShootHelmetOff.Value || !__instance.IsAI) return;
+		// ref: CR-02-02 - ShootOffHelmet é exclusivamente para bots VIVOS (arrancar capacete em combate).
+		// Se o tiro foi fatal, method_35 já disparou o SetupCorpseSyncPacket do Fika antes deste Postfix;
+		// executar ThrowItem após a morte aqui causava duplicação do capacete no cadáver.
+		// Em coop, bots são autoritativamente gerenciados pelo host (FikaServer) ou solo SPT.
+		if (__instance.HealthController == null || !__instance.HealthController.IsAlive) return;
+		if (!(FikaBackendUtils.IsServer || FikaBackendUtils.IsSinglePlayer)) return;
+
+		if (VisceralEntry.Instance == null || !VisceralEntry.Instance.IsCategoryActive(VisceralEntry.Instance.ShootHelmetOff) || !__instance.IsAI) return; // ref: item 005
 		if (bodyPartType != EBodyPart.Head) return;
 
 		// Verify helmet / head area hit

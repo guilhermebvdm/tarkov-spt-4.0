@@ -1,9 +1,11 @@
 using System;
 using System.Linq;
 using System.Reflection;
+using Comfort.Common;
 using EFT;
 using EFT.Ballistics;
 using EFT.InventoryLogic;
+using Fika.Core.Main.Utils; // ref: CR-03-01 - FikaBackendUtils
 using SPT.Reflection.Patching;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -107,7 +109,7 @@ public class LimbKillPatch : ModulePatch
 		// --- 3. Post-mortem dismemberment ---
 		// Head and torso are intentionally excluded: "Base HumanHead" is the mesh root —
 		// scaling it to 0.001f collapses the entire body model.
-		if (VisceralEntry.Instance == null || !VisceralEntry.Instance.EnableDismemberment.Value) return;
+		if (VisceralEntry.Instance == null || !VisceralEntry.Instance.IsCategoryActive(VisceralEntry.Instance.EnableDismemberment)) return; // ref: item 005
 
 		EBodyPart? dismemberPart = null;
 		string boneName = null;
@@ -191,7 +193,7 @@ public class LimbKillPatch : ModulePatch
 			else if (rbLow.Contains("humanhead") || rbLow.Contains("humanskull"))
 			{
 				// Post-mortem head detection. capAsset não é usado pra cabeça (backlog 004:
-				// ResolveHeadOutcome/DismemberLimb/BurstHead decidem Head_1/2/3 mais abaixo).
+				// ResolveHeadOutcome decide o outcome, DismemberLimb decide Head_1/2/3 mais abaixo).
 				dismemberPart = (EBodyPart)0;
 				boneName = "head";
 				extraAssets = Array.Empty<string>();
@@ -254,14 +256,24 @@ public class LimbKillPatch : ModulePatch
 		{
 			VisceralCombat.Combined.Patches.KillPatch.HeadDismemberOutcome headOutcome =
 				VisceralCombat.Combined.Patches.KillPatch.ResolveHeadOutcome(caliberStr, ammoName, projectileCount, bulletMassGram, initialSpeed, player.Id, shot.FireIndex);
+			// ref: CR-HEAD-DUP-01 — "estourar" reusa o mesmo DismemberLimb do "arranca" (só
+			// troca o prop), pra esconder a cabeça original do mesmo jeito comprovado — ver
+			// KillPatch.cs case 0 do Postfix.
 			if (headOutcome == VisceralCombat.Combined.Patches.KillPatch.HeadDismemberOutcome.HeadOff)
 			{
 				Transform[] dummyLimbs;
 				VisceralCombat.Combined.Patches.KillPatch.DismemberLimb(player, shot.Direction, dismemberPart.Value, boneName, "Head_3", extraAssets, out dummyLimbs);
+				// ref: [P-10.3] - Reativado. DropCorpseHeadEquipment agora usa o InventoryController
+				// do host (vivo, sincronizado pela rede) em vez do controller do próprio cadáver
+				// (GClass3385, sem integração Fika) - ver comentário no método.
+				DropCorpseHeadEquipment(player);
 			}
 			else if (headOutcome == VisceralCombat.Combined.Patches.KillPatch.HeadDismemberOutcome.HeadBurst)
 			{
-				VisceralCombat.Combined.Patches.KillPatch.BurstHead(player, shot.Direction);
+				Transform[] dummyLimbs;
+				VisceralCombat.Combined.Patches.KillPatch.DismemberLimb(player, shot.Direction, dismemberPart.Value, boneName, $"Head_{UnityEngine.Random.Range(1, 3)}", extraAssets, out dummyLimbs);
+				// ref: [P-10.3] - ver comentário acima (ramo HeadOff).
+				DropCorpseHeadEquipment(player);
 			}
 			return;
 		}
@@ -272,5 +284,85 @@ public class LimbKillPatch : ModulePatch
 			Transform[] dummyLimbs;
 			VisceralCombat.Combined.Patches.KillPatch.DismemberLimb(player, shot.Direction, dismemberPart.Value, boneName, capAsset, extraAssets, out dummyLimbs);
 		}
+	}
+
+	private static void DropCorpseHeadEquipment(Player player)
+	{
+		// ref: CR-02-04 - Se a cabeça de um cadáver for desmembrada por tiros posteriores,
+		// derruba capacete e óculos que ainda estavam no cadáver para evitar artefatos visuais
+		// (itens flutuando ou presos num pescoço decepado).
+		try
+		{
+			// ref: CR-03-01 - Gate de autoridade (todo outro ponto de mutação de inventário deste
+			// mod tem essa checagem) - agora combinado com o fix de [P-10.3] abaixo, que resolve o
+			// problema de fundo que CR-03-01 tinha deixado pendente.
+			if (!(FikaBackendUtils.IsServer || FikaBackendUtils.IsSinglePlayer)) return;
+			if (VisceralEntry.Instance == null || !VisceralEntry.Instance.DropHeadEquipmentOnDismemberment.Value) return;
+
+			// ref: pedido do usuário 2026-09-20 - fone (Earpiece) e máscara (FaceCover) ficam presos
+			// na cabeça igual capacete/óculos - mesmo toggle (DropHeadEquipmentOnDismemberment).
+			Item helmet = player.Inventory?.Equipment?.GetSlot(EquipmentSlot.Headwear)?.ContainedItem;
+			Item eyewear = player.Inventory?.Equipment?.GetSlot(EquipmentSlot.Eyewear)?.ContainedItem;
+			Item faceCover = player.Inventory?.Equipment?.GetSlot(EquipmentSlot.FaceCover)?.ContainedItem;
+			Item earpiece = player.Inventory?.Equipment?.GetSlot(EquipmentSlot.Earpiece)?.ContainedItem;
+			if (helmet == null && eyewear == null && faceCover == null && earpiece == null) return;
+
+			// ref: [P-10.3] - CR-03-01 usava helmet.Owner (o TraderControllerClass do próprio
+			// cadáver, GClass3385) para executar o ThrowItem - esse controller nunca teve override
+			// de vmethod_1 pelo Fika, então a operação nunca era transmitida pela rede (mesma classe
+			// de bug que motivou a reformulação completa de DeathInventoryDropPatch via
+			// CR-NET-LOCK-01). InteractionsHandlerClass.Throw/smethod_17 (Assembly-CSharp,
+			// decompilados via ilspycmd - InteractionsHandlerClass tem erro de decompile conhecido no
+			// dump) não exigem que o item pertença ao controller que executa a operação: o parâmetro
+			// "itemController" só é usado para contabilizar limite de descarte (comparando
+			// item.Owner com o dono do ENDEREÇO DE DESTINO, não com itemController). E o lado Fika
+			// (HostInventoryController.RunHostOperation) sincroniza pelo NetId de quem EXECUTA a
+			// operação, não pelo dono atual do item - o pacote carrega a operação (com o ID do item)
+			// e cada peer a replica localmente. Por isso: qualquer InventoryController vivo e
+			// Fika-aware serve, mesmo sobre um item que não é dele. Usamos o do host (MainPlayer)
+			// em vez do atirador porque este método só roda no host/singleplayer (gate acima) e o
+			// atirador, quando é um peer remoto, é representado no host como ObservedInventoryController
+			// - que NÃO sobrescreve vmethod_1 (cai no fallback local, sem broadcast). O host
+			// (HostInventoryController, sempre com o override) evita essa armadilha por completo.
+			InventoryController hostController = Singleton<GameWorld>.Instantiated
+				? Singleton<GameWorld>.Instance?.MainPlayer?.InventoryController
+				: null;
+			if (hostController == null) return;
+
+			// ref: [P-10.3] (fix 02) - hostController.ThrowItem(...) usava Player_0 do PRÓPRIO
+			// hostController como origem do arremesso (Player.PlayerOwnerInventoryController.
+			// ThrowItem sempre joga a partir do player DONO do controller - o host, não o cadáver).
+			// Resultado observado em jogo: capacete/óculos apareciam na posição do host/atirador,
+			// não na do cadáver (a 100m de distância, no teste do usuário). Corrigido construindo o
+			// ThrowOperationClass manualmente (o mesmo caminho que ThrowItem usa por baixo:
+			// InteractionsHandlerClass.Throw + vmethod_1 - ambos confirmados públicos via IL),
+			// passando o CADÁVER (player) como o IPlayer de referência de posição/trajetória
+			// (ThrowOperationClass.Iplayer_0), enquanto hostController continua sendo quem executa
+			// a operação pela rede - mesma separação autoridade-vs-posição já comprovada acima pra
+			// item.Owner. O cadáver é um Player/IPlayer válido em todos os peers (sincronizado desde
+			// a morte), então a posição fica correta pra todo mundo, não só localmente no host.
+			if (helmet != null) ThrowFromCorpsePosition(hostController, helmet, player);
+			if (eyewear != null) ThrowFromCorpsePosition(hostController, eyewear, player);
+			if (faceCover != null) ThrowFromCorpsePosition(hostController, faceCover, player);
+			if (earpiece != null) ThrowFromCorpsePosition(hostController, earpiece, player);
+		}
+		catch (Exception ex)
+		{
+			QuickLogger.Log(ELogType.Error, $"[LimbKillPatch.DropCorpseHeadEquipment] {ex}");
+		}
+	}
+
+	// ref: [P-10.3] (fix 02) — constrói e despacha o ThrowOperationClass manualmente (o mesmo
+	// caminho que TraderControllerClass.ThrowItem usa por baixo) pra poder passar "corpse" como
+	// origem de posição em vez do player dono de "itemController". Tipos/membros confirmados
+	// públicos via IL do Assembly-CSharp (ilspycmd): InteractionsHandlerClass.Throw (static),
+	// TraderControllerClass.method_12()/vmethod_1() (herdados por InventoryController).
+	private static void ThrowFromCorpsePosition(TraderControllerClass itemController, Item item, Player corpse)
+	{
+		GStruct154<GClass3406> throwResult = InteractionsHandlerClass.Throw(item, itemController, simulate: true);
+		if (throwResult.Failed) return;
+
+		ThrowOperationClass operation = new ThrowOperationClass(itemController.method_12(), itemController, throwResult.Value, throwResult.Value.ItemsToDestroy, corpse, downDirection: false);
+		itemController.vmethod_1(operation, null);
 	}
 }

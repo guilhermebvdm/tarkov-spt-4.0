@@ -16,11 +16,14 @@ public class PlayerInitPatch : ModulePatch
 	[PatchPostfix]
 	private static void Postfix(Player __instance, Task __result)
 	{
+		// ref: item 005 (§5.5) — checagem ANTES de agendar o ContinueWith, não só dentro dele
+		if (VisceralEntry.Instance == null || !VisceralEntry.Instance.VisceralCombatEnabled.Value) return;
+
 		if (!__instance.IsYourPlayer && __result != null)
 		{
 			__result.ContinueWith(_ =>
 			{
-				if (VisceralEntry.Instance != null && VisceralEntry.Instance.UseActiveRagdolls.Value)
+				if (VisceralEntry.Instance != null && VisceralEntry.Instance.IsCategoryActive(VisceralEntry.Instance.UseActiveRagdolls)) // ref: item 005
 				{
 					Utils.SetupPuppetMaster(__instance);
 					QuickLogger.Log(ELogType.Log, "Setup Puppet Master for " + __instance.Profile.Nickname);

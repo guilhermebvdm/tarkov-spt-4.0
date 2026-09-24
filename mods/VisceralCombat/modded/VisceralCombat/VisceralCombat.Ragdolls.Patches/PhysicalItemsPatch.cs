@@ -20,7 +20,7 @@ public class PhysicalItemsPatch : ModulePatch
 	[PatchPrefix]
 	private static bool Prefix(LootItem __instance, ref bool __result)
 	{
-		if (VisceralEntry.Instance != null && VisceralEntry.Instance.ItemForce.Value)
+		if (VisceralEntry.Instance != null && VisceralEntry.Instance.IsCategoryActive(VisceralEntry.Instance.ItemForce)) // ref: item 005
 		{
 			if (_deadbodyLayer < 0)
 			{

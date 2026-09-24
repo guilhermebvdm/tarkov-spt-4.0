@@ -33,12 +33,18 @@
 | PA-01-04 (spec-tech) | B — Edge Case · 🟢 | Ancoragem visual de `BurstHead` — resolvida com `PlayerBones.Head.Original` (melhor que o `TODO confirmar` original) |
 | CR-01-01 (code-review) | B — Bug latente · 🟠 | Possível dupla contagem de momento entre `KillPatch.Postfix`/`LimbKillPatch.ProcessLimbKill` em corpos já mortos — **pendente de decisão/validação**, não aplicado nesta rodada |
 
+## Mudanças posteriores
+
+**2026-09-11 — Fix `CR-HEAD-DUP-01` (🔴, achado por teste do usuário em jogo) — "2 cabeças no mesmo corpo".** Usuário reportou que o efeito "estourar" mostrava a cabeça original intacta **e** o prop `Head_1`/`Head_2` ao mesmo tempo (dois heads visíveis). Causa raiz: `Head_1`/`Head_2` são modelos de cabeça **completos** (confirmado pelas texturas do bundle — `Brain`/`Eyeball`/`Teeth`/`Mouth`), não decorações pequenas de coto como os caps de braço/perna. `BurstHead` (método próprio criado pra "estourar") deliberadamente não escondia a cabeça original — por isso o novo prop renderizava ao lado da cabeça real, em vez de no lugar dela. Personagens EFT usam um mesh combinado único (sem renderer separado por parte do corpo pra simplesmente desligar), então o único jeito comprovado de esconder geometria que este mod já usa é o encolhimento de osso que `DismemberLimb` já faz pro "arranca".
+**Correção (decisão do usuário: reusar a mesma lógica do "arranca"):** removido o método `BurstHead` inteiro. "Estourar" agora chama o **mesmo** `DismemberLimb` que "arranca" usa (esconde a cabeça original do jeito já comprovado) — a única diferença entre os dois efeitos passou a ser qual prop aparece no lugar (`Head_3` = coto sem cabeça; `Head_1`/`Head_2`, sorteado = cabeça caída/estourada). Também revertido o despacho especial em `OnDismembermentPacketClient` (não é mais necessário — os dois efeitos replicam pelo mesmo caminho de `DismemberLimb`). Arquivos tocados: `KillPatch.cs` (removido `BurstHead`, `Postfix` case 0 simplificado), `LimbKillPatch.cs` (mesma simplificação no ramo pós-morte), `VisceralEntry.cs` (revertido despacho de pacote). Rebuild confirmado (3.9.14 → 3.9.15). **Ainda não revalidado em jogo.**
+
 ## Pendências antes de marcar 🟢 Entregue
 
+- [ ] **`CR-HEAD-DUP-01` (🔴, recém-corrigido):** revalidar em jogo que "estourar" não mostra mais 2 cabeças — prioridade máxima antes de qualquer outra validação deste item.
 - [ ] **`CR-01-01` (🟠):** decidir se aplica a guarda de idempotência no acumulador de momento, ou se valida empiricamente que o risco não se concretiza (testar buckshot repetido no mesmo membro de um corpo já morto e comparar a taxa de desmembramento observada contra a curva calibrada).
 - [ ] Calibração final: `momentum_min_ns`/`momentum_max_ns`/`head_burst_multiplier` em `VD_Calibers.json` são placeholders (3.0/15.0/1.5) — ajustar com base em teste em jogo.
-- [ ] Validação solo completa (ver checklist §9 da spec técnica): calibre fraco nunca desmembra; calibre 12 buckshot acumula corretamente; `.50 BMG` desmembra com chance alta incluindo cabeça; cabeça "estoura" visualmente diferente de "arranca" (confirma `Head_1/2` vs `Head_3`); bloqueio de Boss (item 003) sem regressão; drop de capacete/óculos (item 002) dispara em ambos os efeitos de cabeça.
-- [ ] Validação de rede: peer remoto vendo "estourar" corretamente via `BurstHead` (não `DismemberLimb`) através do pacote.
+- [ ] Validação solo completa (ver checklist §9 da spec técnica): calibre fraco nunca desmembra; calibre 12 buckshot acumula corretamente; `.50 BMG` desmembra com chance alta incluindo cabeça; cabeça "estoura" visualmente diferente de "arranca" (confirma `Head_1/2` vs `Head_3`, sem duplicação); bloqueio de Boss (item 003) sem regressão; drop de capacete/óculos (item 002) dispara em ambos os efeitos de cabeça sem duplicar item (ver fix `CR-DUP-01` do item 002).
+- [ ] Validação de rede: peer remoto vendo "estourar"/"arranca" corretamente (ambos via `DismemberLimb` agora).
 - [ ] `/code-review` rodada 02 (opcional) depois de decidir o `CR-01-01`.
 
 ## Histórico
@@ -47,3 +53,4 @@
 | --- | --- |
 | 2026-09-10 | Build concluído via `/code-mod` — código implementado e compilado, 4 achados corrigidos durante a implementação (além do previsto na spec técnica) |
 | 2026-09-10 | `/code-review` rodada 01: 0 🔴 + 1 🟠 (`CR-01-01`, dupla contagem de momento) + 0 🟡 + 0 🟢 |
+| 2026-09-11 | Fix `CR-HEAD-DUP-01`: "2 cabeças" no efeito "estourar" — `BurstHead` removido, unificado com `DismemberLimb` (mesma lógica de esconder a cabeça original que o "arranca" já usa). Achado por teste do usuário em jogo. Rebuild confirmado (3.9.15), ainda não revalidado. |

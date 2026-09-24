@@ -31,11 +31,14 @@ public class GameStartedPatch : ModulePatch
 		VisceralEntry.Instance.deadPlayers.Clear();
 		VisceralCombat.Ragdolls.Patches.LimbKillPatch.ClearLivingVolleys();
 		VisceralCombat.Combined.Patches.KillPatch.ClearMultiProjectileMomentum();
+		VisceralCombat.Combined.Patches.KillPatch.ClearPendingHeadOutcomes(); // ref: CR-02-05
 		VisceralCombat.Ragdolls.Classes.RagdollHelperClass.ClearAgonyTimers();
 		VisceralCombat.Combined.Classes.VisceralShotProcessor.ClearShots();
 		VisceralCombat.Combat.Patches.ShellCasingPatch.ClearCasings();
+		VisceralCombat.Ragdolls.Patches.PlayerContactPushPatch.ClearContactPushCooldowns(); // ref: item 008
+		VisceralCombat.Ragdolls.Patches.PlayerContactPushPatch.StartPeriodicCheck(); // ref: item 008, fix 02
 		GoreObjectPool.Instance?.ClearPool();
-		QuickLogger.Log(ELogType.Log, "GameStartedPatch: Cleaned deadPlayers, dismemberedPlayers, GoreObjectPool, living volleys, agony timers, and casings for new raid.");
+		QuickLogger.Log(ELogType.Log, "GameStartedPatch: Cleaned deadPlayers, dismemberedPlayers, GoreObjectPool, living volleys, pending head outcomes, agony timers, and casings for new raid.");
 
 		// Only the host (FikaServer) initiates the handshake; solo SPT also triggers immediately.
 		// Clients skip — they respond to the host's ping via VisceralEntry registered packets.
@@ -44,11 +47,11 @@ public class GameStartedPatch : ModulePatch
 			VisceralEntry.Instance.StartVisceralHandshake();
 		}
 
-		if (VisceralEntry.Instance.BodyCollision.Value)
+		if (VisceralEntry.Instance.IsCategoryActive(VisceralEntry.Instance.BodyCollision)) // ref: item 005 (só reavaliado na próxima raid, roda 1x em OnGameStarted)
 		{
 			Physics.IgnoreLayerCollision(LayerMask.NameToLayer("Deadbody"), LayerMask.NameToLayer("HitCollider"), false);
 			Physics.IgnoreLayerCollision(LayerMask.NameToLayer("Deadbody"), LayerMask.NameToLayer("Player"), false);
-			if (VisceralEntry.Instance.UseActiveRagdolls.Value)
+			if (VisceralEntry.Instance.IsCategoryActive(VisceralEntry.Instance.UseActiveRagdolls)) // ref: item 005
 			{
 				Physics.IgnoreLayerCollision(LayerMask.NameToLayer("TransparentFX"), LayerMask.NameToLayer("HitCollider"), false);
 				Physics.IgnoreLayerCollision(LayerMask.NameToLayer("TransparentFX"), LayerMask.NameToLayer("Player"), false);
@@ -58,7 +61,7 @@ public class GameStartedPatch : ModulePatch
 		{
 			Physics.IgnoreLayerCollision(LayerMask.NameToLayer("Deadbody"), LayerMask.NameToLayer("HitCollider"), true);
 			Physics.IgnoreLayerCollision(LayerMask.NameToLayer("Deadbody"), LayerMask.NameToLayer("Player"), true);
-			if (VisceralEntry.Instance.UseActiveRagdolls.Value)
+			if (VisceralEntry.Instance.IsCategoryActive(VisceralEntry.Instance.UseActiveRagdolls)) // ref: item 005
 			{
 				Physics.IgnoreLayerCollision(LayerMask.NameToLayer("TransparentFX"), LayerMask.NameToLayer("HitCollider"), true);
 				Physics.IgnoreLayerCollision(LayerMask.NameToLayer("TransparentFX"), LayerMask.NameToLayer("Player"), true);
