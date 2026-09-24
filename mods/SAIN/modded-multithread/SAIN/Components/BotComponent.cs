@@ -192,10 +192,8 @@ public class BotComponent : BotComponentBase, ISPlayer
     private float _cachedDistToHuman = float.MaxValue;
     private float _combatLockoutTime;
     private const float COMBAT_LOCKOUT_DURATION = 15f;
-    private const float LOD_CLOSE_DIST = 50f;
-    private const float LOD_MID_DIST = 150f;
-    private const float LOD_MID_INTERVAL = 0.04f; // ~25 Hz
-    private const float LOD_FAR_INTERVAL = 0.12f; // ~8 Hz
+    // ref: AUD-01-02 - Estado da última decisão perto/longe, usado no dead-band da fronteira de tier
+    private bool _wasCloseToHuman;
 
     public float DistanceToClosestHuman { get; private set; } = float.MaxValue;
     public bool IsLODTier0 { get; private set; } = true;
@@ -232,10 +230,28 @@ public class BotComponent : BotComponentBase, ISPlayer
         }
         _nextDistCheckTime = currentTime + 0.5f;
 
-        // ref: CR-01-02 - Reuso de PlayerSpawnTracker.FindClosestHumanPlayer para busca de humano
+        // ref: AUD-01-01 - Reusa a distância já calculada pelo SAINAILimit em vez de buscar de
+        // novo. ClosestPlayerDistanceSqr, apesar do nome, já é distância LINEAR em metros
+        // (PlayerDistanceData.Distance) - não aplicar Mathf.Sqrt aqui.
+        // ref: CR-01-01 - Usa "> 0f" (não ">= 0f"): o default não-inicializado do campo em
+        // SAINAILimit é 0f, não -1f, então "0" pode significar "ainda não calculado" em vez
+        // de "distância real zero" (fisicamente inatingível na prática). Não é ambíguo.
+        float aiLimitDist = AILimit.ClosestPlayerDistanceSqr;
+        if (aiLimitDist > 0f)
+        {
+            _cachedDistToHuman = aiLimitDist;
+            DistanceToClosestHuman = aiLimitDist;
+            return aiLimitDist;
+        }
+
+        // ref: AUD-01-02 - Fallback síncrono: só ocorre quando SAINAILimit não tem valor
+        // disponível (ex.: Bot.EnemyController.ActiveHumanEnemy ativo agora, SAINAILimit
+        // seta ClosestPlayerDistanceSqr = -1f). Nesse cenário o bot já entra em Tier 0 via
+        // inCombat/isUnderFire, então este caminho é rede de segurança, não o comum.
         var tracker = GameWorldComponent.Instance?.PlayerTracker;
         if (tracker != null && tracker.FindClosestHumanPlayer(out float closestSqrMag, Position, out _) != null)
         {
+            // Esta sobrecarga SIM retorna magnitude ao quadrado - Sqrt necessário aqui.
             float dist = Mathf.Sqrt(closestSqrMag);
             _cachedDistToHuman = dist;
             DistanceToClosestHuman = dist;
@@ -268,8 +284,26 @@ public class BotComponent : BotComponentBase, ISPlayer
                 // ref: CR-01-03 - Exigir que TimeLastShot > 0 para evitar falso-positivo no início da raid
                 bool isRecentlyShot = Medical != null && Medical.TimeLastShot > 0f && Medical.TimeSinceShot < 10f;
                 float distToHuman = GetMinDistanceToHumanPlayer(currentTime);
+                // ref: AUD-01-03 - Limiares agora vêm de AILimitSettings (editáveis no F6)
+                var lodSettings = GlobalSettingsClass.Instance.General.AILimit;
+                float lodCloseDist = lodSettings.LODCloseDistance;
+                float lodMidDist = lodSettings.LODMidDistance;
+
+                // ref: AUD-01-02 - Fronteira perto/longe com dead-band assimétrico: entra em
+                // "perto" com lodCloseDist, só sai quando ultrapassa lodCloseDist + margem.
+                // Evita oscilação de tier para um bot parado perto do limiar.
+                bool isCloseToHuman;
+                if (_wasCloseToHuman)
+                {
+                    isCloseToHuman = distToHuman <= (lodCloseDist + lodSettings.LODCloseDistanceMargin);
+                }
+                else
+                {
+                    isCloseToHuman = distToHuman <= lodCloseDist;
+                }
                 // ref: CR-01-01 - Fallback de float.MaxValue restrito aos primeiros 5s de aquecimento
-                bool isCloseToHuman = distToHuman <= LOD_CLOSE_DIST || (currentTime < 5f && distToHuman == float.MaxValue);
+                isCloseToHuman |= (currentTime < 5f && distToHuman == float.MaxValue);
+                _wasCloseToHuman = isCloseToHuman;
 
                 bool isTier0 = inCombat || isUnderFire || isLockoutActive || isRecentlyShot || isCloseToHuman;
                 IsLODTier0 = isTier0;
@@ -281,13 +315,13 @@ public class BotComponent : BotComponentBase, ISPlayer
                 }
                 else
                 {
-                    CurrentLodTier = distToHuman <= LOD_MID_DIST ? 1 : 2;
+                    CurrentLodTier = distToHuman <= lodMidDist ? 1 : 2;
                 }
 
                 bool shouldTickLOD = isTier0;
                 if (!shouldTickLOD)
                 {
-                    float interval = distToHuman <= LOD_MID_DIST ? LOD_MID_INTERVAL : LOD_FAR_INTERVAL;
+                    float interval = distToHuman <= lodMidDist ? lodSettings.LODMidIntervalSeconds : lodSettings.LODFarIntervalSeconds;
                     if (currentTime >= _nextLODTickTime)
                     {
                         shouldTickLOD = true;

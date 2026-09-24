@@ -51,4 +51,34 @@ public class AILimitSettings : SAINSettingsBase<AILimitSettings>, ISAINSettings
         { AILimitSetting.VeryFar, 60f },
         { AILimitSetting.Narnia, 25f },
     };
+
+    // ref: AUD-01-03 - Limiares do LOD adaptativo de tick-rate (modded-multithread), antes
+    // hardcoded como `const` privadas em BotComponent.cs e não editáveis pelo F6.
+    [Name("LOD Close Distance")]
+    [Description("Distância (m) abaixo da qual o bot recebe atualização de IA em taxa máxima.")]
+    [MinMax(20f, 100f, 1f)]
+    public float LODCloseDistance = 50f;
+
+    [Name("LOD Mid Distance")]
+    [Description("Distância (m) abaixo da qual o bot recebe atualização em taxa média (~25Hz); acima, taxa mínima (~8Hz).")]
+    [MinMax(50f, 300f, 1f)]
+    public float LODMidDistance = 150f;
+
+    [Name("LOD Close Distance Margin")]
+    [Description("Margem de segurança (m) para sair da faixa \"perto\" - evita oscilação de taxa de atualização para bots parados perto do limiar.")]
+    [MinMax(0f, 30f, 1f)]
+    [Advanced]
+    public float LODCloseDistanceMargin = 10f;
+
+    [Name("LOD Mid Interval")]
+    [Description("Intervalo (s) entre atualizações de IA para bots na faixa média de distância (~25Hz no padrão).")]
+    [MinMax(0.02f, 0.1f, 100f)]
+    [Advanced]
+    public float LODMidIntervalSeconds = 0.04f;
+
+    [Name("LOD Far Interval")]
+    [Description("Intervalo (s) entre atualizações de IA para bots na faixa distante (~8Hz no padrão).")]
+    [MinMax(0.05f, 0.3f, 100f)]
+    [Advanced]
+    public float LODFarIntervalSeconds = 0.12f;
 }

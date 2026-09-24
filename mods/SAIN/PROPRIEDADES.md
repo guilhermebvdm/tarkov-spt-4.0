@@ -12,6 +12,9 @@
 |---|---|---|---|
 | `AILimit.LimitAIvsAIGlobal` | Limitar IA vs IA Globalmente | `bool` | Reduz a frequência de atualização e distância máxima de visão entre bots distantes do jogador para economizar CPU. |
 | `AILimit.MaxVisionRanges` | Distâncias Máximas de Visão por Limite | `Dictionary` | Define os limites de metros de visão para bots nos estados `Far` (150m), `VeryFar` (100m) e `Narnia` (50m). |
+| `AILimit.LODCloseDistance` / `LODMidDistance` | Distâncias do LOD de Taxa de Atualização | `float` | Fronteiras (padrão 50m/150m) que definem se o bot recebe atualização de IA em taxa máxima, média (~25Hz) ou mínima (~8Hz). Só existe em `modded-multithread`. |
+| `AILimit.LODCloseDistanceMargin` (Avançado) | Margem de Segurança do LOD | `float` | Margem (padrão 10m) para sair da faixa "perto" — evita oscilação de taxa de atualização para bots parados perto do limiar. Só existe em `modded-multithread`. |
+| `AILimit.LODMidIntervalSeconds` / `LODFarIntervalSeconds` (Avançado) | Intervalos de Atualização do LOD | `float` | Cadência (padrão 0.04s/0.12s) de atualização de IA para bots nas faixas média e distante. Só existe em `modded-multithread`. |
 | `Performance.PerformanceMode` | Modo de Alta Performance | `bool` | Simplifica cálculos volumétricos de cobertura e reduz taxa de raycasts de busca. |
 | `DoorSettings.DisableDoorOpening` | Desativar Abertura de Portas por Bots | `bool` | Impede que bots abram ou arrombem portas fechadas no cenário. |
 | `Extract.SAIN_EXTRACT_TOGGLE` | Habilitar Extração de Bots | `bool` | Permite que PMCs e PlayerScavs naveguem para os pontos de extração e saiam da raid. |
