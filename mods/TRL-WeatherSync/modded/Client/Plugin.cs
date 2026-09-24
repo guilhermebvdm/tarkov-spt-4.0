@@ -6,7 +6,7 @@ using TRLWeatherSync.Patches;
 
 namespace TRLWeatherSync;
 
-[BepInPlugin("trl.weathersync", "TRL-WeatherSync", "1.1.1")]
+[BepInPlugin("trl.weathersync", "TRL-WeatherSync", "1.3.0")]
 [BepInDependency("com.fika.core", BepInDependency.DependencyFlags.HardDependency)]
 public class TRLWeatherSyncPlugin : BaseUnityPlugin
 {
@@ -14,7 +14,14 @@ public class TRLWeatherSyncPlugin : BaseUnityPlugin
 
     public static ConfigEntry<bool> EnableWeatherSync { get; private set; } = null!;
     public static ConfigEntry<float> SyncIntervalSeconds { get; private set; } = null!;
-    public static ConfigEntry<float> StormCheckCooldownSeconds { get; private set; } = null!;
+    public static ConfigEntry<float> MinRainDropSize { get; private set; } = null!;
+
+    // Configurações de gotas na lente (item 004)
+    public static ConfigEntry<bool> EnableLensDropsTuning { get; private set; } = null!;
+    public static ConfigEntry<float> LensRainDropsLookUpMultiplier { get; private set; } = null!;
+    public static ConfigEntry<float> LensRainDropsForwardRate { get; private set; } = null!;
+    public static ConfigEntry<bool> LensRainDropsLookDownDrain { get; private set; } = null!;
+    public static ConfigEntry<float> LensRainDropsMaxLifetime { get; private set; } = null!;
 
     private void Awake()
     {
@@ -38,21 +45,64 @@ public class TRLWeatherSyncPlugin : BaseUnityPlugin
                 "Valores menores deixam o clima mais preciso, mas aumentam o tráfego de rede.",
                 new AcceptableValueRange<float>(5f, 30f)));
 
-        StormCheckCooldownSeconds = Config.Bind(
-            "Storm",
-            "Storm Check Cooldown Seconds",
-            300f,
+        MinRainDropSize = Config.Bind(
+            "Rain",
+            "Min Rain Drop Size",
+            0.08f,
             new ConfigDescription(
-                "Intervalo mínimo, em segundos, entre tentativas de iniciar uma tempestade sincronizada. A cada ciclo, " +
-                "a autoridade de clima da raid sorteia contra a probabilidade nativa de raio/trovão do jogo (baseada na " +
-                "nebulosidade); se o sorteio ganhar, a tempestade começa sincronizada para todos. O FIM da tempestade " +
-                "ainda não é sincronizado nesta versão — cada jogador sai dela pelo tempo nativo do próprio jogo (CR-01-02 " +
-                "/ pendência P-2.1: sincronizar o fim é trabalho futuro, ainda não resolvido com segurança).",
-                new AcceptableValueRange<float>(60f, 1800f)));
+                "Define o tamanho mínimo visível da gota de chuva (útil para enxergar chuvas fracas de frente). " +
+                "Ajusta ao vivo sem precisar reiniciar a raid. Não altera chuvas fortes caso já ultrapassem este tamanho. Defina 0 para desativar.",
+                new AcceptableValueRange<float>(0f, 0.30f)));
+
+        EnableLensDropsTuning = Config.Bind(
+            "Lens Drops",
+            "Enable Lens Drops Tuning",
+            true,
+            new ConfigDescription(
+                "Ativa a calibragem dinâmica de gotas de chuva na lente da câmera reativas ao ângulo de visão. " +
+                "Se desativado, o comportamento retorna 100% ao original do jogo."));
+
+        LensRainDropsLookUpMultiplier = Config.Bind(
+            "Lens Drops",
+            "Look Up Multiplier",
+            2.5f,
+            new ConfigDescription(
+                "Multiplicador de quantidade e frequência de gotas ao olhar para cima (para o céu).",
+                new AcceptableValueRange<float>(1.0f, 5.0f)));
+
+        LensRainDropsForwardRate = Config.Bind(
+            "Lens Drops",
+            "Forward Rate Multiplier",
+            1.5f,
+            new ConfigDescription(
+                "Multiplicador base da taxa de gotas ao olhar para a frente/horizonte (reforça a presença de pingos em chuvas fracas).",
+                new AcceptableValueRange<float>(0.5f, 3.0f)));
+
+        LensRainDropsLookDownDrain = Config.Bind(
+            "Lens Drops",
+            "Look Down Drain Effect",
+            true,
+            new ConfigDescription(
+                "Faz as gotas da lente secarem/escorrerem rapidamente ao inclinar a cabeça para o chão (simula a aba do capacete/boné protegendo o rosto)."));
+
+        LensRainDropsMaxLifetime = Config.Bind(
+            "Lens Drops",
+            "Max Drop Lifetime Seconds",
+            8.0f,
+            new ConfigDescription(
+                "Tempo máximo de vida de cada gota na lente em segundos. Valores menores deixam o ciclo de gotas mais contínuo e orgânico (o padrão do jogo é 25s).",
+                new AcceptableValueRange<float>(2.0f, 25.0f)));
+
+        // ref: 06-fix-01 — removida a ConfigEntry "Storm Check Cooldown Seconds" (seção "Storm") junto com a
+        // feature de tempestade sincronizada (CR-01-02), que causava nevasca incorreta em vez de tempestade de
+        // verão. Um config antigo do usuário pode manter a chave órfã "Storm.Storm Check Cooldown Seconds" no
+        // .cfg salvo — BepInEx ignora chaves sem ConfigEntry correspondente, sem erro nem efeito.
 
         new GameWorldOnGameStartedPatch().Enable();
         new GameWorldOnDestroyPatch().Enable();
         new CoopGameStopPatch().Enable();
+        new RainDropVisibilityPatch().Enable();
+        new CameraLensRainDropsPatch().Enable();
 
         WeatherSyncNetworkHandler.SubscribeManagerCreatedEvent();
 

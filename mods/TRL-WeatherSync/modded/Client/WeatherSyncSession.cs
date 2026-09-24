@@ -19,7 +19,7 @@ public enum WeatherRole
     Source,
     /// <summary>Só o processo Headless — retransmite o pacote do Source, nunca toca em WeatherController.</summary>
     Relay,
-    /// <summary>Aplica o que chega via SetWeatherForce/HandleReconnect. Nunca transmite.</summary>
+    /// <summary>Aplica o que chega via SetWeatherForce. Nunca transmite.</summary>
     Receiver,
 }
 
@@ -44,7 +44,6 @@ public class WeatherSyncSession : MonoBehaviour
 
     public WeatherRole Role { get; private set; } = WeatherRole.Unset;
     private float _accumulator;
-    private float _stormCooldownRemaining;
     private bool _ended;
 
     public static void Begin()
@@ -129,33 +128,10 @@ public class WeatherSyncSession : MonoBehaviour
             Rain = Mathf.Lerp(1f, 5f, curve.Rain),
             ScaterringFogDensity = curve.Fog,
             Temperature = curve.Temperature,
-            ThunderEventTrigger = RollForStorm(curve), // ref: CR-01-02
+            // ThunderEventTrigger deliberadamente não setado (fica false) — ref: 06-fix-01.
         };
 
         WeatherSyncNetworkHandler.Broadcast(packet);
-    }
-
-    /// <summary>
-    /// Política simples de início de tempestade (CR-01-02): sorteia contra a probabilidade nativa
-    /// de raio/trovão do jogo (IWeatherCurve.LightningThunderProbability, derivada da nebulosidade —
-    /// WeatherCurve.cs:56) a cada ciclo de broadcast, respeitando um cooldown mínimo pra não disparar
-    /// toda hora. Só cobre o INÍCIO — o fim da tempestade não é forçado (nunca mandamos "false" depois
-    /// de "true"); cada jogador sai dela pelo tempo nativo do próprio jogo. Sincronizar o fim é trabalho
-    /// futuro (pendência P-2.1 da memória do mod — precisa reverter dois state machines, Class444 E
-    /// RainController, e ainda não sabemos como fazer isso com segurança).
-    /// </summary>
-    private bool RollForStorm(IWeatherCurve curve)
-    {
-        if (_stormCooldownRemaining > 0f)
-        {
-            _stormCooldownRemaining -= TRLWeatherSyncPlugin.SyncIntervalSeconds.Value;
-            return false;
-        }
-
-        if (UnityEngine.Random.value >= curve.LightningThunderProbability) return false;
-
-        _stormCooldownRemaining = TRLWeatherSyncPlugin.StormCheckCooldownSeconds.Value;
-        return true;
     }
 
     /// <summary>
@@ -202,14 +178,12 @@ public class WeatherSyncSession : MonoBehaviour
         // ref: WeatherController.cs:120 — interpola nativamente via AnimationCurve (WeatherCurve.cs:92-110).
         WeatherController.Instance.SetWeatherForce(target);
 
-        if (packet.ThunderEventTrigger)
-        {
-            // ref: Class443.cs:28 (Controller) + GInterface29.cs:17 (HandleReconnect)
-            // Confirmado que entrar em Storm a partir de estado normal funciona (Class444.cs:181-224).
-            // Encerrar uma tempestade chamando isso de novo a partir de dentro dela pode ser no-op
-            // (Class451/Class452 não sobrescrevem HandleReconnect — herdam o no-op de Class445,
-            // Class444.cs:94-98) — não resolvido nesta versão (pendência P-2.1 da memória do mod).
-            Class443.Controller?.HandleReconnect(ESeasonStatus.Storm, SeasonsSettingsClass.Default);
-        }
+        // ref: 06-fix-01 — removido o antigo `if (packet.ThunderEventTrigger) Class443.Controller?.HandleReconnect(
+        // ESeasonStatus.Storm, ...)`. Causa raiz confirmada em RainController.cs:250-280: o estado "Storm" do
+        // RainController (Class670.vmethod_7() → Class678) SEMPRE desliga a chuva e liga neve/nevasca
+        // (_snowWetRenderer.WinterShow=true, _snowFlakes ativado), não importa a estação atual — não existe
+        // "tempestade de verão" nesse state machine, só o efeito de nevasca do Winter Event. Rain/Cloudness/Wind
+        // altos via SetWeatherForce (linha acima) já produzem trovão/raio nativamente quando a curva pede,
+        // sem precisar dessa troca de estado.
     }
 }

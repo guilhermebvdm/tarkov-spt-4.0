@@ -20,7 +20,10 @@ public struct TrlWeatherSyncPacket : INetSerializable
     public float ScaterringFogDensity;
     public float Temperature;
 
-    /// <summary>Decisão explícita e autoritativa do papel Source: true = forçar ESeasonStatus.Storm agora.</summary>
+    /// <summary>Vestigial (06-fix-01) — sempre false a partir da v1.1.2. Mantido no layout do pacote de
+    /// propósito, pra não mudar o formato serializado (evita reintroduzir o antipattern AP-11 de layout
+    /// mudando sem renomear o tipo). Antes disparava um HandleReconnect(ESeasonStatus.Storm) que causava
+    /// nevasca de inverno incorreta em vez de tempestade de verão — ver 06-fix-01.md do item 001.</summary>
     public bool ThunderEventTrigger;
 
     /// <summary>NÃO serializado. Falso quando o corpo veio truncado — não processar nem retransmitir.</summary>

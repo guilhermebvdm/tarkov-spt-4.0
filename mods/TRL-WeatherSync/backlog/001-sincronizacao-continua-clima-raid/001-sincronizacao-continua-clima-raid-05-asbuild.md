@@ -48,10 +48,25 @@
 | CR-01-02 | ✅ Aplicado | `WeatherSyncSession.cs` (`RollForStorm`, `_stormCooldownRemaining`) + `Plugin.cs` (`ConfigEntry` `Storm Check Cooldown Seconds`) — política simples de início de tempestade: sorteia contra `IWeatherCurve.LightningThunderProbability` a cada ciclo, com cooldown configurável. Decisão do usuário: só o INÍCIO é sincronizado; o fim continua não-forçado (depende de P-2.1, ainda aberta). |
 | CR-01-03 | ✅ Aplicado | `WeatherSyncSession.cs` (`NormalizedWindDirections`, `BuildNormalizedWindDirections`) — os 9 vetores de direção de vento são normalizados uma vez em vez de a cada chamada de `NearestWindDirectionIndex`. |
 
+### Fix 01 (2026-09-12) — remoção da tempestade sincronizada (CR-01-02 revertido)
+
+> Ver [001-sincronizacao-continua-clima-raid-06-fix-01.md](001-sincronizacao-continua-clima-raid-06-fix-01.md) para o diagnóstico completo com `arquivo.cs:linha`.
+
+Feedback in-raid real (convidado viu Verão virar Inverno no meio da raid) revelou que `RollForStorm`/`ThunderEventTrigger`/`HandleReconnect(ESeasonStatus.Storm, ...)` (aplicado como CR-01-02 na rodada 01) nunca produziu uma tempestade de verão — sempre disparava o efeito de nevasca do Winter Event (`RainController.cs:275-280`, `Class678`/`WinterStormReconnect`), incondicionalmente, em qualquer estação. Mecanismo removido por completo; a sincronização contínua de Rain/Cloudness/Wind (inalterada) já produz trovão/raio nativamente quando a curva pede, sem essa troca de estado.
+
+| Arquivo | Mudança |
+| --- | --- |
+| `WeatherSyncSession.cs` | Removidos `RollForStorm()`, `_stormCooldownRemaining`, a atribuição de `ThunderEventTrigger` no broadcast, e o bloco `HandleReconnect` no `ApplyReceivedWeather`. |
+| `Networking/TrlWeatherSyncPacket.cs` | `ThunderEventTrigger` mantido no layout (evita mudar o formato serializado, AP-11) mas agora sempre `false` — comentário XML atualizado. |
+| `Plugin.cs` | `ConfigEntry` `Storm Check Cooldown Seconds` (seção "Storm") removida. |
+| `PROPRIEDADES.md` | Seção "Storm" trocada por nota de remoção. |
+
+Versão `1.1.1 → 1.1.2`. `dotnet build` validado, 0 erros/0 avisos.
+
 ## Pendências conhecidas (não resolvidas neste build)
 
-- **P-2.1 (memória do mod):** sincronizar o FIM de uma tempestade forçada continua sem solução — `HandleReconnect` não tem evidência de funcionar pra sair de `Storm` (`Class451`/`Class452` podem herdar um no-op), e descobriu-se que existe um segundo state machine (`RainController`/`ERainControllerStatus.WinterStorm`) que também precisaria ser revertido. **Decisão consciente do usuário:** o mod sincroniza só o INÍCIO da tempestade (`RollForStorm`, CR-01-02); o fim fica pelo tempo nativo de cada jogo, não sincronizado.
-- **Testes in-game:** nenhum item do checklist §8 que exige raid real foi validado (raid Headless, raid Host normal, reconexão em tempestade, raid1→raid2, e agora também: início de tempestade sincronizado). Ver `/compile-mod` e testes manuais antes de considerar o item pronto para uso.
+- ~~**P-2.1**~~ **Superada pelo Fix 01:** a pendência original era "sincronizar o FIM de uma tempestade forçada" — deixou de fazer sentido porque o próprio INÍCIO forçado (`RollForStorm`) foi removido no Fix 01 por produzir o efeito errado (nevasca, não tempestade de verão). Não há mais nenhum mecanismo de troca de estação/tempestade forçada neste item — só sincronização contínua de valores de clima (Rain/Cloudness/Wind/Fog), que não sofre desse problema.
+- **Testes in-game:** checklist §8 ainda pendente — raid Headless, raid Host normal, raid1→raid2. O cenário de "tempestade" foi testado (revelou o bug do Fix 01) mas precisa reteste após a correção pra confirmar que a estação nunca mais muda.
 
 ## Histórico
 
@@ -61,3 +76,4 @@
 | 2026-09-10 | Aplicação de 1 achado de code-review 01 via `/apply-code-review` — CR-01-01 (bug crítico de escala Rain/Wind) corrigido em `WeatherSyncSession.cs`. CR-01-02/CR-01-03 seguem pendentes. Recompilação (`/compile-mod`) ainda necessária antes de testar. |
 | 2026-09-10 | Recompilado — v1.0.0 → 1.0.1 (fix CR-01-01). |
 | 2026-09-10 | Aplicados CR-01-02 (política simples de início de tempestade) e CR-01-03 (micro-otimização) — rodada 01 de code-review fechada, 3/3 achados aplicados. Recompilado — v1.0.1 → 1.1.0 (feature nova visível: tempestade sincronizada, ainda que só o início). Nenhuma instalação automática no jogo em nenhuma das compilações desta rodada, a pedido do usuário — só `mods/TRL-WeatherSync/builds/`. |
+| 2026-09-12 | Fix 01 aplicado — feedback in-raid real (via Gemini + verificação própria no Assembly) revelou que CR-01-02 causava nevasca incorreta. `RollForStorm`/`ThunderEventTrigger`/`HandleReconnect(Storm)` removidos por completo. Recompilado — v1.1.1 → 1.1.2. `dotnet build` validado; `/compile-mod` e reteste in-raid ainda pendentes. |
