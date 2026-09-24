@@ -1,16 +1,16 @@
-# Graph Report - modded  (2026-09-08)
+# Graph Report - modded  (2026-09-11)
 
 ## Corpus Check
-- 1114 files · ~473,656 words
+- 1116 files · ~475,409 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 15314 nodes · 24991 edges · 775 communities (697 shown, 71 thin omitted)
-- Extraction: 96% EXTRACTED · 4% INFERRED · 0% AMBIGUOUS · INFERRED: 1024 edges (avg confidence: 0.82)
+- 15338 nodes · 25035 edges · 783 communities (706 shown, 71 thin omitted)
+- Extraction: 96% EXTRACTED · 4% INFERRED · 0% AMBIGUOUS · INFERRED: 1025 edges (avg confidence: 0.82)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `06ab4491`
+- Built from commit: `d3bda652`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -18,7 +18,7 @@
 - NetPeer
 - Fika.Headless.Patches
 - .Proceed
-- Fika.Core.Main.Utils
+- Fika.Core.Networking.Models
 - ProfilesPage.razor
 - Fika.Headless.Patches.DestroyGraphics
 - NetPacket
@@ -29,7 +29,7 @@
 - FikaMatch
 - FikaPlayer
 - ObservedPlayer
-- FikaServer.Models.Enums
+- EEFTNotificationIconType
 - BaseGameController
 - FikaServer
 - CoopGame
@@ -38,7 +38,7 @@
 - FikaConfig
 - Fika.Core.Networking
 - ModulePatch
-- Fika.Core.Networking.LiteNetLib
+- PacketLayerBase
 - NetDataReader
 - LL
 - HostGameController
@@ -46,27 +46,27 @@
 - IPoolSubPacket
 - FikaClient
 - EFTSerializationExtensions
-- ClientQuestController
+- ObservedQuestController
 - LiteNetPeer
-- ClientHealthController
+- Bleedout
 - FikaSerializationExtensions
 - FikaWebApp/packages.lock.json
 - FikaBot
 - EVoipControllerStatus
 - HeadlessClientInfo
-- OnlineHeadless
+- ControllerBase
 - HeadlessHelper
 - HeadlessGame
-- NotificationWebSocket
+- PresenceService
 - LZ4Pickler
 - FikaBackendUtils
-- IDisposable
+- .DispatchEvent
 - LiteNetPeer
 - Mapping
 - FikaVOIPController
 - ProfilesPage
 - ILZ4Decoder
-- IRequestData
+- MatchService
 - ObservedFirearmController
 - DisconnectReason
 - Fika.Core/Networking/LiteNetLib/Utils/NetDataReader.cs
@@ -77,16 +77,16 @@
 - FikaGlobals
 - FikaClientFirearmController
 - ReviveInteractable
-- .LogError
+- .LogWarning
 - FikaConfigClient
 - FriendData
 - NetPeer
 - ECommonSubPacketType
 - Microsoft.NETCore.Platforms
-- MatchService
-- ButtonHandler
+- ClientHealthController
+- FikaClientGrenadeFactory
 - FikaServer/Networking/LiteNetLib/Utils/NetDataReader.cs
-- .Prefix
+- OfflineAirdropServerLogicClass_UpdateOfflineClientLogic_Patch
 - .OnConnectionSolved
 - DeliveryMethod
 - net10.0
@@ -110,14 +110,14 @@
 - Fika.Core.Main.Patches.PlayerPatches
 - ObservedInventoryController
 - FikaDialogueController
-- .RegisterPacketsAndTypes
+- LoadingScreenPlayersPacket
 - FikaPingingClient
 - FikaWebApp.Data
 - FikaHeadlessPlugin
 - ObservedMovementContext
-- NetSerializer
+- List
 - SetBlackImageAlpha_Patch
-- FikaServer.Callbacks
+- ModifyProfileDialog
 - MonoBehaviour
 - FikaRequestHandler
 - UpnpNatDevice
@@ -125,13 +125,13 @@
 - Fika.Core/packages.lock.json
 - PlayerRelationsService
 - FikaChatBot
-- NetDataWriter
+- NetDataReader
 - Fika.Core.Networking.LZ4.Internal
 - EPlayerSide
 - List
 - Fika.Headless/packages.lock.json
 - .Put
-- NetDataReader
+- NetDataWriter
 - .Prefix
 - HeadlessService
 - Player
@@ -146,10 +146,10 @@
 - .DiscoverAsync
 - FikaConfigClient
 - Fika.Headless.Patches.Audio.Tripwire
-- FikaHostTransitController
+- .method_12
 - ClientConfigModel
 - ClientGameController
-- EBodyPart
+- DamagePacket
 - .Proceed
 - MainMenuUIScript
 - FikaServer/packages.lock.json
@@ -174,12 +174,12 @@
 - .Prefix
 - InsuranceService
 - WorldInteractionPacket
-- .SendData
+- FikaProfileService
 - IFikaGame
 - ObservedMountedState
 - Dictionary
 - FikaModMetadata
-- .CreateFikaGame
+- .Create
 - RaidAdminUIScript
 - LiteConnectionRequest
 - PmpSearcher
@@ -187,8 +187,8 @@
 - FikaConfigServer
 - dependencies
 - FikaCommands
-- StartHeadlessRequest
-- .FromPingType
+- ConnectionState
+- PingPacket
 - .InvokeAsync
 - FikaWebApp.csproj
 - FriendRequestsService
@@ -206,7 +206,7 @@
 - .CreateFikaGame
 - UsableItemPacket
 - HandsControllerFactory
-- InventoryOperationHandler
+- OperationCallbackPacket
 - NetManager
 - FikaNotificationManager
 - DebugUI
@@ -224,23 +224,23 @@
 - ConfigService
 - .Create
 - Fika.Core.Main.Patches
-- NatPunchPeer
+- NatPunchServer
 - Searcher
 - BTRControllerClass_method_18_Transpiler
 - SendCharacterPacket
 - NetPacketProcessor
 - HeadlessRequesterWebSocket
 - StatisticsPlayer
-- FikaProfileService
-- .GetNewState
+- NotificationWebSocket
+- ObservedBreachDoorState
 - .ColorizeText
-- FikaEvent
+- .LZ4_decompress_generic
 - .GetEFTInventoryLogicOperationsChangeItemsOperationDescriptor
 - NetPacketProcessor
 - ItemCacheService
 - InOutHandsProcessTimestampPatch
 - System.Runtime
-- BotPlayerBridge
+- .Create
 - .CreateObservedPlayer
 - .CreateEvent
 - HeadlessCallbacks
@@ -258,9 +258,9 @@
 - ClientCallbacks
 - FikaServer/Networking/LiteNetLib/LiteNetPeer.cs
 - NativeSocket
-- PacketProperty
+- .HandleTeammateKill
 - net9.0
-- NatPunchServer
+- ButtonHandler
 - ModifyAccountDialog.razor
 - ModifyAccountDialog
 - FikaConfigServer
@@ -268,12 +268,12 @@
 - SendItemDialog.razor
 - FikaHostGameWorld
 - HeadlessWebSocket
-- ControllerBase
+- SendItemRequest
 - SyncableItemPacket
-- Fika.Core.Main.Patches.DebugPatches
+- .Prefix
 - LoadingLootPatch
 - FikaPostLoad
-- FikaCustomRaidSettings
+- ClientQuestController
 - HostInventoryController
 - PhrasePacket
 - SpawnAirdrop
@@ -291,7 +291,7 @@
 - ItemPositionSyncer
 - ObservedStatisticsManager
 - ObservedHostBridge
-- .Create
+- IDisposable
 - EFikaLocation
 - ResetPassword.razor
 - FilesManagerPage.razor
@@ -302,10 +302,10 @@
 - ViewQueuedSendItemsDialog.razor
 - FikaConfig
 - Init
-- .RunClientOperation
+- LoadingProfilePacket
 - ServerPacketSender
 - ViewFilter
-- DamagePacket
+- ObservedKnifeController
 - NetManager
 - StartHeadlessRequest
 - dependencies
@@ -321,18 +321,18 @@
 - BTRSide_Patches
 - INatPunchListener
 - GetPortMappingEntryResponseMessage
-- FastCallSpecific
+- FastCall
 - SPTarkov.Reflection
 - SetPassword.razor
-- .CreateHealthBar
-- Fika.Core.Main.ObservedClasses.MovementStates
+- PlayerPlateUI
+- ObservedSprintState
 - HideoutClass_Init_Patch
 - .PatchPostfix
 - FikaHalloweenEventManager
 - BotInventoryController
 - EventControllerInteractPacket
 - InRaidQuestPacket
-- .CreateHandsController
+- .LogError
 - Vector3
 - .TryGetPeer
 - NetPeerEnumerator
@@ -342,13 +342,13 @@
 - IndexPage
 - AIPlaceLogicPartisan_Dispose_Patch
 - IdentityRevalidatingAuthenticationStateProvider
-- FikaExfilManager
+- VOIPState
 - FastCallSpecificAuto
-- BotInventoryOperationHandler
+- DisconnectReason
 - LightStatesPacket
 - HealthBarEffect
 - .Transpile
-- .Prefix
+- .TryGetCoopHandler
 - MultiSelect
 - NetworkUtils
 - EProceedType
@@ -359,11 +359,11 @@
 - .SetupConfig
 - CylinderMagPacket
 - BotStatePacket
-- TransitEventPacket
+- FikaConfigHeadless
 - VaultPacket
 - ClientInventoryController
 - ClientInventoryOperationHandler
-- ObservedRunState
+- Fika.Core.Main.ObservedClasses.MovementStates
 - ClientPacketSender
 - .CreateHideoutWorld
 - .CreateBot
@@ -378,9 +378,9 @@
 - dependencies
 - dependencies
 - CodeBeam.MudBlazor.Extensions
-- WebAppConfig
+- QuestSyncPacket
 - .Postfix
-- FikaServer/Networking/LiteNetLib/NetDebug.cs
+- System.Diagnostics
 - ObservedTripwireState
 - ObservedQuickUseItemController
 - ArmorDamagePacket
@@ -389,10 +389,10 @@
 - IPEndPoint
 - FikaConfigHeadless
 - Microsoft.AspNetCore.Components.Forms
-- ViewQueuedSendItemsDialog
+- HandsBookkeepingTimestampPatch
 - ToolsPage
 - Azure.Core
-- BTRInteractionPacket
+- TimeSpan
 - EFikaAsset
 - .Extract
 - ChangeFireModePacket
@@ -406,8 +406,8 @@
 - .ProjectToCanvas
 - BtrSpawn
 - InventoryPacket
-- NetUtils
-- HeadlessPage.razor
+- DistantShadow_Awake_Patch
+- .Initalize
 - dependencies
 - BotDifficulties
 - Fika.Headless.AssetNuker.csproj
@@ -419,7 +419,7 @@
 - .ObservedGoIn
 - GetProfileAtEndOfRaidPatch_Override
 - InformationPacket
-- FikaPlayerPresence
+- QuestConditionPacket
 - ReloadMagPacket
 - .Prefix
 - SendItemDialog
@@ -427,7 +427,7 @@
 - Microsoft.Identity.Client
 - Routes.razor
 - .Prefix
-- CloudController_OnEnable_Patch
+- .method_3
 - LiteNetLib
 - FikaRaidGethostResponse
 - .Postfix
@@ -435,14 +435,14 @@
 - ObservedDoorInteractionState
 - GrenadePacket
 - MessagePacket
-- .GetEFTInventoryLogicOperationsAddToWishlistOperationDescriptor
+- ProceedResponsePacket
 - TextureDecalsPainter_Awake_Patch
 - BotHealthController
-- QuestItemPacket
+- .Create
 - LeftStanceChangePacket
-- RollCylinderPacket
-- ReloadBoltActionPacket
-- ToggleAimPacket
+- .ShowFikaMessage
+- .OnConditionValueChanged
+- ToggleInventoryPacket
 - ToggleBipodPacket
 - .ObservedGoOut
 - .SpawnItemInWorld
@@ -452,16 +452,16 @@
 - RocketShotPacket
 - SecretExfilFound
 - EFikaNotification
-- ListPlayer
-- MatchMakerUI
+- MuffledState
+- FastCallSpecificAuto
 - PartyInfoPanel_Show_Patch
 - SendItemController
 - SendItemToAllController
 - AddAliasDialog.razor
 - SendItemModel
 - AirdropEventClass_FlareSuccessEventHandler_Patch
-- StatisticsPage.razor
-- .Prefix
+- Components/_Imports.razor
+- .HandoverItem
 - CustomPlayerLoopSystemsInjector_Injection_Patch
 - MuzzleManager_Play_Patch
 - TarkovApplication_method_53_Patch
@@ -472,29 +472,29 @@
 - .GetEFTBonusDescriptor
 - ObservedEmptyHandsController
 - IPacketSender
-- FikaClientQuickGrenadeController
-- FikaClientQuickKnifeController
-- EBodyPart
-- .InitLevel
+- .vmethod_2
+- .FromPingType
+- KnifeHitPacket
+- FikaClientGrenade
 - ObservedQuickGrenadeController
 - .Create
 - .OnEnemyKill
 - .Prefix
 - .DoReplicatedMineDamage
-- LoadingScreenPacket
-- SideEffectPacket
+- ObservedMedsSpeedHook
+- .Prefix
 - NtpLeapIndicator
 - CheckAmmoPacket
 - CheckChamberPacket
-- ExamineWeaponPacket
+- InteractableInitPacket
 - QuickReloadMagPacket
-- UnderbarrelSightingRangeDownPacket
+- CancelGrenadePacket
 - UnderbarrelSightingRangeUpPacket
-- BorderZoneEvent
+- CheckFireModePacket
 - ClientConnected
 - ClientDisconnected
-- ClientExtract
-- DisarmTripwire
+- FirearmLootPacket
+- ToggleLauncherPacket
 - ExfilCountdown
 - SpawnAI
 - UpdateBackendData
@@ -506,94 +506,95 @@
 - SendMessageDialog.razor
 - YesNoDialog.razor
 - AbstractGame_InRaid_Patch
-- PartyInfoPanel_method_3_Patch
+- CharacterSyncPacket
 - TripwireSynchronizableObject_method_6_Patch
 - AnticheatMipMapChecker_Start_Patch
 - TransitControllerAbstractClass_Exist_Patch
 - WriterPoolManager
-- ObservedSlotViewHandler
+- LootSyncPacket
 - BepInEx.Core
-- AudioSource_Play_Transpiler
+- FikaConfig
 - BaseAmbientSoundPlayer_Stop_Transpiler
 - BaseSpatialAudioPortal_Awake_Transpiler
 - AudioSourceCulling_method_1_Transpiler
 - BetterAudio_AddToAudioSourceQueue_Transpiler
-- BetterAudio_BorrowWeaponAudioQueue_Transpiler
+- FikaSPTHttpServerConfig
 - BetterAudio_LimitedPlayNonSpatial_Transpiler
-- BetterAudio_PlayAtPoint1_Transpiler
+- BetterAudio_LimitedPlay_Transpiler
 - BetterAudio_PlayAtPoint2_Transpiler
-- BetterAudio_PlayAtPoint3_Transpiler
+- BetterAudio_PlayAtPointDelayed1_Transpiler
 - BetterAudio_PlayAtPoint4_Transpiler
 - BetterAudio_PlayAtPointDelayed2_Transpiler
 - BetterAudio_PlayAtPointDistant_Transpiler
 - BetterAudio_PlayDropItem1_Transpiler
 - BetterAudio_StartTinnitusEffect_Transpiler
 - BetterAudio_TryPlayAtPoint_Transpiler
-- WorldInteractiveObject_PlaySoundAtPoint_Transpiler
+- BetterAudio_PlayNonspatial_Transpiler
 - BotStandBy_Update_Transpiler
-- GPUInstancerManager_Update_Transpiler
+- WindowBreaker_method_22_Transpiler
 - LaserBeam_Awake_Patch
 - PerfectCullingCrossSceneGroup_Update_Transpiler
-- LevelSettings_ApplyTreeWindSettings_Transpiler
-- MainMenuControllerClass_method_78_Patch
+- WindowBreaker_method_23_Transpiler
+- ProceduralWeaponAnimation_StartFovCoroutine_Transpiler
 - CorpsePositionSyncer
 - EPingType
 - ObservedStationaryState
-- Player_IsShotDeflectedByHeavyArmor_Transpiler
+- Player_TryGetArmorResistData_Transpiler
 - Player_method_95_Transpiler
 - ScavProfileLoad_Override
-- Player_ManageAggressor_Patch
-- Player_SetDogtagInfo_Patch
+- TextMessagePacket
+- TalkingState
 - BasicMicrophoneCapture_UpdateSubscribers_Transpiler
-- WorldLootPacket
+- SendItemUI
 - UpnpNatDeviceInfo
-- EGrenadePacketType
-- INetReusable
+- Fika.Core.Networking.Packets
+- TOD_Sky_Headless_Patch
 - BepInEx.Core
 - MainMenuUIPlayer
 - GetItemsController
-- UploadProfilesController
+- EventLoopPlayer_Awake_Patch
 - DeliveryMethod
 - FastBitConverter
 - .Prefix
 - HarmonyX
 - SPTarkov.Server.Web
 - ConfirmFleaBanDialog.razor
-- .GetFile
+- LoopAmbientSoundPlayer_Awake_Patch
 - BTRVehicle_method_38_Patch
-- ControlledLampGroup_Start_Patch
+- AnticheatMipMapChecker_Awake_Patch
 - CoopSettingsWindow_Show_Patch
 - .GetAirplaneDataPacketStruct
 - MatchmakerPlayerControllerClass_GetCoopBlockReason_Patch
-- EnumIntSerializer
+- FlareSceneSettings_Awake_Patch
 - .OnPhraseTold
-- EventRandomPlayer_Awake_Patch
+- GPUInstancerHiZOcclusionGenerator_Awake_Patch
 - HarmonyX
-- AmbientSoundPlayer_Awake_Patch
+- RainController_Awake_Patch
 - BaseAmbientSoundPlayer_Awake_Patch
 - SeasonAmbientSoundPlayer_Awake_Patch
 - Flicker_Awake_Patch
-- GrassInitialization_Awake_Patch
+- MainMenuControllerClass_method_50_Patch
 - ImpostorsRenderer_OnEnable_Patch
-- ParticleIntensityFromAnimator_Awake_Patch
+- BTRViewSynchronizer
 - RainFallDrops_Awake_Patch
 - SingleFlareController_OnEnable_Patch
 - StaticDeferredDecal_OnEnable_Patch
-- StaticDeferredDecalRenderer_Awake_Patch
+- .SpawnObservedPlayer
 - VolumetricLightRenderer_Awake_Patch
 - WaterRendererv3_OnEnable_Patch
-- MessageWindow_Show_Patch
+- Crc32cLayer
 - SessionResultExitStatusPatch
-- .Get
+- PacketPool
+- ERequestSubPacketType
 - ObservedJumpState
 - BTRTurretView_AttachBot_Postfix
 - Player_UpdateBtrTraderServiceData_Patch
-- LocaleClass_ReloadBackendLocale_Patch
+- .WebSocket_OnMessage
 - Player_IDissonancePlayerType_Patch
 - .GetThrowableData
-- .GetHost
+- EColor
 - Extensions
-- DownloadProfileResponse
+- AbstractOffState2
 - PlayerStateSnapshot
 - .Get
 - Microsoft.NETFramework.ReferenceAssemblies
@@ -601,12 +602,12 @@
 - AchievementsScreen_Show_Patch
 - AchievementView_Show_Patch
 - DisableInsuranceReadyButton_Patch
-- DisableMatchSettingsReadyButton_Patch
+- WaveSpawnScenario_Patch
 - DisableReadyButton_Patch
 - MatchmakerOfflineRaidScreen_Show_Patch
 - MatchmakerOfflineRaidScreen_Close_Patch
-- RawProfileController
-- FikaServer/Networking/LiteNetLib/NatPunchModule.cs
+- TripwireSynchronizableObject_method_11_Patch
+- DissonanceComms_Start_Patch
 - Microsoft.AspNetCore.Components
 - SPTarkov.Common
 - FikaLayout.razor
@@ -614,45 +615,45 @@
 - Microsoft.EntityFrameworkCore.Tools
 - Microsoft.IdentityModel.Protocols.OpenIdConnect
 - SQLitePCLRaw.bundle_e_sqlite3
-- GetActionsClass_GetAvailableActions_Patch
+- .Prefix
 - System.Threading
 - Fika.Core.csproj
-- EQuestSharingTypes
+- NtpRequest
 - FikaClientPhysical
 - ThrottledMono
 - ObservedIdleZombieStateClass
 - BTRView_Start_Patch
 - BufferInnerZone_ChangeZoneInteractionAvailability_Patch
 - NonWaveSpawnScenario_Patch
-- TarkovApplication_LocalGamePreparer_Patch
-- PmcFoundInRaidEquipment_ConfigurePMCFindInRaidStatus_Patch
+- EFikaPlayerPresence
+- .CreateOverlayText
 - .GetEFTLootDataDescriptor
 - .PutFirearmSubPacket
-- System.Diagnostics
-- EReloadWithAmmoStatus
+- ClientStatisticsManager
+- .QueueProfile
 - System.Threading
-- RaidAdminUI
-- MainMenuControllerClass_method_55_Patch
+- .Update
+- FikaPing
 - GClass3871_ShowAction_Patch
 - HideoutPlayerOwner_SetPointOfView_Patch
-- MenuScreen_Awake_Patch
+- EFloatCompression
 - SessionResultExitStatus_Show_Patch
 - NtpRequest
 - FikaNavMenu.razor
 - Microsoft.EntityFrameworkCore.Relational
 - Microsoft.IdentityModel.Tokens
 - Mono.TextTemplating
-- Fika.Core.Networking.VOIP
+- Fika.Core.Main.Utils
 - .GetEFTRepairEnhancementComponentDescriptor
 - System.ComponentModel
 - System.IO.FileSystem.Primitives
 - StationaryHandler
-- MineDirectional_OnTriggerEnter_Patch
+- MappingLifetime
 - .vmethod_0
 - .SetInventory
 - .GetFirearmLightStates
 - .GetPeers
-- INetSerializable
+- Fika.Core.Networking.LiteNetLib.Utils
 - EStationaryCommand
 - System.Diagnostics.Debug
 - System.Globalization
@@ -660,14 +661,14 @@
 - System.Runtime.Extensions
 - System.Runtime.Handles
 - UnityEngine.Modules
-- INetSerializable
+- ResponseMessageBase
 - ToolsPage.razor
 - AuthPage.razor
 - Brism
 - Microsoft.AspNetCore.App.Internal.Assets
 - MudBlazor
 - mssql1
-- FikaWebApp.Components
+- EQuestSyncType
 - .GetEFTProfileBanDescriptor
 - Microsoft.NETCore.Platforms
 - System.Collections
@@ -684,24 +685,24 @@
 - System.Runtime.Handles
 - System.Text.Encoding
 - System.Threading.Tasks
-- CoopPlayer_CreateMovementContext_Patch.cs
-- ELoadPriority
+- Fika.Core.Networking.Websocket
+- BannedState
 - .ActualDrop
-- .GetOperationFactoryDelegates
-- FikaPlayer_OnItemAddedOrRemoved_Transpiler.cs
+- HeadlessConnectedNotification
+- PushNotification
 - .GetEFTFireModeComponentDescriptor
 - .GetEFTInventoryLogicMapMarker
 - .Serialize
-- IReusable
+- ReceivedSentItemNotification
 - Microsoft.NETCore.Platforms
 - System.ComponentModel.TypeConverter
 - System.Globalization.Extensions
 - System.Linq
 - System.Reflection.TypeExtensions
 - System.Resources.ResourceManager
-- TaskExtensions.cs
-- FikaLocalization
-- ERemoveFriendReason
+- StartRaidNotification
+- PacketLayerBase
+- GetOnlinePlayersResponse
 - JetBrains.Annotations
 - Microsoft.AspNetCore.Components.Analyzers
 - Microsoft.AspNetCore.Metadata
@@ -714,7 +715,7 @@
 - System.Text.Json
 - FikaShared/packages.lock.json
 - App.razor
-- .Search
+- FikaConfigClientMods
 - AboutPage.razor
 - BuildBundlerMinifier
 - Microsoft.Data.SqlClient.SNI.runtime
@@ -733,42 +734,42 @@
 - .GetEFTAddNoteOperationDescriptor
 - .WriteValueInfo
 - .GetEFTCheckMagazineOperationDescriptor
-- .GetEFTCreateMapMarkerOperationDescriptor
-- Minefield_method_2_Patch.cs
+- FikaConfigNatPunchServer
+- EQuitState
 - .GetEFTEditNoteOperationDescriptor
-- .CreateOperationFromDescriptor
-- .IsMisfire
+- .GetTraderService
+- ESendRate
 - .GetEFTResourceKey
 - .GetEFTProfileHealthInfoValueInfo
 - .GetEFTContainerDescriptor
-- .GetEFTDeleteNoteOperationDescriptor
+- .GetClassTransformSync
 - .GetEFTEditMapMarkerOperationDescriptor
 - .GetEFTExamineMalfunctionOperationDescriptor
-- .GetEFTFaceShieldComponentDescriptor
-- .GetEFTFaceshieldMarkOperationDescriptor
+- .vmethod_2
+- .vmethod_2
 - .GetEFTFoldableComponentDescriptor
 - .GetEFTGridItemAddressDescriptor
 - .GetEFTInventoryLogicOperationsSplitToNowhereDescriptor
 - .GetEFTInventoryLogicOperationsTransferFromNowhereDescriptor
-- .GetEFTItemInfoDescriptor
+- .GetBodyPartFromCollider
 - .GetEFTItemInGridDescriptor
 - .GetEFTKeyComponentDescriptor
-- .GetEFTMergeOperationDescriptor
+- .GetEFTCultistAmuletComponentDescriptor
 - .GetEFTNotesNote
-- .GetEFTOwnerItselfDescriptor
+- .GetEFTDeleteMapMarkerOperationDescriptor
 - .GetEFTQuestAcceptDescriptor
-- .GetEFTQuestFinishDescriptor
-- .GetEFTQuestHandoverDescriptor
-- .GetEFTResourceItemComponentDescriptor
-- .GetEFTSetDialogProgressOperationDescriptor
+- .GetEFTDestroyedItem
+- .GetEFTFoodDrinkComponentDescriptor
+- .GetEFTInventoryEquipmentDescriptor
+- .GetEFTInventoryLogicOperationsSearchContentOperationDescriptor
 - .GetEFTSetVariableOperationDescriptor
-- .GetEFTSkillsDescriptor
+- .GetEFTLockableComponentDescriptor
 - .GetEFTSkillsDescriptorMasteringInfoDescriptor
-- .GetEFTSlotItemAddressDescriptor
-- .GetEFTTaskConditionCounterDescriptor
+- .GetEFTProfileHealthInfoEffectInfo
+- .GetEFTProfileMoneyTransferLimitData
 - .GetEFTTogglableComponentDescriptor
 - .GetEFTToggleOperationDescriptor
-- .GetEFTTraderInfoDescriptor
+- .GetEFTRemoveOperationDescriptor
 - NetworkTimeSync.cs
 - AccessDenied.razor
 - InvalidUser.razor
@@ -783,17 +784,25 @@
 - RedirectToLogin.razor
 - FikaMultiLineTextField.razor
 - LockoutPage.razor
+- .GetEFTSceneResourceKey
+- .GetEFTSetupItemOperationDescriptor
+- .GetEFTSlotDescriptor
+- .GetEFTStackSlotItemAddressDescriptor
+- .GetEFTTagComponentDescriptor
+- .GetEFTTagOperationDescriptor
+- .GetEFTWeaponRechamberOperationDescriptor
+- .GetWeightedLootPointSpawnPosition
 
 ## God Nodes (most connected - your core abstractions)
 1. `FikaPlayer` - 266 edges
 2. `EFTSerializationExtensions` - 266 edges
-3. `Fika.Core.Main.Utils` - 181 edges
+3. `Fika.Core.Main.Utils` - 182 edges
 4. `NetDataWriter` - 168 edges
 5. `ObservedPlayer` - 167 edges
 6. `Fika.Core.Main.Players` - 151 edges
-7. `FikaServer` - 139 edges
+7. `FikaServer` - 140 edges
 8. `LiteNetPeer` - 134 edges
-9. `FikaClient` - 116 edges
+9. `FikaClient` - 117 edges
 10. `LiteNetManager` - 114 edges
 
 ## Surprising Connections (you probably didn't know these)
@@ -804,74 +813,74 @@
 - `Slot` --references--> `LiteNetPeer`  [EXTRACTED]
   mods/FIKA/modded/Fika-Server-CSharp/FikaServer/Networking/LiteNetLib/LiteNetManager.HashSet.cs → mods/FIKA/modded/Fika-Plugin/Fika.Core/Networking/LiteNetLib/LiteNetPeer.cs
 - `SetSource()` --references--> `NetDataWriter`  [EXTRACTED]
+  mods/FIKA/modded/Fika-Plugin/Fika.Core/Networking/LiteNetLib/Utils/NetDataReader.cs → mods/FIKA/modded/Fika-Plugin/Fika.Core/Networking/LiteNetLib/Utils/NetDataWriter.cs
+- `SetSource()` --references--> `NetDataWriter`  [EXTRACTED]
   mods/FIKA/modded/Fika-Server-CSharp/FikaServer/Networking/LiteNetLib/Utils/NetDataReader.cs → mods/FIKA/modded/Fika-Plugin/Fika.Core/Networking/LiteNetLib/Utils/NetDataWriter.cs
-- `StatisticsPage` --references--> `HttpClient`  [EXTRACTED]
-  mods/FIKA/modded/Fika-Server-CSharp/FikaWebApp/Components/Fika/Pages/StatisticsPage.razor.cs → mods/FIKA/modded/Fika-Server-CSharp/FikaWebApp/Components/Fika/Pages/HeadlessPage.razor.cs
 
 ## Import Cycles
 - None detected.
 
-## Communities (775 total, 71 thin omitted)
+## Communities (783 total, 71 thin omitted)
 
 ### Community 0 - "NetPeer"
 Cohesion: 0.03
-Nodes (25): IPEndPoint, SocketError, DisconnectInfo, EventBasedLiteNetListener, EventBasedNetListener, ILiteNetEventListener, INetEventListener, UnconnectedMessageType (+17 more)
+Nodes (24): IPEndPoint, SocketError, DisconnectInfo, EventBasedLiteNetListener, EventBasedNetListener, INetEventListener, UnconnectedMessageType, BasicMessage (+16 more)
 
 ### Community 1 - "Fika.Headless.Patches"
 Cohesion: 0.02
-Nodes (71): CarExtraction, Fika.Headless.Patches, CodeInstruction, IEnumerable, MethodBase, PatchTranspiler, BaseGrenadeHansController_vmethod_0_Transpiler, MethodBase (+63 more)
+Nodes (76): CarExtraction, Class444, Fika.Headless.Patches, CodeInstruction, IEnumerable, MethodBase, PatchTranspiler, BaseGrenadeHansController_vmethod_0_Transpiler (+68 more)
 
 ### Community 2 - ".Proceed"
 Cohesion: 0.03
-Nodes (56): FikaPlayer, Action, Callback, EmptyHandsController, FirearmController, FoodDrinkItemClass, Func, GInterface198 (+48 more)
+Nodes (55): FikaPlayer, Action, Callback, EmptyHandsController, FirearmController, FoodDrinkItemClass, GInterface198, GInterface203 (+47 more)
 
-### Community 3 - "Fika.Core.Main.Utils"
-Cohesion: 0.03
-Nodes (28): Fika.Core.UI.Patches, Fika.Core.UI, Fika.Core, Fika.Core.Main.Custom, Fika.Core.Main.Utils, Fika.Core.Main.Components, Fika.Core.Bundles, Fika.Core.UI.Custom (+20 more)
+### Community 3 - "Fika.Core.Networking.Models"
+Cohesion: 0.04
+Nodes (25): Fika.Core.Bundles, Fika.Core.UI.Custom, Fika.Core.Networking.Models.Headless, Fika.Core.Modding, Fika.Core.Main.Patches.Overrides, Fika.Core.UI.Patches.MainMenuUI, Fika.Core.Main.Patches.LocalGame, Fika.Core.UI.Models (+17 more)
 
 ### Community 4 - "ProfilesPage.razor"
 Cohesion: 0.03
-Nodes (73): FikaServer.API, FikaShared.Responses, FikaShared.Requests, FikaWebApp.Components.Fika.Dialogs, FikaWebApp.Models, FikaWebApp.Services, FikaWebApp.Components.Fika.Pages, FikaShared (+65 more)
+Nodes (78): FikaServer.API, FikaShared.Responses, FikaShared.Requests, FikaWebApp.Components.Fika.Dialogs, FikaWebApp.Models, FikaWebApp.Services, FikaWebApp.Components.Fika.Pages, FikaShared (+70 more)
 
 ### Community 5 - "Fika.Headless.Patches.DestroyGraphics"
 Cohesion: 0.02
-Nodes (63): AmbientLight, Fika.Headless.Patches.DestroyGraphics, DistantShadow, DistortRenderer, MethodBase, PatchPrefix, AmbientLight_Start_Patch, AnticheatMipMapChecker (+55 more)
+Nodes (62): AmbientLight, ControlledLampGroup, Fika.Headless.Patches.DestroyGraphics, DistortRenderer, MethodBase, PatchPrefix, AmbientLight_Start_Patch, CameraClass (+54 more)
 
 ### Community 6 - "NetPacket"
-Cohesion: 0.04
-Nodes (40): Queue, BaseChannel, PacketsInQueue, NetPacket, ReadOnlySpan, SocketAddress, NetConnectAcceptPacket, ReliableChannel (+32 more)
+Cohesion: 0.03
+Nodes (44): Fika.Core.Networking.LiteNetLib, Queue, BaseChannel, PacketsInQueue, LiteNetManager, IncomingFragments, NetPacket, ChannelId (+36 more)
 
 ### Community 7 - "Fika.Headless.Patches.Audio"
 Cohesion: 0.02
-Nodes (63): Fika.Headless.Patches.Audio, EventLoopPlayer, AmbientSoundPlayer, MethodBase, PatchPrefix, AmbientPlayerAutoPanner_Awake_Patch, MethodBase, PatchPrefix (+55 more)
+Nodes (63): Fika.Headless.Patches.Audio, EventRandomPlayer, AmbientSoundPlayer, MethodBase, PatchPrefix, AmbientPlayerAutoPanner_Awake_Patch, AmbientSoundPlayer, MethodBase (+55 more)
 
 ### Community 8 - "LiteNetManager"
 Cohesion: 0.04
-Nodes (45): AddressFamily, IPAddress, IPEndPoint, AutoResetEvent, ConcurrentQueue, Conditional, ConnectionRequest, DateTime (+37 more)
+Nodes (47): AddressFamily, IPAddress, IPEndPoint, AutoResetEvent, ConcurrentQueue, Conditional, ConnectionRequest, DateTime (+39 more)
 
 ### Community 9 - "Fika.Core.Main.Players"
 Cohesion: 0.06
-Nodes (9): Fika.Core.Main.BotClasses, Fika.Core.Main.ObservedClasses.HandsControllers, Fika.Core.Networking.Packets.FirearmController.SubPackets, Fika.Core.Main.ClientClasses.HandsControllers, Fika.Core.Networking.Pooling, Fika.Core.Networking.Packets.Generic.SubPackets, Fika.Core.Networking.Packets.Player.Common.SubPackets, Fika.Core.Main.Players (+1 more)
+Nodes (8): Fika.Core.Main.BotClasses, Fika.Core.Main.ObservedClasses.HandsControllers, Fika.Core.Networking.Packets.FirearmController.SubPackets, Fika.Core.Networking.Pooling, Fika.Core.Networking.Packets.Generic.SubPackets, Fika.Core.Networking.Packets.Player.Common.SubPackets, Fika.Core.Main.Players, Fika.Core.Main.ObservedClasses.PlayerBridge
 
 ### Community 10 - ".RegisterPacketsAndTypes"
 Cohesion: 0.02
-Nodes (53): SpawnItemPacket, Task, NetDataReader, NetDataWriter, StashesPacket, NetDataReader, NetDataWriter, StatisticsPacket (+45 more)
+Nodes (48): SpawnItemPacket, Task, NetDataReader, NetDataWriter, LoadingScreenPacket, NetDataReader, NetDataWriter, StashesPacket (+40 more)
 
 ### Community 11 - "FikaMatch"
 Cohesion: 0.02
-Nodes (95): FikaServer.Models.Fika.API, FikaServer.Models.Fika.Routes.Location, EFikaMatchStatus, COMPLETE, IN_GAME, LOADING, EFikaSide, PMC (+87 more)
+Nodes (98): EFikaMatchStatus, COMPLETE, IN_GAME, LOADING, EFikaSide, PMC, Savage, EFikaTime (+90 more)
 
 ### Community 12 - "FikaPlayer"
-Cohesion: 0.03
-Nodes (52): AbstractSkillClass, BTRSide, ClientMovementContext, Coroutine, Corpse, DamageInfoStruct, DateTime, Dictionary (+44 more)
+Cohesion: 0.02
+Nodes (50): ThrowWeapItemClass, FikaClientQuickGrenadeController, BallisticCollider, GStruct182, KnifeComponent, ShotInfoClass, FikaClientQuickKnifeController, AbstractSkillClass (+42 more)
 
 ### Community 13 - "ObservedPlayer"
 Cohesion: 0.02
 Nodes (42): BetterSource, Class1310, ESpeedLimit, FaceShieldComponent, AbstractSkillClass, BasePhysicalClass, Coroutine, EDateTime (+34 more)
 
-### Community 14 - "FikaServer.Models.Enums"
-Cohesion: 0.03
-Nodes (76): FikaServer.Models.Enums, FikaServer.Models.Fika.Presence, FikaServer.Models.Fika.Headless, EEFTNotificationIconType, Achievement, Alert, Default, EntryPoint (+68 more)
+### Community 14 - "EEFTNotificationIconType"
+Cohesion: 0.04
+Nodes (51): EEFTNotificationIconType, Achievement, Alert, Default, EntryPoint, Friend, Hideout, Mail (+43 more)
 
 ### Community 15 - "BaseGameController"
 Cohesion: 0.03
@@ -879,19 +888,19 @@ Nodes (64): DebugUI, BotControllerSettings, GClass3248, LootableContainer, Task,
 
 ### Community 16 - "FikaServer"
 Cohesion: 0.03
-Nodes (55): BTRView, BTRViewSynchronizer, UpdateRate, FikaNetworkManagerDestroyedEvent, Manager, Action, FikaEventDispatcher, DisconnectInfo (+47 more)
+Nodes (60): LampController, WorldInteractiveObject, FikaServer, Action, ArraySegment, CancellationToken, CancellationTokenSource, CommandPacket (+52 more)
 
 ### Community 17 - "CoopGame"
 Cohesion: 0.03
-Nodes (62): BaseLocalGame, Class1636, ELocalMode, EndByExitTrigerScenario, EndByTimerScenario, ClientStatisticsManager, GameUI, FikaTimeManager (+54 more)
+Nodes (49): BaseLocalGame, Class1636, ELocalMode, ExtractionPlayerHandler, EExfiltrationStatus, ExfiltrationPoint, List, ExtractionPlayerHandler (+41 more)
 
 ### Community 18 - "NetDataReader"
 Cohesion: 0.04
-Nodes (31): ClassInfo, CustomType, Action, Dictionary, Func, Guid, List, NetDataReader (+23 more)
+Nodes (26): CustomType, Action, Dictionary, Func, List, NetDataReader, ByteSerializer, CharSerializer (+18 more)
 
 ### Community 19 - ".LogInfo"
 Cohesion: 0.04
-Nodes (45): BloodOnScreen, CC_Blend, CC_Wiggle, Class633, DisablerCullingObjectBase, ECameraState, EftBattleUIScreen, CoopHandler (+37 more)
+Nodes (44): BloodOnScreen, CC_Blend, CC_Wiggle, Class633, DisablerCullingObjectBase, ECameraState, EftBattleUIScreen, EventArgs (+36 more)
 
 ### Community 20 - "FikaConfig"
 Cohesion: 0.02
@@ -899,130 +908,130 @@ Nodes (94): ConfigFile, EPingSound, EQuestSharingTypes, Color, ELoadPriority, ES
 
 ### Community 21 - "Fika.Core.Networking"
 Cohesion: 0.07
-Nodes (24): Fika.Core.Main.ClientClasses, Fika.Core.Main.Patches.BTR, Fika.Core.Main.BaseClasses, Fika.Core.Networking.Packets.World, Fika.Core.Networking.Snapshotting, Fika.Core.ConsoleCommands, Fika.Core.Main.PacketHandlers, Fika.Core.Modding (+16 more)
+Nodes (20): Fika.Core.Main.ClientClasses, Fika.Core.Main.BaseClasses, Fika.Core.Main.Components, Fika.Core.Networking.Packets.World, Fika.Core.Networking.Snapshotting, Fika.Core.ConsoleCommands, Fika.Core.Main.PacketHandlers, Fika.Core.Networking.Packets.Player (+12 more)
 
 ### Community 22 - "ModulePatch"
 Cohesion: 0.02
-Nodes (51): Fika.Headless.Patches.TODPatches, MethodBase, PatchPrefix, TOD_Sky_Headless_Patch, CoreBotSettingsClass, MethodBase, PatchPrefix, BotCacher_Patch (+43 more)
+Nodes (53): CloudController, MethodBase, PatchPrefix, CloudController_OnEnable_Patch, CloudController_UpdateAmbient_Patch, MethodBase, PatchPrefix, GameWorld_method_2_Patch (+45 more)
 
-### Community 23 - "Fika.Core.Networking.LiteNetLib"
-Cohesion: 0.03
-Nodes (42): Attribute, Fika.Core.Networking.LiteNetLib, Fika.Core.Networking.LiteNetLib.Utils, Fika.Core.Networking.LiteNetLib.Layers, IPEndPoint, Crc32cLayer, IPEndPoint, PacketLayerBase (+34 more)
+### Community 23 - "PacketLayerBase"
+Cohesion: 0.11
+Nodes (8): IPEndPoint, Crc32cLayer, IPEndPoint, PacketLayerBase, IPEndPoint, XorEncryptLayer, IPEndPoint, XorEncryptLayer
 
 ### Community 24 - "NetDataReader"
 Cohesion: 0.04
-Nodes (18): FastCallSpecific, Guid, List, NetDataReader, BoolSerializer, ByteSerializer, DoubleSerializer, FastCallSpecificAuto (+10 more)
+Nodes (27): ClassInfo, EnumByteSerializer, FastCallSpecific, Action, Dictionary, Func, List, NetDataReader (+19 more)
 
 ### Community 25 - "LL"
 Cohesion: 0.04
-Nodes (55): Algorithm, LZ4_streamHC_t, MethodImpl, size_t, LL, Algorithm, Enforce32, tableType_t (+47 more)
+Nodes (54): Algorithm, MethodImpl, size_t, LL, Algorithm, Enforce32, tableType_t, cParams_t (+46 more)
 
 ### Community 26 - "HostGameController"
 Cohesion: 0.04
-Nodes (38): BotZone, AbstractGame, List, MethodImpl, NetDataWriter, BotStateManager, Action, BotControllerSettings (+30 more)
+Nodes (39): BotZone, AbstractGame, List, MethodImpl, NetDataWriter, BotStateManager, Action, BotControllerSettings (+31 more)
 
 ### Community 27 - "FikaServer.Services"
-Cohesion: 0.06
-Nodes (30): FikaServer.OnLoad, FikaServer.Models.Fika.Routes.Raid.Join, FikaServer.Models.Fika.Routes.Raid, FikaServer.Models.Fika.Routes.Headless, FikaServer.Controllers, FikaServer.Helpers, FikaServer.Services.Cache, FikaServer.Models.Fika.WebSocket (+22 more)
+Cohesion: 0.04
+Nodes (52): FikaServer.OnLoad, FikaServer.Models.Fika.Routes.Raid.Join, FikaServer.Models.Fika.Routes.Raid, FikaServer.Models.Fika.Routes.Headless, FikaServer.Routers.Static, FikaServer.Controllers, FikaServer.Helpers, FikaServer.Services.Cache (+44 more)
 
 ### Community 28 - "IPoolSubPacket"
 Cohesion: 0.03
-Nodes (26): NetDataReader, NetDataWriter, CancelGrenadePacket, NetDataReader, NetDataWriter, CheckFireModePacket, NetDataReader, NetDataWriter (+18 more)
+Nodes (25): NetDataReader, NetDataWriter, ExamineWeaponPacket, NetDataReader, NetDataWriter, ReloadBoltActionPacket, NetDataReader, NetDataWriter (+17 more)
 
 ### Community 29 - "FikaClient"
 Cohesion: 0.04
-Nodes (43): FikaClient, Action, ArraySegment, BaseInventoryOperationClass, BTRDataPacketStruct, Callback, ConnectionRequest, CoopHandler (+35 more)
+Nodes (47): ISession, FikaClient, Action, ArraySegment, BaseInventoryOperationClass, BTRDataPacketStruct, Callback, ConnectionRequest (+39 more)
 
 ### Community 30 - "EFTSerializationExtensions"
 Cohesion: 0.04
-Nodes (24): ClassVector3, Action, Func, Type, EFTSerializationExtensions, GClass1915, GClass1916, GClass1925 (+16 more)
+Nodes (24): ClassQuaternion, ClassVector3, CreateMapMarkerDescriptorClass, Action, Func, Type, EFTSerializationExtensions, GClass1916 (+16 more)
 
-### Community 31 - "ClientQuestController"
-Cohesion: 0.04
-Nodes (44): ConditionItem, EQuestSyncType, Condition, EQuestStatus, FikaPlayer, InventoryController, IPlayerSearchController, IQuestActions (+36 more)
+### Community 31 - "ObservedQuestController"
+Cohesion: 0.13
+Nodes (15): Dictionary, InventoryController, IPlayerSearchController, IQuestActions, List, MongoID, QuestClass, ObservedQuestController (+7 more)
 
 ### Community 32 - "LiteNetPeer"
 Cohesion: 0.04
-Nodes (30): NetStatistics, BytesReceived, BytesSent, PacketLoss, PacketLossPercent, PacketsReceived, PacketsSent, DateTime (+22 more)
+Nodes (29): NetStatistics, BytesReceived, BytesSent, PacketLoss, PacketLossPercent, PacketsReceived, PacketsSent, DateTime (+21 more)
 
-### Community 33 - "ClientHealthController"
-Cohesion: 0.04
-Nodes (35): ClientWatermark, EButtonType, EmptyInputNode, ErrorScreen, FastBlur, EBodyPart, InventoryController, NetworkHealthSyncPacketStruct (+27 more)
+### Community 33 - "Bleedout"
+Cohesion: 0.06
+Nodes (16): FastBlur, FikaPlayer, KeyboardShortcut, TextMeshProUGUI, Bleedout, GiveUpKey, DeathFade, NetDataReader (+8 more)
 
 ### Community 34 - "FikaSerializationExtensions"
-Cohesion: 0.06
-Nodes (23): EFTInventoryClass, ArtilleryPacketStruct, ETraderServiceType, GameDateTime, GClass3248, Inventory, InventoryDescriptorClass, Item (+15 more)
+Cohesion: 0.07
+Nodes (17): ArtilleryPacketStruct, GameDateTime, GClass3248, Inventory, InventoryDescriptorClass, Item, MongoID, NetDataReader (+9 more)
 
 ### Community 35 - "FikaWebApp/packages.lock.json"
 Cohesion: 0.03
 Nodes (62): MudBlazor, version, Azure.Core, Azure.Identity, BuildBundlerMinifier, Humanizer.Core, Microsoft.Bcl.AsyncInterfaces, Microsoft.Bcl.Cryptography (+54 more)
 
 ### Community 36 - "FikaBot"
-Cohesion: 0.04
-Nodes (34): BotPacketSender, Vector3, Weapon, BotFirearmController, WeaponDirection, Task, AbstractSkillClass, Action (+26 more)
+Cohesion: 0.05
+Nodes (30): BotPacketSender, Vector3, Weapon, BotFirearmController, WeaponDirection, Task, AbstractSkillClass, Action (+22 more)
 
 ### Community 37 - "EVoipControllerStatus"
-Cohesion: 0.05
-Nodes (36): AbstractOffState, AbstractOffState2, EVoipControllerStatus, DateTime, List, TimeSpan, AbstractOffState2, TimeSpan_0 (+28 more)
+Cohesion: 0.12
+Nodes (12): AbstractOffState2, EVoipControllerStatus, BlockedState, Status, LimitedState, Status, MicrophoneFailState, Status (+4 more)
 
 ### Community 38 - "HeadlessClientInfo"
 Cohesion: 0.05
-Nodes (41): FikaServer.Models.Webhook, EHeadlessStatus, IN_RAID, READY, List, MongoId, WebSocket, HeadlessClientInfo (+33 more)
+Nodes (37): FikaServer.Models.Webhook, EHeadlessStatus, IN_RAID, READY, List, MongoId, WebSocket, HeadlessClientInfo (+29 more)
 
-### Community 39 - "OnlineHeadless"
-Cohesion: 0.04
-Nodes (48): EHeadlessState, HttpPost, IActionResult, NotificationSendHelper, SaveServer, Task, TimeUtil, FleaBanController (+40 more)
+### Community 39 - "ControllerBase"
+Cohesion: 0.03
+Nodes (53): Authorize, ControllerBase, FikaWebApp.Controllers, HttpPost, IActionResult, NotificationSendHelper, SaveServer, Task (+45 more)
 
 ### Community 40 - "HeadlessHelper"
-Cohesion: 0.05
-Nodes (38): HttpResponseUtil, MongoId, RegisterPlayerRequestData, ValueTask, RaidCallbacks, GetRaidConfigurationRequestData, List, ISptLogger (+30 more)
+Cohesion: 0.03
+Nodes (66): DateTimeEnum, GetRaidConfigurationRequestData, HttpResponseUtil, MongoId, ValueTask, LocationCallbacks, HttpResponseUtil, MongoId (+58 more)
 
 ### Community 41 - "HeadlessGame"
 Cohesion: 0.04
-Nodes (42): AbstractGame, EBotAmount, Callback, DateTime, Dictionary, EDateTime, ESeason, EUpdateQueue (+34 more)
+Nodes (51): AbstractGame, EBotAmount, Callback, DateTime, Dictionary, EDateTime, ESeason, EUpdateQueue (+43 more)
 
-### Community 42 - "NotificationWebSocket"
-Cohesion: 0.05
-Nodes (43): Dictionary, EFikaLocation, HttpGet, IActionResult, ILogger, SaveServer, PlayersController, HttpResponseUtil (+35 more)
+### Community 42 - "PresenceService"
+Cohesion: 0.06
+Nodes (36): HttpResponseUtil, IRequestData, MongoId, ValueTask, PresenceCallbacks, EFikaPlayerPresences, IN_FLEA, IN_HIDEOUT (+28 more)
 
 ### Community 43 - "LZ4Pickler"
 Cohesion: 0.07
 Nodes (28): K4os.Compression.LZ4, Fika.Core.Networking.LZ4, AssemblyHook, Span, LZ4Level, L00_FAST, L03_HC, L04_HC (+20 more)
 
 ### Community 44 - "FikaBackendUtils"
-Cohesion: 0.04
-Nodes (48): Dictionary, GClass1628, GroupPlayerViewModelClass, Guid, IPEndPoint, MatchMakerAcceptScreen, PartyInfoPanel, Profile (+40 more)
+Cohesion: 0.03
+Nodes (60): ETimeFlowType, GClass1628, GroupPlayerViewModelClass, Guid, IPEndPoint, MatchMakerAcceptScreen, RaidSettings, Task (+52 more)
 
-### Community 45 - "IDisposable"
-Cohesion: 0.05
-Nodes (26): Corpse, List, Renderer, ObservedCorpseCulling, ScreenUpdater, NetDataWriter, IPoolSubPacket, Func (+18 more)
+### Community 45 - ".DispatchEvent"
+Cohesion: 0.08
+Nodes (15): FikaNetworkManagerDestroyedEvent, Manager, Action, FikaEventDispatcher, DisconnectInfo, Func, MethodImpl, BasePacketPoolManager (+7 more)
 
 ### Community 46 - "LiteNetPeer"
-Cohesion: 0.05
-Nodes (21): DateTime, Dictionary, LiteNetManager, SocketAddress, Stopwatch, IncomingFragments, LiteNetPeer, ChannelsCount (+13 more)
+Cohesion: 0.04
+Nodes (25): ILiteNetEventListener, DateTime, Dictionary, NetDataWriter, NetPacket, ReadOnlySpan, ReliableChannel, SequencedChannel (+17 more)
 
 ### Community 47 - "Mapping"
-Cohesion: 0.06
-Nodes (35): DateTime, IPAddress, Protocol, Mapping, Description, Expiration, Lifetime, LifetimeType (+27 more)
+Cohesion: 0.07
+Nodes (30): DateTime, IPAddress, Protocol, Mapping, Description, Expiration, Lifetime, LifetimeType (+22 more)
 
 ### Community 48 - "FikaVOIPController"
-Cohesion: 0.05
-Nodes (32): BannedState, BindableStateClass, BlockedState, MirrorIgnoranceCommsNetwork, CompositeDisposableClass, SoundSettingsControllerClass, AbstractOffState, FikaVOIPController (+24 more)
+Cohesion: 0.07
+Nodes (22): BannedState, BindableStateClass, BlockedState, CompositeDisposableClass, SoundSettingsControllerClass, FikaVOIPController, BlockingTime, DissonanceComms (+14 more)
 
 ### Community 49 - "ProfilesPage"
-Cohesion: 0.05
-Nodes (40): ConfirmFleaBanDialog, ProfileResponse, HasFleaBan, Level, Nickname, ProfileId, IDialogService, ILogger (+32 more)
+Cohesion: 0.09
+Nodes (24): ProfileResponse, HasFleaBan, Level, Nickname, ProfileId, Func, HttpClient, IBrowserFile (+16 more)
 
 ### Community 50 - "ILZ4Decoder"
-Cohesion: 0.07
-Nodes (20): Fika.Core.Networking.LZ4.Encoders, EncoderAction, Copied, Encoded, Loaded, None, ILZ4Decoder, BlockSize (+12 more)
+Cohesion: 0.08
+Nodes (18): Fika.Core.Networking.LZ4.Encoders, EncoderAction, Copied, Encoded, Loaded, None, ILZ4Decoder, BlockSize (+10 more)
 
-### Community 51 - "IRequestData"
-Cohesion: 0.06
-Nodes (33): FikaServer.Models.Fika.Routes.Update, HttpResponseUtil, MongoId, ValueTask, UpdateCallbacks, Task, UpdateController, FikaUpdateRaidAddPlayerData (+25 more)
+### Community 51 - "MatchService"
+Cohesion: 0.04
+Nodes (49): FikaServer.Models.Fika.Routes.Update, HttpResponseUtil, MongoId, ValueTask, UpdateCallbacks, Task, UpdateController, EFikaMatchEndSessionMessage (+41 more)
 
 ### Community 52 - "ObservedFirearmController"
-Cohesion: 0.06
+Cohesion: 0.05
 Nodes (25): BaseAnimationOperationClass, Dictionary, IEnumerator, OperationFactoryDelegate, Type, Vector3, ObservedFirearmController, IsAiming (+17 more)
 
 ### Community 53 - "DisconnectReason"
@@ -1030,84 +1039,84 @@ Cohesion: 0.04
 Nodes (44): DisconnectReason, ConnectionFailed, ConnectionRejected, DisconnectPeerCalled, HostUnreachable, InvalidProtocol, NetworkUnreachable, PeerNotFound (+36 more)
 
 ### Community 54 - "Fika.Core/Networking/LiteNetLib/Utils/NetDataReader.cs"
-Cohesion: 0.08
-Nodes (36): ArraySegment, Func, Guid, IPEndPoint, MethodImpl, Obsolete, ReadOnlySpan, EnsureAvailable() (+28 more)
+Cohesion: 0.07
+Nodes (37): ArraySegment, Func, Guid, IPEndPoint, MethodImpl, Obsolete, ReadOnlySpan, EnsureAvailable() (+29 more)
 
 ### Community 55 - "FikaCommsNetwork"
 Cohesion: 0.06
 Nodes (29): BaseClient, BaseCommsNetwork, BaseServer, ClientInfo, ConcurrentPool, ArraySegment, List, FikaCommsNetwork (+21 more)
 
 ### Community 56 - "LL64"
-Cohesion: 0.11
-Nodes (15): cParams_t, dictCtx_directive, earlyEnd_directive, endCondition_directive, dict_directive, LZ4_streamDecode_t, MethodImpl, size_t (+7 more)
+Cohesion: 0.16
+Nodes (10): cParams_t, dictCtx_directive, LZ4_streamHC_t, LL64, limitedOutput_directive, LZ4_streamHC_t, MethodImpl, size_t (+2 more)
 
 ### Community 57 - "WorldPacket"
 Cohesion: 0.05
-Nodes (29): AirplaneDataPacketStruct, BorderZone, GClass818, List, LootItem, LootSyncStruct, FikaClientWorld, FikaHostWorld (+21 more)
+Nodes (30): AirplaneDataPacketStruct, BorderZone, GClass818, List, LootItem, LootSyncStruct, FikaClientWorld, FikaHostWorld (+22 more)
 
 ### Community 58 - "AbstractPatch"
 Cohesion: 0.08
-Nodes (26): AbstractPatch, CancelFriendRequestData, FikaServer.Overrides.Callbacks, DeclineFriendRequestData, DeleteFriendRequest, AcceptFriendRequestData, EmptyRequestData, MethodBase (+18 more)
+Nodes (28): AbstractPatch, CancelFriendRequestData, FikaServer.Overrides.Callbacks, DeclineFriendRequestData, DeleteFriendRequest, AcceptFriendRequestData, EmptyRequestData, MethodBase (+20 more)
 
 ### Community 59 - "FikaGlobals"
-Cohesion: 0.04
-Nodes (25): Action, BodyPartCollider, Callback, EBodyPart, EInteraction, ELoadPriority, EquipmentSlot, ESendRate (+17 more)
+Cohesion: 0.05
+Nodes (24): Action, Callback, EInteraction, ELoadPriority, EquipmentSlot, ESendRate, EShotType, Func (+16 more)
 
 ### Community 60 - "FikaClientFirearmController"
 Cohesion: 0.06
 Nodes (14): AmmoPackReloadInternalBoltOpenOperationClass, AmmoPackReloadInternalOneChamberOperationClass, CylinderReloadOperationClass, Action, BaseAnimationOperationClass, Dictionary, FirearmScopeStateStruct, OperationFactoryDelegate (+6 more)
 
 ### Community 61 - "ReviveInteractable"
-Cohesion: 0.05
-Nodes (24): CharacterJoint, Action, ActionsReturnClass, Callback, GamePlayerOwner, IResult, PlayerPoolObject, ReviveInteractable (+16 more)
+Cohesion: 0.06
+Nodes (17): CharacterJoint, Action, ActionsReturnClass, Callback, GamePlayerOwner, IResult, PlayerPoolObject, ReviveInteractable (+9 more)
 
-### Community 62 - ".LogError"
+### Community 62 - ".LogWarning"
 Cohesion: 0.05
-Nodes (14): DogtagComponent, PatchPrefix, Vector3, IEnumerator, NetworkHealthSyncPacketStruct, NetDataReader, NetDataWriter, MuffledState (+6 more)
+Nodes (16): DogtagComponent, EOperationStatus, ServerOperationStatus, EDamageType, EDamageType, IEnumerator, NetworkHealthSyncPacketStruct, NetDataReader (+8 more)
 
 ### Community 63 - "FikaConfigClient"
-Cohesion: 0.04
-Nodes (43): FikaConfig, Background, Client, Headless, NatPunchServer, Server, FikaConfigBackground, Enable (+35 more)
+Cohesion: 0.13
+Nodes (15): FikaConfigClient, AllowFreeCam, AllowNamePlates, AllowSpectateFreeCam, AnyoneCanStartRaid, BlacklistedItems, CanEditRaidSettings, DynamicVExfils (+7 more)
 
 ### Community 64 - "FriendData"
 Cohesion: 0.05
-Nodes (37): BackendErrorCodes, FikaServer.Models.Fika.Dialog, MongoId, ChatFriendData, Banned, Ignored, Level, MemberCategory (+29 more)
+Nodes (35): BackendErrorCodes, FikaServer.Models.Fika.Dialog, MongoId, ChatFriendData, Banned, Ignored, Level, MemberCategory (+27 more)
 
 ### Community 65 - "NetPeer"
-Cohesion: 0.05
-Nodes (22): NetPeer, SpawnItemPacket, Dictionary, NetDataReader, NetDataWriter, Profile, LoadingProfilePacket, NetDataReader (+14 more)
+Cohesion: 0.04
+Nodes (24): BtrNotificationInteractionMessageEvent, NetPeer, SpawnItemPacket, NetDataReader, NetDataWriter, ClearSnapshotterPacket, MongoID, NetDataReader (+16 more)
 
 ### Community 66 - "ECommonSubPacketType"
-Cohesion: 0.05
-Nodes (29): IPoolSubPacket, NetDataReader, NetDataWriter, WeaponPacket, NetDataReader, IPoolSubPacket, NetDataReader, NetDataWriter (+21 more)
+Cohesion: 0.07
+Nodes (23): IPoolSubPacket, NetDataReader, NetDataWriter, CommonPlayerPacket, ECommonSubPacketType, ArmorDamage, ContainerInteraction, Damage (+15 more)
 
 ### Community 67 - "Microsoft.NETCore.Platforms"
 Cohesion: 0.05
 Nodes (47): Microsoft.NETCore.Platforms, Microsoft.NETCore.Targets, System.IO, System.Reflection, System.Reflection.Primitives, System.Runtime.Handles, System.Text.Encoding, System.Collections (+39 more)
 
-### Community 68 - "MatchService"
-Cohesion: 0.08
-Nodes (24): HttpResponseUtil, IRequestData, MongoId, ValueTask, PresenceCallbacks, FikaPlayer, GroupId, IsDead (+16 more)
+### Community 68 - "ClientHealthController"
+Cohesion: 0.11
+Nodes (14): EBodyPart, InventoryController, NetworkHealthSyncPacketStruct, ProfileHealthClass, SkillManager, ClientHealthController, BleedoutTime, CanBeDowned (+6 more)
 
-### Community 69 - "ButtonHandler"
-Cohesion: 0.05
-Nodes (27): GrenadeFactoryClass, Coroutine, GrenadeDataPacketStruct, IEnumerator, FikaClientGrenade, GameObject, Grenade, SmokeGrenade (+19 more)
+### Community 69 - "FikaClientGrenadeFactory"
+Cohesion: 0.10
+Nodes (13): GrenadeFactoryClass, GameObject, Grenade, SmokeGrenade, StunGrenade, FikaClientGrenadeFactory, GrenadeDataPacketStruct, FikaClientSmokeGrenade (+5 more)
 
 ### Community 70 - "FikaServer/Networking/LiteNetLib/Utils/NetDataReader.cs"
 Cohesion: 0.07
 Nodes (30): ArraySegment, Func, Guid, IPEndPoint, MethodImpl, ReadOnlySpan, Get(), GetArray() (+22 more)
 
-### Community 71 - ".Prefix"
-Cohesion: 0.04
-Nodes (27): Fika.Core.Main.Patches.Airdrops, Fika.Core.Main.Patches.Rockets, AirplaneDataPacketStruct, MethodBase, PatchPostfix, OfflineAirdropServerLogicClass_UpdateOfflineClientLogic_Patch, AirplaneDataPacketStruct, MethodBase (+19 more)
+### Community 71 - "OfflineAirdropServerLogicClass_UpdateOfflineClientLogic_Patch"
+Cohesion: 0.09
+Nodes (14): Fika.Core.Main.Patches.Airdrops, AirplaneDataPacketStruct, MethodBase, PatchPostfix, OfflineAirdropServerLogicClass_UpdateOfflineClientLogic_Patch, AirplaneDataPacketStruct, MethodBase, PatchPostfix (+6 more)
 
 ### Community 72 - ".OnConnectionSolved"
 Cohesion: 0.06
-Nodes (28): NetDataReader, NetConnectRequestPacket, NetPacket, ConnectionState, Any, Connected, Disconnected, EndPointChange (+20 more)
+Nodes (21): NetDataReader, NetPacket, ReadOnlySpan, SocketAddress, NetConnectAcceptPacket, NetConnectRequestPacket, ConnectRequestResult, NewConnection (+13 more)
 
 ### Community 73 - "DeliveryMethod"
-Cohesion: 0.07
-Nodes (21): NetDataWriter, PooledPacket, ReadOnlySpan, DeliveryMethod, ReliableOrdered, ReliableSequenced, ReliableUnordered, Sequenced (+13 more)
+Cohesion: 0.08
+Nodes (17): PooledPacket, DeliveryMethod, ReliableOrdered, ReliableSequenced, ReliableUnordered, Sequenced, Unreliable, NetConstants (+9 more)
 
 ### Community 74 - "net10.0"
 Cohesion: 0.04
@@ -1122,36 +1131,36 @@ Cohesion: 0.05
 Nodes (44): contentHash, resolved, type, dependencies, .NETStandard,Version=v2.1, contentHash, resolved, type (+36 more)
 
 ### Community 77 - "CoopHandler"
-Cohesion: 0.06
-Nodes (28): EQuitState, Dictionary, EHandsControllerType, IEnumerator, List, LocalPlayer, ManualLogSource, MongoID (+20 more)
+Cohesion: 0.10
+Nodes (15): EQuitState, Dictionary, List, ManualLogSource, Queue, CoopHandler, AmountOfHumans, ExtractedPlayers (+7 more)
 
 ### Community 78 - "MatchMakerUIScript"
-Cohesion: 0.07
-Nodes (26): RaidSettings, AvailableHeadlessClientsRequest, Alias, HeadlessSessionID, Button, Coroutine, DefaultUIButton, GameObject (+18 more)
+Cohesion: 0.05
+Nodes (34): RaidSettings, AvailableHeadlessClientsRequest, Alias, HeadlessSessionID, Button, GameObject, HoverTooltipArea, Image (+26 more)
 
 ### Community 79 - "LZ4ChainDecoder"
-Cohesion: 0.07
-Nodes (20): LZ4BlockDecoder, BlockSize, BytesReady, OutputBuffer, LZ4Context, LZ4ChainDecoder, BlockSize, BytesReady (+12 more)
+Cohesion: 0.06
+Nodes (22): LZ4BlockDecoder, BlockSize, BytesReady, OutputBuffer, LZ4Level, LZ4BlockEncoder, LZ4Context, LZ4ChainDecoder (+14 more)
 
 ### Community 80 - "SendItemController"
-Cohesion: 0.06
-Nodes (32): BaseInteractionRequestData, EventOutputHolder, SearchableItemItemClass, SearchContentOperation, HttpResponseUtil, ItemEventRouterResponse, MongoId, ValueTask (+24 more)
+Cohesion: 0.07
+Nodes (29): BaseInteractionRequestData, EventOutputHolder, HttpResponseUtil, ItemEventRouterResponse, MongoId, ValueTask, SendItemCallbacks, Dictionary (+21 more)
 
 ### Community 81 - "ClientSharedQuestController"
-Cohesion: 0.06
-Nodes (22): ConditionLeaveItemAtLocation, ConditionPlaceBeacon, Condition, EQuestStatus, FikaPlayer, HashSet, InventoryController, IPlayerSearchController (+14 more)
+Cohesion: 0.13
+Nodes (10): ConditionLeaveItemAtLocation, ConditionPlaceBeacon, FikaPlayer, HashSet, InventoryController, IPlayerSearchController, IQuestActions, List (+2 more)
 
 ### Community 82 - "Fika.Core.Networking.Open.Nat.Utils"
-Cohesion: 0.07
-Nodes (23): Fika.Core.Networking.Open.Nat.Utils, Fika.Core.Networking.Open.Nat.Upnp, Fika.Core.Networking.Open.Nat.Upnp.Messages.Responses, Fika.Core.Networking.Open.Nat.Pmp, Fika.Core.Networking.Open.Nat, Fika.Core.Networking.Open.Nat.Exceptions, Fika.Core.Networking.Open.Nat.Upnp.Messages, Fika.Core.Networking.Open.Nat.Enums (+15 more)
+Cohesion: 0.10
+Nodes (15): Fika.Core.Networking.Open.Nat.Utils, Fika.Core.Networking.Open.Nat.Upnp, Fika.Core.Networking.Open.Nat.Upnp.Messages.Responses, Fika.Core.Networking.Open.Nat.Pmp, Fika.Core.Networking.Open.Nat, Fika.Core.Networking.Open.Nat.Exceptions, Fika.Core.Networking.Open.Nat.Enums, Fika.Core.Networking.Open.Nat.Discovery (+7 more)
 
 ### Community 83 - "FikaPlugin"
 Cohesion: 0.05
-Nodes (27): BotDifficulties, Dictionary, FikaConfig, GameUI, HeadlessRequesterWebSocket, IPAddress, ManualLogSource, PatchManager (+19 more)
+Nodes (31): BotDifficulties, Dictionary, FikaConfig, GameUI, HeadlessRequesterWebSocket, IPAddress, ManualLogSource, PatchManager (+23 more)
 
 ### Community 84 - "NetDataWriter"
-Cohesion: 0.08
-Nodes (10): SetSource(), UTF8Encoding, NetDataWriter, Capacity, Data, Length, NetDataWriter, FastCallStruct (+2 more)
+Cohesion: 0.11
+Nodes (8): UTF8Encoding, NetDataWriter, Capacity, Data, Length, NetDataWriter, FastCallClass, NetDataWriter
 
 ### Community 85 - "PinnedMemory"
 Cohesion: 0.09
@@ -1167,11 +1176,11 @@ Nodes (26): Fika.Core.Main.Patches.MovementContextPatches, CodeInstruction, IEnu
 
 ### Community 88 - ".GetRequestSubPacket"
 Cohesion: 0.07
-Nodes (24): ERequestSubPacketType, CharacterSync, Exfiltration, SpawnPoint, TraderServices, Weather, FikaServer, NetPeer (+16 more)
+Nodes (20): FikaServer, NetPeer, IRequestPacket, EExfiltrationStatus, ESeason, FikaServer, List, NetDataWriter (+12 more)
 
 ### Community 89 - "IFikaNetworkManager"
-Cohesion: 0.06
-Nodes (24): Action, ArraySegment, CoopHandler, DeliveryMethod, ESideType, Func, List, NetDataReader (+16 more)
+Cohesion: 0.07
+Nodes (20): Action, ArraySegment, CoopHandler, DeliveryMethod, ESideType, Func, List, NetDataReader (+12 more)
 
 ### Community 90 - "LiteNetManager"
 Cohesion: 0.08
@@ -1182,28 +1191,28 @@ Cohesion: 0.12
 Nodes (18): CommandStatus, AmmoItemClass, CancellationTokenSource, InventoryController, IPlayerSearchController, IResult, Item, MagazineItemClass (+10 more)
 
 ### Community 92 - "Fika.Core.Main.Patches.PlayerPatches"
-Cohesion: 0.05
-Nodes (25): Fika.Core.Main.Patches.PlayerPatches, Callback, Item, MethodBase, PatchPrefix, ObservedPlayer_DropBackpackSafety_Patch, MethodBase, PatchPrefix (+17 more)
+Cohesion: 0.04
+Nodes (35): Fika.Core.Main.Patches.PlayerPatches, Callback, Item, MethodBase, PatchPrefix, ObservedPlayer_DropBackpackSafety_Patch, MethodBase, PatchPrefix (+27 more)
 
 ### Community 93 - "ObservedInventoryController"
 Cohesion: 0.08
-Nodes (22): DestroyedItemsStruct, BaseInventoryOperationClass, Callback, FieldInfo, GEventArgs17, GInterface438, GStruct156, IEnumerable (+14 more)
+Nodes (23): DestroyedItemsStruct, BaseDescriptorClass, BaseInventoryOperationClass, Callback, FieldInfo, GEventArgs1, GEventArgs17, GInterface438 (+15 more)
 
 ### Community 94 - "FikaDialogueController"
-Cohesion: 0.09
-Nodes (23): DialogueController, DialogueHelper, ERemoveFriendReason, AcceptFriendRequestData, Dictionary, HttpResponseUtil, IEnumerable, ISptLogger (+15 more)
+Cohesion: 0.07
+Nodes (32): DialogueController, DialogueHelper, ERemoveFriendReason, AcceptFriendRequestData, Dictionary, GetFriendListDataResponse, HttpResponseUtil, IEnumerable (+24 more)
 
-### Community 95 - ".RegisterPacketsAndTypes"
-Cohesion: 0.06
-Nodes (18): EHitType, CancellationToken, CancellationTokenSource, CommandPacket, MirrorIgnoranceCommsNetwork, SpawnItemPacket, Task, NetDataReader (+10 more)
+### Community 95 - "LoadingScreenPlayersPacket"
+Cohesion: 0.12
+Nodes (6): NetDataReader, NetDataWriter, LoadingScreenPlayersPacket, NetDataReader, NetDataWriter, NetworkSettingsPacket
 
 ### Community 96 - "FikaPingingClient"
 Cohesion: 0.08
-Nodes (21): CancellationToken, CancellationTokenSource, ConnectionRequest, DeliveryMethod, DisconnectInfo, IPAddress, IPEndPoint, List (+13 more)
+Nodes (20): CancellationToken, CancellationTokenSource, ConnectionRequest, DeliveryMethod, DisconnectInfo, IPAddress, IPEndPoint, List (+12 more)
 
 ### Community 97 - "FikaWebApp.Data"
-Cohesion: 0.06
-Nodes (28): ApexCharts, Brism, FikaWebApp.Data, Microsoft.AspNetCore.Routing, FikaWebApp.Components.Account, ILoggerFactory, IdentityComponentsEndpointRouteBuilderExtensions, OnInitializedAsync (+20 more)
+Cohesion: 0.07
+Nodes (23): FikaWebApp.Data, Microsoft.AspNetCore.Routing, ILoggerFactory, IdentityComponentsEndpointRouteBuilderExtensions, OnInitializedAsync, ApplicationUser, IdentityRedirectManager, IEmailSender (+15 more)
 
 ### Community 98 - "FikaHeadlessPlugin"
 Cohesion: 0.07
@@ -1213,57 +1222,57 @@ Nodes (22): BaseUnityPlugin, ConfigEntry, IReadOnlyList, ISession, ManualLogSour
 Cohesion: 0.07
 Nodes (15): ControllerColliderHit, ECantRotate, Error, EStationaryCommand, Quaternion, Transform, Vector3, ObservedMovementContext (+7 more)
 
-### Community 100 - "NetSerializer"
-Cohesion: 0.09
-Nodes (18): FastCall, Action, Dictionary, Func, PropertyInfo, Type, ClassInfo, CustomType (+10 more)
+### Community 100 - "List"
+Cohesion: 0.16
+Nodes (6): PropertyInfo, Type, List, EnumByteSerializer, FastCallSpecific, InvalidTypeException
 
 ### Community 101 - "SetBlackImageAlpha_Patch"
 Cohesion: 0.06
 Nodes (20): Fika.Core.Main.FreeCamera.Patches, DeathFade, MethodBase, PatchPrefix, DeathFade_Patch, Action, Image, MethodBase (+12 more)
 
-### Community 102 - "FikaServer.Callbacks"
-Cohesion: 0.07
-Nodes (25): FikaServer.Routers.Static, FikaServer.Models.Fika.SendItem.AvailableReceivers, FikaServer.Callbacks, GetRaidConfigurationRequestData, HttpResponseUtil, MongoId, ValueTask, LocationCallbacks (+17 more)
+### Community 102 - "ModifyProfileDialog"
+Cohesion: 0.10
+Nodes (16): ConfirmFleaBanDialog, IDialogService, ILogger, IMudDialogInstance, ISnackbar, SendTimersService, Task, YesNoDialog (+8 more)
 
 ### Community 103 - "MonoBehaviour"
-Cohesion: 0.05
-Nodes (23): HeadlessRaidController, Image, FikaPing, ObservedPacketSender, NetworkManager, SendState, Button, TextMeshProUGUI (+15 more)
+Cohesion: 0.06
+Nodes (23): HeadlessRaidController, Button, TextMeshProUGUI, TMP_InputField, FikaChatUI, GameObject, TextMeshProUGUI, Transform (+15 more)
 
 ### Community 104 - "FikaRequestHandler"
-Cohesion: 0.09
-Nodes (13): IPAddress, Task, FikaRequestHandler, AddPlayerRequest, StartHeadlessResponse, Error, MatchId, PingRequest (+5 more)
+Cohesion: 0.07
+Nodes (19): IPAddress, Task, FikaRequestHandler, AddPlayerRequest, Dictionary, DownloadProfileResponse, ErrorMessage, ModData (+11 more)
 
 ### Community 105 - "UpnpNatDevice"
-Cohesion: 0.09
-Nodes (23): Fika.Core.Networking.Open.Nat.Upnp.Messages.Requests, IDictionary, Mapping, CreatePortMappingRequestMessage, IDictionary, Mapping, DeletePortMappingRequestMessage, IDictionary (+15 more)
+Cohesion: 0.07
+Nodes (29): Fika.Core.Networking.Open.Nat.Upnp.Messages.Requests, Protocol, Tcp, Udp, IDictionary, Mapping, CreatePortMappingRequestMessage, IDictionary (+21 more)
 
 ### Community 106 - "ObservedMedsController"
 Cohesion: 0.07
-Nodes (17): Action, BaseAnimationOperationClass, Dictionary, EBodyPart, FieldInfo, GStruct382, IEffect, Item (+9 more)
+Nodes (16): Action, BaseAnimationOperationClass, Dictionary, EBodyPart, FieldInfo, GStruct382, Item, OperationFactoryDelegate (+8 more)
 
 ### Community 107 - "Fika.Core/packages.lock.json"
 Cohesion: 0.05
 Nodes (36): BepInEx.BaseLib, HarmonyX, Microsoft.NETCore.Platforms, Microsoft.NETCore.Targets, Mono.Cecil, MonoMod.RuntimeDetour, MonoMod.Utils, System.Collections (+28 more)
 
 ### Community 108 - "PlayerRelationsService"
-Cohesion: 0.11
-Nodes (22): GetFriendListDataResponse, ISptLogger, List, MongoId, SaveServer, SptWebSocketConnectionHandler, PlayerRelationsHelper, List (+14 more)
+Cohesion: 0.10
+Nodes (21): List, FikaPlayerRelations, Friends, Ignore, AbstractPatch, ISptLogger, JsonUtil, List (+13 more)
 
 ### Community 109 - "FikaChatBot"
 Cohesion: 0.06
 Nodes (28): AbstractDialogChatBot, FikaServer.ChatBot, Dictionary, IEnumerable, ISptLogger, MailSendService, MongoId, UserDialogInfo (+20 more)
 
-### Community 110 - "NetDataWriter"
+### Community 110 - "NetDataReader"
 Cohesion: 0.06
-Nodes (12): ClassQuaternion, NetDataWriter, GClass1926, GClass1939, GClass1943, GClass1962, GClass1966, GClass1968 (+4 more)
+Nodes (12): EWishlistGroup, NetDataReader, GClass1924, GClass1943, GClass1952, GClass1966, GClass1978, GClass1994 (+4 more)
 
 ### Community 111 - "Fika.Core.Networking.LZ4.Internal"
 Cohesion: 0.08
 Nodes (16): Fika.Core.Networking.LZ4.Engine, K4os.Compression.LZ4.Engine, Fika.Core.Networking.LZ4.Internal, LZ4Context, LZ4FastChainEncoder, Context, LZ4Context, LZ4HighChainEncoder (+8 more)
 
 ### Community 112 - "EPlayerSide"
-Cohesion: 0.06
-Nodes (17): EMemberCategory, EProfileType, BotDifficulty, EBodyPart, EBodyPartColliderType, EDamageType, EPlayerSide, ProfileHealthClass (+9 more)
+Cohesion: 0.08
+Nodes (14): EMemberCategory, EProfileType, BotDifficulty, EBodyPartColliderType, EDamageType, EPlayerSide, WildSpawnType, GClass1410 (+6 more)
 
 ### Community 113 - "List"
 Cohesion: 0.06
@@ -1274,60 +1283,60 @@ Cohesion: 0.06
 Nodes (35): BepInEx.BaseLib, HarmonyX, Microsoft.NETCore.Platforms, Microsoft.NETCore.Targets, Mono.Cecil, MonoMod.RuntimeDetour, MonoMod.Utils, System.Collections (+27 more)
 
 ### Community 115 - ".Put"
-Cohesion: 0.08
-Nodes (10): MethodImpl, FastBitConverter, DateTime, Guid, IPEndPoint, MethodImpl, ReadOnlySpan, Span (+2 more)
+Cohesion: 0.07
+Nodes (12): MethodImpl, DateTime, Guid, IPEndPoint, MethodImpl, ReadOnlySpan, Span, CallType (+4 more)
 
-### Community 116 - "NetDataReader"
+### Community 116 - "NetDataWriter"
 Cohesion: 0.06
-Nodes (12): ApplyKeyDescriptorClass, ClassTransformSync, NetDataReader, GClass1953, GClass1955, GClass1979, GClass1982, GClass1987 (+4 more)
+Nodes (12): ApplyKeyDescriptorClass, NetDataWriter, GClass1931, GClass1935, GClass1941, GClass1951, GClass1968, GClass1969 (+4 more)
 
 ### Community 117 - ".Prefix"
 Cohesion: 0.06
 Nodes (23): BipodViewController, Fika.Core.Main.Patches.Camera, MethodBase, PatchPrefix, OpticRetrice_UpdateTransform_Patch, CodeInstruction, IEnumerable, MethodBase (+15 more)
 
 ### Community 118 - "HeadlessService"
-Cohesion: 0.07
-Nodes (27): BotNameService, HttpPost, IActionResult, JsonUtil, Task, RestartHeadlessController, ConfigServer, DatabaseService (+19 more)
+Cohesion: 0.04
+Nodes (43): BotNameService, HttpPost, IActionResult, JsonUtil, Task, RestartHeadlessController, EFikaHeadlessWSMessageType, HeadlessStartRaid (+35 more)
 
 ### Community 119 - "Player"
-Cohesion: 0.09
-Nodes (21): EEventType, EState, InteractPacketStruct, Location, NetPeer, HostRunddansController, MethodBase, PatchPrefix (+13 more)
+Cohesion: 0.04
+Nodes (43): EEventType, Dictionary, List, Location, ProfileKey, Task, TransitInteractionPacketStruct, TransitPoint (+35 more)
 
 ### Community 120 - "ShotInfoPacket"
-Cohesion: 0.09
-Nodes (14): EMalfunctionState, AmmoItemClass, Transform, Vector3, FirearmController, InventoryController, Weapon, EShotType (+6 more)
+Cohesion: 0.11
+Nodes (13): EMalfunctionState, AmmoItemClass, Transform, Vector3, InventoryController, Weapon, EShotType, MongoID (+5 more)
 
 ### Community 121 - ".NETStandard,Version=v2.1"
 Cohesion: 0.06
 Nodes (35): contentHash, resolved, type, dependencies, .NETStandard,Version=v2.1, contentHash, resolved, type (+27 more)
 
 ### Community 122 - "FikaClientKnifeController"
-Cohesion: 0.06
-Nodes (11): BallisticCollider, GStruct182, KnifeComponent, ShotInfoClass, FikaClientKnifeController, NetDataReader, NetDataWriter, CompassChangePacket (+3 more)
+Cohesion: 0.10
+Nodes (8): BallisticCollider, GStruct182, KnifeComponent, ShotInfoClass, FikaClientKnifeController, NetDataReader, NetDataWriter, KnifePacket
 
 ### Community 123 - "PacketProperty"
-Cohesion: 0.06
-Nodes (31): PacketProperty, Ack, Broadcast, Channeled, ConnectAccept, ConnectRequest, Disconnect, Empty (+23 more)
+Cohesion: 0.04
+Nodes (52): PacketProperty, Ack, Broadcast, Channeled, ConnectAccept, ConnectRequest, Disconnect, Empty (+44 more)
 
 ### Community 124 - "NtpPacket"
 Cohesion: 0.08
-Nodes (21): DateTime, TimeSpan, NtpPacket, Bytes, CorrectionOffset, DestinationTimestamp, LeapIndicator, Mode (+13 more)
+Nodes (20): DateTime, TimeSpan, NtpPacket, Bytes, CorrectionOffset, DestinationTimestamp, LeapIndicator, Mode (+12 more)
 
 ### Community 125 - "net9.0"
 Cohesion: 0.06
 Nodes (33): contentHash, resolved, type, contentHash, requested, resolved, contentHash, dependencies (+25 more)
 
 ### Community 126 - "NetManagerUtils"
-Cohesion: 0.08
-Nodes (15): PatchPrefix, RaidSettings, TarkovApplication, FikaNetworkManagerCreatedEvent, Manager, ELobbyStatus, SetStatusModel, CancellationToken (+7 more)
+Cohesion: 0.07
+Nodes (18): Location, MethodBase, PatchPrefix, RaidSettings, TarkovApplication, TarkovApplication_LocalGamePreparer_Patch, FikaNetworkManagerCreatedEvent, Manager (+10 more)
 
 ### Community 127 - "PlayerStateData"
 Cohesion: 0.07
 Nodes (25): EPlayerState, MethodImpl, PhysicalStateStruct, Vector2, Vector3, PlayerStateData, Blindfire, HandsExhausted (+17 more)
 
 ### Community 128 - ".DiscoverAsync"
-Cohesion: 0.08
-Nodes (18): Protocol, Tcp, Udp, Finalizer, CancellationTokenSource, Dictionary, IEnumerable, Task (+10 more)
+Cohesion: 0.13
+Nodes (12): Finalizer, CancellationTokenSource, Dictionary, IEnumerable, Task, Timer, TraceSource, NatDiscoverer (+4 more)
 
 ### Community 129 - "FikaConfigClient"
 Cohesion: 0.06
@@ -1337,29 +1346,29 @@ Nodes (33): List, FikaConfigClient, AllowFreeCam, AllowNamePlates, AllowSpectate
 Cohesion: 0.06
 Nodes (21): Fika.Headless.Patches.Audio.Tripwire, CodeInstruction, IEnumerable, MethodBase, PatchTranspiler, GClass2581_PlayCollisionSound_Transpiler, CodeInstruction, IEnumerable (+13 more)
 
-### Community 131 - "FikaHostTransitController"
-Cohesion: 0.07
-Nodes (17): SearchableItemItemClass, SearchContentOperation, SearchableItemItemClass, SearchContentOperation, Dictionary, List, LocalRaidSettings, ProfileKey (+9 more)
+### Community 131 - ".method_12"
+Cohesion: 0.18
+Nodes (6): SearchableItemItemClass, SearchContentOperation, SearchableItemItemClass, SearchContentOperation, SearchableItemItemClass, SearchContentOperation
 
 ### Community 132 - "ClientConfigModel"
-Cohesion: 0.06
+Cohesion: 0.07
 Nodes (29): ClientConfigModel, AllowFreeCam, AllowItemSending, AllowNamePlates, AllowSpectateBots, AllowSpectateFreeCam, AnyoneCanStartRaid, BlacklistedItems (+21 more)
 
 ### Community 133 - "ClientGameController"
-Cohesion: 0.10
-Nodes (14): DefaultUIButton, GameObject, BotControllerSettings, EUpdateQueue, GameWorld, IEnumerator, ISession, Location (+6 more)
+Cohesion: 0.13
+Nodes (12): BotControllerSettings, EUpdateQueue, GameWorld, IEnumerator, ISession, Location, Profile, Task (+4 more)
 
-### Community 134 - "EBodyPart"
-Cohesion: 0.12
-Nodes (17): DamageInfoStruct, EArmorPlateCollider, EBodyPart, EBodyPartColliderType, ShotIdStruct, ShotInfoClass, DamageInfoStruct, Dictionary (+9 more)
+### Community 134 - "DamagePacket"
+Cohesion: 0.10
+Nodes (24): DamageInfoStruct, Dictionary, EArmorPlateCollider, EBodyPart, EBodyPartColliderType, EDamageType, ExplosiveHitArmorColliderStruct, GStruct382 (+16 more)
 
 ### Community 135 - ".Proceed"
-Cohesion: 0.07
-Nodes (23): AbstractHandsController, Callback, FoodDrinkItemClass, GInterface198, GInterface203, GInterface206, GStruct382, IFirearmHandsController (+15 more)
+Cohesion: 0.14
+Nodes (12): Callback, FoodDrinkItemClass, GInterface198, GInterface203, GInterface206, IFirearmHandsController, IHandsThrowController, IKnifeController (+4 more)
 
 ### Community 136 - "MainMenuUIScript"
-Cohesion: 0.08
-Nodes (21): Coroutine, DateTime, EDateTime, EFikaPlayerPresence, GameObject, HoverTooltipArea, IEnumerator, ISession (+13 more)
+Cohesion: 0.05
+Nodes (32): EDateTime, EFikaPlayerPresence, ESideType, FikaPlayerPresence, RaidInformation, EFikaPlayerPresence, FikaSetPresence, Coroutine (+24 more)
 
 ### Community 137 - "FikaServer/packages.lock.json"
 Cohesion: 0.06
@@ -1382,7 +1391,7 @@ Cohesion: 0.08
 Nodes (23): FikaServer.Models.Fika.Routes.Admin, HttpResponseUtil, MongoId, ValueTask, AdminCallbacks, ISptLogger, MongoId, ValueTask (+15 more)
 
 ### Community 142 - ".LZ4_compress_generic"
-Cohesion: 0.11
+Cohesion: 0.09
 Nodes (13): dictIssue_directive, LZ4_stream_t, MethodImpl, tableType_t, dict_directive, limitedOutput_directive, LZ4_stream_t, MethodImpl (+5 more)
 
 ### Community 143 - "FikaClientGameWorld"
@@ -1394,48 +1403,48 @@ Cohesion: 0.08
 Nodes (12): AmmoItemClass, AmmoPackReloadingClass, Callback, ItemAddress, List, MagazineItemClass, WeaponManagerClass, NetDataReader (+4 more)
 
 ### Community 145 - "FikaChatUIScript"
-Cohesion: 0.08
+Cohesion: 0.09
 Nodes (12): ECommand, ECursorResult, ETranslateResult, GameObject, List, UIDragComponent, ChatMessage, FormattedMessage (+4 more)
 
 ### Community 146 - "NetDataWriter"
-Cohesion: 0.10
-Nodes (15): CallType, Array, Basic, DateTime, Guid, IPEndPoint, MethodImpl, ReadOnlySpan (+7 more)
+Cohesion: 0.12
+Nodes (12): DateTime, Guid, IPEndPoint, MethodImpl, ReadOnlySpan, Span, UTF8Encoding, NetDataWriter (+4 more)
 
 ### Community 147 - "EFirearmSubPacketType"
-Cohesion: 0.06
-Nodes (31): EFirearmSubPacketType, CancelGrenade, ChangeFireMode, CheckAmmo, CheckChamber, CheckFireMode, CompassChange, CylinderMag (+23 more)
+Cohesion: 0.05
+Nodes (36): EFirearmSubPacketType, CancelGrenade, ChangeFireMode, CheckAmmo, CheckChamber, CheckFireMode, CompassChange, CylinderMag (+28 more)
 
 ### Community 148 - "HeadlessProfileService"
-Cohesion: 0.11
-Nodes (22): Uri, HeadlessLaunchSettings, BackendUrl, ProfileId, StartMinimized, ConfigServer, ConfigService, CoreConfig (+14 more)
+Cohesion: 0.09
+Nodes (26): HttpPost, IActionResult, Task, HeadlessProfileController, Uri, HeadlessLaunchSettings, BackendUrl, ProfileId (+18 more)
 
 ### Community 149 - "NtpPacket"
 Cohesion: 0.09
 Nodes (20): DateTime, TimeSpan, NtpPacket, Bytes, CorrectionOffset, DestinationTimestamp, LeapIndicator, Mode (+12 more)
 
 ### Community 150 - "ClientTransitController"
-Cohesion: 0.08
-Nodes (11): LocalRaidSettings, TransitInteractionPacketStruct, TransitPoint, ClientTransitController, InteractPacket, Player, NetDataReader, NetDataWriter (+3 more)
+Cohesion: 0.05
+Nodes (23): ETransitEventType, LocalRaidSettings, TransitInteractionPacketStruct, TransitPoint, ClientTransitController, InteractPacket, Player, NetDataReader (+15 more)
 
 ### Community 151 - "NatPunchModule"
-Cohesion: 0.10
-Nodes (24): ConcurrentQueue, IPEndPoint, LiteNetManager, NetDataReader, NetDataWriter, NetPacketProcessor, NatIntroduceRequestPacket, Internal (+16 more)
+Cohesion: 0.11
+Nodes (22): ConcurrentQueue, IPEndPoint, LiteNetManager, NetDataReader, NetDataWriter, NetPacketProcessor, NatIntroduceRequestPacket, Internal (+14 more)
 
 ### Community 152 - "ClientService"
-Cohesion: 0.08
-Nodes (17): List, FikaCheckModResponse, Forbidden, HashMismatch, MissingRequired, Dictionary, SptProfile, DownloadProfileResponse (+9 more)
+Cohesion: 0.11
+Nodes (14): MongoId, ClientController, VersionCheckResponse, Version, Dictionary, SptProfile, DownloadProfileResponse, ModData (+6 more)
 
 ### Community 153 - "SendTimersService"
-Cohesion: 0.09
-Nodes (23): SendItemRequest, ProfileId, SendItemToAllRequest, ProfileIds, KeyValuePair, Task, Timer, YesNoDialog (+15 more)
+Cohesion: 0.19
+Nodes (11): DateTime, HttpClient, ILogger, Lock, Task, Timer, SendTimersService, Timers (+3 more)
 
 ### Community 154 - "Microsoft.EntityFrameworkCore.Sqlite"
 Cohesion: 0.07
 Nodes (31): Microsoft.Data.Sqlite.Core, Microsoft.EntityFrameworkCore.Sqlite.Core, Microsoft.Extensions.DependencyModel, SQLitePCLRaw.bundle_e_sqlite3, SQLitePCLRaw.core, contentHash, dependencies, resolved (+23 more)
 
 ### Community 155 - "AbstractPing"
-Cohesion: 0.14
-Nodes (20): AbstractPing, Canvas, Color, Dictionary, EFikaSprite, Image, RectTransform, Sprite (+12 more)
+Cohesion: 0.13
+Nodes (21): AbstractPing, Canvas, Color, Dictionary, EFikaSprite, EUISoundType, Image, RectTransform (+13 more)
 
 ### Community 156 - ".Prefix"
 Cohesion: 0.07
@@ -1449,36 +1458,36 @@ Nodes (20): FikaServer.Models.Fika.Insurance, MongoId, FikaInsurancePlayer, Ende
 Cohesion: 0.09
 Nodes (14): EInteractionStage, InteractionResult, WorldInteractiveObject, EInteractionType, NetDataReader, NetDataWriter, ContainerInteractionPacket, EInteractionType (+6 more)
 
-### Community 159 - ".SendData"
-Cohesion: 0.11
-Nodes (12): Dictionary, List, Location, ProfileKey, Task, TransitInteractionPacketStruct, TransitPoint, FikaHeadlessTransitController (+4 more)
+### Community 159 - "FikaProfileService"
+Cohesion: 0.16
+Nodes (13): Dictionary, EFikaLocation, HttpGet, IActionResult, ILogger, SaveServer, PlayersController, Dictionary (+5 more)
 
 ### Community 160 - "IFikaGame"
-Cohesion: 0.07
-Nodes (23): GameWorld, BackendConfigSettingsClass, EUpdateQueue, GameDateTime, ISession, LocalRaidSettings, Location, Task (+15 more)
+Cohesion: 0.06
+Nodes (28): GameWorld, BackendConfigSettingsClass, EUpdateQueue, GameDateTime, ISession, LocalRaidSettings, Location, Task (+20 more)
 
 ### Community 161 - "ObservedMountedState"
 Cohesion: 0.09
 Nodes (9): Quaternion, Vector2, Vector3, ObservedMountedState, PitchLimitX, PitchLimitY, IMountingMovementSettings, MovementState (+1 more)
 
 ### Community 162 - "Dictionary"
-Cohesion: 0.07
-Nodes (13): CompleteProfileDescriptorClass, Dictionary, EBodyModelPart, EQuestStatus, ETraderServiceType, ProfileBodyPartHealthClass, TraderServicesClass, GClass1917 (+5 more)
+Cohesion: 0.06
+Nodes (16): CompleteProfileDescriptorClass, Dictionary, EBodyModelPart, EBodyPart, EQuestStatus, ETraderServiceType, ProfileBodyPartHealthClass, ProfileHealthClass (+8 more)
 
 ### Community 163 - "FikaModMetadata"
 Cohesion: 0.07
 Nodes (23): AbstractModMetadata, FikaServer, EFikaLocation, PmcData, SptProfile, ExtensionMethods, Dictionary, List (+15 more)
 
-### Community 164 - ".CreateFikaGame"
-Cohesion: 0.11
-Nodes (21): GameDateTime, BundleLockClass, CompositeDisposableClass, ExitStatus, LocalRaidSettings, Location, MainMenuControllerClass, MethodBase (+13 more)
+### Community 164 - ".Create"
+Cohesion: 0.06
+Nodes (38): EndByExitTrigerScenario, EndByTimerScenario, GameUI, Callback, EDateTime, ISession, LocalRaidSettings, Location (+30 more)
 
 ### Community 165 - "RaidAdminUIScript"
 Cohesion: 0.10
 Nodes (11): ECommand, ECursorResult, ETranslateResult, IEnumerator, List, LiteNetPeer, NetManager, UIDragComponent (+3 more)
 
 ### Community 166 - "LiteConnectionRequest"
-Cohesion: 0.09
+Cohesion: 0.10
 Nodes (14): IPEndPoint, LiteNetManager, NetDataReader, NetDataWriter, ReadOnlySpan, ConnectionRequest, ConnectionRequestResult, Accept (+6 more)
 
 ### Community 167 - "PmpSearcher"
@@ -1501,33 +1510,33 @@ Nodes (29): Azure.Identity, Microsoft.Bcl.Cryptography, Microsoft.Data.SqlClient
 Cohesion: 0.22
 Nodes (5): ConsoleCommand, EBodyPart, Transform, FikaCommands, CommandPacket
 
-### Community 172 - "StartHeadlessRequest"
-Cohesion: 0.07
-Nodes (27): DateTimeEnum, FikaCustomRaidSettings, DisableArmStamina, DisableLegStamina, DisableOverload, UseCustomWeather, PlayersSpawnPlace, StartHeadlessRequest (+19 more)
+### Community 172 - "ConnectionState"
+Cohesion: 0.11
+Nodes (15): ConnectionState, Any, Connected, Disconnected, EndPointChange, Outgoing, ShutdownRequested, DisconnectResult (+7 more)
 
-### Community 173 - ".FromPingType"
-Cohesion: 0.10
-Nodes (15): DeadBodyPing, DoorPing, EPingType, EUISoundType, GameObject, Color, NetDataReader, NetDataWriter (+7 more)
+### Community 173 - "PingPacket"
+Cohesion: 0.22
+Nodes (6): EPingType, Color, NetDataReader, NetDataWriter, Vector3, PingPacket
 
 ### Community 174 - ".InvokeAsync"
-Cohesion: 0.09
-Nodes (20): Exception, MappingException, ErrorCode, ErrorText, NatDeviceNotFoundException, IDictionary, IEnumerable, KeyValuePair (+12 more)
+Cohesion: 0.10
+Nodes (18): MappingException, ErrorCode, ErrorText, IDictionary, IEnumerable, KeyValuePair, Task, Uri (+10 more)
 
 ### Community 175 - "FikaWebApp.csproj"
 Cohesion: 0.08
 Nodes (24): net9.0, Microsoft.NET.Sdk.Web, net9.0, Microsoft.NET.Sdk, Microsoft.NET.Sdk.Web, net10.0, Blazor-ApexCharts (6.1.0), Brism (1.0.1) (+16 more)
 
 ### Community 176 - "FriendRequestsService"
-Cohesion: 0.10
-Nodes (22): MongoId, FriendRequestListResponse, Date, From, Id, Profile, To, AbstractPatch (+14 more)
+Cohesion: 0.13
+Nodes (18): MongoId, FriendRequestListResponse, Date, From, Id, Profile, To, ConfigService (+10 more)
 
 ### Community 177 - "Register.razor"
 Cohesion: 0.07
 Nodes (27): CreateUser, GetEmailStore, ApplicationUser, DataAnnotationsValidator, EditForm, IdentityError, IdentityRedirectManager, IEmailSender (+19 more)
 
 ### Community 178 - "Fika.Core.Networking.Websocket.Notifications"
-Cohesion: 0.09
-Nodes (22): Fika.Core.Networking.Websocket.Notifications, ENotificationIconType, OpenAdminMenuNotification, Description, Icon, Success, ENotificationIconType, PushNotification (+14 more)
+Cohesion: 0.18
+Nodes (9): Fika.Core.Networking.Websocket.Notifications, ENotificationIconType, OpenAdminMenuNotification, Description, Icon, Success, ShutdownClientNotification, Description (+1 more)
 
 ### Community 179 - "Fika.Headless.Patches.Locales"
 Cohesion: 0.07
@@ -1542,52 +1551,52 @@ Cohesion: 0.07
 Nodes (15): Fika.Headless.Patches.LoadingPatches, MethodBase, PatchPrefix, AmbientLight_RuntimeOptimizePrepare_Patch, MethodBase, PatchPrefix, Task, PerfectCullingCrossSceneSampler_InitializeAutoCulling_Patch (+7 more)
 
 ### Community 182 - "DefaultFireOperation"
-Cohesion: 0.15
-Nodes (9): DefaultWeaponOperationClass, AmmoPackReloadingClass, Callback, IResult, ItemAddress, MagazineItemClass, DefaultFireOperation, ReloadBarrelsHandler (+1 more)
+Cohesion: 0.17
+Nodes (8): DefaultWeaponOperationClass, AmmoPackReloadingClass, Callback, ItemAddress, MagazineItemClass, DefaultFireOperation, ReloadBarrelsHandler, ReloadMagHandler
 
 ### Community 183 - "StreamExtensions"
 Cohesion: 0.10
 Nodes (13): Enum, CancellationToken, CancellationTokenSource, Task, TimeSpan, TraceSource, XmlDocument, XmlNode (+5 more)
 
 ### Community 184 - "UpnpSearcher"
-Cohesion: 0.12
-Nodes (18): IDictionary, DiscoveryResponseMessage, IPAddress, DiscoverDeviceMessage, CancellationToken, DateTime, Dictionary, IDictionary (+10 more)
+Cohesion: 0.13
+Nodes (16): IDictionary, DiscoveryResponseMessage, CancellationToken, DateTime, Dictionary, IDictionary, IPAddress, IPEndPoint (+8 more)
 
 ### Community 185 - "EGenericSubPacketType"
 Cohesion: 0.08
-Nodes (22): EGenericSubPacketType, CharacterSync, ClientConnected, ClientDisconnected, ClientExtract, DisarmTripwire, ExfilCountdown, InventoryOperation (+14 more)
+Nodes (23): EGenericSubPacketType, CharacterSync, ClientConnected, ClientDisconnected, ClientExtract, DisarmTripwire, ExfilCountdown, InventoryOperation (+15 more)
 
 ### Community 186 - ".Prefix"
 Cohesion: 0.09
 Nodes (16): Fika.Core.Main.Patches.Artillery, ArtilleryServerProjectileClass, MethodBase, PatchPrefix, ArtilleryServerProjectileClass_Constructor_Patch, CancellationToken, MethodBase, PatchPrefix (+8 more)
 
 ### Community 187 - "ReconnectPacket"
-Cohesion: 0.09
-Nodes (23): EReconnectDataType, LampController, WindowBreaker, WorldInteractiveObject, Dictionary, List, NetDataReader, NetDataWriter (+15 more)
+Cohesion: 0.11
+Nodes (20): EReconnectDataType, Dictionary, List, NetDataReader, NetDataWriter, Profile, ProfileHealthClass, SmokeGrenadeDataPacketStruct (+12 more)
 
 ### Community 188 - ".CreateFikaGame"
-Cohesion: 0.12
-Nodes (20): BundleLockClass, CompositeDisposableClass, ExitStatus, GameDateTime, GameWorld, LocalRaidSettings, Location, MainMenuControllerClass (+12 more)
+Cohesion: 0.06
+Nodes (37): BundleLockClass, CompositeDisposableClass, ExitStatus, GameDateTime, GameWorld, LocalRaidSettings, Location, MainMenuControllerClass (+29 more)
 
 ### Community 189 - "UsableItemPacket"
 Cohesion: 0.10
 Nodes (9): Item, FikaClientPortableRangeFinderController, Item, FikaClientUsableItemController, NetDataReader, NetDataWriter, UsableItemPacket, PortableRangeFinderController (+1 more)
 
 ### Community 190 - "HandsControllerFactory"
-Cohesion: 0.08
-Nodes (17): EBodyPart, FoodDrinkItemClass, GrenadeHandsController, GStruct382, Item, KnifeComponent, KnifeController, MedsController (+9 more)
+Cohesion: 0.05
+Nodes (30): EquipmentSlotClass, EBodyPart, FirearmController, FoodDrinkItemClass, GrenadeHandsController, GStruct382, Item, KnifeComponent (+22 more)
 
-### Community 191 - "InventoryOperationHandler"
-Cohesion: 0.10
-Nodes (13): Callback, IResult, NetPeer, OperationDataStruct, InventoryOperationHandler, EOperationStatus, NetDataReader, NetDataWriter (+5 more)
+### Community 191 - "OperationCallbackPacket"
+Cohesion: 0.20
+Nodes (5): EOperationStatus, NetDataReader, NetDataWriter, Obsolete, OperationCallbackPacket
 
 ### Community 192 - "NetManager"
 Cohesion: 0.12
 Nodes (13): NtpPacket, ConcurrentDictionary, IPEndPoint, List, NetDataWriter, NetPeer, NtpRequest, ReadOnlySpan (+5 more)
 
 ### Community 193 - "FikaNotificationManager"
-Cohesion: 0.09
-Nodes (18): ErrorEventArgs, ManualLogSource, MessageEventArgs, NotificationAbstractClass, PushNotification, Task, WebSocket, FikaNotificationManager (+10 more)
+Cohesion: 0.14
+Nodes (10): ErrorEventArgs, ManualLogSource, Task, WebSocket, FikaNotificationManager, Connected, Exists, Host (+2 more)
 
 ### Community 194 - "DebugUI"
 Cohesion: 0.12
@@ -1606,20 +1615,20 @@ Cohesion: 0.08
 Nodes (13): Fika.Headless.Patches.WeaponManagerClassPatches, MethodBase, PatchPrefix, UnderbarrelManagerClass_method_6_Patch, MethodBase, PatchPrefix, UnderbarrelManagerClass_method_7_Patch, MethodBase (+5 more)
 
 ### Community 198 - "HealthSyncPacket"
-Cohesion: 0.09
-Nodes (18): EExtraDataType, EBodyPartColliderType, EquipmentSlot, EBodyPart, EBodyPartColliderType, EDamageType, EquipmentSlot, ESyncType (+10 more)
+Cohesion: 0.11
+Nodes (16): EExtraDataType, EBodyPart, EBodyPartColliderType, EDamageType, EquipmentSlot, ESyncType, InventoryDescriptorClass, Item (+8 more)
 
 ### Community 199 - ".Prefix"
-Cohesion: 0.08
-Nodes (19): EItemInfoButton, Dictionary, Button, TextMeshProUGUI, TMP_Dropdown, TMP_InputField, UIDragComponent, SendItemUI (+11 more)
+Cohesion: 0.12
+Nodes (13): EItemInfoButton, Dictionary, AvailableReceiversRequest, GClass3871, Item, MethodBase, MongoID, PatchPrefix (+5 more)
 
 ### Community 200 - "HostGrenadeFactory"
 Cohesion: 0.09
 Nodes (16): GrenadeFactoryClass, FikaHostGrenade, HasNetData, FikaHostSmokeGrenade, HasNetData, FikaHostStunGrenade, HasNetData, GameObject (+8 more)
 
 ### Community 201 - "NatPunchModule"
-Cohesion: 0.13
-Nodes (17): ConcurrentQueue, IPEndPoint, LiteNetManager, NetDataReader, NatIntroduceRequestPacket, Internal, Token, NatIntroduceResponsePacket (+9 more)
+Cohesion: 0.09
+Nodes (23): ConcurrentQueue, IPEndPoint, LiteNetManager, NetDataReader, INatPunchListener, NatAddressType, External, Internal (+15 more)
 
 ### Community 202 - "dependencies"
 Cohesion: 0.10
@@ -1638,23 +1647,23 @@ Cohesion: 0.09
 Nodes (25): System.Composition.AttributedModel, System.Composition.Convention, System.Composition.Hosting, System.Composition.Runtime, System.Composition.TypedParts, System.Composition, System.Composition.Convention, System.Composition.Hosting (+17 more)
 
 ### Community 206 - "ConfigService"
-Cohesion: 0.11
-Nodes (17): AuthorizationFilterContext, Task, Task, FikaWebAppBuild, ConfigServer, CoreConfig, ISptLogger, JsonUtil (+9 more)
+Cohesion: 0.10
+Nodes (19): AuthorizationFilterContext, Task, RequireApiKeyAttribute, Task, FikaWebAppBuild, ConfigServer, CoreConfig, ISptLogger (+11 more)
 
 ### Community 207 - ".Create"
-Cohesion: 0.09
-Nodes (16): CollisionFlags, Func, IAnimator, ICharacterController, LayerMask, Vector3, HeadlessClientMovementContext, Action (+8 more)
+Cohesion: 0.20
+Nodes (7): Func, IAnimator, ICharacterController, LayerMask, Vector3, HeadlessClientMovementContext, PatchPrefix
 
 ### Community 208 - "Fika.Core.Main.Patches"
-Cohesion: 0.08
-Nodes (14): Fika.Core.Main.Patches, MethodBase, PatchPrefix, GClass2287_method_0_Patch, IEnumerable, IPlayer, MethodBase, PatchPrefix (+6 more)
+Cohesion: 0.05
+Nodes (22): Fika.Core.Main.Patches, CoreBotSettingsClass, MethodBase, PatchPrefix, BotCacher_Patch, MethodBase, PatchPrefix, GClass2287_method_0_Patch (+14 more)
 
-### Community 209 - "NatPunchPeer"
-Cohesion: 0.09
-Nodes (18): FikaServer.Servers, FikaServer.Models.Servers.Enums, FikaServer.Models.Servers, NatPunchType, Client, Server, DateTime, IPEndPoint (+10 more)
+### Community 209 - "NatPunchServer"
+Cohesion: 0.06
+Nodes (26): FikaServer.Servers, FikaServer.Models.Servers.Enums, FikaServer.Models.Servers, NatPunchType, Client, Server, DateTime, IPEndPoint (+18 more)
 
 ### Community 210 - "Searcher"
-Cohesion: 0.13
+Cohesion: 0.14
 Nodes (16): Fika.Core.Networking.Open.Nat.EventArgs, EventArgs, EventHandler, CancellationToken, DateTime, IEnumerable, IPAddress, IPEndPoint (+8 more)
 
 ### Community 211 - "BTRControllerClass_method_18_Transpiler"
@@ -1662,8 +1671,8 @@ Cohesion: 0.08
 Nodes (15): Fika.Headless.Patches.BTR, CodeInstruction, IEnumerable, MethodBase, PatchTranspiler, BTRControllerClass_method_18_Transpiler, CodeInstruction, IEnumerable (+7 more)
 
 ### Community 212 - "SendCharacterPacket"
-Cohesion: 0.11
-Nodes (11): EHandsControllerType, EHandsControllerType, MongoID, NetDataReader, NetDataWriter, Profile, Vector3, PlayerInfoPacket (+3 more)
+Cohesion: 0.14
+Nodes (9): EHandsControllerType, EHandsControllerType, MongoID, NetDataReader, NetDataWriter, Profile, Vector3, PlayerInfoPacket (+1 more)
 
 ### Community 213 - "NetPacketProcessor"
 Cohesion: 0.12
@@ -1674,48 +1683,48 @@ Cohesion: 0.09
 Nodes (17): EFikaHeadlessWSMessageType, HeadlessStartRaid, KeepAlive, RequesterJoinRaid, ShutdownClient, ErrorEventArgs, EventArgs, ManualLogSource (+9 more)
 
 ### Community 215 - "StatisticsPlayer"
-Cohesion: 0.10
-Nodes (21): IActionResult, List, GetStatisticsResponse, Players, StatisticsPlayer, AmmoUsed, ArmorDamage, BodyDamage (+13 more)
+Cohesion: 0.04
+Nodes (44): EHeadlessState, IActionResult, HttpGet, IActionResult, HeadlessController, List, OnlineHeadless, Nickname (+36 more)
 
-### Community 216 - "FikaProfileService"
-Cohesion: 0.12
-Nodes (17): GeneratedRegex, JsonUtil, MailSendService, MongoId, Regex, SendMessageRequest, UserDialogInfo, ValueTask (+9 more)
+### Community 216 - "NotificationWebSocket"
+Cohesion: 0.08
+Nodes (27): HttpResponseUtil, ISptLogger, MongoId, PushNotification, ValueTask, NotificationCallbacks, GeneratedRegex, JsonUtil (+19 more)
 
-### Community 217 - ".GetNewState"
-Cohesion: 0.09
-Nodes (14): BaseMovementState, BreachDoorStateClass, Action, InteractionResult, MovementContext, WorldInteractiveObject, ObservedBreachDoorState, MovementContext (+6 more)
+### Community 217 - "ObservedBreachDoorState"
+Cohesion: 0.20
+Nodes (6): BreachDoorStateClass, Action, InteractionResult, MovementContext, WorldInteractiveObject, ObservedBreachDoorState
 
 ### Community 218 - ".ColorizeText"
-Cohesion: 0.10
-Nodes (19): EColor, DateTime, Dictionary, EDateTime, EColor, BLACK, BLUE, BROWN (+11 more)
+Cohesion: 0.27
+Nodes (6): EColor, DateTime, Dictionary, EDateTime, FikaUIGlobals, StaticTime
 
-### Community 219 - "FikaEvent"
-Cohesion: 0.09
-Nodes (18): AbstractGame, AbstractGameCreatedEvent, Game, FikaEvent, FikaGameEndedEvent, ExitName, ExitStatus, IsServer (+10 more)
+### Community 219 - ".LZ4_decompress_generic"
+Cohesion: 0.19
+Nodes (7): earlyEnd_directive, endCondition_directive, dict_directive, LZ4_streamDecode_t, MethodImpl, size_t, variable_length_error
 
 ### Community 220 - ".GetEFTInventoryLogicOperationsChangeItemsOperationDescriptor"
 Cohesion: 0.09
 Nodes (9): BaseDescriptorClass, GClass1950, GClass1921, GClass1972, GClass1973, GClass1983, GClass1997, MoveDescriptorClass (+1 more)
 
 ### Community 221 - "NetPacketProcessor"
-Cohesion: 0.13
-Nodes (8): Action, Dictionary, Func, NetDataReader, SubscribeDelegate, HashCache, NetPacketProcessor, ShortHashCache
+Cohesion: 0.10
+Nodes (12): Exception, ParseException, NatDeviceNotFoundException, Action, Dictionary, Func, NetDataReader, SubscribeDelegate (+4 more)
 
 ### Community 222 - "ItemCacheService"
 Cohesion: 0.11
 Nodes (16): Dictionary, GetItemsResponse, Items, ItemData, Description, Name, StackAmount, HttpClient (+8 more)
 
 ### Community 223 - "InOutHandsProcessTimestampPatch"
-Cohesion: 0.13
-Nodes (13): ConditionalWeakTable, Entry, Dictionary, GEventArgs17, Item, MethodBase, PatchPostfix, PatchPrefix (+5 more)
+Cohesion: 0.14
+Nodes (13): Entry, ConditionalWeakTable, Dictionary, GEventArgs17, Item, MethodBase, PatchPostfix, PatchPrefix (+5 more)
 
 ### Community 224 - "System.Runtime"
 Cohesion: 0.21
 Nodes (22): Microsoft.NETCore.Platforms, Microsoft.NETCore.Targets, System.IO, System.Reflection, System.Reflection.Primitives, System.Runtime, System.Runtime.Handles, System.Text.Encoding (+14 more)
 
-### Community 225 - "BotPlayerBridge"
-Cohesion: 0.13
-Nodes (16): ArmorResistanceStruct, BodyPartCollider, DamageInfoStruct, EArmorPlateCollider, EBodyPart, EBodyPartColliderType, EftBulletClass, IPlayer (+8 more)
+### Community 225 - ".Create"
+Cohesion: 0.06
+Nodes (33): ArmorResistanceStruct, BodyPartCollider, DamageInfoStruct, EArmorPlateCollider, EBodyPart, EBodyPartColliderType, EftBulletClass, IPlayer (+25 more)
 
 ### Community 226 - ".CreateObservedPlayer"
 Cohesion: 0.09
@@ -1726,12 +1735,12 @@ Cohesion: 0.21
 Nodes (8): DeliveryMethod, DisconnectReason, LiteConnectionRequest, LiteNetPeer, NetDataWriter, NetPacket, ReadOnlySpan, SocketError
 
 ### Community 228 - "HeadlessCallbacks"
-Cohesion: 0.13
-Nodes (12): EmptyRequestData, HttpResponseUtil, MongoId, ValueTask, HeadlessCallbacks, HeadlessController, MongoId, HeadlessAvailableClients (+4 more)
+Cohesion: 0.16
+Nodes (12): EmptyRequestData, HttpResponseUtil, MongoId, ValueTask, HeadlessCallbacks, HeadlessController, Dictionary, MongoId (+4 more)
 
 ### Community 229 - "PlayersPage"
-Cohesion: 0.11
-Nodes (17): EFikaLocation, OnlinePlayer, Level, Location, Nickname, ProfileId, List, OnlinePlayer (+9 more)
+Cohesion: 0.15
+Nodes (13): EFikaLocation, OnlinePlayer, Level, Location, Nickname, ProfileId, EFikaLocation, ILogger (+5 more)
 
 ### Community 230 - "ApplicationUser"
 Cohesion: 0.18
@@ -1742,8 +1751,8 @@ Cohesion: 0.09
 Nodes (21): ApplicationUser, AuthenticationStateProvider, Authorized, AuthorizeView, CellTemplate, Columns, IDialogService, ISnackbar (+13 more)
 
 ### Community 232 - ".Main"
-Cohesion: 0.15
-Nodes (15): App, DbContextOptions, ApplicationDbContext, AuthenticationStateProvider, IdentityRole, IEmailSender, ILoggerFactory, IOptions (+7 more)
+Cohesion: 0.08
+Nodes (28): App, DbContextOptions, ApplicationDbContext, AuthenticationStateProvider, HttpClient, IdentityRole, IEmailSender, ILoggerFactory (+20 more)
 
 ### Community 233 - "FastCall"
 Cohesion: 0.11
@@ -1766,16 +1775,16 @@ Cohesion: 0.10
 Nodes (15): EBodyPart, GStruct382, InventoryController, Item, List, Player, ProfileBodyPartHealthClass, ProfileHealthClass (+7 more)
 
 ### Community 238 - "ObservedClientBridge"
-Cohesion: 0.13
-Nodes (15): ArmorResistanceStruct, BodyPartCollider, DamageInfoStruct, EArmorPlateCollider, EBodyPart, EBodyPartColliderType, EftBulletClass, IPlayer (+7 more)
+Cohesion: 0.12
+Nodes (16): ArmorResistanceStruct, BodyPartCollider, DamageInfoStruct, EArmorPlateCollider, EBodyPart, EBodyPartColliderType, EftBulletClass, IPlayer (+8 more)
 
 ### Community 239 - "NativeSocket"
 Cohesion: 0.16
 Nodes (11): Dictionary, DllImport, IntPtr, IPEndPoint, MethodImpl, SocketError, SocketException, SocketFlags (+3 more)
 
 ### Community 240 - "ClientCallbacks"
-Cohesion: 0.18
-Nodes (10): HttpResponseUtil, IRequestData, MongoId, ValueTask, ClientCallbacks, MongoId, ClientController, FikaCheckModRequestData (+2 more)
+Cohesion: 0.12
+Nodes (13): HttpResponseUtil, IRequestData, MongoId, ValueTask, ClientCallbacks, FikaCheckModRequestData, List, FikaCheckModResponse (+5 more)
 
 ### Community 241 - "FikaServer/Networking/LiteNetLib/LiteNetPeer.cs"
 Cohesion: 0.10
@@ -1785,17 +1794,17 @@ Nodes (20): ConnectionState, Any, Connected, Disconnected, EndPointChange, Outgo
 Cohesion: 0.16
 Nodes (11): Dictionary, DllImport, IntPtr, IPEndPoint, MethodImpl, SocketError, SocketException, SocketFlags (+3 more)
 
-### Community 243 - "PacketProperty"
-Cohesion: 0.10
-Nodes (21): PacketProperty, Ack, Broadcast, Channeled, ConnectAccept, ConnectRequest, Disconnect, Empty (+13 more)
+### Community 243 - ".HandleTeammateKill"
+Cohesion: 0.18
+Nodes (12): DamageInfoStruct, EArmorPlateCollider, EBodyPart, EBodyPartColliderType, EPlayerSide, HealthEffects, IPlayer, List (+4 more)
 
 ### Community 244 - "net9.0"
 Cohesion: 0.10
 Nodes (21): dependencies, net9.0, contentHash, resolved, type, type, contentHash, resolved (+13 more)
 
-### Community 245 - "NatPunchServer"
-Cohesion: 0.13
-Nodes (8): CancellationTokenSource, ConcurrentDictionary, DateTime, IPEndPoint, ISptLogger, SocketError, Task, NatPunchServer
+### Community 245 - "ButtonHandler"
+Cohesion: 0.19
+Nodes (8): ButtonHandler, IEnumerator, Image, Sprite, TextMeshProUGUI, IPointerEnterHandler, IPointerExitHandler, PointerEventData
 
 ### Community 246 - "ModifyAccountDialog.razor"
 Cohesion: 0.10
@@ -1806,36 +1815,36 @@ Cohesion: 0.15
 Nodes (11): GeneratedRegex, IEnumerable, ILogger, IMudDialogInstance, MudTextField, Regex, Task, ModifyAccountDialog (+3 more)
 
 ### Community 248 - "FikaConfigServer"
-Cohesion: 0.10
-Nodes (20): List, FikaConfigServer, AdminIds, AllowItemSending, ApiKey, ItemSendingStorageTime, LauncherListAllProfiles, SentItemsLoseFIR (+12 more)
+Cohesion: 0.17
+Nodes (12): List, FikaConfigServer, AdminIds, AllowItemSending, ApiKey, ItemSendingStorageTime, LauncherListAllProfiles, SentItemsLoseFIR (+4 more)
 
 ### Community 249 - "InternalBundleLoader"
 Cohesion: 0.10
 Nodes (16): AssetBundle, EFikaAsset, Dictionary, EFikaSprite, GameObject, Sprite, Task, EFikaSprite (+8 more)
 
 ### Community 250 - "SendItemDialog.razor"
-Cohesion: 0.10
-Nodes (19): ChildContent, DialogActions, DialogContent, FikaMultiLineTextField, MudButton, MudCheckBox, MudCollapse, MudDialog (+11 more)
+Cohesion: 0.08
+Nodes (23): ChildContent, Fika.Core.Networking.Open.Nat.Upnp.Messages, IPAddress, DiscoverDeviceMessage, DialogActions, DialogContent, FikaMultiLineTextField, MudButton (+15 more)
 
 ### Community 251 - "FikaHostGameWorld"
-Cohesion: 0.12
-Nodes (12): ClientLocalGameWorld, Dictionary, EState, FikaHostWorld, Item, SyncObjectProcessorClass, TripwireSynchronizableObject, Turnable (+4 more)
+Cohesion: 0.08
+Nodes (20): ClientLocalGameWorld, CancellationToken, Dictionary, EState, FikaHostWorld, Item, List, LoadingProgressStruct (+12 more)
 
 ### Community 252 - "HeadlessWebSocket"
-Cohesion: 0.11
-Nodes (12): CloseEventArgs, ErrorEventArgs, EventArgs, ManualLogSource, MessageEventArgs, Task, WebSocket, HeadlessWebSocket (+4 more)
+Cohesion: 0.12
+Nodes (11): CloseEventArgs, ErrorEventArgs, EventArgs, ManualLogSource, Task, WebSocket, HeadlessWebSocket, Connected (+3 more)
 
-### Community 253 - "ControllerBase"
-Cohesion: 0.10
-Nodes (16): ControllerBase, HttpGet, IActionResult, GetRaidsController, SaveServer, GetStatisticsController, HttpPost, IActionResult (+8 more)
+### Community 253 - "SendItemRequest"
+Cohesion: 0.14
+Nodes (12): SendItemRequest, ProfileId, SendItemToAllRequest, ProfileIds, KeyValuePair, Task, Timer, YesNoDialog (+4 more)
 
 ### Community 254 - "SyncableItemPacket"
 Cohesion: 0.12
 Nodes (13): Crack, DamageInfoStruct, WindowBreaker, EState, ESyncType, FikaPlayer, NetDataReader, NetDataWriter (+5 more)
 
-### Community 255 - "Fika.Core.Main.Patches.DebugPatches"
-Cohesion: 0.10
-Nodes (12): Fika.Core.Main.Patches.DebugPatches, MethodBase, PatchPrefix, GClass1640_method_0_Patch, CodeInstruction, IEnumerable, MethodBase, PatchTranspiler (+4 more)
+### Community 255 - ".Prefix"
+Cohesion: 0.06
+Nodes (22): Fika.Core.Main.Patches.DebugPatches, MethodBase, PatchPrefix, GClass1640_method_0_Patch, CodeInstruction, IEnumerable, MethodBase, PatchTranspiler (+14 more)
 
 ### Community 256 - "LoadingLootPatch"
 Cohesion: 0.10
@@ -1845,24 +1854,24 @@ Nodes (11): Fika.Core.UI.Patches.LoadingScreen, LoadingProgressStruct, MethodBas
 Cohesion: 0.14
 Nodes (12): DatabaseServer, ConfigServer, CoreConfig, ISptLogger, Task, FikaPostLoad, Dictionary, Task (+4 more)
 
-### Community 258 - "FikaCustomRaidSettings"
-Cohesion: 0.11
-Nodes (15): ETimeFlowType, FikaCustomRaidSettings, DisableArmStamina, DisableLegStamina, DisableOverload, UseCustomWeather, EDateTime, ESideType (+7 more)
+### Community 258 - "ClientQuestController"
+Cohesion: 0.18
+Nodes (10): FikaPlayer, InventoryController, IPlayerSearchController, IQuestActions, List, MongoID, ClientQuestController, LampController (+2 more)
 
 ### Community 259 - "HostInventoryController"
-Cohesion: 0.13
-Nodes (12): CultistAmuletItemClass, FikaPlayer, IPlayerSearchController, Weapon, HostInventoryController, FikaPlayer, HasDiscardLimits, PlayerSearchController (+4 more)
+Cohesion: 0.10
+Nodes (17): BaseInventoryOperationClass, Callback, CultistAmuletItemClass, FikaPlayer, IPlayerSearchController, Task, Weapon, HostInventoryController (+9 more)
 
 ### Community 260 - "PhrasePacket"
 Cohesion: 0.12
 Nodes (12): EPhraseTrigger, PhraseSpeakerClass, TagBank, TaggedClip, EPhraseTrigger, PhraseSpeakerClass, TagBank, TaggedClip (+4 more)
 
 ### Community 261 - "SpawnAirdrop"
-Cohesion: 0.14
-Nodes (14): EAirdropType, Item, LootableContainer, EAirdropType, Item, MongoID, NetDataWriter, Quaternion (+6 more)
+Cohesion: 0.19
+Nodes (11): EAirdropType, Item, MongoID, NetDataWriter, Quaternion, Vector3, SpawnAirdrop, SpawnAirplane (+3 more)
 
 ### Community 262 - "NetLogLevel"
-Cohesion: 0.17
+Cohesion: 0.18
 Nodes (10): Conditional, INetLogger, NetDebug, NetLogLevel, Error, Info, Trace, Warning (+2 more)
 
 ### Community 263 - "PlayerSnapshotter"
@@ -1882,28 +1891,28 @@ Cohesion: 0.10
 Nodes (20): Microsoft.Data.SqlClient, Microsoft.EntityFrameworkCore.Relational, contentHash, dependencies, requested, resolved, type, contentHash (+12 more)
 
 ### Community 267 - "ObservedQuickKnifeController"
-Cohesion: 0.11
-Nodes (13): Class1290, Action, BallisticCollider, BaseAnimationOperationClass, Dictionary, GStruct182, KnifeComponent, OperationFactoryDelegate (+5 more)
+Cohesion: 0.13
+Nodes (12): Class1290, Action, BallisticCollider, BaseAnimationOperationClass, Dictionary, GStruct182, OperationFactoryDelegate, ShotInfoClass (+4 more)
 
 ### Community 268 - "ValidateFormatPatch1"
 Cohesion: 0.11
 Nodes (10): Fika.Headless.Patches.TextureValidateFormat, MethodBase, PatchPostfix, ValidateFormatPatch1, MethodBase, PatchPostfix, ValidateFormatPatch2, MethodBase (+2 more)
 
 ### Community 269 - "AdminSettingsUIScript"
-Cohesion: 0.13
-Nodes (9): Fika.Core.Networking.Models.Admin, CurrentSettingsResponse, SetSettingsRequest, SetSettingsResponse, AdminSettingsUI, Button, Toggle, AdminSettingsUIScript (+1 more)
+Cohesion: 0.18
+Nodes (6): CurrentSettingsResponse, AdminSettingsUI, Button, Toggle, AdminSettingsUIScript, UIDragComponent
 
 ### Community 270 - "ClientMovementContext"
 Cohesion: 0.11
-Nodes (11): Func, IAnimator, ICharacterController, LayerMask, Vector3, ClientMovementContext, Func, IAnimator (+3 more)
+Nodes (12): Func, IAnimator, ICharacterController, LayerMask, Vector3, ClientMovementContext, Func, IAnimator (+4 more)
 
 ### Community 271 - "FikaClientGrenadeController"
 Cohesion: 0.15
 Nodes (5): EFireMode, Quaternion, ThrowWeapItemClass, Vector3, FikaClientGrenadeController
 
 ### Community 272 - "FikaHealthBar"
-Cohesion: 0.16
-Nodes (7): Camera, CanvasGroup, EventArgs, List, Transform, FikaHealthBar, HealthBarEffect
+Cohesion: 0.09
+Nodes (14): ChatSpecialIconSettings, Camera, CanvasGroup, DamageInfoStruct, Dictionary, EBodyPart, EDamageType, EventArgs (+6 more)
 
 ### Community 273 - "ItemPositionSyncer"
 Cohesion: 0.12
@@ -1914,12 +1923,12 @@ Cohesion: 0.11
 Nodes (10): AmmoItemClass, ExitStatus, Inventory, Item, Player, TimeSpan, Weapon, ObservedStatisticsManager (+2 more)
 
 ### Community 275 - "ObservedHostBridge"
-Cohesion: 0.12
-Nodes (14): ArmorResistanceStruct, BodyPartCollider, EftBulletClass, IPlayer, Vector3, ObservedHostBridge, iPlayer, UsingSimplifiedSkeleton (+6 more)
+Cohesion: 0.09
+Nodes (20): ArmorResistanceStruct, BodyPartCollider, DamageInfoStruct, EArmorPlateCollider, EBodyPart, EBodyPartColliderType, EftBulletClass, IPlayer (+12 more)
 
-### Community 276 - ".Create"
-Cohesion: 0.11
-Nodes (17): BodyPartCollider, EftBulletClass, EPointOfView, ETraderServiceType, EUpdateMode, EUpdateQueue, GameWorld, HashSet (+9 more)
+### Community 276 - "IDisposable"
+Cohesion: 0.16
+Nodes (8): Corpse, List, Renderer, ObservedCorpseCulling, ScreenUpdater, GClass999, IDisposable, MatchmakerPlayerControllerClass
 
 ### Community 277 - "EFikaLocation"
 Cohesion: 0.11
@@ -1942,8 +1951,8 @@ Cohesion: 0.11
 Nodes (19): contentHash, dependencies, resolved, type, Azure.Core, Microsoft.Identity.Client, Microsoft.Identity.Client.Extensions.Msal, System.Security.Cryptography.ProtectedData (+11 more)
 
 ### Community 282 - "ConfigurationPage"
-Cohesion: 0.16
-Nodes (7): AddAliasDialog, IDialogService, List, MudChip, Task, ConfigurationPage, DialogService
+Cohesion: 0.14
+Nodes (8): AddAliasDialog, IDialogService, List, MudChip, Task, ConfigurationPage, DialogService, Statics
 
 ### Community 283 - "HeartbeatService"
 Cohesion: 0.12
@@ -1961,29 +1970,29 @@ Nodes (12): FikaServer.Models.Fika.Config, FikaConfig, Background, Client, Headl
 Cohesion: 0.12
 Nodes (11): FikaWebApp.Migrations, DateTimeOffset, DateTimeOffset, ModelBuilder, Init, DateTimeOffset, ModelBuilder, ApplicationDbContextModelSnapshot (+3 more)
 
-### Community 287 - ".RunClientOperation"
-Cohesion: 0.18
-Nodes (8): Action, BaseInventoryOperationClass, Callback, ServerOperationStatus, Task, BaseInventoryOperationClass, Callback, Task
+### Community 287 - "LoadingProfilePacket"
+Cohesion: 0.15
+Nodes (8): Dictionary, PartyInfoPanel, Profile, Dictionary, NetDataReader, NetDataWriter, Profile, LoadingProfilePacket
 
 ### Community 288 - "ServerPacketSender"
-Cohesion: 0.12
+Cohesion: 0.15
 Nodes (9): DateTime, FikaPlayer, Task, ServerPacketSender, CanPing, Enabled, IsMoving, NetworkManager (+1 more)
 
 ### Community 289 - "ViewFilter"
-Cohesion: 0.11
+Cohesion: 0.12
 Nodes (14): EBodyModelPart, HashSet, ClientViewFilter, AllowedParts, EBodyModelPart, HashSet, ViewFilter, AllowedParts (+6 more)
 
-### Community 290 - "DamagePacket"
-Cohesion: 0.18
-Nodes (11): DamageInfoStruct, EArmorPlateCollider, EBodyPart, EBodyPartColliderType, EDamageType, MongoID, NetDataReader, NetDataWriter (+3 more)
+### Community 290 - "ObservedKnifeController"
+Cohesion: 0.15
+Nodes (8): KnifeController, BallisticCollider, GStruct182, KnifeComponent, ShotInfoClass, ObservedKnifeController, CreateKnifeControllerHandler, KnifeController
 
 ### Community 291 - "NetManager"
-Cohesion: 0.15
-Nodes (10): IPEndPoint, NtpRequest, NeedToKill, ConcurrentDictionary, IPEndPoint, NetPeer, NtpRequest, ReadOnlySpan (+2 more)
+Cohesion: 0.21
+Nodes (7): ConcurrentDictionary, IPEndPoint, NetPeer, NtpRequest, ReadOnlySpan, NetManager, ChannelsCount
 
 ### Community 292 - "StartHeadlessRequest"
-Cohesion: 0.11
-Nodes (18): BotControllerSettings, EDateTime, EPlayersSpawnPlace, ESideType, StartHeadlessRequest, BotSettings, CustomRaidSettings, HeadlessSessionID (+10 more)
+Cohesion: 0.10
+Nodes (19): MessageEventArgs, BotControllerSettings, EDateTime, EPlayersSpawnPlace, ESideType, StartHeadlessRequest, BotSettings, CustomRaidSettings (+11 more)
 
 ### Community 293 - "dependencies"
 Cohesion: 0.15
@@ -2006,8 +2015,8 @@ Cohesion: 0.15
 Nodes (11): AsyncOperation, GameObject, IEnumerator, MethodBase, PatchPostfix, Renderer, Type, LoadScenePatch (+3 more)
 
 ### Community 298 - "IdentityRedirectManager"
-Cohesion: 0.18
-Nodes (11): CookieBuilder, Dictionary, DoesNotReturn, HttpContext, NavigationManager, IdentityRedirectManager, CurrentPath, HttpContext (+3 more)
+Cohesion: 0.15
+Nodes (12): CookieBuilder, FikaWebApp.Components.Account, Dictionary, DoesNotReturn, HttpContext, NavigationManager, IdentityRedirectManager, CurrentPath (+4 more)
 
 ### Community 299 - "LampController_TurnLights_Transpiler"
 Cohesion: 0.12
@@ -2030,16 +2039,16 @@ Cohesion: 0.18
 Nodes (10): BTRSide, List, MethodBase, PatchPrefix, Transform, BTRSide_AddPassenger_Patch, BTRSide_method_9_Patch, BTRSide_Patches (+2 more)
 
 ### Community 304 - "INatPunchListener"
-Cohesion: 0.16
+Cohesion: 0.17
 Nodes (6): EventBasedNatPunchListener, INatPunchListener, NatAddressType, External, Internal, EventBasedNatPunchListener
 
 ### Community 305 - "GetPortMappingEntryResponseMessage"
-Cohesion: 0.12
-Nodes (15): XmlDocument, AddPortMappingResponseMessage, XmlDocument, DeletePortMappingResponseMessage, Protocol, GetPortMappingEntryResponseMessage, Enabled, ExternalPort (+7 more)
+Cohesion: 0.10
+Nodes (18): XmlDocument, AddPortMappingResponseMessage, XmlDocument, DeletePortMappingResponseMessage, IPAddress, GetExternalIPAddressResponseMessage, ExternalIPAddress, Protocol (+10 more)
 
-### Community 306 - "FastCallSpecific"
-Cohesion: 0.16
-Nodes (6): PropertyInfo, Type, EnumByteSerializer, FastCallSpecific, InvalidTypeException, ParseException
+### Community 306 - "FastCall"
+Cohesion: 0.11
+Nodes (9): FastCall, ClassInfo, CustomType, PropertyInfo, Type, CustomType, EnumByteSerializer, FastCallSpecific (+1 more)
 
 ### Community 307 - "SPTarkov.Reflection"
 Cohesion: 0.12
@@ -2049,13 +2058,13 @@ Nodes (17): FastCloner, HarmonyX, SPTarkov.Common, SPTarkov.DI, System.IO.Hashin
 Cohesion: 0.12
 Nodes (16): OnInitializedAsync, OnValidSubmitAsync, ApplicationUser, DataAnnotationsValidator, EditForm, IdentityRedirectManager, IdentityUserAccessor, InputText (+8 more)
 
-### Community 309 - ".CreateHealthBar"
-Cohesion: 0.16
-Nodes (8): ChatSpecialIconSettings, Dictionary, RectTransform, CanvasGroup, GameObject, Image, TextMeshProUGUI, PlayerPlateUI
+### Community 309 - "PlayerPlateUI"
+Cohesion: 0.29
+Nodes (5): CanvasGroup, GameObject, Image, TextMeshProUGUI, PlayerPlateUI
 
-### Community 310 - "Fika.Core.Main.ObservedClasses.MovementStates"
-Cohesion: 0.13
-Nodes (6): Fika.Core.Main.ObservedClasses.MovementStates, MovementContext, ObservedMoveZombieStateClass, ObservedSprintState, MoveZombieStateClass, SprintStateClass
+### Community 310 - "ObservedSprintState"
+Cohesion: 0.15
+Nodes (5): MovementContext, ObservedMoveZombieStateClass, ObservedSprintState, MoveZombieStateClass, SprintStateClass
 
 ### Community 311 - "HideoutClass_Init_Patch"
 Cohesion: 0.12
@@ -2066,12 +2075,12 @@ Cohesion: 0.15
 Nodes (13): CustomTextMeshProUGUI, CanvasGroup, DropDownBox, List, LocalizedText, MethodBase, PatchPostfix, RaidSettings (+5 more)
 
 ### Community 313 - "FikaHalloweenEventManager"
-Cohesion: 0.17
-Nodes (9): EEventState, Action, ManualLogSource, FikaHalloweenEventManager, NetDataReader, Vector3, HalloweenSummonStartedEvent, HalloweenSyncExitsEvent (+1 more)
+Cohesion: 0.10
+Nodes (16): EEventState, Action, ManualLogSource, FikaHalloweenEventManager, NetDataReader, NetDataWriter, SyncEventFromServer, Vector3 (+8 more)
 
 ### Community 314 - "BotInventoryController"
-Cohesion: 0.19
-Nodes (11): BaseInventoryOperationClass, Callback, IPlayerSearchController, Task, ThrowWeapItemClass, Vector3, Weapon, BotInventoryController (+3 more)
+Cohesion: 0.11
+Nodes (18): BaseInventoryOperationClass, Callback, IPlayerSearchController, Task, ThrowWeapItemClass, Vector3, Weapon, BotInventoryController (+10 more)
 
 ### Community 315 - "EventControllerInteractPacket"
 Cohesion: 0.12
@@ -2081,13 +2090,13 @@ Nodes (9): CancellationToken, FikaPlayer, Task, ClientRunddansController, Intera
 Cohesion: 0.16
 Nodes (10): FlatItemsDataClass, List, MongoID, NetDataReader, NetDataWriter, InRaidQuestPacket, InraidQuestType, Finish (+2 more)
 
-### Community 317 - ".CreateHandsController"
+### Community 317 - ".LogError"
 Cohesion: 0.33
 Nodes (3): EHandsControllerType, KnifeComponent, MongoID
 
 ### Community 318 - "Vector3"
-Cohesion: 0.15
-Nodes (6): Dictionary, GrenadeDataPacketStruct, LootSyncStruct, Quaternion, RagdollPacketStruct, Vector3
+Cohesion: 0.12
+Nodes (8): Dictionary, EBodyPartColliderType, EquipmentSlot, GrenadeDataPacketStruct, LootSyncStruct, Quaternion, RagdollPacketStruct, Vector3
 
 ### Community 319 - ".TryGetPeer"
 Cohesion: 0.21
@@ -2098,8 +2107,8 @@ Cohesion: 0.15
 Nodes (7): NetPeerEnumerator, Current, IEnumerator, NetPeerEnumerator, Current, IEnumerator, NetPeerEnumerator
 
 ### Community 321 - "NetUtils"
-Cohesion: 0.17
-Nodes (11): IList, List, NetworkInterface, SuppressMessage, LocalAddrType, All, IPv4, IPv6 (+3 more)
+Cohesion: 0.10
+Nodes (16): IList, List, NetworkInterface, SuppressMessage, LocalAddrType, All, IPv4, IPv6 (+8 more)
 
 ### Community 322 - "NetStatistics"
 Cohesion: 0.12
@@ -2121,41 +2130,41 @@ Nodes (9): AIPlaceInfo, Fika.Core.Main.Patches.AI, MethodBase, PatchPrefix, AIPl
 Cohesion: 0.16
 Nodes (13): AuthenticationState, ClaimsPrincipal, CancellationToken, IdentityOptions, ILoggerFactory, IOptions, Task, TimeSpan (+5 more)
 
-### Community 327 - "FikaExfilManager"
-Cohesion: 0.20
-Nodes (7): ExtractionPlayerHandler, EExfiltrationStatus, ExfiltrationPoint, List, ExtractionPlayerHandler, FikaExfilManager, SecretExfiltrationPoint
+### Community 327 - "VOIPState"
+Cohesion: 0.19
+Nodes (6): VOIPState, Bool1, Controller, LimitChecker, Status, TimeSpan_0
 
 ### Community 328 - "FastCallSpecificAuto"
-Cohesion: 0.17
-Nodes (7): FastCallSpecificAuto, IPEndPoint, CharSerializer, IPEndPointSerializer, IPEndPoint, CharSerializer, IPEndPointSerializer
+Cohesion: 0.13
+Nodes (9): FastCallSpecificAuto, IPEndPoint, CharSerializer, IPEndPointSerializer, Guid, IPEndPoint, FastCallSpecificAuto, GuidSerializer (+1 more)
 
-### Community 329 - "BotInventoryOperationHandler"
-Cohesion: 0.18
-Nodes (7): BaseInventoryOperationClass, Callback, IResult, BotInventoryOperationHandler, Func, BotInventoryOperationHandlerPool, Instance
+### Community 329 - "DisconnectReason"
+Cohesion: 0.15
+Nodes (13): DisconnectReason, ConnectionFailed, ConnectionRejected, DisconnectPeerCalled, HostUnreachable, InvalidProtocol, NetworkUnreachable, PeerNotFound (+5 more)
 
 ### Community 330 - "LightStatesPacket"
 Cohesion: 0.15
 Nodes (6): FirearmLightStateStruct, LightComponent, FirearmLightStateStruct, NetDataReader, NetDataWriter, LightStatesPacket
 
 ### Community 331 - "HealthBarEffect"
-Cohesion: 0.18
+Cohesion: 0.16
 Nodes (8): GameObject, IEffect, Image, Sprite, TextMeshProUGUI, Type, HealthBarEffect, Amount
 
 ### Community 332 - ".Transpile"
-Cohesion: 0.13
-Nodes (10): CodeInstruction, IEnumerable, PatchTranspiler, CodeInstruction, IEnumerable, MethodBase, PatchTranspiler, Player_RecalculateEquipmentParams_Transpiler (+2 more)
+Cohesion: 0.11
+Nodes (12): CodeInstruction, IEnumerable, MethodBase, PatchTranspiler, FikaPlayer_OnItemAddedOrRemoved_Transpiler, CodeInstruction, IEnumerable, MethodBase (+4 more)
 
-### Community 333 - ".Prefix"
-Cohesion: 0.21
-Nodes (9): Action, List, MethodBase, PatchPrefix, LighthouseTraderZone_AddPlayer_Patch, LighthouseTraderZone_Awake_Patch, LighthouseTraderZone_Patches, LighthouseTraderZone_RemovePlayer_Patch (+1 more)
+### Community 333 - ".TryGetCoopHandler"
+Cohesion: 0.16
+Nodes (10): CoopHandler, Action, List, MethodBase, PatchPrefix, LighthouseTraderZone_AddPlayer_Patch, LighthouseTraderZone_Awake_Patch, LighthouseTraderZone_Patches (+2 more)
 
 ### Community 334 - "MultiSelect"
 Cohesion: 0.14
 Nodes (13): Action, Func, IEnumerable, Item, MethodInfo, Task, Type, Version (+5 more)
 
 ### Community 335 - "NetworkUtils"
-Cohesion: 0.13
-Nodes (11): ReadOnlySpan, EPacketType, BTR, PlayerState, Serializable, VOIP, NetworkUtils, EventDataReader (+3 more)
+Cohesion: 0.14
+Nodes (11): IPEndPoint, EPacketType, BTR, PlayerState, Serializable, VOIP, NetworkUtils, EventDataReader (+3 more)
 
 ### Community 336 - "EProceedType"
 Cohesion: 0.13
@@ -2182,35 +2191,35 @@ Cohesion: 0.15
 Nodes (8): ConfigDescription, ConfigEntryBase&gt;, CustomHotkeyDrawerFunc, ConfigurationManagerAttributes, Func, ConfigEntry, KeyboardShortcut, List
 
 ### Community 342 - "CylinderMagPacket"
-Cohesion: 0.16
-Nodes (7): CylinderMagazineItemClass, List, ReloadCylinderMagazineHandler, EReloadWithAmmoStatus, NetDataReader, NetDataWriter, CylinderMagPacket
+Cohesion: 0.13
+Nodes (8): CylinderMagazineItemClass, IResult, List, ReloadCylinderMagazineHandler, EReloadWithAmmoStatus, NetDataReader, NetDataWriter, CylinderMagPacket
 
 ### Community 343 - "BotStatePacket"
 Cohesion: 0.15
 Nodes (9): EStateType, NetDataReader, NetDataWriter, BotStatePacket, EStateType, DisableBot, DisposeBot, EnableBot (+1 more)
 
-### Community 344 - "TransitEventPacket"
-Cohesion: 0.14
-Nodes (12): ETransitEventType, NetDataReader, NetDataWriter, SyncEventFromServer, ETransitEventType, Extract, GroupSize, GroupTimer (+4 more)
+### Community 344 - "FikaConfigHeadless"
+Cohesion: 0.18
+Nodes (12): Dictionary, FikaConfigHeadless, Profiles, RestartAfterAmountOfRaids, Scripts, SetLevelToAverageOfLobby, FikaConfigHeadlessProfiles, Aliases (+4 more)
 
 ### Community 345 - "VaultPacket"
 Cohesion: 0.20
 Nodes (5): EVaultingStrategy, NetDataReader, NetDataWriter, Vector3, VaultPacket
 
 ### Community 346 - "ClientInventoryController"
-Cohesion: 0.14
-Nodes (11): CultistAmuletItemClass, EOperationStatus, FikaPlayer, IPlayerSearchController, StationaryWeapon, Weapon, ClientInventoryController, FikaPlayer (+3 more)
+Cohesion: 0.13
+Nodes (14): Action, BaseInventoryOperationClass, Callback, CultistAmuletItemClass, FikaPlayer, IPlayerSearchController, ServerOperationStatus, StationaryWeapon (+6 more)
 
 ### Community 347 - "ClientInventoryOperationHandler"
-Cohesion: 0.22
-Nodes (6): Action, BaseInventoryOperationClass, Callback, IResult, ServerOperationStatus, ClientInventoryOperationHandler
+Cohesion: 0.19
+Nodes (8): Action, BaseInventoryOperationClass, Callback, IResult, ServerOperationStatus, ClientInventoryOperationHandler, Func, ClientInventoryOperationHandlerPool
 
-### Community 348 - "ObservedRunState"
-Cohesion: 0.16
-Nodes (5): MovementContext, Vector2, ObservedProneMoveStateClass, ObservedRunState, RunStateClass
+### Community 348 - "Fika.Core.Main.ObservedClasses.MovementStates"
+Cohesion: 0.09
+Nodes (14): BaseMovementState, Fika.Core.Main.ObservedClasses.MovementStates, MovementContext, Vector2, ObservedIdleStateClass, MovementContext, Vector2, ObservedProneMoveStateClass (+6 more)
 
 ### Community 349 - "ClientPacketSender"
-Cohesion: 0.18
+Cohesion: 0.13
 Nodes (8): DateTime, FikaPlayer, Task, ClientPacketSender, CanPing, IsMoving, NetworkManager, SendState
 
 ### Community 350 - ".CreateHideoutWorld"
@@ -2265,33 +2274,33 @@ Nodes (14): Microsoft.AspNetCore.Metadata, Microsoft.Extensions.Localization.Abs
 Cohesion: 0.14
 Nodes (14): contentHash, dependencies, requested, resolved, type, BuildBundlerMinifier, MudBlazor, contentHash (+6 more)
 
-### Community 363 - "WebAppConfig"
-Cohesion: 0.14
-Nodes (13): HttpClient, Uri, WebAppConfig, APIKey, BaseUrl, DatabasePath, DataPath, HeartbeatInterval (+5 more)
+### Community 363 - "QuestSyncPacket"
+Cohesion: 0.18
+Nodes (6): EQuestSyncType, MongoID, NetDataReader, NetDataWriter, QuestSyncPacket, GEventArgs2
 
 ### Community 364 - ".Postfix"
 Cohesion: 0.15
 Nodes (11): AnimatedToggle, EMenuType, DateTime, Dictionary, GameObject, HoverTooltipArea, Image, LocalizedText (+3 more)
 
-### Community 365 - "FikaServer/Networking/LiteNetLib/NetDebug.cs"
-Cohesion: 0.17
-Nodes (11): ArgumentException, InvalidPacketException, TooBigPacketException, INetLogger, InvalidPacketException, NetLogLevel, Error, Info (+3 more)
+### Community 365 - "System.Diagnostics"
+Cohesion: 0.12
+Nodes (14): ArgumentException, InvalidPacketException, TooBigPacketException, INetLogger, InvalidPacketException, NetLogLevel, Error, Info (+6 more)
 
 ### Community 366 - "ObservedTripwireState"
 Cohesion: 0.15
 Nodes (5): BaseAnimationOperationClass, Callback, GInterface438, ObservedTripwireState, TripwireStateManagerClass
 
 ### Community 367 - "ObservedQuickUseItemController"
-Cohesion: 0.17
-Nodes (9): BaseAnimationOperationClass, Dictionary, Item, OperationFactoryDelegate, Type, ObservedQuickUseItemController, ObservedQuickUseItemControllerOperation, GClass2058 (+1 more)
+Cohesion: 0.20
+Nodes (8): BaseAnimationOperationClass, Dictionary, OperationFactoryDelegate, Type, ObservedQuickUseItemController, ObservedQuickUseItemControllerOperation, GClass2058, QuickUseItemController
 
 ### Community 368 - "ArmorDamagePacket"
 Cohesion: 0.19
 Nodes (5): ArmorComponent, MongoID, NetDataReader, NetDataWriter, ArmorDamagePacket
 
 ### Community 369 - "FikaModHandler"
-Cohesion: 0.22
-Nodes (7): ManualLogSource, PatchManager, Task, Version, FikaModHandler, SPTCoreVersion, ModValidationResponse
+Cohesion: 0.12
+Nodes (12): Fika.Core.Main.Patches.Bugfixes, GroupPlayerViewModelClass, MethodBase, PatchPrefix, PartyInfoPanel_method_3_Patch, ManualLogSource, PatchManager, Task (+4 more)
 
 ### Community 370 - "PausedSocketFix"
 Cohesion: 0.17
@@ -2309,21 +2318,21 @@ Nodes (12): Dictionary, FikaConfigHeadless, Profiles, RestartAfterAmountOfRaids,
 Cohesion: 0.15
 Nodes (13): Microsoft.AspNetCore.Components, Microsoft.AspNetCore.Components.Web, Microsoft.Extensions.Localization, contentHash, dependencies, resolved, type, contentHash (+5 more)
 
-### Community 374 - "ViewQueuedSendItemsDialog"
-Cohesion: 0.15
-Nodes (10): IDialogService, ItemCacheService, SendTimersService, ViewQueuedSendItemsDialog, DialogService, ItemCacheService, SendTimersService, List (+2 more)
+### Community 374 - "HandsBookkeepingTimestampPatch"
+Cohesion: 0.21
+Nodes (9): ConditionalWeakTable, Dictionary, GEventArgs1, Item, MethodBase, PatchPostfix, TraderControllerClass, HandsBookkeepingTimestampPatch (+1 more)
 
 ### Community 375 - "ToolsPage"
-Cohesion: 0.15
-Nodes (13): HttpClient, IDialogService, ILogger, ISnackbar, ItemCacheService, SendTimersService, ToolsPage, DialogService (+5 more)
+Cohesion: 0.12
+Nodes (16): HttpClient, IDialogService, ILogger, ISnackbar, ItemCacheService, List, MouseEventArgs, SendTimersService (+8 more)
 
 ### Community 376 - "Azure.Core"
 Cohesion: 0.15
 Nodes (13): contentHash, dependencies, resolved, type, Microsoft.Bcl.AsyncInterfaces, System.ClientModel, System.Memory.Data, Azure.Core (+5 more)
 
-### Community 377 - "BTRInteractionPacket"
-Cohesion: 0.18
-Nodes (7): BtrNotificationInteractionMessageEvent, EBtrInteractionStatus, EInteractionType, NetDataReader, NetDataWriter, BTRInteractionPacket, PlayerInteractPacket
+### Community 377 - "TimeSpan"
+Cohesion: 0.23
+Nodes (10): DateTime, List, TimeSpan, LimitChecker, Struct510, Boolean_0, TimeSpan_0, TimeState (+2 more)
 
 ### Community 378 - "EFikaAsset"
 Cohesion: 0.17
@@ -2354,8 +2363,8 @@ Cohesion: 0.18
 Nodes (5): FirearmScopeStateStruct, FirearmScopeStateStruct, NetDataReader, NetDataWriter, ScopeStatesPacket
 
 ### Community 385 - "ObservedGrenadeController"
-Cohesion: 0.20
-Nodes (4): Quaternion, Vector3, ObservedGrenadeController, GrenadeHandsController
+Cohesion: 0.14
+Nodes (7): Dictionary, OperationFactoryDelegate, Quaternion, Type, Vector3, ObservedGrenadeController, GrenadeHandsController
 
 ### Community 386 - "ZyriachyBossLogicClass_Activate_Patch"
 Cohesion: 0.17
@@ -2366,24 +2375,24 @@ Cohesion: 0.20
 Nodes (4): FirearmLightStateStruct, NetDataReader, NetDataWriter, HeadLightsPacket
 
 ### Community 388 - ".ProjectToCanvas"
-Cohesion: 0.32
+Cohesion: 0.36
 Nodes (5): RectTransform, Vector2, Vector3, WorldToScreen, ProceduralWeaponAnimation
 
 ### Community 389 - "BtrSpawn"
-Cohesion: 0.23
-Nodes (6): BtrSpawnOnThePathEvent, NetDataReader, NetDataWriter, Quaternion, Vector3, BtrSpawn
+Cohesion: 0.29
+Nodes (5): NetDataReader, NetDataWriter, Quaternion, Vector3, BtrSpawn
 
 ### Community 390 - "InventoryPacket"
 Cohesion: 0.18
 Nodes (6): BaseDescriptorClass, BaseInventoryOperationClass, NetDataReader, NetDataWriter, Obsolete, InventoryPacket
 
-### Community 391 - "NetUtils"
-Cohesion: 0.21
-Nodes (6): AddressFamily, IList, IPAddress, IPEndPoint, List, NetUtils
+### Community 391 - "DistantShadow_Awake_Patch"
+Cohesion: 0.22
+Nodes (6): DistantShadow, MethodBase, PatchPrefix, RenderTexture, DistantShadow_Awake_Patch, DistantShadow_Update_Patch
 
-### Community 392 - "HeadlessPage.razor"
-Cohesion: 0.17
-Nodes (11): CellTemplate, Columns, MudButton, MudDataGrid, MudDataGridPager, MudProgressCircular, MudStack, MudText (+3 more)
+### Community 392 - ".Initalize"
+Cohesion: 0.25
+Nodes (6): MethodBase, PatchPrefix, Task, FikaHeadlessSettingsManager, SettingsPatch, SharedGameSettingsClass
 
 ### Community 393 - "dependencies"
 Cohesion: 0.17
@@ -2429,9 +2438,9 @@ Nodes (7): CompleteProfileDescriptorClass, ISession, MethodBase, PatchPrefix, Fi
 Cohesion: 0.18
 Nodes (6): DateTime, GameDateTime, NetDataReader, NetDataWriter, TimeSpan, InformationPacket
 
-### Community 404 - "FikaPlayerPresence"
+### Community 404 - "QuestConditionPacket"
 Cohesion: 0.22
-Nodes (7): EDateTime, EFikaPlayerPresence, ESideType, FikaPlayerPresence, RaidInformation, EFikaPlayerPresence, FikaSetPresence
+Nodes (4): MongoID, NetDataReader, NetDataWriter, QuestConditionPacket
 
 ### Community 405 - "ReloadMagPacket"
 Cohesion: 0.24
@@ -2442,8 +2451,8 @@ Cohesion: 0.20
 Nodes (8): DefaultUIButton, ISession, MatchMakerAcceptScreen, MethodBase, PatchPostfix, PatchPrefix, RaidSettings, MatchmakerAcceptScreen_Show_Patch
 
 ### Community 407 - "SendItemDialog"
-Cohesion: 0.18
-Nodes (8): DateTime, IMudDialogInstance, ItemCacheService, TimeSpan, SendItemDialog, CantConfirm, ItemCacheService, MudDialog
+Cohesion: 0.13
+Nodes (11): CancellationToken, DateTime, IEnumerable, IMudDialogInstance, ItemCacheService, Task, TimeSpan, SendItemDialog (+3 more)
 
 ### Community 408 - "IndexPage.razor"
 Cohesion: 0.18
@@ -2461,9 +2470,9 @@ Nodes (9): AuthorizeRouteView, CascadingAuthenticationState, MudText, NotAuthori
 Cohesion: 0.20
 Nodes (8): BTRControllerClass, BTRGlobalSettings, CancellationToken, GameWorld, MethodBase, PatchPrefix, Task, BTRControllerClass_Init_Patch
 
-### Community 412 - "CloudController_OnEnable_Patch"
-Cohesion: 0.24
-Nodes (5): CloudController, MethodBase, PatchPrefix, CloudController_OnEnable_Patch, CloudController_UpdateAmbient_Patch
+### Community 412 - ".method_3"
+Cohesion: 0.18
+Nodes (5): AbstractOffState, OffState, Status, TimeSpan_0, VOIPState
 
 ### Community 413 - "LiteNetLib"
 Cohesion: 0.20
@@ -2493,9 +2502,9 @@ Nodes (6): EGrenadePacketType, NetDataReader, NetDataWriter, Quaternion, Vector3
 Cohesion: 0.27
 Nodes (6): ENotificationDurationType, Color, ENotificationIconType, NetDataReader, NetDataWriter, MessagePacket
 
-### Community 420 - ".GetEFTInventoryLogicOperationsAddToWishlistOperationDescriptor"
-Cohesion: 0.20
-Nodes (4): EWishlistGroup, GClass1994, GClass1998, GClass2000
+### Community 420 - "ProceedResponsePacket"
+Cohesion: 0.18
+Nodes (5): Item, MongoID, NetDataReader, NetDataWriter, ProceedResponsePacket
 
 ### Community 421 - "TextureDecalsPainter_Awake_Patch"
 Cohesion: 0.22
@@ -2505,25 +2514,25 @@ Nodes (6): MethodBase, PatchPrefix, RenderTexture, TextureDecalsPainter_Awake_Pa
 Cohesion: 0.22
 Nodes (8): ESyncType, InventoryController, NetworkHealthSyncPacketStruct, ProfileHealthClass, SkillManager, BotHealthController, _sendNetworkSyncPackets, GClass3010
 
-### Community 423 - "QuestItemPacket"
+### Community 423 - ".Create"
 Cohesion: 0.24
-Nodes (4): MongoID, NetDataReader, NetDataWriter, QuestItemPacket
+Nodes (8): CollisionFlags, Action, Func, IAnimator, ICharacterController, LayerMask, Vector3, HeadlessMovementContext
 
 ### Community 424 - "LeftStanceChangePacket"
 Cohesion: 0.20
 Nodes (3): NetDataReader, NetDataWriter, LeftStanceChangePacket
 
-### Community 425 - "RollCylinderPacket"
+### Community 425 - ".ShowFikaMessage"
 Cohesion: 0.20
-Nodes (3): NetDataReader, NetDataWriter, RollCylinderPacket
+Nodes (9): EButtonType, EmptyInputNode, ErrorScreen, Action, CompositeDisposableClass, Coroutine, DefaultUIButton, GClass3835 (+1 more)
 
-### Community 426 - "ReloadBoltActionPacket"
-Cohesion: 0.20
-Nodes (3): NetDataReader, NetDataWriter, ReloadBoltActionPacket
+### Community 426 - ".OnConditionValueChanged"
+Cohesion: 0.22
+Nodes (6): Condition, EQuestStatus, Condition, EQuestStatus, IConditional, TaskConditionCounterClass
 
-### Community 427 - "ToggleAimPacket"
+### Community 427 - "ToggleInventoryPacket"
 Cohesion: 0.20
-Nodes (3): NetDataReader, NetDataWriter, ToggleAimPacket
+Nodes (3): NetDataReader, NetDataWriter, ToggleInventoryPacket
 
 ### Community 428 - "ToggleBipodPacket"
 Cohesion: 0.20
@@ -2561,13 +2570,13 @@ Nodes (4): NetDataReader, NetDataWriter, SecretExfilFound, SecretExfiltrationPoi
 Cohesion: 0.20
 Nodes (8): EFikaNotification, HeadlessConnected, KeepAlive, OpenAdminSettings, PushNotification, SentItem, ShutdownClient, StartedRaid
 
-### Community 437 - "ListPlayer"
-Cohesion: 0.29
-Nodes (4): Color, Image, TMP_Text, ListPlayer
-
-### Community 438 - "MatchMakerUI"
+### Community 437 - "MuffledState"
 Cohesion: 0.20
-Nodes (8): Button, GameObject, HoverTooltipArea, Image, TextMeshProUGUI, TMP_Dropdown, Toggle, MatchMakerUI
+Nodes (3): NetDataReader, NetDataWriter, MuffledState
+
+### Community 438 - "FastCallSpecificAuto"
+Cohesion: 0.29
+Nodes (3): Guid, FastCallSpecificAuto, GuidSerializer
 
 ### Community 439 - "PartyInfoPanel_Show_Patch"
 Cohesion: 0.20
@@ -2593,13 +2602,13 @@ Nodes (10): DateTime, SendItemModel, Amount, Date, ExpirationDays, FoundInRaid, 
 Cohesion: 0.22
 Nodes (6): AirdropEventClass, Fika.Headless.Patches.Airdrop, MethodBase, PatchPrefix, Vector3, AirdropEventClass_FlareSuccessEventHandler_Patch
 
-### Community 445 - "StatisticsPage.razor"
-Cohesion: 0.22
-Nodes (8): ApexChart, ApexPointSeries, MudGrid, MudItem, MudPaper, MudProgressCircular, MudStack, MudText
+### Community 445 - "Components/_Imports.razor"
+Cohesion: 0.06
+Nodes (26): ApexChart, ApexCharts, ApexPointSeries, Brism, FikaWebApp.Components, FikaWebApp, MudGrid, MudItem (+18 more)
 
-### Community 446 - ".Prefix"
-Cohesion: 0.22
-Nodes (6): Class444, MethodBase, PatchPrefix, Task, Class444_Run_Patch, Interface3
+### Community 446 - ".HandoverItem"
+Cohesion: 0.25
+Nodes (7): ConditionItem, IResult, Item, QuestClass, Task, GStruct154, GStruct426
 
 ### Community 447 - "CustomPlayerLoopSystemsInjector_Injection_Patch"
 Cohesion: 0.22
@@ -2626,36 +2635,32 @@ Cohesion: 0.22
 Nodes (6): Fika.Core.Main.Patches.Testing, GamePlayerOwner, MethodBase, PatchPrefix, TestPatchRundans, RunddansControllerClass
 
 ### Community 453 - ".GetEFTInventoryDescriptor"
-Cohesion: 0.22
-Nodes (4): EAreaType, EBoundItem, GClass1959, GClass1988
+Cohesion: 0.18
+Nodes (5): EAreaType, EBoundItem, EFTInventoryClass, GClass1959, GClass1988
 
 ### Community 454 - ".GetEFTBonusDescriptor"
 Cohesion: 0.22
 Nodes (5): EBonusType, ESkillClass, ESkillId, GClass2225, ProfileBonusesClass
 
 ### Community 456 - "IPacketSender"
-Cohesion: 0.25
-Nodes (3): IPacketSender, NetworkManager, SendState
+Cohesion: 0.18
+Nodes (6): IPacketSender, NetworkManager, SendState, ObservedPacketSender, NetworkManager, SendState
 
-### Community 457 - "FikaClientQuickGrenadeController"
-Cohesion: 0.25
-Nodes (5): Quaternion, ThrowWeapItemClass, Vector3, FikaClientQuickGrenadeController, QuickGrenadeThrowHandsController
-
-### Community 458 - "FikaClientQuickKnifeController"
-Cohesion: 0.25
-Nodes (6): BallisticCollider, GStruct182, KnifeComponent, ShotInfoClass, FikaClientQuickKnifeController, QuickKnifeKickController
-
-### Community 459 - "EBodyPart"
-Cohesion: 0.28
-Nodes (4): DamageInfoStruct, EBodyPart, EDamageType, ValueStruct
-
-### Community 460 - ".InitLevel"
+### Community 458 - ".FromPingType"
 Cohesion: 0.22
-Nodes (8): CancellationToken, List, LoadingProgressStruct, ResourceKey, Task, IProgress, ItemFactoryClass, ObjectsFactoryDataClass
+Nodes (8): DeadBodyPing, DoorPing, GameObject, InteractablePing, LootContainerPing, LootItemPing, PlayerPing, PointPing
+
+### Community 459 - "KnifeHitPacket"
+Cohesion: 0.28
+Nodes (5): EHitType, NetDataReader, NetDataWriter, Vector3, KnifeHitPacket
+
+### Community 460 - "FikaClientGrenade"
+Cohesion: 0.28
+Nodes (6): Coroutine, GrenadeDataPacketStruct, IEnumerator, FikaClientGrenade, ObservedGrenade, WaitForFixedUpdate
 
 ### Community 461 - "ObservedQuickGrenadeController"
-Cohesion: 0.28
-Nodes (3): Quaternion, Vector3, ObservedQuickGrenadeController
+Cohesion: 0.24
+Nodes (4): Quaternion, Vector3, ObservedQuickGrenadeController, QuickGrenadeThrowHandsController
 
 ### Community 462 - ".Create"
 Cohesion: 0.22
@@ -2673,13 +2678,13 @@ Nodes (7): BaseLocalGame, Dictionary, EftGamePlayerOwner, FlatItemsDataClass, Me
 Cohesion: 0.31
 Nodes (6): IPlayer, List, MethodBase, PatchPrefix, Minefield_method_2_Patch, Minefield
 
-### Community 466 - "LoadingScreenPacket"
-Cohesion: 0.22
-Nodes (3): NetDataReader, NetDataWriter, LoadingScreenPacket
+### Community 466 - "ObservedMedsSpeedHook"
+Cohesion: 0.25
+Nodes (6): IEffect, Func, Item, ManualLogSource, ObservedMedsSpeedHook, Log
 
-### Community 467 - "SideEffectPacket"
+### Community 467 - ".Prefix"
 Cohesion: 0.22
-Nodes (4): MongoID, NetDataReader, NetDataWriter, SideEffectPacket
+Nodes (6): Coroutine, MethodBase, PatchPrefix, RocketProjectile_Launch_Patch, RocketLauncherConeBlastClass, RocketProjectile
 
 ### Community 468 - "NtpLeapIndicator"
 Cohesion: 0.22
@@ -2693,25 +2698,25 @@ Nodes (3): NetDataReader, NetDataWriter, CheckAmmoPacket
 Cohesion: 0.22
 Nodes (3): NetDataReader, NetDataWriter, CheckChamberPacket
 
-### Community 471 - "ExamineWeaponPacket"
-Cohesion: 0.22
-Nodes (3): NetDataReader, NetDataWriter, ExamineWeaponPacket
+### Community 471 - "InteractableInitPacket"
+Cohesion: 0.25
+Nodes (4): Dictionary, NetDataReader, NetDataWriter, InteractableInitPacket
 
 ### Community 472 - "QuickReloadMagPacket"
 Cohesion: 0.25
 Nodes (4): MongoID, NetDataReader, NetDataWriter, QuickReloadMagPacket
 
-### Community 473 - "UnderbarrelSightingRangeDownPacket"
+### Community 473 - "CancelGrenadePacket"
 Cohesion: 0.22
-Nodes (3): NetDataReader, NetDataWriter, UnderbarrelSightingRangeDownPacket
+Nodes (3): NetDataReader, NetDataWriter, CancelGrenadePacket
 
 ### Community 474 - "UnderbarrelSightingRangeUpPacket"
 Cohesion: 0.22
 Nodes (3): NetDataReader, NetDataWriter, UnderbarrelSightingRangeUpPacket
 
-### Community 475 - "BorderZoneEvent"
+### Community 475 - "CheckFireModePacket"
 Cohesion: 0.22
-Nodes (3): NetDataReader, NetDataWriter, BorderZoneEvent
+Nodes (3): NetDataReader, NetDataWriter, CheckFireModePacket
 
 ### Community 476 - "ClientConnected"
 Cohesion: 0.22
@@ -2721,20 +2726,20 @@ Nodes (3): NetDataReader, NetDataWriter, ClientConnected
 Cohesion: 0.22
 Nodes (3): NetDataReader, NetDataWriter, ClientDisconnected
 
-### Community 478 - "ClientExtract"
+### Community 478 - "FirearmLootPacket"
 Cohesion: 0.22
-Nodes (3): NetDataReader, NetDataWriter, ClientExtract
+Nodes (3): NetDataReader, NetDataWriter, FirearmLootPacket
 
-### Community 479 - "DisarmTripwire"
-Cohesion: 0.25
-Nodes (4): AirplaneDataPacketStruct, NetDataReader, NetDataWriter, DisarmTripwire
+### Community 479 - "ToggleLauncherPacket"
+Cohesion: 0.22
+Nodes (3): NetDataReader, NetDataWriter, ToggleLauncherPacket
 
 ### Community 480 - "ExfilCountdown"
 Cohesion: 0.22
 Nodes (3): NetDataReader, NetDataWriter, ExfilCountdown
 
 ### Community 481 - "SpawnAI"
-Cohesion: 0.28
+Cohesion: 0.24
 Nodes (4): NetDataReader, NetDataWriter, Vector3, SpawnAI
 
 ### Community 482 - "UpdateBackendData"
@@ -2750,8 +2755,8 @@ Cohesion: 0.22
 Nodes (6): CanvasGroup, DropDownBox, List, MethodBase, PatchPrefix, RaidSettingsWindow_method_8_Patch
 
 ### Community 485 - "FikaServer/Networking/LiteNetLib/NetUtils.cs"
-Cohesion: 0.25
-Nodes (7): NetworkInterface, SuppressMessage, LocalAddrType, All, IPv4, IPv6, NetworkSorter
+Cohesion: 0.22
+Nodes (8): NetworkInterface, SuppressMessage, LocalAddrType, All, IPv4, IPv6, NetworkSorter, IComparer
 
 ### Community 486 - "NtpLeapIndicator"
 Cohesion: 0.22
@@ -2773,9 +2778,9 @@ Nodes (8): Cancel, Confirm, DialogActions, DialogContent, FikaPrimaryButton, Fik
 Cohesion: 0.25
 Nodes (5): Fika.Core.Main.Patches.AbstractGamePatches, AbstractGame, MethodBase, PatchPrefix, AbstractGame_InRaid_Patch
 
-### Community 491 - "PartyInfoPanel_method_3_Patch"
-Cohesion: 0.25
-Nodes (5): Fika.Core.Main.Patches.Bugfixes, GroupPlayerViewModelClass, MethodBase, PatchPrefix, PartyInfoPanel_method_3_Patch
+### Community 491 - "CharacterSyncPacket"
+Cohesion: 0.22
+Nodes (4): List, NetDataReader, NetDataWriter, CharacterSyncPacket
 
 ### Community 492 - "TripwireSynchronizableObject_method_6_Patch"
 Cohesion: 0.25
@@ -2793,17 +2798,17 @@ Nodes (5): Fika.Core.Main.Patches.TransitController, MethodBase, PatchPrefix, Tr
 Cohesion: 0.39
 Nodes (5): EFTWriterClass, MethodImpl, Obsolete, Stack, WriterPoolManager
 
-### Community 496 - "ObservedSlotViewHandler"
-Cohesion: 0.32
-Nodes (5): EquipmentSlotClass, EquipmentSlot, Slot, ObservedSlotViewHandler, GClass3558
+### Community 496 - "LootSyncPacket"
+Cohesion: 0.22
+Nodes (6): LootSyncStruct, NetDataReader, NetDataWriter, Quaternion, Vector3, LootSyncPacket
 
 ### Community 497 - "BepInEx.Core"
 Cohesion: 0.25
 Nodes (8): contentHash, dependencies, requested, resolved, type, BepInEx.BaseLib, HarmonyX, BepInEx.Core
 
-### Community 498 - "AudioSource_Play_Transpiler"
-Cohesion: 0.25
-Nodes (5): CodeInstruction, IEnumerable, MethodBase, PatchTranspiler, AudioSource_Play_Transpiler
+### Community 498 - "FikaConfig"
+Cohesion: 0.22
+Nodes (8): FikaConfig, Background, Client, Headless, NatPunchServer, Server, FikaConfigBackground, Enable
 
 ### Community 499 - "BaseAmbientSoundPlayer_Stop_Transpiler"
 Cohesion: 0.25
@@ -2821,25 +2826,25 @@ Nodes (5): CodeInstruction, IEnumerable, MethodBase, PatchTranspiler, AudioSourc
 Cohesion: 0.25
 Nodes (5): CodeInstruction, IEnumerable, MethodBase, PatchTranspiler, BetterAudio_AddToAudioSourceQueue_Transpiler
 
-### Community 503 - "BetterAudio_BorrowWeaponAudioQueue_Transpiler"
+### Community 503 - "FikaSPTHttpServerConfig"
 Cohesion: 0.25
-Nodes (5): CodeInstruction, IEnumerable, MethodBase, PatchTranspiler, BetterAudio_BorrowWeaponAudioQueue_Transpiler
+Nodes (8): FikaSPTHttpServerConfig, BackendIp, BackendPort, Ip, Port, FikaSPTServerConfig, DisableSPTChatBots, Http
 
 ### Community 504 - "BetterAudio_LimitedPlayNonSpatial_Transpiler"
 Cohesion: 0.25
 Nodes (5): CodeInstruction, IEnumerable, MethodBase, PatchTranspiler, BetterAudio_LimitedPlayNonSpatial_Transpiler
 
-### Community 505 - "BetterAudio_PlayAtPoint1_Transpiler"
+### Community 505 - "BetterAudio_LimitedPlay_Transpiler"
 Cohesion: 0.25
-Nodes (5): CodeInstruction, IEnumerable, MethodBase, PatchTranspiler, BetterAudio_PlayAtPoint1_Transpiler
+Nodes (5): CodeInstruction, IEnumerable, MethodBase, PatchTranspiler, BetterAudio_LimitedPlay_Transpiler
 
 ### Community 506 - "BetterAudio_PlayAtPoint2_Transpiler"
 Cohesion: 0.25
 Nodes (5): CodeInstruction, IEnumerable, MethodBase, PatchTranspiler, BetterAudio_PlayAtPoint2_Transpiler
 
-### Community 507 - "BetterAudio_PlayAtPoint3_Transpiler"
+### Community 507 - "BetterAudio_PlayAtPointDelayed1_Transpiler"
 Cohesion: 0.25
-Nodes (5): CodeInstruction, IEnumerable, MethodBase, PatchTranspiler, BetterAudio_PlayAtPoint3_Transpiler
+Nodes (5): CodeInstruction, IEnumerable, MethodBase, PatchTranspiler, BetterAudio_PlayAtPointDelayed1_Transpiler
 
 ### Community 508 - "BetterAudio_PlayAtPoint4_Transpiler"
 Cohesion: 0.25
@@ -2865,17 +2870,17 @@ Nodes (5): CodeInstruction, IEnumerable, MethodBase, PatchTranspiler, BetterAudi
 Cohesion: 0.25
 Nodes (5): CodeInstruction, IEnumerable, MethodBase, PatchTranspiler, BetterAudio_TryPlayAtPoint_Transpiler
 
-### Community 514 - "WorldInteractiveObject_PlaySoundAtPoint_Transpiler"
+### Community 514 - "BetterAudio_PlayNonspatial_Transpiler"
 Cohesion: 0.25
-Nodes (5): CodeInstruction, IEnumerable, MethodBase, PatchTranspiler, WorldInteractiveObject_PlaySoundAtPoint_Transpiler
+Nodes (5): CodeInstruction, IEnumerable, MethodBase, PatchTranspiler, BetterAudio_PlayNonspatial_Transpiler
 
 ### Community 515 - "BotStandBy_Update_Transpiler"
 Cohesion: 0.25
 Nodes (5): CodeInstruction, IEnumerable, MethodBase, PatchTranspiler, BotStandBy_Update_Transpiler
 
-### Community 516 - "GPUInstancerManager_Update_Transpiler"
+### Community 516 - "WindowBreaker_method_22_Transpiler"
 Cohesion: 0.25
-Nodes (5): CodeInstruction, IEnumerable, MethodBase, PatchTranspiler, GPUInstancerManager_Update_Transpiler
+Nodes (5): CodeInstruction, IEnumerable, MethodBase, PatchTranspiler, WindowBreaker_method_22_Transpiler
 
 ### Community 517 - "LaserBeam_Awake_Patch"
 Cohesion: 0.25
@@ -2885,13 +2890,13 @@ Nodes (5): Mesh, MethodBase, PatchPrefix, LaserBeam_Awake_Patch, LaserBeam
 Cohesion: 0.25
 Nodes (5): CodeInstruction, IEnumerable, MethodBase, PatchTranspiler, PerfectCullingCrossSceneGroup_Update_Transpiler
 
-### Community 519 - "LevelSettings_ApplyTreeWindSettings_Transpiler"
+### Community 519 - "WindowBreaker_method_23_Transpiler"
 Cohesion: 0.25
-Nodes (5): CodeInstruction, IEnumerable, MethodBase, PatchTranspiler, LevelSettings_ApplyTreeWindSettings_Transpiler
+Nodes (5): CodeInstruction, IEnumerable, MethodBase, PatchTranspiler, WindowBreaker_method_23_Transpiler
 
-### Community 520 - "MainMenuControllerClass_method_78_Patch"
+### Community 520 - "ProceduralWeaponAnimation_StartFovCoroutine_Transpiler"
 Cohesion: 0.25
-Nodes (5): MainMenuControllerClass, MethodBase, PatchPostfix, RaidSettings, MainMenuControllerClass_method_78_Patch
+Nodes (5): CodeInstruction, IEnumerable, MethodBase, PatchTranspiler, ProceduralWeaponAnimation_StartFovCoroutine_Transpiler
 
 ### Community 521 - "CorpsePositionSyncer"
 Cohesion: 0.29
@@ -2905,9 +2910,9 @@ Nodes (8): EPingType, DeadBody, Door, Interactable, LootContainer, LootItem, Pla
 Cohesion: 0.25
 Nodes (5): AbstractHandsController, MovementContext, ObservedStationaryState, OutOfOperationRange, StationaryStateClass
 
-### Community 524 - "Player_IsShotDeflectedByHeavyArmor_Transpiler"
+### Community 524 - "Player_TryGetArmorResistData_Transpiler"
 Cohesion: 0.25
-Nodes (5): CodeInstruction, IEnumerable, MethodBase, PatchTranspiler, Player_IsShotDeflectedByHeavyArmor_Transpiler
+Nodes (5): CodeInstruction, IEnumerable, MethodBase, PatchTranspiler, Player_TryGetArmorResistData_Transpiler
 
 ### Community 525 - "Player_method_95_Transpiler"
 Cohesion: 0.25
@@ -2917,33 +2922,33 @@ Nodes (5): CodeInstruction, IEnumerable, MethodBase, PatchTranspiler, Player_met
 Cohesion: 0.25
 Nodes (5): MethodBase, PatchPrefix, Profile, RaidSettings, ScavProfileLoad_Override
 
-### Community 527 - "Player_ManageAggressor_Patch"
+### Community 527 - "TextMessagePacket"
 Cohesion: 0.25
-Nodes (5): CodeInstruction, IEnumerable, MethodBase, PatchTranspiler, Player_ManageAggressor_Patch
+Nodes (3): NetDataReader, NetDataWriter, TextMessagePacket
 
-### Community 528 - "Player_SetDogtagInfo_Patch"
-Cohesion: 0.25
-Nodes (5): CodeInstruction, IEnumerable, MethodBase, PatchTranspiler, Player_SetDogtagInfo_Patch
+### Community 528 - "TalkingState"
+Cohesion: 0.32
+Nodes (3): TalkingState, Status, TimeSpan_0
 
 ### Community 529 - "BasicMicrophoneCapture_UpdateSubscribers_Transpiler"
 Cohesion: 0.25
 Nodes (5): CodeInstruction, IEnumerable, MethodBase, PatchTranspiler, BasicMicrophoneCapture_UpdateSubscribers_Transpiler
 
-### Community 530 - "WorldLootPacket"
+### Community 530 - "SendItemUI"
 Cohesion: 0.25
-Nodes (3): NetDataReader, NetDataWriter, WorldLootPacket
+Nodes (6): Button, TextMeshProUGUI, TMP_Dropdown, TMP_InputField, UIDragComponent, SendItemUI
 
 ### Community 531 - "UpnpNatDeviceInfo"
 Cohesion: 0.25
 Nodes (8): IPAddress, IPEndPoint, Uri, UpnpNatDeviceInfo, HostEndPoint, LocalAddress, ServiceControlUri, ServiceType
 
-### Community 532 - "EGrenadePacketType"
-Cohesion: 0.25
-Nodes (7): EGrenadePacketType, ExamineWeapon, HighThrow, LowThrow, None, PullRingForHighThrow, PullRingForLowThrow
+### Community 532 - "Fika.Core.Networking.Packets"
+Cohesion: 0.06
+Nodes (20): Fika.Core.Main.ClientClasses.HandsControllers, Fika.Core.Networking.Packets, Fika.Core.Networking.Packets.FirearmController, EGrenadePacketType, ExamineWeapon, HighThrow, LowThrow, None (+12 more)
 
-### Community 533 - "INetReusable"
-Cohesion: 0.25
-Nodes (3): NetDataReader, NetDataWriter, INetReusable
+### Community 533 - "TOD_Sky_Headless_Patch"
+Cohesion: 0.29
+Nodes (4): Fika.Headless.Patches.TODPatches, MethodBase, PatchPrefix, TOD_Sky_Headless_Patch
 
 ### Community 534 - "BepInEx.Core"
 Cohesion: 0.25
@@ -2957,9 +2962,9 @@ Nodes (5): Button, EFikaPlayerPresence, Image, TextMeshProUGUI, MainMenuUIPlayer
 Cohesion: 0.25
 Nodes (7): DatabaseService, HashSet, HttpGet, IActionResult, LocaleService, MongoId, GetItemsController
 
-### Community 537 - "UploadProfilesController"
-Cohesion: 0.25
-Nodes (7): IActionResult, JsonUtil, ProfileActivityService, SaveServer, SptProfile, Task, UploadProfilesController
+### Community 537 - "EventLoopPlayer_Awake_Patch"
+Cohesion: 0.29
+Nodes (4): EventLoopPlayer, MethodBase, PatchPrefix, EventLoopPlayer_Awake_Patch
 
 ### Community 538 - "DeliveryMethod"
 Cohesion: 0.25
@@ -2985,17 +2990,17 @@ Nodes (8): MudBlazor, SPTarkov.Server.Core, SPTarkov.Server.Web, contentHash, de
 Cohesion: 0.25
 Nodes (7): Cancel, Confirm, DialogActions, DialogContent, MudButton, MudDialog, MudNumericField
 
-### Community 544 - ".GetFile"
+### Community 544 - "LoopAmbientSoundPlayer_Awake_Patch"
 Cohesion: 0.29
-Nodes (5): Authorize, FikaWebApp.Controllers, HttpGet, IActionResult, SecureDownloadController
+Nodes (4): MethodBase, PatchPrefix, LoopAmbientSoundPlayer_Awake_Patch, LoopAmbientSoundPlayer
 
 ### Community 545 - "BTRVehicle_method_38_Patch"
 Cohesion: 0.29
 Nodes (5): BTRPassenger, EBtrInteractionStatus, MethodBase, PatchPostfix, BTRVehicle_method_38_Patch
 
-### Community 546 - "ControlledLampGroup_Start_Patch"
+### Community 546 - "AnticheatMipMapChecker_Awake_Patch"
 Cohesion: 0.29
-Nodes (4): ControlledLampGroup, MethodBase, PatchPrefix, ControlledLampGroup_Start_Patch
+Nodes (4): AnticheatMipMapChecker, MethodBase, PatchPrefix, AnticheatMipMapChecker_Awake_Patch
 
 ### Community 547 - "CoopSettingsWindow_Show_Patch"
 Cohesion: 0.29
@@ -3009,25 +3014,25 @@ Nodes (5): EAirdropFallingStage, ETripwireState, AirplaneDataPacketStruct, EAird
 Cohesion: 0.29
 Nodes (4): ECoopBlock, MethodBase, PatchPrefix, MatchmakerPlayerControllerClass_GetCoopBlockReason_Patch
 
-### Community 550 - "EnumIntSerializer"
+### Community 550 - "FlareSceneSettings_Awake_Patch"
 Cohesion: 0.29
-Nodes (3): EnumByteSerializer, EnumIntSerializer, EnumIntSerializer
+Nodes (4): MethodBase, PatchPrefix, FlareSceneSettings_Awake_Patch, FlareSceneSettings
 
 ### Community 551 - ".OnPhraseTold"
 Cohesion: 0.29
 Nodes (5): ETagStatus, EPhraseTrigger, PhraseSpeakerClass, TagBank, TaggedClip
 
-### Community 552 - "EventRandomPlayer_Awake_Patch"
+### Community 552 - "GPUInstancerHiZOcclusionGenerator_Awake_Patch"
 Cohesion: 0.29
-Nodes (4): EventRandomPlayer, MethodBase, PatchPrefix, EventRandomPlayer_Awake_Patch
+Nodes (4): MethodBase, PatchPrefix, GPUInstancerHiZOcclusionGenerator_Awake_Patch, GPUInstancerHiZOcclusionGenerator
 
 ### Community 553 - "HarmonyX"
 Cohesion: 0.29
 Nodes (7): MonoMod.RuntimeDetour, System.Reflection.Emit, contentHash, dependencies, resolved, type, HarmonyX
 
-### Community 554 - "AmbientSoundPlayer_Awake_Patch"
+### Community 554 - "RainController_Awake_Patch"
 Cohesion: 0.29
-Nodes (4): AmbientSoundPlayer, MethodBase, PatchPrefix, AmbientSoundPlayer_Awake_Patch
+Nodes (4): MethodBase, PatchPrefix, RainController_Awake_Patch, RainController
 
 ### Community 555 - "BaseAmbientSoundPlayer_Awake_Patch"
 Cohesion: 0.29
@@ -3041,17 +3046,17 @@ Nodes (4): MethodBase, PatchPrefix, SeasonAmbientSoundPlayer_Awake_Patch, Season
 Cohesion: 0.29
 Nodes (4): MethodBase, PatchPrefix, Flicker_Awake_Patch, Flicker
 
-### Community 558 - "GrassInitialization_Awake_Patch"
+### Community 558 - "MainMenuControllerClass_method_50_Patch"
 Cohesion: 0.29
-Nodes (4): MethodBase, PatchPrefix, GrassInitialization_Awake_Patch, GrassInitialization
+Nodes (4): MainMenuControllerClass, MethodBase, PatchPrefix, MainMenuControllerClass_method_50_Patch
 
 ### Community 559 - "ImpostorsRenderer_OnEnable_Patch"
 Cohesion: 0.29
 Nodes (4): MethodBase, PatchPrefix, ImpostorsRenderer_OnEnable_Patch, ImpostorsRenderer
 
-### Community 560 - "ParticleIntensityFromAnimator_Awake_Patch"
+### Community 560 - "BTRViewSynchronizer"
 Cohesion: 0.29
-Nodes (4): MethodBase, PatchPrefix, ParticleIntensityFromAnimator_Awake_Patch, ParticleIntensityFromAnimator
+Nodes (4): BTRView, BTRViewSynchronizer, UpdateRate, BTRDataPacketStruct
 
 ### Community 561 - "RainFallDrops_Awake_Patch"
 Cohesion: 0.29
@@ -3065,9 +3070,9 @@ Nodes (4): MethodBase, PatchPrefix, SingleFlareController_OnEnable_Patch, Single
 Cohesion: 0.29
 Nodes (4): MethodBase, PatchPrefix, StaticDeferredDecal_OnEnable_Patch, StaticDeferredDecal
 
-### Community 564 - "StaticDeferredDecalRenderer_Awake_Patch"
-Cohesion: 0.29
-Nodes (4): MethodBase, PatchPrefix, StaticDeferredDecalRenderer_Awake_Patch, StaticDeferredDecalRenderer
+### Community 564 - ".SpawnObservedPlayer"
+Cohesion: 0.38
+Nodes (4): IEnumerator, LocalPlayer, ValueTask, SpawnObject
 
 ### Community 565 - "VolumetricLightRenderer_Awake_Patch"
 Cohesion: 0.29
@@ -3077,13 +3082,21 @@ Nodes (4): MethodBase, PatchPrefix, VolumetricLightRenderer_Awake_Patch, Volumet
 Cohesion: 0.29
 Nodes (4): MethodBase, PatchPrefix, WaterRendererv3_OnEnable_Patch, WaterRendererv3
 
-### Community 567 - "MessageWindow_Show_Patch"
-Cohesion: 0.29
-Nodes (4): MethodBase, PatchPostfix, MessageWindow_Show_Patch, GClass3834
+### Community 567 - "Crc32cLayer"
+Cohesion: 0.38
+Nodes (3): CRC32C, IPEndPoint, Crc32cLayer
 
 ### Community 568 - "SessionResultExitStatusPatch"
 Cohesion: 0.29
 Nodes (4): DefaultUIButton, MethodBase, PatchPostfix, SessionResultExitStatusPatch
+
+### Community 569 - "PacketPool"
+Cohesion: 0.29
+Nodes (4): Func, MethodImpl, Stack, PacketPool
+
+### Community 570 - "ERequestSubPacketType"
+Cohesion: 0.29
+Nodes (6): ERequestSubPacketType, CharacterSync, Exfiltration, SpawnPoint, TraderServices, Weather
 
 ### Community 571 - "ObservedJumpState"
 Cohesion: 0.33
@@ -3097,9 +3110,9 @@ Nodes (5): CodeInstruction, IEnumerable, MethodBase, PatchTranspiler, BTRTurretV
 Cohesion: 0.29
 Nodes (5): LocalPlayer, MethodBase, PatchPrefix, Task, Player_UpdateBtrTraderServiceData_Patch
 
-### Community 574 - "LocaleClass_ReloadBackendLocale_Patch"
-Cohesion: 0.29
-Nodes (4): MethodBase, PatchPostfix, Task, LocaleClass_ReloadBackendLocale_Patch
+### Community 574 - ".WebSocket_OnMessage"
+Cohesion: 0.38
+Nodes (3): MessageEventArgs, NotificationAbstractClass, PushNotification
 
 ### Community 575 - "Player_IDissonancePlayerType_Patch"
 Cohesion: 0.29
@@ -3109,17 +3122,17 @@ Nodes (4): MethodBase, PatchPrefix, Player_IDissonancePlayerType_Patch, NetworkP
 Cohesion: 0.38
 Nodes (3): List, SmokeGrenadeDataPacketStruct, WorldInteractiveDataPacketStruct
 
-### Community 577 - ".GetHost"
+### Community 577 - "EColor"
 Cohesion: 0.29
-Nodes (3): GetHostRequest, Guid, GetHostResponse
+Nodes (7): EColor, BLACK, BLUE, BROWN, GREEN, RED, WHITE
 
 ### Community 578 - "Extensions"
 Cohesion: 0.38
 Nodes (3): DoesNotReturn, MethodImpl, Extensions
 
-### Community 579 - "DownloadProfileResponse"
-Cohesion: 0.29
-Nodes (6): Dictionary, DownloadProfileResponse, ErrorMessage, ModData, Profile, JObject
+### Community 579 - "AbstractOffState2"
+Cohesion: 0.33
+Nodes (4): AbstractOffState, AbstractOffState2, TimeSpan_0, Struct510
 
 ### Community 580 - "PlayerStateSnapshot"
 Cohesion: 0.29
@@ -3149,9 +3162,9 @@ Nodes (4): MethodBase, PatchPostfix, TMP_Text, AchievementView_Show_Patch
 Cohesion: 0.29
 Nodes (4): DefaultUIButton, MethodBase, PatchPostfix, DisableInsuranceReadyButton_Patch
 
-### Community 587 - "DisableMatchSettingsReadyButton_Patch"
-Cohesion: 0.29
-Nodes (4): DefaultUIButton, MethodBase, PatchPostfix, DisableMatchSettingsReadyButton_Patch
+### Community 587 - "WaveSpawnScenario_Patch"
+Cohesion: 0.33
+Nodes (4): MethodBase, PatchPrefix, WavesSpawnScenario, WaveSpawnScenario_Patch
 
 ### Community 588 - "DisableReadyButton_Patch"
 Cohesion: 0.29
@@ -3165,13 +3178,13 @@ Nodes (5): LocalizedText, MethodBase, PatchPostfix, MatchmakerOfflineRaidScreen_
 Cohesion: 0.29
 Nodes (4): MethodBase, PatchPrefix, RaidSettings, MatchmakerOfflineRaidScreen_Close_Patch
 
-### Community 591 - "RawProfileController"
-Cohesion: 0.29
-Nodes (6): HttpGet, IActionResult, JsonUtil, SaveServer, RawProfileController, Content
+### Community 591 - "TripwireSynchronizableObject_method_11_Patch"
+Cohesion: 0.33
+Nodes (4): MethodBase, PatchPrefix, TripwireSynchronizableObject, TripwireSynchronizableObject_method_11_Patch
 
-### Community 592 - "FikaServer/Networking/LiteNetLib/NatPunchModule.cs"
-Cohesion: 0.29
-Nodes (4): INatPunchListener, NatAddressType, External, Internal
+### Community 592 - "DissonanceComms_Start_Patch"
+Cohesion: 0.33
+Nodes (3): MethodBase, PatchPrefix, DissonanceComms_Start_Patch
 
 ### Community 593 - "Microsoft.AspNetCore.Components"
 Cohesion: 0.29
@@ -3201,9 +3214,9 @@ Nodes (7): Microsoft.IdentityModel.Protocols, System.IdentityModel.Tokens.Jwt, c
 Cohesion: 0.29
 Nodes (7): SQLitePCLRaw.lib.e_sqlite3, SQLitePCLRaw.provider.e_sqlite3, SQLitePCLRaw.bundle_e_sqlite3, contentHash, dependencies, resolved, type
 
-### Community 600 - "GetActionsClass_GetAvailableActions_Patch"
-Cohesion: 0.33
-Nodes (3): Fika.Core.Main.Patches.Revival, MethodBase, GetActionsClass_GetAvailableActions_Patch
+### Community 600 - ".Prefix"
+Cohesion: 0.14
+Nodes (8): MethodBase, ClientHealthController_Kill_Patch, ActionsReturnClass, GamePlayerOwner, MethodBase, PatchPrefix, GetActionsClass_GetAvailableActions_Patch, GInterface177
 
 ### Community 601 - "System.Threading"
 Cohesion: 0.33
@@ -3213,9 +3226,9 @@ Nodes (6): System.Threading.Tasks, System.Threading, contentHash, dependencies, 
 Cohesion: 0.33
 Nodes (4): BepInEx.Core (5.*), UnityEngine.Modules (2022.3.43), Microsoft.NET.Sdk, Microsoft.NETFramework.ReferenceAssemblies (1.0.3)
 
-### Community 603 - "EQuestSharingTypes"
+### Community 603 - "NtpRequest"
 Cohesion: 0.33
-Nodes (6): EQuestSharingTypes, All, Kills, Location, None, PlaceBeacon
+Nodes (4): IPEndPoint, Socket, NtpRequest, NeedToKill
 
 ### Community 604 - "FikaClientPhysical"
 Cohesion: 0.33
@@ -3237,33 +3250,25 @@ Nodes (4): EBufferZoneData, MethodBase, PatchPostfix, BufferInnerZone_ChangeZone
 Cohesion: 0.33
 Nodes (4): MethodBase, NonWavesSpawnScenario, PatchPrefix, NonWaveSpawnScenario_Patch
 
-### Community 610 - "TarkovApplication_LocalGamePreparer_Patch"
+### Community 610 - "EFikaPlayerPresence"
+Cohesion: 0.33
+Nodes (6): EFikaPlayerPresence, IN_FLEA, IN_HIDEOUT, IN_MENU, IN_RAID, IN_STASH
+
+### Community 611 - ".CreateOverlayText"
+Cohesion: 0.50
+Nodes (3): ClientWatermark, TextMeshProUGUI, Vector4
+
+### Community 614 - "ClientStatisticsManager"
 Cohesion: 0.40
-Nodes (3): Location, MethodBase, TarkovApplication_LocalGamePreparer_Patch
+Nodes (3): ClientStatisticsManager, LocalizationKey, LocationStatisticsCollectorAbstractClass
 
-### Community 611 - "PmcFoundInRaidEquipment_ConfigurePMCFindInRaidStatus_Patch"
-Cohesion: 0.33
-Nodes (3): MethodBase, PatchPrefix, PmcFoundInRaidEquipment_ConfigurePMCFindInRaidStatus_Patch
-
-### Community 614 - "System.Diagnostics"
-Cohesion: 0.33
-Nodes (3): OnInitialized, PageTitle, System.Diagnostics
-
-### Community 615 - "EReloadWithAmmoStatus"
-Cohesion: 0.33
-Nodes (5): EReloadWithAmmoStatus, AbortReload, EndReload, None, StartReload
+### Community 615 - ".QueueProfile"
+Cohesion: 0.60
+Nodes (4): EHandsControllerType, MongoID, Vector3, SpawnObject
 
 ### Community 616 - "System.Threading"
 Cohesion: 0.33
 Nodes (6): System.Threading.Tasks, System.Threading, contentHash, dependencies, resolved, type
-
-### Community 617 - "RaidAdminUI"
-Cohesion: 0.33
-Nodes (5): Button, GameObject, TextMeshProUGUI, TMP_Dropdown, RaidAdminUI
-
-### Community 618 - "MainMenuControllerClass_method_55_Patch"
-Cohesion: 0.33
-Nodes (3): MethodBase, PatchPrefix, MainMenuControllerClass_method_55_Patch
 
 ### Community 619 - "GClass3871_ShowAction_Patch"
 Cohesion: 0.33
@@ -3273,9 +3278,9 @@ Nodes (4): GClass3871, MethodBase, PatchPostfix, GClass3871_ShowAction_Patch
 Cohesion: 0.33
 Nodes (4): MethodBase, PatchPostfix, HideoutPlayerOwner_SetPointOfView_Patch, HideoutPlayerOwner
 
-### Community 621 - "MenuScreen_Awake_Patch"
-Cohesion: 0.33
-Nodes (4): MethodBase, PatchPostfix, MenuScreen_Awake_Patch, MenuScreen
+### Community 621 - "EFloatCompression"
+Cohesion: 0.40
+Nodes (3): EFloatCompression, High, Low
 
 ### Community 622 - "SessionResultExitStatus_Show_Patch"
 Cohesion: 0.33
@@ -3301,6 +3306,10 @@ Nodes (6): Microsoft.IdentityModel.Logging, contentHash, dependencies, resolved,
 Cohesion: 0.33
 Nodes (6): System.CodeDom, contentHash, dependencies, resolved, type, Mono.TextTemplating
 
+### Community 628 - "Fika.Core.Main.Utils"
+Cohesion: 0.04
+Nodes (15): Fika.Core.UI.Patches, Fika.Core.UI, Fika.Core, Fika.Core.Main.Patches.BTR, Fika.Core.Main.Custom, Fika.Core.Networking.VOIP, Fika.Core.Main.Patches.Revival, Fika.Core.Main.Utils (+7 more)
+
 ### Community 629 - ".GetEFTRepairEnhancementComponentDescriptor"
 Cohesion: 0.40
 Nodes (3): EBuffRarity, ERepairBuffType, GClass1942
@@ -3317,21 +3326,25 @@ Nodes (5): System.IO.FileSystem.Primitives, contentHash, dependencies, resolved,
 Cohesion: 0.60
 Nodes (3): AbstractHandsController, Action, StationaryHandler
 
-### Community 633 - "MineDirectional_OnTriggerEnter_Patch"
+### Community 633 - "MappingLifetime"
 Cohesion: 0.40
-Nodes (3): MethodBase, PatchPrefix, MineDirectional_OnTriggerEnter_Patch
+Nodes (5): MappingLifetime, ForcedSession, Manual, Permanent, Session
 
 ### Community 634 - ".vmethod_0"
 Cohesion: 0.50
 Nodes (3): Action, InteractionResult, WorldInteractiveObject
 
 ### Community 635 - ".SetInventory"
-Cohesion: 0.40
+Cohesion: 0.33
 Nodes (3): Corpse, InventoryDescriptorClass, ObservedCorpse
 
 ### Community 636 - ".GetFirearmLightStates"
 Cohesion: 0.40
 Nodes (3): FirearmLightStateStruct, LightComponent, TacticalComboVisualController
+
+### Community 638 - "Fika.Core.Networking.LiteNetLib.Utils"
+Cohesion: 0.09
+Nodes (11): Attribute, Fika.Core.Networking.LiteNetLib.Utils, Fika.Core.Networking.LiteNetLib.Layers, FastBitConverter, NetDataReader, INetSerializable, PreserveAttribute, CRC32C (+3 more)
 
 ### Community 639 - "EStationaryCommand"
 Cohesion: 0.40
@@ -3361,6 +3374,10 @@ Nodes (5): System.Runtime.Handles, contentHash, dependencies, resolved, type
 Cohesion: 0.40
 Nodes (5): UnityEngine.Modules, contentHash, requested, resolved, type
 
+### Community 646 - "ResponseMessageBase"
+Cohesion: 0.40
+Nodes (3): XmlDocument, XmlNode, ResponseMessageBase
+
 ### Community 647 - "ToolsPage.razor"
 Cohesion: 0.40
 Nodes (4): OnBreakpointChanged, FikaPrimaryButton, MudBreakpointProvider, MudPaper
@@ -3384,6 +3401,10 @@ Nodes (5): contentHash, requested, resolved, type, MudBlazor
 ### Community 652 - "mssql1"
 Cohesion: 0.40
 Nodes (4): dependencies, mssql1, connectionId, type
+
+### Community 653 - "EQuestSyncType"
+Cohesion: 0.40
+Nodes (5): EQuestSyncType, Conditional, ItemDrop, PickUpQuestItem, PlaceVisited
 
 ### Community 655 - "Microsoft.NETCore.Platforms"
 Cohesion: 0.50
@@ -3445,17 +3466,29 @@ Nodes (4): System.Text.Encoding, contentHash, resolved, type
 Cohesion: 0.50
 Nodes (4): System.Threading.Tasks, contentHash, resolved, type
 
-### Community 671 - "ELoadPriority"
-Cohesion: 0.50
-Nodes (4): ELoadPriority, High, Low, Medium
+### Community 670 - "Fika.Core.Networking.Websocket"
+Cohesion: 0.12
+Nodes (7): Fika.Headless.Classes, Fika.Core.Networking.Websocket.Headless, Fika.Core.Networking.Websocket, MethodBase, CoopPlayer_CreateMovementContext_Patch, EFikaHeadlessWSMessageType, RequesterJoinRaid
+
+### Community 671 - "BannedState"
+Cohesion: 0.40
+Nodes (4): BannedState, Boolean_1, Status, TimeSpan_0
 
 ### Community 672 - ".ActualDrop"
 Cohesion: 0.50
 Nodes (3): Action, IHandsThrowController, Result
 
-### Community 673 - ".GetOperationFactoryDelegates"
-Cohesion: 0.50
-Nodes (3): Dictionary, OperationFactoryDelegate, Type
+### Community 673 - "HeadlessConnectedNotification"
+Cohesion: 0.40
+Nodes (5): ENotificationIconType, HeadlessConnectedNotification, Description, Icon, Name
+
+### Community 674 - "PushNotification"
+Cohesion: 0.40
+Nodes (4): ENotificationIconType, PushNotification, Description, Icon
+
+### Community 678 - "ReceivedSentItemNotification"
+Cohesion: 0.40
+Nodes (4): ENotificationIconType, ReceivedSentItemNotification, Description, Icon
 
 ### Community 679 - "Microsoft.NETCore.Platforms"
 Cohesion: 0.50
@@ -3481,13 +3514,13 @@ Nodes (4): System.Reflection.TypeExtensions, contentHash, resolved, type
 Cohesion: 0.50
 Nodes (4): System.Resources.ResourceManager, contentHash, resolved, type
 
-### Community 686 - "FikaLocalization"
-Cohesion: 0.50
-Nodes (3): FikaLocalization, TermsOfService, TermsOfServiceAccepted
+### Community 685 - "StartRaidNotification"
+Cohesion: 0.40
+Nodes (5): EDateTime, ENotificationIconType, StartRaidNotification, Description, Icon
 
-### Community 687 - "ERemoveFriendReason"
-Cohesion: 0.50
-Nodes (4): ERemoveFriendReason, Accept, Cancel, Decline
+### Community 687 - "GetOnlinePlayersResponse"
+Cohesion: 0.40
+Nodes (4): List, OnlinePlayer, GetOnlinePlayersResponse, Players
 
 ### Community 688 - "JetBrains.Annotations"
 Cohesion: 0.50
@@ -3537,9 +3570,9 @@ Nodes (3): dependencies, net9.0, version
 Cohesion: 0.50
 Nodes (3): HeadOutlet, ImportMap, Routes
 
-### Community 700 - ".Search"
-Cohesion: 0.50
-Nodes (3): CancellationToken, IEnumerable, Task
+### Community 700 - "FikaConfigClientMods"
+Cohesion: 0.40
+Nodes (4): List, FikaConfigClientMods, Optional, Required
 
 ### Community 701 - "AboutPage.razor"
 Cohesion: 0.50
@@ -3601,25 +3634,37 @@ Nodes (4): System.Memory.Data, contentHash, resolved, type
 Cohesion: 0.50
 Nodes (4): System.Security.Cryptography.Pkcs, contentHash, resolved, type
 
+### Community 719 - "FikaConfigNatPunchServer"
+Cohesion: 0.40
+Nodes (4): FikaConfigNatPunchServer, Enable, NatIntroduceAmount, Port
+
+### Community 720 - "EQuitState"
+Cohesion: 0.50
+Nodes (4): EQuitState, Dead, Extracted, None
+
+### Community 723 - "ESendRate"
+Cohesion: 0.50
+Nodes (4): ESendRate, High, Low, Medium
+
 ## Knowledge Gaps
-- **3111 isolated node(s):** `net9.0`, `AssetsTools.NET (3.0.0)`, `AssetsTools.NET.Texture (1.0.0)`, `SixLabors.ImageSharp (3.1.11)`, `Microsoft.NET.Sdk` (+3106 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 6916 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **3112 isolated node(s):** `net9.0`, `AssetsTools.NET (3.0.0)`, `AssetsTools.NET.Texture (1.0.0)`, `SixLabors.ImageSharp (3.1.11)`, `Microsoft.NET.Sdk` (+3107 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 6923 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 - **71 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `FikaPlayer` connect `FikaPlayer` to `NetPeer`, `.Proceed`, `ObservedPlayer`, `.LogInfo`, `Fika.Core.Networking`, `HostGameController`, `IPoolSubPacket`, `ClientHealthController`, `FikaBot`, `FikaVOIPController`, `ObservedFirearmController`, `FikaClientFirearmController`, `ReviveInteractable`, `.LogError`, `ECommonSubPacketType`, `PlayerStateSnapshot`, `CoopHandler`, `IFikaNetworkManager`, `BaseInventoryController`, `FikaClientPhysical`, `ObservedInventoryController`, `.PutFirearmSubPacket`, `ObservedMedsController`, `Player`, `ShotInfoPacket`, `FikaClientKnifeController`, `NetManagerUtils`, `Callback`, `AbstractPing`, `WorldInteractionPacket`, `IFikaGame`, `.FromPingType`, `DefaultFireOperation`, `UsableItemPacket`, `HandsControllerFactory`, `InventoryOperationHandler`, `DebugUI`, `HealthSyncPacket`, `SendCharacterPacket`, `PhrasePacket`, `SpawnAirdrop`, `PlayerSnapshotter`, `ClientMovementContext`, `FikaClientGrenadeController`, `FikaHealthBar`, `.Create`, `DamagePacket`, `MountingPacket`, `.CreateHandsController`, `FikaExfilManager`, `LightStatesPacket`, `CylinderMagPacket`, `VaultPacket`, `InteractionPacket`, `StationaryPacket`, `ObservedTripwireState`, `ArmorDamagePacket`, `ChangeFireModePacket`, `FlareShotPacket`, `ReloadWithAmmoPacket`, `MineEvent`, `ScopeStatesPacket`, `ObservedGrenadeController`, `HeadLightsPacket`, `.ProjectToCanvas`, `BtrSpawn`, `InventoryPacket`, `BotPacketSender`, `LeftStanceChangePacket`, `RollCylinderPacket`, `ReloadBoltActionPacket`, `ToggleAimPacket`, `ToggleBipodPacket`, `.SpawnItemInWorld`, `SecretExfilFound`, `ListPlayer`, `IPacketSender`, `FikaClientQuickGrenadeController`, `FikaClientQuickKnifeController`, `CheckAmmoPacket`, `CheckChamberPacket`, `ExamineWeaponPacket`, `UnderbarrelSightingRangeDownPacket`, `UnderbarrelSightingRangeUpPacket`, `BorderZoneEvent`, `ClientConnected`, `ClientDisconnected`, `ClientExtract`, `ExfilCountdown`, `UpdateBackendData`?**
-  _High betweenness centrality (0.154) - this node is a cross-community bridge._
-- **Why does `Fika.Core.Main.Utils` connect `Fika.Core.Main.Utils` to `LoadingLootPatch`, `.ProjectToCanvas`, `PlayerSnapshotter`, `Fika.Core.Main.Players`, `Fika.Core.Networking`, `MainMenuUIPlayer`, `FikaPlayer_OnItemAddedOrRemoved_Transpiler.cs`, `FikaBot`, `IDisposable`, `Fika.Core.Networking.Websocket.Notifications`, `MatchMakerUI`, `.Prefix`, `.Prefix`, `.Prefix`, `BotInventoryOperationHandler`, `.Transpile`, `MultiSelect`, `Fika.Core.Main.Patches`, `Minefield_method_2_Patch.cs`, `Fika.Core.Main.Patches.PlayerPatches`, `SetBlackImageAlpha_Patch`, `MonoBehaviour`, `TransitControllerAbstractClass_Exist_Patch`, `Fika.Core.Networking.VOIP`, `Fika.Core.Main.Patches.DebugPatches`?**
-  _High betweenness centrality (0.132) - this node is a cross-community bridge._
-- **Why does `Fika.Core.Main.Players` connect `Fika.Core.Main.Players` to `FikaPlayer_OnItemAddedOrRemoved_Transpiler.cs`, `Fika.Core.Main.Utils`, `.ProjectToCanvas`, `.PutFirearmSubPacket`, `IDisposable`, `ObservedHealthController`, `Minefield_method_2_Patch.cs`, `Fika.Core.Main.Patches`, `Fika.Core.Networking.VOIP`, `Fika.Core.Networking`, `Fika.Core.Networking.LiteNetLib`, `Fika.Core.Main.Patches.PlayerPatches`, `CoopPlayer_CreateMovementContext_Patch.cs`?**
-  _High betweenness centrality (0.104) - this node is a cross-community bridge._
+- **Why does `FikaPlayer` connect `FikaPlayer` to `NetPeer`, `.Proceed`, `ObservedPlayer`, `CoopGame`, `.LogInfo`, `Fika.Core.Networking`, `HostGameController`, `IPoolSubPacket`, `Bleedout`, `FikaBot`, `FikaVOIPController`, `ObservedFirearmController`, `FikaClientFirearmController`, `ReviveInteractable`, `.LogWarning`, `NetPeer`, `ECommonSubPacketType`, `PlayerStateSnapshot`, `CoopHandler`, `IFikaNetworkManager`, `BaseInventoryController`, `FikaClientPhysical`, `ObservedInventoryController`, `.PutFirearmSubPacket`, `.Update`, `ObservedMedsController`, `Player`, `ShotInfoPacket`, `FikaClientKnifeController`, `NetManagerUtils`, `Callback`, `EFirearmSubPacketType`, `AbstractPing`, `WorldInteractionPacket`, `IFikaGame`, `PingPacket`, `DefaultFireOperation`, `UsableItemPacket`, `HandsControllerFactory`, `OperationCallbackPacket`, `DebugUI`, `HealthSyncPacket`, `SendCharacterPacket`, `.Create`, `.HandleTeammateKill`, `PhrasePacket`, `SpawnAirdrop`, `PlayerSnapshotter`, `ClientMovementContext`, `FikaClientGrenadeController`, `FikaHealthBar`, `MountingPacket`, `.LogError`, `LightStatesPacket`, `CylinderMagPacket`, `VaultPacket`, `InteractionPacket`, `StationaryPacket`, `ObservedTripwireState`, `ArmorDamagePacket`, `ChangeFireModePacket`, `FlareShotPacket`, `ReloadWithAmmoPacket`, `MineEvent`, `ScopeStatesPacket`, `ObservedGrenadeController`, `HeadLightsPacket`, `.ProjectToCanvas`, `InventoryPacket`, `BotPacketSender`, `LeftStanceChangePacket`, `ToggleInventoryPacket`, `ToggleBipodPacket`, `.SpawnItemInWorld`, `SecretExfilFound`, `MuffledState`, `IPacketSender`, `CheckAmmoPacket`, `CheckChamberPacket`, `CancelGrenadePacket`, `UnderbarrelSightingRangeUpPacket`, `CheckFireModePacket`, `ClientConnected`, `ClientDisconnected`, `FirearmLootPacket`, `ToggleLauncherPacket`, `ExfilCountdown`, `SpawnAI`, `UpdateBackendData`, `CharacterSyncPacket`?**
+  _High betweenness centrality (0.181) - this node is a cross-community bridge._
+- **Why does `Fika.Core.Main.Utils` connect `Fika.Core.Main.Utils` to `LoadingLootPatch`, `Fika.Core.Networking.Models`, `PlayerSnapshotter`, `Fika.Core.Main.Players`, `SendItemUI`, `Fika.Core.Networking.Packets`, `Fika.Core.Networking`, `MainMenuUIPlayer`, `Fika.Core.Networking.Websocket`, `ReceivedSentItemNotification`, `Fika.Core.Networking.Websocket.Notifications`, `ReviveInteractable`, `.Prefix`, `OfflineAirdropServerLogicClass_UpdateOfflineClientLogic_Patch`, `.Transpile`, `MultiSelect`, `MatchMakerUIScript`, `Fika.Core.Main.Patches`, `.Prefix`, `Fika.Core.Main.Patches.PlayerPatches`, `SetBlackImageAlpha_Patch`, `MonoBehaviour`, `TransitControllerAbstractClass_Exist_Patch`, `.Prefix`?**
+  _High betweenness centrality (0.137) - this node is a cross-community bridge._
+- **Why does `NetPeer` connect `NetPeer` to `NetManager`, `NetPeerEnumerator`, `LiteConnectionRequest`, `NetPacket`, `LiteNetManager`, `DeliveryMethod`, `FikaPlayer`, `LiteNetPeer`, `NatPunchServer`?**
+  _High betweenness centrality (0.133) - this node is a cross-community bridge._
 - **What connects `net9.0`, `AssetsTools.NET (3.0.0)`, `AssetsTools.NET.Texture (1.0.0)` to the rest of the system?**
-  _3111 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _3112 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `NetPeer` be split into smaller, more focused modules?**
-  _Cohesion score 0.02760632925597576 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.03118440779610195 - nodes in this community are weakly interconnected._
 - **Should `Fika.Headless.Patches` be split into smaller, more focused modules?**
-  _Cohesion score 0.016247969003874516 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.015037593984962405 - nodes in this community are weakly interconnected._
 - **Should `.Proceed` be split into smaller, more focused modules?**
-  _Cohesion score 0.030764848312206237 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.031145878603505723 - nodes in this community are weakly interconnected._
