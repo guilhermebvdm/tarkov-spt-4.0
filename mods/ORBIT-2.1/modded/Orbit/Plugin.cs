@@ -40,6 +40,8 @@ public class Plugin : BaseUnityPlugin
     public const string PluginGuid = "com.chazut.orbit";
     public const string PluginName = "ORBIT";
     public const string OrbitVersion = "2.1.0";
+    // SPT 4.0 port: same version as the upstream build it was made from; the tag tells the two apart in the log.
+    public const string OrbitBuild = OrbitVersion + " (SPT 4.0 port)";
 
     public static ManualLogSource LogSource;
 
@@ -93,7 +95,7 @@ public class Plugin : BaseUnityPlugin
         // FIKA headless client skips, so we can't depend on it (issue #5).
         StartCoroutine(WaitForHandbook());
 
-        Log.Always($"ORBIT {OrbitVersion} initialised");
+        Log.Always($"ORBIT {OrbitBuild} initialised");
 
         // Patches — wrap each in EnableSafe so one bad patch (wrong Harmony parameter name, missing target
         // method after a game update) can't collapse the rest of init. Without the guard a single failure
@@ -141,7 +143,11 @@ public class Plugin : BaseUnityPlugin
         EnableSafe(new DormantDamageProbePatch());
         EnableSafe(new DormantGroundCollisionPatch());
         EnableSafe(new DormantAvoidDangerBypassPatch());
-        EnableSafe(new DormantBoarAvoidDangerBypassPatch());
+        // SPT 4.0: BoarAvoidDangerLayer (GClass49) inherits ShallUseNow from AvoidDangerLayer without overriding it,
+        // so the patch above already covers it. Enabling this one too would put a second, identical prefix on the
+        // same method and hand plain AvoidDangerLayer instances to a parameter typed as the Boar layer.
+        if (DormantBoarAvoidDangerBypassPatch.Applies)
+            EnableSafe(new DormantBoarAvoidDangerBypassPatch());
 
         // Inventory subsystem patches
         EnableSafe(new AirdropLandedPatch());
@@ -214,7 +220,7 @@ public class Plugin : BaseUnityPlugin
         brains.Add(nameof(BsgBrain.FollowerGluharScout));
         BrainManager.AddCustomLayer(typeof(OrbitBrainLayer), brains, 19);
 
-        Log.Always($"ORBIT {OrbitVersion} fully loaded — BrainManager wired");
+        Log.Always($"ORBIT {OrbitBuild} fully loaded — BrainManager wired");
     }
 
     private IEnumerator WaitForHandbook()

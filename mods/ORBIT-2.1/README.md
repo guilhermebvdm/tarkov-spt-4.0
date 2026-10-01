@@ -42,7 +42,7 @@ De-para completo, evidências e riscos: [spec técnica](backlog/001-downgrade-sp
 |---|---|
 | `original/` | Clone do repositório oficial, sem `.git`. **Não modificar.** Referência intocada usada para diff e atualizações. |
 | `modded/` | Cópia de trabalho. Modificações vão aqui. |
-| `backlog/` | Itens de backlog com spec, reviews e as-built. |
+| `backlog/` | Itens de backlog com spec, reviews e as-built. 001 = o port; 002 = pacotes Fika do addon. |
 | `builds/` | Builds geradas (não versionadas). |
 | `scripts/` | Verificação fora do jogo e instalação (abaixo). |
 | `memory/` | Memória de sessões deste mod. |
@@ -61,7 +61,7 @@ Os projetos resolvem as DLLs do jogo e do servidor a partir de `SPT_PATH` ou do 
 
 | Comando | O que confere |
 |---|---|
-| `bash mods/ORBIT-2.1/scripts/verify-port.sh` | Cada patch Harmony resolve o alvo no jogo instalado, os parâmetros ligam, os transpilers rodam sobre o IL real, e os nomes de tipo comparados como texto estão cobertos |
+| `bash mods/ORBIT-2.1/scripts/verify-port.sh` | Cada patch Harmony resolve o alvo no jogo instalado, os parâmetros ligam, os transpilers rodam sobre o IL real; as ligações com SAIN, MoreBotsAPI e UNTAR resolvem; os nomes de tipo comparados como texto estão cobertos; nenhuma linha monta caminho do SPT 4.1 |
 | `powershell -File mods\ORBIT-2.1\scripts\server-smoke-test.ps1` | Uma cópia descartável do servidor 4.0 carrega o mod, as 13 páginas e as 3 rotas respondem |
 
 Nenhum dos dois escreve na instalação do SPT. Nenhum dos dois substitui a validação em jogo.

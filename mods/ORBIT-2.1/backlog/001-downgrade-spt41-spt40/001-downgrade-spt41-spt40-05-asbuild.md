@@ -12,7 +12,7 @@
 
 | Parte | Compila contra o 4.0.13 | Verificado fora do jogo | Verificado em jogo |
 |---|---|---|---|
-| Cliente `ORBIT.dll` 2.1.0 | sim | 43 patches + 3 conjuntos manuais aplicam (alvo, parâmetros, transpilers); 8 leitores por reflexão resolvem; 17 nomes de camada cobertos | **não** |
+| Cliente `ORBIT.dll` 2.1.0 | sim | 42 patches + 3 conjuntos manuais ligam (alvo, parâmetros, transpilers), 1 patch não se aplica ao 4.0; 8 leitores por reflexão resolvem; 17 nomes de camada cobertos; ligações com SAIN, MoreBotsAPI e UNTAR resolvem | **não** |
 | Addon `Orbit.Fika.dll` 1.1.0 | sim, contra Fika.Core 2.3.21 | 4 postfixes de porta ligam; campos de interação de porta encontrados | **não** |
 | Servidor `Orbit.Server.dll` 2.1.0 | sim, `net9.0` | carrega no `SPT.Server` 4.0.13; 13 páginas e 3 rotas respondem; no navegador: navegação, caixa de confirmação, Save | **não** com o cliente do jogo |
 
@@ -20,7 +20,7 @@ Nada foi instalado em `D:\SPT`. O ORBIT 1.2.1 continua sendo o que o jogo carreg
 
 ## Tamanho do port
 
-52 arquivos em `modded/`, 471 linhas adicionadas e 183 removidas contra o upstream `8fd7e661`; 5 arquivos novos. `original/` intacto.
+53 arquivos em `modded/`, 496 linhas adicionadas e 187 removidas contra o upstream `8fd7e661` (`git diff --shortstat b1bedb0b -- mods/ORBIT-2.1/modded`); 5 arquivos novos. `original/` intacto.
 
 ## Arquivos alterados (build inicial)
 
@@ -63,25 +63,36 @@ Nada foi instalado em `D:\SPT`. O ORBIT 1.2.1 continua sendo o que o jogo carreg
 | `scripts/verify-port.sh` parte 1 | Cada alvo de patch resolve no jogo instalado; parâmetros de prefixo/postfix/finalizer ligam pelas regras do HarmonyX 2.9; cada transpiler roda sobre o IL real sem lançar; leitores por reflexão em campos estáticos não são nulos; reflexão do SAIN resolve | Que o desvio é aplicado dentro do jogo; o efeito do patch |
 | `scripts/verify-port.sh` parte 2 | Todo literal igual a um nome de tipo 4.1 tem linha no `Spt40TypeNames` | Nomes montados em tempo de execução |
 | `scripts/server-smoke-test.ps1` | O servidor 4.0.13 carrega o mod; 13 páginas renderizam com os arquivos do MudBlazor; 3 rotas respondem; log sem erro | Cliques e Save (conferidos à mão no navegador em 2026-09-30) |
-| Cinco defeitos introduzidos de propósito | Cada um fez a verificação correspondente falhar: linha de campo removida, método trocado por um inexistente, `___campo` errado, linha de camada removida, nome de parâmetro errado | — |
+| Seis defeitos introduzidos de propósito | Cada um fez a verificação correspondente falhar: linha de campo removida, método trocado por um inexistente, `___campo` errado, linha de camada removida, nome de parâmetro errado, caminho do 4.1 de volta no ZIP de preset | — |
 
 O programa de verificação altera duas coisas nas cópias que carrega, e só nelas: troca `Time.frameCount` por `0` dentro de `Orbit.Log` (chamada nativa da Unity) e marca como `sealed` 107 tipos delegate do `Assembly-CSharp` (o runtime de desktop recusa delegate não selado; o do jogo aceita). 53 tipos do jogo continuam sem carregar fora do jogo e são pulados.
 
-## PA-NN-MM resolvidos durante o build
+## PA-NN-MM resolvidos
 
-Ver [001-downgrade-spt41-spt40-03-spec-tech-review-01.md](001-downgrade-spt41-spt40-03-spec-tech-review-01.md).
+A review técnica 01 chegou depois do build inicial. Os 20 pontos foram aplicados; os que mudaram código ou verificação:
+
+| ID | Categoria · Impacto | Resumo da resolução |
+| --- | --- | --- |
+| PA-01-05 | C — Erro de lógica · 🟡 | `DormantBoarAvoidDangerBypassPatch.Applies`; `Plugin.cs` só liga o patch quando o alvo é declarado na classe do Boar |
+| PA-01-06 | C — Erro de lógica · 🟡 | `PatchDryRun` conta como falha qualquer aviso ou erro que o mod grave no próprio log |
+| PA-01-07, PA-01-10 | A — Gap · 🟡 | `PatchDryRun` carrega os mods opcionais instalados e confere as ligações de MoreBotsAPI (11 membros) e UNTAR (5) |
+| PA-01-09 | B — Edge case · 🟡 | `verify-port.sh` parte 3/3: caminhos do 4.1 em texto |
+| PA-01-11 | A — Gap · 🟡 | `OnGhostFightPacketSafe` no addon; desvios de formato no item 002 |
+| PA-01-20 | A — Gap · 🟢 | `Plugin.OrbitBuild`: o log diz `ORBIT 2.1.0 (SPT 4.0 port)` |
+
+Os demais pontos mudaram só o texto da spec técnica. Detalhe em [001-downgrade-spt41-spt40-03-spec-tech-review-01.md](001-downgrade-spt41-spt40-03-spec-tech-review-01.md).
 
 ## Mudanças posteriores
 
 ### Code review 01 — 2026-09-30
 
-Aplicados: CR-01-01 a CR-01-09. Aceitos sem mudança: CR-01-10 a CR-01-14. Detalhe em [001-downgrade-spt41-spt40-04-code-review-01.md](001-downgrade-spt41-spt40-04-code-review-01.md).
+Aplicados: CR-01-01 a CR-01-10 e CR-01-15 (este em parte; o resto é o item 002). Aceitos sem mudança: CR-01-11 a CR-01-14. Detalhe em [001-downgrade-spt41-spt40-04-code-review-01.md](001-downgrade-spt41-spt40-04-code-review-01.md).
 
 ## Pendências para validação em jogo
 
 1. Instalar: `bash mods/ORBIT-2.1/scripts/install-to-spt.sh` (jogo e servidor fechados).
 2. Subir o servidor e conferir no log `ORBIT Server ... carregado`.
-3. Abrir o jogo e conferir em `BepInEx/LogOutput.log`: `ORBIT 2.1.0 fully loaded`, `body guards ready (32 entry points)`, `scripted medicine guard ready`, `scoped resume guard ready`, e nenhuma linha `failed to enable` ou `unavailable`.
+3. Abrir o jogo e conferir em `BepInEx/LogOutput.log`: `ORBIT 2.1.0 (SPT 4.0 port) fully loaded`, `body guards ready (32 entry points)`, `scripted medicine guard ready`, `scoped resume guard ready`, e nenhuma linha `failed to enable` ou `unavailable`.
 4. Raid solo com Ghost Mode ligado: esquadrões com objetivo, saque, extração; bots distantes dormindo e acordando.
 5. Raid Fika com host ou headless e um cliente, todos com `ORBIT.dll` e `Orbit.Fika.dll` iguais: portas abertas por bot e tiros de combate fantasma no cliente.
 6. Raid 1 → saída → raid 2; morte; alt-F4.
@@ -92,3 +103,4 @@ Aplicados: CR-01-01 a CR-01-09. Aceitos sem mudança: CR-01-10 a CR-01-14. Detal
 | Data | Evento |
 |---|---|
 | 2026-09-30 | Build inicial e code review 01 aplicada |
+| 2026-09-30 | Review técnica 01 aplicada (20 pontos) |

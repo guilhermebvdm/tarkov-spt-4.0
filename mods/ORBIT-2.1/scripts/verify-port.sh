@@ -4,6 +4,7 @@
 #   1. Harmony patches: runs every patch Enable() of builds/client/ORBIT.dll (and Orbit.Fika.dll) against the
 #      real game assemblies of the install and checks target resolution, parameter binding and transpilers.
 #   2. Type names compared as text: every 4.1 class name used as a string has a row in Spt40TypeNames.cs.
+#   3. Install paths written as text: no source line builds a path with the SPT 4.1 folder layout.
 #
 # Uso: bash mods/ORBIT-2.1/scripts/verify-port.sh [--spt-path <path>]
 # Requer um build prévio: /compile-mod ORBIT-2.1 --no-install
@@ -19,7 +20,7 @@ SPT_PATH="${SPT_PATH:-}"
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --spt-path) SPT_PATH="${2:-}"; shift 2 ;;
-    -h|--help) sed -n '2,11p' "$0" | sed 's|^# \{0,1\}||'; exit 0 ;;
+    -h|--help) sed -n '2,12p' "$0" | sed 's|^# \{0,1\}||'; exit 0 ;;
     *) echo "Erro: argumento desconhecido: $1" >&2; exit 1 ;;
   esac
 done
@@ -34,15 +35,27 @@ BUILD="$MOD/builds/client"
 
 status=0
 
-echo "=== 1/2 Patches Harmony contra o jogo em $SPT_PATH ==="
+echo "=== 1/3 Patches Harmony contra o jogo em $SPT_PATH ==="
 SPT_PATH="$SPT_PATH" dotnet build "$HERE/patch-dryrun/PatchDryRun.csproj" -c Release --nologo -v q >/dev/null \
   || { echo "Erro: não compilou scripts/patch-dryrun" >&2; exit 1; }
 "$HERE/patch-dryrun/bin/Release/PatchDryRun.exe" "$(cygpath -w "$SPT_PATH" 2>/dev/null || echo "$SPT_PATH")" \
   "$(cygpath -w "$BUILD" 2>/dev/null || echo "$BUILD")" || status=1
 
 echo
-echo "=== 2/2 Nomes de tipo comparados como texto ==="
+echo "=== 2/3 Nomes de tipo comparados como texto ==="
 python "$HERE/check-type-name-literals.py" || status=1
+
+echo
+echo "=== 3/3 Caminhos de instalação do SPT 4.1 escritos em texto ==="
+# No 4.0 a pasta do servidor é SPT/ (4.1: SPT_Runtime/) e a pasta do mod é a de instalação, não "ORBIT".
+# Linhas de comentário (//, ///, @*) não contam.
+hits="$(grep -rnE 'SPT_Runtime|user/mods/ORBIT/' "$MOD/modded" --include='*.cs' --include='*.razor'         | grep -vE '/(obj|bin|References)/'         | grep -vE '^[^:]+:[0-9]+:[[:space:]]*(//|@\*)' || true)"
+if [[ -n "$hits" ]]; then
+  echo "$hits" | sed "s|$MOD/||; s|^|FAIL  |"
+  status=1
+else
+  echo "OK    nenhuma linha de código monta caminho com SPT_Runtime/ ou user/mods/ORBIT/"
+fi
 
 echo
 [[ $status -eq 0 ]] && echo "verify-port: TUDO PASSOU" || echo "verify-port: FALHOU"

@@ -1,16 +1,16 @@
 # Graph Report - mods\ORBIT-2.1\modded  (2026-09-30)
 
 ## Corpus Check
-- 240 files · ~193,809 words
+- 240 files · ~193,989 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 3451 nodes · 6027 edges · 217 communities (198 shown, 19 thin omitted)
+- 3452 nodes · 6030 edges · 216 communities (197 shown, 19 thin omitted)
 - Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 119 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `03c9290e`
+- Built from commit: `9759d7d7`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -83,6 +83,7 @@
 - [[_COMMUNITY_Community 65|Community 65]]
 - [[_COMMUNITY_Community 66|Community 66]]
 - [[_COMMUNITY_Community 67|Community 67]]
+- [[_COMMUNITY_Community 68|Community 68]]
 - [[_COMMUNITY_Community 69|Community 69]]
 - [[_COMMUNITY_Community 70|Community 70]]
 - [[_COMMUNITY_Community 71|Community 71]]
@@ -161,7 +162,6 @@
 - [[_COMMUNITY_Community 144|Community 144]]
 - [[_COMMUNITY_Community 145|Community 145]]
 - [[_COMMUNITY_Community 146|Community 146]]
-- [[_COMMUNITY_Community 147|Community 147]]
 - [[_COMMUNITY_Community 148|Community 148]]
 - [[_COMMUNITY_Community 149|Community 149]]
 - [[_COMMUNITY_Community 150|Community 150]]
@@ -253,7 +253,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (217 total, 19 thin omitted)
+## Communities (216 total, 19 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.06
@@ -308,8 +308,8 @@ Cohesion: 0.11
 Nodes (20): AISoundType, Loud, Agent, bool, BotOwner, Dictionary, float, GhostHearingCategory (+12 more)
 
 ### Community 13 - "Community 13"
-Cohesion: 0.08
-Nodes (16): Cell, Convergence, BotsController, ConfigBundle, Dictionary, float, int, List (+8 more)
+Cohesion: 0.07
+Nodes (17): Cell, Convergence, BotsController, ConfigBundle, Dictionary, Door, float, int (+9 more)
 
 ### Community 14 - "Community 14"
 Cohesion: 0.05
@@ -368,12 +368,12 @@ Cohesion: 0.12
 Nodes (16): GoalScope, BotMover, BotOwner, CustomNavigationPoint, Exception, MethodBase, NavMeshPathStatus, PatchFinalizer (+8 more)
 
 ### Community 28 - "Community 28"
-Cohesion: 0.19
-Nodes (6): GhostWakeReason, BotOwner, List, BotOwner, List, DormancySystem
+Cohesion: 0.14
+Nodes (12): GhostSleepPlan, GhostWakeReason, List, Agent, BotOwner, List, Player, Squad (+4 more)
 
 ### Community 29 - "Community 29"
-Cohesion: 0.10
-Nodes (16): Corpse, MethodBase, PatchPostfix, Player, BotMover, MethodBase, PatchPrefix, Player (+8 more)
+Cohesion: 0.13
+Nodes (13): MethodBase, BotMover, MethodBase, PatchPrefix, Player, Vector3, ModulePatch, CorpseRegistrationPatch (+5 more)
 
 ### Community 30 - "Community 30"
 Cohesion: 0.17
@@ -392,7 +392,7 @@ Cohesion: 0.17
 Nodes (6): BotType, ExtractFaction, BotTypeUtils, LootingFaction, WildSpawnType, Profile
 
 ### Community 34 - "Community 34"
-Cohesion: 0.17
+Cohesion: 0.16
 Nodes (9): MethodInfo, Action, BotOwner, Dictionary, DoorSystem, FieldInfo, HashSet, Type (+1 more)
 
 ### Community 35 - "Community 35"
@@ -423,6 +423,10 @@ Nodes (23): MudButton, MudSelect, MudSelectItem, MudText, Orbit.Server.Zones, Or
 Cohesion: 0.09
 Nodes (22): ActivatorContent, ConfigService, ISnackbar, Microsoft.AspNetCore.Components.Forms, MudButton, MudChip, MudContainer, MudFileUpload (+14 more)
 
+### Community 42 - "Community 42"
+Cohesion: 0.14
+Nodes (3): BotOwner, Item, Player
+
 ### Community 43 - "Community 43"
 Cohesion: 0.14
 Nodes (11): Behaviour, bool, BotOwner, CodeInstruction, Func, IEnumerable, MethodBase, string (+3 more)
@@ -432,8 +436,8 @@ Cohesion: 0.23
 Nodes (18): ArchetypeSection, FactionsSection, GeneralSection, GhostModeSection, LootSection, MainObjectivesSection, PersonalitiesSection, PlayerScavSection (+10 more)
 
 ### Community 45 - "Community 45"
-Cohesion: 0.26
-Nodes (3): HashSet, Waypoint, WaypointCategory
+Cohesion: 0.17
+Nodes (6): Agent, ExfiltrationPoint, MethodImpl, Squad, Waypoint, WaypointCategory
 
 ### Community 46 - "Community 46"
 Cohesion: 0.24
@@ -444,7 +448,7 @@ Cohesion: 0.15
 Nodes (10): BotRoster, SquadRegistry, Agent, BotOwner, Dictionary, float, List, MethodImpl (+2 more)
 
 ### Community 48 - "Community 48"
-Cohesion: 0.15
+Cohesion: 0.14
 Nodes (10): IReadOnlyList, bool, BotOwner, Dictionary, float, NativeGhostNavigation, Sleeper, Vector3 (+2 more)
 
 ### Community 49 - "Community 49"
@@ -452,7 +456,7 @@ Cohesion: 0.13
 Nodes (14): Action, bool, BotOwner, float, Func, int, NativeGhostNavigation, NavMeshPath (+6 more)
 
 ### Community 50 - "Community 50"
-Cohesion: 0.16
+Cohesion: 0.19
 Nodes (10): List, Squad, Vector2, Vector2Int, Vector3, Waypoint, ZoneAnchor, WaypointSystem (+2 more)
 
 ### Community 51 - "Community 51"
@@ -464,16 +468,16 @@ Cohesion: 0.11
 Nodes (13): Entity, IEquatable, Waypoint, float, int, float, int, List (+5 more)
 
 ### Community 53 - "Community 53"
-Cohesion: 0.13
-Nodes (4): GhostWakeCause, Agent, Squad, Player
+Cohesion: 0.21
+Nodes (3): GhostWakeCause, Squad, Player
 
 ### Community 54 - "Community 54"
 Cohesion: 0.21
 Nodes (10): BotMover, ConditionalWeakTable, NativeGhostNavigation, NavMeshPathStatus, object, string, Vector3, GoalScope (+2 more)
 
 ### Community 55 - "Community 55"
-Cohesion: 0.23
-Nodes (4): Entity, MethodImpl, Vector2, WildSpawnType
+Cohesion: 0.18
+Nodes (3): Entity, Vector2Int, WildSpawnType
 
 ### Community 56 - "Community 56"
 Cohesion: 0.19
@@ -567,10 +571,6 @@ Nodes (14): MudContainer, MudGrid, MudItem, Orbit.Server.Web.OrbitConfigPage, Or
 Cohesion: 0.13
 Nodes (14): IDialogService, MudContainer, Orbit.Server.Web.OrbitConfigPage, OrbitSlider, OrbitSwitch, PageHeader, PageTitle, SettingsCard (+6 more)
 
-### Community 80 - "Community 80"
-Cohesion: 0.24
-Nodes (3): ExfiltrationPoint, Squad, ToString()
-
 ### Community 81 - "Community 81"
 Cohesion: 0.16
 Nodes (10): ActiveHealthController, DamageInfoStruct, FieldRef<ActiveHealthController, Player>, bool, EBodyPart, int, MethodBase, PatchPostfix (+2 more)
@@ -612,7 +612,7 @@ Cohesion: 0.18
 Nodes (8): BotOwner, Dictionary, Exception, HashSet, int, StateWarnPlayer, NativeGhostDiagnostics, WarnPlayerRequest
 
 ### Community 91 - "Community 91"
-Cohesion: 0.20
+Cohesion: 0.29
 Nodes (5): List, LootExtractSweep, Vector3, Waypoint, WaypointSystem
 
 ### Community 92 - "Community 92"
@@ -652,7 +652,7 @@ Cohesion: 0.40
 Nodes (3): BotOwner, NativeGhostNavigation, NativeGhostPartisan
 
 ### Community 101 - "Community 101"
-Cohesion: 0.28
+Cohesion: 0.39
 Nodes (3): BotMover, NavMeshPathStatus, Vector3
 
 ### Community 102 - "Community 102"
@@ -684,7 +684,7 @@ Cohesion: 0.29
 Nodes (5): BotLogicDecision, BotOwner, Func, PatrolLootPointsData, NativeGhostLoot
 
 ### Community 109 - "Community 109"
-Cohesion: 0.24
+Cohesion: 0.29
 Nodes (4): AICoreAgentClass, BotDoorOpener, Door, Exception
 
 ### Community 110 - "Community 110"
@@ -788,8 +788,8 @@ Cohesion: 0.25
 Nodes (6): Dictionary, Door, float, List, Vector3, DoorSpatialIndex
 
 ### Community 135 - "Community 135"
-Cohesion: 0.14
-Nodes (6): Item, BotOwner, float, GhostUnit, Vector3, DormancySystem
+Cohesion: 0.31
+Nodes (5): BotOwner, float, GhostUnit, Vector3, DormancySystem
 
 ### Community 136 - "Community 136"
 Cohesion: 0.36
@@ -798,6 +798,10 @@ Nodes (5): BotOwner, DoorSystem, Player, Vector3, NativeGhostRelocation
 ### Community 137 - "Community 137"
 Cohesion: 0.28
 Nodes (5): BotLogicDecision, BotOwner, Func, Vector3, NativeGhostWarning
+
+### Community 138 - "Community 138"
+Cohesion: 0.50
+Nodes (3): Corpse, PatchPostfix, Player
 
 ### Community 139 - "Community 139"
 Cohesion: 0.25
@@ -831,16 +835,12 @@ Nodes (5): NavJob, NavJobExecutor, NavMeshPathStatus, Queue, Vector3
 Cohesion: 0.39
 Nodes (3): float, Item, RigScorer
 
-### Community 147 - "Community 147"
-Cohesion: 0.26
-Nodes (7): GhostSleepPlan, Agent, BotOwner, List, Player, Squad, DormancySystem
-
 ### Community 148 - "Community 148"
 Cohesion: 0.25
 Nodes (7): ISnackbar, MudButton, MudPaper, MudSpacer, MudText, MudTooltip, DoReset
 
 ### Community 149 - "Community 149"
-Cohesion: 0.46
+Cohesion: 0.36
 Nodes (4): AICoreActionResultStruct, AICoreStrategyAbstractClass, BotLogicDecision, CoreActionResultParams
 
 ### Community 150 - "Community 150"
@@ -1029,7 +1029,7 @@ _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `ModulePatch` connect `Community 29` to `Community 130`, `Community 131`, `Community 8`, `Community 139`, `Community 140`, `Community 27`, `Community 158`, `Community 159`, `Community 160`, `Community 161`, `Community 162`, `Community 174`, `Community 58`, `Community 60`, `Community 61`, `Community 66`, `Community 76`, `Community 81`, `Community 82`, `Community 113`, `Community 121`, `Community 125`?**
   _High betweenness centrality (0.011) - this node is a cross-community bridge._
-- **Why does `DormancySystem` connect `Community 11` to `Community 68`, `Community 69`, `Community 135`, `Community 42`, `Community 53`, `Community 119`, `Community 28`?**
+- **Why does `DormancySystem` connect `Community 11` to `Community 68`, `Community 69`, `Community 42`, `Community 53`, `Community 119`, `Community 28`?**
   _High betweenness centrality (0.006) - this node is a cross-community bridge._
 - **Why does `IItemOperationResult` connect `Community 2` to `Community 60`?**
   _High betweenness centrality (0.006) - this node is a cross-community bridge._

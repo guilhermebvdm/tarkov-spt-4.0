@@ -68,7 +68,7 @@ public class OrbitFikaPlugin : BaseUnityPlugin
         _pending.Clear();
         // Only clients replay received fights; the host already plays its own burst via the limiter.
         if (!_isHost)
-            e.Manager.RegisterPacket<OrbitGhostFightPacket>(OnGhostFightPacket);
+            e.Manager.RegisterPacket<OrbitGhostFightPacket>(OnGhostFightPacketSafe);
         _log.LogInfo($"{PluginName}: network manager ready (host={_isHost})");
     }
 
@@ -101,6 +101,14 @@ public class OrbitFikaPlugin : BaseUnityPlugin
         {
             // Raid-teardown race: losing one burst is fine.
         }
+    }
+
+    // SPT 4.0 port: an exception escaping a Fika packet callback makes Fika drop every other packet of that
+    // network frame, for every mod (docs/technical/fika-packet-desync-prevention-plan.md, cause 4).
+    private static void OnGhostFightPacketSafe(OrbitGhostFightPacket packet)
+    {
+        try { OnGhostFightPacket(packet); }
+        catch (System.Exception e) { _log.LogError($"{PluginName}: ghost fight packet rejected: {e}"); }
     }
 
     private static void OnGhostFightPacket(OrbitGhostFightPacket packet)

@@ -47,6 +47,13 @@ public class DormantAvoidDangerBypassPatch : ModulePatch
 /// <summary>Same gate for the Boar variant of the layer (Kaban's guards run their own copy).</summary>
 public class DormantBoarAvoidDangerBypassPatch : ModulePatch
 {
+    /// <summary>
+    /// True when the Boar layer declares its own ShallUseNow (SPT 4.1). On SPT 4.0 it inherits the method from
+    /// AvoidDangerLayer, which <see cref="DormantAvoidDangerBypassPatch"/> already patches.
+    /// </summary>
+    public static bool Applies => typeof(BoarAvoidDangerLayer).GetMethod(nameof(BoarAvoidDangerLayer.ShallUseNow),
+        BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly) != null;
+
     protected override MethodBase GetTargetMethod()
         => AccessTools.Method(typeof(BoarAvoidDangerLayer), nameof(BoarAvoidDangerLayer.ShallUseNow));
 

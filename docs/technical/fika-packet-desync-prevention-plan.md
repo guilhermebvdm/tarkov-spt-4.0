@@ -409,6 +409,16 @@ Auditoria de 2026-07-26:
 | `TrueTrauma - FINALIZADO` | 1 (`TraumaFaintPacket`) | 🔴 | — | 🔴 | evento | ⚪ não | 🟠 **Não conforme · não instalado** |
 | `Band-Aid` | 4 (`BandAid*`) | 🔴 | — | — | 🔴 `bool` | ⚪ não | 🟠 **Não conforme · não instalado** |
 
+**Acréscimo de 2026-09-30** (a tabela acima é a auditoria de 2026-07-26 e não foi refeita):
+
+| Mod | Pacotes | Envelope | Main thread | Airbag + guard | Registro | Instalado | Status |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| `ORBIT-2.1` (addon `Orbit.Fika`) | 2 (`OrbitDoorPacket`, `OrbitGhostFightPacket`) | 🔴 | não conferido | 🟡 captura nos dois callbacks; sem `Valid` | evento; `UnregisterPacket` na ponte de portas | ⚪ não | 🟠 **Não conforme · não instalado** |
+
+O addon é do upstream do ORBIT; o port para o SPT 4.0 só acrescentou a captura de exceção no recebimento do pacote de combate fantasma. Os desvios e a decisão estão na [spec técnica do port](../../mods/ORBIT-2.1/backlog/001-downgrade-spt41-spt40/001-downgrade-spt41-spt40-02-spec-tech.md) §7.5; a correção de formato é o item de backlog [002](../../mods/ORBIT-2.1/backlog/002-pacotes-fika-ap11/002-pacotes-fika-ap11-01-spec.md). **Vira risco ativo quando o ORBIT 2.1 for instalado.**
+
+Em 2026-09-30, `grep -rl "INetSerializable" mods/ --include="*.cs"` (sem `original/` e `-bak/`) devolve **12** mods, não mais 6. Além dos 6 da tabela e do `ORBIT-2.1`, aparecem `Climbable Ladders`, `LoadAmmoAnim`, `TRL-FikaSync-ClimbableLadders`, `TRL-PvpMode` e `VisceralCombat`, que **não foram auditados** nesta tabela.
+
 ### 6.1 Os três não conformes — detalhe
 
 Nenhum é fork nosso; **não foram alterados**, só auditados. Nenhum representa risco ativo hoje, pelos motivos da coluna Instalado.
@@ -467,3 +477,5 @@ Antes de aprovar qualquer PR ou alteração de mod que envolva sincronização F
 | 2026-07-26 | Guilherme + agente | Segunda revisão contra `references/fika-plugin/`, com `arquivo.cs:linha` para cada afirmação. **§2:** causa 1 descrevia "descarta a leitura" — o real é `throw new ParseException` (`NetPacketProcessor.cs:88`); causas 1-3 reescritas para convergir na causa 4, com a cadeia sem `try/catch` (`PollEvents:1436-1441` → `ProcessEvent:443` → `OnNetworkReceive:494` → `ReadAllPackets:135`). **§3:** removido o "cerca 100%" — `PollEvents` roda no `Update()` do `FikaClient`/`FikaServer` e a ordem de `Update()` entre `MonoBehaviour`s é indeterminada, então resta uma janela de um frame. **§4.1 (nova):** padrão híbrido com a API oficial `Fika.Core/Modding/Events/` (`FikaNetworkManagerCreatedEvent`), com as 3 ressalvas verificadas — evento dispara após `Init()`, `UnsubscribeEvent` não remove nada, e `DispatchEvent` sem `try/catch` faz um handler que lança impedir o registro dos mods seguintes. **§5.1:** a instância do pacote é reutilizada (`SubscribeNetSerializable:388`) → reset obrigatório dos campos; aviso sobre o overload de 1 arg de `PutBytesWithLength`. **§6:** critério do universo declarado (6 mods com `INetSerializable`), coluna "Instalado" e "Registro", e §6.1/6.2 com a auditoria dos 3 que estavam fora do escopo (todos não conformes, nenhum ativo) + `StanceSync` verificado e descartado. |
 | 2026-07-26 | Guilherme | chore(harness): faixa AP-NN em vez de AP-01..AP-10 e regra de rename de doc em conventions |
 | 2026-08-01 | Guilherme | docs(launcher): backlog items 031/032 — sync-notification and download-speed reports (2026-07-28) |
+| 2026-09-30 | Guilherme + agente | §6: acréscimo do addon `Orbit.Fika` do `ORBIT-2.1` (não conforme, não instalado) e registro de que o inventário de 2026-07-26 está defasado (12 mods declaram pacote, 5 não auditados). |
+| 2026-09-30 | Guilherme | docs(orbit-2.1): as-built, consolidated code review, memory, install script and the 4.1->4.0 downgrade guide |

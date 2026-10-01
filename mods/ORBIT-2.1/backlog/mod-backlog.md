@@ -4,6 +4,7 @@
 
 | # | Título | Resumo | Pasta | Status |
 |---|---|---|---|---|
+| 002 | Pacotes Fika do addon no padrão AP-11 | Envelope de comprimento, leitura com `TryGet*`, flag `Valid` e fim do `UnregisterPacket` em `OrbitDoorPacket` e `OrbitGhostFightPacket`. Herdado do upstream; muda o formato dos pacotes. | [002-pacotes-fika-ap11/](./002-pacotes-fika-ap11/) | ⚪ |
 | 001 | Downgrade SPT 4.1 → 4.0 | Portar o ORBIT 2.1.0 (cliente, addon Fika e servidor), escrito para SPT 4.1, para rodar no SPT 4.0.13 / EFT 0.16.9 usando o de-para de classes lido ao contrário. | [001-downgrade-spt41-spt40/](./001-downgrade-spt41-spt40/) | 🟡 |
 
 ## Legenda

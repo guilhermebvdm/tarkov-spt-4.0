@@ -29,7 +29,7 @@ O caminho oficial documentado é o de subida (4.0 → 4.1). Aqui o mesmo materia
 - [ ] Compilar os três projetos com `/compile-mod ORBIT-2.1` contra o SPT 4.0.13, com zero erros.
 - [ ] Iniciar o servidor SPT 4.0.13 com o mod de servidor instalado e ver no log a linha de carga do ORBIT Server e nenhuma linha de erro; abrir `/orbit` e cada página do painel sem erro.
 - [ ] Obter do servidor, pelas rotas que o cliente usa, a configuração e as zonas em JSON válido.
-- [ ] Iniciar o jogo com o plugin instalado e ver no log do BepInEx a linha "ORBIT 2.1.0 fully loaded" e as três linhas de prontidão ("body guards ready", "scripted medicine guard ready", "scoped resume guard ready"), sem nenhuma linha "failed to enable" nem "unavailable".
+- [ ] Iniciar o jogo com o plugin instalado e ver no log do BepInEx a linha "ORBIT 2.1.0 (SPT 4.0 port) fully loaded" e as três linhas de prontidão ("body guards ready", "scripted medicine guard ready", "scoped resume guard ready"), sem nenhuma linha "failed to enable" nem "unavailable".
 - [ ] Jogar uma raid em mapa com PMCs e scavs e observar esquadrões do ORBIT indo a objetivos, saqueando e extraindo; com o Ghost Mode ligado, observar bots distantes dormindo e acordando ao se aproximar.
 - [ ] Abrir o painel, mudar uma opção, salvar e ver o valor novo aplicado na raid seguinte.
 - [ ] **Fika/multiplayer:** em raid com host (ou headless) e ao menos um cliente, todos com o plugin e o addon na mesma versão: os bots aparecem e se comportam igual para todos, uma porta aberta por bot abre para o cliente, e o cliente ouve os tiros dos combates fantasmas. Sem o addon em algum cliente, o log avisa a incompatibilidade e a raid segue.

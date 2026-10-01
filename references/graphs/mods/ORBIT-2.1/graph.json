@@ -894,30 +894,40 @@
       "norm_label": "ghostfightsounds"
     },
     {
-      "label": ".OnGhostFightPacket()",
+      "label": ".OnGhostFightPacketSafe()",
       "file_type": "code",
       "source_file": "Orbit.Fika/OrbitFikaPlugin.cs",
-      "source_location": "L106",
+      "source_location": "L108",
       "_origin": "ast",
-      "id": "orbit_fika_orbitfikaplugin_orbitfikaplugin_onghostfightpacket",
+      "id": "orbit_fika_orbitfikaplugin_orbitfikaplugin_onghostfightpacketsafe",
       "community": 8,
-      "norm_label": ".onghostfightpacket()"
+      "norm_label": ".onghostfightpacketsafe()"
     },
     {
       "label": "OrbitGhostFightPacket",
       "file_type": "code",
       "source_file": "Orbit.Fika/OrbitFikaPlugin.cs",
-      "source_location": "L106",
+      "source_location": "L108",
       "_origin": "ast",
       "id": "orbitghostfightpacket",
       "community": 8,
       "norm_label": "orbitghostfightpacket"
     },
     {
+      "label": ".OnGhostFightPacket()",
+      "file_type": "code",
+      "source_file": "Orbit.Fika/OrbitFikaPlugin.cs",
+      "source_location": "L114",
+      "_origin": "ast",
+      "id": "orbit_fika_orbitfikaplugin_orbitfikaplugin_onghostfightpacket",
+      "community": 8,
+      "norm_label": ".onghostfightpacket()"
+    },
+    {
       "label": ".ToWire()",
       "file_type": "code",
       "source_file": "Orbit.Fika/OrbitFikaPlugin.cs",
-      "source_location": "L170",
+      "source_location": "L178",
       "_origin": "ast",
       "id": "orbit_fika_orbitfikaplugin_orbitfikaplugin_towire",
       "community": 8,
@@ -927,7 +937,7 @@
       "label": "GhostShooter",
       "file_type": "code",
       "source_file": "Orbit.Fika/OrbitFikaPlugin.cs",
-      "source_location": "L170",
+      "source_location": "L178",
       "_origin": "ast",
       "id": "orbit_fika_orbitfikaplugin_cs_ghostshooter",
       "community": 8,
@@ -937,7 +947,7 @@
       "label": "OrbitGhostShooter",
       "file_type": "code",
       "source_file": "Orbit.Fika/OrbitFikaPlugin.cs",
-      "source_location": "L170",
+      "source_location": "L178",
       "_origin": "ast",
       "id": "orbitghostshooter",
       "community": 8,
@@ -947,7 +957,7 @@
       "label": ".OnSideA()",
       "file_type": "code",
       "source_file": "Orbit.Fika/OrbitFikaPlugin.cs",
-      "source_location": "L179",
+      "source_location": "L187",
       "_origin": "ast",
       "id": "orbit_fika_orbitfikaplugin_orbitfikaplugin_onsidea",
       "community": 8,
@@ -957,7 +967,7 @@
       "label": "Vector3",
       "file_type": "code",
       "source_file": "Orbit.Fika/OrbitFikaPlugin.cs",
-      "source_location": "L179",
+      "source_location": "L187",
       "_origin": "ast",
       "id": "orbit_fika_orbitfikaplugin_cs_vector3",
       "community": 8,
@@ -967,7 +977,7 @@
       "label": ".QueueShooterShots()",
       "file_type": "code",
       "source_file": "Orbit.Fika/OrbitFikaPlugin.cs",
-      "source_location": "L182",
+      "source_location": "L190",
       "_origin": "ast",
       "id": "orbit_fika_orbitfikaplugin_orbitfikaplugin_queueshootershots",
       "community": 8,
@@ -977,7 +987,7 @@
       "label": "WeaponSoundPlayer",
       "file_type": "code",
       "source_file": "Orbit.Fika/OrbitFikaPlugin.cs",
-      "source_location": "L182",
+      "source_location": "L190",
       "_origin": "ast",
       "id": "orbit_fika_orbitfikaplugin_cs_weaponsoundplayer",
       "community": 8,
@@ -987,7 +997,7 @@
       "label": "GhostWeaponProfile",
       "file_type": "code",
       "source_file": "Orbit.Fika/OrbitFikaPlugin.cs",
-      "source_location": "L182",
+      "source_location": "L190",
       "_origin": "ast",
       "id": "orbit_fika_orbitfikaplugin_cs_ghostweaponprofile",
       "community": 8,
@@ -997,7 +1007,7 @@
       "label": ".WeaponFromProfile()",
       "file_type": "code",
       "source_file": "Orbit.Fika/OrbitFikaPlugin.cs",
-      "source_location": "L200",
+      "source_location": "L208",
       "_origin": "ast",
       "id": "orbit_fika_orbitfikaplugin_orbitfikaplugin_weaponfromprofile",
       "community": 8,
@@ -1007,7 +1017,7 @@
       "label": "GameWorld",
       "file_type": "code",
       "source_file": "Orbit.Fika/OrbitFikaPlugin.cs",
-      "source_location": "L200",
+      "source_location": "L208",
       "_origin": "ast",
       "id": "orbit_fika_orbitfikaplugin_cs_gameworld",
       "community": 8,
@@ -1017,7 +1027,7 @@
       "label": "Weapon",
       "file_type": "code",
       "source_file": "Orbit.Fika/OrbitFikaPlugin.cs",
-      "source_location": "L200",
+      "source_location": "L208",
       "_origin": "ast",
       "id": "orbit_fika_orbitfikaplugin_cs_weapon",
       "community": 8,
@@ -1027,7 +1037,7 @@
       "label": ".WeaponSoundFromProfile()",
       "file_type": "code",
       "source_file": "Orbit.Fika/OrbitFikaPlugin.cs",
-      "source_location": "L214",
+      "source_location": "L222",
       "_origin": "ast",
       "id": "orbit_fika_orbitfikaplugin_orbitfikaplugin_weaponsoundfromprofile",
       "community": 8,
@@ -1037,7 +1047,7 @@
       "label": ".Update()",
       "file_type": "code",
       "source_file": "Orbit.Fika/OrbitFikaPlugin.cs",
-      "source_location": "L228",
+      "source_location": "L236",
       "_origin": "ast",
       "id": "orbit_fika_orbitfikaplugin_orbitfikaplugin_update",
       "community": 8,
@@ -1047,7 +1057,7 @@
       "label": ".OnDestroy()",
       "file_type": "code",
       "source_file": "Orbit.Fika/OrbitFikaPlugin.cs",
-      "source_location": "L271",
+      "source_location": "L279",
       "_origin": "ast",
       "id": "orbit_fika_orbitfikaplugin_orbitfikaplugin_ondestroy",
       "community": 8,
@@ -17670,7 +17680,7 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "patches_corpseregistrationpatch_corpseregistrationpatch_postfix",
-      "community": 29,
+      "community": 138,
       "norm_label": ".postfix()"
     },
     {
@@ -17680,7 +17690,7 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "orbit_patches_corpseregistrationpatch_cs_player",
-      "community": 29,
+      "community": 138,
       "norm_label": "player"
     },
     {
@@ -17690,7 +17700,7 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "orbit_patches_corpseregistrationpatch_cs_corpse",
-      "community": 29,
+      "community": 138,
       "norm_label": "corpse"
     },
     {
@@ -17700,7 +17710,7 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "orbit_patches_corpseregistrationpatch_cs_patchpostfix",
-      "community": 29,
+      "community": 138,
       "norm_label": "patchpostfix"
     },
     {
@@ -18137,7 +18147,7 @@
       "label": ".GetTargetMethod()",
       "file_type": "code",
       "source_file": "Orbit/Patches/DormantDangerLayerBypassPatch.cs",
-      "source_location": "L50",
+      "source_location": "L57",
       "_origin": "ast",
       "id": "patches_dormantdangerlayerbypasspatch_dormantboaravoiddangerbypasspatch_gettargetmethod",
       "community": 82,
@@ -18147,7 +18157,7 @@
       "label": ".Prefix()",
       "file_type": "code",
       "source_file": "Orbit/Patches/DormantDangerLayerBypassPatch.cs",
-      "source_location": "L53",
+      "source_location": "L60",
       "_origin": "ast",
       "id": "patches_dormantdangerlayerbypasspatch_dormantboaravoiddangerbypasspatch_prefix",
       "community": 82,
@@ -18157,7 +18167,7 @@
       "label": "BoarAvoidDangerLayer",
       "file_type": "code",
       "source_file": "Orbit/Patches/DormantDangerLayerBypassPatch.cs",
-      "source_location": "L53",
+      "source_location": "L60",
       "_origin": "ast",
       "id": "boaravoiddangerlayer",
       "community": 82,
@@ -20777,7 +20787,7 @@
       "label": "ManualLogSource",
       "file_type": "code",
       "source_file": "Orbit/Plugin.cs",
-      "source_location": "L44",
+      "source_location": "L46",
       "_origin": "ast",
       "id": "orbit_plugin_cs_manuallogsource",
       "community": 8,
@@ -20787,7 +20797,7 @@
       "label": "ConfigEntry",
       "file_type": "code",
       "source_file": "Orbit/Plugin.cs",
-      "source_location": "L52",
+      "source_location": "L54",
       "_origin": "ast",
       "id": "configentry",
       "community": 8,
@@ -20797,7 +20807,7 @@
       "label": ".Awake()",
       "file_type": "code",
       "source_file": "Orbit/Plugin.cs",
-      "source_location": "L67",
+      "source_location": "L69",
       "_origin": "ast",
       "id": "orbit_plugin_plugin_awake",
       "community": 8,
@@ -20807,7 +20817,7 @@
       "label": ".DelayedLoad()",
       "file_type": "code",
       "source_file": "Orbit/Plugin.cs",
-      "source_location": "L74",
+      "source_location": "L76",
       "_origin": "ast",
       "id": "orbit_plugin_plugin_delayedload",
       "community": 8,
@@ -20817,7 +20827,7 @@
       "label": "IEnumerator",
       "file_type": "code",
       "source_file": "Orbit/Plugin.cs",
-      "source_location": "L74",
+      "source_location": "L76",
       "_origin": "ast",
       "id": "ienumerator",
       "community": 8,
@@ -20827,7 +20837,7 @@
       "label": ".WaitForHandbook()",
       "file_type": "code",
       "source_file": "Orbit/Plugin.cs",
-      "source_location": "L220",
+      "source_location": "L226",
       "_origin": "ast",
       "id": "orbit_plugin_plugin_waitforhandbook",
       "community": 8,
@@ -20837,7 +20847,7 @@
       "label": ".ApplyFactionTakeoverToggle()",
       "file_type": "code",
       "source_file": "Orbit/Plugin.cs",
-      "source_location": "L246",
+      "source_location": "L252",
       "_origin": "ast",
       "id": "orbit_plugin_plugin_applyfactiontakeovertoggle",
       "community": 8,
@@ -20847,7 +20857,7 @@
       "label": ".EnableSafe()",
       "file_type": "code",
       "source_file": "Orbit/Plugin.cs",
-      "source_location": "L276",
+      "source_location": "L282",
       "_origin": "ast",
       "id": "orbit_plugin_plugin_enablesafe",
       "community": 8,
@@ -20857,7 +20867,7 @@
       "label": "ModulePatch",
       "file_type": "code",
       "source_file": "Orbit/Plugin.cs",
-      "source_location": "L276",
+      "source_location": "L282",
       "_origin": "ast",
       "id": "orbit_plugin_cs_modulepatch",
       "community": 29,
@@ -20867,7 +20877,7 @@
       "label": ".SetupConfig()",
       "file_type": "code",
       "source_file": "Orbit/Plugin.cs",
-      "source_location": "L297",
+      "source_location": "L303",
       "_origin": "ast",
       "id": "orbit_plugin_plugin_setupconfig",
       "community": 8,
@@ -20877,7 +20887,7 @@
       "label": ".DrawWebConfigButton()",
       "file_type": "code",
       "source_file": "Orbit/Plugin.cs",
-      "source_location": "L320",
+      "source_location": "L326",
       "_origin": "ast",
       "id": "orbit_plugin_plugin_drawwebconfigbutton",
       "community": 8,
@@ -20887,7 +20897,7 @@
       "label": "ConfigEntryBase",
       "file_type": "code",
       "source_file": "Orbit/Plugin.cs",
-      "source_location": "L320",
+      "source_location": "L326",
       "_origin": "ast",
       "id": "orbit_plugin_cs_configentrybase",
       "community": 8,
@@ -22090,7 +22100,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "systems_dormancysystem_encounters",
-      "community": 147,
+      "community": 28,
       "norm_label": "dormancysystem.encounters.cs"
     },
     {
@@ -22100,7 +22110,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "systems_dormancysystem_encounters_dormancysystem",
-      "community": 147,
+      "community": 28,
       "norm_label": "dormancysystem"
     },
     {
@@ -22110,7 +22120,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "ghostsleepplan",
-      "community": 147,
+      "community": 28,
       "norm_label": "ghostsleepplan"
     },
     {
@@ -22120,7 +22130,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "systems_dormancysystem_encounters_dormancysystem_updatesleeppreferred",
-      "community": 147,
+      "community": 28,
       "norm_label": ".updatesleeppreferred()"
     },
     {
@@ -22130,7 +22140,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "orbit_systems_dormancysystem_encounters_cs_list",
-      "community": 147,
+      "community": 28,
       "norm_label": "list"
     },
     {
@@ -22140,7 +22150,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "orbit_systems_dormancysystem_encounters_cs_agent",
-      "community": 147,
+      "community": 28,
       "norm_label": "agent"
     },
     {
@@ -22150,7 +22160,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "orbit_systems_dormancysystem_encounters_cs_squad",
-      "community": 147,
+      "community": 28,
       "norm_label": "squad"
     },
     {
@@ -22160,7 +22170,7 @@
       "source_location": "L125",
       "_origin": "ast",
       "id": "systems_dormancysystem_encounters_dormancysystem_vanilladormantcount",
-      "community": 147,
+      "community": 28,
       "norm_label": ".vanilladormantcount()"
     },
     {
@@ -22170,7 +22180,7 @@
       "source_location": "L125",
       "_origin": "ast",
       "id": "orbit_systems_dormancysystem_encounters_cs_botowner",
-      "community": 147,
+      "community": 28,
       "norm_label": "botowner"
     },
     {
@@ -22180,7 +22190,7 @@
       "source_location": "L132",
       "_origin": "ast",
       "id": "systems_dormancysystem_encounters_dormancysystem_nativeawakecount",
-      "community": 147,
+      "community": 28,
       "norm_label": ".nativeawakecount()"
     },
     {
@@ -22190,7 +22200,7 @@
       "source_location": "L142",
       "_origin": "ast",
       "id": "systems_dormancysystem_encounters_dormancysystem_isactivatedneighbour",
-      "community": 147,
+      "community": 28,
       "norm_label": ".isactivatedneighbour()"
     },
     {
@@ -22200,7 +22210,7 @@
       "source_location": "L142",
       "_origin": "ast",
       "id": "orbit_systems_dormancysystem_encounters_cs_player",
-      "community": 147,
+      "community": 28,
       "norm_label": "player"
     },
     {
@@ -22820,7 +22830,7 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "systems_dormancysystem_nativepolicy_dormancysystem_countnativestandard",
-      "community": 53,
+      "community": 28,
       "norm_label": ".countnativestandard()"
     },
     {
@@ -23190,7 +23200,7 @@
       "source_location": "L121",
       "_origin": "ast",
       "id": "systems_dormancysystem_dormancysystem_throttlebrain",
-      "community": 53,
+      "community": 68,
       "norm_label": ".throttlebrain()"
     },
     {
@@ -23200,7 +23210,7 @@
       "source_location": "L121",
       "_origin": "ast",
       "id": "orbit_systems_dormancysystem_cs_botowner",
-      "community": 28,
+      "community": 42,
       "norm_label": "botowner"
     },
     {
@@ -23210,7 +23220,7 @@
       "source_location": "L127",
       "_origin": "ast",
       "id": "systems_dormancysystem_dormancysystem_unthrottlebrain",
-      "community": 28,
+      "community": 42,
       "norm_label": ".unthrottlebrain()"
     },
     {
@@ -23410,7 +23420,7 @@
       "source_location": "L354",
       "_origin": "ast",
       "id": "systems_dormancysystem_dormancysystem_isdefaultdormant",
-      "community": 53,
+      "community": 28,
       "norm_label": ".isdefaultdormant()"
     },
     {
@@ -23420,7 +23430,7 @@
       "source_location": "L371",
       "_origin": "ast",
       "id": "systems_dormancysystem_dormancysystem_update",
-      "community": 53,
+      "community": 68,
       "norm_label": ".update()"
     },
     {
@@ -23430,7 +23440,7 @@
       "source_location": "L371",
       "_origin": "ast",
       "id": "orbit_systems_dormancysystem_cs_agent",
-      "community": 53,
+      "community": 68,
       "norm_label": "agent"
     },
     {
@@ -23460,7 +23470,7 @@
       "source_location": "L484",
       "_origin": "ast",
       "id": "systems_dormancysystem_dormancysystem_onagentremoved",
-      "community": 53,
+      "community": 68,
       "norm_label": ".onagentremoved()"
     },
     {
@@ -23490,7 +23500,7 @@
       "source_location": "L572",
       "_origin": "ast",
       "id": "systems_dormancysystem_dormancysystem_issquaddormant",
-      "community": 135,
+      "community": 53,
       "norm_label": ".issquaddormant()"
     },
     {
@@ -23670,7 +23680,7 @@
       "source_location": "L829",
       "_origin": "ast",
       "id": "systems_dormancysystem_dormancysystem_totalhp",
-      "community": 53,
+      "community": 68,
       "norm_label": ".totalhp()"
     },
     {
@@ -23680,7 +23690,7 @@
       "source_location": "L850",
       "_origin": "ast",
       "id": "systems_dormancysystem_dormancysystem_inventoryoperationinflight",
-      "community": 53,
+      "community": 68,
       "norm_label": ".inventoryoperationinflight()"
     },
     {
@@ -23700,7 +23710,7 @@
       "source_location": "L901",
       "_origin": "ast",
       "id": "systems_dormancysystem_dormancysystem_sleepagent",
-      "community": 53,
+      "community": 68,
       "norm_label": ".sleepagent()"
     },
     {
@@ -23740,7 +23750,7 @@
       "source_location": "L953",
       "_origin": "ast",
       "id": "systems_dormancysystem_dormancysystem_wakeagent",
-      "community": 53,
+      "community": 68,
       "norm_label": ".wakeagent()"
     },
     {
@@ -23750,7 +23760,7 @@
       "source_location": "L1037",
       "_origin": "ast",
       "id": "systems_dormancysystem_dormancysystem_trynearestpathcorner",
-      "community": 53,
+      "community": 68,
       "norm_label": ".trynearestpathcorner()"
     },
     {
@@ -23800,7 +23810,7 @@
       "source_location": "L1319",
       "_origin": "ast",
       "id": "systems_dormancysystem_dormancysystem_fightweaponof",
-      "community": 135,
+      "community": 42,
       "norm_label": ".fightweaponof()"
     },
     {
@@ -23810,7 +23820,7 @@
       "source_location": "L1319",
       "_origin": "ast",
       "id": "orbit_systems_dormancysystem_cs_item",
-      "community": 135,
+      "community": 42,
       "norm_label": "item"
     },
     {
@@ -23840,7 +23850,7 @@
       "source_location": "L1343",
       "_origin": "ast",
       "id": "systems_dormancysystem_dormancysystem_buildghostunits",
-      "community": 135,
+      "community": 42,
       "norm_label": ".buildghostunits()"
     },
     {
@@ -23850,7 +23860,7 @@
       "source_location": "L1405",
       "_origin": "ast",
       "id": "systems_dormancysystem_dormancysystem_unitmemberreach",
-      "community": 135,
+      "community": 42,
       "norm_label": ".unitmemberreach()"
     },
     {
@@ -23860,7 +23870,7 @@
       "source_location": "L1443",
       "_origin": "ast",
       "id": "systems_dormancysystem_dormancysystem_currentdarkness",
-      "community": 135,
+      "community": 42,
       "norm_label": ".currentdarkness()"
     },
     {
@@ -23870,7 +23880,7 @@
       "source_location": "L1466",
       "_origin": "ast",
       "id": "systems_dormancysystem_dormancysystem_hasnightvision",
-      "community": 135,
+      "community": 42,
       "norm_label": ".hasnightvision()"
     },
     {
@@ -23880,7 +23890,7 @@
       "source_location": "L1508",
       "_origin": "ast",
       "id": "systems_dormancysystem_dormancysystem_applynightreach",
-      "community": 135,
+      "community": 42,
       "norm_label": ".applynightreach()"
     },
     {
@@ -23900,7 +23910,7 @@
       "source_location": "L1524",
       "_origin": "ast",
       "id": "systems_dormancysystem_dormancysystem_weaponkillrange",
-      "community": 135,
+      "community": 42,
       "norm_label": ".weaponkillrange()"
     },
     {
@@ -23930,7 +23940,7 @@
       "source_location": "L1580",
       "_origin": "ast",
       "id": "systems_dormancysystem_dormancysystem_difficultymul",
-      "community": 28,
+      "community": 42,
       "norm_label": ".difficultymul()"
     },
     {
@@ -24230,7 +24240,7 @@
       "source_location": "L2131",
       "_origin": "ast",
       "id": "systems_dormancysystem_dormancysystem_pumpghostfightshots",
-      "community": 53,
+      "community": 68,
       "norm_label": ".pumpghostfightshots()"
     },
     {
@@ -24310,7 +24320,7 @@
       "source_location": "L2356",
       "_origin": "ast",
       "id": "systems_dormancysystem_dormancysystem_collectvanillagroups",
-      "community": 28,
+      "community": 42,
       "norm_label": ".collectvanillagroups()"
     },
     {
@@ -24380,7 +24390,7 @@
       "source_location": "L2569",
       "_origin": "ast",
       "id": "systems_dormancysystem_dormancysystem_wakevanillabot",
-      "community": 28,
+      "community": 42,
       "norm_label": ".wakevanillabot()"
     },
     {
@@ -24400,7 +24410,7 @@
       "source_location": "L2599",
       "_origin": "ast",
       "id": "systems_dormancysystem_dormancysystem_onvanillaremoved",
-      "community": 28,
+      "community": 42,
       "norm_label": ".onvanillaremoved()"
     },
     {
@@ -29180,7 +29190,7 @@
       "source_location": "L195",
       "_origin": "ast",
       "id": "systems_nativeghostsystem_nativeghostsystem_needsbody",
-      "community": 34,
+      "community": 149,
       "norm_label": ".needsbody()"
     },
     {
@@ -29200,7 +29210,7 @@
       "source_location": "L201",
       "_origin": "ast",
       "id": "systems_nativeghostsystem_nativeghostsystem_bodyreason",
-      "community": 34,
+      "community": 149,
       "norm_label": ".bodyreason()"
     },
     {
@@ -29250,7 +29260,7 @@
       "source_location": "L291",
       "_origin": "ast",
       "id": "systems_nativeghostsystem_nativeghostsystem_ownsinactivemovement",
-      "community": 101,
+      "community": 34,
       "norm_label": ".ownsinactivemovement()"
     },
     {
@@ -29260,7 +29270,7 @@
       "source_location": "L294",
       "_origin": "ast",
       "id": "systems_nativeghostsystem_nativeghostsystem_retainsnativestate",
-      "community": 101,
+      "community": 34,
       "norm_label": ".retainsnativestate()"
     },
     {
@@ -29270,7 +29280,7 @@
       "source_location": "L298",
       "_origin": "ast",
       "id": "systems_nativeghostsystem_nativeghostsystem_deferbodyoperation",
-      "community": 109,
+      "community": 34,
       "norm_label": ".deferbodyoperation()"
     },
     {
@@ -29280,7 +29290,7 @@
       "source_location": "L305",
       "_origin": "ast",
       "id": "systems_nativeghostsystem_nativeghostsystem_deferprone",
-      "community": 109,
+      "community": 34,
       "norm_label": ".deferprone()"
     },
     {
@@ -29420,7 +29430,7 @@
       "source_location": "L419",
       "_origin": "ast",
       "id": "systems_nativeghostsystem_nativeghostsystem_setreachdistance",
-      "community": 101,
+      "community": 34,
       "norm_label": ".setreachdistance()"
     },
     {
@@ -29430,7 +29440,7 @@
       "source_location": "L425",
       "_origin": "ast",
       "id": "systems_nativeghostsystem_nativeghostsystem_preservepathduringsaincleanup",
-      "community": 101,
+      "community": 34,
       "norm_label": ".preservepathduringsaincleanup()"
     },
     {
@@ -29470,7 +29480,7 @@
       "source_location": "L453",
       "_origin": "ast",
       "id": "systems_nativeghostsystem_nativeghostsystem_infight",
-      "community": 34,
+      "community": 48,
       "norm_label": ".infight()"
     },
     {
@@ -29520,7 +29530,7 @@
       "source_location": "L595",
       "_origin": "ast",
       "id": "systems_nativeghostsystem_nativeghostsystem_move",
-      "community": 34,
+      "community": 109,
       "norm_label": ".move()"
     },
     {
@@ -30850,7 +30860,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "systems_waypointsystem",
-      "community": 80,
+      "community": 13,
       "norm_label": "waypointsystem.cs"
     },
     {
@@ -30890,7 +30900,7 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "orbit_systems_waypointsystem_cs_vector2int",
-      "community": 13,
+      "community": 55,
       "norm_label": "vector2int"
     },
     {
@@ -30900,7 +30910,7 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "orbit_systems_waypointsystem_cs_vector2",
-      "community": 55,
+      "community": 80,
       "norm_label": "vector2"
     },
     {
@@ -31000,7 +31010,7 @@
       "source_location": "L88",
       "_origin": "ast",
       "id": "orbit_systems_waypointsystem_cs_hashset",
-      "community": 45,
+      "community": 80,
       "norm_label": "hashset"
     },
     {
@@ -31040,7 +31050,7 @@
       "source_location": "L322",
       "_origin": "ast",
       "id": "systems_waypointsystem_waypointsystem_calculateadvectionzones",
-      "community": 91,
+      "community": 80,
       "norm_label": ".calculateadvectionzones()"
     },
     {
@@ -31120,7 +31130,7 @@
       "source_location": "L577",
       "_origin": "ast",
       "id": "orbit_systems_waypointsystem_cs_methodimpl",
-      "community": 55,
+      "community": 45,
       "norm_label": "methodimpl"
     },
     {
@@ -31140,7 +31150,7 @@
       "source_location": "L620",
       "_origin": "ast",
       "id": "orbit_systems_waypointsystem_cs_squad",
-      "community": 80,
+      "community": 45,
       "norm_label": "squad"
     },
     {
@@ -31210,7 +31220,7 @@
       "source_location": "L734",
       "_origin": "ast",
       "id": "systems_waypointsystem_waypointsystem_addruntimewaypoint",
-      "community": 91,
+      "community": 80,
       "norm_label": ".addruntimewaypoint()"
     },
     {
@@ -31240,7 +31250,7 @@
       "source_location": "L762",
       "_origin": "ast",
       "id": "systems_waypointsystem_waypointsystem_wascorpsekilledbysquad",
-      "community": 138,
+      "community": 45,
       "norm_label": ".wascorpsekilledbysquad()"
     },
     {
@@ -31260,7 +31270,7 @@
       "source_location": "L803",
       "_origin": "ast",
       "id": "systems_waypointsystem_waypointsystem_trypickownkillcorpse",
-      "community": 138,
+      "community": 45,
       "norm_label": ".trypickownkillcorpse()"
     },
     {
@@ -31270,7 +31280,7 @@
       "source_location": "L867",
       "_origin": "ast",
       "id": "systems_waypointsystem_waypointsystem_trygetownkillcorpseforagent",
-      "community": 138,
+      "community": 45,
       "norm_label": ".trygetownkillcorpseforagent()"
     },
     {
@@ -31280,7 +31290,7 @@
       "source_location": "L867",
       "_origin": "ast",
       "id": "orbit_systems_waypointsystem_cs_agent",
-      "community": 138,
+      "community": 45,
       "norm_label": "agent"
     },
     {
@@ -31290,7 +31300,7 @@
       "source_location": "L897",
       "_origin": "ast",
       "id": "systems_waypointsystem_waypointsystem_trygetnextownkillcorpseforagent",
-      "community": 138,
+      "community": 45,
       "norm_label": ".trygetnextownkillcorpseforagent()"
     },
     {
@@ -31320,7 +31330,7 @@
       "source_location": "L951",
       "_origin": "ast",
       "id": "systems_waypointsystem_waypointsystem_corpserequiressightorsquadkillforsquad",
-      "community": 80,
+      "community": 45,
       "norm_label": ".corpserequiressightorsquadkillforsquad()"
     },
     {
@@ -31330,7 +31340,7 @@
       "source_location": "L960",
       "_origin": "ast",
       "id": "systems_waypointsystem_waypointsystem_tryfindopportunisticcorpse",
-      "community": 91,
+      "community": 80,
       "norm_label": ".tryfindopportunisticcorpse()"
     },
     {
@@ -31340,7 +31350,7 @@
       "source_location": "L1035",
       "_origin": "ast",
       "id": "systems_waypointsystem_waypointsystem_findroamsplinterformember",
-      "community": 45,
+      "community": 80,
       "norm_label": ".findroamsplinterformember()"
     },
     {
@@ -31370,7 +31380,7 @@
       "source_location": "L1189",
       "_origin": "ast",
       "id": "systems_waypointsystem_waypointsystem_findlootsplinterforfollower",
-      "community": 45,
+      "community": 80,
       "norm_label": ".findlootsplinterforfollower()"
     },
     {
@@ -31380,7 +31390,7 @@
       "source_location": "L1253",
       "_origin": "ast",
       "id": "systems_waypointsystem_waypointsystem_findnearesteligibleexfil",
-      "community": 80,
+      "community": 45,
       "norm_label": ".findnearesteligibleexfil()"
     },
     {
@@ -31390,7 +31400,7 @@
       "source_location": "L1309",
       "_origin": "ast",
       "id": "systems_waypointsystem_waypointsystem_scannearestreachableexfil",
-      "community": 80,
+      "community": 45,
       "norm_label": ".scannearestreachableexfil()"
     },
     {
@@ -31400,7 +31410,7 @@
       "source_location": "L1361",
       "_origin": "ast",
       "id": "systems_waypointsystem_waypointsystem_logeligibleexfilsforsquad",
-      "community": 80,
+      "community": 45,
       "norm_label": ".logeligibleexfilsforsquad()"
     },
     {
@@ -31410,7 +31420,7 @@
       "source_location": "L1413",
       "_origin": "ast",
       "id": "systems_waypointsystem_waypointsystem_applylootcoveragerollforcell",
-      "community": 13,
+      "community": 55,
       "norm_label": ".applylootcoveragerollforcell()"
     },
     {
@@ -31420,7 +31430,7 @@
       "source_location": "L1470",
       "_origin": "ast",
       "id": "systems_waypointsystem_waypointsystem_clearsquadunreachabilityforcell",
-      "community": 13,
+      "community": 55,
       "norm_label": ".clearsquadunreachabilityforcell()"
     },
     {
@@ -31430,7 +31440,7 @@
       "source_location": "L1496",
       "_origin": "ast",
       "id": "systems_waypointsystem_waypointsystem_clearsquadunreachability",
-      "community": 80,
+      "community": 45,
       "norm_label": ".clearsquadunreachability()"
     },
     {
@@ -31440,7 +31450,7 @@
       "source_location": "L1506",
       "_origin": "ast",
       "id": "systems_waypointsystem_waypointsystem_findnearbysweeptarget",
-      "community": 45,
+      "community": 80,
       "norm_label": ".findnearbysweeptarget()"
     },
     {
@@ -31600,7 +31610,7 @@
       "source_location": "L1772",
       "_origin": "ast",
       "id": "systems_waypointsystem_waypointsystem_worldtocell",
-      "community": 91,
+      "community": 80,
       "norm_label": ".worldtocell()"
     },
     {
@@ -31610,7 +31620,7 @@
       "source_location": "L1792",
       "_origin": "ast",
       "id": "systems_waypointsystem_waypointsystem_pickrandomadjacentvalidcell",
-      "community": 13,
+      "community": 55,
       "norm_label": ".pickrandomadjacentvalidcell()"
     },
     {
@@ -31620,7 +31630,7 @@
       "source_location": "L1827",
       "_origin": "ast",
       "id": "systems_waypointsystem_waypointsystem_worldtocellcentered",
-      "community": 50,
+      "community": 80,
       "norm_label": ".worldtocellcentered()"
     },
     {
@@ -31650,7 +31660,7 @@
       "source_location": "L1852",
       "_origin": "ast",
       "id": "systems_waypointsystem_waypointsystem_isvalidcell",
-      "community": 91,
+      "community": 80,
       "norm_label": ".isvalidcell()"
     },
     {
@@ -31680,7 +31690,7 @@
       "source_location": "L1931",
       "_origin": "ast",
       "id": "systems_waypointsystem_waypointsystem_rollforceunlockforpick",
-      "community": 55,
+      "community": 45,
       "norm_label": ".rollforceunlockforpick()"
     },
     {
@@ -31730,7 +31740,7 @@
       "source_location": "L2168",
       "_origin": "ast",
       "id": "systems_waypointsystem_waypointsystem_allalivemembersvalueskipped",
-      "community": 80,
+      "community": 45,
       "norm_label": ".allalivemembersvalueskipped()"
     },
     {
@@ -31780,7 +31790,7 @@
       "source_location": "L2466",
       "_origin": "ast",
       "id": "systems_waypointsystem_waypointsystem_iswaypointreachable",
-      "community": 138,
+      "community": 45,
       "norm_label": ".iswaypointreachable()"
     },
     {
@@ -31790,7 +31800,7 @@
       "source_location": "L2527",
       "_origin": "ast",
       "id": "systems_waypointsystem_waypointsystem_issquadknownunreachable",
-      "community": 45,
+      "community": 80,
       "norm_label": ".issquadknownunreachable()"
     },
     {
@@ -31800,7 +31810,7 @@
       "source_location": "L2534",
       "_origin": "ast",
       "id": "systems_waypointsystem_waypointsystem_categoryallowslockeddoorbypass",
-      "community": 138,
+      "community": 45,
       "norm_label": ".categoryallowslockeddoorbypass()"
     },
     {
@@ -31810,7 +31820,7 @@
       "source_location": "L2551",
       "_origin": "ast",
       "id": "systems_waypointsystem_waypointsystem_collectnearbylockeddoors",
-      "community": 138,
+      "community": 13,
       "norm_label": ".collectnearbylockeddoors()"
     },
     {
@@ -31820,7 +31830,7 @@
       "source_location": "L2551",
       "_origin": "ast",
       "id": "orbit_systems_waypointsystem_cs_door",
-      "community": 138,
+      "community": 13,
       "norm_label": "door"
     },
     {
@@ -31840,7 +31850,7 @@
       "source_location": "L2615",
       "_origin": "ast",
       "id": "systems_waypointsystem_waypointsystem_squadcanusewaypoint",
-      "community": 80,
+      "community": 45,
       "norm_label": ".squadcanusewaypoint()"
     },
     {
@@ -31850,7 +31860,7 @@
       "source_location": "L2698",
       "_origin": "ast",
       "id": "systems_waypointsystem_waypointsystem_hasbotunreachablerequirement",
-      "community": 80,
+      "community": 45,
       "norm_label": ".hasbotunreachablerequirement()"
     },
     {
@@ -31860,7 +31870,7 @@
       "source_location": "L2698",
       "_origin": "ast",
       "id": "orbit_systems_waypointsystem_cs_exfiltrationpoint",
-      "community": 80,
+      "community": 45,
       "norm_label": "exfiltrationpoint"
     },
     {
@@ -31870,7 +31880,7 @@
       "source_location": "L2728",
       "_origin": "ast",
       "id": "systems_waypointsystem_waypointsystem_squadcanusewaypointignoringentry",
-      "community": 80,
+      "community": 45,
       "norm_label": ".squadcanusewaypointignoringentry()"
     },
     {
@@ -31880,7 +31890,7 @@
       "source_location": "L2756",
       "_origin": "ast",
       "id": "systems_waypointsystem_waypointsystem_matchesbotspawnentry",
-      "community": 80,
+      "community": 45,
       "norm_label": ".matchesbotspawnentry()"
     },
     {
@@ -31890,7 +31900,7 @@
       "source_location": "L2791",
       "_origin": "ast",
       "id": "systems_waypointsystem_waypointsystem_resolvederivedentrypoint",
-      "community": 80,
+      "community": 45,
       "norm_label": ".resolvederivedentrypoint()"
     },
     {
@@ -31950,7 +31960,7 @@
       "source_location": "L2999",
       "_origin": "ast",
       "id": "systems_waypointsystem_waypointsystem_propagateforce",
-      "community": 91,
+      "community": 55,
       "norm_label": ".propagateforce()"
     },
     {
@@ -31980,7 +31990,7 @@
       "source_location": "L3113",
       "_origin": "ast",
       "id": "systems_waypointsystem_tostring",
-      "community": 80,
+      "community": 13,
       "norm_label": "tostring()"
     },
     {
@@ -32020,7 +32030,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "systems_waypointzonescopes_waypointsystem_matcheszonefloor",
-      "community": 45,
+      "community": 50,
       "norm_label": ".matcheszonefloor()"
     },
     {
@@ -32140,7 +32150,7 @@
       "source_location": "L75",
       "_origin": "ast",
       "id": "systems_waypointzonescopes_waypointsystem_zonefloorforcell",
-      "community": 45,
+      "community": 50,
       "norm_label": ".zonefloorforcell()"
     },
     {
@@ -32150,7 +32160,7 @@
       "source_location": "L99",
       "_origin": "ast",
       "id": "systems_waypointzonescopes_waypointsystem_matchesdestinationfloor",
-      "community": 45,
+      "community": 80,
       "norm_label": ".matchesdestinationfloor()"
     },
     {
@@ -35864,6 +35874,16 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "Orbit.Fika/OrbitFikaPlugin.cs",
+      "source_location": "L108",
+      "weight": 1.0,
+      "source": "orbit_fika_orbitfikaplugin_orbitfikaplugin",
+      "target": "orbit_fika_orbitfikaplugin_orbitfikaplugin_onghostfightpacketsafe",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Orbit.Fika/OrbitFikaPlugin.cs",
       "source_location": "L83",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -36020,6 +36040,50 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "Orbit.Fika/OrbitFikaPlugin.cs",
+      "source_location": "L110",
+      "weight": 1.0,
+      "source": "orbit_fika_orbitfikaplugin_orbitfikaplugin_onghostfightpacketsafe",
+      "target": "orbit_fika_orbitfikaplugin_orbitfikaplugin_onghostfightpacket",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Orbit.Fika/OrbitFikaPlugin.cs",
+      "source_location": "L108",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "orbit_fika_orbitfikaplugin_orbitfikaplugin_onghostfightpacketsafe",
+      "target": "orbitghostfightpacket",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Orbit.Fika/OrbitFikaPlugin.cs",
+      "source_location": "L106",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "confidence_score": 1.0,
+      "source": "orbit_fika_orbitfikaplugin_orbitfikaplugin_onghostfightpacket",
+      "target": "orbitghostfightpacket"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Orbit.Fika/OrbitFikaPlugin.cs",
+      "source_location": "L179",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "confidence_score": 1.0,
+      "source": "orbit_fika_orbitfikaplugin_orbitfikaplugin_onsidea",
+      "target": "orbitghostfightpacket"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Orbit.Fika/OrbitFikaPlugin.cs",
       "source_location": "L127",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -36058,28 +36122,6 @@
       "confidence_score": 1.0,
       "source": "orbit_fika_orbitfikaplugin_orbitfikaplugin_onghostfightpacket",
       "target": "orbit_fika_orbitfikaplugin_orbitfikaplugin_weaponsoundfromprofile"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "source_file": "Orbit.Fika/OrbitFikaPlugin.cs",
-      "source_location": "L106",
-      "weight": 1.0,
-      "context": "parameter_type",
-      "confidence_score": 1.0,
-      "source": "orbit_fika_orbitfikaplugin_orbitfikaplugin_onghostfightpacket",
-      "target": "orbitghostfightpacket"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "source_file": "Orbit.Fika/OrbitFikaPlugin.cs",
-      "source_location": "L179",
-      "weight": 1.0,
-      "context": "parameter_type",
-      "confidence_score": 1.0,
-      "source": "orbit_fika_orbitfikaplugin_orbitfikaplugin_onsidea",
-      "target": "orbitghostfightpacket"
     },
     {
       "relation": "references",
@@ -36239,9 +36281,9 @@
       "source_file": "Orbit.Server/Compat/Spt40ServerCompat.cs",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "compat_spt40servercompat",
-      "target": "compat_spt40servercompat_mudblazorcompat",
-      "confidence_score": 1.0
+      "target": "compat_spt40servercompat_mudblazorcompat"
     },
     {
       "relation": "contains",
@@ -36249,9 +36291,9 @@
       "source_file": "Orbit.Server/Compat/Spt40ServerCompat.cs",
       "source_location": "L30",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "compat_spt40servercompat",
-      "target": "compat_spt40servercompat_orbit_server_compat",
-      "confidence_score": 1.0
+      "target": "compat_spt40servercompat_orbit_server_compat"
     },
     {
       "relation": "contains",
@@ -36259,9 +36301,9 @@
       "source_file": "Orbit.Server/Compat/Spt40ServerCompat.cs",
       "source_location": "L32",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "compat_spt40servercompat",
-      "target": "compat_spt40servercompat_spt40paths",
-      "confidence_score": 1.0
+      "target": "compat_spt40servercompat_spt40paths"
     },
     {
       "relation": "contains",
@@ -36269,9 +36311,9 @@
       "source_file": "Orbit.Server/Compat/Spt40ServerCompat.cs",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "compat_spt40servercompat",
-      "target": "compat_spt40servercompat_sptarkov_common_models_logging",
-      "confidence_score": 1.0
+      "target": "compat_spt40servercompat_sptarkov_common_models_logging"
     },
     {
       "relation": "imports",
@@ -36280,9 +36322,9 @@
       "source_file": "Orbit.Server/Compat/Spt40ServerCompat.cs",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "compat_spt40servercompat",
-      "target": "mudblazor",
-      "confidence_score": 1.0
+      "target": "mudblazor"
     },
     {
       "relation": "method",
@@ -36290,9 +36332,9 @@
       "source_file": "Orbit.Server/Compat/Spt40ServerCompat.cs",
       "source_location": "L18",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "compat_spt40servercompat_mudblazorcompat",
-      "target": "compat_spt40servercompat_mudblazorcompat_showmessageboxasync",
-      "confidence_score": 1.0
+      "target": "compat_spt40servercompat_mudblazorcompat_showmessageboxasync"
     },
     {
       "relation": "references",
@@ -36301,9 +36343,9 @@
       "source_location": "L18",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "compat_spt40servercompat_mudblazorcompat_showmessageboxasync",
-      "target": "dialogoptions",
-      "confidence_score": 1.0
+      "target": "dialogoptions"
     },
     {
       "relation": "references",
@@ -36312,9 +36354,9 @@
       "source_location": "L18",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "compat_spt40servercompat_mudblazorcompat_showmessageboxasync",
-      "target": "orbit_server_compat_spt40servercompat_cs_idialogservice",
-      "confidence_score": 1.0
+      "target": "orbit_server_compat_spt40servercompat_cs_idialogservice"
     },
     {
       "relation": "references",
@@ -36323,9 +36365,9 @@
       "source_location": "L18",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "compat_spt40servercompat_mudblazorcompat_showmessageboxasync",
-      "target": "orbit_server_compat_spt40servercompat_cs_task",
-      "confidence_score": 1.0
+      "target": "orbit_server_compat_spt40servercompat_cs_task"
     },
     {
       "relation": "contains",
@@ -37112,9 +37154,9 @@
       "source_file": "Orbit.Server/Load/OrbitServerLoad.cs",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "load_orbitserverload_orbitserverload",
-      "target": "load_orbitserverload_orbitserverload_onload",
-      "confidence_score": 1.0
+      "target": "load_orbitserverload_orbitserverload_onload"
     },
     {
       "relation": "references",
@@ -37123,9 +37165,9 @@
       "source_location": "L13",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "load_orbitserverload_orbitserverload_onload",
-      "target": "orbit_server_load_orbitserverload_cs_task",
-      "confidence_score": 1.0
+      "target": "orbit_server_load_orbitserverload_cs_task"
     },
     {
       "relation": "contains",
@@ -37141,9 +37183,9 @@
       "confidence": "EXTRACTED",
       "source_file": "Orbit.Server/Orbit.Server.csproj",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "orbit_server_orbit_server",
-      "target": "framework_net9_0",
-      "confidence_score": 1.0
+      "target": "framework_net9_0"
     },
     {
       "relation": "references",
@@ -42256,9 +42298,9 @@
       "source_file": "Orbit.Server/Web/Shared/MainLayout.razor",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_mainlayout",
-      "target": "headcontent",
-      "confidence_score": 1.0
+      "target": "headcontent"
     },
     {
       "relation": "inherits",
@@ -46245,9 +46287,9 @@
       "source_location": "L194",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "brain_orbitbrainlayer_orbitbrainlayer_ondead",
-      "target": "damageinfo",
-      "confidence_score": 1.0
+      "target": "damageinfo"
     },
     {
       "relation": "references",
@@ -46289,9 +46331,9 @@
       "source_file": "Orbit/Compat/Spt40TypeAliases.cs",
       "source_location": "L71",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "compat_spt40typealiases",
-      "target": "damageinfo",
-      "confidence_score": 1.0
+      "target": "damageinfo"
     },
     {
       "relation": "references",
@@ -46300,9 +46342,9 @@
       "source_location": "L209",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "brain_orbitbrainlayer_orbitbrainlayer_onlayerchanged",
-      "target": "aicorelayerclass",
-      "confidence_score": 1.0
+      "target": "aicorelayerclass"
     },
     {
       "relation": "references",
@@ -46365,9 +46407,9 @@
       "source_file": "Orbit/Compat/Spt40Members.cs",
       "source_location": "L18",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "compat_spt40members",
-      "target": "compat_spt40members_spt40members",
-      "confidence_score": 1.0
+      "target": "compat_spt40members_spt40members"
     },
     {
       "relation": "method",
@@ -46375,9 +46417,9 @@
       "source_file": "Orbit/Compat/Spt40Members.cs",
       "source_location": "L51",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "compat_spt40members_spt40members",
-      "target": "compat_spt40members_spt40members_field",
-      "confidence_score": 1.0
+      "target": "compat_spt40members_spt40members_field"
     },
     {
       "relation": "method",
@@ -46385,9 +46427,9 @@
       "source_file": "Orbit/Compat/Spt40Members.cs",
       "source_location": "L68",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "compat_spt40members_spt40members",
-      "target": "compat_spt40members_spt40members_method",
-      "confidence_score": 1.0
+      "target": "compat_spt40members_spt40members_method"
     },
     {
       "relation": "method",
@@ -46395,9 +46437,9 @@
       "source_file": "Orbit/Compat/Spt40Members.cs",
       "source_location": "L76",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "compat_spt40members_spt40members",
-      "target": "compat_spt40members_spt40members_ownerfield",
-      "confidence_score": 1.0
+      "target": "compat_spt40members_spt40members_ownerfield"
     },
     {
       "relation": "references",
@@ -46406,9 +46448,9 @@
       "source_location": "L37",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "compat_spt40members_spt40members",
-      "target": "orbit_compat_spt40members_cs_dictionary",
-      "confidence_score": 1.0
+      "target": "orbit_compat_spt40members_cs_dictionary"
     },
     {
       "relation": "references",
@@ -46417,9 +46459,9 @@
       "source_location": "L65",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "compat_spt40members_spt40members",
-      "target": "orbit_compat_spt40members_cs_string",
-      "confidence_score": 1.0
+      "target": "orbit_compat_spt40members_cs_string"
     },
     {
       "relation": "references",
@@ -46428,9 +46470,9 @@
       "source_location": "L51",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "compat_spt40members_spt40members_field",
-      "target": "orbit_compat_spt40members_cs_fieldinfo",
-      "confidence_score": 1.0
+      "target": "orbit_compat_spt40members_cs_fieldinfo"
     },
     {
       "relation": "references",
@@ -46439,9 +46481,9 @@
       "source_location": "L51",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "compat_spt40members_spt40members_field",
-      "target": "orbit_compat_spt40members_cs_type",
-      "confidence_score": 1.0
+      "target": "orbit_compat_spt40members_cs_type"
     },
     {
       "relation": "references",
@@ -46450,9 +46492,9 @@
       "source_location": "L68",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "compat_spt40members_spt40members_method",
-      "target": "orbit_compat_spt40members_cs_type",
-      "confidence_score": 1.0
+      "target": "orbit_compat_spt40members_cs_type"
     },
     {
       "relation": "references",
@@ -46461,9 +46503,9 @@
       "source_location": "L76",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "compat_spt40members_spt40members_ownerfield",
-      "target": "orbit_compat_spt40members_cs_type",
-      "confidence_score": 1.0
+      "target": "orbit_compat_spt40members_cs_type"
     },
     {
       "relation": "references",
@@ -46472,9 +46514,9 @@
       "source_location": "L76",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "compat_spt40members_spt40members_ownerfield",
-      "target": "orbit_compat_spt40members_cs_fieldinfo",
-      "confidence_score": 1.0
+      "target": "orbit_compat_spt40members_cs_fieldinfo"
     },
     {
       "relation": "imports",
@@ -46483,9 +46525,9 @@
       "source_file": "Orbit/Compat/Spt40TypeAliases.cs",
       "source_location": "L21",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "compat_spt40typealiases",
-      "target": "aicorecontroller",
-      "confidence_score": 1.0
+      "target": "aicorecontroller"
     },
     {
       "relation": "imports",
@@ -46494,9 +46536,9 @@
       "source_file": "Orbit/Compat/Spt40TypeAliases.cs",
       "source_location": "L48",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "compat_spt40typealiases",
-      "target": "ammo",
-      "confidence_score": 1.0
+      "target": "ammo"
     },
     {
       "relation": "imports",
@@ -46505,9 +46547,9 @@
       "source_file": "Orbit/Compat/Spt40TypeAliases.cs",
       "source_location": "L22",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "compat_spt40typealiases",
-      "target": "assaultenemyfarlayer",
-      "confidence_score": 1.0
+      "target": "assaultenemyfarlayer"
     },
     {
       "relation": "imports",
@@ -46516,9 +46558,9 @@
       "source_file": "Orbit/Compat/Spt40TypeAliases.cs",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "compat_spt40typealiases",
-      "target": "avoiddangerlayer",
-      "confidence_score": 1.0
+      "target": "avoiddangerlayer"
     },
     {
       "relation": "imports",
@@ -46527,9 +46569,9 @@
       "source_file": "Orbit/Compat/Spt40TypeAliases.cs",
       "source_location": "L25",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "compat_spt40typealiases",
-      "target": "birdeyepatrollayer",
-      "confidence_score": 1.0
+      "target": "birdeyepatrollayer"
     },
     {
       "relation": "imports",
@@ -46538,9 +46580,9 @@
       "source_file": "Orbit/Compat/Spt40TypeAliases.cs",
       "source_location": "L26",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "compat_spt40typealiases",
-      "target": "boaravoiddangerlayer",
-      "confidence_score": 1.0
+      "target": "boaravoiddangerlayer"
     },
     {
       "relation": "imports",
@@ -46549,9 +46591,9 @@
       "source_file": "Orbit/Compat/Spt40TypeAliases.cs",
       "source_location": "L33",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "compat_spt40typealiases",
-      "target": "botfirstaid",
-      "confidence_score": 1.0
+      "target": "botfirstaid"
     },
     {
       "relation": "imports",
@@ -46560,9 +46602,9 @@
       "source_file": "Orbit/Compat/Spt40TypeAliases.cs",
       "source_location": "L35",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "compat_spt40typealiases",
-      "target": "botmoverimpostor",
-      "confidence_score": 1.0
+      "target": "botmoverimpostor"
     },
     {
       "relation": "imports",
@@ -46571,9 +46613,9 @@
       "source_file": "Orbit/Compat/Spt40TypeAliases.cs",
       "source_location": "L36",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "compat_spt40typealiases",
-      "target": "botstimulators",
-      "confidence_score": 1.0
+      "target": "botstimulators"
     },
     {
       "relation": "imports",
@@ -46582,9 +46624,9 @@
       "source_file": "Orbit/Compat/Spt40TypeAliases.cs",
       "source_location": "L37",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "compat_spt40typealiases",
-      "target": "botsurgicalkit",
-      "confidence_score": 1.0
+      "target": "botsurgicalkit"
     },
     {
       "relation": "imports",
@@ -46593,9 +46635,9 @@
       "source_file": "Orbit/Compat/Spt40TypeAliases.cs",
       "source_location": "L70",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "compat_spt40typealiases",
-      "target": "clientairdrop",
-      "confidence_score": 1.0
+      "target": "clientairdrop"
     },
     {
       "relation": "imports",
@@ -46604,9 +46646,9 @@
       "source_file": "Orbit/Compat/Spt40TypeAliases.cs",
       "source_location": "L28",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "compat_spt40typealiases",
-      "target": "exfiltrationlayer",
-      "confidence_score": 1.0
+      "target": "exfiltrationlayer"
     },
     {
       "relation": "imports",
@@ -46615,9 +46657,9 @@
       "source_file": "Orbit/Compat/Spt40TypeAliases.cs",
       "source_location": "L54",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "compat_spt40typealiases",
-      "target": "iitemoperationresult",
-      "confidence_score": 1.0
+      "target": "iitemoperationresult"
     },
     {
       "relation": "imports",
@@ -46626,9 +46668,9 @@
       "source_file": "Orbit/Compat/Spt40TypeAliases.cs",
       "source_location": "L56",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "compat_spt40typealiases",
-      "target": "itemcontroller",
-      "confidence_score": 1.0
+      "target": "itemcontroller"
     },
     {
       "relation": "contains",
@@ -46636,9 +46678,9 @@
       "source_file": "Orbit/Compat/Spt40TypeNames.cs",
       "source_location": "L19",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "compat_spt40typenames",
-      "target": "compat_spt40typenames_spt40typenames",
-      "confidence_score": 1.0
+      "target": "compat_spt40typenames_spt40typenames"
     },
     {
       "relation": "method",
@@ -46646,9 +46688,9 @@
       "source_file": "Orbit/Compat/Spt40TypeNames.cs",
       "source_location": "L45",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "compat_spt40typenames_spt40typenames",
-      "target": "compat_spt40typenames_spt40typenames_of",
-      "confidence_score": 1.0
+      "target": "compat_spt40typenames_spt40typenames_of"
     },
     {
       "relation": "references",
@@ -46657,9 +46699,9 @@
       "source_location": "L23",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "compat_spt40typenames_spt40typenames",
-      "target": "orbit_compat_spt40typenames_cs_dictionary",
-      "confidence_score": 1.0
+      "target": "orbit_compat_spt40typenames_cs_dictionary"
     },
     {
       "relation": "contains",
@@ -55503,9 +55545,9 @@
       "source_location": "L1417",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "looting_orbitloothandler_orbitloothandler_findplace",
-      "target": "orbit_looting_orbitloothandler_cs_gstruct154",
-      "confidence_score": 1.0
+      "target": "orbit_looting_orbitloothandler_cs_gstruct154"
     },
     {
       "relation": "references",
@@ -55514,9 +55556,9 @@
       "source_location": "L1428",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "looting_orbitloothandler_orbitloothandler_runtransactionasync",
-      "target": "orbit_looting_orbitloothandler_cs_gstruct154",
-      "confidence_score": 1.0
+      "target": "orbit_looting_orbitloothandler_cs_gstruct154"
     },
     {
       "relation": "references",
@@ -59299,9 +59341,9 @@
       "source_location": "L468",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "weaponswap_weaponswapper_weaponswapper_runguardedtransactionasync",
-      "target": "orbit_looting_weaponswap_weaponswapper_cs_gstruct154",
-      "confidence_score": 1.0
+      "target": "orbit_looting_weaponswap_weaponswapper_cs_gstruct154"
     },
     {
       "relation": "references",
@@ -61458,9 +61500,9 @@
       "source_location": "L31",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "patches_dormantbrainthrottlepatch_dormantbrainthrottlepatch_prefix",
-      "target": "orbit_patches_dormantbrainthrottlepatch_cs_aicoreagentclass",
-      "confidence_score": 1.0
+      "target": "orbit_patches_dormantbrainthrottlepatch_cs_aicoreagentclass"
     },
     {
       "relation": "references",
@@ -61491,9 +61533,9 @@
       "source_location": "L45",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "patches_dormantbrainthrottlepatch_dormantbrainthrottlepatch_finalizer",
-      "target": "orbit_patches_dormantbrainthrottlepatch_cs_aicoreagentclass",
-      "confidence_score": 1.0
+      "target": "orbit_patches_dormantbrainthrottlepatch_cs_aicoreagentclass"
     },
     {
       "relation": "references",
@@ -61640,9 +61682,9 @@
       "source_location": "L30",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "patches_dormantdamageprobepatch_dormantdamageprobepatch_postfix",
-      "target": "damageinfostruct",
-      "confidence_score": 1.0
+      "target": "damageinfostruct"
     },
     {
       "relation": "references",
@@ -63635,9 +63677,9 @@
       "source_location": "L13",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "patches_nativeghostdecisionpatch_nativeghostdecisionpatch_postfix",
-      "target": "orbit_patches_nativeghostdecisionpatch_cs_aicoreactionresultstruct",
-      "confidence_score": 1.0
+      "target": "orbit_patches_nativeghostdecisionpatch_cs_aicoreactionresultstruct"
     },
     {
       "relation": "references",
@@ -63646,9 +63688,9 @@
       "source_location": "L13",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "patches_nativeghostdecisionpatch_nativeghostdecisionpatch_postfix",
-      "target": "orbit_patches_nativeghostdecisionpatch_cs_aicorestrategyabstractclass",
-      "confidence_score": 1.0
+      "target": "orbit_patches_nativeghostdecisionpatch_cs_aicorestrategyabstractclass"
     },
     {
       "relation": "references",
@@ -85394,9 +85436,9 @@
       "source_location": "L27",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "systems_nativeghostsystem_sleeper",
-      "target": "orbit_systems_nativeghostsystem_cs_aicoreagentclass",
-      "confidence_score": 1.0
+      "target": "orbit_systems_nativeghostsystem_cs_aicoreagentclass"
     },
     {
       "relation": "references",
@@ -85834,9 +85876,9 @@
       "source_location": "L580",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "systems_nativeghostsystem_nativeghostsystem_handlebrainexception",
-      "target": "orbit_systems_nativeghostsystem_cs_aicoreagentclass",
-      "confidence_score": 1.0
+      "target": "orbit_systems_nativeghostsystem_cs_aicoreagentclass"
     },
     {
       "relation": "references",
@@ -85845,9 +85887,9 @@
       "source_location": "L456",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "systems_nativeghostsystem_nativeghostsystem_schedulebrain",
-      "target": "orbit_systems_nativeghostsystem_cs_aicoreagentclass",
-      "confidence_score": 1.0
+      "target": "orbit_systems_nativeghostsystem_cs_aicoreagentclass"
     },
     {
       "relation": "references",
@@ -85999,9 +86041,9 @@
       "source_location": "L117",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "systems_nativeghostsystem_nativeghostsystem_refreshpeacefuldecision",
-      "target": "orbit_systems_nativeghostsystem_cs_aicoreactionresultstruct",
-      "confidence_score": 1.0
+      "target": "orbit_systems_nativeghostsystem_cs_aicoreactionresultstruct"
     },
     {
       "relation": "references",
@@ -86010,9 +86052,9 @@
       "source_location": "L117",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "systems_nativeghostsystem_nativeghostsystem_refreshpeacefuldecision",
-      "target": "orbit_systems_nativeghostsystem_cs_aicorestrategyabstractclass",
-      "confidence_score": 1.0
+      "target": "orbit_systems_nativeghostsystem_cs_aicorestrategyabstractclass"
     },
     {
       "relation": "references",
@@ -86043,9 +86085,9 @@
       "source_location": "L512",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "systems_nativeghostsystem_nativeghostsystem_guarddecision",
-      "target": "orbit_systems_nativeghostsystem_cs_aicorestrategyabstractclass",
-      "confidence_score": 1.0
+      "target": "orbit_systems_nativeghostsystem_cs_aicorestrategyabstractclass"
     },
     {
       "relation": "references",
@@ -86054,9 +86096,9 @@
       "source_location": "L512",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "systems_nativeghostsystem_nativeghostsystem_guarddecision",
-      "target": "orbit_systems_nativeghostsystem_cs_aicoreactionresultstruct",
-      "confidence_score": 1.0
+      "target": "orbit_systems_nativeghostsystem_cs_aicoreactionresultstruct"
     },
     {
       "relation": "references",
@@ -98511,5 +98553,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "03c9290e30f1a797086746dd86ab335948bc0bc3"
+  "built_at_commit": "9759d7d76df5d0dfb54eaec9468784f8a5301e98"
 }

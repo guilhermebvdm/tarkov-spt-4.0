@@ -74,7 +74,7 @@ Truques que economizam edição:
 5. **Varredura das categorias sem erro de compilação:** literais iguais a nome de tipo 4.1; toda chamada de reflexão com nome em texto, incluindo os helpers do próprio mod; parâmetros `___`; caminhos.
 6. **Executar os patches fora do jogo** (seção 5).
 7. **Servidor:** subir uma cópia da pasta `SPT/` sem `user/`, em outra porta, só com o mod; conferir carga, páginas e rotas; abrir o painel num navegador e clicar.
-8. **Revisão por leitores independentes**, cada um com uma frente: nomes em texto, patches e equivalência de membros, servidor.
+8. **Revisão por leitores independentes**, cada um com uma frente: nomes em texto, patches e equivalência de membros, servidor, e a própria spec. Se o mod declara pacote Fika (`INetSerializable`), conferir contra [fika-packet-desync-prevention-plan.md](fika-packet-desync-prevention-plan.md) §7: pacote herdado do upstream costuma estar fora do padrão.
 9. **Defeito proposital:** reverter uma correção de cada tipo e confirmar que a verificação correspondente falha.
 10. **Validação em jogo.** Nada acima a substitui.
 
@@ -90,6 +90,8 @@ O Harmony não consegue desviar um método do jogo fora do processo do jogo: o r
 | Finalizador em `RuntimeAssembly.GetTypes` devolvendo os tipos que carregaram | Alguns tipos do jogo não carregam fora do Mono e `GetTypes()` lançaria |
 | Cópia do mod com as chamadas nativas da Unity do logger trocadas por constante | Sem isso todo `Log.Info` lança |
 | Arquivo `.ini` ao lado da DLL com `AllowOptimize=0` | Impede o JIT de embutir métodos entre as cópias |
+| Carregar as DLLs dos mods opcionais instalados antes de rodar os resolvedores | As buscas de tipo por nome só acham o mod se o assembly estiver carregado, como no jogo |
+| Contar como falha todo aviso ou erro que o mod grave no próprio log | Um mod bem escrito desliga o recurso e avisa no log em vez de lançar; sem isso a execução "passa" com o recurso desligado |
 
 O interceptador confere o que o Harmony conferiria ao montar o desvio: alvo não nulo, `__instance`, `__result`, `___campo`, parâmetros por nome (mesmas regras de `HarmonyManipulator.EmitCallParameter`), e roda cada transpiler sobre o IL real obtido com `PatchProcessor.GetOriginalInstructions`.
 
@@ -101,6 +103,7 @@ Prova: alvo resolve nesta instalação, parâmetros ligam, transpilers encontram
 - Integrações com mods que não estão instalados na máquina.
 - Outras instalações: SAIN, Fika e mods de facção do servidor de produção podem estar em versões diferentes. Rodar a verificação com `--spt-path` contra a instalação alvo.
 - Comportamento. Compilar, resolver patch e responder HTTP 200 não são prova de comportamento ([AP-06](spt-antipatterns.md)).
+- Patch que no 4.0 cai num método herdado. Um tipo que no 4.1 sobrescreve um método pode só herdá-lo no 4.0; o patch então resolve no método da classe base, junto de outro patch, e recebe instâncias de outro tipo. Dar a cada patch desses uma condição (`Applies`) e não ligá-lo quando o alvo não é declarado na classe esperada.
 
 ## Ver também
 
@@ -114,3 +117,4 @@ Prova: alvo resolve nesta instalação, parâmetros ligam, transpilers encontram
 |---|---|---|
 | 2026-09-30 | Guilherme + agente | Criação, a partir do port do ORBIT 2.1 para o SPT 4.0.13 |
 | 2026-09-30 | Guilherme | fix(orbit-2.1): make the web panel interactive on SPT 4.0 and fix name lookups found by review |
+| 2026-09-30 | Guilherme | docs(orbit-2.1): as-built, consolidated code review, memory, install script and the 4.1->4.0 downgrade guide |

@@ -4,6 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.Serialization;
+using System.Text.RegularExpressions;
+using BepInEx;
+using BepInEx.Bootstrap;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
@@ -114,10 +118,19 @@ namespace PatchDryRun
             var enable = modulePatch.GetMethod("Enable", BindingFlags.Public | BindingFlags.Instance, null, Type.EmptyTypes, null);
             var target = modulePatch.GetProperty("TargetMethod");
             var patches = SafeTypes(orbit).Where(t => !t.IsAbstract && modulePatch.IsAssignableFrom(t)).OrderBy(t => t.FullName).ToList();
+            var notEnabled = 0;
             foreach (var type in patches)
             {
                 Problems.Clear();
                 var before = _patchCalls;
+                // A patch class can say it does not apply to this game version; the plugin then never enables it.
+                var applies = type.GetProperty("Applies", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+                if (applies != null && applies.PropertyType == typeof(bool) && !(bool)applies.GetValue(null, null))
+                {
+                    notEnabled++;
+                    Console.WriteLine($"  N/A   {type.Name,-36} Applies == false on this install: the plugin does not enable it");
+                    continue;
+                }
                 try
                 {
                     var instance = Activator.CreateInstance(type, true);
@@ -132,7 +145,7 @@ namespace PatchDryRun
                     Fail(type.Name, Flatten(e));
                 }
             }
-            Console.WriteLine($"  -- {patches.Count} ModulePatch classes");
+            Console.WriteLine($"  -- {patches.Count} ModulePatch classes, {notEnabled} not enabled on this install");
 
             Section("2. Manual Harmony patch sets (static Enable(), each reports through its Ready flag)");
             foreach (var name in new[]
@@ -145,7 +158,10 @@ namespace PatchDryRun
 
             Section("3. Reflection bindings resolved once at start-up");
             Probe(orbit, "Orbit.Sain.SainPersonality", "InitIfNeeded");
-            Probe(orbit, "Orbit.Systems.NativeGhostAdapters", "ResolveBindings");
+
+            Section("3a. Bindings into optional mods (checked when the mod is installed, listed as absent otherwise)");
+            LoadOptionalPlugins(spt);
+            ProbeOptionalMods(orbit);
 
             var fikaPath = Path.Combine(stage, "Orbit.Fika.dll");
             var fika = File.Exists(fikaPath) ? Assembly.LoadFrom(fikaPath) : null;
@@ -185,15 +201,18 @@ namespace PatchDryRun
                 }
             }
 
+            Section("3c. Fika accessors compiled by the client plugin (Helpers/GhostSpectatorPlayers)");
+            ProbeFikaAccessors(orbit);
+
+            // The mod reports a binding it could not make through its own log. Any warning or error it wrote
+            // during this run is a feature it turned off, so it counts as a failure here.
+            if (Captured.Count > 0) Section("Warnings and errors the mod itself logged during the run");
+            foreach (var line in Captured.Distinct())
+                Fail("mod log", line);
+
             Section("Every Harmony.Patch call the mod made");
             foreach (var line in Intercepted) Console.WriteLine("  " + line);
             Console.WriteLine($"  -- {_patchCalls} calls");
-
-            if (Captured.Count > 0)
-            {
-                Section("Warnings and errors the mod itself logged during the run");
-                foreach (var line in Captured.Distinct()) Console.WriteLine("  " + line);
-            }
 
             Console.WriteLine();
             Console.WriteLine(_failures == 0 ? "RESULT: OK — no failure" : $"RESULT: {_failures} FAILURE(S)");
@@ -525,6 +544,111 @@ namespace PatchDryRun
 
         private static bool IsHandle(Type t)
             => typeof(MemberInfo).IsAssignableFrom(t) || typeof(Delegate).IsAssignableFrom(t);
+
+        // ---------------------------------------------------------------- optional mods
+
+        // Mods ORBIT integrates with through reflection. They are optional; when one is installed its DLL is
+        // loaded so the type lookups (AccessTools.TypeByName) can find it, as they would in the game.
+        private static readonly Regex OptionalPlugin = new Regex(
+            "UNTARGH|MoreBots|RUAF|ISB|BlackDiv|RoguesVRaiders|InterchangeRework|Manimal[.](Interchange|Lighthouse)|CombineSoldiers", RegexOptions.IgnoreCase);
+
+        private static void LoadOptionalPlugins(string spt)
+        {
+            var plugins = Path.Combine(spt, "BepInEx", "plugins");
+            foreach (var file in Directory.GetFiles(plugins, "*.dll", SearchOption.AllDirectories).OrderBy(f => f))
+            {
+                if (!OptionalPlugin.IsMatch(Path.GetFileName(file))) continue;
+                try
+                {
+                    var asm = Assembly.LoadFrom(file);
+                    Dirs.Add(Path.GetDirectoryName(file));
+                    Console.WriteLine($"  loaded optional mod {asm.GetName().Name} {asm.GetName().Version}  ({file.Substring(plugins.Length + 1)})");
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"  could not load {Path.GetFileName(file)}: {Flatten(e)}");
+                }
+            }
+        }
+
+        private static void ProbeOptionalMods(Assembly orbit)
+        {
+            // Checkpoint adapters (UNTAR / RUAF / ISB): one binding object per mod, five members each.
+            var adapters = orbit.GetType("Orbit.Systems.NativeGhostAdapters", true);
+            RunQuiet(adapters, "ResolveBindings");
+            foreach (var pair in new[] { new[] { "_untar", "UNTAR" }, new[] { "_ruaf", "RUAF Come Home" }, new[] { "_isb", "ISB" } })
+            {
+                var binding = StaticField(adapters, pair[0]);
+                var what = "NativeGhostAdapters " + pair[1];
+                if (binding == null) { Fail(what, "binding object was not created"); continue; }
+                if (InstanceField(binding, "Type") == null) { Absent(what); continue; }
+                var missing = new[] { "Available", "Point", "Choose", "Set" }.Where(n => InstanceField(binding, n) == null).ToList();
+                if (missing.Count > 0) Fail(what, "mod installed but these members did not bind: " + string.Join(", ", missing));
+                else Ok(what, "CanDoCheckpointActions, guardPoint, GetCheckpointCoverPoint, SetGuardPoint, guardPointDirty bound");
+            }
+            if (AccessTools.TypeByName("RoguesVRaiders.SquadRegistry") == null) Absent("NativeGhostAdapters RoguesVRaiders");
+            else CheckStatics(adapters, "NativeGhostAdapters RoguesVRaiders", "_rvrMember", "_rvrBoard", "_rvrOrders");
+
+            // MoreBotsAPI hunt manager: regroup recovery and the per-tick hunt update.
+            var regroup = orbit.GetType("Orbit.Systems.NativeGhostRegroup", true);
+            RunQuiet(regroup, "Resolve", new object[] { null });
+            if (StaticField(regroup, "_type") == null) Absent("NativeGhostRegroup MoreBotsAPI");
+            else CheckStatics(regroup, "NativeGhostRegroup MoreBotsAPI", "_owner", "_active", "_regroup", "_regrouping", "_ignore", "_dirty", "_point", "_choose", "_setPoint");
+
+            var system = orbit.GetType("Orbit.Systems.NativeGhostSystem", true);
+            RunQuiet(system, "HuntUpdater", new object[] { null });
+            if (StaticField(system, "_huntType") == null) Absent("NativeGhostSystem MoreBotsAPI hunt");
+            else CheckStatics(system, "NativeGhostSystem MoreBotsAPI hunt", "_huntActive", "_huntUpdate");
+        }
+
+        // GhostSpectatorPlayers compiles its Fika accessors in its constructor, from the plugin instance BepInEx
+        // registered. Outside the game there is no Chainloader, so an empty FikaPlugin object is registered first.
+        private static void ProbeFikaAccessors(Assembly orbit)
+        {
+            const string what = "GhostSpectatorPlayers";
+            var fikaCore = TryLoad("Fika.Core");
+            var pluginType = fikaCore?.GetType("Fika.Core.FikaPlugin");
+            if (pluginType == null) { Absent(what + " (Fika.Core)"); return; }
+            try
+            {
+                var info = (PluginInfo)Activator.CreateInstance(typeof(PluginInfo), true);
+                typeof(PluginInfo).GetProperty("Instance").SetValue(info, FormatterServices.GetUninitializedObject(pluginType), null);
+                Chainloader.PluginInfos["com.fika.core"] = info;
+                var type = orbit.GetType("Orbit.Helpers.GhostSpectatorPlayers", true);
+                var instance = Activator.CreateInstance(type, true);
+                var missing = new[] { "_handler", "_humans", "_extracted", "_netId", "_headless" }.Where(n => InstanceField(instance, n) == null).ToList();
+                if (missing.Count > 0) Fail(what, "accessors not compiled: " + string.Join(", ", missing));
+                else Ok(what, "IFikaNetworkManager.CoopHandler, HumanPlayers, ExtractedPlayers, FikaPlayer.NetId, FikaBackendUtils.IsHeadless bound");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"  SKIP  {what,-36} cannot be exercised outside the game: {Flatten(e)}");
+            }
+        }
+
+        private const BindingFlags Any = BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+
+        private static object StaticField(Type type, string name) => type.GetField(name, Any)?.GetValue(null);
+
+        private static object InstanceField(object target, string name) => target.GetType().GetField(name, Any)?.GetValue(target);
+
+        // Resolvers take a bot and go on to use it; only the binding they do first matters here.
+        private static void RunQuiet(Type type, string method, object[] args = null)
+        {
+            var m = type.GetMethod(method, Any);
+            if (m == null) { Fail(type.Name + "." + method, "method not found in ORBIT.dll"); return; }
+            try { m.Invoke(null, args); }
+            catch (TargetInvocationException e) when (e.InnerException is NullReferenceException) { /* no bot outside the game */ }
+        }
+
+        private static void CheckStatics(Type type, string what, params string[] fields)
+        {
+            var missing = fields.Where(f => StaticField(type, f) == null).ToList();
+            if (missing.Count > 0) Fail(what, "mod installed but these members did not bind: " + string.Join(", ", missing));
+            else Ok(what, fields.Length + " members bound");
+        }
+
+        private static void Absent(string what) => Console.WriteLine($"  ABSENT {what,-35} mod not installed here: binding not checkable");
 
         // ---------------------------------------------------------------- helpers
 

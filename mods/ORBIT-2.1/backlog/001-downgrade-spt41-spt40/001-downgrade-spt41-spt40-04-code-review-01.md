@@ -10,7 +10,7 @@
 
 ## Resumo
 
-> 🔴 Bloqueadores: 0 · 🟠 Fortes: 0 · 🟡 Médios: 0 · 🟢 Menores: 0 · ✅ Resolvidos: 9 · ⏭️ Aceitos sem mudança: 5 · Total: 14
+> 🔴 Bloqueadores: 0 · 🟠 Fortes: 0 · 🟡 Médios: 0 · 🟢 Menores: 0 · ✅ Resolvidos: 11 · ⏭️ Aceitos sem mudança: 4 · Total: 15
 
 ## Índice
 
@@ -25,11 +25,12 @@
 | CR-01-07 | B — Bug latente | 🟡 | `NativePatrolArrivalDiagnosticPatch`: alvo `IsCome()` inexistente e campo `____owner` | ✅ Aplicado |
 | CR-01-08 | B — Bug latente | 🟡 | `NativeGlukharChoiceDiagnosticPatch`: campo `____owner` inexistente | ✅ Aplicado |
 | CR-01-09 | E — Manutenção | 🟢 | Três campos de diagnóstico de patrulha lidos pelo nome 4.1 | ✅ Aplicado |
-| CR-01-10 | F — Opcional | 🟢 | `DormantBoarAvoidDangerBypassPatch` cai no mesmo método do patch irmão | ⏭️ Aceito |
+| CR-01-10 | F — Opcional | 🟢 | `DormantBoarAvoidDangerBypassPatch` cai no mesmo método do patch irmão | ✅ Aplicado |
 | CR-01-11 | E — Manutenção | 🟢 | Diagnóstico de granada do SAIN fica inerte (classe não existe no SAIN 4.8.0) | ⏭️ Aceito |
 | CR-01-12 | B — Bug latente | 🟡 | Corpo de jogador humano remoto não gera ponto de corpo no host (Fika) | ⏭️ Aceito — igual no upstream |
 | CR-01-13 | F — Opcional | 🟢 | `POST /orbit/zones/native-floors` sem corpo lança exceção | ⏭️ Aceito |
 | CR-01-14 | F — Opcional | 🟢 | Link "Server home" leva à página de agradecimento; não há cartão de mod no 4.0 | ⏭️ Aceito |
+| CR-01-15 | B — Bug latente | 🟠 | Recebimento do pacote de combate fantasma sem captura de exceção; pacotes do addon fora do padrão AP-11 | ✅ Aplicado em parte; resto no item 002 |
 
 ## Categorias
 
@@ -181,7 +182,7 @@
 
 ---
 
-### CR-01-10 · F — Opcional · 🟢 · ⏭️ Aceito
+### CR-01-10 · F — Opcional · 🟢 · ✅ Aplicado em 2026-09-30
 
 **`DormantBoarAvoidDangerBypassPatch` cai no mesmo método do patch irmão**
 
@@ -189,7 +190,11 @@
 
 **Problema:** no 4.0 `GClass49` (BoarAvoidDangerLayer) não declara `ShallUseNow`; o alvo resolvido é `GClass48.ShallUseNow` (`GClass48.cs:88`), que já tem o prefixo de `DormantAvoidDangerBypassPatch`.
 
-**Decisão:** manter como no upstream. Os dois prefixos fazem o mesmo teste, que só lê `BotOwner_0` da classe base; o resultado é igual e o custo é uma consulta a mais por decisão de camada. Três revisores chegaram à mesma conclusão. Remover o patch divergiria do upstream sem ganho observável.
+**Primeira decisão (revista):** manter como no upstream, porque os dois prefixos fazem o mesmo teste e o resultado é igual.
+
+**Resolução:** a review da spec técnica (PA-01-05) mostrou o que essa decisão omitia: o segundo prefixo recebe instâncias `GClass48` num parâmetro declarado como `GClass49`, e isso só não falha enquanto o prefixo não tocar membro declarado em `GClass49`. O patch ganhou a propriedade `Applies` (verdadeira só quando `BoarAvoidDangerLayer` declara `ShallUseNow`) e `Plugin.cs` só o liga quando ela é verdadeira. No 4.0 ele não liga, e `DormantAvoidDangerBypassPatch` cobre as instâncias `GClass49` por herança.
+
+**Verificação:** `verify-port.sh` → `N/A DormantBoarAvoidDangerBypassPatch — Applies == false on this install`; 89 chamadas `Harmony.Patch` em vez de 90.
 
 ---
 
@@ -233,14 +238,31 @@
 
 ---
 
+### CR-01-15 · B — Bug latente · 🟠 · ✅ Aplicado em parte em 2026-09-30
+
+**Pacotes do addon Fika fora do padrão do repositório (AP-11)**
+
+**Local:** [`modded/Orbit.Fika/OrbitFikaPlugin.cs`](../../modded/Orbit.Fika/OrbitFikaPlugin.cs), `OrbitGhostFightPacket.cs`, `OrbitDoorPacket.cs`, `DoorSyncBridge.cs:125`
+
+**Problema:** achado pela review da spec técnica (PA-01-11). O callback `OnGhostFightPacket` não tinha captura de exceção; os dois pacotes leem com `Get*`, sem envelope de comprimento e sem flag `Valid`; `DoorSyncBridge` chama `UnregisterPacket`; `OrbitGhostFightPacket` decide se há lista de atiradores por `AvailableBytes`.
+
+**Por que importa:** o guia [fika-packet-desync-prevention-plan.md](../../../../docs/technical/fika-packet-desync-prevention-plan.md) registra que uma exceção num callback de pacote, ou um pacote lido fora de alinhamento, faz o Fika descartar os demais pacotes daquele frame, de todos os mods. O servidor do grupo roda outros mods com pacote próprio.
+
+**Resolução:** o callback passou a ser `OnGhostFightPacketSafe`, com captura total e o objeto da exceção no log. Não muda o formato do pacote. Os desvios de formato são herdados do upstream; corrigi-los muda o formato e exige teste em coop, então viraram o item de backlog [002](../002-pacotes-fika-ap11/). `node scripts/check-packet-hashes.js`: hashes 38924 e 43571, sem colisão.
+
+**Verificação:** compila; não exercido em rede.
+
+---
+
 ## Cobertura das revisões
 
 | Frente | O que conferiu | Resultado |
 |---|---|---|
-| Execução dos patches fora do jogo | 43 `ModulePatch` + 3 conjuntos manuais + addon Fika: alvo, ligação de parâmetros, transpilers sobre o IL real | 90 chamadas `Harmony.Patch`, 0 falhas |
+| Execução dos patches fora do jogo | 43 `ModulePatch` (1 não se aplica ao 4.0) + 3 conjuntos manuais + addon Fika: alvo, ligação de parâmetros, transpilers sobre o IL real; ligações com MoreBotsAPI e UNTAR | 89 chamadas `Harmony.Patch` em 80 métodos, 0 falhas |
 | Revisor de reflexão por texto | Todo acesso por nome em `Orbit/` e `Orbit.Fika/` contra o jogo 4.0, SAIN 4.8.0, Fika 2.3.21, BigBrain 1.4.0, Waypoints 1.8.2, MoreBotsAPI 2.0.1, UNTAR 3.1.0 | 14 NÃO (todos tratados acima), demais SIM |
 | Revisor de patches e membros | 43 patches + 60 pares de renomeação, com programa próprio | 0 renomeação errada |
 | Revisor do servidor | Carga, ordem, rotas, páginas, 35 componentes MudBlazor, JS, disco | 1 bloqueador e 1 importante (tratados), 4 menores |
+| Revisor da spec técnica | Afirmações da spec contra o decompile e o commit do autor; cobertura dos checkpoints; pacotes Fika | 20 pontos, todos aplicados ([review 01](001-downgrade-spt41-spt40-03-spec-tech-review-01.md)) |
 
 **Fora do alcance de todas as frentes:** comportamento em raid; o lado 4.1 dos membros (não há assembly 4.1); integrações com mods ausentes da máquina (RUAF, Black Division, ISB, Combine Soldiers, RoguesVRaiders, InterchangeRework, mapas do Manimal, Fika headless).
 
@@ -249,3 +271,4 @@
 | Data | Evento |
 |---|---|
 | 2026-09-30 | Code review 01 criada, consolidando a execução fora do jogo e três revisores independentes; achados aplicados no mesmo dia |
+| 2026-09-30 | CR-01-10 revisto e aplicado; CR-01-15 acrescentado, a partir da review da spec técnica |
