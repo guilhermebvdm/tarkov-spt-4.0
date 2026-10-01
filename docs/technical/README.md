@@ -14,6 +14,7 @@ Camada do harness lida **durante o ciclo de desenvolvimento**, não só quando a
 | [`spt4-vs-spt41-gclass-deobfuscation.md`](spt4-vs-spt41-gclass-deobfuscation.md) | spec ou código cita `GClassNNNN` / `GStructNNNN` / `GInterfaceNNNN` | 02·03·04 | regra de conceito do `/code-review` |
 | [`spt4-mod-creation.md`](spt4-mod-creation.md) | mod novo, ou primeira feature server-side de um mod | 02 | — |
 | [`spt3-to-spt4-mod-migration.md`](spt3-to-spt4-mod-migration.md) | port de mod 3.x | 02 | — |
+| [`spt41-to-spt4-mod-downgrade.md`](spt41-to-spt4-mod-downgrade.md) | mod cujo upstream é para SPT 4.1 (declara `~4.1`, ou usa nomes de classe do jogo sem `GClass`) | 02·03·04·05 | checkpoints do próprio doc (§4 e §5) |
 | [`spt4-csharp-build.md`](spt4-csharp-build.md) | launcher ou `TarkovRedLine.Server` | build (fora do ciclo de artefatos) | — |
 
 > **Legenda da coluna Fases** — os números são os do artefato no ciclo: `01` spec funcional · `02` spec técnica · `03` review da spec técnica · `04` code review · `05` as-build. Ver [WORKFLOW.md](../../WORKFLOW.md).

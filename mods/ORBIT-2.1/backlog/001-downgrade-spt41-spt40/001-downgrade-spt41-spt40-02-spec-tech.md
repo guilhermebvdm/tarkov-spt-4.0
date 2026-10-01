@@ -58,7 +58,7 @@ O port não cria patch novo. Os alvos abaixo são os que mudam de nome no 4.0; o
 | `HardTeleportTracePatch`, `RescueInterceptPatch` | `BotMover.CastFromPos` | `BotMover.method_10(Vector3 posiblePos, bool withExtra)` | [BotMover.cs:756](../../../../references/eft-decompiled/Assembly-CSharp/BotMover.cs#L756) |
 | `OrbitMoverHandoffFallbackPatch` | `BotMover.FindBetterPosition` | `BotMover.method_4(Vector3 castPoint)` | [BotMover.cs:631](../../../../references/eft-decompiled/Assembly-CSharp/BotMover.cs#L631), chamado em `SetPlayerToNavMesh` |
 | `OrbitMoverMotionPatch` | `BotMoverImpostor.OnMotionApplied` | `GClass494.method_21(CollisionFlags flags, Vector3 deltaMove)` | [GClass494.cs:103](../../../../references/eft-decompiled/Assembly-CSharp/GClass494.cs#L103) |
-| `NativePatrolArrivalDiagnosticPatch` | `PatrolMoveSimple.IsCome()` | `GClass510.method_0()` | [GClass510.cs:104](../../../../references/eft-decompiled/Assembly-CSharp/GClass510.cs#L104) |
+| `NativePatrolArrivalDiagnosticPatch` | `PatrolMoveSimple.IsCome()` | `GClass510.method_0()` | [GClass510.cs:85](../../../../references/eft-decompiled/Assembly-CSharp/GClass510.cs#L85) |
 | `OrbitTickPatch` | `AICoreController.Update` | `AICoreControllerClass.Update` | commit `00e7ad8` |
 | Camadas `AssaultEnemyFar`, `Exfiltration`, `PtrlBirdEye`, `AvoidDanger` | tipo com nome real | `GClass45`, `GClass75`, `GClass79`, `GClass48` | literal de `Name()` em cada classe |
 | `NativeGhostBodyPatches.Bind` (BotDoorOpener) | `TryPassCurrentDoor`, `RunEnteringDoorSequence`, `WaitForDoorOpen`, `InteractionWithDoor` | `method_2`, `method_7`, `method_0`, `method_8` | [BotDoorOpener.cs:455](../../../../references/eft-decompiled/Assembly-CSharp/BotDoorOpener.cs#L455), `:626`, `:428`, `:737` |
@@ -76,7 +76,7 @@ Nenhuma. As 4 entradas existentes estão em [PROPRIEDADES.md](../../PROPRIEDADES
 | Arquivo | Ação | Resumo |
 |---|---|---|
 | `modded/Directory.Build.props` | CRIAR | Resolve `SptRoot`, `FikaRef` e `SPT_DIR` a partir de `SPT_PATH` ou do `.spt-path` |
-| `modded/Orbit/Compat/Spt40TypeAliases.cs` | CRIAR | 46 apelidos de tipo 4.1 → 4.0 |
+| `modded/Orbit/Compat/Spt40TypeAliases.cs` | CRIAR | 47 apelidos de tipo 4.1 → 4.0 |
 | `modded/Orbit/Compat/Spt40TypeNames.cs` | CRIAR | 17 camadas de IA: tipo 4.0 → nome 4.1, para comparação de texto |
 | `modded/Orbit/Compat/Spt40Members.cs` | CRIAR | Nomes 4.0 dos membros que o mod busca por texto |
 | `modded/Orbit.Server/Compat/Spt40ServerCompat.cs` | CRIAR | Namespace do logger, ponte `ShowMessageBoxAsync` do MudBlazor 8.13 |
