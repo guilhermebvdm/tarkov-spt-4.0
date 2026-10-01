@@ -35,7 +35,7 @@ public class BleedPatch : ModulePatch
 	[PatchPostfix]
 	private static void Postfix(BallisticsCalculator __instance, EftBulletClass __result, AmmoItemClass __0, Vector3 __1, Vector3 __2, int __3, string __4, Item __5, float __6, int __7)
 	{
-		if (VisceralEntry.Instance != null && VisceralEntry.Instance.EnableBloodEffects.Value && __result != null)
+		if (VisceralEntry.Instance != null && VisceralEntry.Instance.IsCategoryActive(VisceralEntry.Instance.EnableBloodEffects) && __result != null) // ref: item 005
 		{
 			VisceralCombat.Combined.Classes.VisceralShotProcessor.RegisterShot(__result);
 		}
@@ -77,7 +77,7 @@ public class BleedPatch : ModulePatch
 		{
 			if (IsArmorOrPlateHit(shot))
 			{
-				if (VisceralEntry.Instance != null && VisceralEntry.Instance.EnableArmorSparks != null && VisceralEntry.Instance.EnableArmorSparks.Value)
+				if (VisceralEntry.Instance != null && VisceralEntry.Instance.EnableArmorSparks != null && VisceralEntry.Instance.IsCategoryActive(VisceralEntry.Instance.EnableArmorSparks)) // ref: item 005
 				{
 					if (Singleton<Effects>.Instantiated && shot.HittedBallisticCollider != null)
 					{
@@ -139,7 +139,7 @@ public class BleedPatch : ModulePatch
 
 	public static void HitEffect(Player player, Collider col, EftBulletClass shot, bool isAlive, float time, int bundleIndex)
 	{
-		if (VisceralEntry.Instance == null || !VisceralEntry.Instance.EnableBloodEffects.Value || VisceralEntry.Instance.effectContainer == null) return;
+		if (VisceralEntry.Instance == null || !VisceralEntry.Instance.IsCategoryActive(VisceralEntry.Instance.EnableBloodEffects) || VisceralEntry.Instance.effectContainer == null) return; // ref: item 005
 		EffectContainer container = VisceralEntry.Instance.effectContainer;
 
 		GameObject val = null;
@@ -198,7 +198,7 @@ public class BleedPatch : ModulePatch
 
 	public static void BleedEffect(Collider col, EftBulletClass shot, bool isAlive, float chance, float time, int bundleIndex)
 	{
-		if (chance < 8f || VisceralEntry.Instance == null || !VisceralEntry.Instance.EnableBloodEffects.Value || !VisceralEntry.Instance.ArterySpray.Value || VisceralEntry.Instance.effectContainer == null) return;
+		if (chance < 8f || VisceralEntry.Instance == null || !VisceralEntry.Instance.IsCategoryActive(VisceralEntry.Instance.EnableBloodEffects) || !VisceralEntry.Instance.ArterySpray.Value || VisceralEntry.Instance.effectContainer == null) return; // ref: item 005
 		EffectContainer container = VisceralEntry.Instance.effectContainer;
 
 		GameObject val = null;

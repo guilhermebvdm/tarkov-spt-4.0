@@ -17,12 +17,21 @@ namespace TRLDynamicSpawn.Helpers
         {
             if (gameWorld == null || gameWorld.MainPlayer == null) return;
             if (gameWorld.MainPlayer is HideoutPlayer) return;   // hideout is not a raid
+            // ref: 015-spawn-point-reviewer-debug — inicia sessão de auditoria visual se ativado no F12 (funciona para Solo, Host e Client)
+            if (Settings.enableSpawnPointReviewer != null && Settings.enableSpawnPointReviewer.Value)
+            {
+                string map = gameWorld.LocationId ?? gameWorld.MainPlayer?.Location ?? "";
+                SpawnPointReviewerManager.EnsureInstance()?.StartReviewSession(map);
+            }
+
             if (FikaHelper.IsClient()) return;                   // guest: no spawn/despawn work at all (PA-01-03)
             // ref: CR-01-01 — always re-arm; StartLoop is idempotent (one coroutine per raid), so a stale
             // _raidActive from a raid that ended without hooks can never block the next raid.
             _raidActive = true;
             BotDespawnManager.StartLoop();
             CorpseCleanupManager.StartLoop();
+            // ref: 013-estabilizacao-spawn-e-visual-cadaver — pre-warming assíncrono do asset da mochila MBSS
+            _ = CorpseCleanupManager.PreloadMbssBackpackBundle();
         }
 
         // ref: Assembly-CSharp/EFT/LocalGame.cs:357 (Stop override), fika-plugin CoopGame.cs:718 (Stop) and EFT/GameWorld.cs:2111 (OnDestroy)
@@ -39,6 +48,7 @@ namespace TRLDynamicSpawn.Helpers
             BotDespawnManager.ClearStaticState();
             CorpseCleanupManager.StopLoop();
             CorpseCleanupManager.ClearStaticState();
+            SpawnPointReviewerManager.Instance?.StopReviewSession(); // ref: 015-spawn-point-reviewer-debug
             DynamicSpawnManager.StopSpawnLoops();                // ref: AUD-01-06 — waves/groups stop at the first end hook
             DynamicSpawnManager.ClearStaticState();
             ZoneCache.Clear();

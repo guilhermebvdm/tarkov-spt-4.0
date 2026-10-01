@@ -34,7 +34,7 @@ public class GameStartedPatch : ModulePatch
 		if (Singleton<Effects>.Instantiated)
 		{
 			VisceralEntry.Instance.effectContainer = GClass6.GetOrAddComponent<EffectContainer>(((Component)Singleton<Effects>.Instance).gameObject);
-			if (VisceralEntry.Instance.EnableBloodEffects.Value)
+			if (VisceralEntry.Instance.IsCategoryActive(VisceralEntry.Instance.EnableBloodEffects)) // ref: item 005 (só reavaliado na próxima raid, roda 1x em GameStarted)
 			{
 				TextureDecalsPainter texDecals = Singleton<Effects>.Instance.TexDecals;
 				if (texDecals != null)

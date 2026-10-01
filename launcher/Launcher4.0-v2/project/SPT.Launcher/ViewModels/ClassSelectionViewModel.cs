@@ -179,9 +179,13 @@ namespace SPT.Launcher.ViewModels
 
             FinalizeAccountCommand = ReactiveCommand.CreateFromTask(async () =>
             {
-                // ref: CR-01-02 — guard ANTES de limpar a mensagem: clique no estado vazio
-                // não pode apagar a única orientação visível da tela.
-                if (SelectedClass == null) return;
+                if (SelectedClass == null)
+                {
+                    RegisterErrorMsg = IsLoading 
+                        ? LocalizationProvider.Instance.class_selection_loading 
+                        : LocalizationProvider.Instance.class_selection_none_available;
+                    return;
+                }
 
                 RegisterErrorMsg = "";
 

@@ -9,6 +9,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
+using System.Linq;
 using UnityEngine;
 
 namespace Manimal.LoadAmmoAnim.Patches
@@ -149,6 +150,19 @@ namespace Manimal.LoadAmmoAnim.Patches
         {
             var s = TryGet(player);
             if (s != null) s.LoadingCount = 0;
+        }
+
+        // Class1204.Start/method_5 and Class1207.method_4 are global Harmony patches — they fire for
+        // ANY PlayerInventoryController in the raid (other Fika players, possibly bots with AI reload
+        // mods), not just the local one. Without this check we'd hijack localPlayer's session with
+        // someone else's magazine/ammo, either corrupting an in-progress local load or spuriously
+        // starting our animation on hands that never actually started loading anything.
+        public static bool BelongsToLocalPlayer(object class1204OrClass1207Instance, Player localPlayer)
+        {
+            if (localPlayer == null) return false;
+            var invController = Traverse.Create(class1204OrClass1207Instance)
+                .Field<InventoryController>("InventoryController_0").Value;
+            return invController == localPlayer.InventoryController;
         }
     }
 
@@ -300,8 +314,31 @@ namespace Manimal.LoadAmmoAnim.Patches
             catch (Exception ex)
             {
                 Plugin.LogSource?.LogError(
-                    $"[LoadAmmoAnim] CreateAndSpawnBundleController threw: {ex.GetType().Name}: {ex.Message}");
+                    $"[LoadAmmoAnim] CreateAndSpawnBundleController threw: {ex}");
                 session.IsOurAnimation = false;
+
+                // Player.SpawnController assigns HandsController before running the item's own
+                // Spawn/animator setup — a third-party Harmony patch throwing partway through
+                // that setup (eg. a compat gap in another mod) can leave the player's hands
+                // stuck on a half-initialized LoadAmmoBundleController with no weapon and no
+                // AnimLoop running to ever tear it down. Recover here instead of soft-locking.
+                try
+                {
+                    if (player?.HandsController is LoadAmmoBundleController)
+                    {
+                        player.DestroyController();
+                    }
+                }
+                catch (Exception cleanupEx)
+                {
+                    Plugin.LogSource?.LogError(
+                        $"[LoadAmmoAnim] cleanup after failed spawn threw: {cleanupEx.Message}");
+                }
+
+                if (player != null && player.HandsIsEmpty)
+                {
+                    player.TrySetLastEquippedWeapon();
+                }
             }
         }
 
@@ -625,6 +662,8 @@ namespace Manimal.LoadAmmoAnim.Patches
         {
             var player = Singleton<GameWorld>.Instance?.MainPlayer;
             if (player == null) return;
+            if (!LoadAmmoAnimState.BelongsToLocalPlayer(__instance, player)) return;
+
             var session = LoadAmmoAnimState.Get(player);
 
             session.CurrentMagTemplateId = null;
@@ -676,10 +715,12 @@ namespace Manimal.LoadAmmoAnim.Patches
         }
 
         [PatchPostfix]
-        private static void Postfix(Task<IResult> __result)
+        private static void Postfix(object __instance, Task<IResult> __result)
         {
             var player = Singleton<GameWorld>.Instance?.MainPlayer;
             if (player == null) return;
+            if (!LoadAmmoAnimState.BelongsToLocalPlayer(__instance, player)) return;
+
             // Class1204.Start returns a Task that resolves when the session ends.
             // hook the continuation so LoadingCount decrements no matter how it ends.
             __result?.ContinueWith(_ => LoadAmmoAnimState.OnLoadingEnded(player));
@@ -702,6 +743,8 @@ namespace Manimal.LoadAmmoAnim.Patches
         {
             var player = Singleton<GameWorld>.Instance?.MainPlayer;
             if (player == null) return true;
+            if (!LoadAmmoAnimState.BelongsToLocalPlayer(__instance, player)) return true;
+
             var session = LoadAmmoAnimState.TryGet(player);
             if (session == null || session.IsAnimationBanned) return true;
 
@@ -743,6 +786,10 @@ namespace Manimal.LoadAmmoAnim.Patches
         {
             float mult = Plugin.UnloadingSpeedMultiplier?.Value ?? 1f;
             if (mult <= 0f || Mathf.Approximately(mult, 1f)) return true; // passthrough
+
+            var player = Singleton<GameWorld>.Instance?.MainPlayer;
+            if (player == null) return true;
+            if (!LoadAmmoAnimState.BelongsToLocalPlayer(__instance, player)) return true;
 
             float float1 = Traverse.Create(__instance).Field<float>("Float_1").Value;
             int delayMs = Mathf.Max(1, Mathf.CeilToInt(float1 * 1000f / mult));
@@ -798,7 +845,19 @@ namespace Manimal.LoadAmmoAnim.Patches
         public static bool Prefix(Player __instance)
         {
             if (__instance?.ProceduralWeaponAnimation?.HandsContainer?.WeaponRootAnim == null)
+            {
+                if (__instance?.HandsController is LoadAmmoBundleController bundleController && bundleController.ControllerGameObject != null)
+                {
+                    var animRoot = bundleController.ControllerGameObject.GetComponentsInChildren<Transform>(true)
+                        .FirstOrDefault(t => t.name == "Weapon_root_anim");
+                    if (animRoot != null && __instance.ProceduralWeaponAnimation?.HandsContainer != null)
+                    {
+                        __instance.ProceduralWeaponAnimation.HandsContainer.WeaponRootAnim = animRoot;
+                        return true;
+                    }
+                }
                 return false;
+            }
             return true;
         }
     }

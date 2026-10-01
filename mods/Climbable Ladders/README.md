@@ -8,16 +8,24 @@
 
 ## O que é
 
-(TODO: descrever o mod em 1-2 parágrafos)
+O **Climbable Ladders** é um mod client-side (C# / BepInEx) e cooperativo (Fika) para Escape From Tarkov / SPT 4.0 que transforma as escadas estáticas do cenário em elementos totalmente funcionais e escaláveis. 
+
+O mod implementa um sistema completo de movimentação vertical, animação procedural via Cinemática Inversa (FinalIK), rig dinâmico de dedos ([ProceduralGrip](./modded/ladders.bep/ProceduralGrip.cs)), dreno de estamina modulado pelo peso do inventário, penalidades de dano por membros fraturados, integração suave com a mecânica de *Vaulting* da BSG no topo da subida e suporte completo à replicação multiplayer no **Fika Core**.
+
+## Documentação Técnica
+
+A documentação modular detalhada de todos os subsistemas encontra-se em:
+👉 **[Documentação Técnica Modular (docs/README.md)](./docs/README.md)**
 
 ## Estrutura desta pasta
 
 | Pasta | Conteúdo |
 |---|---|
+| `docs/` | **Documentação técnica e funcional completa**, artigos modulares, diagramas conceituais e guias de subsistemas. |
 | `original/` | Clone do repositório oficial, sem `.git`. **Não modificar.** Referência intocada usada para diff e atualizações. |
-| `modded/` | Cópia de trabalho. Modificações vão aqui. |
-| `assets/` | Imagens, prints, documentação externa. |
-| `backlog/` | Ideias, bugs, próximos passos. |
+| `modded/` | Cópia de trabalho contendo o código C#, prefabs e cenas Unity do mod. |
+| `assets/` | Imagens, prints e documentação externa. |
+| `backlog/` | Ideias, bugs e próximos passos de desenvolvimento. |
 | `builds/` | Builds geradas para distribuição. |
 | `scripts/` | Scripts auxiliares específicos deste mod. |
 | `mod.json` | Metadados machine-readable (alimenta o inventário de mods). |

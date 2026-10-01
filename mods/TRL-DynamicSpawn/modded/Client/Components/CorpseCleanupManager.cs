@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 using Comfort.Common;
 using EFT;
@@ -273,12 +274,71 @@ namespace TRLDynamicSpawn.Components
             return true;
         }
 
+        // ref: 013-estabilizacao-spawn-e-visual-cadaver — pré-carregamento do asset da mochila Flyye MBSS
+        public static async Task PreloadMbssBackpackBundle()
+        {
+            if (_cachedMbssPrefab != null) return;
+
+            try
+            {
+                if (Singleton<ItemFactoryClass>.Instantiated)
+                {
+                    var item = Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), MBSS_BACKPACK_TEMPLATE, null);
+                    if (item?.Template?.Prefab != null)
+                    {
+                        if (Singleton<PoolManagerClass>.Instantiated)
+                        {
+                            await Singleton<PoolManagerClass>.Instance.LoadBundlesAndCreatePools(
+                                PoolManagerClass.PoolsCategory.Raid,
+                                PoolManagerClass.AssemblyType.Online,
+                                new ResourceKey[] { item.Template.Prefab },
+                                JobPriorityClass.Low,
+                                new Progress<LoadingProgressStruct>()
+                            );
+                        }
+
+                        if (Singleton<IEasyAssets>.Instantiated)
+                        {
+                            _cachedMbssPrefab = Singleton<IEasyAssets>.Instance.GetAsset<GameObject>(item.Template.Prefab);
+                        }
+
+                        if (_cachedMbssPrefab == null && Singleton<PoolManagerClass>.Instantiated)
+                        {
+                            _cachedMbssPrefab = Singleton<PoolManagerClass>.Instance.CreateCleanLootPrefab(item, EFT.CameraControl.ECameraType.Default);
+                        }
+
+                        if (_cachedMbssPrefab != null)
+                        {
+                            Plugin.LogSource?.LogInfo("[TRL-DynamicSpawn] Corpse Cleanup: Flyye MBSS Backpack bundle pre-warmed successfully.");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Plugin.LogSource?.LogWarning($"[TRL-DynamicSpawn] PreloadMbssBackpackBundle failed: {ex.Message}");
+            }
+        }
+
+        // ref: 013-estabilizacao-spawn-e-visual-cadaver — conversão segura em mochila
+        // 1. Desacoplada da hierarquia do bot (parent = null) para evitar repulsão física explosiva (catapulta ao céu)
+        // 2. Colisor estático com BoxCollider na layer Deadbody + InteractiveProxy apontando para Corpse
+        // 3. Ignora colisão contra os membros do ragdoll
+        // 4. Fallback atômico: se o prefab falhar, mantém as malhas do corpo humano ativas (0 cadáveres invisíveis)
         private void ConvertToBackpack(TrackedCorpse tracked)
         {
             var corpsePlayer = tracked.Player;
             if (corpsePlayer == null || corpsePlayer.gameObject == null) return;
 
-            // 1. Congelar física do Ragdoll (CPU = 0% de física contínua)
+            // 1. Validar se o prefab está disponível ANTES de ocultar as malhas
+            GameObject mbssPrefab = GetMbssBackpackPrefab();
+            if (mbssPrefab == null)
+            {
+                Plugin.LogSource?.LogWarning($"[TRL-DynamicSpawn] Corpse Cleanup: MBSS prefab unavailable. Aborting conversion for '{corpsePlayer.Profile?.Nickname}' to prevent invisible corpse.");
+                return;
+            }
+
+            // 2. Congelar física do Ragdoll (CPU = 0% de física contínua)
             var rbs = corpsePlayer.GetComponentsInChildren<Rigidbody>();
             foreach (var rb in rbs)
             {
@@ -287,7 +347,6 @@ namespace TRLDynamicSpawn.Components
                     rb.velocity = Vector3.zero;
                     rb.angularVelocity = Vector3.zero;
                     rb.isKinematic = true;
-                    rb.detectCollisions = false;
                 }
             }
 
@@ -297,7 +356,90 @@ namespace TRLDynamicSpawn.Components
                 if (j != null) j.enableCollision = false;
             }
 
-            // 2. Ocultar 100% das malhas do corpo humano, roupas e armas (GPU = 0 Draw Calls para o bot morto)
+            // 3. Instanciar o modelo 3D visual padrão da mochila Flyye MBSS (UCP) no mundo estático
+            GameObject backpackVisual = null;
+            try
+            {
+                Vector3 backpackPos = corpsePlayer.Position + Vector3.up * 0.12f;
+                if (corpsePlayer.PlayerBones?.Spine3?.Original != null)
+                {
+                    backpackPos = corpsePlayer.PlayerBones.Spine3.Original.position;
+                }
+
+                // Snap vertical no terreno para apoiar a mochila perfeitamente sobre a superfície
+                if (Physics.Raycast(backpackPos + Vector3.up * 0.5f, Vector3.down, out var groundHit, 2.0f, LayerMaskClass.HighPolyWithTerrainMask))
+                {
+                    backpackPos = groundHit.point + Vector3.up * 0.05f;
+                }
+
+                // Desacoplamento físico: parent = null (independente no mundo, sem sofrer impulsos dos rigidbodies de ragdoll)
+                backpackVisual = UnityEngine.Object.Instantiate(
+                    mbssPrefab,
+                    backpackPos,
+                    Quaternion.Euler(0f, corpsePlayer.Transform.eulerAngles.y, 0f)
+                );
+
+                // Destruição IMEDIATA de rigidbodies residuais para eliminar forças dinâmicas no frame 0
+                var visualRbs = backpackVisual.GetComponentsInChildren<Rigidbody>();
+                foreach (var vrb in visualRbs)
+                {
+                    if (vrb != null) UnityEngine.Object.DestroyImmediate(vrb);
+                }
+                var oldCols = backpackVisual.GetComponentsInChildren<Collider>();
+                foreach (var c in oldCols)
+                {
+                    if (c != null) UnityEngine.Object.DestroyImmediate(c);
+                }
+
+                // Garantir que os renderers da mochila instanciada estejam visíveis
+                var mbssRenderers = backpackVisual.GetComponentsInChildren<Renderer>();
+                foreach (var r in mbssRenderers)
+                {
+                    if (r != null)
+                    {
+                        r.forceRenderingOff = false;
+                        r.enabled = true;
+                    }
+                }
+
+                // Adicionar BoxCollider sólido estático dimensionado para responder ao raycast de interação do EFT
+                var boxCollider = backpackVisual.AddComponent<BoxCollider>();
+                boxCollider.size = new Vector3(0.5f, 0.5f, 0.45f);
+                boxCollider.center = new Vector3(0f, 0.25f, 0f);
+                boxCollider.isTrigger = false;
+
+                // Ignorar colisão física mútua contra todos os colliders do ragdoll do cadáver
+                var corpseColliders = corpsePlayer.GetComponentsInChildren<Collider>();
+                foreach (var cc in corpseColliders)
+                {
+                    if (cc != null && cc != boxCollider)
+                    {
+                        Physics.IgnoreCollision(boxCollider, cc, true);
+                    }
+                }
+
+                // Setar a layer para Deadbody (LayerMaskClass.DeadbodyLayer)
+                int deadbodyLayer = LayerMaskClass.DeadbodyLayer;
+                TransformHelperClass.SetLayersRecursively(backpackVisual, deadbodyLayer);
+
+                // Anexar como filho do corpsePlayer para que GetComponentInParent<InteractableObject>()
+                // encontre nativamente o Corpse do bot no clique/raycast de saque do EFT
+                backpackVisual.transform.SetParent(corpsePlayer.gameObject.transform, true);
+
+                tracked.SpawnedBackpackVisual = backpackVisual;
+            }
+            catch (Exception ex)
+            {
+                Plugin.LogSource?.LogWarning($"[TRL-DynamicSpawn] Could not attach visual MBSS backpack: {ex.Message}");
+                if (backpackVisual != null)
+                {
+                    UnityEngine.Object.Destroy(backpackVisual);
+                    tracked.SpawnedBackpackVisual = null;
+                }
+                return; // Aborta sem ocultar o corpo original
+            }
+
+            // 4. Somente após a mochila visual estar com sucesso no mundo, ocultamos as malhas humanas
             _tempRenderers.Clear();
             if (corpsePlayer.PlayerBody != null)
             {
@@ -311,7 +453,6 @@ namespace TRLDynamicSpawn.Components
                 }
             }
 
-            // Ocultar armas e acessórios anexados
             var allRenderers = corpsePlayer.GetComponentsInChildren<Renderer>();
             foreach (var r in allRenderers)
             {
@@ -319,47 +460,6 @@ namespace TRLDynamicSpawn.Components
                 {
                     r.forceRenderingOff = true;
                 }
-            }
-
-            // 3. Instanciar o modelo 3D visual padrão da mochila Flyye MBSS (UCP)
-            try
-            {
-                Vector3 backpackPos = corpsePlayer.Position + Vector3.up * 0.12f;
-                if (corpsePlayer.PlayerBones?.Spine3?.Original != null)
-                {
-                    backpackPos = corpsePlayer.PlayerBones.Spine3.Original.position;
-                }
-
-                GameObject mbssPrefab = GetMbssBackpackPrefab();
-                if (mbssPrefab != null)
-                {
-                    GameObject backpackVisual = UnityEngine.Object.Instantiate(mbssPrefab, backpackPos, Quaternion.identity);
-                    backpackVisual.transform.SetParent(corpsePlayer.gameObject.transform, true);
-
-                    // Garantir que os renderers da mochila instanciada estejam visíveis
-                    var mbssRenderers = backpackVisual.GetComponentsInChildren<Renderer>();
-                    foreach (var r in mbssRenderers)
-                    {
-                        if (r != null)
-                        {
-                            r.forceRenderingOff = false;
-                            r.enabled = true;
-                        }
-                    }
-
-                    // Remover rigidbodies/colliders extras do prefab visual para não colidir com o bot
-                    var visualRbs = backpackVisual.GetComponentsInChildren<Rigidbody>();
-                    foreach (var vrb in visualRbs)
-                    {
-                        if (vrb != null) UnityEngine.Object.Destroy(vrb);
-                    }
-
-                    tracked.SpawnedBackpackVisual = backpackVisual;
-                }
-            }
-            catch (Exception ex)
-            {
-                Plugin.LogSource?.LogWarning($"[TRL-DynamicSpawn] Could not attach visual MBSS backpack: {ex.Message}");
             }
 
             Plugin.LogSource?.LogInfo($"[TRL-DynamicSpawn] Corpse Cleanup: Converted '{corpsePlayer.Profile.Nickname}' to standard Flyye MBSS Backpack (Physics Frozen + 0 Draw Calls). Loot remains interactive.");

@@ -117,11 +117,24 @@ public class LockPickingGame : MonoBehaviour
     {
         _disabled = false;
 
+        // ref: AUD-01-28 — reasserção de cursor/input movida de Update() (rodava todo quadro sem
+        // necessidade aparente) pra cá, que já faz setup equivalente. Se o cursor/input "vazar" de
+        // volta ao padrão do jogo durante o minigame, reverter e documentar a reasserção contínua
+        // como intencional (ver 004-...-02-spec-tech.md §1.11 — validado em jogo antes de fechar).
+        CursorSettings.SetCursor(ECursorType.Idle);
+        Cursor.lockState = CursorLockMode.None;
+
+        if (GamePlayerOwner.MyPlayer is not null)
+        {
+            GamePlayerOwner.IgnoreInputWithKeepResetLook = true;
+            GamePlayerOwner.IgnoreInputInNPCDialog = true;
+        }
+
         if (Player is null || !Player.IsYourPlayer)
         {
             return;
         }
-        
+
         Player.MovementContext.ToggleBlockInputPlayerRotation(true);
         Player.CurrentManagedState.ChangePose(-1f);
     }
@@ -129,25 +142,29 @@ public class LockPickingGame : MonoBehaviour
     public void OnDisable()
     {
         _disabled = true;
-        
+
+        // ref: AUD-01-23 — retinha LockPickActionHandler/GamePlayerOwner/WorldInteractiveObject da
+        // raid anterior até a próxima chamada de Activate() sobrescrever.
+        _onUnlocked = null;
+
         if (Player is null || !Player.IsYourPlayer)
         {
             return;
         }
-        
+
         Player.MovementContext.ToggleBlockInputPlayerRotation(false);
         Player.CurrentManagedState.ChangePose(1f);
-        
+
         CursorSettings.SetCursor(ECursorType.Invisible);
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-            
+
         if (GamePlayerOwner.MyPlayer is not null)
         {
             GamePlayerOwner.IgnoreInputWithKeepResetLook = false;
             GamePlayerOwner.IgnoreInputInNPCDialog = false;
         }
-        
+
         Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuDropdown);
     }
 
@@ -179,18 +196,12 @@ public class LockPickingGame : MonoBehaviour
         }
 
         //AdjustPickStrengthImage();
-        
-        MoveLockPick();
-        
-        CursorSettings.SetCursor(ECursorType.Idle);
-        Cursor.lockState = CursorLockMode.None;
 
-        if (GamePlayerOwner.MyPlayer is not null)
-        {
-            GamePlayerOwner.IgnoreInputWithKeepResetLook = true;
-            GamePlayerOwner.IgnoreInputInNPCDialog = true;
-        }
-        
+        MoveLockPick();
+
+        // ref: AUD-01-28 — reasserção de cursor/input movida pra OnEnable() (rodava todo quadro aqui
+        // sem necessidade aparente enquanto o minigame está aberto).
+
         _isRotating = Input.GetKey(_rotateButton);
         
         if (_isRotating)
@@ -402,31 +413,47 @@ public class LockPickingGame : MonoBehaviour
     /// </summary>
     private void SetSweetSpotRange(int doorLevel)
     {
-        var skillMod = 1 + SkillManager.SkillManagerExtended.LockPickingForgiveness;
+        // ref: AUD-01-17 — SkillManager é [CanBeNull] por contrato de GameUtils.GetSkillManager();
+        // a property escondia isso atrás de um tipo que o compilador não força checar
+        // (<Nullable>disable</Nullable> no .csproj).
+        var skillManager = SkillManager;
+        if (skillManager == null)
+        {
+            return;
+        }
+
+        var skillMod = 1 + skillManager.SkillManagerExtended.LockPickingForgiveness;
         var doorMod = Mathf.Clamp(doorLevel / 35f, 0.05f, 1.5f);
 
 #if DEBUG
         SkillsExtendedPlugin.Log.LogDebug($"SKILL: {skillMod}");
         SkillsExtendedPlugin.Log.LogDebug($"DOOR: {doorMod}");
 #endif
-        
+
         var configVal = SkillsExtendedPlugin.SkillData.LockPicking.SweetSpotRangeBase;
-        
+
         _sweetSpotRange = Mathf.Clamp((configVal - doorMod) * skillMod, 0f, 20f);
 #if DEBUG
         SkillsExtendedPlugin.Log.LogDebug($"SWEET SPOT RANGE: {_sweetSpotRange}");
 #endif
     }
-    
+
     private void SetTimeLimit(int doorLevel)
     {
-        var skillMod = 1 + SkillManager.SkillManagerExtended.LockPickingTimeBuff;
+        // ref: AUD-01-17 — mesmo guard.
+        var skillManager = SkillManager;
+        if (skillManager == null)
+        {
+            return;
+        }
+
+        var skillMod = 1 + skillManager.SkillManagerExtended.LockPickingTimeBuff;
         var doorMod = Mathf.Clamp(doorLevel / 50f, 0.05f, 1f);
-        
+
         var configVal = SkillsExtendedPlugin.SkillData.LockPicking.PickStrengthBase;
-        
+
         var originalLimit = Mathf.Clamp((configVal - doorMod) * skillMod, 1f, 20f);
-        
+
         _wiggleTimeLimit = MathUtils.RandomizePercentage(originalLimit, 0.10f);
     }
 

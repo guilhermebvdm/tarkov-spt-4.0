@@ -1,0 +1,890 @@
+﻿using Comfort.Common;
+using EFT;
+using EFT.Interactive;
+using EFT.InventoryLogic;
+using Fika.Core.Main.ClientClasses;
+using Fika.Core.Main.Factories;
+using Fika.Core.Main.GameMode;
+using Fika.Core.Main.HostClasses;
+using Fika.Core.Main.ObservedClasses;
+using Fika.Core.Main.Players;
+using Fika.Core.Main.Utils;
+using Fika.Core.Networking.Packets.Backend;
+using Fika.Core.Networking.Packets.Communication;
+#if DEBUG
+using Fika.Core.Networking.Packets.Debug;
+using EFT.UI;
+using static Fika.Core.Networking.Packets.Debug.CommandPacket;
+using Fika.Core.ConsoleCommands;
+#endif
+using Fika.Core.Networking.Packets.FirearmController;
+using Fika.Core.Networking.Packets.Generic;
+using Fika.Core.Networking.Packets.Generic.SubPackets;
+using Fika.Core.Networking.Packets.Player;
+using Fika.Core.Networking.Packets.Player.Common;
+using Fika.Core.Networking.Packets.World;
+using HarmonyLib;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using static Fika.Core.Networking.Packets.World.ReconnectPacket;
+using EFT.NetworkPackets;
+
+namespace Fika.Core.Networking;
+
+public sealed partial class FikaServer
+{
+    private void OnQuestSyncPacketReceived(QuestSyncPacket packet, NetPeer peer)
+    {
+        if (!CoopHandler.Players.TryGetValue(packet.NetId, out var player))
+        {
+            _logger.LogError($"Could not find player with id [{packet.NetId}] when trying to sync quest packet");
+            return;
+        }
+
+        if (player.AbstractQuestControllerClass is ObservedQuestController observedQuestController)
+        {
+            observedQuestController.UpdateQuestStatusForClient(packet);
+            return;
+        }
+
+        _logger.LogError($"QuestController on player [{player.Profile.GetCorrectedNickname()}] was not of type observed, was [{player.AbstractQuestControllerClass.GetType().Name}]");
+    }
+
+    private void OnKnifeHitPacketReceived(KnifeHitPacket packet, NetPeer _)
+    {
+        var gameWorld = Singleton<GameWorld>.Instance;
+        if (gameWorld == null)
+        {
+            FikaGlobals.LogError("GameWorld was null when receiving KnifeHitPacket");
+            return;
+        }
+
+        if (gameWorld is not FikaHostGameWorld hostGameWorld)
+        {
+            FikaGlobals.LogError($"GameWorld not a FikaHostGameWorld, was: {gameWorld.GetType().Name}");
+            return;
+        }
+
+        switch (packet.HitType)
+        {
+            case EHitType.Window:
+                {
+                    if (!hostGameWorld.Windows.TryGetByKey(packet.HitId, out var window))
+                    {
+                        FikaGlobals.LogError($"Could not find window with NetId {packet.HitId}");
+                        return;
+                    }
+
+                    var damageInfo = new DamageInfoStruct
+                    {
+                        HitPoint = packet.HitPoint
+                    };
+                    window.MakeHit(in damageInfo);
+                }
+                break;
+            case EHitType.Btr:
+                {
+                    if (!CoopHandler.Players.TryGetValue(packet.NetId, out var player))
+                    {
+                        FikaGlobals.LogError($"Could not find player with NetId {packet.NetId}");
+                        return;
+                    }
+
+                    if (hostGameWorld.BtrController != null)
+                    {
+                        hostGameWorld.BtrController.HitFromPlayer(player);
+                    }
+                }
+                break;
+            case EHitType.Default:
+            case EHitType.Lamp:
+                {
+                    if (!hostGameWorld.TurnablesDict.TryGetValue(packet.HitId, out var turnable))
+                    {
+                        FikaGlobals.LogError($"Could not find turnable with NetId {packet.HitId}");
+                        return;
+                    }
+
+                    turnable.method_0(new DamageInfoStruct
+                    {
+                        HitPoint = packet.HitPoint
+                    });
+                }
+                break;
+            case EHitType.Tripwire:
+            case EHitType.Event:
+                break;
+        }
+    }
+
+    private void OnProceedRequestPacketReceived(ProceedRequestPacket packet, NetPeer peer)
+    {
+        var response = new ProceedResponsePacket
+        {
+            CallbackId = packet.CallbackId
+        };
+
+        if (!CoopHandler.Players.TryGetValue(packet.NetId, out var player))
+        {
+            response.Error = $"Could not find player with id {packet.NetId}";
+            SendDataToPeer(ref response, DeliveryMethod.ReliableOrdered, peer);
+            return;
+        }
+
+        if (!TryFindItemForProceedPacket(packet.ItemId, out var item))
+        {
+            response.Error = $"Could not find item with id {packet.ItemId}";
+            SendDataToPeer(ref response, DeliveryMethod.ReliableOrdered, peer);
+            return;
+        }
+
+        if (item.CurrentAddress != null)
+        {
+            var result = item.CheckAction(null);
+            if (result.Failed)
+            {
+                response.Error = $"Player cannot equip item with id {packet.ItemId}: {result.Error}";
+                SendDataToPeer(ref response, DeliveryMethod.ReliableOrdered, peer);
+                return;
+            }
+        }
+
+        SendDataToPeer(ref response, DeliveryMethod.ReliableOrdered, peer);
+    }
+
+    /// <summary>
+    /// Attempts to find the item with the given id
+    /// </summary>
+    /// <param name="itemId">The id to search for</param>
+    /// <param name="item">The item if found</param>
+    /// <returns><see langword="true"/> if found; otherwise <see langword="false"/></returns>
+    private bool TryFindItemForProceedPacket(MongoID itemId, out Item item)
+    {
+        var gameWorld = Singleton<GameWorld>.Instance;
+
+        var search = gameWorld.FindItemWithWorldData(itemId);
+        if (search.Succeeded)
+        {
+            item = search.Value.item;
+            return true;
+        }
+
+        var stationary = gameWorld.FindStationaryWeaponByItemId(itemId);
+        if (stationary != null)
+        {
+            item = stationary.Item;
+            return true;
+        }
+
+        item = null;
+        return false;
+    }
+
+    private void OnClearSnapshotterPacketReceived(ClearSnapshotterPacket packet, NetPeer _)
+    {
+        if (_coopHandler.Players.TryGetValue(packet.NetId, out var player) && player is ObservedPlayer observedPlayer)
+        {
+            observedPlayer.HealthBar.RemoveAllActiveEffects();
+            observedPlayer.Snapshotter.Clear();
+            return;
+        }
+
+        _logger.LogError($"Could not find player {packet.NetId} to reset snapshotter");
+    }
+
+    private void OnLoadingScreenPlayersPacketReceived(LoadingScreenPlayersPacket packet, NetPeer _)
+    {
+        if (LoadingScreenUI.Instance != null)
+        {
+            for (var i = 0; i < packet.NetIds.Length; i++)
+            {
+                LoadingScreenUI.Instance.AddPlayer(packet.NetIds[i], packet.Nicknames[i]);
+            }
+        }
+
+        var newPacket = LoadingScreenUI.Instance.GetPlayersPacket();
+        SendData(ref newPacket, DeliveryMethod.ReliableUnordered);
+    }
+
+    private void OnLoadingScreenPacketReceived(LoadingScreenPacket packet, NetPeer peer)
+    {
+        if (LoadingScreenUI.Instance != null)
+        {
+            LoadingScreenUI.Instance.SetProgress(packet.NetId, packet.Progress);
+        }
+
+        SendData(ref packet, DeliveryMethod.Unreliable, peer);
+    }
+
+#if DEBUG
+    private void OnCommandPacketReceived(CommandPacket packet, NetPeer peer)
+    {
+        switch (packet.CommandType)
+        {
+            case ECommandType.SpawnAI:
+                FikaCommands.SpawnNPC(packet.SpawnType, packet.SpawnAmount);
+                break;
+            case ECommandType.DespawnAI:
+                FikaCommands.DespawnAllAI();
+                break;
+            case ECommandType.Bring:
+                FikaCommands.BringReplicated(packet.NetId);
+                break;
+            case ECommandType.SpawnAirdrop:
+                FikaCommands.SpawnAirdrop();
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void OnSpawnItemPacketReceived(SpawnItemPacket packet, NetPeer peer)
+    {
+        SendData(ref packet, DeliveryMethod.ReliableOrdered, peer);
+
+        if (_coopHandler.Players.TryGetValue(packet.NetId, out var playerToApply))
+        {
+            FikaGlobals.SpawnItemInWorld(packet.Item, playerToApply);
+        }
+    }
+#endif
+
+    private void OnEventControllerInteractPacketReceived(EventControllerInteractPacket packet, NetPeer peer)
+    {
+        var gameWorld = Singleton<GameWorld>.Instance;
+        if (_coopHandler.Players.TryGetValue(packet.NetId, out var player))
+        {
+            if (gameWorld.RunddansController is HostRunddansController controller)
+            {
+                controller.ObservedInteractWithEventObject(player, packet.Data, peer);
+                return;
+            }
+
+            _logger.LogError("Could not find the RunddansController when player interacted");
+        }
+    }
+
+    private void OnInraidQuestPacketReceived(InRaidQuestPacket packet, NetPeer peer)
+    {
+        if (_coopHandler.Players.TryGetValue(packet.NetId, out var player))
+        {
+            if (player.AbstractQuestControllerClass is ObservedQuestController controller)
+            {
+                controller.HandleInraidQuestPacket(packet);
+            }
+        }
+    }
+
+    private void OnNetworkSettingsPacketReceived(NetworkSettingsPacket packet, NetPeer peer)
+    {
+#if DEBUG
+        _logger.LogInfo($"Received connection from {packet.ProfileId}");
+#endif
+        if (!_cachedConnections.TryGetValue(packet.ProfileId, out var netId))
+        {
+            netId = PopNetId();
+            _cachedConnections.Add(packet.ProfileId, netId);
+        }
+
+        NetworkSettingsPacket response = new()
+        {
+            SendRate = _sendRate,
+            NetId = netId,
+            AllowVOIP = AllowVOIP,
+            StrictSync = StrictInventorySync
+        };
+        SendDataToPeer(ref response, DeliveryMethod.ReliableOrdered, peer);
+    }
+
+    private void OnWorldPacketReceived(WorldPacket packet, NetPeer peer)
+    {
+        var gameWorld = Singleton<GameWorld>.Instance;
+        if (gameWorld == null)
+        {
+            _logger.LogError("OnNewWorldPacketReceived: GameWorld was null!");
+            return;
+        }
+
+        FikaHostWorld.LootSyncPackets.AddRange(packet.LootSyncStructs);
+
+        packet.Flush();
+    }
+
+    private void OnRequestPacketReceived(RequestPacket packet, NetPeer peer)
+    {
+        if (packet.RequestSubPacket == null)
+        {
+            _logger.LogError("OnRequestPacketReceived: RequestSubPacket was null!");
+            return;
+        }
+
+        packet.RequestSubPacket.HandleRequest(peer, this);
+    }
+
+    private void OnSideEffectPacketReceived(SideEffectPacket packet, NetPeer peer)
+    {
+#if DEBUG
+        _logger.LogWarning("OnSideEffectPacketReceived: Received");
+#endif
+
+        var gameWorld = Singleton<GameWorld>.Instance;
+        if (gameWorld == null)
+        {
+            _logger.LogError("OnSideEffectPacketReceived: GameWorld was null!");
+            return;
+        }
+
+        var gstruct2 = gameWorld.FindItemById(packet.ItemId);
+        if (gstruct2.Failed)
+        {
+            _logger.LogError("OnSideEffectPacketReceived: " + gstruct2.Error);
+            return;
+        }
+        var item = gstruct2.Value;
+        if (item.TryGetItemComponent(out SideEffectComponent sideEffectComponent))
+        {
+#if DEBUG
+            _logger.LogInfo("Setting value to: " + packet.Value + ", original: " + sideEffectComponent.Value);
+#endif
+            sideEffectComponent.Value = packet.Value;
+            item.RaiseRefreshEvent(false, false);
+            return;
+        }
+        _logger.LogError("OnSideEffectPacketReceived: SideEffectComponent was not found!");
+    }
+
+    private void OnLoadingProfilePacketReceived(LoadingProfilePacket packet, NetPeer peer)
+    {
+        if (packet.Profiles == null)
+        {
+            _logger.LogError("OnLoadingProfilePacketReceived: Profiles was null!");
+            return;
+        }
+
+        (var profile, var isLeader) = packet.Profiles.First();
+        if (!_visualProfiles.Any(x => x.Key.ProfileId == profile.ProfileId))
+        {
+            _visualProfiles.Add(profile, _visualProfiles.Count == 0 || isLeader);
+        }
+        FikaBackendUtils.AddPartyMembers(_visualProfiles);
+        packet.Profiles = _visualProfiles;
+        SendData(ref packet, DeliveryMethod.ReliableOrdered);
+
+        var clientConnected = ClientConnected.FromValue(profile.Info.MainProfileNickname);
+        if (!FikaBackendUtils.IsHeadless)
+        {
+            clientConnected.Execute();
+        }
+
+        SendGenericPacket(EGenericSubPacketType.ClientConnected,
+            clientConnected, true);
+
+        peer.Tag = profile.Info.MainProfileNickname;
+    }
+
+    private void OnPingPacketReceived(PingPacket packet, NetPeer peer)
+    {
+        if (FikaPlugin.Instance.Settings.UsePingSystem.Value && !FikaBackendUtils.IsHeadless)
+        {
+            PingFactory.ReceivePing(packet.PingLocation, packet.PingType, packet.PingColor, packet.Nickname, packet.LocaleId);
+        }
+    }
+
+    private void OnBotStatePacketReceived(BotStatePacket packet, NetPeer peer)
+    {
+        switch (packet.Type)
+        {
+            case BotStatePacket.EStateType.LoadBot:
+                {
+                    var fikaGame = Singleton<IFikaGame>.Instance;
+                    if (fikaGame != null)
+                    {
+                        (fikaGame.GameController as HostGameController).IncreaseLoadedPlayers(packet.NetId);
+                    }
+                }
+                break;
+            case BotStatePacket.EStateType.DisposeBot:
+            case BotStatePacket.EStateType.EnableBot:
+            case BotStatePacket.EStateType.DisableBot:
+            default:
+                break;
+        }
+    }
+
+    private void OnTransitInteractPacketReceived(TransitInteractPacket packet, NetPeer peer)
+    {
+        if (_coopHandler.Players.TryGetValue(packet.NetId, out var playerToApply))
+        {
+            var transitController = Singleton<GameWorld>.Instance.TransitController;
+            if (transitController != null)
+            {
+                transitController.InteractWithTransit(playerToApply, packet.Data);
+            }
+        }
+    }
+
+    private void OnSyncTransitControllersPacketReceived(SyncTransitControllersPacket packet, NetPeer peer)
+    {
+        var transitController = Singleton<GameWorld>.Instance.TransitController;
+        if (transitController != null)
+        {
+            transitController.summonedTransits[packet.ProfileId] = new(packet.RaidId, packet.Count, packet.Maps, packet.Events);
+            return;
+        }
+
+        _logger.LogError("OnSyncTransitControllersPacketReceived: TransitController was null!");
+    }
+
+    private void OnBTRInteractionPacketReceived(BTRInteractionPacket packet, NetPeer peer)
+    {
+        if (_coopHandler.Players.TryGetValue(packet.NetId, out var playerToApply))
+        {
+            var gameWorld = Singleton<GameWorld>.Instance;
+            if (gameWorld.BtrController != null && gameWorld.BtrController.BtrVehicle != null)
+            {
+                var status = gameWorld.BtrController.BtrVehicle.method_39(playerToApply, packet.Data);
+                BTRInteractionPacket response = new(packet.NetId)
+                {
+                    IsResponse = true,
+                    Status = status,
+                    Data = packet.Data
+                };
+
+                SendData(ref response, DeliveryMethod.ReliableOrdered);
+            }
+        }
+    }
+
+    private void OnResyncInventoryIdPacketReceived(ResyncInventoryIdPacket packet, NetPeer peer)
+    {
+        if (_coopHandler.Players.TryGetValue(packet.NetId, out var playerToApply))
+        {
+            if (playerToApply is ObservedPlayer observedPlayer)
+            {
+                if (observedPlayer.InventoryController is ObservedInventoryController observedController)
+                {
+                    observedController.SetNewID(packet.MongoId);
+                }
+            }
+        }
+    }
+
+    private void OnReconnectPacketReceived(ReconnectPacket packet, NetPeer peer)
+    {
+        if (packet.IsRequest)
+        {
+            if (packet.InitialRequest)
+            {
+                NotificationManagerClass.DisplayMessageNotification(LocaleUtils.RECONNECT_REQUESTED.Localized(),
+                    iconType: EFT.Communications.ENotificationIconType.Alert);
+                foreach (var player in _coopHandler.HumanPlayers)
+                {
+                    if (player.ProfileId == packet.ProfileId && player is ObservedPlayer observedPlayer)
+                    {
+#if DEBUG
+                        _logger.LogInfo($"Found player to send back: {observedPlayer.Profile.GetCorrectedNickname()}");
+#endif
+                        ReconnectPacket ownCharacterPacket = new()
+                        {
+                            Type = EReconnectDataType.OwnCharacter,
+                            Profile = observedPlayer.Profile,
+                            ProfileHealthClass = observedPlayer.NetworkHealthController.Store(),
+                            PlayerPosition = observedPlayer.Position,
+                            PlayerRotation = observedPlayer.Rotation
+                        };
+
+                        SendDataToPeer(ref ownCharacterPacket, DeliveryMethod.ReliableOrdered, peer);
+
+                        break;
+                    }
+                }
+
+                return;
+            }
+
+            var gameWorld = Singleton<GameWorld>.Instance;
+            var worldTraverse = Traverse.Create(gameWorld.World_0);
+
+            var grenades = gameWorld.Grenades.GetValuesEnumerator();
+            List<SmokeGrenadeDataPacketStruct> smokeData = [];
+            foreach (var item in grenades)
+            {
+                if (item is SmokeGrenade smokeGrenade)
+                {
+                    smokeData.Add(smokeGrenade.NetworkData);
+                }
+            }
+
+            if (smokeData.Count > 0)
+            {
+                ReconnectPacket throwablePacket = new()
+                {
+                    Type = EReconnectDataType.Throwable,
+                    ThrowableData = smokeData
+                };
+
+                SendDataToPeer(ref throwablePacket, DeliveryMethod.ReliableOrdered, peer);
+            }
+
+            List<WorldInteractiveObject.WorldInteractiveDataPacketStruct> interactivesData = [];
+            foreach (var interactiveObject in worldTraverse.Field<WorldInteractiveObject[]>("worldInteractiveObject_0").Value)
+            {
+                if ((interactiveObject.DoorState != interactiveObject.InitialDoorState
+                    && interactiveObject.DoorState != EDoorState.Interacting)
+                    || (interactiveObject is Door door && door.IsBroken))
+                {
+                    interactivesData.Add(interactiveObject.GetStatusInfo(true));
+                }
+            }
+
+            if (interactivesData.Count > 0)
+            {
+                ReconnectPacket interactivePacket = new()
+                {
+                    Type = EReconnectDataType.Interactives,
+                    InteractivesData = interactivesData
+                };
+
+                SendDataToPeer(ref interactivePacket, DeliveryMethod.ReliableOrdered, peer);
+            }
+
+            var lampControllers = LocationScene.GetAllObjects<LampController>(false);
+            Dictionary<int, byte> lampStates = [];
+            foreach (var controller in lampControllers)
+            {
+                lampStates.Add(controller.NetId, (byte)controller.LampState);
+            }
+
+            if (lampStates.Count > 0)
+            {
+                ReconnectPacket lampPacket = new()
+                {
+                    Type = EReconnectDataType.LampControllers,
+                    LampStates = lampStates
+                };
+
+                SendDataToPeer(ref lampPacket, DeliveryMethod.ReliableOrdered, peer);
+            }
+
+            var windows = gameWorld.Windows.GetValuesEnumerator();
+            Dictionary<int, Vector3> windowData = [];
+            foreach (var window in windows)
+            {
+                if (window.AvailableToSync && window.IsDamaged)
+                {
+                    windowData.Add(window.NetId, window.FirstHitPosition.Value);
+                }
+            }
+
+            if (windowData.Count > 0)
+            {
+                ReconnectPacket windowPacket = new()
+                {
+                    Type = EReconnectDataType.Windows,
+                    WindowBreakerStates = windowData
+                };
+
+                SendDataToPeer(ref windowPacket, DeliveryMethod.ReliableOrdered, peer);
+            }
+
+            foreach (var player in _coopHandler.Players.Values)
+            {
+                if (player.ProfileId == packet.ProfileId)
+                {
+                    continue;
+                }
+
+                var characterPacket = SendCharacterPacket.FromValue(new()
+                {
+                    Profile = player.Profile,
+                    ControllerId = player.InventoryController.CurrentId,
+                    FirstOperationId = player.InventoryController.NextOperationId
+                },
+                player.HealthController.IsAlive, player.IsAI, player.Position, player.NetId);
+
+                if (player.ActiveHealthController != null)
+                {
+                    characterPacket.PlayerInfoPacket.HealthByteArray = player.ActiveHealthController.SerializeState();
+                }
+                else if (player is ObservedPlayer observedPlayer)
+                {
+                    characterPacket.PlayerInfoPacket.HealthByteArray = observedPlayer.NetworkHealthController.Store().SerializeHealthInfo();
+                }
+
+                if (player.HandsController != null)
+                {
+                    characterPacket.PlayerInfoPacket.ControllerType = HandsControllerToEnumClass.FromController(player.HandsController);
+                    characterPacket.PlayerInfoPacket.ItemId = player.HandsController.Item.Id;
+                    characterPacket.PlayerInfoPacket.IsStationary = player.MovementContext.IsStationaryWeaponInHands;
+                }
+
+                SendGenericPacketToPeer(EGenericSubPacketType.SendCharacter, characterPacket, peer);
+            }
+
+            StashesPacket stashesPacket = new();
+            if (gameWorld.BtrController != null)
+            {
+                stashesPacket.HasBTR = true;
+                var length = gameWorld.BtrController.TransferItemsController.List_0.Count;
+                stashesPacket.BTRStashes = new StashItemClass[length];
+                for (var i = 0; i < length; i++)
+                {
+                    stashesPacket.BTRStashes[i] = gameWorld.BtrController.TransferItemsController.List_0[i];
+                }
+            }
+
+            if (gameWorld.TransitController != null)
+            {
+                stashesPacket.HasTransit = true;
+                var length = gameWorld.TransitController.TransferItemsController.List_0.Count;
+                stashesPacket.TransitStashes = new StashItemClass[length];
+                for (var i = 0; i < length; i++)
+                {
+                    stashesPacket.TransitStashes[i] = gameWorld.TransitController.TransferItemsController.List_0[i];
+                }
+            }
+
+            SendDataToPeer(ref stashesPacket, DeliveryMethod.ReliableOrdered, peer);
+
+            foreach (var player in _coopHandler.HumanPlayers)
+            {
+                if (player.ProfileId == packet.ProfileId && player is ObservedPlayer observedPlayer && observedPlayer.AbstractQuestControllerClass is ObservedQuestController questController)
+                {
+                    if (questController.TryGetReconnectQuestSyncPackets(out var packets))
+                    {
+                        ReconnectPacket questSyncPacket = new()
+                        {
+                            Type = EReconnectDataType.Quests,
+                            QuestSyncPackets = packets
+                        };
+
+#if DEBUG
+                        _logger.LogInfo($"Sending {packets.Count} quest sync packets back to reconnecting client {observedPlayer.Profile.GetCorrectedNickname()}");
+#endif
+
+                        SendDataToPeer(ref questSyncPacket, DeliveryMethod.ReliableOrdered, peer);
+                    }
+
+                    break;
+                }
+            }
+
+            ReconnectPacket finishPacket = new()
+            {
+                Type = EReconnectDataType.Finished
+            };
+
+            SendDataToPeer(ref finishPacket, DeliveryMethod.ReliableOrdered, peer);
+        }
+    }
+
+    private void OnWorldLootPacketReceived(WorldLootPacket packet, NetPeer peer)
+    {
+        var fikaGame = Singleton<IFikaGame>.Instance;
+        if (fikaGame != null)
+        {
+            WorldLootPacket response = new()
+            {
+                Data = (fikaGame.GameController as HostGameController).GetHostLootItems()
+            };
+
+            SendDataToPeer(ref response, DeliveryMethod.ReliableOrdered, peer);
+        }
+    }
+
+    private void OnInteractableInitPacketReceived(InteractableInitPacket packet, NetPeer peer)
+    {
+        if (packet.IsRequest)
+        {
+            if (Singleton<GameWorld>.Instantiated)
+            {
+                var world = Singleton<GameWorld>.Instance.World_0;
+                if (world.Interactables != null)
+                {
+                    InteractableInitPacket response = new(false)
+                    {
+                        Interactables = (Dictionary<string, int>)world.Interactables
+                    };
+
+                    SendDataToPeer(ref response, DeliveryMethod.ReliableOrdered, peer);
+                }
+            }
+        }
+    }
+
+    private void OnQuestDropItemPacketReceived(QuestDropItemPacket packet, NetPeer peer)
+    {
+        if (_hostPlayer == null)
+        {
+            return;
+        }
+
+        if (_hostPlayer.HealthController.IsAlive)
+        {
+            if (_hostPlayer.AbstractQuestControllerClass is ClientSharedQuestController sharedQuestController)
+            {
+                sharedQuestController.ReceiveQuestDropItemPacket(packet);
+            }
+        }
+    }
+
+    private void OnQuestItemPacketReceived(QuestItemPacket packet, NetPeer peer)
+    {
+        if (_hostPlayer == null)
+        {
+            return;
+        }
+
+        if (_hostPlayer.HealthController.IsAlive)
+        {
+            if (_hostPlayer.AbstractQuestControllerClass is ClientSharedQuestController sharedQuestController)
+            {
+                sharedQuestController.ReceiveQuestItemPacket(packet);
+            }
+        }
+    }
+
+    private void OnQuestConditionPacketReceived(QuestConditionPacket packet, NetPeer peer)
+    {
+        if (_hostPlayer == null)
+        {
+            return;
+        }
+
+        if (_hostPlayer.HealthController.IsAlive)
+        {
+            if (_hostPlayer.AbstractQuestControllerClass is ClientSharedQuestController sharedQuestController)
+            {
+                sharedQuestController.ReceiveQuestPacket(packet);
+            }
+        }
+    }
+
+    private void OnTextMessagePacketReceived(TextMessagePacket packet, NetPeer peer)
+    {
+        _logger.LogInfo($"Received message from: {packet.Nickname}, Message: {packet.Message}");
+
+        if (_fikaChat != null)
+        {
+            _fikaChat.AddMessage(new(packet.Nickname, packet.Message), true);
+            _fikaChat.OpenChat(true);
+        }
+    }
+
+    private void OnGenericPacketReceived(GenericPacket packet, NetPeer peer)
+    {
+        if (packet.Type is EGenericSubPacketType.InventoryOperation)
+        {
+            OnInventoryPacketReceived((InventoryPacket)packet.SubPacket, peer);
+            return;
+        }
+        packet.Execute();
+    }
+
+    private void OnInformationPacketReceived(InformationPacket packet, NetPeer peer)
+    {
+        ReadyClients += packet.ReadyPlayers;
+
+        var gameExists = _coopHandler != null && _coopHandler.LocalGameInstance != null;
+
+        InformationPacket respondPackage = new()
+        {
+            RaidStarted = gameExists && Singleton<IFikaGame>.Instance.GameController.RaidStarted,
+            ReadyPlayers = ReadyClients,
+            HostReady = HostReady,
+            HostLoaded = RaidInitialized,
+            HostReceivedLocation = LocationReceived,
+            AmountOfPeers = _netServer.ConnectedPeersCount + 1
+        };
+
+        if (gameExists && packet.RequestStart)
+        {
+            Singleton<IFikaGame>.Instance.GameController.RaidStarted = true;
+        }
+
+        if (gameExists && HostReady)
+        {
+            respondPackage.GameTime = _gameStartTime.Value;
+            var gameTimer = _coopHandler.LocalGameInstance.GameController.GameInstance.GameTimer;
+            respondPackage.SessionTime = gameTimer.SessionTime.Value;
+            respondPackage.GameDateTime = (Singleton<IFikaGame>.Instance.GameController as HostGameController).GameDateTime;
+        }
+
+        if (packet.RemoteNetId != 0 && _coopHandler.Players.TryGetValue(packet.RemoteNetId, out var player))
+        {
+            peer.Player = player;
+        }
+
+        SendData(ref respondPackage, DeliveryMethod.ReliableOrdered);
+    }
+
+    private void OnCommonPlayerPacketReceived(CommonPlayerPacket packet, NetPeer peer)
+    {
+        if (_coopHandler.Players.TryGetValue(packet.NetId, out var playerToApply))
+        {
+            packet.Execute(playerToApply);
+        }
+    }
+
+    private void OnInventoryPacketReceived(InventoryPacket packet, NetPeer peer)
+    {
+        if (_coopHandler.Players.TryGetValue(packet.NetId, out var playerToApply))
+        {
+            try
+            {
+                if (playerToApply.InventoryController is Interface18 inventoryController)
+                {
+                    var result = inventoryController.CreateOperationFromDescriptor(packet.Descriptor);
+#if DEBUG
+                    if (result.Succeeded)
+                    {
+                        ConsoleScreen.Log($"Received InvOperation: {result.Value.GetType().Name}, Id: {result.Value.Id}");
+                    }
+#endif
+
+                    if (result.Failed)
+                    {
+                        _logger.LogError($"ItemControllerExecutePacket::Operation conversion failed: {result.Error}");
+                        SendGenericPacketToPeer(EGenericSubPacketType.OperationCallback,
+                            OperationCallbackPacket.FromValue(packet.NetId, packet.CallbackId, EOperationStatus.Failed, result.Error.ToString()), peer);
+
+                        ResyncInventoryIdPacket resyncPacket = new(playerToApply.NetId);
+                        SendDataToPeer(ref resyncPacket, DeliveryMethod.ReliableOrdered, peer);
+                        return;
+                    }
+
+                    var handler = _inventoryOperationHandlerPool.Get();
+                    handler.Set(result, packet.CallbackId, packet.NetId, peer, this);
+                    SendGenericPacketToPeer(EGenericSubPacketType.OperationCallback,
+                            OperationCallbackPacket.FromValue(packet.NetId, packet.CallbackId, EOperationStatus.Started), peer);
+
+                    SendGenericPacket(EGenericSubPacketType.InventoryOperation, packet,
+                        true, peer);
+                    handler.OperationResult.Value.method_1(handler.HandleResultDelegate);
+                }
+                else
+                {
+                    throw new InvalidTypeException($"Inventory controller was not of type {nameof(Interface18)}!");
+                }
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError($"ItemControllerExecutePacket::Exception thrown: {exception}");
+                SendGenericPacketToPeer(EGenericSubPacketType.OperationCallback,
+                            OperationCallbackPacket.FromValue(packet.NetId, packet.CallbackId, EOperationStatus.Failed, exception.Message), peer);
+
+                ResyncInventoryIdPacket resyncPacket = new(playerToApply.NetId);
+                SendDataToPeer(ref resyncPacket, DeliveryMethod.ReliableOrdered, peer);
+            }
+        }
+    }
+
+    private void OnWeaponPacketReceived(WeaponPacket packet, NetPeer peer)
+    {
+        if (_coopHandler.Players.TryGetValue(packet.NetId, out var playerToApply))
+        {
+            packet.Execute(playerToApply);
+        }
+    }
+}

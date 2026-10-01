@@ -190,7 +190,7 @@ internal class MedsOperationScopePatch : ModulePatch
 
         try
         {
-            if (!SkillMultipliers.IsLocalClass("Combat Medic"))
+            if (!SkillMultipliers.IsLocalClass(EClassId.CombatMedic))
             {
                 return;
             }

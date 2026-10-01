@@ -6,8 +6,13 @@ Custom launcher for Escape From Tarkov to start the game in offline mode
 ------------------ | --------------------------------------------
 SPT.Build          | Build script
 SPT.ByteBanger     | Assembly-CSharp.dll patcher
-SPT.Launcher       | Launcher frontend
+SPT.Launcher       | Launcher frontend (Avalonia UI .NET 9)
 SPT.Launcher.Base  | Launcher backend
+
+## Documentação Técnica
+
+A documentação arquitetural e funcional completa do Launcher está disponível em:
+- 📖 [Documentação Modular do Launcher](./docs/README.md)
 
 ## Privacy
 SPT is an open source project. Your commit credentials as author of a commit will be visible by anyone. Please make sure you understand this before submitting a PR.

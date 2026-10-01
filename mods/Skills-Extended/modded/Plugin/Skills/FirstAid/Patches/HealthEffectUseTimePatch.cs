@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using EFT;
 using EFT.InventoryLogic;
 using HarmonyLib;
@@ -21,7 +21,7 @@ internal class HealthEffectUseTimePatch : ModulePatch
     {
         var firstAid = SkillsExtendedPlugin.SkillData.FirstAid;
 
-        if (!firstAid.Enabled)
+        if (!firstAid.Enabled || SkillsExtendedInfo.IsFikaHeadless)
         {
             return;
         }
@@ -29,7 +29,6 @@ internal class HealthEffectUseTimePatch : ModulePatch
         var skillManager = GameUtils.GetSkillManager();
         if (skillManager == null)
         {
-            Logger.LogError("Skill Manager is null");
             return;
         }
         
@@ -49,7 +48,7 @@ internal class SpawnPatch : ModulePatch
     {
         var firstAid = SkillsExtendedPlugin.SkillData.FirstAid;
 
-        if (!firstAid.Enabled)
+        if (!firstAid.Enabled || SkillsExtendedInfo.IsFikaHeadless)
         {
             return;
         }
@@ -57,7 +56,6 @@ internal class SpawnPatch : ModulePatch
         var skillManager = GameUtils.GetSkillManager();
         if (skillManager == null)
         {
-            Logger.LogError("Skill Manager is null");
             return;
         }
             

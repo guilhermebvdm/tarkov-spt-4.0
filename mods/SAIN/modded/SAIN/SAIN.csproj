@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <LangVersion>latest</LangVersion>
@@ -6,6 +6,7 @@
     <Nullable>disable</Nullable>
     <RootNamespace>SAIN</RootNamespace>
     <AssemblyName>SAIN</AssemblyName>
+    <Version>4.5.1</Version>
     <ReleaseOutputDir>..\Build\BepInEx\plugins\SAIN\</ReleaseOutputDir>
   </PropertyGroup>
 

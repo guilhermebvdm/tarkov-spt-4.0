@@ -18,6 +18,7 @@ public class GrenadeDeadBodiesPatch : ModulePatch
 	private static void Postfix(IExplosiveItem grenadeItem, Vector3 grenadePosition)
 	{
 		if (grenadeItem == null || VisceralEntry.Instance == null) return;
+		if (!VisceralEntry.Instance.VisceralCombatEnabled.Value) return; // ref: item 005 (§5.5)
 		float maxDist = grenadeItem.MaxExplosionDistance;
 
 		Collider[] colliders = Physics.OverlapSphere(grenadePosition, maxDist, LayerMasksDataAbstractClass.HitMask);

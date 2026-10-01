@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <Version>1.0.2</Version>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <AssemblyName>TRLWeatherSyncSeasonCycle</AssemblyName>
+        <RootNamespace>TrlWeatherSync.SeasonCycle</RootNamespace>
+        <OutputType>Library</OutputType>
+        <LangVersion>latest</LangVersion>
+    </PropertyGroup>
+
+    <!--
+      Nenhum target de pós-build copia o .dll pra SPT/user/mods/ automaticamente — decisão permanente do
+      usuário (ver mods/TRL-WeatherSync/backlog/002-.../002-...-02-spec-tech.md §7). Build e cópia são
+      manuais: `dotnet build` gera o .dll em bin/Release/net9.0/, e o usuário copia pra pasta real do
+      servidor SPT quando quiser, do jeito que já faz com o client. NÃO replicar o padrão
+      "CopyToServer"/"PostBuildEvent" usado em mods/Skills-Extended/modded/Server/Server.csproj.
+    -->
+
+    <ItemGroup>
+      <PackageReference Include="SPTarkov.Reflection" Version="4.0.2" />
+      <PackageReference Include="SPTarkov.Server.Core" Version="4.0.2" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="Config\**\*.*" CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+
+</Project>

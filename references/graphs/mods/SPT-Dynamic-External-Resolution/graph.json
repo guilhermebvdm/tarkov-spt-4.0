@@ -1,0 +1,2699 @@
+{
+  "directed": false,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {
+      "id": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches",
+      "label": "DynamicExternalResolutionPatches",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "DynamicExternalResolutionPatches",
+      "file_type": "code",
+      "metadata": {
+        "namespace": "DynamicExternalResolution",
+        "scope_chain": [
+          "s354"
+        ]
+      },
+      "norm_label": "dynamicexternalresolutionpatches",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L62"
+    },
+    {
+      "id": "dynamicexternalresolution_dynamicexternalresolution_dynamicexternalresolution",
+      "label": "DynamicExternalResolution",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "DynamicExternalResolution",
+      "file_type": "code",
+      "metadata": {
+        "namespace": "DynamicExternalResolution",
+        "scope_chain": [
+          "s124"
+        ]
+      },
+      "norm_label": "dynamicexternalresolution",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolution.cs",
+      "source_location": "L9"
+    },
+    {
+      "id": "dynamicexternalresolutionpatches_dynamicexternalresolution_clientfirearmcontrollerchangeaimingmodepath",
+      "label": "ClientFirearmControllerChangeAimingModePath",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "DynamicExternalResolution",
+      "file_type": "code",
+      "metadata": {
+        "is_nested_type": true,
+        "namespace": "DynamicExternalResolution",
+        "scope_chain": [
+          "s354"
+        ]
+      },
+      "norm_label": "clientfirearmcontrollerchangeaimingmodepath",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L292"
+    },
+    {
+      "id": "dynamicexternalresolutionpatches_dynamicexternalresolution_opticsightondisablepath",
+      "label": "OpticSightOnDisablePath",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "DynamicExternalResolution",
+      "file_type": "code",
+      "metadata": {
+        "is_nested_type": true,
+        "namespace": "DynamicExternalResolution",
+        "scope_chain": [
+          "s354"
+        ]
+      },
+      "norm_label": "opticsightondisablepath",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L273"
+    },
+    {
+      "id": "dynamicexternalresolutionpatches_dynamicexternalresolution_opticsightonenablepath",
+      "label": "OpticSightOnEnablePath",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "DynamicExternalResolution",
+      "file_type": "code",
+      "metadata": {
+        "is_nested_type": true,
+        "namespace": "DynamicExternalResolution",
+        "scope_chain": [
+          "s354"
+        ]
+      },
+      "norm_label": "opticsightonenablepath",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L240"
+    },
+    {
+      "id": "dynamicexternalresolutionconfig_dynamicexternalresolution_configs_dlssmodequality",
+      "label": "DLSSModeQuality",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "DynamicExternalResolutionConfig",
+      "file_type": "code",
+      "metadata": {
+        "is_nested_type": true,
+        "namespace": "DynamicExternalResolution.Configs",
+        "scope_chain": [
+          "s109"
+        ]
+      },
+      "norm_label": "dlssmodequality",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionConfig.cs",
+      "source_location": "L10"
+    },
+    {
+      "id": "dynamicexternalresolutionconfig_dynamicexternalresolution_configs_dynamicexternalresolutionconfig",
+      "label": "DynamicExternalResolutionConfig",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "DynamicExternalResolutionConfig",
+      "file_type": "code",
+      "metadata": {
+        "namespace": "DynamicExternalResolution.Configs",
+        "scope_chain": [
+          "s109"
+        ]
+      },
+      "norm_label": "dynamicexternalresolutionconfig",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionConfig.cs",
+      "source_location": "L8"
+    },
+    {
+      "id": "dynamicexternalresolutionconfig_dynamicexternalresolution_configs_fsr2modequality",
+      "label": "FSR2ModeQuality",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "DynamicExternalResolutionConfig",
+      "file_type": "code",
+      "metadata": {
+        "is_nested_type": true,
+        "namespace": "DynamicExternalResolution.Configs",
+        "scope_chain": [
+          "s109"
+        ]
+      },
+      "norm_label": "fsr2modequality",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionConfig.cs",
+      "source_location": "L18"
+    },
+    {
+      "id": "dynamicexternalresolutionconfig_dynamicexternalresolution_configs_fsr3modequality",
+      "label": "FSR3ModeQuality",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "DynamicExternalResolutionConfig",
+      "file_type": "code",
+      "metadata": {
+        "is_nested_type": true,
+        "namespace": "DynamicExternalResolution.Configs",
+        "scope_chain": [
+          "s109"
+        ]
+      },
+      "norm_label": "fsr3modequality",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionConfig.cs",
+      "source_location": "L25"
+    },
+    {
+      "id": "dynamicexternalresolutionpatches_dynamicexternalresolution_patcher",
+      "label": "Patcher",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "PatchManager",
+      "file_type": "code",
+      "metadata": {
+        "namespace": "DynamicExternalResolution",
+        "scope_chain": [
+          "s354"
+        ]
+      },
+      "norm_label": "patcher",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L18"
+    },
+    {
+      "id": "dynamicexternalresolutionpatches_dynamicexternalresolution_patchmanager",
+      "label": "PatchManager",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "PatchManager",
+      "file_type": "code",
+      "metadata": {
+        "namespace": "DynamicExternalResolution",
+        "scope_chain": [
+          "s354"
+        ]
+      },
+      "norm_label": "patchmanager",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L31"
+    },
+    {
+      "id": "configurationmanagerattributes_configurationmanagerattributes",
+      "label": "ConfigurationManagerAttributes",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "ConfigurationManagerAttributes",
+      "file_type": "code",
+      "norm_label": "configurationmanagerattributes",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/ConfigurationManagerAttributes.cs",
+      "source_location": "L29"
+    },
+    {
+      "id": "dynamicexternalresolution_dynamicexternalresolution_dynamicexternalresolution_getcamerainstance",
+      "label": ".getCameraInstance()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "DynamicExternalResolutionPatches",
+      "file_type": "code",
+      "metadata": {
+        "namespace": "DynamicExternalResolution",
+        "scope_chain": [
+          "s124"
+        ]
+      },
+      "norm_label": ".getcamerainstance()",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolution.cs",
+      "source_location": "L25"
+    },
+    {
+      "id": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_getgamesetting",
+      "label": ".GetGameSetting()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "DynamicExternalResolutionPatches",
+      "file_type": "code",
+      "metadata": {
+        "namespace": "DynamicExternalResolution",
+        "scope_chain": [
+          "s354"
+        ],
+        "unresolved_calls": [
+          {
+            "callee": "GetValue",
+            "receiver_type": "FieldInfo",
+            "lang": "csharp",
+            "line": "L197"
+          }
+        ]
+      },
+      "norm_label": ".getgamesetting()",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L195"
+    },
+    {
+      "id": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_setantialiasing",
+      "label": ".SetAntiAliasing()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "DynamicExternalResolutionPatches",
+      "file_type": "code",
+      "metadata": {
+        "namespace": "DynamicExternalResolution",
+        "scope_chain": [
+          "s354"
+        ],
+        "unresolved_calls": [
+          {
+            "callee": "SetAntiAliasing",
+            "receiver_type": "CameraManager",
+            "lang": "csharp",
+            "line": "L217"
+          }
+        ]
+      },
+      "norm_label": ".setantialiasing()",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L211"
+    },
+    {
+      "id": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_setfsr2",
+      "label": ".SetFSR2()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "DynamicExternalResolutionPatches",
+      "file_type": "code",
+      "metadata": {
+        "namespace": "DynamicExternalResolution",
+        "scope_chain": [
+          "s354"
+        ],
+        "unresolved_calls": [
+          {
+            "callee": "SetFSR2",
+            "receiver_type": "CameraManager",
+            "lang": "csharp",
+            "line": "L227"
+          }
+        ]
+      },
+      "norm_label": ".setfsr2()",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L221"
+    },
+    {
+      "id": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_setfsr3",
+      "label": ".SetFSR3()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "DynamicExternalResolutionPatches",
+      "file_type": "code",
+      "metadata": {
+        "namespace": "DynamicExternalResolution",
+        "scope_chain": [
+          "s354"
+        ],
+        "unresolved_calls": [
+          {
+            "callee": "SetFSR3",
+            "receiver_type": "CameraManager",
+            "lang": "csharp",
+            "line": "L236"
+          }
+        ]
+      },
+      "norm_label": ".setfsr3()",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L230"
+    },
+    {
+      "id": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_setresolutionaim",
+      "label": ".SetResolutionAim()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "DynamicExternalResolutionPatches",
+      "file_type": "code",
+      "metadata": {
+        "namespace": "DynamicExternalResolution",
+        "scope_chain": [
+          "s354"
+        ],
+        "unresolved_calls": [
+          {
+            "callee": "IsDLSSSupported",
+            "receiver_type": "DLSSWrapper",
+            "lang": "csharp",
+            "line": "L114"
+          },
+          {
+            "callee": "GetValue",
+            "receiver_type": "FieldInfo",
+            "lang": "csharp",
+            "line": "L116"
+          },
+          {
+            "callee": "GetValue",
+            "receiver_type": "PropertyInfo",
+            "lang": "csharp",
+            "line": "L119"
+          }
+        ]
+      },
+      "norm_label": ".setresolutionaim()",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L112"
+    },
+    {
+      "id": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_setresolutiondefault",
+      "label": ".SetResolutionDefault()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "DynamicExternalResolutionPatches",
+      "file_type": "code",
+      "metadata": {
+        "namespace": "DynamicExternalResolution",
+        "scope_chain": [
+          "s354"
+        ],
+        "unresolved_calls": [
+          {
+            "callee": "IsDLSSSupported",
+            "receiver_type": "DLSSWrapper",
+            "lang": "csharp",
+            "line": "L161"
+          },
+          {
+            "callee": "GetValue",
+            "receiver_type": "FieldInfo",
+            "lang": "csharp",
+            "line": "L163"
+          },
+          {
+            "callee": "GetValue",
+            "receiver_type": "PropertyInfo",
+            "lang": "csharp",
+            "line": "L166"
+          }
+        ]
+      },
+      "norm_label": ".setresolutiondefault()",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L159"
+    },
+    {
+      "id": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_setsupersampling",
+      "label": ".SetSuperSampling()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "DynamicExternalResolutionPatches",
+      "file_type": "code",
+      "metadata": {
+        "namespace": "DynamicExternalResolution",
+        "scope_chain": [
+          "s354"
+        ],
+        "unresolved_calls": [
+          {
+            "callee": "Clamp",
+            "receiver_type": "Mathf",
+            "lang": "csharp",
+            "line": "L207"
+          }
+        ]
+      },
+      "norm_label": ".setsupersampling()",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L200"
+    },
+    {
+      "id": "dynamicexternalresolution_dynamicexternalresolution_dynamicexternalresolution_getplayerinstance",
+      "label": ".getPlayerInstance()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "DynamicExternalResolution",
+      "file_type": "code",
+      "metadata": {
+        "namespace": "DynamicExternalResolution",
+        "scope_chain": [
+          "s124"
+        ]
+      },
+      "norm_label": ".getplayerinstance()",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolution.cs",
+      "source_location": "L14"
+    },
+    {
+      "id": "dynamicexternalresolutionpatches_dynamicexternalresolution_clientfirearmcontrollerchangeaimingmodepath_gettargetmethod",
+      "label": ".GetTargetMethod()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "DynamicExternalResolution",
+      "file_type": "code",
+      "metadata": {
+        "namespace": "DynamicExternalResolution",
+        "scope_chain": [
+          "s354"
+        ],
+        "unresolved_calls": [
+          {
+            "callee": "Method",
+            "receiver_type": "AccessTools",
+            "lang": "csharp",
+            "line": "L296"
+          }
+        ]
+      },
+      "norm_label": ".gettargetmethod()",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L294"
+    },
+    {
+      "id": "dynamicexternalresolutionpatches_dynamicexternalresolution_clientfirearmcontrollerchangeaimingmodepath_patchpostfix",
+      "label": ".PatchPostfix()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "DynamicExternalResolution",
+      "file_type": "code",
+      "metadata": {
+        "namespace": "DynamicExternalResolution",
+        "scope_chain": [
+          "s354"
+        ]
+      },
+      "norm_label": ".patchpostfix()",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L299"
+    },
+    {
+      "id": "dynamicexternalresolutionpatches_dynamicexternalresolution_opticsightondisablepath_gettargetmethod",
+      "label": ".GetTargetMethod()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "DynamicExternalResolution",
+      "file_type": "code",
+      "metadata": {
+        "namespace": "DynamicExternalResolution",
+        "scope_chain": [
+          "s354"
+        ],
+        "unresolved_calls": [
+          {
+            "callee": "Method",
+            "receiver_type": "AccessTools",
+            "lang": "csharp",
+            "line": "L277"
+          }
+        ]
+      },
+      "norm_label": ".gettargetmethod()",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L275"
+    },
+    {
+      "id": "dynamicexternalresolutionpatches_dynamicexternalresolution_opticsightondisablepath_patchpostfix",
+      "label": ".PatchPostfix()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "DynamicExternalResolution",
+      "file_type": "code",
+      "metadata": {
+        "namespace": "DynamicExternalResolution",
+        "scope_chain": [
+          "s354"
+        ]
+      },
+      "norm_label": ".patchpostfix()",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L280"
+    },
+    {
+      "id": "dynamicexternalresolutionpatches_dynamicexternalresolution_opticsightonenablepath_gettargetmethod",
+      "label": ".GetTargetMethod()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "DynamicExternalResolution",
+      "file_type": "code",
+      "metadata": {
+        "namespace": "DynamicExternalResolution",
+        "scope_chain": [
+          "s354"
+        ],
+        "unresolved_calls": [
+          {
+            "callee": "Method",
+            "receiver_type": "AccessTools",
+            "lang": "csharp",
+            "line": "L244"
+          }
+        ]
+      },
+      "norm_label": ".gettargetmethod()",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L242"
+    },
+    {
+      "id": "dynamicexternalresolutionpatches_dynamicexternalresolution_opticsightonenablepath_patchpostfix",
+      "label": ".PatchPostfix()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "DynamicExternalResolution",
+      "file_type": "code",
+      "metadata": {
+        "namespace": "DynamicExternalResolution",
+        "scope_chain": [
+          "s354"
+        ]
+      },
+      "norm_label": ".patchpostfix()",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L247"
+    },
+    {
+      "id": "dynamicexternalresolution_dynamicexternalresolution_dynamicexternalresolution_ondestroy",
+      "label": ".OnDestroy()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "PatchManager",
+      "file_type": "code",
+      "metadata": {
+        "namespace": "DynamicExternalResolution",
+        "scope_chain": [
+          "s124"
+        ],
+        "unresolved_calls": [
+          {
+            "callee": "LogInfo",
+            "receiver_type": "Logger",
+            "lang": "csharp",
+            "line": "L40"
+          }
+        ]
+      },
+      "norm_label": ".ondestroy()",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolution.cs",
+      "source_location": "L37"
+    },
+    {
+      "id": "dynamicexternalresolutionpatches_dynamicexternalresolution_patcher_patchall",
+      "label": ".PatchAll()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "PatchManager",
+      "file_type": "code",
+      "metadata": {
+        "namespace": "DynamicExternalResolution",
+        "scope_chain": [
+          "s354"
+        ]
+      },
+      "norm_label": ".patchall()",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L20"
+    },
+    {
+      "id": "dynamicexternalresolutionpatches_dynamicexternalresolution_patcher_unpatchall",
+      "label": ".UnpatchAll()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "PatchManager",
+      "file_type": "code",
+      "metadata": {
+        "namespace": "DynamicExternalResolution",
+        "scope_chain": [
+          "s354"
+        ]
+      },
+      "norm_label": ".unpatchall()",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L25"
+    },
+    {
+      "id": "dynamicexternalresolutionpatches_dynamicexternalresolution_patchmanager_runpatches",
+      "label": ".RunPatches()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "PatchManager",
+      "file_type": "code",
+      "metadata": {
+        "namespace": "DynamicExternalResolution",
+        "scope_chain": [
+          "s354"
+        ]
+      },
+      "norm_label": ".runpatches()",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L43"
+    },
+    {
+      "id": "dynamicexternalresolutionpatches_dynamicexternalresolution_patchmanager_rununpatches",
+      "label": ".RunUnpatches()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "PatchManager",
+      "file_type": "code",
+      "metadata": {
+        "namespace": "DynamicExternalResolution",
+        "scope_chain": [
+          "s354"
+        ]
+      },
+      "norm_label": ".rununpatches()",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L51"
+    },
+    {
+      "id": "dynamicexternalresolution_dynamicexternalresolution_dynamicexternalresolution_awake",
+      "label": ".Awake()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "ConfigurationManagerAttributes",
+      "file_type": "code",
+      "metadata": {
+        "namespace": "DynamicExternalResolution",
+        "scope_chain": [
+          "s124"
+        ],
+        "unresolved_calls": [
+          {
+            "callee": "LogInfo",
+            "receiver_type": "Logger",
+            "lang": "csharp",
+            "line": "L34"
+          }
+        ]
+      },
+      "norm_label": ".awake()",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolution.cs",
+      "source_location": "L30"
+    },
+    {
+      "id": "dynamicexternalresolutionconfig_dynamicexternalresolution_configs_dynamicexternalresolutionconfig_init",
+      "label": ".Init()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "ConfigurationManagerAttributes",
+      "file_type": "code",
+      "metadata": {
+        "namespace": "DynamicExternalResolution.Configs",
+        "scope_chain": [
+          "s109"
+        ],
+        "unresolved_calls": [
+          {
+            "callee": "Bind",
+            "receiver_type": "ConfigFile",
+            "lang": "csharp",
+            "line": "L43"
+          }
+        ]
+      },
+      "norm_label": ".init()",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionConfig.cs",
+      "source_location": "L39"
+    },
+    {
+      "id": "cameramanager",
+      "label": "CameraManager",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "DynamicExternalResolutionPatches",
+      "file_type": "code",
+      "norm_label": "cameramanager",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "dynamicexternalresolutionpatches_cs_edlssmode",
+      "label": "EDLSSMode",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "DynamicExternalResolutionPatches",
+      "file_type": "code",
+      "norm_label": "edlssmode",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "dynamicexternalresolutionpatches_cs_efsr2mode",
+      "label": "EFSR2Mode",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "DynamicExternalResolutionPatches",
+      "file_type": "code",
+      "norm_label": "efsr2mode",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "dynamicexternalresolutionpatches_cs_efsr3mode",
+      "label": "EFSR3Mode",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "DynamicExternalResolutionPatches",
+      "file_type": "code",
+      "norm_label": "efsr3mode",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "eantialiasingmode",
+      "label": "EAntialiasingMode",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "DynamicExternalResolutionPatches",
+      "file_type": "code",
+      "norm_label": "eantialiasingmode",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "fieldinfo",
+      "label": "FieldInfo",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "DynamicExternalResolutionPatches",
+      "file_type": "code",
+      "norm_label": "fieldinfo",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "propertyinfo",
+      "label": "PropertyInfo",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "DynamicExternalResolutionPatches",
+      "file_type": "code",
+      "norm_label": "propertyinfo",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "ssaaimpl",
+      "label": "SSAAImpl",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "DynamicExternalResolutionPatches",
+      "file_type": "code",
+      "norm_label": "ssaaimpl",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "baseunityplugin",
+      "label": "BaseUnityPlugin",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "DynamicExternalResolution",
+      "file_type": "code",
+      "norm_label": "baseunityplugin",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "methodbase",
+      "label": "MethodBase",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "DynamicExternalResolution",
+      "file_type": "code",
+      "norm_label": "methodbase",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "modulepatch",
+      "label": "ModulePatch",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "DynamicExternalResolution",
+      "file_type": "code",
+      "norm_label": "modulepatch",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "patchpostfix",
+      "label": "PatchPostfix",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "DynamicExternalResolution",
+      "file_type": "code",
+      "norm_label": "patchpostfix",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "player",
+      "label": "Player",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "DynamicExternalResolution",
+      "file_type": "code",
+      "norm_label": "player",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "configentry",
+      "label": "ConfigEntry",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "DynamicExternalResolutionConfig",
+      "file_type": "code",
+      "norm_label": "configentry",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "dynamicexternalresolutionconfig_cs_edlssmode",
+      "label": "EDLSSMode",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "DynamicExternalResolutionConfig",
+      "file_type": "code",
+      "norm_label": "edlssmode",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "dynamicexternalresolutionconfig_cs_efsr2mode",
+      "label": "EFSR2Mode",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "DynamicExternalResolutionConfig",
+      "file_type": "code",
+      "norm_label": "efsr2mode",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "dynamicexternalresolutionconfig_cs_efsr3mode",
+      "label": "EFSR3Mode",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "DynamicExternalResolutionConfig",
+      "file_type": "code",
+      "norm_label": "efsr3mode",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "dynamicexternalresolutionconfig_dynamicexternalresolution_configs_dynamicexternalresolutionconfig_dlssmode",
+      "label": "DLSSMode",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "DynamicExternalResolutionConfig",
+      "file_type": "code",
+      "metadata": {
+        "namespace": "DynamicExternalResolution.Configs",
+        "scope_chain": [
+          "s109"
+        ]
+      },
+      "norm_label": "dlssmode",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionConfig.cs",
+      "source_location": "L35"
+    },
+    {
+      "id": "dynamicexternalresolutionconfig_dynamicexternalresolution_configs_dynamicexternalresolutionconfig_enablemod",
+      "label": "EnableMod",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "DynamicExternalResolutionConfig",
+      "file_type": "code",
+      "metadata": {
+        "namespace": "DynamicExternalResolution.Configs",
+        "scope_chain": [
+          "s109"
+        ]
+      },
+      "norm_label": "enablemod",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionConfig.cs",
+      "source_location": "L33"
+    },
+    {
+      "id": "dynamicexternalresolutionconfig_dynamicexternalresolution_configs_dynamicexternalresolutionconfig_fsr2mode",
+      "label": "FSR2Mode",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "DynamicExternalResolutionConfig",
+      "file_type": "code",
+      "metadata": {
+        "namespace": "DynamicExternalResolution.Configs",
+        "scope_chain": [
+          "s109"
+        ]
+      },
+      "norm_label": "fsr2mode",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionConfig.cs",
+      "source_location": "L36"
+    },
+    {
+      "id": "dynamicexternalresolutionconfig_dynamicexternalresolution_configs_dynamicexternalresolutionconfig_fsr3mode",
+      "label": "FSR3Mode",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "DynamicExternalResolutionConfig",
+      "file_type": "code",
+      "metadata": {
+        "namespace": "DynamicExternalResolution.Configs",
+        "scope_chain": [
+          "s109"
+        ]
+      },
+      "norm_label": "fsr3mode",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionConfig.cs",
+      "source_location": "L37"
+    },
+    {
+      "id": "dynamicexternalresolutionconfig_dynamicexternalresolution_configs_dynamicexternalresolutionconfig_supersampling",
+      "label": "SuperSampling",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "DynamicExternalResolutionConfig",
+      "file_type": "code",
+      "metadata": {
+        "namespace": "DynamicExternalResolution.Configs",
+        "scope_chain": [
+          "s109"
+        ]
+      },
+      "norm_label": "supersampling",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionConfig.cs",
+      "source_location": "L34"
+    },
+    {
+      "id": "csharp_namespace:3ed679a824166764",
+      "label": "DynamicExternalResolution.Configs",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "PatchManager",
+      "file_type": "code",
+      "metadata": {
+        "kind": "csharp_namespace",
+        "namespace": "DynamicExternalResolution.Configs"
+      },
+      "norm_label": "dynamicexternalresolution.configs",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionConfig.cs",
+      "source_location": "L6",
+      "type": "namespace"
+    },
+    {
+      "id": "csharp_namespace:59a471c39e6ac7ef",
+      "label": "DynamicExternalResolution",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "PatchManager",
+      "file_type": "code",
+      "metadata": {
+        "kind": "csharp_namespace",
+        "namespace": "DynamicExternalResolution"
+      },
+      "norm_label": "dynamicexternalresolution",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolution.cs",
+      "source_location": "L7",
+      "type": "namespace"
+    },
+    {
+      "id": "dynamicexternalresolution_cs_dynamicexternalresolution",
+      "label": "DynamicExternalResolution.cs",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "PatchManager",
+      "file_type": "code",
+      "norm_label": "dynamicexternalresolution.cs",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolution.cs",
+      "source_location": "L1"
+    },
+    {
+      "id": "dynamicexternalresolutionconfig",
+      "label": "DynamicExternalResolutionConfig.cs",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "PatchManager",
+      "file_type": "code",
+      "norm_label": "dynamicexternalresolutionconfig.cs",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionConfig.cs",
+      "source_location": "L1"
+    },
+    {
+      "id": "dynamicexternalresolutionpatches",
+      "label": "DynamicExternalResolutionPatches.cs",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "PatchManager",
+      "file_type": "code",
+      "norm_label": "dynamicexternalresolutionpatches.cs",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L1"
+    },
+    {
+      "id": "list",
+      "label": "List",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "PatchManager",
+      "file_type": "code",
+      "norm_label": "list",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "configentrybase_gt",
+      "label": "ConfigEntryBase&gt;",
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "ConfigurationManagerAttributes",
+      "file_type": "code",
+      "norm_label": "configentrybase&gt;",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "configfile",
+      "label": "ConfigFile",
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "ConfigurationManagerAttributes",
+      "file_type": "code",
+      "norm_label": "configfile",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "configurationmanagerattributes",
+      "label": "ConfigurationManagerAttributes.cs",
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "ConfigurationManagerAttributes",
+      "file_type": "code",
+      "norm_label": "configurationmanagerattributes.cs",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/ConfigurationManagerAttributes.cs",
+      "source_location": "L1"
+    },
+    {
+      "id": "func",
+      "label": "Func",
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "ConfigurationManagerAttributes",
+      "file_type": "code",
+      "norm_label": "func",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "dynamicexternalresolution_csproj_dynamicexternalresolution",
+      "label": "DynamicExternalResolution",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "DynamicExternalResolution",
+      "file_type": "code",
+      "norm_label": "dynamicexternalresolution",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolution.csproj",
+      "source_location": null
+    },
+    {
+      "id": "framework_net471",
+      "label": "net471",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "DynamicExternalResolution",
+      "file_type": "concept",
+      "norm_label": "net471",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolution.csproj",
+      "source_location": null
+    },
+    {
+      "id": "sdk_microsoft_net_sdk",
+      "label": "Microsoft.NET.Sdk",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "DynamicExternalResolution",
+      "file_type": "concept",
+      "norm_label": "microsoft.net.sdk",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolution.csproj",
+      "source_location": null
+    },
+    {
+      "id": "dynamicexternalresolution_sln_dynamicexternalresolution",
+      "label": "DynamicExternalResolution.sln",
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "DynamicExternalResolution.sln",
+      "file_type": "code",
+      "norm_label": "dynamicexternalresolution.sln",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolution.sln",
+      "source_location": null
+    }
+  ],
+  "links": [
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_clientfirearmcontrollerchangeaimingmodepath_patchpostfix",
+      "target": "patchpostfix",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "attribute",
+      "metadata": {
+        "ref_token": "PatchPostfix"
+      },
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L299",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_opticsightondisablepath_patchpostfix",
+      "target": "patchpostfix",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "attribute",
+      "metadata": {
+        "ref_token": "PatchPostfix"
+      },
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L280",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_opticsightonenablepath_patchpostfix",
+      "target": "patchpostfix",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "attribute",
+      "metadata": {
+        "ref_token": "PatchPostfix"
+      },
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L247",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolution_dynamicexternalresolution_dynamicexternalresolution_awake",
+      "target": "dynamicexternalresolutionconfig_dynamicexternalresolution_configs_dynamicexternalresolutionconfig_init",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolution.cs",
+      "source_location": "L32",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolution_dynamicexternalresolution_dynamicexternalresolution_awake",
+      "target": "dynamicexternalresolutionpatches_dynamicexternalresolution_patcher_patchall",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolution.cs",
+      "source_location": "L33",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolution_dynamicexternalresolution_dynamicexternalresolution_ondestroy",
+      "target": "dynamicexternalresolutionpatches_dynamicexternalresolution_patcher_unpatchall",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolution.cs",
+      "source_location": "L39",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_clientfirearmcontrollerchangeaimingmodepath_patchpostfix",
+      "target": "dynamicexternalresolution_dynamicexternalresolution_dynamicexternalresolution_getplayerinstance",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L302",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_clientfirearmcontrollerchangeaimingmodepath_patchpostfix",
+      "target": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_setresolutionaim",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L315",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_clientfirearmcontrollerchangeaimingmodepath_patchpostfix",
+      "target": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_setresolutiondefault",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L319",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_setantialiasing",
+      "target": "dynamicexternalresolution_dynamicexternalresolution_dynamicexternalresolution_getcamerainstance",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L213",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_setfsr2",
+      "target": "dynamicexternalresolution_dynamicexternalresolution_dynamicexternalresolution_getcamerainstance",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L223",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_setfsr3",
+      "target": "dynamicexternalresolution_dynamicexternalresolution_dynamicexternalresolution_getcamerainstance",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L232",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_setresolutionaim",
+      "target": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_setsupersampling",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L140",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_setresolutionaim",
+      "target": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_setantialiasing",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L145",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_setresolutionaim",
+      "target": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_setfsr2",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L150",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_setresolutionaim",
+      "target": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_setfsr3",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L155",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_setresolutiondefault",
+      "target": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_setsupersampling",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L179",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_setresolutiondefault",
+      "target": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_setantialiasing",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L183",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_setresolutiondefault",
+      "target": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_setfsr2",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L187",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_setresolutiondefault",
+      "target": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_setfsr3",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L191",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_setsupersampling",
+      "target": "dynamicexternalresolution_dynamicexternalresolution_dynamicexternalresolution_getcamerainstance",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L202",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_opticsightondisablepath_patchpostfix",
+      "target": "dynamicexternalresolution_dynamicexternalresolution_dynamicexternalresolution_getplayerinstance",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L283",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_opticsightondisablepath_patchpostfix",
+      "target": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_setresolutiondefault",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L287",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_opticsightonenablepath_patchpostfix",
+      "target": "dynamicexternalresolution_dynamicexternalresolution_dynamicexternalresolution_getplayerinstance",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L252",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_opticsightonenablepath_patchpostfix",
+      "target": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_setresolutionaim",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L265",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_patcher_patchall",
+      "target": "dynamicexternalresolutionpatches_dynamicexternalresolution_patchmanager",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L22",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_patcher_patchall",
+      "target": "dynamicexternalresolutionpatches_dynamicexternalresolution_patchmanager_runpatches",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L22",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_patcher_unpatchall",
+      "target": "dynamicexternalresolutionpatches_dynamicexternalresolution_patchmanager",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L27",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_patcher_unpatchall",
+      "target": "dynamicexternalresolutionpatches_dynamicexternalresolution_patchmanager_rununpatches",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L27",
+      "weight": 1.0
+    },
+    {
+      "source": "configurationmanagerattributes_configurationmanagerattributes",
+      "target": "func",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "field",
+      "metadata": {
+        "ref_token": "Func",
+        "qualified": true,
+        "ref_qualifier": "System"
+      },
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/ConfigurationManagerAttributes.cs",
+      "source_location": "L103",
+      "weight": 1.0
+    },
+    {
+      "source": "configurationmanagerattributes_configurationmanagerattributes",
+      "target": "configentrybase_gt",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "field",
+      "metadata": {
+        "ref_token": "ConfigEntryBase&gt;",
+        "qualified": true,
+        "ref_qualifier": "System.Action&lt;BepInEx.Configuration"
+      },
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/ConfigurationManagerAttributes.cs",
+      "source_location": "L40",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionconfig_dynamicexternalresolution_configs_dynamicexternalresolutionconfig",
+      "target": "configentry",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "field",
+      "metadata": {
+        "ref_token": "ConfigEntry"
+      },
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionConfig.cs",
+      "source_location": "L37",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionconfig_dynamicexternalresolution_configs_dlssmodequality",
+      "target": "dynamicexternalresolutionconfig_cs_edlssmode",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "field",
+      "metadata": {
+        "ref_token": "EDLSSMode"
+      },
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionConfig.cs",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionconfig_dynamicexternalresolution_configs_fsr2modequality",
+      "target": "dynamicexternalresolutionconfig_cs_efsr2mode",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "field",
+      "metadata": {
+        "ref_token": "EFSR2Mode"
+      },
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionConfig.cs",
+      "source_location": "L23",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionconfig_dynamicexternalresolution_configs_fsr3modequality",
+      "target": "dynamicexternalresolutionconfig_cs_efsr3mode",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "field",
+      "metadata": {
+        "ref_token": "EFSR3Mode"
+      },
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionConfig.cs",
+      "source_location": "L30",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches",
+      "target": "fieldinfo",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "field",
+      "metadata": {
+        "ref_token": "FieldInfo"
+      },
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L73",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_patchmanager",
+      "target": "list",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "field",
+      "metadata": {
+        "ref_token": "List"
+      },
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L59",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolution_dynamicexternalresolution_dynamicexternalresolution",
+      "target": "player",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "field",
+      "metadata": {
+        "ref_token": "Player"
+      },
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolution.cs",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches",
+      "target": "propertyinfo",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "field",
+      "metadata": {
+        "ref_token": "PropertyInfo"
+      },
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L78",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionconfig_dynamicexternalresolution_configs_dynamicexternalresolutionconfig",
+      "target": "dynamicexternalresolutionconfig_dynamicexternalresolution_configs_dynamicexternalresolutionconfig_enablemod",
+      "relation": "defines",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "field",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionConfig.cs",
+      "source_location": "L33",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionconfig_dynamicexternalresolution_configs_dynamicexternalresolutionconfig",
+      "target": "dynamicexternalresolutionconfig_dynamicexternalresolution_configs_dynamicexternalresolutionconfig_supersampling",
+      "relation": "defines",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "field",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionConfig.cs",
+      "source_location": "L34",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionconfig_dynamicexternalresolution_configs_dynamicexternalresolutionconfig",
+      "target": "dynamicexternalresolutionconfig_dynamicexternalresolution_configs_dynamicexternalresolutionconfig_dlssmode",
+      "relation": "defines",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "field",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionConfig.cs",
+      "source_location": "L35",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionconfig_dynamicexternalresolution_configs_dynamicexternalresolutionconfig",
+      "target": "dynamicexternalresolutionconfig_dynamicexternalresolution_configs_dynamicexternalresolutionconfig_fsr2mode",
+      "relation": "defines",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "field",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionConfig.cs",
+      "source_location": "L36",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionconfig_dynamicexternalresolution_configs_dynamicexternalresolutionconfig",
+      "target": "dynamicexternalresolutionconfig_dynamicexternalresolution_configs_dynamicexternalresolutionconfig_fsr3mode",
+      "relation": "defines",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "field",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionConfig.cs",
+      "source_location": "L37",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_setresolutionaim",
+      "target": "eantialiasingmode",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "generic_arg",
+      "metadata": {
+        "ref_token": "EAntialiasingMode"
+      },
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L126",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_setresolutiondefault",
+      "target": "eantialiasingmode",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "generic_arg",
+      "metadata": {
+        "ref_token": "EAntialiasingMode"
+      },
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L172",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionconfig_dynamicexternalresolution_configs_dynamicexternalresolutionconfig",
+      "target": "dynamicexternalresolutionconfig_cs_edlssmode",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "generic_arg",
+      "metadata": {
+        "ref_token": "EDLSSMode"
+      },
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionConfig.cs",
+      "source_location": "L35",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_setresolutionaim",
+      "target": "dynamicexternalresolutionpatches_cs_edlssmode",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "generic_arg",
+      "metadata": {
+        "ref_token": "EDLSSMode"
+      },
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L128",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_setresolutiondefault",
+      "target": "dynamicexternalresolutionpatches_cs_edlssmode",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "generic_arg",
+      "metadata": {
+        "ref_token": "EDLSSMode"
+      },
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L173",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionconfig_dynamicexternalresolution_configs_dynamicexternalresolutionconfig",
+      "target": "dynamicexternalresolutionconfig_cs_efsr2mode",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "generic_arg",
+      "metadata": {
+        "ref_token": "EFSR2Mode"
+      },
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionConfig.cs",
+      "source_location": "L36",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_setresolutionaim",
+      "target": "dynamicexternalresolutionpatches_cs_efsr2mode",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "generic_arg",
+      "metadata": {
+        "ref_token": "EFSR2Mode"
+      },
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L131",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_setresolutiondefault",
+      "target": "dynamicexternalresolutionpatches_cs_efsr2mode",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "generic_arg",
+      "metadata": {
+        "ref_token": "EFSR2Mode"
+      },
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L174",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionconfig_dynamicexternalresolution_configs_dynamicexternalresolutionconfig",
+      "target": "dynamicexternalresolutionconfig_cs_efsr3mode",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "generic_arg",
+      "metadata": {
+        "ref_token": "EFSR3Mode"
+      },
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionConfig.cs",
+      "source_location": "L37",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_setresolutionaim",
+      "target": "dynamicexternalresolutionpatches_cs_efsr3mode",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "generic_arg",
+      "metadata": {
+        "ref_token": "EFSR3Mode"
+      },
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L134",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_setresolutiondefault",
+      "target": "dynamicexternalresolutionpatches_cs_efsr3mode",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "generic_arg",
+      "metadata": {
+        "ref_token": "EFSR3Mode"
+      },
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L175",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_patchmanager",
+      "target": "modulepatch",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "generic_arg",
+      "metadata": {
+        "ref_token": "ModulePatch"
+      },
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L59",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_setsupersampling",
+      "target": "ssaaimpl",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "generic_arg",
+      "metadata": {
+        "ref_token": "SSAAImpl"
+      },
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L207",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolution_cs_dynamicexternalresolution",
+      "target": "csharp_namespace:3ed679a824166764",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "metadata": {
+        "using_kind": "namespace",
+        "target_fqn": "DynamicExternalResolution.Configs",
+        "scope_kind": "file"
+      },
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolution.cs",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches",
+      "target": "csharp_namespace:3ed679a824166764",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "metadata": {
+        "using_kind": "namespace",
+        "target_fqn": "DynamicExternalResolution.Configs",
+        "scope_kind": "file"
+      },
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionconfig_dynamicexternalresolution_configs_dynamicexternalresolutionconfig_init",
+      "target": "configfile",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "parameter_type",
+      "metadata": {
+        "ref_token": "ConfigFile"
+      },
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionConfig.cs",
+      "source_location": "L39",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_setantialiasing",
+      "target": "eantialiasingmode",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "parameter_type",
+      "metadata": {
+        "ref_token": "EAntialiasingMode"
+      },
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L211",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_setantialiasing",
+      "target": "dynamicexternalresolutionpatches_cs_edlssmode",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "parameter_type",
+      "metadata": {
+        "ref_token": "EDLSSMode"
+      },
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L211",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_setantialiasing",
+      "target": "dynamicexternalresolutionpatches_cs_efsr2mode",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "parameter_type",
+      "metadata": {
+        "ref_token": "EFSR2Mode"
+      },
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L211",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_setfsr2",
+      "target": "dynamicexternalresolutionpatches_cs_efsr2mode",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "parameter_type",
+      "metadata": {
+        "ref_token": "EFSR2Mode"
+      },
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L221",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_setantialiasing",
+      "target": "dynamicexternalresolutionpatches_cs_efsr3mode",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "parameter_type",
+      "metadata": {
+        "ref_token": "EFSR3Mode"
+      },
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L211",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_setfsr3",
+      "target": "dynamicexternalresolutionpatches_cs_efsr3mode",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "parameter_type",
+      "metadata": {
+        "ref_token": "EFSR3Mode"
+      },
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L230",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_getgamesetting",
+      "target": "fieldinfo",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "parameter_type",
+      "metadata": {
+        "ref_token": "FieldInfo"
+      },
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L195",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolution_dynamicexternalresolution_dynamicexternalresolution_getcamerainstance",
+      "target": "cameramanager",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "return_type",
+      "metadata": {
+        "ref_token": "CameraManager"
+      },
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolution.cs",
+      "source_location": "L25",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_clientfirearmcontrollerchangeaimingmodepath_gettargetmethod",
+      "target": "methodbase",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "return_type",
+      "metadata": {
+        "ref_token": "MethodBase"
+      },
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L294",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_opticsightondisablepath_gettargetmethod",
+      "target": "methodbase",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "return_type",
+      "metadata": {
+        "ref_token": "MethodBase"
+      },
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L275",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_opticsightonenablepath_gettargetmethod",
+      "target": "methodbase",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "return_type",
+      "metadata": {
+        "ref_token": "MethodBase"
+      },
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L242",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolution_dynamicexternalresolution_dynamicexternalresolution_getplayerinstance",
+      "target": "player",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "return_type",
+      "metadata": {
+        "ref_token": "Player"
+      },
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolution.cs",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolution_dynamicexternalresolution_dynamicexternalresolution",
+      "target": "baseunityplugin",
+      "relation": "inherits",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "metadata": {
+        "ref_token": "BaseUnityPlugin"
+      },
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolution.cs",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_clientfirearmcontrollerchangeaimingmodepath",
+      "target": "modulepatch",
+      "relation": "inherits",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "metadata": {
+        "ref_token": "ModulePatch"
+      },
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L292",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_opticsightondisablepath",
+      "target": "modulepatch",
+      "relation": "inherits",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "metadata": {
+        "ref_token": "ModulePatch"
+      },
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L273",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_opticsightonenablepath",
+      "target": "modulepatch",
+      "relation": "inherits",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "metadata": {
+        "ref_token": "ModulePatch"
+      },
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L240",
+      "weight": 1.0
+    },
+    {
+      "source": "configurationmanagerattributes",
+      "target": "configurationmanagerattributes_configurationmanagerattributes",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/ConfigurationManagerAttributes.cs",
+      "source_location": "L29",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolution_cs_dynamicexternalresolution",
+      "target": "csharp_namespace:59a471c39e6ac7ef",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolution.cs",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolution_cs_dynamicexternalresolution",
+      "target": "dynamicexternalresolution_dynamicexternalresolution_dynamicexternalresolution",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolution.cs",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolution_sln_dynamicexternalresolution",
+      "target": "dynamicexternalresolution_sln_dynamicexternalresolution",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolution.sln",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionconfig",
+      "target": "csharp_namespace:3ed679a824166764",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionConfig.cs",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionconfig",
+      "target": "dynamicexternalresolutionconfig_dynamicexternalresolution_configs_dynamicexternalresolutionconfig",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionConfig.cs",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionconfig_dynamicexternalresolution_configs_dynamicexternalresolutionconfig",
+      "target": "dynamicexternalresolutionconfig_dynamicexternalresolution_configs_dlssmodequality",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionConfig.cs",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionconfig_dynamicexternalresolution_configs_dynamicexternalresolutionconfig",
+      "target": "dynamicexternalresolutionconfig_dynamicexternalresolution_configs_fsr2modequality",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionConfig.cs",
+      "source_location": "L18",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionconfig_dynamicexternalresolution_configs_dynamicexternalresolutionconfig",
+      "target": "dynamicexternalresolutionconfig_dynamicexternalresolution_configs_fsr3modequality",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionConfig.cs",
+      "source_location": "L25",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches",
+      "target": "csharp_namespace:59a471c39e6ac7ef",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches",
+      "target": "dynamicexternalresolutionpatches_dynamicexternalresolution_patcher",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L18",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches",
+      "target": "dynamicexternalresolutionpatches_dynamicexternalresolution_patchmanager",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L31",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches",
+      "target": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L62",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches",
+      "target": "dynamicexternalresolutionpatches_dynamicexternalresolution_opticsightonenablepath",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L240",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches",
+      "target": "dynamicexternalresolutionpatches_dynamicexternalresolution_opticsightondisablepath",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L273",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches",
+      "target": "dynamicexternalresolutionpatches_dynamicexternalresolution_clientfirearmcontrollerchangeaimingmodepath",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L292",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolution_dynamicexternalresolution_dynamicexternalresolution",
+      "target": "dynamicexternalresolution_dynamicexternalresolution_dynamicexternalresolution_getplayerinstance",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolution.cs",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolution_dynamicexternalresolution_dynamicexternalresolution",
+      "target": "dynamicexternalresolution_dynamicexternalresolution_dynamicexternalresolution_getcamerainstance",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolution.cs",
+      "source_location": "L25",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolution_dynamicexternalresolution_dynamicexternalresolution",
+      "target": "dynamicexternalresolution_dynamicexternalresolution_dynamicexternalresolution_awake",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolution.cs",
+      "source_location": "L30",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolution_dynamicexternalresolution_dynamicexternalresolution",
+      "target": "dynamicexternalresolution_dynamicexternalresolution_dynamicexternalresolution_ondestroy",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolution.cs",
+      "source_location": "L37",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionconfig_dynamicexternalresolution_configs_dynamicexternalresolutionconfig",
+      "target": "dynamicexternalresolutionconfig_dynamicexternalresolution_configs_dynamicexternalresolutionconfig_init",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionConfig.cs",
+      "source_location": "L39",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_clientfirearmcontrollerchangeaimingmodepath",
+      "target": "dynamicexternalresolutionpatches_dynamicexternalresolution_clientfirearmcontrollerchangeaimingmodepath_gettargetmethod",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L294",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_clientfirearmcontrollerchangeaimingmodepath",
+      "target": "dynamicexternalresolutionpatches_dynamicexternalresolution_clientfirearmcontrollerchangeaimingmodepath_patchpostfix",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L299",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches",
+      "target": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_setresolutionaim",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L112",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches",
+      "target": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_setresolutiondefault",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L159",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches",
+      "target": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_getgamesetting",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L195",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches",
+      "target": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_setsupersampling",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L200",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches",
+      "target": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_setantialiasing",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L211",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches",
+      "target": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_setfsr2",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L221",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches",
+      "target": "dynamicexternalresolutionpatches_dynamicexternalresolution_dynamicexternalresolutionpatches_setfsr3",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L230",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_opticsightondisablepath",
+      "target": "dynamicexternalresolutionpatches_dynamicexternalresolution_opticsightondisablepath_gettargetmethod",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L275",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_opticsightondisablepath",
+      "target": "dynamicexternalresolutionpatches_dynamicexternalresolution_opticsightondisablepath_patchpostfix",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L280",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_opticsightonenablepath",
+      "target": "dynamicexternalresolutionpatches_dynamicexternalresolution_opticsightonenablepath_gettargetmethod",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L242",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_opticsightonenablepath",
+      "target": "dynamicexternalresolutionpatches_dynamicexternalresolution_opticsightonenablepath_patchpostfix",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L247",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_patcher",
+      "target": "dynamicexternalresolutionpatches_dynamicexternalresolution_patcher_patchall",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L20",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_patcher",
+      "target": "dynamicexternalresolutionpatches_dynamicexternalresolution_patcher_unpatchall",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L25",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_patchmanager",
+      "target": "dynamicexternalresolutionpatches_dynamicexternalresolution_patchmanager_runpatches",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L43",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionpatches_dynamicexternalresolution_patchmanager",
+      "target": "dynamicexternalresolutionpatches_dynamicexternalresolution_patchmanager_rununpatches",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionPatches.cs",
+      "source_location": "L51",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolution_csproj_dynamicexternalresolution",
+      "target": "framework_net471",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolution.csproj",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolution_csproj_dynamicexternalresolution",
+      "target": "sdk_microsoft_net_sdk",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolution.csproj",
+      "weight": 1.0
+    },
+    {
+      "source": "dynamicexternalresolutionconfig_dynamicexternalresolution_configs_dynamicexternalresolutionconfig_init",
+      "target": "configurationmanagerattributes_configurationmanagerattributes",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "call",
+      "source_file": "mods/SPT-Dynamic-External-Resolution/modded/DynamicExternalResolutionConfig.cs",
+      "source_location": "L43",
+      "weight": 1.0
+    }
+  ],
+  "hyperedges": [],
+  "built_at_commit": "d3bda652a368ed1be06aeac0eb25f180b61947c6"
+}

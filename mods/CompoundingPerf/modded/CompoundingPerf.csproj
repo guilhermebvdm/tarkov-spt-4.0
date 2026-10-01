@@ -1,0 +1,63 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <RootNamespace>CompoundingPerf</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <OutputType>Library</OutputType>
+    <Version>1.3.0</Version>
+    <OutputPath>bin\$(Configuration)\$(ProjectName)\$(AssemblyName)\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+
+    <!-- Mono-repo: exclude sibling folders from server compile globs. -->
+    <DefaultItemExcludes>$(DefaultItemExcludes);client\**;tests\**;scripts\**</DefaultItemExcludes>
+  </PropertyGroup>
+
+  <!-- Dev benchmark builds: dotnet build -p:Bench=true compiles in the server-side
+       bench sampler (GC pauses, feature counters → user/logs JSONL). Release packages
+       are built WITHOUT this flag and contain no sampler. Mirrors the client csproj. -->
+  <PropertyGroup Condition="'$(Bench)' == 'true'">
+    <DefineConstants>$(DefineConstants);BENCH</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SPTarkov.Common" Version="4.0.13" />
+    <PackageReference Include="SPTarkov.DI" Version="4.0.13" />
+    <PackageReference Include="SPTarkov.Server.Core" Version="4.0.13" />
+    <!-- 0Harmony ships with the SPT server runtime; Lib.Harmony is the standard NuGet
+         that exposes the `HarmonyLib` API we compile against. Marked PrivateAssets
+         so we don't try to copy it next to our DLL — the runtime already has it. -->
+    <PackageReference Include="Lib.Harmony" Version="2.3.3">
+      <PrivateAssets>all</PrivateAssets>
+      <ExcludeAssets>runtime</ExcludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <!-- Auto-deploy: copy the server DLL + config.json to the live SPT mods folder. -->
+  <PropertyGroup>
+    <SptRoot Condition="'$(SptRoot)' == ''">C:\SPT</SptRoot>
+  </PropertyGroup>
+
+  <!-- Auto-deploy: copy the server DLL + config.json to the live SPT mods folder.
+       Skip by passing -p:SkipDeploy=true (useful when SPT.Server is running and
+       holding a file lock — tests + builds still succeed, just no live deploy). -->
+  <Target Name="DeployToSpt" AfterTargets="PostBuildEvent" Condition="'$(SkipDeploy)' != 'true'">
+    <PropertyGroup>
+      <ServerDeployDir>$(SptRoot)\SPT\user\mods\CompoundingPerf\</ServerDeployDir>
+    </PropertyGroup>
+    <MakeDir Directories="$(ServerDeployDir)" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ServerDeployDir)" SkipUnchangedFiles="false"
+          ContinueOnError="WarnAndContinue" />
+    <Copy SourceFiles="$(MSBuildProjectDirectory)\config.json" DestinationFolder="$(ServerDeployDir)" SkipUnchangedFiles="false"
+          ContinueOnError="WarnAndContinue" />
+    <Message Text="Deployed $(TargetFileName) + config.json to $(ServerDeployDir)" Importance="high" />
+  </Target>
+
+</Project>

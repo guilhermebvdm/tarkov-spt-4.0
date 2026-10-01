@@ -20,7 +20,7 @@ public enum ScrollMode
     Linear,
 }
 
-[BepInPlugin("com.trl.stancesandmobility", "TRL-StancesAndMobility", "2.17.1")]
+[BepInPlugin("com.trl.stancesandmobility", "TRL-StancesAndMobility", "2.25.3")]
 public class Plugin : BaseUnityPlugin
 {
     public static Plugin Instance { get; private set; }
@@ -97,6 +97,30 @@ public class Plugin : BaseUnityPlugin
     public static ConfigEntry<int> _AdsSpeedCompression;  // item 017 (F3) — % de compressão
     public static ConfigEntry<float> _AdsSpeedPivot;      // item 017 (F3) — centro da compressão
     public static ConfigEntry<float> _StanceOvershootDamping;
+    // Item 021 — preserva (default) ou descarta (legado) o tombamento nativo de miras em trilho lateral.
+    public static ConfigEntry<bool> _FlattenCantedSightTilt;
+
+    // Item 018 — correr agachado / rastejar rápido (crouch-run + prone-run).
+    // Sem tempo de rampa em nenhuma das duas posturas (removido — sem ganho perceptível pro mod).
+    public static ConfigEntry<bool> _EnableCrouchRun;
+    public static ConfigEntry<float> _CrouchRunSpeedMultiplier;
+    // Opcional (default 0 = desligada): o dreno nativo de sprint já se aplica sozinho (o Prefix do
+    // crouch-run chama movementContext.EnableSprint(), que aciona o dreno vanilla) — essa sobretaxa é
+    // só pra quem quer um custo extra por cima. Removida em 2026-09-09, re-adicionada a pedido do
+    // usuário no mesmo dia.
+    public static ConfigEntry<float> _CrouchRunStaminaSurcharge;
+    // Pedido do usuário (2026-09-10): com a postura já perto de em pé (ex.: 0.8~0.9), o jogador espera
+    // o sprint vanilla normal (levanta e corre em pé), não o boost agachado — mesmo sem estar
+    // exatamente em PoseLevel==1. Abaixo do limiar → crouch-run; no limiar ou acima → sprint vanilla.
+    public static ConfigEntry<float> _CrouchRunPoseThreshold;
+    public static ConfigEntry<bool> _EnableProneRun;
+    public static ConfigEntry<float> _ProneRunSpeedMultiplier;
+    // Mantida: o prone-run NÃO aciona o dreno nativo de sprint (ProneMoveStateClass.EnableSprint
+    // nunca chama Physical.Sprint()) — sem esta sobretaxa, o prone-run seria de graça.
+    public static ConfigEntry<float> _ProneRunStaminaSurcharge;
+    // Bug 2026-09-09: piso do multiplicador de Animator.speed quando o scroll wheel nativo reduz a
+    // velocidade em prone. Sem piso, o Animator INTEIRO (não só a locomoção) toca em câmera lenta.
+    public static ConfigEntry<float> _ProneRunMinSpeedFloor;
 
     // Hold Breath
     public static ConfigEntry<float> _HoldBreathOxygenDrain;
@@ -203,6 +227,7 @@ public class Plugin : BaseUnityPlugin
     public static ConfigEntry<bool> _DebugStaminaState;   // item 012 — toggle do overlay/log de estado de stamina
     public static ConfigEntry<bool> _DebugAdsSpeed;       // item 017 F3 — overlay nativo→comprimido do ADS speed
     public static ConfigEntry<bool> _DebugSpeedLimits;    // P-11.1 — overlay das causas de teto de velocidade
+    public static ConfigEntry<bool> _DebugProneRun;       // item 018 (spy) — overlay do estado real do prone-run
     public static ConfigEntry<bool> _ShowMountIcon;
 
     // Animation Settings (Item 005)
@@ -217,13 +242,17 @@ public class Plugin : BaseUnityPlugin
     // Action Stance Settings (Item 008)
     public static ConfigEntry<bool> _EnableActionStanceSwap;
 
-    // Manual Chambering (Item 010)
+    // Manual Chambering & Bolt Action (Item 010)
     public static ConfigEntry<bool> _EnableManualChambering;
     public static ConfigEntry<bool> _ManualChamberingOnRaidStart;
     public static ConfigEntry<bool> _ManualChamberingOnReload;
+    public static ConfigEntry<bool> _EnableManualBoltAction;
+    public static ConfigEntry<bool> _EnableManualPumpAction;
 
-    // Weapon Inspection (Item 019)
+    // Weapon Inspection (Item 019 & Mag Check Delay)
     public static ConfigEntry<bool> _ShowChamberAmmoOnCheck;
+    public static ConfigEntry<bool> _EnableMagCheckDelay;
+    public static ConfigEntry<float> _MagCheckDelaySeconds;
 
     public void Awake()
     {
@@ -267,20 +296,20 @@ public class Plugin : BaseUnityPlugin
     private void BindAllConfig()
     {
         // ========================================
-        // MANUAL CHAMBERING
+        // MANUAL CHAMBERING & BOLT ACTION
         // ========================================
         _EnableManualChambering = Config.Bind(
             "Manual Chambering",
             "Enable Manual Chambering",
-            true,
-            new ConfigDescription("Master toggle for Manual Chambering. Off = vanilla behavior in ALL scenarios (safe kill-switch). Rack the bolt with the native 'Chamber/Unload' key when the chamber is empty and there is ammo in the magazine.\n\nInterruptor mestre do Manual Chambering. Desligado = comportamento vanilla em TODOS os cenários (kill-switch seguro). Puxe o ferrolho com a tecla nativa 'Chamber/Unload' quando a câmara estiver vazia e houver munição no carregador.",
+            false,
+            new ConfigDescription("Master toggle for Manual Chambering. Off = vanilla behavior in ALL scenarios (safe kill-switch). Rack the bolt with the native 'Chamber/Unload' key (Shift + T) when the chamber is empty and there is ammo in the magazine.\n\nInterruptor mestre do Manual Chambering. Desligado = comportamento vanilla em TODOS os cenários (kill-switch seguro). Puxe o ferrolho com a tecla nativa 'Chamber/Unload' (Shift + T) quando a câmara estiver vazia e houver munição no carregador.",
             null,
             new ConfigurationManagerAttributes { Order = 70 }));
 
         _ManualChamberingOnRaidStart = Config.Bind(
             "Manual Chambering",
             "Manual Chambering On Raid Start",
-            true,
+            false,
             new ConfigDescription(
                 "When enabled, a weapon that starts the raid with an empty chamber does NOT auto-load the first round on spawn — rack the bolt manually. Off = vanilla at raid start. Takes effect NEXT RAID.\n\nQuando ativado, a arma que inicia a raid com a câmara vazia NÃO carrega a primeira bala automaticamente no spawn — puxe o ferrolho manualmente. Desligado = vanilla no início da raid. Efetivo na PRÓXIMA RAID.",
                 null,
@@ -289,11 +318,29 @@ public class Plugin : BaseUnityPlugin
         _ManualChamberingOnReload = Config.Bind(
             "Manual Chambering",
             "Manual Chambering On Reload",
-            true,
+            false,
             new ConfigDescription(
                 "When enabled, reloading with an empty chamber does NOT auto-load the first round after inserting the magazine — rack the bolt manually. Off = vanilla on reload. Real time.\n\nQuando ativado, recarregar com a câmara vazia NÃO carrega automaticamente a primeira bala após inserir o carregador — puxe o ferrolho manualmente. Desligado = vanilla no reload. Tempo real.",
                 null,
                 new ConfigurationManagerAttributes { Order = 68 }));
+
+        _EnableManualBoltAction = Config.Bind(
+            "Manual Chambering",
+            "Enable Manual Bolt Action",
+            false,
+            new ConfigDescription(
+                "When enabled, firing bolt-action rifles (Mosin, SV-98, DVL-10, M700, T-5000, etc.) will NOT cycle the bolt automatically upon releasing the trigger. Cycle the bolt manually using the Chamber key (Shift + T).\n\nQuando ativado, disparar rifles de ferrolho (Mosin, SV-98, DVL-10, M700, T-5000, etc.) NÃO ciclará o ferrolho automaticamente ao soltar o gatilho. Cicle o ferrolho manualmente usando o comando de Chamber (Shift + T).",
+                null,
+                new ConfigurationManagerAttributes { Order = 67 }));
+
+        _EnableManualPumpAction = Config.Bind(
+            "Manual Chambering",
+            "Enable Manual Pump Action",
+            false,
+            new ConfigDescription(
+                "When enabled, firing pump-action shotguns (Remington 870, MP-133, KS-23M) will NOT pump the action automatically after firing. Pump the action manually using the Chamber key (Shift + T).\n\nQuando ativado, disparar escopetas de bomba (Remington 870, MP-133, KS-23M) NÃO ciclará a bomba automaticamente após o disparo. Bombeie manualmente usando o comando de Chamber (Shift + T).",
+                null,
+                new ConfigurationManagerAttributes { Order = 66 }));
 
         // ========================================
         // WEAPON INSPECTION (Item 019)
@@ -306,6 +353,28 @@ public class Plugin : BaseUnityPlugin
                 "When enabled, checking the chamber in-raid shows the same on-screen panel as the magazine check, telling you whether a round is chambered and which one. Vanilla shows nothing on the HUD when you check the chamber. Local only (not synced over Fika).\n\nQuando ativado, checar a câmara na raid mostra o mesmo painel do check de carregador, indicando se há bala na câmara e qual é. O vanilla não mostra nada no HUD ao checar a câmara. Só local (não sincroniza no Fika).",
                 null,
                 new ConfigurationManagerAttributes { Order = 67 }));
+
+        // ref: CR-01-02 (item 023) — tooltips corrigidos: este delay também atrasa a checagem de câmara
+        // (item 019), já que as duas convergem no mesmo EftBattleUIScreen.ShowAmmoDetails
+        // (ver backlog/023-atraso-checagem-carregador-02-spec-tech.md §1/§6). Nomes das props mantidos
+        // (renomear resetaria o valor salvo do usuário — repo-workflow-best-practices §7).
+        _EnableMagCheckDelay = Config.Bind(
+            "Weapon Inspection",
+            "Enable Magazine Check Delay",
+            true,
+            new ConfigDescription(
+                "When enabled, checking the magazine OR the chamber in-raid delays the on-screen ammo HUD by a realistic duration instead of showing instantly at frame 0. Both checks share the same panel and the same delay.\n\nQuando ativado, checar o carregador OU a câmara na raid atrasa a exibição do HUD de munição por um tempo realista em vez de mostrar instantaneamente no frame 0. As duas checagens compartilham o mesmo painel e o mesmo atraso.",
+                null,
+                new ConfigurationManagerAttributes { Order = 66 }));
+
+        _MagCheckDelaySeconds = Config.Bind(
+            "Weapon Inspection",
+            "Magazine Check Delay Seconds",
+            1.0f, // validado in-game pelo usuário (2026-09-22, item 023) — 2.0 era o valor original ad-hoc, nunca calibrado
+            new ConfigDescription(
+                "Seconds to wait before displaying the ammo status HUD during a magazine OR chamber check animation.\n\nSegundos de espera antes de exibir o HUD de situação de munição durante a animação de checagem do carregador OU da câmara.",
+                new AcceptableValueRange<float>(0.5f, 4.0f),
+                new ConfigurationManagerAttributes { Order = 65 }));
 
 
         // ========================================
@@ -463,6 +532,96 @@ public class Plugin : BaseUnityPlugin
             new ConfigDescription("Damping for the spring physics. Lower values mean more overshoot/bounce. Default is 15.\n\nAmortecimento da física de mola. Valores menores geram mais overshoot/quicada. Padrão é 15.",
             new AcceptableValueRange<float>(1f, 30.0f),
             new ConfigurationManagerAttributes { Order = 95 }));
+
+        // Item 021 — antes o mod descartava incondicionalmente o tombamento nativo de miras em trilho
+        // lateral (canted/off-axis); default false preserva o comportamento vanilla.
+        _FlattenCantedSightTilt = Config.Bind(
+            GeneralSection,
+            "Straighten Weapon On Canted Sights",
+            false,
+            new ConfigDescription(
+                "When enabled, keeps the weapon perfectly straight even when aiming with a sight mounted on a side rail (canted/off-axis sight), ignoring the game's native tilt for that sight. When disabled (default), the weapon tilts naturally like in vanilla.\n\nQuando ativado, mantém a arma sempre reta mesmo ao mirar com uma mira montada em trilho lateral (mira inclinada/canted), ignorando o tombamento nativo do jogo para essa mira. Quando desativado (padrão), a arma tomba normalmente como no vanilla.",
+                null,
+                new ConfigurationManagerAttributes { Order = 94 }));
+
+        // Item 018 — correr agachado / rastejar rápido. Seção própria (feature independente das stances).
+        const string CrouchProneRunSection = "Crouch & Prone Sprint";
+
+        _EnableCrouchRun = Config.Bind(
+            CrouchProneRunSection,
+            "Enable Crouch Run",
+            false,
+            new ConfigDescription(
+                "When enabled, holding the sprint key while crouched keeps the character crouched and increases speed, instead of standing up. Disabled by default until validated in-game.\n\nQuando ativado, segurar a tecla de correr agachado mantém o personagem agachado e aumenta a velocidade, em vez de levantá-lo. Desativado por padrão até validação in-game.",
+                null,
+                new ConfigurationManagerAttributes { Order = 89 }));
+
+        _CrouchRunSpeedMultiplier = Config.Bind(
+            CrouchProneRunSection,
+            "Crouch Run Speed Multiplier",
+            1.25f,
+            new ConfigDescription(
+                "Speed multiplier while crouch-running (with Enable Crouch Run active).\n\nMultiplicador de velocidade ao correr agachado (com Enable Crouch Run ativo).",
+                new AcceptableValueRange<float>(1.0f, 2.0f),
+                new ConfigurationManagerAttributes { Order = 88 }));
+
+        _CrouchRunStaminaSurcharge = Config.Bind(
+            CrouchProneRunSection,
+            "Crouch Run Stamina Surcharge",
+            0.0f,
+            new ConfigDescription(
+                "Extra stamina drain per second while crouch-running, on top of the native sprint drain (which already applies on its own). 0 = no surcharge, native drain only.\n\nDreno extra de stamina (por segundo) ao correr agachado, somado ao dreno nativo de sprint (que já se aplica sozinho). 0 = sem sobretaxa, só o dreno nativo.",
+                new AcceptableValueRange<float>(0f, 30f),
+                new ConfigurationManagerAttributes { Order = 87 }));
+
+        _CrouchRunPoseThreshold = Config.Bind(
+            CrouchProneRunSection,
+            "Crouch Run Pose Threshold",
+            0.5f,
+            new ConfigDescription(
+                "Pose level below which crouch-run applies (keeps posture, boosts speed). At or above this value, the sprint key triggers native vanilla sprint (stands up) instead — near-standing poses already look like standing to the player.\n\nNível de postura abaixo do qual o crouch-run atua (mantém a postura, acelera a velocidade). No valor ou acima, a tecla de correr aciona o sprint vanilla nativo (levanta) em vez disso — posturas quase em pé já parecem em pé pro jogador.",
+                new AcceptableValueRange<float>(0.1f, 1.0f),
+                new ConfigurationManagerAttributes { Order = 86 }));
+
+        _EnableProneRun = Config.Bind(
+            CrouchProneRunSection,
+            "Enable Prone Run",
+            false,
+            new ConfigDescription(
+                "When enabled, holding the sprint key while prone accelerates crawling beyond the current cap, without changing posture. Disabled by default until validated in-game.\n\nQuando ativado, segurar a tecla de correr rastejando (prone) acelera o rastejo além do teto atual, sem alterar a postura. Desativado por padrão até validação in-game.",
+                null,
+                new ConfigurationManagerAttributes { Order = 83 }));
+
+        _ProneRunSpeedMultiplier = Config.Bind(
+            CrouchProneRunSection,
+            "Prone Run Speed Multiplier",
+            1.25f,
+            new ConfigDescription(
+                "Speed multiplier while crawling with the sprint key held (with Enable Prone Run active).\n\nMultiplicador de velocidade ao rastejar com a tecla de correr segurada (com Enable Prone Run ativo).",
+                new AcceptableValueRange<float>(1.0f, 2.0f),
+                new ConfigurationManagerAttributes { Order = 82 }));
+
+        _ProneRunStaminaSurcharge = Config.Bind(
+            CrouchProneRunSection,
+            "Prone Run Stamina Surcharge",
+            8.0f,
+            new ConfigDescription(
+                "Extra stamina drain per second while prone-running, on top of normal drain. Still reduced by the same skills that reduce normal sprint drain.\n\nDreno extra de stamina (por segundo) ao rastejar acelerado, somado ao dreno normal. Ainda é reduzido pelas mesmas habilidades que reduzem o dreno de sprint normal.",
+                new AcceptableValueRange<float>(0f, 30f),
+                new ConfigurationManagerAttributes { Order = 81 }));
+
+        // Bug 2026-09-09: sem piso, reduzir a velocidade em prone (scroll wheel nativo) derrubava o
+        // Animator.speed perto de 0 — e esse multiplicador é GLOBAL (toda animação do personagem,
+        // não só a locomoção), causando câmera lenta absurda até em levantar/mirar. Ver
+        // ProneRunSpeedDriverPatch.
+        _ProneRunMinSpeedFloor = Config.Bind(
+            CrouchProneRunSection,
+            "Prone Run Min Speed Floor",
+            0.4f,
+            new ConfigDescription(
+                "Minimum Animator playback multiplier while prone, no matter how far the native scroll-wheel speed adjustment is reduced. Prevents the whole character (not just crawling) from going into extreme slow motion. 1.0 = no reduction allowed.\n\nMultiplicador mínimo de playback do Animator em prone, não importa o quanto o ajuste nativo de velocidade (scroll wheel) seja reduzido. Evita que o personagem inteiro (não só o rastejo) entre em câmera lenta extrema. 1.0 = não permite nenhuma redução.",
+                new AcceptableValueRange<float>(0.1f, 1.0f),
+                new ConfigurationManagerAttributes { Order = 80 }));
 
         // Item 017 (F1): o waypoint por Stance 0 ao mirar é POR STANCE — ver BindStance (seção de cada Stance).
 
@@ -1162,6 +1321,26 @@ public class Plugin : BaseUnityPlugin
                 null,
                 new ConfigurationManagerAttributes { IsAdvanced = true, Order = -4 }));
 
+        // Item 018 (spy) — bug "prone-run: teto muda, velocidade real não" sobreviveu ao fix da
+        // 2.20.2 (PlayerAnimatorEnableSprint). Este overlay mostra ao vivo todos os valores que a
+        // teoria (baseada em Assembly) diz que deveriam mudar — se algum não mudar, é ali que a
+        // teoria está errada. Ver ProneRunDebugUI.
+        _DebugProneRun = Config.Bind(
+            DebugSettings,
+            "Debug Prone Run",
+            false,
+            new ConfigDescription(
+                "Shows on screen the live state of the prone-run feature: which native movement " +
+                "state is active, MaxSpeed/CharacterMovementSpeed/ClampedSpeed/SmoothedCharacterMovementSpeed " +
+                "(all normalized factors, not m/s), and the actual Animator \"Speed\" parameter value. " +
+                "Use this to diagnose why the speed boost isn't visible in-game.\n\nMostra na tela o " +
+                "estado ao vivo do prone-run: qual estado nativo de movimento está ativo, " +
+                "MaxSpeed/CharacterMovementSpeed/ClampedSpeed/SmoothedCharacterMovementSpeed (todos " +
+                "fatores normalizados, não m/s), e o valor real do parâmetro \"Speed\" do Animator. " +
+                "Use isso pra diagnosticar por que o boost de velocidade não aparece no jogo.",
+                null,
+                new ConfigurationManagerAttributes { IsAdvanced = true, Order = -5 }));
+
         // ========================================
         // STANCE STAMINA + VELOCIDADE (backlog 001) — 5 props × 4 stances
         // ========================================
@@ -1260,6 +1439,19 @@ public class Plugin : BaseUnityPlugin
         // sumir num update do EFT, queremos `[enable] FAIL` no log — não uma exceção que derruba o resto.
         SafeEnable("ApplyComplexRotationPatch", () => new Patches.ApplyComplexRotationPatch());
         SafeEnable("HoldBreathPatch", () => new Patches.HoldBreathPatch());
+        // Item 018 — correr agachado / rastejar rápido.
+        SafeEnable("CrouchRunEnableSprintPatch", () => new Patches.CrouchRunEnableSprintPatch());
+        SafeEnable("SprintStateEnableSprintSyncPatch", () => new Patches.SprintStateEnableSprintSyncPatch());
+        SafeEnable("CrouchRunMaxSpeedPatch", () => new Patches.CrouchRunMaxSpeedPatch());
+        // fix 2026-09-09: ProneRunObservePatch (escutava só ProneMoveStateClass.EnableSprint) trocado
+        // pelos dois patches abaixo, que escutam o input de sprint no nível de Player — funciona
+        // independente de o prone estar parado ou andando no momento do aperto de tecla.
+        SafeEnable("PlayerToggleSprintPatch", () => new Patches.PlayerToggleSprintPatch());
+        SafeEnable("PlayerEnableSprintPatch", () => new Patches.PlayerEnableSprintPatch());
+        SafeEnable("ProneRunMaxSpeedPatch", () => new Patches.ProneRunMaxSpeedPatch());
+        SafeEnable("ProneRunSpeedDriverPatch", () => new Patches.ProneRunSpeedDriverPatch());
+        SafeEnable("ProneMoveExitResetPatch", () => new Patches.ProneMoveExitResetPatch());
+        SafeEnable("ProneHandsBusyMovementBlockPatch", () => new Patches.ProneHandsBusyMovementBlockPatch());
         // Áudio NÃO é carregado aqui (cena de menu): a transição p/ o jogo descarrega os clips
         // (length vira 0). Carregamento é disparado em GameWorld.OnGameStarted via HoldBreathPatch.OnRaidStart().
 
@@ -1322,16 +1514,32 @@ public class Plugin : BaseUnityPlugin
         SafeEnable("ActionStanceOnIdlePatch", () => new Patches.ActionStanceOnIdlePatch());
         SafeEnable("ActionStanceCheckFireModePatch", () => new Patches.ActionStanceCheckFireModePatch());
 
-        // Item 010: Manual Chambering
+        // Item 010: Manual Chambering & Bolt Action
         SafeEnable("StartEquipWeapPatch", () => new Patches.StartEquipWeapPatch());
+        SafeEnable("StartEquipResetPatch", () => new Patches.StartEquipResetPatch());
+        SafeEnable("ReloadExternalMagChamberPatch", () => new Patches.ReloadExternalMagChamberPatch());
         SafeEnable("StartReloadResetPatch", () => new Patches.StartReloadResetPatch());
-        SafeEnable("SetAmmoCompatiblePatch", () => new Patches.SetAmmoCompatiblePatch());
-        SafeEnable("SetAmmoOnMagPatch", () => new Patches.SetAmmoOnMagPatch());
-        SafeEnable("PreChamberLoadPatch", () => new Patches.PreChamberLoadPatch());
+        SafeEnable("IdleStartEventPatch", () => new Patches.IdleStartEventPatch());
+        SafeEnable("ReloadIdleStartEventPatch", () => new Patches.ReloadIdleStartEventPatch());
+        SafeEnable("ReloadResetPatch", () => new Patches.ReloadResetPatch());
+        SafeEnable("ManualBoltActionPatch", () => new Patches.ManualBoltActionPatch());
+        SafeEnable("ManualBoltActionStartPatch", () => new Patches.ManualBoltActionStartPatch());
+        SafeEnable("ManualBoltActionNetPatch", () => new Patches.ManualBoltActionNetPatch());
         SafeEnable("ManualChamberingInputPatch", () => new Patches.ManualChamberingInputPatch());
+        SafeEnable("ChamberCheckModelCleanupPatch", () => new Patches.ChamberCheckModelCleanupPatch());
+        SafeEnable("ChamberUnloadModelCleanupPatch", () => new Patches.ChamberUnloadModelCleanupPatch());
+        SafeEnable("WeaponBoltActionGetterPatch", () => new Patches.WeaponBoltActionGetterPatch());
+        SafeEnable("DryFireFeedbackPatch", () => new Patches.DryFireFeedbackPatch());
+        SafeEnable("CheckChamberArmPatch", () => new Patches.CheckChamberArmPatch());
+        SafeEnable("RechamberOperationEmptyMagFixPatch", () => new Patches.RechamberOperationEmptyMagFixPatch());
+        SafeEnable("InstallMagChamberPatch", () => new Patches.InstallMagChamberPatch());
+        SafeEnable("InstallMagStartPatch", () => new Patches.InstallMagStartPatch());
+        SafeEnable("InstallMagInsertedPatch", () => new Patches.InstallMagInsertedPatch());
+        SafeEnable("InstallMagResetPatch", () => new Patches.InstallMagResetPatch());
 
         // Item 019: Chamber Check Ammo UI
         SafeEnable("ChamberCheckAmmoPatch", () => new Patches.ChamberCheckAmmoPatch());
+        SafeEnable("MagCheckDelayPatch", () => new Patches.MagCheckDelayPatch());
         // PickupAimingSafetyPatch devolvido ao TRL-Fixes na v2.13.0 — é remendo sobre bug do jogo base
         // (trava de controles ao pegar item do chão), sem relação com posturas/mobilidade. Ver
         // mods/TRL-Fixes/docs/handoff-pickup-aiming-safety.md.
@@ -1352,6 +1560,9 @@ public class Plugin : BaseUnityPlugin
 
         // [P-11.1]: overlay de debug das causas de teto de velocidade (toggle no F12).
         gameObject.AddComponent<SpeedLimitDebugUI>();
+
+        // Item 018 (spy): overlay de debug do estado real do prone-run (toggle no F12).
+        gameObject.AddComponent<ProneRunDebugUI>();
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]

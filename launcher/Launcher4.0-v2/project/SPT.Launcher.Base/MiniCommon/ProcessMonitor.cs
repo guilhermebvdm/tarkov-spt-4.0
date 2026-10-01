@@ -42,17 +42,26 @@ namespace SPT.Launcher.MiniCommon
 
         private void OnPollEvent(object source, ElapsedEventArgs e)
         {
-            Process[] clientProcess = Process.GetProcessesByName(processName);
-
-            // client instances still running
-            if (clientProcess.Length > 0)
+            Process[] clientProcesses = Process.GetProcessesByName(processName);
+            try
             {
-                aliveCallback(this);
-                return;
-            }
+                // client instances still running
+                if (clientProcesses.Length > 0)
+                {
+                    aliveCallback(this);
+                    return;
+                }
 
-            // all client instances stopped running
-            exitCallback(this);
+                // all client instances stopped running
+                exitCallback(this);
+            }
+            finally
+            {
+                foreach (var p in clientProcesses)
+                {
+                    try { p.Dispose(); } catch { }
+                }
+            }
         }
     }
 }

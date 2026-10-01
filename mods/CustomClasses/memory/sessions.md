@@ -6,6 +6,7 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados). Ca
 
 ## Estado atual (snapshot ao fim da última sessão)
 
+- **Item 090 (Velocidade da animação de cura não replica no Fika) IMPLEMENTADO (Sessão 17, 2026-09-09):** O multiplicador de velocidade da animação de cura agora replica para outros jogadores assinando o hook genérico do FIKA (item 005) em `ClassMedicReplicationHook.cs` por reflexão de tipo. Reusa `ClassIdentities.ClassIdOf` e `MedicTiming.FactorFor`/`IsSurgery`. `Plugin.cs` ganhou dependência suave `com.fika.core` e registro com try/catch. Build/instalação no jogo não foi executada a pedido do usuário (restrita ao repo). Validação in-game pendente (P-17.1).
 **Mod híbrido completo e maduro.** Itens **001–037 entregues** (🟢): 11 classes + identidade visual + **editor web Blazor completo** (018–029) + **épico UX (030–037) EXECUTADO** (autônomo via Workflow, 2026-06-11→12). **Tudo UNIFICADO em `main` e PUSHADO** (2026-07-06: merges `feat/trl-items-autodev` + `feat/053-perks-property-model`, worktree `wt-057` removido, `main`=`origin/main`). Relatório: `.handoffs/handoff-2026-06-12-overnight-ux-030-037.md`.
 
 **Redesign 11→6 — épico 050 (perks/drawbacks) IMPLEMENTADO (Sessão 10, 2026-06-23).** Roster: **6 + Peladão** (Médico/Fuzileiro/Caçador/**Furtivo**/Saqueador/Tanque); arquitetura **"tudo-é-perk-flat"** (signatures = perks **flat client-side no F12**, não skills custom — pivot do antigo "tudo-é-skill-real"). **050.0–050.4 compilam** (~21 efeitos: Bulwark, Pack Mule, Heavy Frame, Overladen, Rooted, Execution, Shaky Hands, Rattled, **Adrenaline** state-machine, Cool Under Fire, Ghost Step, Loud Operator, Silent Looter, **Bunker** armas pesadas, Sharpshooter, Iron Lungs…) — **NADA validado in-game** (🔴 P-10.1; vários gates de runtime). Item 047 (matriz) entregue. Design vivo: [class-design.md](../docs/class-design.md) (overview+levers ⚫ arquivados); matriz `scripts/class-matrix.mjs`. **Restante no backlog:** 052 (validação final) e 054 (rename `--force-config`); 053/055/056/059 e 057 ENTREGUES aguardando re-teste (P-11.1); 058 DESTRAVADO — gate V fechado (P-12.1); 051 speccado com decisão (a) (P-12.2). **Deferidos:** Combat Medic (transpiler), Quick Hands (server-side), Iron Lungs sway. **Sessão 13 (07-04→07-06):** 051/054/057(fix-04)/058/060 IMPLEMENTADOS + code-review adversarial em lote (19 findings, 18 aplicados) + **balance board B1–B19** ([balance-review-2026-07-05.md](../backlog/balance-review-2026-07-05.md)) + **baseline v2 (062) EXECUTADA** (6 classes re-extraídas dos perfis novos; gate passou, resta re-teste do Peladão). Worktree extinto — tudo em `main`. **Sessão 14 (2026-07-10):** **Onda 0 do balance APLICADA** (B1·B2·B3·B4·B17 — Médico deixa de ser negativo + ganha 1º perk vivo; cards do painel CLASS agora leem o F12 vivo; Ghost Step/Iron Lungs alinhados ao card). Ondas 1/2 do board seguem pendentes de ✅. **+ REORG COMPLETA DO F12**: 9 seções (uma por classe + Sistema/Interface + Vanilla Skill Fixes; prefixo numérico EN), **Pack Mule e Loud Operator DESDOBRADOS por classe** (2 configs cada; helpers `PackMule.LocalBonus()`/`LoudOperator.Mult()`), descrições bilíngues PT/EN, docs `PROPRIEDADES.md`+`PROPERTIES.md`, `.cfg` migrado (valores preservados, 7 órfãs removidas).
@@ -25,6 +26,7 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados). Ca
 
 ## Pendências / próximos passos conhecidos
 
+- 🔴 [P-17.1] (aberta 2026-09-09) **Validar in-game a replicação de velocidade de cura no Fika (item 090)** — Testar em coop Fika com 2+ jogadores: médico usando kit cirúrgico e auto-cura com perk Rapid Care / Swift Surgeon; confirmar que jogador observador vê a animação na velocidade acelerada correta. Testar também cura de aliado via ICM. Categoria: 🔴 bloqueador de validação.
 - 🟡 [P-13.1] (aberta 2026-07-06) **Gate consolidado da leva 051/054/057/058/060 + UI r5 + re-teste do Peladão** (skin Tagilla/BEAR Vacation + sem faca + sem container). Checklist detalhado por tela na conversa de 2026-07-10 e nos 05-asbuild; itens críticos: deploy em **coop 2+ como CLIENTE** (057), GP-25 XP ao vivo + RealRecoil OFF (058), estamina de braço Hunter/Tank (051). QUANDO PASSAR: resolve o grosso de P-10.1. (Supersede P-11.1/P-12.1.)
 - 🟡 [P-13.2] (aberta 2026-07-05, atualizada 2026-07-10) **Decisões do balance board B1–B19** ([balance-review](../backlog/balance-review-2026-07-05.md)) + RN-03 (mastery por classe). **Onda 0 APLICADA 2026-07-10** (B1·B2·B3·B4·B17 — Sessão 14). **Restam:** Onda 1 (.jsonc: B5·B8·B9·B10·B11·B18), Onda 2 (combate: B6·B7·B15·B16, só se a percepção não corrigir sozinha), estruturais (B13·B14·B19) e RN-03 — todos aguardando ✅ do usuário no §2 do board.
 - 🟢 [P-14.1] (aberta 2026-07-10) **Card fantasma do Shaky Hands**: com B1 (`ShakyHandsEnabled` default OFF), o efeito não roda, mas o card "Mãos Trêmulas ×1.25 recuo" AINDA aparece na aba CLASS do Médico (o catálogo não checa o toggle `Enabled`, só os valores). Coerente com o board (B1 pediu só o default), mas contra o espírito de transparência do B4. Follow-up natural: cards refletirem o `Enabled` (esconder ou marcar "desativado") — encaixa com B4/B19. Decisão de UX pendente do usuário.
@@ -39,6 +41,39 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados). Ca
 - 🟡 [P-7.x] (abertas 2026-06-11/12, GC 2026-07-15 → MANTIDAS de baixa prioridade) **Housekeeping/QA residual do épico UX 030–037** (já entregue e validado): medição quantitativa do 037 (ex-P-7.10), achados de review adiados 036/037/034 (ex-P-7.11), validações in-game da sessão de 2026-06-11 013/015/017 (ex-P-7.4), housekeeping do editor CR-EP-10/CR2-EP-05/rota picker-test (ex-P-7.5). Consolidadas: 4 bullets → 1 (o épico está entregue; são otimizações/QA sem prioridade — promover a backlog se voltarem a importar).
 
 ## Sessões
+
+### 2026-09-09 01:05 (GMT-3) — Sessão 17: Replicação de velocidade de cura no Fika (item 090)
+
+**Tema central:** Ciclo completo de backlog (spec funcional → review-spec → spec técnica → review técnica 01 → `/code-mod` → `/code-review` 01 → `/apply-code-review`) do item 090 — replicação da velocidade da animação de cura para outros jogadores no FIKA via `ObservedMedsSpeedHook`.
+
+**Decisões-chave:**
+- **Assinatura por reflexão no hook genérico do FIKA (`ObservedMedsSpeedHook`):** `ClassMedicReplicationHook.Register()` resolve `Fika.Core.ObservedMedsSpeedHook` via reflexão em tempo de execução e conecta o delegate `ResolveFactor(Player, Item)`. Não introduz acoplamento binário rígido em tempo de compilação.
+- **Reuso integral da lógica de resolução de fator:** `ResolveFactor` reusa `ClassIdentities.ClassIdOf(player)` (item 057) e `MedicTiming.IsSurgery`/`FactorFor` (item 072) — nenhuma duplicação de fórmulas ou regras de classe.
+- **Dependência suave e ordem de carga:** Adicionado `[BepInDependency("com.fika.core", BepInDependency.DependencyFlags.SoftDependency)]` no `Plugin.cs` (PA-01-01), garantindo que se o FIKA estiver presente, ele carregue antes e disponibilize o tipo do hook.
+- **Fail-open e diagnóstico transparente:** Se o FIKA ou o hook não estiverem presentes (versão upstream ou fork sem o item 005), o registro falha silenciosamente com `LogWarning` sem interromper o carregamento do `CustomClasses` (PA-01-02, PA-01-03).
+- **Proteção contra sobrescrita acidental:** `CR-01-01` aplicado via `/apply-code-review` em `ClassMedicReplicationHook.cs` adicionando guard que emite `LogWarning` caso `ExtraSpeedMultiplier` já possua outro delegate assinado antes de sobrescrever.
+
+**Lições / hipóteses descartadas:**
+- *Causa raiz confirmada no decompile:* O multiplicador nativo de velocidade (`SetUseTimeMultiplier`) só é aplicado quando `ActiveHealthController` existe (`Player.cs:19549-19568`), o que só é verdadeiro no cliente dono do personagem. Proxies remotos (`ObservedPlayer`) não possuem esse controller e usavam velocidade vanilla.
+- *Opção A (fórmula de fallback por reflexão no cliente) descartada:* Optado pela Opção B (hook nativo exportado pelo fork do FIKA, item 005) por ser limpa, performática (zero alocações) e genérica para qualquer mod.
+
+**Atividade cronológica:**
+1. Diagnóstico do bug relatado pelo usuário (velocidade de cura não replicava no Fika).
+2. Coordenação técnica com o fork do FIKA (criação do item irmão FIKA/005).
+3. Elaboração da spec funcional (`01-spec.md`), spec técnica (`02-spec-tech.md`) e review técnica (`03-spec-tech-review-01.md` — 3 achados PA-01-01 a PA-01-03 resolvidos).
+4. Implementação via `/code-mod`: criado `ClassMedicReplicationHook.cs` e ajustado `Plugin.cs`.
+5. `/code-review` 01 identificou CR-01-01 (guard de sobrescrita do delegate), aplicado via `/apply-code-review`.
+6. As-built (`05-asbuild.md`) gerado. Build/instalação em `D:/SPT` não executado por instrução do usuário ("apenas no repositório").
+
+**Pendências abertas nesta sessão:**
+- [P-17.1] (aberta 2026-09-09) 🔴 Validar in-game a replicação de velocidade de cura no Fika (item 090) em sessão coop com 2+ jogadores.
+
+**Cross-refs:**
+- Item irmão: `mods/FIKA/backlog/005-hook-velocidade-cura-observada/` (`ObservedMedsSpeedHook.cs`).
+- Conecta com os perks de médico do item 072 (`MedicTiming.cs`) e identidade de classe do item 057 (`ClassIdentities.cs`).
+- Artefatos do item: `mods/CustomClasses/backlog/090-velocidade-cura-nao-replica/`.
+
+---
 
 ### 2026-08-02 — Correção da Exceção KeyNotFoundException no MedrosoPatch (082 / ScavengerTremor)
 

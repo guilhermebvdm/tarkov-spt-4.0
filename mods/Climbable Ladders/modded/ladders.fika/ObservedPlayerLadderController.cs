@@ -1,4 +1,4 @@
-﻿using EFT;
+using EFT;
 using tarkin.ladders.bep;
 using tarkin.ladders.shared;
 using UnityEngine;
@@ -9,6 +9,7 @@ using DamageInfo = DamageInfoStruct;
 
 namespace tarkin.ladders.fika
 {
+    [DefaultExecutionOrder(100)]
     public class ObservedPlayerLadderController : MonoBehaviour
     {
         private Player player;
@@ -18,11 +19,14 @@ namespace tarkin.ladders.fika
         private float targetAngle = 0f;
         private float angleVelocity = 0f;
 
-        private readonly float smoothTime = 0.1f;
+        private const float SmoothTime = 0.08f;
 
         public void Init(Ladder ladder)
         {
             this.player = GetComponent<Player>();
+
+            // ref: AUD-01-02 Oculta arma no clone remoto em 3ª pessoa
+            player?.HideWeapon();
 
             body = new ProceduralLadderBody(player, ladder);
 
@@ -50,7 +54,7 @@ namespace tarkin.ladders.fika
                 currentVisualAngle,
                 targetAngle,
                 ref angleVelocity,
-                smoothTime
+                SmoothTime
             );
 
             body.Update(currentVisualAngle);
@@ -59,9 +63,18 @@ namespace tarkin.ladders.fika
         void OnDestroy()
         {
             if (player != null)
+            {
                 player.OnPlayerDead -= Player_OnPlayerDead;
 
+                // ref: AUD-01-02 Restaura arma ao sair da escada se o jogador estiver vivo
+                if (player.HealthController != null && player.HealthController.IsAlive)
+                {
+                    player.RevealWeapon();
+                }
+            }
+
             body?.Dispose();
+            body = null;
         }
     }
 }

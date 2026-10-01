@@ -1,96 +1,264 @@
 [
-    {
-      "dismember_calibers": {
-        "Caliber12g": 1.0,
-        "Caliber86x70": 0.5,
-        "Caliber127x55": 0.5,
-        "Caliber20g": 0.8,
-        "Caliber23x75": 1.0,
-        "Caliber9x33R": 0.07,
-        "Caliber545x39": 0.05,
-        "Caliber762x39": 0.1,
-        "Caliber762x51": 0.35,
-        "Caliber762x54R": 0.2,
-        "Caliber762x35": 0.2,
-        "Caliber556x45NATO": 0.1,
-        "Caliber9x39": 0.1,
-        "Caliber127x33": 0.0,
-        "Caliber68x51": 0.7,
-        "Caliber9x19PARA": 0.0,
-        "9x19PARA": 0.0,
-        "Caliber9x18PM": 0.0,
-        "9x18PM": 0.0,
-        "Caliber1143x23ACP": 0.0,
-        "1143x23ACP": 0.0,
-        "Caliber762x25TT": 0.0,
-        "762x25TT": 0.0,
-        "Caliber9x21": 0.0,
-        "9x21": 0.0,
-        "Caliber46x30": 0.0,
-        "46x30": 0.0,
-        "Caliber57x28": 0.0,
-        "57x28": 0.0
+  {
+    "dismember_calibers": {
+      "Caliber1143x23ACP": {
+        "arm": 0.0,
+        "leg": 0.0,
+        "head_off": 0.0,
+        "head_burst": 0.5
+      },
+      "Caliber127x108": {
+        "arm": 1.0,
+        "leg": 1.0,
+        "head_off": 1.0,
+        "head_burst": 1.0
+      },
+      "Caliber127x33": {
+        "arm": 1.0,
+        "leg": 1.0,
+        "head_off": 0.6,
+        "head_burst": 1.0
+      },
+      "Caliber127x55": {
+        "arm": 0.8,
+        "leg": 0.7,
+        "head_off": 0.0,
+        "head_burst": 1.0
+      },
+      "Caliber127x99": {
+        "arm": 1.0,
+        "leg": 1.0,
+        "head_off": 1.0,
+        "head_burst": 1.0
+      },
+      "Caliber12g": {
+        "arm": 0.7,
+        "leg": 0.7,
+        "head_off": 0.65,
+        "head_burst": 1.0
+      },
+      "Caliber20x1mm": {
+        "arm": 0.0,
+        "leg": 0.0,
+        "head_off": 0.0,
+        "head_burst": 0.0
+      },
+      "Caliber26x75": {
+        "arm": 0.0,
+        "leg": 0.0,
+        "head_off": 0.0,
+        "head_burst": 0.0
+      },
+      "Caliber30x29": {
+        "arm": 0.0,
+        "leg": 0.0,
+        "head_off": 0.0,
+        "head_burst": 0.0
+      },
+      "Caliber366TKM": {
+        "arm": 0.5,
+        "leg": 0.4,
+        "head_off": 0.0,
+        "head_burst": 0.7
+      },
+      "Caliber40mmRU": {
+        "arm": 0.0,
+        "leg": 0.0,
+        "head_off": 0.0,
+        "head_burst": 0.0
+      },
+      "Caliber46x30": {
+        "arm": 0.0,
+        "leg": 0.0,
+        "head_off": 0.0,
+        "head_burst": 0.0
+      },
+      "Caliber545x39": {
+        "arm": 0.0,
+        "leg": 0.0,
+        "head_off": 0.0,
+        "head_burst": 0.4
+      },
+      "Caliber556x45NATO": {
+        "arm": 0.0,
+        "leg": 0.0,
+        "head_off": 0.0,
+        "head_burst": 0.5
+      },
+      "Caliber57x28": {
+        "arm": 0.0,
+        "leg": 0.0,
+        "head_off": 0.0,
+        "head_burst": 0.0
+      },
+      "Caliber68x51": {
+        "arm": 0.6,
+        "leg": 0.5,
+        "head_off": 0.0,
+        "head_burst": 0.7
+      },
+      "Caliber725": {
+        "arm": 0.0,
+        "leg": 0.0,
+        "head_off": 0.0,
+        "head_burst": 0.0
+      },
+      "Caliber762x25TT": {
+        "arm": 0.0,
+        "leg": 0.0,
+        "head_off": 0.0,
+        "head_burst": 0.0
+      },
+      "Caliber762x35": {
+        "arm": 0.55,
+        "leg": 0.45,
+        "head_off": 0.0,
+        "head_burst": 0.65
+      },
+      "Caliber762x39": {
+        "arm": 0.5,
+        "leg": 0.4,
+        "head_off": 0.0,
+        "head_burst": 0.6
+      },
+      "Caliber762x51": {
+        "arm": 0.7,
+        "leg": 0.6,
+        "head_off": 0.3,
+        "head_burst": 0.8
+      },
+      "Caliber762x54R": {
+        "arm": 0.7,
+        "leg": 0.6,
+        "head_off": 0.3,
+        "head_burst": 0.8
+      },
+      "Caliber86x70": {
+        "arm": 1.0,
+        "leg": 1.0,
+        "head_off": 0.8,
+        "head_burst": 0.9
+      },
+      "Caliber9x18PM": {
+        "arm": 0.0,
+        "leg": 0.0,
+        "head_off": 0.0,
+        "head_burst": 0.0
+      },
+      "Caliber9x19PARA": {
+        "arm": 0.0,
+        "leg": 0.0,
+        "head_off": 0.0,
+        "head_burst": 0.0
+      },
+      "Caliber9x21": {
+        "arm": 0.0,
+        "leg": 0.0,
+        "head_off": 0.0,
+        "head_burst": 0.0
+      },
+      "Caliber9x33R": {
+        "arm": 0.0,
+        "leg": 0.0,
+        "head_off": 0.0,
+        "head_burst": 0.0
+      },
+      "Caliber9x39": {
+        "arm": 0.0,
+        "leg": 0.0,
+        "head_off": 0.0,
+        "head_burst": 0.4
+      },
+      "Caliber20g": {
+        "arm": 0.7,
+        "leg": 0.7,
+        "head_off": 0.65,
+        "head_burst": 1.0
       }
-    },
-    {
-        "bleed_calibers": {
-          "12g": 1.0,
-          "86x70": 0.8,
-          "127x55": 0.8,
-          "20g": 0.8,
-          "23x75": 1.0,
-          "9x33R": 0.07,
-          "545x39": 0.4,
-          "762x39": 0.5,
-          "762x51": 0.9,
-          "762x54R": 1.0,
-          "762x35": 0.5,
-          "1143x23ACP": 0.2,
-          "9x19PARA": 0.2,
-          "9x18PM": 0.2,
-          "762x25TT": 0.2,
-          "556x45NATO": 0.6,
-          "9x39": 0.4,
-          "127x108": 1.0,
-          "127x33": 0.8,
-          "68x51": 0.7
-        }
-    },
-    {
-      "ragdoll_limb_chances": {
-        "Head": 0.2,
-        "Chest": 0.5,
-        "Stomach": 0.7,
-        "Thighs": 0.8,
-        "Arms": 1
-      }
-    },
-    {
-      "light_bleed_calibers": [
-        "545x39",
-        "762x39",
-        "556x45NATO",
-        "46x30",
-        "57x28",
-        "762x25TT",
-        "9x18PM",
-        "9x19PARA",
-        "9x21",
-        "762x35",
-        "127x55",
-        "23x75",
-        "9x39",
-        "762x51",
-        "762x54R",
-        "12g",
-        "127x33",
-        "68x51"
-      ]
-    },
-    {
-      "heavy_bleed_calibers": [
-        "86x70",
-        "127x108"
-      ]
     }
-  ]
+  },
+  {
+    "dismember_exceptions": {
+      "patron_23x75_barricade": {
+        "arm": 1.0,
+        "leg": 1.0,
+        "head_off": 0.9,
+        "head_burst": 1.0
+      },
+      "patron_23x75_star": {
+        "arm": 0.0,
+        "leg": 0.0,
+        "head_off": 0.0,
+        "head_burst": 0.0
+      }
+    }
+  },
+  {
+    "dismember_multiprojectile_curve": {
+      "momentum_min_ns": 3.0,
+      "momentum_max_ns": 15.0,
+      "head_burst_multiplier": 1.5
+    }
+  },
+  {
+    "bleed_calibers": {
+      "12g": 1.0,
+      "86x70": 0.8,
+      "127x55": 0.8,
+      "20g": 0.8,
+      "23x75": 1.0,
+      "9x33R": 0.07,
+      "545x39": 0.4,
+      "762x39": 0.5,
+      "762x51": 0.9,
+      "762x54R": 1.0,
+      "762x35": 0.5,
+      "1143x23ACP": 0.2,
+      "9x19PARA": 0.2,
+      "9x18PM": 0.2,
+      "762x25TT": 0.2,
+      "556x45NATO": 0.6,
+      "9x39": 0.4,
+      "127x108": 1.0,
+      "127x33": 0.8,
+      "68x51": 0.7
+    }
+  },
+  {
+    "ragdoll_limb_chances": {
+      "Head": 0.2,
+      "Chest": 0.5,
+      "Stomach": 0.7,
+      "Thighs": 0.8,
+      "Arms": 1
+    }
+  },
+  {
+    "light_bleed_calibers": [
+      "545x39",
+      "762x39",
+      "556x45NATO",
+      "46x30",
+      "57x28",
+      "762x25TT",
+      "9x18PM",
+      "9x19PARA",
+      "9x21",
+      "762x35",
+      "127x55",
+      "23x75",
+      "9x39",
+      "762x51",
+      "762x54R",
+      "12g",
+      "127x33",
+      "68x51"
+    ]
+  },
+  {
+    "heavy_bleed_calibers": [
+      "86x70",
+      "127x108"
+    ]
+  }
+]

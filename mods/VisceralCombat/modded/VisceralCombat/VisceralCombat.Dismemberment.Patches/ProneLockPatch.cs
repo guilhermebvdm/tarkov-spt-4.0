@@ -19,6 +19,9 @@ public class ProneLockPatch : ModulePatch
 	[PatchPrefix]
 	private static bool Prefix(BotLay __instance, ref bool value)
 	{
+		// ref: item 005 — toggle mestre desligado = comportamento vanilla (deixa levantar)
+		if (VisceralEntry.Instance == null || !VisceralEntry.Instance.IsCategoryActive(VisceralEntry.Instance.EnableDismemberment)) return true;
+
 		if (!value && __instance != null)
 		{
 			Player player = __instance.BotOwner_0?.GetPlayer;
@@ -45,6 +48,9 @@ public class ProneMoverDoPronePatch : ModulePatch
 	[PatchPrefix]
 	private static bool Prefix(BotMover __instance, ref bool val)
 	{
+		// ref: item 005 — toggle mestre desligado = comportamento vanilla (deixa levantar)
+		if (VisceralEntry.Instance == null || !VisceralEntry.Instance.IsCategoryActive(VisceralEntry.Instance.EnableDismemberment)) return true;
+
 		if (!val && __instance != null)
 		{
 			Player player = __instance.BotOwner_0?.GetPlayer;

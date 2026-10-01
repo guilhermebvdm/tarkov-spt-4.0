@@ -111,3 +111,39 @@ Aplica em `modded/` os achados de um `04-code-review-NN.md` marcados como **Acei
 - **Imutabilidade da review:** o documento de review original é **anotado**, nunca reescrito. Adicionar Resolução, marcar ✅/⏭️/⚠️, mas preservar o texto original do Problema/Sugestão.
 - **Compilação efetiva** (gerar `.dll`) **não** está no escopo deste comando — usar `/compile-mod` em seguida.
 - **Ambiguidade:** quando "Aceitar com modificação" tiver texto vago demais, **marcar ⚠️ Skip e perguntar** ao usuário em vez de inventar.
+
+---
+
+## 🔄 Fluxo Particionado para Mods Grandes e Complexos
+
+Para mods extensos com múltiplos subsistemas interdependentes (ex.: **FIKA**, **SAIN**, **RealismMod**), o processo de auditoria e correção deve ser **particionado em escopos lógicos controlados** para evitar análises superficiais, riscos de regressão e quebra de compatibilidade com mods de terceiros.
+
+```mermaid
+flowchart TD
+    subgraph Fase_A [Fase A: Diagnóstico & Auditoria por Partição]
+        A1[1. Delimitar Partição / Escopo Funcional] --> A2[2. Criar/Editar Plano de Implementação da Auditoria]
+        A2 --> A3[3. Rodar Code Review no Plano para Checagem de Cobertura]
+        A3 --> A4{4. Usuário Aprova o Plano?}
+        A4 -- Não / Ajustes --> A2
+        A4 -- Sim --> A5[5. Executar Auditoria & Gerar Relatório]
+        A5 --> A6{Mais Partições a Auditar?}
+        A6 -- Sim --> A1
+    end
+
+    subgraph Fase_B [Fase B: Correção & Otimização por Partição]
+        B1[6. Criar/Editar Plano de Implementação para Correção] --> B2[7. Rodar Code Review no Plano de Correção]
+        B2 --> B3{8. Usuário Aprova o Plano de Correção?}
+        B3 -- Não / Ajustes --> B1
+        B3 -- Sim --> B4[9. Aplicar Correções em modded/ & Validar Build]
+        B4 --> B5{Mais Partições a Corrigir?}
+        B5 -- Sim --> B1
+        B5 -- Não --> B6[10. Conclusão da Suíte & Validação Final]
+    end
+
+    A6 -- Todas Concluídas --> B1
+```
+
+### Regras do Fluxo Particionado:
+1. **Preservação Estrita do Código Original e Compatibilidade de Terceiros:** Manter sempre as classes, métodos, propriedades, eventos e assinaturas públicas originais e intactos para assegurar o perfeito funcionamento de mods de terceiros (ex.: *Speak From Tarkov*, *SAIN*, *Dynamic Maps* e outros mods do servidor). Evitar a qualquer custo modificar ou renomear contratos públicos que sirvam de base para o ecossistema.
+2. **Ciclo de Aprovação Explícita:** Cada partição requer validação do Plano de Implementação antes da execução do diagnóstico e antes da aplicação das alterações em código.
+3. **Múltiplas Rodadas:** É incentivado rodar repetições da auditoria sobre o código resultante para caçar corner cases que tenham passado despercebidos.

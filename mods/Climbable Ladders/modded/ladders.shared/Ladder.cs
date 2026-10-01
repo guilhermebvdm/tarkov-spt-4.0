@@ -16,6 +16,7 @@ namespace tarkin.ladders.shared
 #endif
     {
         public static bool TryGetLadderInstanceByNetId(string netId, out Ladder ladder) => registry.TryGetValue(netId, out ladder);
+        public static void ClearRegistry() => registry.Clear();
         private static Dictionary<string, Ladder> registry = new Dictionary<string, Ladder>();
 
         public string NetId => gameObject.name;
@@ -40,13 +41,20 @@ namespace tarkin.ladders.shared
         public bool IsSurfaceSoundIdentified { get; private set; }
         public void TryIdentifySurfaceSound(Vector3 contactPoint)
         {
-            if (Physics.OverlapSphereNonAlloc(contactPoint, 0.1f, overlapCols, 1 << 12) > 0)
+            try
             {
-                if (overlapCols[0].TryGetComponent(out EFT.Ballistics.BallisticCollider ballistic))
+                if (Physics.OverlapSphereNonAlloc(contactPoint, 0.1f, overlapCols, 1 << 12) > 0)
                 {
-                    IsSurfaceSoundIdentified = true;
-                    SurfaceSound = ballistic.SurfaceSound;
+                    if (overlapCols[0].TryGetComponent(out EFT.Ballistics.BallisticCollider ballistic))
+                    {
+                        IsSurfaceSoundIdentified = true;
+                        SurfaceSound = ballistic.SurfaceSound;
+                    }
                 }
+            }
+            finally
+            {
+                overlapCols[0] = null; // ref: AUD-01-04 liberação imediata do heap
             }
         }
         public BaseBallistic.ESurfaceSound SurfaceSound { get; private set; } = BaseBallistic.ESurfaceSound.MetalThin;

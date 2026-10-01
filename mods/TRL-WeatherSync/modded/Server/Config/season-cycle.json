@@ -1,0 +1,26 @@
+// Ordem e durações conforme decisão da Sessão 1 (memory/sessions.md): 7 dias para Verão/Inverno (fase única),
+// 3.5+3.5 dias para as sub-fases de transição de Primavera e Outono. Total: 28 dias (ciclo anual completo).
+// AUTUMN é a primeira entrada de propósito — corner case "primeira execução -> Outono" (spec funcional).
+// Editar este arquivo exige reiniciar o SPT Server para o efeito colar (PA-01-02). Comentários // são
+// permitidos (JsonUtil.cs:20, ReadCommentHandling.Skip) mas chaves desconhecidas NÃO são (JsonUtil.cs:24,
+// UnmappedMemberHandling.Disallow — só os campos abaixo, nada além deles).
+{
+  "referenceEpochUtc": 1757462400,
+  "cycleOrder": [
+    { "season": "AUTUMN", "days": 3.5 },
+    { "season": "AUTUMN_LATE", "days": 3.5 },
+    { "season": "WINTER", "days": 7 },
+    { "season": "SPRING_EARLY", "days": 3.5 },
+    { "season": "SPRING", "days": 3.5 },
+    { "season": "SUMMER", "days": 7 }
+  ],
+  "fixedSeason": null,
+  "weatherPresetWeight": {
+    "SUMMER":       { "SUNNY": 5, "RAINY": 1, "CLOUDY": 3 },
+    "AUTUMN":       { "SUNNY": 3, "RAINY": 2, "CLOUDY": 4 },
+    "AUTUMN_LATE":  { "SUNNY": 2, "RAINY": 3, "CLOUDY": 4 },
+    "WINTER":       { "SUNNY": 1, "RAINY": 4, "CLOUDY": 4 },
+    "SPRING_EARLY": { "SUNNY": 3, "RAINY": 3, "CLOUDY": 3 },
+    "SPRING":       { "SUNNY": 4, "RAINY": 2, "CLOUDY": 3 }
+  }
+}

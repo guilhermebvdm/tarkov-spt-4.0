@@ -1,5 +1,6 @@
 ﻿// Credits: Drakiaxyz/SPT
 
+using System;
 using System.Text.Json.Serialization;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;
@@ -42,7 +43,12 @@ internal class UpdateChecker(
     {
         try
         {
-            var httpClient = new HttpClient();
+            // ref: AUD-01-24 — using garante Dispose; AUD-01-26 — Timeout evita pendência indefinida
+            // se a API do GitHub não responder.
+            using var httpClient = new HttpClient
+            {
+                Timeout = TimeSpan.FromSeconds(5)
+            };
 
             // These headers are _required_ by GitHub API
             httpClient.DefaultRequestHeaders.UserAgent.TryParseAdd("CJ-SPT");
@@ -78,9 +84,12 @@ internal class UpdateChecker(
                 }
             }
         }
-        // We ignore errors, this isn't critical to run, and we don't want to scare users
-        catch 
-        { }
+        // We ignore errors, this isn't critical to run, and we don't want to scare users —
+        // but ref: AUD-01-25, log at debug level so a broken check is at least diagnosable.
+        catch (Exception ex)
+        {
+            logger.Debug($"UpdateChecker: falha ao verificar atualização — {ex.Message}");
+        }
     }
 }
 

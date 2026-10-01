@@ -1,0 +1,11 @@
+{
+  "name": "Simple-Declutter",
+  "upstream_url": "https://github.com/gitTerebi/Simple-Declutter.git",
+  "upstream_sha": "776b5560418db1eb8840b23de8ac9c2b54137c6f",
+  "upstream_branch": "3.11",
+  "forge_url": "",
+  "license": "Unknown",
+  "version_base": "unknown",
+  "spt_version": "",
+  "created_at": "2026-09-15T03:52:08Z"
+}

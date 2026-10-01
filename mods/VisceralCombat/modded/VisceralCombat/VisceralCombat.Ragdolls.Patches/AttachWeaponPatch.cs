@@ -15,6 +15,9 @@ public class AttachWeaponPatch : ModulePatch
 	[PatchPostfix]
 	private static void Postfix(RagdollClass __instance, Rigidbody weaponRigidbody)
 	{
+		// ref: item 005 (§5.5)
+		if (VisceralEntry.Instance == null || !VisceralEntry.Instance.VisceralCombatEnabled.Value) return;
+
 		SpringJoint component = ((Component)weaponRigidbody).gameObject.GetComponent<SpringJoint>();
 		if ((Object)(object)component != (Object)null)
 		{

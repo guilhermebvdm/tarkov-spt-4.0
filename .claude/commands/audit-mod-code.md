@@ -173,9 +173,20 @@ Verificação sistemática contra a base [docs/technical/spt-antipatterns.md](..
 
 ---
 
-### Dimensão 6: Threading e Segurança de Execução
+### Dimensão 6: Threading, Paralelização & Compatibilidade de API Pública
 
-- **Main Thread Safety:** Garantir que nenhuma thread secundária (`Task.Run`, `Thread`, `BackgroundWorker`) tente instanciar `UnityEngine.Object`, chamar `GameObject.GetComponent` ou acessar APIs do Unity sem despachar para a main thread.
+1. **Segurança de Main Thread (Unity Thread-Safety):**
+   - Garantir que nenhuma thread secundária (`Task.Run`, `Thread`, `IJobParallelFor`, `BackgroundWorker`) acesse diretamente APIs restritas do Unity (`UnityEngine.Object`, `Transform`, `GameObject.GetComponent`, `NavMesh.CalculatePath`) sem prévia coleta ou despacho para a Main Thread.
+
+2. **Offloading Multithread & Unity Jobs (Desafogo da Main Thread):**
+   - Identificar rotinas matemáticas pesadas, loops em coleções de entidades, cálculos de distância $N \times N$, geometria vetorial e checagens de linha de visão que possam ser movidas para **`Unity.Jobs` (`IJobParallelFor`)** ou **`RaycastCommand.ScheduleBatch`**.
+   - **Pool de Memória Nativa (Zero-Alloc):** Evitar `new NativeArray<...>(..., Allocator.TempJob)` dentro de `Update()` ou coroutines frame-a-frame. Exigir buffers nativos persistentes e redimensionáveis (*Persistent Pools*) para eliminar sobrecarga de alocação de memória na CPU.
+
+3. **Preservação Estrita de Contratos de Leitura Pública (Princípio da Caixa Preta):**
+   - **Compatibilidade 100% com Outros Mods:** Ao migrar qualquer cálculo interno para multithread ou aplicar LOD por distância:
+     - **NUNCA** alterar nomes, tipos, modificadores de acesso (`public`), métodos ou propriedades públicas lidas por outros mods do ecossistema (*QuestingBots*, *LootingBots*, *FIKA*, mods de HUD, etc.).
+     - As threads secundárias processam estruturas internas puras (`structs` blittable / `NativeArray`), mas os resultados consolidados são gravados nas propriedades públicas existentes na Main Thread.
+     - Métodos e getters públicos continuam respondendo instantaneamente a qualquer frame, garantindo que o mod continue funcionando como uma "caixa preta" de alta performance sem quebrar integrações de terceiros.
 
 ---
 

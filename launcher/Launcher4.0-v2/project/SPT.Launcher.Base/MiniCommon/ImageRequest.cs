@@ -17,7 +17,7 @@ namespace SPT.Launcher.MiniCommon
 
     public static class ImageRequest
     {
-        public static string ImageCacheFolder = Path.Join(LauncherSettingsProvider.Instance.GamePath, "SPT", "SPT_Data", "Launcher", "Image_Cache");
+        public static string ImageCacheFolder = Path.Join(SPT.Launcher.Base.Helpers.SptPathHelper.SptRootPath, "SPT_Data", "Launcher", "Image_Cache");
 
         // ref: CR-01-04 — a infra virou multi-thread (ícones de classe baixados em paralelo pelo item
         // 004, em corrida potencial com CacheSideImage/CacheBackgroundImage): List sem lock trocada por
@@ -142,6 +142,79 @@ namespace SPT.Launcher.MiniCommon
             catch (Exception ex)
             {
                 LogManager.Instance.Exception(ex);
+            }
+        }
+
+        public static async System.Threading.Tasks.Task SyncCarouselImagesAsync(string serverUrl = null)
+        {
+            try
+            {
+                string baseUrl = !string.IsNullOrWhiteSpace(serverUrl) 
+                    ? serverUrl 
+                    : (ServerManager.SelectedServer?.backendUrl ?? LauncherSettingsProvider.Instance.Server?.Url);
+
+                if (string.IsNullOrWhiteSpace(baseUrl)) return;
+
+                string carouselDir = Path.Combine(ImageCacheFolder, "carrocel");
+                if (!Directory.Exists(carouselDir))
+                {
+                    Directory.CreateDirectory(carouselDir);
+                }
+
+                string listUrl = $"{baseUrl.TrimEnd('/')}{RequestHandler.ModRoutePrefix}/redline/launcher/carousel";
+                var handler = new System.Net.Http.HttpClientHandler
+                {
+                    ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true
+                };
+                using var client = new System.Net.Http.HttpClient(handler);
+                client.Timeout = TimeSpan.FromSeconds(10);
+
+                var response = await client.GetAsync(listUrl);
+                if (!response.IsSuccessStatusCode) return;
+
+                string json = await response.Content.ReadAsStringAsync();
+                var data = Newtonsoft.Json.Linq.JObject.Parse(json);
+                var images = data["images"]?.ToObject<System.Collections.Generic.List<string>>();
+                if (images == null) return;
+
+                var serverFileSet = new System.Collections.Generic.HashSet<string>(images, StringComparer.OrdinalIgnoreCase);
+
+                // 1. Baixar imagens novas
+                foreach (string fileName in images)
+                {
+                    string safeName = Path.GetFileName(fileName);
+                    string localPath = Path.Combine(carouselDir, safeName);
+
+                    if (!File.Exists(localPath))
+                    {
+                        string downloadUrl = $"{baseUrl.TrimEnd('/')}{RequestHandler.ModRoutePrefix}/redline/launcher/carousel/{Uri.EscapeDataString(safeName)}";
+                        byte[] bytes = await client.GetByteArrayAsync(downloadUrl);
+                        if (bytes != null && bytes.Length > 0)
+                        {
+                            await File.WriteAllBytesAsync(localPath, bytes);
+                            LogManager.Instance.Info($"[ImageRequest] Nova imagem do carrossel baixada: {safeName} ({bytes.Length / 1024} KB)");
+                        }
+                    }
+                }
+
+                // 2. Limpar imagens locais deletadas do servidor
+                foreach (string localFile in Directory.EnumerateFiles(carouselDir))
+                {
+                    string localName = Path.GetFileName(localFile);
+                    if (!serverFileSet.Contains(localName))
+                    {
+                        try
+                        {
+                            File.Delete(localFile);
+                            LogManager.Instance.Info($"[ImageRequest] Imagem do carrossel removida (já não existe no servidor): {localName}");
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogManager.Instance.Warning($"[ImageRequest] Falha na sincronização do carrossel: {ex.Message}");
             }
         }
     }

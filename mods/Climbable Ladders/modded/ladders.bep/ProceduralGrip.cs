@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 #if SPT_4_0
@@ -192,15 +192,6 @@ namespace tarkin.ladders.bep
             SetCurl(newCurlAmount);
         }
 
-        public void TestSinAnimation()
-        {
-            float t = Time.time;
-
-            float normalizedTime = (Mathf.Sin(t * 3f) + 1f) * 0.5f;
-
-            SetCurl(normalizedTime);
-        }
-
         void SetCurl(float t)
         {
             currentCurl = t;
@@ -209,12 +200,11 @@ namespace tarkin.ladders.bep
             {
                 Finger finger = _fingers[i];
                 float curlAngle = Mathf.Lerp(finger.MinCurl, finger.MaxCurl, t);
+                Quaternion curlRotation = Quaternion.AngleAxis(curlAngle, _bendAxis);
 
-                foreach (FingerJoint joint in finger.Joints)
-                {
-                    Quaternion curlRotation = Quaternion.AngleAxis(curlAngle, _bendAxis);
-                    _fingerRotations[joint.Index] = joint.RestRotation * curlRotation;
-                }
+                if (finger.Base != null) _fingerRotations[finger.Base.Index] = finger.Base.RestRotation * curlRotation;
+                if (finger.Mid != null) _fingerRotations[finger.Mid.Index] = finger.Mid.RestRotation * curlRotation;
+                if (finger.Tip != null) _fingerRotations[finger.Tip.Index] = finger.Tip.RestRotation * curlRotation;
             }
         }
 

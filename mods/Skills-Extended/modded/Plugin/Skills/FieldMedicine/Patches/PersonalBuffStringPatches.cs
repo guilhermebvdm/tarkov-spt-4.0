@@ -21,7 +21,9 @@ internal class PersonalBuffFullStringPatch : ModulePatch
             return;
         }
 
+        // ref: AUD-01-20 — mesma correção de PersonalBuffPatch: mutava um clone descartado antes de
+        // GetStringValue() rodar, então o tooltip nunca refletia o ajuste.
         var skillManager = GameUtils.GetSkillManager()?.SkillManagerExtended;
-        skillManager?.AdjustStimulatorBuff((InjectorBuff)__instance.Clone());
+        skillManager?.AdjustStimulatorBuff(__instance);
     }
 }

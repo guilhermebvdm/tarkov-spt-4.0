@@ -19,6 +19,8 @@ bash "$HOOK_DIR/check-graph-freshness.sh" || true
 bash "$HOOK_DIR/check-memory-ids.sh" || true
 # WARN: .csproj com <HintPath> absoluto em vez de References\ (.spt-path).
 bash "$HOOK_DIR/check-csproj-references.sh" || true
+# WARN: código de mod mudou sem item de backlog staged junto (ver WORKFLOW.md).
+bash "$HOOK_DIR/check-backlog-traceability.sh" || true
 # HARD: frontmatter obrigatório em docs/**/*.md staged. Mesma regra do hook do Claude Code
 # (.claude/settings.json), mas aqui vale para QUALQUER commit — inclusive fora do Claude Code.
 DOCS_HEADER_STAGED=$(git diff --cached --name-only --diff-filter=ACM | grep -E '^docs/.+\.md$' | grep -v 'README\.md' || true)

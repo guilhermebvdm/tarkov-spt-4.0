@@ -1,0 +1,20 @@
+<Project>
+  <PropertyGroup>
+    <SolutionName>"MagCheckInterrupt"</SolutionName>
+    <!-- Precedência de SPTPath: CLI (-p:SPTPath=...) > Environment ($SPT_PATH) > fallback local -->
+    <SPTPath Condition=" '$(SPTPath)' == '' ">E:\Tarkov Red Line\</SPTPath>
+  </PropertyGroup>
+
+  <!-- ISOLAMENTO DE BUILD (GEMINI RULE): NUNCA copiar para a pasta de instalação do jogo.
+       Copiar os binários gerados exclusivamente para mods/SPT-MagCheckInterrupt/builds/ -->
+  <Target Name="CopyOutputToBuilds" AfterTargets="Build">
+    <Copy
+      SourceFiles="@(ModRoot)"
+      DestinationFolder="$(MSBuildThisFileDirectory)..\builds\"
+      Condition="@(ModRoot.Count) != 0" />
+    <Copy
+      SourceFiles="@(PDB)"
+      DestinationFolder="$(MSBuildThisFileDirectory)..\builds\"
+      Condition="'$(Configuration)' == 'Debug' AND @(PDB.Count) != 0" />
+  </Target>
+</Project>

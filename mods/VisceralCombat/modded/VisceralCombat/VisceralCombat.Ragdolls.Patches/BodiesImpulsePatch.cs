@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using EFT;
@@ -14,33 +13,15 @@ namespace VisceralCombat.Ragdolls.Patches;
 
 public class BodiesImpulsePatch : ModulePatch
 {
-	private static Dictionary<string, float> _dictionary = new Dictionary<string, float>
-	{
-		{ "Caliber12g", 150f },
-		{ "Caliber762x51", 65f },
-		{ "Caliber762x39", 45f },
-		{ "Caliber9x39", 33f },
-		{ "Caliber545x39", 35f },
-		{ "Caliber9x18PM", 12f },
-		{ "Caliber762x35", 60f },
-		{ "Caliber556x45NATO", 30f },
-		{ "Caliber127x55", 100f },
-		{ "Caliber9x19PARA", 18f },
-		{ "Caliber40mmRU", 100f },
-		{ "Caliber9x21", 20f },
-		{ "Caliber1143x23ACP", 22f },
-		{ "Caliber46x30", 25f },
-		{ "Caliber762x25TT", 20f },
-		{ "Caliber20g", 110f },
-		{ "Caliber57x28", 22f },
-		{ "Caliber762x54R", 70f },
-		{ "Caliber366TKM", 50f },
-		{ "Caliber23x75", 160f },
-		{ "Caliber86x70", 120f },
-		{ "Caliber9x33R", 40f },
-		{ "Caliber26x75", 80f },
-		{ "Caliber68x51", 80f }
-	};
+	// Teto e piso de massa pra conversão impulso→velocidade no ramo de item largado: itens mais
+	// pesados que isso são tratados, só pra esta conta, como se pesassem MassCapKg — dá um piso de
+	// reação perceptível pra itens pesados (arma, capacete) sem alterar a reação de itens já mais
+	// leves que o teto (máscara, óculos, fone continuam usando a massa real, comportamento idêntico
+	// ao de hoje). MinMassKg protege contra item com peso zero/quase-zero cadastrado (ex.: chave,
+	// documento, item de quest) — sem ele, a divisão manual poderia gerar Infinity/NaN e quebrar a
+	// física daquele item (ref: item 007, PA-01-01).
+	private const float MassCapKg = 0.5f; // ref: item 007 — calibrar em jogo se necessário
+	private const float MinMassKg = 0.05f; // ref: item 007, PA-01-01 — piso de segurança, não deve afetar item real
 
 	protected override MethodBase GetTargetMethod()
 	{
@@ -69,10 +50,27 @@ public class BodiesImpulsePatch : ModulePatch
 		Rigidbody lootRb = hitCollider.attachedRigidbody ?? hitCollider.GetComponentInParent<Rigidbody>();
 		if (lootRb != null && lootRb.gameObject.GetComponent<ObservedLootItem>() != null)
 		{
-			if (VisceralEntry.Instance != null && VisceralEntry.Instance.ItemForce.Value)
+			if (VisceralEntry.Instance != null && VisceralEntry.Instance.IsCategoryActive(VisceralEntry.Instance.ItemForce)) // ref: item 005
 			{
 				physicalImpulse *= VisceralEntry.Instance.objectIntensity.Value;
-				lootRb.AddForceAtPosition(shot.Direction * physicalImpulse, shot.HitPoint, ForceMode.Impulse);
+
+				// ref: item 007 (fix 01) — teto/piso de massa efetiva. lootRb.mass é o peso real do
+				// item (LootItem.cs:334 — _rigidBody.mass = item_0.TotalWeight). Clamp() garante que
+				// itens ACIMA do teto usem o teto, itens com peso ~zero usem o piso (PA-01-01), e
+				// qualquer item com peso realista entre os dois use a massa real, sem mudança.
+				float effectiveMass = Mathf.Clamp(lootRb.mass, MinMassKg, MassCapKg);
+
+				// ref: item 007, fix 01 — PhysX não suporta ForceMode.VelocityChange nativamente em
+				// AddForceAtPosition (só Force/Impulse têm implementação nativa; VelocityChange usa
+				// um caminho custom da Unity, com torque/rotação pouco previsíveis quando o ponto de
+				// impacto está longe do centro de massa — foi o que causou o item "reagir fraco
+				// demais" em testes reais). Em vez de dividir manualmente e trocar o ForceMode,
+				// escalamos o impulso pela razão massa-real/massa-efetiva e deixamos ForceMode.Impulse
+				// (nativo, mesmo caminho de antes do item 007) fazer a divisão pela massa REAL — o
+				// resultado da velocidade final é idêntico ao pretendido (physicalImpulse/effectiveMass),
+				// mas o torque volta a usar o tensor de inércia real do jeito que sempre usou.
+				Vector3 scaledImpulse = shot.Direction * (physicalImpulse * (lootRb.mass / effectiveMass));
+				lootRb.AddForceAtPosition(scaledImpulse, shot.HitPoint, ForceMode.Impulse);
 			}
 			return;
 		}
@@ -83,6 +81,9 @@ public class BodiesImpulsePatch : ModulePatch
 		{
 			return;
 		}
+
+		// ref: item 005 (§5.5) — sem toggle mestre, corpo usa física vanilla (sem impulso/wake customizado)
+		if (VisceralEntry.Instance == null || !VisceralEntry.Instance.VisceralCombatEnabled.Value) return;
 
 		// Wake the corpse's rigidbodies and re-support them in EFT physics
 		Rigidbody[] corpseRbs = RagdollHelperClass.WakeCorpse(hitCollider, 2.5f);

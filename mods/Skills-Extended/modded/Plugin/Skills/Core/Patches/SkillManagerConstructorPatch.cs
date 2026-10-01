@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using EFT;
 using HarmonyLib;
 using SkillsExtended.Helpers;
@@ -10,11 +11,16 @@ namespace SkillsExtended.Skills.Core.Patches;
 
 internal class SkillManagerConstructorPatch : ModulePatch
 {
+    // ref: AUD-01-10 — mapa fraco (não impede GC do SkillManager/Profile dono ao fim da raid). Permite
+    // AbstractSkillClassSummaryLevelPatch resolver o dono real de um AbstractSkillClass em vez de sempre
+    // presumir o MainPlayer via GameUtils.GetSkillManager().
+    internal static readonly ConditionalWeakTable<AbstractSkillClass, SkillManager> SkillOwners = new();
+
     protected override MethodBase GetTargetMethod() =>
         typeof(SkillManager).GetConstructor(
-            BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, 
-            null, 
-            [], 
+            BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+            null,
+            [],
             null);
 
     [PatchPrefix]
@@ -22,13 +28,19 @@ internal class SkillManagerConstructorPatch : ModulePatch
     {
         __instance.SkillManagerExtended = new SkillManagerExt(__instance);
     }
-    
+
     [PatchPostfix]
     public static void Postfix(SkillManager __instance, ref SkillClass[] ___DisplayList, ref SkillClass[] ___Skills)
     {
         InitializeNewSkills(__instance, ref ___Skills);
         ModifyDisplayList(__instance, ref ___DisplayList);
         LockSkills(__instance);
+
+        // ref: AUD-01-10 — EFT/SkillManager.cs:2530, FieldMedicine já construído pelo ctor base neste ponto.
+        if (!SkillOwners.TryGetValue(__instance.FieldMedicine, out _))
+        {
+            SkillOwners.Add(__instance.FieldMedicine, __instance);
+        }
 	}
 
     /// <summary>
@@ -109,34 +121,22 @@ internal class SkillManagerConstructorPatch : ModulePatch
         displayList = newDisplayList;
     }
 
+    // ref: AUD-01-27 — resolvido uma vez em vez de 8x a cada SkillManager construído.
+    private static readonly FieldInfo LockedField = AccessTools.Field(typeof(SkillClass), "Locked");
+
     /// <summary>
     ///     Locks skills if they are not enabled
     /// </summary>
     /// <param name="skillManager">skill manager</param>
     private static void LockSkills(SkillManager skillManager)
     {
-        AccessTools.Field(typeof(SkillClass), "Locked").SetValue(skillManager.UsecArsystems,
-            !SkillsExtendedPlugin.SkillData.NatoWeapons.Enabled);
-
-        AccessTools.Field(typeof(SkillClass), "Locked").SetValue(skillManager.BearAksystems,
-            !SkillsExtendedPlugin.SkillData.EasternWeapons.Enabled);
-        
-        AccessTools.Field(typeof(SkillClass), "Locked").SetValue(skillManager.Lockpicking,
-            !SkillsExtendedPlugin.SkillData.LockPicking.Enabled);
-        
-        AccessTools.Field(typeof(SkillClass), "Locked").SetValue(skillManager.FieldMedicine,
-            !SkillsExtendedPlugin.SkillData.FieldMedicine.Enabled);
-
-        AccessTools.Field(typeof(SkillClass), "Locked").SetValue(skillManager.FirstAid,
-            !SkillsExtendedPlugin.SkillData.FirstAid.Enabled);
-        
-        AccessTools.Field(typeof(SkillClass), "Locked").SetValue(skillManager.ProneMovement,
-            !SkillsExtendedPlugin.SkillData.ProneMovement.Enabled);
-        
-        AccessTools.Field(typeof(SkillClass), "Locked").SetValue(skillManager.SilentOps,
-            !SkillsExtendedPlugin.SkillData.SilentOps.Enabled);
-        
-        AccessTools.Field(typeof(SkillClass), "Locked").SetValue(skillManager.Shadowconnections,
-            !SkillsExtendedPlugin.SkillData.ShadowConnections.Enabled);
+        LockedField.SetValue(skillManager.UsecArsystems, !SkillsExtendedPlugin.SkillData.NatoWeapons.Enabled);
+        LockedField.SetValue(skillManager.BearAksystems, !SkillsExtendedPlugin.SkillData.EasternWeapons.Enabled);
+        LockedField.SetValue(skillManager.Lockpicking, !SkillsExtendedPlugin.SkillData.LockPicking.Enabled);
+        LockedField.SetValue(skillManager.FieldMedicine, !SkillsExtendedPlugin.SkillData.FieldMedicine.Enabled);
+        LockedField.SetValue(skillManager.FirstAid, !SkillsExtendedPlugin.SkillData.FirstAid.Enabled);
+        LockedField.SetValue(skillManager.ProneMovement, !SkillsExtendedPlugin.SkillData.ProneMovement.Enabled);
+        LockedField.SetValue(skillManager.SilentOps, !SkillsExtendedPlugin.SkillData.SilentOps.Enabled);
+        LockedField.SetValue(skillManager.Shadowconnections, !SkillsExtendedPlugin.SkillData.ShadowConnections.Enabled);
     }
 }

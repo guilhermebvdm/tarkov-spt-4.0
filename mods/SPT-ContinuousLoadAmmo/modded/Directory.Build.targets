@@ -1,19 +1,19 @@
 <Project>
   <PropertyGroup>
-    <!-- Paths -->
+    <!-- Paths: CLI (-p:SPTPath=...) > Environment ($SPT_PATH) > fallback local -->
     <SPTPath Condition=" '$(SPTPath)' == '' ">E:\Tarkov Red Line\</SPTPath>
   </PropertyGroup>
 
-  <Target Name="CopyOutput" AfterTargets="Build">
-    <!-- Release Package in mod workspace -->
+  <!-- ISOLAMENTO DE BUILD (REGRA GEMINI): NUNCA copiar binários para a pasta de instalação do jogo.
+       Copiar os binários gerados exclusivamente para mods/SPT-ContinuousLoadAmmo/builds/ -->
+  <Target Name="CopyOutputToBuilds" AfterTargets="Build">
     <Copy
       SourceFiles="@(OutputDLL)"
-      DestinationFolder="$(MSBuildProjectDirectory)\Dist\$(Authors)-$(RootNamespace)\$(DestDir)"
-      Condition="'$(Configuration)' == 'Release' AND @(OutputDLL.Count) != 0" />
-    <ZipDirectory
-      SourceDirectory="$(MSBuildProjectDirectory)\Dist\$(Authors)-$(RootNamespace)"
-      DestinationFile="$(MSBuildProjectDirectory)\Dist\$(Authors)-$(RootNamespace)-$(Version).zip"
-      Overwrite="true"
-      Condition="'$(Configuration)' == 'Release'" />
+      DestinationFolder="$(MSBuildProjectDirectory)\..\builds\"
+      Condition="@(OutputDLL.Count) != 0" />
+    <Copy
+      SourceFiles="@(PDB)"
+      DestinationFolder="$(MSBuildProjectDirectory)\..\builds\"
+      Condition="'$(Configuration)' == 'Debug' AND @(PDB.Count) != 0" />
   </Target>
 </Project>

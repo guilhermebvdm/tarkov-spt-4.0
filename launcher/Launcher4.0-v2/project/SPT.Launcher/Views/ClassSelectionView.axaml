@@ -58,9 +58,8 @@
     </UserControl.Styles>
 
     <Grid>
-        <!-- Fundo + overlay TRL. bg_02 é placeholder: a arte-alvo (post do Reddit) não foi
-             extraível — trocar por bg dedicado quando houver o URL direto da imagem. -->
-        <Image Source="/Assets/Backgrounds/bg_02.jpg" Stretch="UniformToFill" RenderOptions.BitmapInterpolationMode="HighQuality"/>
+        <!-- Fundo + overlay TRL (arte dedicada de seleção de classe) -->
+        <Image Source="/Assets/bg2.png" Stretch="UniformToFill" RenderOptions.BitmapInterpolationMode="HighQuality"/>
         <Border Background="{DynamicResource TrlPhotoOverlayBrush}" IsHitTestVisible="False"/>
 
         <Grid ColumnDefinitions="300, *">

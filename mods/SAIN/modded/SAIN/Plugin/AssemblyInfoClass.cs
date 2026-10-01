@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 
 [assembly: AssemblyTitle(SAIN.AssemblyInfoClass.Description)]
 [assembly: AssemblyDescription(SAIN.AssemblyInfoClass.Description)]
@@ -24,7 +24,7 @@ public static class AssemblyInfoClass
 
     public const string SAINGUID = "me.sol.sain";
     public const string SAINName = "SAIN";
-    public const string SAINVersion = "4.4.3";
+    public const string SAINVersion = "4.5.1";
     public const string SAINPresetVersion = "4.4.0";
 
     public const string SPTVersion = "4.0.0";

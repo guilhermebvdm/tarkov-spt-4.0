@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\Shared.props" />
+
+  <PropertyGroup>
+    <AssemblyName>7Bpencil.MaterialEditor</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\WeaponCamoAndStickers\WeaponCamoAndStickers.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="0Harmony" />
+    <Reference Include="spt-reflection" />
+    <Reference Include="Assembly-CSharp" />
+    <Reference Include="BepInEx" />
+    <Reference Include="Comfort" />
+    <Reference Include="Comfort.Unity" />
+    <Reference Include="Newtonsoft.Json" />
+    <Reference Include="Sirenix.Serialization" />
+    <Reference Include="UnityEngine" />
+    <Reference Include="UnityEngine.CoreModule" />
+    <Reference Include="UnityEngine.IMGUIModule" />
+  </ItemGroup>
+
+</Project>

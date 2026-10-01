@@ -4,7 +4,7 @@
 
 ## Estado atual
 
-> **Delta 2026-07-26:** Launcher em **v2.7.3** em produção, funcionando sem reports (validação por uso; pendências in-game dos itens entregues fechadas por uso). O **item 030 (tela "Mods e Configs")** foi **IMPLEMENTADO nesta data** via `/g-autodev` — Fases 1-3 (motor + servidor + UI) + code-review adversarial, 239 testes verdes, ver [[P-1.1]]. **Ainda NÃO em produção:** falta o conteúdo do servidor ([[P-1.2]]), os gates in-game e o rollout ordenado (R-11). O canal de performance virou regra de pasta `performance-to-config` (aposentou o overlay do item 008); mods opcionais vêm de `plugins-optional.json` (aposentou a pasta `Opcionais/` + rotas `optionals-*`).
+> **Delta 2026-08-31:** Launcher em **v2.11.3** compilado e assinado digitalmente com `.sig` RSA-2048 SHA-256 (`Build/TarkovRedLine.exe`). Implementado o Heartbeat Adaptativo Inteligente (`ServerHeartbeatMonitor.cs`), reduzindo drasticamente a carga e os logs no console do SPT Server com intervalo de 30s quando ocioso/pronto e 5s somente durante download ativo (`IsHighFrequencyMode`) ou quando o servidor estiver offline/reconectando. Suíte de 315 testes unitários 100% aprovada.
 
 - **Estrutura (papéis, análogos ao mod):** `project/` = código editável (papel do `modded/`); upstream intocado em `launcher/Launcher4.0/` (papel do `original/` — **nunca editar**, citar como `// ref: Launcher4.0/<arquivo>:<linha>`); `backlog/` (mesmo SDD dos mods); `docs/`; `tools/` (`sign-launcher.ps1`, geração de chave); `dist/` (builds); `assets/`; esta `memory/` (criada 2026-07-26).
 - **Build:** self-contained single-file (~145 MB) — **não** framework-dependent. ⚠️ O csproj tem `RuntimeIdentifier=win-x64` mas **não** força `SelfContained`; depende do flag `--self-contained true` no `dotnet publish`. Publish/build sem o flag gera exe de ~244 KB que **exige .NET runtime instalado** e mostra "You must install .NET Desktop Runtime" — foi o que quebrou pro amigo do usuário (2026-07-26); resolvido entregando o single-file. `dotnet build launcher/Launcher4.0-v2/project/Launcher.sln` (o `/compile-mod` não cobre o launcher).
@@ -54,5 +54,50 @@
 2. Doc 01 escrito no padrão `NN-` com cabeçalho/histórico, commitado (`b73faa33`).
 3. Mermaid não renderizava no preview do editor (Antigravity) — resolvido com artifact + extensão `bierner.markdown-mermaid` instalada com aprovação do usuário.
 
-**Cross-refs:**
-- Trabalho principal desta sessão (rework do AutoSync-Cache v2): ver `mods/TarkovRedLine4.0/memory/sessions.md` 2026-08-02 (Sessão 1).
+## 2026-08-29 (GMT-3) — Sessão 3: Documentação modular técnica (01..08) + Auditoria estática e fixes de memória (v2.10.2)
+
+**Tema central:** criar a documentação técnica completa do Launcher v2 (`docs/01` a `08`), diagnosticar a falha de cadastro do Avalonia (`bg2.png`), executar a auditoria técnica de código em 6 dimensões (`relatorio-auditoria-codigo-01.md`), aplicar correções em ViewModels/Bitmaps/WMI/Processos e gerar o release compilado e assinado v2.10.2.
+
+**Decisões-chave & Correções:**
+- **Recuperação de imagens estáticas:** Telas de login, registro e seleção de classes usam recursos locais embutidos (`bg1.png`, `bg2.png`), enquanto apenas o carrossel da tela de perfil busca dinamicamente do servidor.
+- **AUD-01-01 (Memory Leak):** Inscrições em `LauncherSettingsProvider.Instance.PropertyChanged` movidas para o ciclo reativo `this.WhenActivated` com `Disposable.Create().DisposeWith(disposables)` em `ProfileViewModel.cs` e `LoginViewModel.cs`.
+- **AUD-01-02 (Memory Leak Gráfico):** Implementado `DisposeDecodedBitmaps()` no `BackgroundCarousel.cs` sob `lock (_lock)` para liberar ponteiros nativos de GPU/Skia de instâncias `Bitmap` no `Reload()` e `Dispose()`.
+- **AUD-01-03 (Win32 Handles):** Adicionado `try/finally` com descarte (`.Dispose()`) de cada instância de `Process` retornado por `Process.GetProcessesByName` no `ProcessMonitor.cs`.
+- **AUD-01-05 (COM/WMI Leaks):** Encapsuladas as consultas `ManagementObjectSearcher.Get()` e instâncias de `ManagementObject` em blocos `using` no `HwidHelper.cs`.
+- **AUD-01-06 (UX Guard):** Adicionado feedback dinâmico em `RegisterErrorMsg` no `ClassSelectionViewModel.cs` caso o clique ocorra antes de selecionar uma classe.
+- **Build & Assinatura:** Versão bumpada para `2.10.2` em todos os campos do csproj; executável single-file `Build/TarkovRedLine.exe` publicado e assinado via `sign-launcher.ps1` (`Verified OK`). 315 testes unitários 100% aprovados.
+
+## 2026-08-30/31 (GMT-3) — Sessão 4: Migração para Cloudflare R2 (HTTP Nativo) + Gate de Auto-Update no JOGAR + Resiliência Offline, Padronização Canônica e Heartbeat Adaptativo (v2.10.8 -> v2.11.3)
+
+**Tema central:** Substituir integralmente o motor de download BitTorrent/P2P (MonoTorrent) por um novo motor HTTP nativo multi-thread integrado à CDN global Cloudflare R2; implementar verificação preventiva obrigatória de atualização no botão "JOGAR"; adicionar resiliência automática à queda/retorno do servidor SPT durante o download; padronizar caminhos de persistência de estado em `SPT/user/launcher/`; indexar 11.631 arquivos (70.93 GB) no manifesto público; implementar Heartbeat Adaptativo Inteligente para despoluir o console do servidor e entregar os releases v2.10.8 a v2.11.3 assinados digitalmente.
+
+**Decisões-chave & Implementações:**
+- **Infraestrutura Cloudflare R2:** Configurado o bucket `tarkov-redline-base` com acesso público via subdomínio `r2.dev`. O tráfego de download (egress) é 100% gratuito e ilimitado, eliminando sobrecarga de upload na máquina host e prevenindo custos de tráfego de rede.
+- **Motor `BaseGameHttpDownloader.cs` (v2.11.0):**
+  - Download paralelo com pool de concorrência (`SemaphoreSlim(8)`).
+  - Resume inteligente: escaneia o diretório de instalação local e faz download estritamente dos arquivos faltantes ou corrompidos.
+  - Escrita atômica em arquivos `.tmp` com movimentação `File.Move` após fechamento do stream, garantindo integridade caso o processo seja interrompido.
+  - Cálculo de velocidade em tempo real (MB/s) com média exponencial móvel e estimativa de tempo restante (ETA).
+  - Throttling de gravação em disco a cada 5 segundos para persistência de estado.
+  - Atribuição automática de atributos `Hidden | System` no `EscapeFromTarkov.exe` ao concluir o download.
+- **Gate de Auto-Update no Botão "JOGAR" (v2.10.9):**
+  - Método `LauncherUpdateHelper.CheckForAvailableUpdateAsync(serverUrl)` adicionado com timeout curto de 5s.
+  - Antes de executar `StartGameCore()` (login e lançamento do processo), o Launcher consulta se o servidor possui versão superior do Launcher.
+  - Se houver atualização pendente: cancela o início do jogo, abre o diálogo de confirmação (`ConfirmationDialogViewModel`) e, ao confirmar, dispara o auto-update seguro com validação de assinatura digital RSA-2048 (`.sig`).
+- **Resiliência a Quedas e Retorno do Servidor SPT (v2.11.1):**
+  - No `ProfileViewModel.cs`, se o servidor ficar offline durante um download ativo do jogo base, o download é pausado com segurança e a interface exibe aviso de espera.
+  - Assim que o servidor restabelece conexão (online), o Launcher detecta a volta em até 5s, exibe mensagem de reconexão e retoma o download da Cloudflare R2 de forma 100% automática e transparente.
+- **Padronização Canônica de Pastas (v2.11.2):**
+  - Ajustado `GetStateFilePath` em `GameStateDetector.cs` para persistir em `<GamePath>/SPT/user/launcher/base-game-state.json` (junto ao `config.json` e `sync-state.json`), mantendo a raiz do jogo limpa.
+  - Implementada rotina de migração automática: se o Launcher detectar um `base-game-state.json` legado na raiz `user/launcher/`, ele move automaticamente para a pasta `SPT/user/launcher/` no boot, preservando o progresso sem perdas.
+- **Heartbeat Adaptativo Inteligente (v2.11.3):**
+  - Implementada propriedade dinâmica `CurrentInterval` e flag `IsHighFrequencyMode` no `ServerHeartbeatMonitor.cs`.
+  - Quando ocioso/pronto no menu, o ping ocorre a cada 30 segundos (reduzindo em 83% os logs de `/launcher/ping` no console do SPT Server).
+  - Durante downloads ativos do jogo base (`ProfileViewModel.cs`) ou quando o servidor estiver offline/reconectando, o modo de alta frequência de 5 segundos é ativado automaticamente.
+- **Gerador de Manifesto do Jogo Base:** Script Node.js `generate-base-manifest.js` escaneou `E:\base-client` gerando o `base-manifest.json` com 11.631 arquivos (70.93 GB) e hashes SHA-256 para distribuição pública.
+- **Ciclo de Compilação & Assinatura Digital:**
+  - Versão SemVer bumpada nos 4 campos do `SPT.Launcher.csproj` a cada entrega (`2.10.8` -> `2.10.9` -> `2.11.0` -> `2.11.1` -> `2.11.2` -> `2.11.3`).
+  - Binário Single-File Release `launcher/Launcher4.0-v2/Build/TarkovRedLine.exe` publicado e assinado via OpenSSL RSA-2048 SHA-256 (`TarkovRedLine.exe.sig`, `Verified OK`).
+  - Suíte de 315 testes unitários 100% aprovada em todos os builds.
+
+

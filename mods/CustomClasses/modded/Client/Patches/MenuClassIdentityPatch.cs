@@ -96,23 +96,67 @@ internal class MenuClassIdentityPatch : ModulePatch
         _applyCo = runner.StartCoroutine(ApplyToMenu(_lastMenu));
     }
 
+    /// <summary>
+    ///     ref: AUD-01-01 — transform do painel do Menu-Overhaul, cacheado entre aberturas do menu.
+    ///     O <c>==</c> do Unity detecta a instância destruída; a atividade é conferida à parte (PA-02-04).
+    /// </summary>
+    private static Transform? _cachedPmv;
+
     private static IEnumerator ApplyToMenu(MenuScreen menu)
     {
+        // ref: AUD-01-01 · PA-01-05 — sem o Menu-Overhaul o painel NUNCA existe, e o "no-op" custava 60
+        // buscas GLOBAIS na cena (GameObject.Find percorre a hierarquia inteira por nome) + 90 frames de
+        // coroutine viva, a cada MenuScreen.Show e a cada evento do picker de cor. IsPresent é O(1).
+        //
+        // ⚠️ Este bail PRESERVA o comportamento — cadeia provada (PA-01-05):
+        //   1. `MainMenuPlayerModelView` é criado e NOMEADO pelo Menu-Overhaul
+        //      (mods/SPT-Menu-Overhaul/modded/Patches/PlayerProfileFeaturesPatch.cs:302).
+        //   2. Sem o MO esse objeto não existe → `nick` fica null nas 60 iterações.
+        //   3. O guard abaixo (`menu == null || nick == null || nickname vazio`) já fazia `yield break`
+        //      ANTES do FixTopGlow → nada daqui para baixo rodava hoje sem o MO. Sair antes não remove feature.
+        //   (`Environment UI`/`Glow Canvas`/`TopGlowPve` são objetos do EFT que o MO apenas muta —
+        //    MenuVisibilityController.cs:14-15 — mas isso é irrelevante: o caminho já era inalcançável.)
+        if (!MenuOverhaulBridge.IsPresent)
+        {
+            yield break;
+        }
+
+        // PERF-INSTR AUD-01-01 — temporary, remove after validation
+        var sw = PerkDiag.Enabled ? System.Diagnostics.Stopwatch.StartNew() : null;
+        var finds = 0;
+
         // O Menu-Overhaul cria o painel do jogador de forma assíncrona (idempotente) → espera alguns frames.
         TextMeshProUGUI? nick = null;
         for (var i = 0; i < 60 && nick == null; i++)
         {
-            var pmv = GameObject.Find("MainMenuPlayerModelView");
-            var nickTr = pmv?.transform.Find("BottomField/NicknameText");
-            if (nickTr != null)
+            // ⚠️ ref: PA-02-04 — o `==` do Unity cobre o objeto DESTRUÍDO, mas não o DESATIVADO. E o
+            // GameObject.Find só encontra ATIVOS: hoje um painel velho desativado é ignorado sozinho a cada
+            // frame; com cache, ele sequestraria a identidade do painel novo (escreveríamos num invisível).
+            if (_cachedPmv == null || !_cachedPmv.gameObject.activeInHierarchy)
             {
-                nick = nickTr.GetComponent<TextMeshProUGUI>();
+                _cachedPmv = GameObject.Find("MainMenuPlayerModelView")?.transform;
+                finds++;
             }
+
+            nick = _cachedPmv != null
+                ? _cachedPmv.Find("BottomField/NicknameText")?.GetComponent<TextMeshProUGUI>()
+                : null;
 
             if (nick == null)
             {
+                // ref: AUD-01-01 — poll a cada 3 frames em vez de todo frame. Mesma janela total de espera
+                // (60 frames), 1/3 das varreduras globais no pior caso.
                 yield return null;
+                yield return null;
+                yield return null;
+                i += 2;
             }
+        }
+
+        // PERF-INSTR AUD-01-01 — temporary, remove after validation
+        if (sw != null)
+        {
+            Plugin.Log?.LogInfo($"[CustomClasses][perf/AUD-01-01] menu apply: finds={finds} found={nick != null} ms={sw.Elapsed.TotalMilliseconds:F1}");
         }
 
         var nickname = SkillMultipliers.Nickname;
@@ -152,10 +196,9 @@ internal class MenuClassIdentityPatch : ModulePatch
         }
 
         // Espera o EFT/MO assentarem (o glow do PvE é (re)montado de forma assíncrona) e corrige o glow.
-        for (var i = 0; i < 90; i++)
-        {
-            yield return null;
-        }
+        // ref: AUD-01-01 — eram 90 frames contados um a um; a espera não precisa de granularidade de frame.
+        // Realtime porque o menu não tem timeScale garantido. 90 frames @60fps ≈ 1,5 s.
+        yield return new WaitForSecondsRealtime(1.5f);
 
         FixTopGlow(baseColor);
     }

@@ -1,4 +1,4 @@
-﻿using EFT;
+using EFT;
 using HarmonyLib;
 using SPT.Reflection.Patching;
 using System.Reflection;
@@ -19,8 +19,14 @@ namespace tarkin.ladders.bep
         [PatchPostfix]
         private static void PatchPostfix(Physical __instance, ref bool __result)
         {
-            if (!__result)
-                __result = OverrideCanClimb;
+            if (!__result && OverrideCanClimb)
+            {
+                var mainPlayer = Comfort.Common.Singleton<GameWorld>.Instance?.MainPlayer;
+                if (mainPlayer != null && __instance == mainPlayer.Physical)
+                {
+                    __result = true;
+                }
+            }
         }
     }
 
@@ -36,8 +42,14 @@ namespace tarkin.ladders.bep
         [PatchPostfix]
         private static void PatchPostfix(Physical __instance, ref bool __result)
         {
-            if (!__result)
-                __result = OverrideCanVault;
+            if (!__result && OverrideCanVault)
+            {
+                var mainPlayer = Comfort.Common.Singleton<GameWorld>.Instance?.MainPlayer;
+                if (mainPlayer != null && __instance == mainPlayer.Physical)
+                {
+                    __result = true;
+                }
+            }
         }
     }
 }

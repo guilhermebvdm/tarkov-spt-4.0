@@ -1,10 +1,56 @@
 # TRL-SpeakFromTarkov — Memória de Sessões
 
 ## Snapshot Delta
-- **Versão:** 1.5.3 (SPT 4.0 / FIKA — Auditoria V3 Review 02 & Zero-Alloc OnGUI)
-- **Estado:** 2ª rodada de auditoria técnica estática (Review 02) concluída e registrada em `docs/relatorio-auditoria-codigo-02.md`. 100% dos achados AUD-02-01 a AUD-02-03 aplicados: eliminação de GPU churn e GC pressure no OnGUI (InRaidVoipHUD e VoipHUD), guard in-raid no retry de microfone e otimização da busca do BattleStancePanel. Compilação 100% limpa (0 erros e 0 avisos).
-- **Próximo Passo:** Implementação e isolamento do transporte de canais de voz no Menu Principal (relay HTTP/WebSocket desacoplado do FIKA).
-- **Pendências:** 🟢 Nenhuma pendência blocker registrada.
+- **Versão:** 1.6.0 (SPT 4.0 / FIKA — Auditoria Review 03 & Workspace modded-V4)
+- **Estado:** 3ª rodada de auditoria técnica estática profunda concluída em `docs/relatorio-auditoria-codigo-03.md` (18 achados identificados nos 17 arquivos C#). Criado fork dedicado `modded-V4/` preservando `modded-V3-audit` intacto como referência estável. Investigação sobre o canal LiteNetLib consolidada em `docs/investigacao-canal-litenetlib-voip.md`. Materializados no backlog os itens `010` a `015`. Item `010` (bot não ouve convidado / regressão AISoundType.gun) especificado (01-spec, 02-spec-tech, 03-review-01) e compilado localmente em `modded-V4/build-output/` (v1.6.0), mas **NÃO CONCLUÍDO** — aguarda validação in-raid do usuário para prosseguir.
+- **Pendências:** 🔴 1 · 🟡 5 (ver abaixo).
+
+## Pendências / próximos passos conhecidos
+
+- [P-17.1] (aberta 2026-09-09) 🔴 **Validação em raid real do Item 010 (bot não ouve convidado / AISoundType)** — O código foi preparado e compilado localmente em `modded-V4/`, mas a causa e o comportamento precisam de teste in-game real pelo usuário antes de ir para `/code-mod` ou marcar como concluído.
+- [P-17.2] (aberta 2026-09-09) 🟡 **Item 011 (Threading e Oclusão de Voz)** — Corrigir acesso a `Camera.main`/`GameWorld` na audio thread (`AUD-03-02`), composição de `LayerMask` sem shift (`AUD-03-03`) e race condition em `VoipProcessor` (`AUD-03-04`).
+- [P-17.3] (aberta 2026-09-09) 🟡 **Item 012 (GC Pressure em Telas de VOIP)** — Eliminar alocações repetitivas de `GUIStyle`/`List` nas telas de HUD e I/O síncrono em disco no drag de volume (`AUD-03-06`, `AUD-03-07`).
+- [P-17.4] (aberta 2026-09-09) 🟡 **Item 013 (Limpeza de Código Morto e Polimento)** — Aplicar os 10 achados de baixa severidade/código morto (`AUD-03-09` a `AUD-03-18`).
+- [P-17.5] (aberta 2026-09-09) 🟡 **Item 014 (Spatial Culling Host-Side)** — Filtrar retransmissão de voz por distância no host (`SendDataToPeer`) para economizar uplink, conforme `docs/investigacao-canal-litenetlib-voip.md`.
+- [P-17.6] (aberta 2026-09-09) 🟡 **Item 015 (Ambiente Acústico e Reverb por Distância)** — Avaliar reverb nativo e revisar curvas de atenuação de áudio 3D.
+
+---
+
+## 2026-09-09 18:30 (GMT-3) — Sessão 17: Auditoria Review 03, Workspace modded-V4 (v1.6.0), Investigação LiteNetLib e Especificação do Item 010
+
+**Tema central:** Conclusão da 3ª rodada de auditoria técnica estática profunda (Review 03) nos 17 arquivos C# do mod (~5.850 linhas), criação do workspace isolado `modded-V4/` (v1.6.0), investigação técnica sobre o canal de rede LiteNetLib, materialização dos itens 010 a 015 no backlog e especificação técnica do item 010.
+
+**Decisões-chave:**
+- **Auditoria Técnica Review 03 formalizada (`docs/relatorio-auditoria-codigo-03.md`):** Identificados 18 achados (1 🔴 crítico, 3 🟠 altos, 8 🟡 médios, 6 🔵 baixos). O achado crítico `AUD-03-01` (`BotVoiceBridge.cs:108`) detectou que `AISoundType.gun` no lugar de `.step` fazia bots entrarem em pânico de combate imediato ao ouvirem sussurros/fala do jogador.
+- **Criação do workspace isolado `modded-V4/`:** Criada a pasta `modded-V4/` baseada em `modded-V3-audit/` (v1.5.4) para isolar as refatorações e correções da Review 03, mantendo a V3 intacta como versão estável de referência. Bump de versão para `1.6.0` em `TRL-SpeakFromTarkov.csproj` e `VOIPPlugin.cs`. Compilação local gerada em `modded-V4/build-output/`.
+- **Investigação do Canal LiteNetLib (`docs/investigacao-canal-litenetlib-voip.md`):** Confirmado no código-fonte do FIKA que o `Channel 1` do LiteNetLib está livre na camada de transporte (`ChannelsCount = 2`), mas consumi-lo exigiria reimplementar a serialização binária privada do FIKA (`_dataWriter`/`_packetProcessor`). Conclusão técnica: o ganho real de banda/estabilidade virá do Spatial Culling no Host (item 014) via API pública, sem fragilidade de internals.
+- **Estruturação do Backlog (Itens 010 a 015):** Mapeamento dos achados da auditoria em pacotes executáveis de backlog no `mod-backlog.md` (010 IA de bots, 011 threading/oclusão, 012 GC pressure OnGUI, 013 código morto/polimento, 014 spatial culling host, 015 ambiente acústico/reverb).
+- **Especificação do Item 010 (`010-bot-nao-ouve-convidado`):** Ciclo de spec funcional (`01-spec.md`), técnica (`02-spec-tech.md`) e review técnica 01 (`03-spec-tech-review-01.md`). **Item mantido deliberadamente em aberto / não concluído:** aguarda teste em raid real do usuário para validar a causa raiz da percepção dos bots antes de avançar para `/code-mod`.
+
+**Lições / hipóteses descartadas:**
+- *Hipótese de canal exclusivo LiteNetLib descartada:* Embora viável em baixo nível, acopla o mod aos internals privados do Fika. A auditoria confirmou que o problema de saturação é volume de dados em broadcast, resolvível com Spatial Culling no Host (item 014).
+- *Regressão de IA identificada por auditoria estática:* O uso de `AISoundType.gun` foi um erro que passou despercebido por falta de auditoria na mudança não versionada; o sensor nativo de audição do Tarkov trata tiro com pânico incondicional (`BULLET_FEEL_DIST`).
+
+**Atividade cronológica:**
+1. Auditoria técnica estática integral realizada e documentada em `docs/relatorio-auditoria-codigo-03.md`.
+2. Investigação da camada de rede LiteNetLib consolidada em `docs/investigacao-canal-litenetlib-voip.md`.
+3. Criação do workspace `modded-V4/`, bump para v1.6.0 e compilação de validação local em `build-output/`.
+4. Materialização dos itens 010 a 015 em `mod-backlog.md`.
+5. Elaboração da spec funcional, técnica e review 01 do item 010 (aguardando validação in-game).
+
+**Pendências abertas nesta sessão:**
+- [P-17.1] 🔴 Validação em raid real do Item 010 (bot não ouve convidado / AISoundType).
+- [P-17.2] 🟡 Item 011 (Threading e Oclusão de Voz).
+- [P-17.3] 🟡 Item 012 (GC Pressure em Telas de VOIP).
+- [P-17.4] 🟡 Item 013 (Limpeza de Código Morto e Polimento).
+- [P-17.5] 🟡 Item 014 (Spatial Culling Host-Side).
+- [P-17.6] 🟡 Item 015 (Ambiente Acústico e Reverb por Distância).
+
+**Cross-refs:**
+- Relatório de Auditoria: `mods/TRL-SpeakFromTarkov/docs/relatorio-auditoria-codigo-03.md`.
+- Investigação de Rede: `mods/TRL-SpeakFromTarkov/docs/investigacao-canal-litenetlib-voip.md`.
+- Backlog: `mods/TRL-SpeakFromTarkov/backlog/010-bot-nao-ouve-convidado/`.
+- Workspace: `mods/TRL-SpeakFromTarkov/modded-V4/`.
 
 ---
 

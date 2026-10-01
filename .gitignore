@@ -101,3 +101,9 @@ graphify-out/
 # (default OUTDIR). Build artifacts — never committed.
 /dist/
 mods/*/modded-bkcp/
+
+# Claude<->Gemini/Antigravity handoff — experimento pessoal de workflow, não faz parte
+# do processo oficial do repo e não deve ser sincronizado com outros colaboradores.
+/.gemini-handoff/
+.claude/commands/gemini-handoff-spec.md
+.claude/commands/gemini-handoff-review.md

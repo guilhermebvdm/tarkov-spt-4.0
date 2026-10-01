@@ -179,6 +179,7 @@ namespace Manimal.LoadAmmoAnim.CustomEFTData
 
         /// <summary>
         /// Disables all hardcoded embedded magazine/bullet meshes in the bundle prefab so they don't render.
+        /// Leaves arm/hand/prop/character meshes completely untouched.
         /// </summary>
         public static void DisableEmbeddedMeshes(GameObject bundleRoot)
         {
@@ -188,15 +189,19 @@ namespace Manimal.LoadAmmoAnim.CustomEFTData
                 var meshRenderers = bundleRoot.GetComponentsInChildren<MeshRenderer>(true);
                 foreach (var r in meshRenderers)
                 {
-                    if (IsArmOrCharacterMesh(r.gameObject.name)) continue;
-                    r.enabled = false;
+                    if (IsEmbeddedMagOrBulletMesh(r.gameObject.name))
+                    {
+                        r.enabled = false;
+                    }
                 }
 
                 var skinnedRenderers = bundleRoot.GetComponentsInChildren<SkinnedMeshRenderer>(true);
                 foreach (var sr in skinnedRenderers)
                 {
-                    if (IsArmOrCharacterMesh(sr.gameObject.name)) continue;
-                    sr.enabled = false;
+                    if (IsEmbeddedMagOrBulletMesh(sr.gameObject.name))
+                    {
+                        sr.enabled = false;
+                    }
                 }
             }
             catch (Exception ex)
@@ -205,14 +210,13 @@ namespace Manimal.LoadAmmoAnim.CustomEFTData
             }
         }
 
-        private static bool IsArmOrCharacterMesh(string name)
+        private static bool IsEmbeddedMagOrBulletMesh(string name)
         {
             if (string.IsNullOrEmpty(name)) return false;
-            return name.IndexOf("arm", StringComparison.OrdinalIgnoreCase) >= 0
-                || name.IndexOf("hand", StringComparison.OrdinalIgnoreCase) >= 0
-                || name.IndexOf("body", StringComparison.OrdinalIgnoreCase) >= 0
-                || name.IndexOf("glove", StringComparison.OrdinalIgnoreCase) >= 0
-                || name.IndexOf("sleeve", StringComparison.OrdinalIgnoreCase) >= 0;
+            return name.IndexOf("stanag", StringComparison.OrdinalIgnoreCase) >= 0
+                || name.IndexOf("pmag", StringComparison.OrdinalIgnoreCase) >= 0
+                || name.IndexOf("bullet", StringComparison.OrdinalIgnoreCase) >= 0
+                || name.IndexOf("patron", StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
         private static bool _dumpedOnce = false;

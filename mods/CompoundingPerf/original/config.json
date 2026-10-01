@@ -1,0 +1,72 @@
+{
+  "_comment": "CompoundingPerf — toggle each optimization independently. Telemetry off by default.",
+  "_MasterEnabled_note": "One-switch A/B toggle for benchmarking: false disables EVERY optimization (server + client) regardless of individual flags below. The FrameStats recorder stays on either way, so with/without comparisons are a single flip apart.",
+  "MasterEnabled": true,
+
+  "Server": {
+    "_ProfileSaveDebouncer_note": "DI override of SaveServer — coalesces save spam, trailing-edge guarantees no state loss. Set Enabled to false to revert to built-in SaveServer behavior.",
+    "ProfileSaveDebouncer": {
+      "Enabled": true
+    },
+    "_ResponseCache_note": "Caches static-after-load endpoints (item DB, handbook, hideout recipes, globals, etc.). First request per path goes through the normal router chain; subsequent identical requests serve the cached JSON. Per-session endpoints are NOT cached.",
+    "ResponseCache": {
+      "Enabled": true,
+      "AdditionalPaths": []
+    },
+    "_ThreadSafeRandom_note": "DI-overrides SPT's RandomUtil to make its shared Random thread-safe. Pure correctness fix — no behavior change.",
+    "ThreadSafeRandom": {
+      "Enabled": true
+    },
+    "_ResponseSanitizer_note": "Replaces the five-regex-passes-per-HTTP-response ClearString with a single scan. Identical output, zero allocations on the common path.",
+    "ResponseSanitizer": {
+      "Enabled": true
+    },
+    "_RagfairCalmUpdates_note": "Vanilla forces a blocking, compacting full GC every time enough flea offers expire — a recurring stall. This reproduces the expiry sequence exactly, minus the forced collect.",
+    "RagfairCalmUpdates": {
+      "Enabled": true
+    },
+    "_FastCompression_note": "Vanilla zlib-compresses every response at SmallestSize (slowest). Fastest is several times cheaper in CPU for a few percent larger payloads that only cross localhost/LAN. Levels: Fastest | Optimal | SmallestSize | NoCompression.",
+    "FastCompression": {
+      "Enabled": true,
+      "Level": "Fastest"
+    },
+    "_ThreadSafeCaches_note": "Serializes access to three SPT caches whose plain collections are written at runtime while other threads read them (handbook prices, item base classes, item blacklists). Pure correctness fix — no behavior change.",
+    "ThreadSafeCaches": {
+      "Enabled": true
+    },
+    "_SaveDirtyTracking_note": "Skips the periodic profile save entirely when the session is clean — vanilla serializes + hashes the full profile every tick even when idle. Player actions always mark the session dirty (any non-pure request). ForceSaveIntervalSeconds is the worst-case persistence window for passive server-side changes like hideout production — it MUST exceed SPT's save tick (60s) or the skip never triggers; default 300 skips ~4 of every 5 idle saves.",
+    "SaveDirtyTracking": {
+      "Enabled": true,
+      "ForceSaveIntervalSeconds": 300
+    },
+    "_IsolatedBotRandomisation_note": "Fixes a vanilla bug: night-raid equipment modifiers are written into SHARED bot config — they compound per generated bot, persist across raids until restart, and race across vanilla's parallel bot generation. With this on, every bot gets a private copy and the modifier applies exactly once.",
+    "IsolatedBotRandomisation": {
+      "Enabled": true
+    },
+    "_CalmNotifier_note": "Websocket sends stop holding the global socket lock during network writes (one slow client no longer stalls the server), payloads serialize once per message, and the /notify long-poll releases its thread between checks instead of pinning one thread-pool thread per connected client. Most valuable for FIKA hosts.",
+    "CalmNotifier": {
+      "Enabled": true
+    }
+  },
+
+  "Client": {
+    "_FrameStats_note": "Dev benchmark builds only (compiled with -p:Bench=true). Release builds contain no frame recorder and ignore this section entirely. In bench builds: per-raid stats line (map / population / avg / 1% low / 0.1% low / hitches / worst spike) appended to SPT/user/logs/CompoundingPerf-framestats.jsonl on raid end. Not gated by MasterEnabled, so it measures both sides of an A/B run.",
+    "FrameStats": {
+      "Enabled": true,
+      "WarmupSkipSeconds": 20
+    }
+  },
+
+  "Telemetry": {
+    "Enabled": false,
+    "DumpEveryNRaids": 10,
+    "DumpOnRaidEnd": true,
+    "DumpOnServerShutdown": true,
+    "TimingEnabled": false
+  },
+
+  "Compat": {
+    "AutoDisableOnConflict": true,
+    "Verbose": true
+  }
+}

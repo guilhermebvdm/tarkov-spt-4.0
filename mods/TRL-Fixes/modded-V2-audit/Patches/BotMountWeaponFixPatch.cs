@@ -140,51 +140,6 @@ namespace TRLFixes.Patches
         }
     }
 
-    public class FikaPlayerOperateStationaryWeaponPatch : ModulePatch
-    {
-        protected override MethodBase GetTargetMethod()
-        {
-            Type fikaPlayerType = AccessTools.TypeByName("Fika.Core.Main.Players.FikaPlayer, Fika.Core");
-            if (fikaPlayerType != null)
-            {
-                return AccessTools.Method(fikaPlayerType, "OperateStationaryWeapon");
-            }
-            return null;
-        }
-
-        [PatchPrefix]
-        private static bool PatchPrefix(EFT.Player __instance, StationaryWeapon stationaryWeapon, StationaryPacketStruct.EStationaryCommand command)
-        {
-            if (__instance == null || !__instance.IsAI || stationaryWeapon == null) return true;
-
-            if (command == StationaryPacketStruct.EStationaryCommand.Occupy)
-            {
-                if (stationaryWeapon.Locked && !stationaryWeapon.IsOperator(__instance.ProfileId))
-                {
-                    stationaryWeapon.Unlock(null);
-                }
-
-                stationaryWeapon.SetOperator(__instance.ProfileId, isAI: true);
-                __instance.MovementContext.StationaryWeapon = stationaryWeapon;
-                __instance.MovementContext.InteractionParameters = stationaryWeapon.GetInteractionParameters();
-                __instance.MovementContext.PlayerAnimatorSetApproached(b: false);
-                __instance.MovementContext.PlayerAnimatorSetStationary(b: true);
-                __instance.RemoveLeftHandItem();
-                __instance.MovementContext.PlayerAnimatorSetStationaryAnimation((int)stationaryWeapon.Animation);
-                return false; // Bypassa a checagem de WaitingForCallback do FIKA para bots de IA
-            }
-            else if (command == StationaryPacketStruct.EStationaryCommand.Leave)
-            {
-                __instance.MovementContext.PlayerAnimatorSetStationary(false);
-                stationaryWeapon.Unlock(__instance.ProfileId);
-                __instance.AIData?.BotOwner?.WeaponManager?.Selector?.TakeMainWeapon();
-                return false;
-            }
-
-            return true;
-        }
-    }
-
     public class PlayerOperateStationaryWeaponPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()

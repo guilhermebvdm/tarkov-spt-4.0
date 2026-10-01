@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using EFT;
 using SAIN.Components;
@@ -160,9 +160,10 @@ public class HearingInputClass : BotSubClass<SAINHearingSensorClass>, IBotClass
         }
 
         // Process most sounds if we aren't deafened
+        // ref: AUD-02-01 - Corrigida passagem da lista de conversações para evitar vazamento de memória
         if (AISoundCachedEvents_Conversations.Count > 0)
         {
-            ProcessSounds(AISoundCachedEvents, AlreadyDeafened, DeafenCoef_Convo, SoundDataToReactTo);
+            ProcessSounds(AISoundCachedEvents_Conversations, AlreadyDeafened, DeafenCoef_Convo, SoundDataToReactTo);
         }
         if (AISoundCachedEvents.Count > 0)
         {
@@ -207,13 +208,16 @@ public class HearingInputClass : BotSubClass<SAINHearingSensorClass>, IBotClass
 
     private float _BotDeafedTime = -1;
 
+    // ref: AUD-02-02 - Delegado estático de comparação para evitar alocações de closure em hot path
+    private static readonly Comparison<AISoundData> _soundDistanceComparison = (a, b) => a.PlayerDistance.CompareTo(b.PlayerDistance);
+
     private static bool ProcessSounds(List<AISoundData> Sounds, bool PreviouslyDeaf, float DeafenCoef, List<AISoundData> Results)
     {
         bool DeafeningShot = false;
         int Count = Sounds.Count;
         if (Count > 0)
         {
-            Sounds.Sort((a, b) => a.PlayerDistance.CompareTo(b.PlayerDistance));
+            Sounds.Sort(_soundDistanceComparison);
             for (int i = 0; i < Count; i++)
             {
                 AISoundData Sound = Sounds[i];
@@ -239,7 +243,7 @@ public class HearingInputClass : BotSubClass<SAINHearingSensorClass>, IBotClass
         int Count = Sounds.Count;
         if (Count > 0)
         {
-            Sounds.Sort((a, b) => a.PlayerDistance.CompareTo(b.PlayerDistance));
+            Sounds.Sort(_soundDistanceComparison);
             for (int i = 0; i < Count; i++)
             {
                 AISoundData Sound = Sounds[i];
@@ -290,11 +294,22 @@ public class HearingInputClass : BotSubClass<SAINHearingSensorClass>, IBotClass
         }
     }
 
+    // ref: AUD-02-01 - Desinscricao defensiva de eventos singleton para evitar memory leaks
     public override void Dispose()
     {
-        //SAINBotController.Instance.BotHearing.AISoundPlayed -= soundHeard;
-        BotManagerComponent.Instance.BotHearing.BulletImpact -= bulletImpacted;
         PlayerComponent.OnBulletFlyBy -= OnBulletFlyBy;
+        if (BotManagerComponent.Instance?.BotHearing != null)
+        {
+            BotManagerComponent.Instance.BotHearing.BulletImpact -= bulletImpacted;
+        }
+        // ref: AUD-02-04 - Esvaziamento explícito de listas de áudio no Dispose
+        AISoundCachedEvents.Clear();
+        AISoundCachedEvents_Conversations.Clear();
+        AISoundCachedEvents_Gunshots.Clear();
+        AISoundCachedEvents_Gunshots_Suppressed.Clear();
+        SoundDataToReactTo.Clear();
+        // ref: AUD-08-02 - Zerar delegate de som amigável
+        OnFriendlySoundHeard = null;
         base.Dispose();
     }
 

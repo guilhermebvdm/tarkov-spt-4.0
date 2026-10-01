@@ -46,9 +46,9 @@ public class PlayerIpsManagerController : ControllerBase
                     _playerIps = JsonSerializer.Deserialize<Dictionary<string, PlayerIpEntry>>(json) ?? new Dictionary<string, PlayerIpEntry>();
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // Ignorar erro
+                Console.WriteLine($"[PlayerIps] Erro ao carregar player_ips: {ex.Message}");
             }
             finally
             {
@@ -71,9 +71,9 @@ public class PlayerIpsManagerController : ControllerBase
                 var json = JsonSerializer.Serialize(_playerIps, new JsonSerializerOptions { WriteIndented = true });
                 System.IO.File.WriteAllText(PlayerIpsPath, json);
             }
-            catch
+            catch (Exception ex)
             {
-                // Ignorar
+                Console.WriteLine($"[PlayerIps] Erro ao salvar player_ips: {ex.Message}");
             }
         }
     }
@@ -89,7 +89,12 @@ public class PlayerIpsManagerController : ControllerBase
             return BadRequest(new { status = "INVALID_REQUEST" });
         }
 
-        var timeZone = TimeZoneInfo.FindSystemTimeZoneById("E. South America Standard Time");
+        TimeZoneInfo timeZone;
+        if (!TimeZoneInfo.TryFindSystemTimeZoneById("E. South America Standard Time", out timeZone) &&
+            !TimeZoneInfo.TryFindSystemTimeZoneById("America/Sao_Paulo", out timeZone))
+        {
+            timeZone = TimeZoneInfo.Utc;
+        }
         var localTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZone);
         var lastSeen = localTime.ToString("dd/MM/yyyy HH:mm:ss");
 

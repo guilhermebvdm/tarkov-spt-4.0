@@ -61,7 +61,7 @@ internal static class Medroso
     {
         try
         {
-            if (PerksConfig.MedrosoEnabled?.Value != true || !SkillMultipliers.IsLocalClass("Scavenger"))
+            if (PerksConfig.MedrosoEnabled?.Value != true || !SkillMultipliers.IsLocalClass(EClassId.Scavenger))
             {
                 return;
             }
@@ -172,7 +172,7 @@ internal static class Medroso
         try
         {
             var dist = PerksConfig.MedrosoSuppressDistance?.Value ?? 0f;
-            if (dist <= 0f || PerksConfig.MedrosoEnabled?.Value != true || !SkillMultipliers.IsLocalClass("Scavenger"))
+            if (dist <= 0f || PerksConfig.MedrosoEnabled?.Value != true || !SkillMultipliers.IsLocalClass(EClassId.Scavenger))
             {
                 return;   // supressão desligada, perk off, ou não-Scav → sai antes da geometria
             }

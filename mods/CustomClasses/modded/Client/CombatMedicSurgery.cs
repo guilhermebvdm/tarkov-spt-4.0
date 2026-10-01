@@ -20,7 +20,7 @@ namespace CustomClasses.Client;
 ///     (caminho nativo, paciente local) é coberta pelo <see cref="SurgeryPenaltyPatch"/> aqui.
 ///     </para>
 ///     <para>
-///     Gate = classe do OPERADOR via <see cref="ClassIdentities.ClassNameEnOf"/> (resolve local + peer pela rota 057;
+///     Gate = classe do OPERADOR via <see cref="ClassIdentities.ClassIdOf"/> (resolve local + peer pela rota 057;
 ///     retorna null p/ <c>IsAI</c>). Os 3 cenários coop (médico host→client · client→host · client→client) caem
 ///     naturalmente: o operador é o <c>doctor</c> do ApplySurgery, resolvido em qualquer processo pelo ProfileId.
 ///     </para>
@@ -52,10 +52,12 @@ public static class CombatMedicSurgery
                 return penalty;
             }
 
-            // classe do OPERADOR (não do paciente). ClassNameEnOf: local via SkillMultipliers, peer via rota 057,
-            // null p/ IsAI (bots barrados — regra 075). Compare case-insensitive, alinhado ao resto do mod.
-            var cls = ClassIdentities.ClassNameEnOf(doctor);
-            if (!string.Equals(cls, "Combat Medic", StringComparison.OrdinalIgnoreCase))
+            // classe do OPERADOR (não do paciente). ClassIdOf: local via SkillMultipliers, peer via rota 057,
+            // None p/ IsAI (bots barrados — regra 075).
+            // ref: AUD-01-02 · PA-03-01 — comparação de int. ⚠️ PA-01-06: só o CORPO deste método muda; a
+            // assinatura pública `Adjust(Player?, float)` é consumida pelo TRL-ImmersiveCombatMedicine POR
+            // REFLEXÃO e é intocável — o compilador não protege essa fronteira.
+            if (ClassIdentities.ClassIdOf(doctor) != EClassId.CombatMedic)
             {
                 return penalty;
             }
@@ -86,7 +88,7 @@ public static class CombatMedicSurgery
 ///     auto-cirurgia o operador = paciente = dono deste <c>ActiveHealthController</c> → o gate lê a classe dele.
 ///     No caso de ALIADO (o ICM aplica o packet no ActiveHC do paciente), o <c>SetExternalHandling(true)</c> do ICM
 ///     faz este patch PULAR — o penalty já veio ajustado pela classe do OPERADOR no envio (#2).
-///     <para>Bots: se um bot fizesse cirurgia, <c>ClassNameEnOf</c> retorna null (IsAI) → não é Médico → penalty
+///     <para>Bots: se um bot fizesse cirurgia, <c>ClassIdOf</c> retorna None (IsAI) → não é Médico → penalty
 ///     intacto. Regra 075 (gate por classe do operador, que barra IsAI).</para>
 /// </summary>
 internal class SurgeryPenaltyPatch : ModulePatch

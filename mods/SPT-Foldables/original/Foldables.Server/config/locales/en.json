@@ -1,0 +1,21 @@
+{
+  // Server locales
+  "set-properties": "Set {{name}} ({{id}}) folded size to: {{size}} and folding time to: {{time}}",
+  "set-properties-skip": "Skipping {{name}} ({{id}}), no change in folding size",
+  "missing-override-properties": "Missing override properties for id: %s. Is this intended?",
+  "added-backpacks": "Added foldable properties to %s backpacks",
+  "added-vests": "Added foldable properties to %s vests",
+  "added-headphones": "Added foldable properties to %s headphones",
+  "load-success": "loaded successfully!",
+
+  // Client locales
+  "Container is folded": "Container is folded",
+  "Item is folded and can't unfold in place": "Item is folded and can't unfold in place",
+  "Cannot fold the item now": "Cannot fold the item now",
+  "Cannot fold the item while moving": "Cannot fold the item while moving",
+  "Cannot fold the container with items inside": "Cannot fold the container with items inside",
+  "Cannot fold the container with unsearched items inside": "Cannot fold the container with unsearched items inside",
+  "Cannot fold while the item is equipped": "Cannot fold while the item is equipped",
+  "Do you want to spill the contents of {0} and fold?": "Do you want to spill the contents of {0} and fold?",
+  " (Folded)": " (Folded)"
+}

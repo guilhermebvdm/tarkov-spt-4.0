@@ -159,13 +159,14 @@ namespace CameraRotationMod
             _wasAimingGlobal = isAiming;
 
             bool isSprinting = gameWorld?.MainPlayer?.IsSprintEnabled == true;
+            bool isOnLadder = gameWorld?.MainPlayer?.gameObject?.GetComponent("PlayerLadderController") != null;
 
-            if (isNativeMounting || isInProne || isStationary)
+            if (isNativeMounting || isInProne || isStationary || isOnLadder)
             {
-                // Se deitou, apoiou (bipé) ou entrou em arma montada, quebra a Action Stance e trava controles
+                // Se deitou, apoiou (bipé), entrou em arma montada ou subiu em escada (Climbable Ladders), quebra a Action Stance e trava controles
                 if (_isActionStanceActive) EndActionStance(forceCancel: true);
 
-                // Forçar Stance 0 (item 013: inclui arma montada do cenário — evita desalinhamento visual)
+                // Forçar Stance 0 (item 013: inclui arma montada do cenário e escadas — evita desalinhamento visual)
                 if (CurrentStance != Stance.Default)
                 {
                     SetStance(Stance.Default);
@@ -177,12 +178,30 @@ namespace CameraRotationMod
             {
                 if (_isActionStanceActive) EndActionStance(forceCancel: true);
                 // item 013 (fix-01): NÃO forçar Stance 0 ao correr. A corrida acontece inteiramente na
-                // stance atual (0/1/2/3), sem qualquer transição ou "flash" pela Stance 0. TacSprint normal.
-                return; // Trava as hotkeys normais durante o sprint
+                // stance atual (0/1/2/3), sem qualquer transição ou "flash" pela Stance 0.
+                //
+                // Bug real 2026-09-09: este `return` (removido) travava TODAS as hotkeys de Stance
+                // durante qualquer sprint — inclusive o crouch-run (item 018), que liga a mesma flag
+                // IsSprintEnabled/Physical.Sprinting enquanto ainda agachado, pra acionar o dreno nativo
+                // de stamina. Esse bloqueio pra sprint em pé já foi removido a pedido do usuário no
+                // guard equivalente de HandleStanceHotkeys() — mantê-lo aqui, num nível mais alto,
+                // reintroduzia o mesmo bloqueio por outra porta. Removido por completo: trocar de
+                // Stance agora funciona normalmente durante qualquer sprint (em pé ou crouch-run).
             }
 
             // Action Stance: o término é detectado via ActionStanceOnIdlePatch (OnIdleStartEvent).
-            // Sem polling aqui — o evento nativo é preciso e sem gaps.
+            // Timeout de segurança (6s): previne que a ActionStance fique eternamente presa se a animação for interrompida
+            if (_isActionStanceActive && (Time.time - _actionStanceStartTime > 6.0f))
+            {
+                Plugin.Logger.LogWarning("[ActionStance] Timeout de segurança (6s) atingido. Forçando encerramento da ActionStance.");
+                EndActionStance(forceCancel: true);
+            }
+
+            // Guard de mãos: não processar comandos de troca de postura se as mãos estiverem ocupadas ou em transição
+            if (!HandsStateGuard.CanChangeStance(gameWorld?.MainPlayer))
+            {
+                return;
+            }
 
             // Se estiver mirando (ADS), não processamos as hotkeys ou a roda do mouse,
             // mas ainda queremos rodar a ActionStance e UpdateTacSprint, então apenas pulamos a entrada.
@@ -238,6 +257,9 @@ namespace CameraRotationMod
         /// </summary>
         private static void HandleLinearScroll(float scrollDelta)
         {
+            var gw = GetCachedGameWorld();
+            if (!HandsStateGuard.CanChangeStance(gw?.MainPlayer)) return;
+
             Stance next = CurrentStance;
             if (scrollDelta > 0) // scroll-up
             {
@@ -277,7 +299,10 @@ namespace CameraRotationMod
         {
             var gw = GetCachedGameWorld();
             if (gw?.MainPlayer == null) return false;
-            if (gw.MainPlayer.IsSprintEnabled) return false;                                  // bloqueio sprint
+            if (!HandsStateGuard.CanChangeStance(gw.MainPlayer)) return false;                // guard de mãos / medicina / transição
+            // Bloqueio de sprint removido a pedido do usuário (2026-09-09) — não fazia mais sentido
+            // mantê-lo (o item 018/crouch-run já tinha exposto que a regra original era frágil demais
+            // pra distinguir sprint em pé de sprint agachado pela mesma flag nativa IsSprintEnabled).
             if (gw.MainPlayer.ProceduralWeaponAnimation?.IsAiming == true) return false;      // ignora em ADS
             if (gw.MainPlayer.IsInPronePose) return false;                                    // bloqueio prone
 
@@ -361,10 +386,6 @@ namespace CameraRotationMod
 
             _isActionStanceActive = false;
 
-            // Reseta o estado do manual chambering para que o próximo tiro/operação de engatilhamento manual funcione normalmente
-            Patches.ManualChamberingState.CanLoadChamber = true;
-            Patches.ManualChamberingState.BlockChambering = false;
-
             // Se forceCancel for true (ex: começou a correr no meio do reload),
             // a própria lógica de sprint ou outras resetam a stance, então não voltamos para previousStance forçadamente
             // Se for falso, restauramos a stance original se estivermos em Default
@@ -400,6 +421,7 @@ namespace CameraRotationMod
         {
             var gw = GetCachedGameWorld();
             if (gw?.MainPlayer == null) return false;
+            if (!HandsStateGuard.CanChangeStance(gw.MainPlayer)) return false;
             
             if (gw.MainPlayer.ProceduralWeaponAnimation?.IsAiming == true)
             {
@@ -850,6 +872,14 @@ namespace CameraRotationMod
             Patches.ApplyComplexRotationPatch.ResetMetrics(); // item 017 (F0) — régua de transição
             Patches.ApplyComplexRotationPatch.ResetWaypoint(); // item 017 (F1) — waypoint + gate de aim-speed
             Patches.AdsSpeedCompressionPatch.Reset(); // item 017 (F3) — compressão de ADS-speed
+
+            // Item 018 — correr agachado / rastejar rápido: flags estáticas de tecla segurada, rampa
+            // de velocidade, animação de sprint forçada, piso de postura e sobretaxa de stamina.
+            Patches.CrouchRunEnableSprintPatch.ResetState();
+            Patches.CrouchRunMaxSpeedPatch.ResetState();
+            Patches.ProneRunSprintIntent.ResetState();
+            Patches.ProneRunMaxSpeedPatch.ResetState();
+            Patches.ProneRunSpeedDriverPatch.ResetState();
 
             _isTacSprintActive = false;
             _wasAiming = false;

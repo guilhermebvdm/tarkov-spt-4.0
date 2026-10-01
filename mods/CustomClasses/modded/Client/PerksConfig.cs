@@ -42,7 +42,7 @@ internal static class PerksConfig
         }
     }
 
-    // OrdinalIgnoreCase: alinha com o ClassNameEnOf/IsClass (case-insensitive no resto do mod) e tolera drift de
+    // OrdinalIgnoreCase: alinha com o Parse/IsClass (case-insensitive no resto do mod) e tolera drift de
     // caixa. ⚠️ Limitação: as 7 chaves são os nomes EN SHIPPED — se o usuário RENOMEAR displayName.en de uma
     // classe pelo editor web, a chave deixa de casar e o override daquela classe vira no-op (a cor cai no server,
     // que já reflete o rename → o nome segue colorido, só o lever do F12 desconecta). Cobrir rename exigiria
@@ -651,11 +651,62 @@ internal static class PerksConfig
             new ConfigDescription(
                 "Redução de recuo por nível da maestria da arma na mão (0.004 = −0.4%/nível; paridade WeaponSkillRecoilBonusPerLevel). / Recoil reduction per mastery level of the held weapon (0.004 = −0.4%/level).",
                 new AcceptableValueRange<float>(0f, 0.02f)));
-        MasteryErgoPerLevel = BindOrdered(config, 
+        MasteryErgoPerLevel = BindOrdered(config,
             SecVanillaFixes, "Weapon Mastery — Ergo bonus per level", 0.002f,
             new ConfigDescription(
                 "Aumento de ergonomia por nível da maestria da arma na mão (0.002 = +0.2%/nível). / Ergonomics increase per mastery level of the held weapon (0.002 = +0.2%/level).",
                 new AcceptableValueRange<float>(0f, 0.02f)));
+
+        ValidateClassLists();   // ref: PA-02-03 · PA-04-02
+    }
+
+    /// <summary>
+    ///     ref: PA-02-03 · PA-04-02 — a lista de classes vive em <b>TRÊS</b> lugares, e nada obriga os três a
+    ///     concordarem. Divergência é 100% silenciosa: nenhum erro, só um comportamento pela metade que
+    ///     sobrevive meses.
+    ///     <list type="bullet">
+    ///     <item><see cref="EClassId"/> / <c>SkillMultipliers.Parse</c> (7) — resolve os <b>gates</b>.</item>
+    ///     <item><see cref="ClassColors"/>, via <c>BindClassColor</c> (7) — a <b>cor</b> do F12.</item>
+    ///     <item><c>PerksCatalog.ByClass</c> (<b>6</b>) — a <b>composição</b> de perks.</item>
+    ///     </list>
+    ///     ⚠️ A diferença 7 · 7 · <b>6</b> é CORRETA: o Peladão (<c>Naked</c>) tem identidade visual e nenhum
+    ///     perk, então legitimamente não tem composição. A exceção é codificada aqui — uma checagem que
+    ///     exigisse os três iguais acusaria o Naked em todo boot, e alarme que grita à toa é alarme ignorado.
+    ///     <para>Caminho frio: roda 1× no <c>Awake</c>.</para>
+    /// </summary>
+    private static void ValidateClassLists()
+    {
+        // Eixo canônico = o enum.
+        foreach (EClassId id in Enum.GetValues(typeof(EClassId)))
+        {
+            if (id == EClassId.None)
+            {
+                continue;
+            }
+
+            var name = SkillMultipliers.NameOf(id)!;   // switch puro — nunca null p/ id != None
+
+            if (!ClassColors.ContainsKey(name))
+            {
+                Plugin.Log?.LogError($"[CustomClasses] (PA-04-02) EClassId.{id} sem entrada em ClassColors — a cor do F12 nunca se aplica a ela.");
+            }
+
+            // Naked é a exceção LEGÍTIMA: classe sem perks não tem composição.
+            if (id != EClassId.Naked && PerksCatalog.GroupsFor(name) == null)
+            {
+                Plugin.Log?.LogError($"[CustomClasses] (PA-04-02) EClassId.{id} sem composição em PerksCatalog.ByClass — aba CLASS vazia p/ ela.");
+            }
+        }
+
+        // Sentido inverso: chave de cor que o enum não conhece ("criei a classe no editor web e registrei só
+        // a cor"). warnUnknown: false p/ não consumir o warn-once do Parse (ref: PA-03-06).
+        foreach (var key in ClassColors.Keys)
+        {
+            if (SkillMultipliers.Parse(key, warnUnknown: false) == EClassId.None)
+            {
+                Plugin.Log?.LogError($"[CustomClasses] (PA-02-03) classe '{key}' tem cor no F12 mas não existe em EClassId — perks NÃO vão disparar p/ ela.");
+            }
+        }
     }
 
     /// <summary>

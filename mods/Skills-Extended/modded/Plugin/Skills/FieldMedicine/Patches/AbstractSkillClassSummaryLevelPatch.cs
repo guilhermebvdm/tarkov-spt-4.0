@@ -1,7 +1,6 @@
-﻿using System.Reflection;
+using System.Reflection;
 using HarmonyLib;
-using SkillsExtended.Helpers;
-using SkillsExtended.Utils;
+using SkillsExtended.Skills.Core.Patches;
 using SPT.Reflection.Patching;
 using UnityEngine;
 
@@ -21,19 +20,20 @@ public class AbstractSkillClassSummaryLevelPatch : ModulePatch
         {
             return true;
         }
-        
-        var skillManager =  GameUtils.GetSkillManager();
-        if (skillManager == null)
+
+        // ref: AUD-01-10 — dono real via SkillManagerConstructorPatch.SkillOwners, não GameUtils.GetSkillManager()
+        // (que sempre resolve o MainPlayer, independentemente de quem é o __instance de fato).
+        if (!SkillManagerConstructorPatch.SkillOwners.TryGetValue(__instance, out var skillManager) || skillManager == null)
         {
             return true;
         }
-        
-        var newSkillCap = 60 * (1 + skillManager?.SkillManagerExtended.FieldMedicineSkillCap);
+
+        var newSkillCap = 60 * (1 + skillManager.SkillManagerExtended.FieldMedicineSkillCap);
 
         var level = __instance.Level;
         var buff = __instance.Buff;
         __result = Mathf.CeilToInt(Mathf.Min(buff > 0 ? newSkillCap : 51, level + buff));
-        
+
         return false;
     }
 }

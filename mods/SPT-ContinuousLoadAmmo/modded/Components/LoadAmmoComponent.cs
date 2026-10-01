@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using ContinuousLoadAmmo.Controllers;
@@ -92,6 +92,27 @@ public class LoadAmmoComponent : InputNode
         {
             if (_loadAmmoControllerController.IsActive)
             {
+                // Intercepta e cancela o carregamento contínuo em comandos de recarga ou troca de arma,
+                // permitindo que o comando passe para o jogo restabelecer e recarregar a arma
+                if (command.IsCommand(ECommand.ReloadWeapon)
+                    || command.IsCommand(ECommand.QuickReloadWeapon)
+                    || command.IsCommand(ECommand.SelectFirstPrimaryWeapon)
+                    || command.IsCommand(ECommand.SelectSecondPrimaryWeapon)
+                    || command.IsCommand(ECommand.SelectSecondaryWeapon)
+                    || command.IsCommand(ECommand.QuickSelectSecondaryWeapon)
+                    || command.IsCommand(ECommand.SelectKnife)
+                    || command.IsCommand(ECommand.SelectFastSlot4)
+                    || command.IsCommand(ECommand.SelectFastSlot5)
+                    || command.IsCommand(ECommand.SelectFastSlot6)
+                    || command.IsCommand(ECommand.SelectFastSlot7)
+                    || command.IsCommand(ECommand.SelectFastSlot8)
+                    || command.IsCommand(ECommand.SelectFastSlot9)
+                    || command.IsCommand(ECommand.SelectFastSlot0))
+                {
+                    _loadAmmoControllerController.StopLoading();
+                    return ETranslateResult.Ignore;
+                }
+
                 // Cancel on shoot/alt shoot, or quick load key, if loading ammo outside inventory
                 if (command.IsCommand(ECommand.ToggleShooting)
                     || command.IsCommand(ECommand.ToggleAlternativeShooting)
@@ -150,9 +171,12 @@ public class LoadAmmoComponent : InputNode
 
     public void OnDestroy()
     {
+        Close();
         _chosenAmmoTcs?.TrySetResult(null);
         _chosenAmmoTcs = null;
         CommonUtils.InputTree.Remove(this);
+        _loadAmmoControllerController?.Dispose();
+        _loadAmmoControllerController = null;
     }
 
     private async Task OpenAmmoSelectorAsync()

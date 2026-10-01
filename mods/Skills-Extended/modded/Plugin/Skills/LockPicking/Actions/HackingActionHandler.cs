@@ -1,4 +1,5 @@
-﻿using EFT;
+﻿using System.Reflection;
+using EFT;
 using EFT.Interactive;
 using HarmonyLib;
 using SkillsExtended.Helpers;
@@ -7,6 +8,9 @@ namespace SkillsExtended.Skills.LockPicking.Actions;
 
 public class HackingActionHandler
 {
+    // ref: AUD-01-27 — resolvido uma vez em vez de a cada terminal hackeado com sucesso.
+    private static readonly MethodInfo UnlockMethod = AccessTools.Method(typeof(WorldInteractiveObject), "Unlock");
+
     public GamePlayerOwner Owner;
     public WorldInteractiveObject InteractiveObject;
     public void HackTerminalAction(bool unlocked)
@@ -14,7 +18,7 @@ public class HackingActionHandler
         if (unlocked)
         {
             LockPickingHelpers.ApplyLockPickActionXp(InteractiveObject, Owner);
-            AccessTools.Method(typeof(WorldInteractiveObject), "Unlock").Invoke(InteractiveObject, null);
+            UnlockMethod.Invoke(InteractiveObject, null);
             return;
         }
         

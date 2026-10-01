@@ -10,13 +10,16 @@ namespace TRLFixes.Patches
 {
     /// <summary>
     /// Correção completa para permitir que bots de IA (Rogues exUsec e outros) operem armas estáticas (NSV, AGS-30).
-    /// Resolve 3 problemas distintos da IA/Engine:
+    /// Resolve problemas da IA/Engine:
     /// 1. Ativação da Camada 10 (StationaryWS) e transição de CurUsingLogic de NoSupress (Usable=false) -> MgSuppress (Usable=true).
     /// 2. Resolução de comparação de itens por ID de string no method_4 (evita DropCurWeapon() por ponteiro C#).
     /// 3. Destravamento de rede no FikaPlayer/Player (bypassa a checagem WaitingForCallback do FIKA para bots de IA).
+    /// 4. Mitigação do bug visual de metralhadora duplicada nas mãos do bot ao sair da arma (força TakeMainWeapon no Leave/Drop).
     /// </summary>
     public class BotMountWeaponFixPatch : ModulePatch
     {
+        private static readonly List<int> _stationaryLayers = new List<int> { 10 };
+
         protected override MethodBase GetTargetMethod()
         {
             return AccessTools.Constructor(typeof(ExUsecBrainClass), new[] { typeof(BotOwner) });
@@ -30,7 +33,7 @@ namespace TRLFixes.Patches
             try
             {
                 // Garante que a camada 10 (StationaryWithSuppressLayer) esteja na lista de execução ativa da IA
-                __instance.ActivateLayers(new List<int> { 10 });
+                __instance.ActivateLayers(_stationaryLayers);
 
                 // Se não estiver vinculado a nenhuma metralhadora, busca no raio de 100m
                 if (__instance.StationaryWeaponLink_0 == null)
@@ -100,41 +103,40 @@ namespace TRLFixes.Patches
         }
     }
 
-    public class FikaPlayerOperateStationaryWeaponPatch : ModulePatch
+    public class BotStationaryWeaponDataDropCurWeaponPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {
-            Type fikaPlayerType = AccessTools.TypeByName("Fika.Core.Main.Players.FikaPlayer, Fika.Core");
-            if (fikaPlayerType != null)
-            {
-                return AccessTools.Method(fikaPlayerType, "OperateStationaryWeapon");
-            }
-            return null;
+            return AccessTools.Method(typeof(BotStationaryWeaponData), nameof(BotStationaryWeaponData.DropCurWeapon));
         }
 
         [PatchPrefix]
-        private static bool PatchPrefix(EFT.Player __instance, StationaryWeapon stationaryWeapon, StationaryPacketStruct.EStationaryCommand command)
+        private static void PatchPrefix(BotStationaryWeaponData __instance)
         {
-            if (__instance == null || !__instance.IsAI || stationaryWeapon == null) return true;
+            if (__instance == null || __instance.BotOwner_0 == null) return;
 
-            if (command == StationaryPacketStruct.EStationaryCommand.Occupy)
+            // Assegura que o bot consiga processar a saída mesmo se CanLeave estiver pendente
+            if (__instance.CurLink != null)
             {
-                if (stationaryWeapon.Locked && !stationaryWeapon.IsOperator(__instance.ProfileId))
-                {
-                    stationaryWeapon.Unlock(null);
-                }
-
-                stationaryWeapon.SetOperator(__instance.ProfileId, isAI: true);
-                __instance.MovementContext.StationaryWeapon = stationaryWeapon;
-                __instance.MovementContext.InteractionParameters = stationaryWeapon.GetInteractionParameters();
-                __instance.MovementContext.PlayerAnimatorSetApproached(b: false);
-                __instance.MovementContext.PlayerAnimatorSetStationary(b: true);
-                __instance.RemoveLeftHandItem();
-                __instance.MovementContext.PlayerAnimatorSetStationaryAnimation((int)stationaryWeapon.Animation);
-                return false; // Bypassa a checagem de WaitingForCallback do FIKA para bots de IA
+                __instance.CanLeave = true;
             }
+        }
 
-            return true;
+        [PatchPostfix]
+        private static void PatchPostfix(BotStationaryWeaponData __instance)
+        {
+            if (__instance == null || __instance.BotOwner_0 == null) return;
+
+            try
+            {
+                // Limpa postura de metralhadora e força o bot a equipar a arma primária do inventário imediatamente
+                __instance.BotOwner_0.GetPlayer?.MovementContext?.PlayerAnimatorSetStationary(false);
+                __instance.BotOwner_0.WeaponManager?.Selector?.TakeMainWeapon();
+            }
+            catch (Exception ex)
+            {
+                Plugin.Log?.LogWarning($"[TRL-Fixes] Exceção ao restabelecer arma primária no DropCurWeapon: {ex.Message}");
+            }
         }
     }
 
@@ -164,6 +166,14 @@ namespace TRLFixes.Patches
                 __instance.MovementContext.PlayerAnimatorSetStationary(b: true);
                 __instance.RemoveLeftHandItem();
                 __instance.MovementContext.PlayerAnimatorSetStationaryAnimation((int)stationaryWeapon.Animation);
+                return false; // Retorna false para evitar duplicação de animação/setup do método vanilla (AUD-01-03)
+            }
+            else if (command == StationaryPacketStruct.EStationaryCommand.Leave)
+            {
+                __instance.MovementContext.PlayerAnimatorSetStationary(false);
+                stationaryWeapon.Unlock(__instance.ProfileId);
+                __instance.AIData?.BotOwner?.WeaponManager?.Selector?.TakeMainWeapon();
+                return false;
             }
 
             return true;

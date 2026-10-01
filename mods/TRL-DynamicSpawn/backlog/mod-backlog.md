@@ -4,6 +4,11 @@
 
 | # | Título | Resumo | Pasta | Status |
 |---|---|---|---|---|
+| 016 | elite-nao-nativo-clona-boss | Esquadrão de elite não-nativo (ex: Sanitar em Labs) clona o próprio boss em vez de usar os seguidores nativos dele; grupo de múltiplos deve ser exclusivo de Rogues/Raiders/Bloodhounds | [016-elite-nao-nativo-clona-boss/](./016-elite-nao-nativo-clona-boss/) | 🟢 |
+| 015 | spawn-point-reviewer-debug | Ferramenta interna de validação visual e ajuste fino 3D (X/Y/Z) de pontos de spawn via câmera livre e persistência JSON | [015-spawn-point-reviewer-debug/](./015-spawn-point-reviewer-debug/) | 🔵 |
+| 014 | sincronizacao-rede-cadaver-fika | Sincronização de rede (FIKA Coop) para replicação de eventos de conversão e remoção de cadáveres nos clientes convidados com zero-alloc | [014-sincronizacao-rede-cadaver-fika/](./014-sincronizacao-rede-cadaver-fika/) | ⚪ |
+| 013 | estabilizacao-spawn-e-visual-cadaver | Snap seguro contra queda no limbo em Customs, preload de bundle MBSS, fallback de renderers e desacoplamento físico contra efeito catapulta | [013-estabilizacao-spawn-e-visual-cadaver/](./013-estabilizacao-spawn-e-visual-cadaver/) | 🔵 |
+| 012 | otimizacao-stutter-spawn | Eliminação de stuttering via pre-warming assíncrono de bundles, staggered spawning (1.2s-1.5s), cache de LoS com filtro de 150m e amarração de esquadrões (líder/seguidores) | [012-otimizacao-stutter-spawn/](./012-otimizacao-stutter-spawn/) | 🔵 |
 | 011 | perf-estoque-dificuldade | Estoque de perfis com teto por mapa e numa dificuldade só + etiqueta de dificuldade reescrita na escolha + sorteio de dificuldade valendo com SAIN (reverte premissa do 004) | [011-perf-estoque-dificuldade/](./011-perf-estoque-dificuldade/) | ⚪ |
 | 010 | perf-spawn-pipeline-r2 | Rodada 2 de performance (AUD-01-04/05/06/07/08): spawner vanilla barrado na fonte, pool de perfis estável, fila sem cancelamento periódico, waves só com raid ativa, logs sob gate | [010-perf-spawn-pipeline-r2/](./010-perf-spawn-pipeline-r2/) | 🟢 |
 | 009 | perf-config-cache-raid | Rodada 1 de performance (AUD-01-01/02/03): config do servidor cacheada por raid, poller de despawn só em raid e backoff em falha de fetch | [009-perf-config-cache-raid/](./009-perf-config-cache-raid/) | 🟢 |

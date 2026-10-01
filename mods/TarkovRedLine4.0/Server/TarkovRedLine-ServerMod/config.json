@@ -1,8 +1,17 @@
 {
     "serverVersion": "1.5.7",
-    "launcherVersion": "1.1.36",
+    "launcherVersion": "2.10.2",
     "modsRepoPath": "./mods_repo",
     "opcionaisPath": "./Opcionais",
+    "carouselPath": "Launcher-Updater/carrocel",
+    "baseClientPath": "Launcher-Updater/base-client",
+    "torrentFilePath": "Launcher-Updater/base-game.torrent",
+    "bandwidthControl": {
+        "enabled": true,
+        "totalUploadMbps": 100,
+        "idlePercent": 85,
+        "raidActivePercent": 40
+    },
     "managedPaths": [
         "BepInEx/plugins",
         "user/cache"

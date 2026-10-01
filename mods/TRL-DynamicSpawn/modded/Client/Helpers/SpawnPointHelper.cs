@@ -13,6 +13,15 @@ namespace TRLDynamicSpawn.Helpers
             return roleStr.Contains("marksman") || roleStr.Contains("sniper") || roleStr.Contains("snipe");
         }
 
+        public static bool IsCultistRole(WildSpawnType role)
+        {
+            return role == WildSpawnType.sectantPriest ||
+                   role == WildSpawnType.sectantWarrior ||
+                   role == WildSpawnType.sectantOni ||
+                   role == WildSpawnType.sectantPrizrak ||
+                   role == WildSpawnType.sectantPredvestnik;
+        }
+
         public static bool IsSniperZone(BotZone zone)
         {
             if (zone == null) return false;

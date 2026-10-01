@@ -18,6 +18,18 @@ internal static class ClassIdentities
     internal sealed class Identity
     {
         public string? NameEn, NamePt, IconFile;
+
+        /// <summary>
+        ///     ref: AUD-01-02 — id da classe, resolvido 1× no <see cref="Commit"/>/<see cref="Local"/>,
+        ///     nunca por som.
+        ///     <para>
+        ///     ⚠️ PA-04-04 — <b>TODO construtor de Identity preenche isto</b>. São dois: o <see cref="TryFetch"/>
+        ///     (mapa de peers) e o <see cref="Local"/> (fallback local). Deixar no default seria pior que
+        ///     inútil: <c>None</c> SIGNIFICA "vanilla/desconhecido", então o campo mentiria em silêncio e um
+        ///     perk que devesse disparar simplesmente não dispararia.
+        ///     </para>
+        /// </summary>
+        internal EClassId ClassId;
         public string? DisplayName => GameLocale.IsPortuguese ? (NamePt ?? NameEn) : (NameEn ?? NamePt);
 
         // item 068: description localizada (en/pt), resolvida pelo idioma do EFT — aba CLASS + tooltip.
@@ -111,7 +123,17 @@ internal static class ClassIdentities
     ///     um protocolo — o server teria de ser a fonte dos valores, não o F12.
     ///     </para>
     /// </summary>
-    public static string? ClassNameEnOf(EFT.Player? player)
+    /// <remarks>
+    ///     ⚠️ ref: PA-03-01 — o antigo <c>ClassNameEnOf</c> (que devolvia a <b>string</b>) foi <b>REMOVIDO</b>,
+    ///     não deprecado. Motivo: os patches de som usavam a string em dois papéis — alimentar os helpers E
+    ///     alimentar o <c>PerkDiag.LogPeer</c>. Migrar só os helpers para <c>EClassId</c> levaria à
+    ///     implementação natural de manter os dois resolvedores, ou seja <b>dois lookups de dicionário por
+    ///     passo de cada player/bot</b> — dobrando o custo exatamente onde o AUD-01-02 queria baratear, sem
+    ///     quebrar nada e sem nenhum teste falhar. Com o método fora, o compilador impede a reintrodução.
+    ///     Para o nome legível no diagnóstico: <c>SkillMultipliers.NameOf(id)</c>, dentro de
+    ///     <c>if (PerkDiag.Enabled)</c>.
+    /// </remarks>
+    internal static EClassId ClassIdOf(EFT.Player? player)
     {
         // ⚠️ BOTS FORA — gate crítico, não é defensivo à toa: bots também emitem passo por
         // `BotEventHandler.PlaySound` (MovementContext.cs:1629 passa o Player do bot como `person`), e o EFT
@@ -120,12 +142,12 @@ internal static class ClassIdentities
         // (É também o gate mais barato: bot é a MAIORIA das chamadas deste hot path → sai na 1ª linha.)
         if (player is null || player.IsAI)   // ref: Player.cs:25135
         {
-            return null;
+            return EClassId.None;
         }
 
         if (player.IsYourPlayer)
         {
-            return SkillMultipliers.ClassNameEn;
+            return SkillMultipliers.LocalClassId;   // ref: PA-04-05 — sem EnsureLoaded, de propósito
         }
 
         // ⚠️ HOT PATH — lookup CRU no dict, sem EnsureLoaded (code-review B14, achado 4). Este método roda a cada
@@ -134,7 +156,7 @@ internal static class ClassIdentities
         // freeze no meio da raid. Quem garante o mapa quente é o Prefetch() do raid-start; frio aqui = sem perk
         // (degradação silenciosa), nunca um hitch.
         var nickname = player.Profile?.Nickname;
-        return nickname != null && ByNickname.TryGetValue(nickname, out var identity) ? identity.NameEn : null;
+        return nickname != null && ByNickname.TryGetValue(nickname, out var identity) ? identity.ClassId : EClassId.None;
     }
 
     /// <summary>
@@ -150,6 +172,7 @@ internal static class ClassIdentities
             {
                 NameEn = SkillMultipliers.ClassNameEn,
                 NamePt = SkillMultipliers.ClassNamePt,
+                ClassId = SkillMultipliers.LocalClassId,   // ref: PA-04-04 — os DOIS construtores preenchem
                 IconFile = SkillMultipliers.IconFile,
                 // 067: cor CRUA do server (não a já resolvida) → o getter da Identity resolve o override 1× por
                 // cima, sem dupla resolução nem risco de fixar um hex de override obsoleto no fallback.
@@ -200,6 +223,7 @@ internal static class ClassIdentities
                     fresh[p.Nickname!] = new Identity
                     {
                         NameEn = p.ClassNameEn,
+                        ClassId = SkillMultipliers.Parse(p.ClassNameEn),   // ref: AUD-01-02 — 1× por fetch
                         NamePt = p.ClassNamePt,
                         IconFile = p.IconFile,
                         NameColor = p.NameColor,

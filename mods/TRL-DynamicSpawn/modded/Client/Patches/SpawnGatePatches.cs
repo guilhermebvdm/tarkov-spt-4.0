@@ -33,6 +33,17 @@ namespace TRLDynamicSpawn.Patches
                 if (!(data is BotProfileDataClass bp)) return true;            // unknown provider: let vanilla decide
 
                 var role = bp.WildSpawnType_0;                                  // ref: BotProfileDataClass.cs:16 (public field, already used at Patches.cs ChooseProfilePatch)
+                if (role == WildSpawnType.marksman)
+                {
+                    if (DynamicSpawnManager.AllowedSniperZones.Count == 0)
+                    {
+                        if (Settings.enableDebugLogs.Value)
+                            Plugin.LogSource.LogInfo($"[TRLDynamicSpawn] Refused vanilla continuous marksman spawn: no allowed sniper zones.");
+                        return false;
+                    }
+                    return true;
+                }
+
                 if (role != WildSpawnType.assault && role != WildSpawnType.cursedAssault) return true;
 
                 if (Settings.enableDebugLogs.Value)                             // gate BEFORE formatting (AUD-01-07)

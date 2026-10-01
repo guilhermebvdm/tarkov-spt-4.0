@@ -1,10 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using ContinuousLoadAmmo.Models;
 using ContinuousLoadAmmo.Patches;
 using ContinuousLoadAmmo.Utils;
+using Comfort.Common;
 using EFT;
 using EFT.Communications;
 using EFT.InventoryLogic;
@@ -19,11 +22,14 @@ public class LoadAmmoController : IDisposable
     private readonly MagazinePresetLoader _magazinePresetLoader;
     private MagazineItemClass _magazine;
     private bool _isReachable = true;
+    private bool _disposed;
 
     public event Action<float, int, int> OnStartLoading;
     public event Action<Item> OnCloseInventoryLoading;
     public event Action OnEndLoading;
     public event Action OnPlayerDestroy;
+
+    public static LoadAmmoController Instance { get; private set; }
 
     public bool IsActive => PlayerInventoryController.Interface19_0 is not null || _magazinePresetLoader.PresetLoaderIsActive;
     public bool IsInventoryOpened => _player.IsInventoryOpened;
@@ -31,6 +37,7 @@ public class LoadAmmoController : IDisposable
 
     public LoadAmmoController(Player player)
     {
+        Instance = this;
         _player = player;
         if (_player.InventoryController is not PlayerInventoryController playerInvCont)
         {
@@ -52,7 +59,8 @@ public class LoadAmmoController : IDisposable
 
     public bool CanLoadOutsideInventory()
     {
-        return !PlayerInventoryController.HasAnyHandsActionNonLinq() && _isReachable;
+        bool isOnLadder = _player != null && _player.gameObject != null && _player.gameObject.GetComponent("PlayerLadderController") != null;
+        return !isOnLadder && !PlayerInventoryController.HasAnyHandsActionNonLinq() && _isReachable;
     }
 
     public bool IsQuickLoadAvailable(out List<AmmoItemClass> reachableAmmo, out MagazineItemClass foundMagazine, string caliber = null)
@@ -64,6 +72,11 @@ public class LoadAmmoController : IDisposable
 
     public void TryQuickLoadAmmo()
     {
+        if (!CanLoadOutsideInventory())
+        {
+            return;
+        }
+
         if (!IsQuickLoadAvailable(out var reachableAmmo, out var foundMagazine))
         {
             CommonUtils.DisplayNotification(
@@ -116,10 +129,37 @@ public class LoadAmmoController : IDisposable
     public void LoadMagazine(AmmoItemClass ammo, MagazineItemClass magazine)
     {
         var loadCount = Mathf.Min(ammo.StackObjectsCount, magazine.MaxCount - magazine.Count);
-        _ = PlayerInventoryController.LoadMagazine(ammo, magazine, loadCount, false);
+        _ = LoadMagazineFireAndForgetAsync(ammo, magazine, loadCount);
     }
 
-    public async Task LoadMagazineAsync(AmmoItemClass ammo, MagazineItemClass magazine, CancellationToken token, int? ammoCount = null)
+    // LoadMagazine below is awaited but its IResult was previously discarded — a server-side
+    // rejection (eg. Fika: "item is currently being modified") came back as a failed result,
+    // not an exception, so it went unnoticed and the player was left with the "Loading X"
+    // notification already shown and nothing actually happening.
+    private async Task LoadMagazineFireAndForgetAsync(AmmoItemClass ammo, MagazineItemClass magazine, int loadCount)
+    {
+        try
+        {
+            // InventoryScreen.Close() locks PlayerInventoryController's "next process" flag and only
+            // InventoryScreen.Show() clears it — vanilla assumes LoadMagazine is only ever invoked from
+            // an open inventory. Since this call happens with the inventory closed, force-clear it first,
+            // otherwise it stays stuck locked from the last time the player closed their inventory.
+            PlayerInventoryController.SetNextProcessLocked(false);
+            var result = await PlayerInventoryController.LoadMagazine(ammo, magazine, loadCount, false);
+            if (result.Failed)
+            {
+                ContinuousLoadAmmo.LogSource.LogWarning($"ContinuousLoadAmmo: LoadMagazine falhou: {DescribeFailure(result)}");
+                CommonUtils.DisplayNotification("Failed to load ammo, try again", ENotificationIconType.Alert, true);
+            }
+        }
+        catch (Exception ex)
+        {
+            ContinuousLoadAmmo.LogSource.LogError($"ContinuousLoadAmmo: LoadMagazine excecao: {ex}");
+        }
+    }
+
+    /// <returns>false if the server rejected the operation (result.Failed) — caller should stop instead of assuming success</returns>
+    public async Task<bool> LoadMagazineAsync(AmmoItemClass ammo, MagazineItemClass magazine, CancellationToken token, int? ammoCount = null)
     {
         var loadCount = ammoCount ?? Mathf.Min(ammo.StackObjectsCount, magazine.MaxCount - magazine.Count);
         while (PlayerInventoryController.Locked)
@@ -127,7 +167,22 @@ public class LoadAmmoController : IDisposable
             token.ThrowIfCancellationRequested();
             await Task.Yield();
         }
-        await PlayerInventoryController.LoadMagazine(ammo, magazine, loadCount, false);
+        // See the matching comment in LoadMagazineFireAndForgetAsync — closing the inventory
+        // re-locks this flag and nothing else clears it before an outside-inventory call.
+        PlayerInventoryController.SetNextProcessLocked(false);
+        var result = await PlayerInventoryController.LoadMagazine(ammo, magazine, loadCount, false);
+        if (result.Failed)
+        {
+            ContinuousLoadAmmo.LogSource.LogWarning($"ContinuousLoadAmmo: LoadMagazineAsync falhou: {DescribeFailure(result)}");
+        }
+        return !result.Failed;
+    }
+
+    // IResult.ToString() on a failure is just the type name ("Comfort.Common.FailedResult") with no
+    // detail — FailedResult carries the actual reason in its Error field, so surface that instead.
+    private static string DescribeFailure(IResult result)
+    {
+        return result is FailedResult failed ? failed.Error : result.ToString();
     }
 
     private readonly List<MagazineItemClass> _reachableMagazinesScratch = [];
@@ -146,7 +201,7 @@ public class LoadAmmoController : IDisposable
             PlayerInventoryController.GetAcceptableItemsNonAlloc(
                 ReachableSlots,
                 _reachableMagazinesScratch,
-                (mag) => PlayerInventoryController.Examined(mag) && mag.Count != mag.MaxCount && mag.CheckCompatibility(ammo),
+                (mag) => PlayerInventoryController.Examined(mag) && mag.Count != mag.MaxCount && mag.CheckCompatibility(ammo) && IsLoadableOutsideWeapon(mag),
                 ContainerPredicate
             );
         }
@@ -155,7 +210,7 @@ public class LoadAmmoController : IDisposable
             // Can be recursive
             GetReachableItems(
                 _reachableMagazinesScratch,
-                (mag) => PlayerInventoryController.Examined(mag) && mag.Count != mag.MaxCount && mag.CheckCompatibility(ammo)
+                (mag) => PlayerInventoryController.Examined(mag) && mag.Count != mag.MaxCount && mag.CheckCompatibility(ammo) && IsLoadableOutsideWeapon(mag)
             );
         }
         if (_reachableMagazinesScratch.Count <= 0) return false;
@@ -169,6 +224,19 @@ public class LoadAmmoController : IDisposable
         // Mag with most amount
         foundMagazine = _reachableMagazinesScratch[0];
         return true;
+    }
+
+    /// <summary>
+    /// PlayerInventoryController.LoadMagazine always calls the restricted MagazineItemClass.Apply,
+    /// which unconditionally rejects any magazine currently installed in a weapon slot (Parent.Container
+    /// is Slot) before even checking weapon.SupportsInternalReload. The vanilla UI avoids this by routing
+    /// ammo dropped on an installed magazine through LoadWeaponWithAmmo instead of LoadMagazine, but this
+    /// mod only ever calls LoadMagazine, so an installed magazine (eg. a spare weapon holstered in a rig
+    /// or backpack) must be excluded from the reachable search rather than attempted and silently failed.
+    /// </summary>
+    private static bool IsLoadableOutsideWeapon(MagazineItemClass mag)
+    {
+        return mag.Parent?.Container is not Slot;
     }
 
     private readonly List<AmmoItemClass> _reachableAmmoScratch = [];
@@ -221,13 +289,26 @@ public class LoadAmmoController : IDisposable
         return true;
     }
 
+    private readonly List<AmmoItemClass> _allAmmoScratch = [];
+
+    private static readonly Comparison<AmmoItemClass> _ammoComparison = (a, b) =>
+    {
+        var result = b.PenetrationPower.CompareTo(a.PenetrationPower);
+        if (result == 0)
+        {
+            result = a.StackObjectsCount.CompareTo(b.StackObjectsCount);
+        }
+        return result;
+    };
+
     /// <summary>
     /// Find ammo for <paramref name="magazine"/>. Used by loading mag presets in the inventory screen
     /// </summary>
     /// <param name="magazine">Magazine to be checked compatible with</param>
     public bool GetAllAmmoForMagazine(out List<AmmoItemClass> allAmmo, MagazineItemClass magazine)
     {
-        allAmmo = [];
+        _allAmmoScratch.Clear();
+        allAmmo = _allAmmoScratch;
         PlayerInventoryController.Inventory.Equipment.GetAcceptableItemsNonAlloc(
             _reachableAll,
             allAmmo,
@@ -236,17 +317,7 @@ public class LoadAmmoController : IDisposable
         );
         if (allAmmo.Count <= 0) return false;
 
-        // Sort penetration power highest to lowest, then stack count ascending
-        allAmmo.Sort((a, b) =>
-            {
-                var result = b.PenetrationPower.CompareTo(a.PenetrationPower);
-                if (result == 0)
-                {
-                    result = a.StackObjectsCount.CompareTo(b.StackObjectsCount);
-                }
-                return result;
-            }
-        );
+        allAmmo.Sort(_ammoComparison);
         return true;
     }
 
@@ -254,6 +325,46 @@ public class LoadAmmoController : IDisposable
     {
         _magazinePresetLoader.CancelMagPresetLoading();
         PlayerInventoryController.StopProcesses();
+
+        if (_stateCoroutine != null && _player != null)
+        {
+            _player.StopCoroutine(_stateCoroutine);
+            _stateCoroutine = null;
+        }
+
+        if (_player?.MovementContext != null)
+        {
+            _player.MovementContext.RemoveStateSpeedLimit(ESpeedLimit.BarbedWire);
+            _player.MovementContext.SetPhysicalCondition(EPhysicalCondition.SprintDisabled, false);
+
+            bool hasLoadAmmoAnim = IsLoadAmmoAnimActiveOrPending(_player);
+            if (!hasLoadAmmoAnim && _player.HandsIsEmpty && !IsInventoryOpened)
+            {
+                _player.TrySetLastEquippedWeapon();
+            }
+        }
+    }
+
+    private static bool IsLoadAmmoAnimActiveOrPending(Player player)
+    {
+        if (player == null) return false;
+        if (player.HandsController?.GetType().Name == "LoadAmmoBundleController") return true;
+
+        try
+        {
+            var animStateType = AppDomain.CurrentDomain.GetAssemblies()
+                .SelectMany(a => { try { return a.GetTypes(); } catch { return Array.Empty<Type>(); } })
+                .FirstOrDefault(t => t.FullName == "Manimal.LoadAmmoAnim.Patches.LoadAmmoAnimState");
+
+            if (animStateType != null)
+            {
+                var anyMethod = animStateType.GetMethod("AnyIsOurAnimation", BindingFlags.Public | BindingFlags.Static);
+                if (anyMethod != null && (bool)anyMethod.Invoke(null, null)) return true;
+            }
+        }
+        catch { }
+
+        return false;
     }
 
     public string GetMagAmmoCountByLevel()
@@ -293,6 +404,14 @@ public class LoadAmmoController : IDisposable
 
     public void Dispose()
     {
+        if (_disposed) return;
+        _disposed = true;
+
+        if (Instance == this)
+        {
+            Instance = null;
+        }
+
         _magazinePresetLoader.Dispose();
         if (PlayerInventoryController is not null)
         {
@@ -306,6 +425,8 @@ public class LoadAmmoController : IDisposable
                 _player.StopCoroutine(_stateCoroutine);
                 _stateCoroutine = null;
             }
+            _player.MovementContext?.RemoveStateSpeedLimit(ESpeedLimit.BarbedWire);
+            _player.MovementContext?.SetPhysicalCondition(EPhysicalCondition.SprintDisabled, false);
             InventoryScreenClosePatch.OnInventoryClose -= LoadingOutsideInventory;
             UnloadMagazineStartPatch.OnLoadingEnd -= LoadingEnd;
             LoadMagazineStartPatch.OnLoadingEnd -= LoadingEnd;
@@ -321,6 +442,11 @@ public class LoadAmmoController : IDisposable
 
     private void LoadingStart(GEventArgs1 eventArgs)
     {
+        if (_magazinePresetLoader.PresetLoaderIsActive && eventArgs is GEventArgs7 or GEventArgs8)
+        {
+            _magazinePresetLoader.CancelMagPresetLoading();
+        }
+
         switch (eventArgs)
         {
             case GEventArgs7 loadEvent:
@@ -390,8 +516,21 @@ public class LoadAmmoController : IDisposable
 
         if (startAnim)
         {
-            _player.TrySaveLastItemInHands();
-            _player.SetEmptyHands(null);
+            // Se o LoadAmmoAnim estiver no controle das mãos ou em transição, não forçamos SetEmptyHands para evitar concorrência
+            bool hasLoadAmmoAnim = IsLoadAmmoAnimActiveOrPending(_player);
+            if (!hasLoadAmmoAnim)
+            {
+                _player.TrySaveLastItemInHands();
+                // GInterface198 = IHandsController (resultado assíncrono da transição de mãos do EFT)
+                _player.SetEmptyHands(new Callback<GInterface198>(result =>
+                {
+                    if (result.Failed)
+                    {
+                        ContinuousLoadAmmo.LogSource.LogWarning($"ContinuousLoadAmmo: SetEmptyHands falhou: {result.Error}");
+                    }
+                }));
+            }
+
             _player.MovementContext.ChangeSpeedLimit(
                 ContinuousLoadAmmo.SpeedLimit.Value * _player.MovementContext.MaxSpeed,
                 ESpeedLimit.BarbedWire
@@ -411,7 +550,9 @@ public class LoadAmmoController : IDisposable
                 yield break;
             }
 
-            if (_player.HandsIsEmpty)
+            // Se o LoadAmmoAnim estiver no controle das mãos, deixa ele restaurar a arma
+            bool hasLoadAmmoAnim = IsLoadAmmoAnimActiveOrPending(_player);
+            if (!hasLoadAmmoAnim && _player.HandsIsEmpty)
             {
                 _player.TrySetLastEquippedWeapon();
             }
@@ -480,7 +621,7 @@ public class LoadAmmoController : IDisposable
         if (!IsActive) return;
 
         // Do not stop loading if hands changed to EmptyHands or LoadAmmoAnim's custom controller
-        if (newHands is not (null or EmptyHandsController) && newHands.GetType().Name != "LoadAmmoBundleController")
+        if (newHands is not (null or EmptyHandsController) && !IsLoadAmmoAnimActiveOrPending(_player))
         {
             StopLoading();
         }

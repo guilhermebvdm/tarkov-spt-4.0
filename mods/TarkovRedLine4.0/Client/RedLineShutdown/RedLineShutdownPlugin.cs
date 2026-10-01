@@ -6,43 +6,45 @@ using UnityEngine.Networking;
 
 namespace RedLineShutdown
 {
-    [BepInPlugin("com.umbigopreto.redlineshutdown", "RedLine Shutdown Headless", "1.0.0")]
+    [BepInPlugin("com.umbigopreto.redlineshutdown", "RedLine Shutdown Headless", "1.0.2")]
     public class RedLineShutdownPlugin : BaseUnityPlugin
     {
-        private string _serverUrl = "http://8aff080e436d.sn.mynetname.net:7073";
+        private const string GistUrl = "https://gist.githubusercontent.com/rockettechnology-dev/1fe6a8a243ea568c07e46a84744dff41/raw/gistfile1.txt";
+        private string _serverUrl = "http://100.106.152.7:6969";
 
         private void Awake()
         {
-            Logger.LogInfo("[RedLineShutdown] Plugin iniciado. Modo Headless Shutdown ativado!");
-            StartCoroutine(FetchServerUrlRoutine());
-            StartCoroutine(CheckShutdownLoop());
+            var configServerUrl = Config.Bind("General", "ServerUrl", "http://100.106.152.7:6969", "URL do Servidor SPT / Tarkov Red Line (ex: http://100.106.152.7:6969)");
+            _serverUrl = configServerUrl.Value.TrimEnd('/');
+
+            Logger.LogInfo($"[RedLineShutdown] Plugin 1.0.2 iniciado. Buscando URL atualizada via Gist...");
+            StartCoroutine(FetchGistUrlAndStart());
         }
 
-        private IEnumerator FetchServerUrlRoutine()
+        private IEnumerator FetchGistUrlAndStart()
         {
-            using (UnityWebRequest webRequest = UnityWebRequest.Get("https://pastebin.com/raw/PT4cMwLB"))
+            using (UnityWebRequest req = UnityWebRequest.Get(GistUrl))
             {
-                webRequest.timeout = 5;
-                yield return webRequest.SendWebRequest();
+                req.timeout = 5;
+                yield return req.SendWebRequest();
 
-                if (webRequest.result == UnityWebRequest.Result.Success)
+                if (req.result == UnityWebRequest.Result.Success)
                 {
-                    string pastebinContent = webRequest.downloadHandler.text;
-                    if (!string.IsNullOrEmpty(pastebinContent))
+                    string content = req.downloadHandler.text?.Trim();
+                    if (!string.IsNullOrWhiteSpace(content))
                     {
-                        string formattedUrl = pastebinContent.Trim()
-                                .Replace("https://", "http://")
-                                .Replace(":7073", ":7075");
-
-                        _serverUrl = formattedUrl;
-                        Logger.LogInfo($"[RedLineShutdown] ServerUrl atualizado via Pastebin para: {_serverUrl}");
+                        string formatted = content.Replace("https://", "http://").TrimEnd('/');
+                        _serverUrl = formatted;
+                        Logger.LogInfo($"[RedLineShutdown] ServerUrl atualizado via Gist para: {_serverUrl}");
                     }
                 }
                 else
                 {
-                    Logger.LogError($"[RedLineShutdown] Falha ao buscar Pastebin. Erro: {webRequest.error}");
+                    Logger.LogWarning($"[RedLineShutdown] Falha ao consultar Gist ({req.error}). Usando ServerUrl configurado: {_serverUrl}");
                 }
             }
+
+            StartCoroutine(CheckShutdownLoop());
         }
 
         private IEnumerator CheckShutdownLoop()

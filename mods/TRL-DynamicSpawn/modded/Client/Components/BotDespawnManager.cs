@@ -760,6 +760,21 @@ namespace TRLDynamicSpawn.Components
                     Vector3 offset = (i == 0) ? Vector3.zero : new Vector3(UnityEngine.Random.Range(-1.5f, 1.5f), 0f, UnityEngine.Random.Range(-1.5f, 1.5f));
                     Vector3 targetPos = spawnPoint.Position + offset;
 
+                    // ref: 013-estabilizacao-spawn-e-visual-cadaver — snap seguro de teleporte
+                    // Evita soterramento em declives sem arriscar puxar o bot para o subsolo em pontes e armazéns
+                    if (Physics.Raycast(targetPos + Vector3.up * 0.5f, Vector3.down, out RaycastHit rayHit, 1.0f, LayerMaskClass.HighPolyWithTerrainMask | LayerMaskClass.PlayerStaticCollisionsMask))
+                    {
+                        float deltaY = rayHit.point.y - targetPos.y;
+                        if (Mathf.Abs(deltaY) <= 0.35f)
+                        {
+                            targetPos.y = rayHit.point.y;
+                        }
+                    }
+                    if (UnityEngine.AI.NavMesh.SamplePosition(targetPos, out UnityEngine.AI.NavMeshHit navHit, 1.0f, UnityEngine.AI.NavMesh.AllAreas))
+                    {
+                        targetPos = navHit.position;
+                    }
+
                     // 1. Interrompe navegação de NavMesh no ponto de origem ANTES de teleportar
                     try { m.Mover?.Stop(); } catch { }
 

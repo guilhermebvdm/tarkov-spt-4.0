@@ -8,7 +8,14 @@
 
 ## O que é
 
-(TODO: descrever o mod em 1-2 parágrafos)
+Skills-Extended é um mod híbrido SPT 4.0.2 / EFT 0.16.x (`com.cj.SkillsExtended`) que reativa skills dormentes do vanilla (Lockpicking, Prone Movement, Silent Ops) e adiciona 4 skills novas (Usec Ar Systems, Bear Ak Systems, Usec Negotiations, Bear Raw Power), com um minigame customizado de arrombamento de fechaduras, configuração extensa via JSON/Web UI e sincronização multiplayer via Fika.
+
+Ver a documentação técnica completa em [`docs/README.md`](docs/README.md) e o catálogo de configuração F12 em [`PROPRIEDADES.md`](PROPRIEDADES.md).
+
+## Documentação
+
+- [`docs/README.md`](docs/README.md) — índice da documentação técnica completa (arquitetura, sistema de skills/buffs, lockpicking, servidor/Web UI, multiplayer Fika)
+- [`PROPRIEDADES.md`](PROPRIEDADES.md) — catálogo de configuração F12 (BepInEx ConfigurationManager) do lado cliente
 
 ## Estrutura desta pasta
 

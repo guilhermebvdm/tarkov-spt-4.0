@@ -88,14 +88,14 @@ internal static class StancesArmStaminaBridge
 
             // 🔧 Steady Arms (Caçador): braço cansa menos AO MIRAR. IsAiming é o MESMO sinal que o Resolve()
             // do stances usa pros cenários *Ads — e HoldBreath implica IsAiming (evidência na review 01).
-            if (PerksConfig.SteadyArmsEnabled?.Value == true && SkillMultipliers.IsLocalClass("Hunter")
+            if (PerksConfig.SteadyArmsEnabled?.Value == true && SkillMultipliers.IsLocalClass(EClassId.Hunter)
                 && p.ProceduralWeaponAnimation != null && p.ProceduralWeaponAnimation.IsAiming)
             {
                 return Sane(PerksConfig.SteadyArmsDrain?.Value ?? 1f);
             }
 
             // 🔧 Tireless Arms (Tanque): braço cansa MUITO devagar com arma pesada EM MÃOS (B16: ×0.20; era ×0 = imune). Mesmo gate do Bunker.
-            if (PerksConfig.TirelessArmsEnabled?.Value == true && SkillMultipliers.IsLocalClass("Tank")
+            if (PerksConfig.TirelessArmsEnabled?.Value == true && SkillMultipliers.IsLocalClass(EClassId.Tank)
                 && HeavyWeapon.InHand(p))
             {
                 return Sane(PerksConfig.TirelessArmsDrain?.Value ?? 1f);

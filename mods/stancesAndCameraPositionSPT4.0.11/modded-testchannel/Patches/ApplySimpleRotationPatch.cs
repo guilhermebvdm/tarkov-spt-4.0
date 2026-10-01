@@ -112,7 +112,11 @@ namespace CameraRotationMod.Patches
 
         protected override MethodBase GetTargetMethod()
         {
-            _scopeRotationField = AccessTools.Field(typeof(EFT.Animations.ProceduralWeaponAnimation), "_targetScopeRotation");
+            // Item 021 — ref: Assembly-CSharp/EFT.Animations/ProceduralWeaponAnimation.cs:276. Antes apontava
+            // para "_targetScopeRotation" (:278, alvo instantâneo sem suavização, usado só no guard de NaN).
+            // "_scopeRotation" é o valor já interpolado por Quaternion.Lerp dentro do próprio
+            // ApplyComplexRotation/ApplySimpleRotation (:1774/:1799) — inclui a transição suave de ADS de graça.
+            _scopeRotationField = AccessTools.Field(typeof(EFT.Animations.ProceduralWeaponAnimation), "_scopeRotation");
             _weapTempPositionField = AccessTools.Field(typeof(EFT.Animations.ProceduralWeaponAnimation), "_temporaryPosition");
             _weapTempRotationField = AccessTools.Field(typeof(EFT.Animations.ProceduralWeaponAnimation), "_temporaryRotation");
             _isAimingField = AccessTools.Field(typeof(EFT.Animations.ProceduralWeaponAnimation), "_isAiming");
@@ -192,9 +196,16 @@ namespace CameraRotationMod.Patches
                 return;
             }
 
+            // Item 021 — toggle F12 "Straighten Weapon On Canted Sights" (default false = preserva o
+            // tombamento nativo). scopeRotation aqui já é "_scopeRotation" (ver GetTargetMethod) — suavizado
+            // pelo próprio nativo, NUNCA convertido para .eulerAngles (só multiplicado como Quaternion), o
+            // que evita o gimbal-flip que o comentário acima ("Nunca usar scopeRotation.eulerAngles...") alerta.
+            bool flattenCantedSights = Plugin._FlattenCantedSightTilt?.Value ?? false;
+            Quaternion effectiveScopeRotation = flattenCantedSights ? Quaternion.identity : scopeRotation;
+
             // Apply directly to WeaponRootAnim, ensuring the position offset is oriented correctly in the weapon's local space
             Vector3 orientedPositionOffset = weapRotation * CurrentPosition;
-            __instance.HandsContainer.WeaponRootAnim.SetPositionAndRotation(weaponPosition + orientedPositionOffset, weapRotation * CurrentRotation);
+            __instance.HandsContainer.WeaponRootAnim.SetPositionAndRotation(weaponPosition + orientedPositionOffset, weapRotation * effectiveScopeRotation * CurrentRotation);
         }
     }
 }

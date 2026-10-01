@@ -25,7 +25,7 @@ public class ShellCasingPatch : ModulePatch
 	[PatchPrefix]
 	private static bool Prefix(AmmoPoolObject __instance)
 	{
-		if (VisceralEntry.Instance != null && VisceralEntry.Instance.NeverDeleteShells != null && VisceralEntry.Instance.NeverDeleteShells.Value)
+		if (VisceralEntry.Instance != null && VisceralEntry.Instance.NeverDeleteShells != null && VisceralEntry.Instance.IsCategoryActive(VisceralEntry.Instance.NeverDeleteShells)) // ref: item 005
 		{
 			if (ActiveCasingsSet.Add(__instance))
 			{

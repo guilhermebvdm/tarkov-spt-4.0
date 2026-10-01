@@ -61,6 +61,47 @@ namespace SPT.Launcher.Helpers
             global::SPT.Launcher.Controllers.LogManager.Instance.Error(msg);
 
         /// <summary>
+        /// Realiza consulta rápida (timeout de 5s) para verificar se existe uma versão mais recente do Launcher disponível no servidor.
+        /// Retorna a versão mais recente em caso positivo, ou null se o Launcher já estiver atualizado ou inalcançável.
+        /// </summary>
+        public static async Task<string?> CheckForAvailableUpdateAsync(string serverUrl)
+        {
+            if (string.IsNullOrWhiteSpace(serverUrl)) return null;
+
+            try
+            {
+                using var client = new HttpClient(CreatePinnedHandler());
+                client.Timeout = TimeSpan.FromSeconds(5);
+
+                string updateServerUrl = serverUrl.TrimEnd('/');
+                string versionUrl = $"{updateServerUrl}{SPT.Launcher.RequestHandler.ModRoutePrefix}/redline/launcher/version";
+
+                var response = await client.GetAsync(versionUrl);
+                if (!response.IsSuccessStatusCode)
+                    return null;
+
+                string versionJson = await response.Content.ReadAsStringAsync();
+                using var doc = JsonDocument.Parse(versionJson);
+                var root = doc.RootElement;
+
+                string newVersion = root.TryGetProperty("version", out var vEl) && vEl.ValueKind == JsonValueKind.String
+                    ? vEl.GetString() ?? "1.0.0"
+                    : "1.0.0";
+
+                if (UpdateVersion.IsNewerVersion(CurrentVersion, newVersion))
+                {
+                    return newVersion;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogInfo($"[AutoUpdate] Verificação rápida de versão do launcher: {ex.Message}");
+            }
+
+            return null;
+        }
+
+        /// <summary>
         /// Checks the server for a newer launcher and, if one exists, downloads it to QUARANTINE, verifies
         /// its detached signature against the embedded public key, and only then promotes + restarts.
         /// FAIL-CLOSED (01-spec RN-1): any doubt aborts without touching the running binary. Returns an
@@ -155,48 +196,73 @@ namespace SPT.Launcher.Helpers
             string promotedExe = Path.Combine(currentDir, PromotedFileName);
             string batFile = Path.Combine(currentDir, "update_launcher.bat");
 
-            // --- Download to quarantine (network/IO problems → NetworkError, abort gracious) ---
-            try
+            // --- Download to quarantine with Heartbeat resilience (network/IO problems retry on reboot) ---
+            const int maxRetries = 3;
+            int attempt = 0;
+            bool downloadSuccess = false;
+
+            while (attempt < maxRetries && !downloadSuccess)
             {
-                TryDelete(quarantineExe); // clear any stale/locked leftover before writing
-
-                using var client = new HttpClient(CreatePinnedHandler());
-                client.Timeout = TimeSpan.FromMinutes(5);
-                using var response = await client.GetAsync(downloadUrl, HttpCompletionOption.ResponseHeadersRead);
-                response.EnsureSuccessStatusCode();
-
-                var totalBytes = response.Content.Headers.ContentLength ?? -1L;
-                var canReportProgress = totalBytes != -1 && progress != null;
-
-                using (var contentStream = await response.Content.ReadAsStreamAsync())
-                using (var fileStream = new FileStream(quarantineExe, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true))
+                attempt++;
+                try
                 {
-                    var totalRead = 0L;
-                    var buffer = new byte[8192];
-                    var lastReportedProgress = -1;
-                    int read;
+                    TryDelete(quarantineExe); // clear any stale/locked leftover before writing
 
-                    while ((read = await contentStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                    using var client = new HttpClient(CreatePinnedHandler());
+                    client.Timeout = TimeSpan.FromMinutes(5);
+                    using var response = await client.GetAsync(downloadUrl, HttpCompletionOption.ResponseHeadersRead);
+                    response.EnsureSuccessStatusCode();
+
+                    var totalBytes = response.Content.Headers.ContentLength ?? -1L;
+                    var canReportProgress = totalBytes != -1 && progress != null;
+
+                    using (var contentStream = await response.Content.ReadAsStreamAsync())
+                    using (var fileStream = new FileStream(quarantineExe, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true))
                     {
-                        await fileStream.WriteAsync(buffer, 0, read);
-                        totalRead += read;
-                        if (canReportProgress)
+                        var totalRead = 0L;
+                        var buffer = new byte[8192];
+                        var lastReportedProgress = -1;
+                        int read;
+
+                        while ((read = await contentStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
                         {
-                            var percentage = (int)((totalRead * 100) / totalBytes);
-                            if (percentage != lastReportedProgress)
+                            await fileStream.WriteAsync(buffer, 0, read);
+                            totalRead += read;
+                            if (canReportProgress)
                             {
-                                progress.Report(percentage);
-                                lastReportedProgress = percentage;
+                                var percentage = (int)((totalRead * 100) / totalBytes);
+                                if (percentage != lastReportedProgress)
+                                {
+                                    progress.Report(percentage);
+                                    lastReportedProgress = percentage;
+                                }
                             }
                         }
                     }
+                    downloadSuccess = true;
                 }
-            }
-            catch (Exception ex)
-            {
-                LogError($"[AutoUpdate] Falha ao baixar a atualização: {ex.Message}");
-                TryDelete(quarantineExe);
-                return UpdateOutcome.NetworkError;
+                catch (Exception ex)
+                {
+                    LogError($"[AutoUpdate] Falha no download do launcher (tentativa {attempt}/{maxRetries}): {ex.Message}");
+                    TryDelete(quarantineExe);
+
+                    if (attempt < maxRetries)
+                    {
+                        LogInfo("[AutoUpdate] Servidor pode estar reiniciando. Aguardando servidor voltar online via Heartbeat...");
+                        bool online = await ServerHeartbeatMonitor.Instance.WaitForServerOnlineAsync(TimeSpan.FromSeconds(35));
+                        if (!online)
+                        {
+                            LogError("[AutoUpdate] Servidor não respondeu dentro do tempo limite.");
+                            return UpdateOutcome.NetworkError;
+                        }
+                        LogInfo("[AutoUpdate] Servidor online confirmado! Retentando download do launcher...");
+                        await Task.Delay(1000);
+                    }
+                    else
+                    {
+                        return UpdateOutcome.NetworkError;
+                    }
+                }
             }
 
             // --- Verify signature over the bytes ON DISK (authority = recomputed hash, CA-6) ---

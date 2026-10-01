@@ -11,10 +11,116 @@ namespace CustomClasses.Client;
 ///     Carregamento LAZY na 1ª chamada (PA-01-04: evita depender de hook de seleção de perfil
 ///     ofuscado) — quando uma skill ganha XP, a sessão já existe e a rota responde.
 /// </summary>
+/// <summary>
+///     ref: AUD-01-02 — id numérico da classe. A classe é IMUTÁVEL durante a raid; resolvê-la 1× no fetch
+///     transforma todo gate (42+ call-sites, vários per-frame) numa comparação de inteiros, em vez de
+///     <c>string.Equals(..., OrdinalIgnoreCase)</c>, que faz dobra de caixa caractere a caractere.
+///     <para>
+///     ⚠️ PA-01-06 — <c>internal</c>: casa com <c>ClassIdentities.Identity</c> (internal sealed) e evita
+///     expor um tipo novo na superfície pública que o TRL-ImmersiveCombatMedicine consome por reflexão.
+///     </para>
+///     <para>
+///     ⚠️ PA-04-02 — este enum é o <b>eixo canônico</b> de TRÊS listas paralelas de classe:
+///     <see cref="SkillMultipliers.Parse"/> (gates), <c>PerksConfig.ClassColors</c> (cor do F12) e
+///     <c>PerksCatalog.ByClass</c> (composição de perks). A checagem de boot em <c>PerksConfig.Bind</c>
+///     é o que impede as três de divergirem em silêncio.
+///     </para>
+/// </summary>
+internal enum EClassId
+{
+    None = 0,
+    CombatMedic,
+    Rifleman,
+    Hunter,
+    Stealth,
+    Scavenger,
+    Naked,
+    Tank,
+}
+
 internal static class SkillMultipliers
 {
     private static readonly Dictionary<ESkillId, float> Factors = new();
     private static bool _loaded;
+
+    /// <summary>ref: AUD-01-02 — resolvido em <see cref="Apply"/>, zerado em <see cref="Reset"/>.</summary>
+    private static EClassId _classId;
+
+    private static bool _warnedUnknownClass;
+
+    /// <summary>
+    ///     ref: AUD-01-02 — id da classe local, CRU.
+    ///     <para>
+    ///     ⚠️ PA-04-05 — <b>NÃO chama <c>EnsureLoaded</c></b>, ao contrário do <see cref="IsLocalClass"/>,
+    ///     e a diferença é DELIBERADA. Este acessor é o que o <c>ClassIdentities.ClassIdOf</c> usa no ramo
+    ///     <c>IsYourPlayer</c>, e o <c>ClassIdOf</c> roda a cada passo de cada player/bot
+    ///     (<c>BotEventHandler.PlaySound</c>): um GET síncrono ali seria freeze no meio da raid — foi
+    ///     exatamente o que o achado 4 do code-review B14 tirou do hot path (ClassIdentities.cs:131-135).
+    ///     Não "uniformizar" com o <see cref="IsLocalClass"/> em nenhuma das duas direções.
+    ///     </para>
+    /// </summary>
+    internal static EClassId LocalClassId => _classId;
+
+    /// <summary>
+    ///     ref: PA-01-03 · PA-04-03 — disparado sempre que a classe/idioma resolvidos mudam (fim de
+    ///     <see cref="Apply"/> e de <see cref="Reset"/>). Quem cacheia algo derivado da classe assina isto;
+    ///     o <c>SkillMultipliers</c> não conhece consumidor nenhum. Molde: <c>PerksConfig.ClassColorsChanged</c>
+    ///     (item 067). Assinatura estática↔estática, 1× no <c>Awake</c>, sem <c>-=</c> — mesma vida do plugin.
+    /// </summary>
+    internal static event Action? ClassChanged;
+
+    /// <summary>
+    ///     ref: AUD-01-02 — nome EN → id. Fonte única do mapeamento (os literais de classe existiam
+    ///     espalhados em 42+ call-sites; agora existem só aqui, e o compilador cuida do resto).
+    ///     <para>
+    ///     ref: PA-03-06 — <paramref name="warnUnknown"/> existe para a checagem de boot (PA-02-03/PA-04-02)
+    ///     não consumir o warn-once: ela emite o próprio erro, mais específico, e o warn-once fica
+    ///     reservado ao caminho de runtime (fetch de peer, troca de perfil).
+    ///     </para>
+    /// </summary>
+    internal static EClassId Parse(string? nameEn, bool warnUnknown = true)
+    {
+        if (string.IsNullOrEmpty(nameEn))
+        {
+            return EClassId.None;
+        }
+
+        // OrdinalIgnoreCase preservado (mesma semântica do IsClass antigo) — roda 1× por fetch, não por frame.
+        if (string.Equals(nameEn, "Combat Medic", StringComparison.OrdinalIgnoreCase)) return EClassId.CombatMedic;
+        if (string.Equals(nameEn, "Rifleman", StringComparison.OrdinalIgnoreCase)) return EClassId.Rifleman;
+        if (string.Equals(nameEn, "Hunter", StringComparison.OrdinalIgnoreCase)) return EClassId.Hunter;
+        if (string.Equals(nameEn, "Stealth", StringComparison.OrdinalIgnoreCase)) return EClassId.Stealth;
+        if (string.Equals(nameEn, "Scavenger", StringComparison.OrdinalIgnoreCase)) return EClassId.Scavenger;
+        if (string.Equals(nameEn, "Naked", StringComparison.OrdinalIgnoreCase)) return EClassId.Naked;
+        if (string.Equals(nameEn, "Tank", StringComparison.OrdinalIgnoreCase)) return EClassId.Tank;
+
+        // Corner case da 01-spec: edition órfã, ou classe nova criada no editor web. Degrada para None
+        // (nenhum perk dispara) com 1 aviso por sessão — NUNCA casa com a classe errada.
+        if (warnUnknown && !_warnedUnknownClass)
+        {
+            _warnedUnknownClass = true;
+            Plugin.Log?.LogWarning($"[CustomClasses] (AUD-01-02) classe desconhecida '{nameEn}' — perks desligados p/ ela.");
+        }
+
+        return EClassId.None;
+    }
+
+    /// <summary>
+    ///     ref: PA-03-01 — inverso do <see cref="Parse"/>: id → nome EN. <c>switch</c> puro, sem dicionário.
+    ///     Existe SÓ para o diagnóstico (o <c>PerkDiag.LogPeer</c> precisa do nome legível) e para a checagem
+    ///     de boot. <b>Chamar apenas de dentro de <c>if (PerkDiag.Enabled)</c></b> — nunca no caminho quente.
+    /// </summary>
+    internal static string? NameOf(EClassId id) => id switch
+    {
+        EClassId.CombatMedic => "Combat Medic",
+        EClassId.Rifleman => "Rifleman",
+        EClassId.Hunter => "Hunter",
+        EClassId.Stealth => "Stealth",
+        EClassId.Scavenger => "Scavenger",
+        EClassId.Naked => "Naked",
+        EClassId.Tank => "Tank",
+        _ => null,
+    };
 
     // Item 008 (i18n): nome localizado en/pt vindo do server (fallback ao className legado = edition/PT).
     private static string? _classNameEn;
@@ -45,21 +151,35 @@ internal static class SkillMultipliers
     public static string? DescriptionPt => _descriptionPt;
     private static string? _descriptionEn, _descriptionPt;
 
-    /// <summary>Item 050: true se a classe do perfil local é <paramref name="nameEn"/> (compara o nome EN estável, case-insensitive).</summary>
-    public static bool IsLocalClass(string nameEn)
+    /// <summary>
+    ///     Item 050 · ref: AUD-01-02 — <b>o gate quente</b>. Comparação de int; sem alocação, sem string.
+    ///     <para>
+    ///     ⚠️ PA-02-08 — NÃO remover o <c>EnsureLoaded</c> por parecer redundante depois da migração. Ele é o
+    ///     fetch PREGUIÇOSO para quando nenhum <c>Prefetch</c> rodou (menu, hideout, 1ª raid pós-restart do
+    ///     server). Com o cache frio ele faz um GET HTTP SÍNCRONO — e é exatamente por isso que todo patch
+    ///     que roda para bots/peers coloca o gate de INSTÂNCIA ANTES deste
+    ///     (ref: CalmSightsPatch.cs:51-53, achado CR-F5).
+    ///     </para>
+    ///     <para>
+    ///     Os overloads de <c>string</c> foram REMOVIDOS de propósito (PA-01-06): um wrapper de compatibilidade
+    ///     deixaria call-sites antigos passarem despercebidos e anularia o ganho. Sem eles, o compilador aponta
+    ///     cada call-site e um nome digitado errado vira erro de build em vez de perk silenciosamente morto.
+    ///     </para>
+    /// </summary>
+    public static bool IsLocalClass(EClassId id)
     {
         EnsureLoaded();
-        return IsClass(_classNameEn, nameEn);
+        return id != EClassId.None && _classId == id;
     }
 
     /// <summary>
-    ///     B14 (coop): compara DUAS classes pelo nome EN estável (case-insensitive), sem assumir que uma delas é
-    ///     a local. Necessário porque o HOST precisa avaliar a classe de um peer Fika (resolvida via
-    ///     <see cref="ClassIdentities.ClassNameEnOf"/>), não só a sua. Null = vanilla/desconhecida → false.
+    ///     B14 (coop) · ref: AUD-01-02 — compara DUAS classes por id, sem assumir que uma delas é a local.
+    ///     Necessário porque o HOST precisa avaliar a classe de um peer Fika (resolvida via
+    ///     <see cref="ClassIdentities.ClassIdOf"/>), não só a sua. <c>None</c> = vanilla/desconhecida → false.
     /// </summary>
-    public static bool IsClass(string? classNameEn, string nameEn)
+    public static bool IsClass(EClassId classId, EClassId id)
     {
-        return classNameEn != null && string.Equals(classNameEn, nameEn, StringComparison.OrdinalIgnoreCase);
+        return id != EClassId.None && classId == id;
     }
 
     /// <summary>Item 015: nickname do perfil local (p/ casar o ChatSpecialIcon do jogador local).</summary>
@@ -117,7 +237,9 @@ internal static class SkillMultipliers
         _serverNameColor = null;   // 067: cor crua do server (o override vive no F12, não é resetado aqui)
         _descriptionEn = null;   // item 068
         _descriptionPt = null;   // item 068
+        _classId = EClassId.None;   // ref: AUD-01-02
         _loaded = false;
+        ClassChanged?.Invoke();     // ref: PA-04-03 — quem cacheia algo derivado da classe se invalida aqui
     }
 
     public static void EnsureLoaded()
@@ -170,6 +292,7 @@ internal static class SkillMultipliers
         // Item 008 (i18n): guarda en/pt; o getter ClassName resolve pelo idioma do EFT. Fallback ao className legado.
         _classNameEn = payload.ClassNameEn ?? payload.ClassName;
         _classNamePt = payload.ClassNamePt ?? payload.ClassName;
+        _classId = Parse(_classNameEn);   // ref: AUD-01-02 — id resolvido junto com o nome (inclui o Prefetch)
         Nickname = payload.Nickname;
         IconFile = payload.IconFile;
         _serverNameColor = payload.NameColor;   // 067: guarda o valor CRU; NameColor resolve o override do F12
@@ -190,6 +313,8 @@ internal static class SkillMultipliers
         }
 
         Plugin.Log?.LogInfo($"[CustomClasses] {Factors.Count} multiplicador(es) de skill carregado(s) (classe '{ClassName ?? "—"}').");
+
+        ClassChanged?.Invoke();   // ref: PA-04-03 — invalida os caches derivados da classe (tooltip, grupos)
     }
 
     public static bool TryGet(ESkillId id, out float factor) => Factors.TryGetValue(id, out factor);
