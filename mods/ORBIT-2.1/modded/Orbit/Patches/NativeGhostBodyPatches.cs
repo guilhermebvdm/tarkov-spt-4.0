@@ -58,13 +58,15 @@ internal static class NativeGhostBodyPatches
 
     private static void Bind(Harmony harmony, Type type, params string[] names)
     {
-        var owner = AccessTools.Field(type, "_owner");
+        // SPT 4.0: "_owner" and some of the method names below are 4.1 names; Orbit.Compat resolves the 4.0 ones.
+        var owner = Orbit.Compat.Spt40Members.OwnerField(type);
         if (owner?.FieldType != typeof(BotOwner)) throw new MissingFieldException(type.FullName, "_owner");
         var instance = Expression.Parameter(typeof(object), "instance");
         var getter = Expression.Lambda<Func<object, BotOwner>>(
             Expression.Field(Expression.Convert(instance, owner.DeclaringType), owner), instance).Compile();
-        foreach (var name in names)
+        foreach (var name41 in names)
         {
+            var name = Orbit.Compat.Spt40Members.Method(type, name41);
             // Include engine overrides, so a specialized weapon selector cannot bypass the guard.
             var methods = type.Assembly.GetTypes().Where(type.IsAssignableFrom)
                 .SelectMany(t => t.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly))

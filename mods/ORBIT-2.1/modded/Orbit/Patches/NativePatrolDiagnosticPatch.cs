@@ -12,11 +12,13 @@ namespace Orbit.Patches;
 public class NativePatrolArrivalDiagnosticPatch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
-        => AccessTools.Method(typeof(PatrolMoveSimple), nameof(PatrolMoveSimple.IsCome), Type.EmptyTypes);
+        // SPT 4.0: the parameterless arrival check is still PatrolMoveSimple.method_0 (4.1: IsCome()),
+        // and the owner field is BotOwner_0 (4.1: _owner), injected by Harmony through the ___ prefix.
+        => AccessTools.Method(typeof(PatrolMoveSimple), nameof(PatrolMoveSimple.method_0), Type.EmptyTypes);
 
     [PatchPostfix]
-    public static void Postfix(BotOwner ____owner, bool __result)
-        => NativePatrolDiagnostics.ArrivalChecked(____owner, __result);
+    public static void Postfix(BotOwner ___BotOwner_0, bool __result)
+        => NativePatrolDiagnostics.ArrivalChecked(___BotOwner_0, __result);
 }
 
 public class NativeGlukharChoiceDiagnosticPatch : ModulePatch
@@ -24,9 +26,10 @@ public class NativeGlukharChoiceDiagnosticPatch : ModulePatch
     protected override MethodBase GetTargetMethod()
         => AccessTools.Method(typeof(PatrolPointChooserBossGluhar), nameof(PatrolPointChooserBossGluhar.FindNextPoint));
 
+    // SPT 4.0: the point choosers keep their bot in the Owner field (4.1: _owner).
     [PatchPostfix]
-    public static void Postfix(BotOwner ____owner, PatrolPointContainer __result)
-        => NativePatrolDiagnostics.PointChosen(____owner, __result);
+    public static void Postfix(BotOwner ___Owner, PatrolPointContainer __result)
+        => NativePatrolDiagnostics.PointChosen(___Owner, __result);
 }
 
 public class NativeFollowerArrivalDiagnosticPatch : ModulePatch

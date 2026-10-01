@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Offline dry run of the ORBIT Harmony patches against the real SPT 4.0 game assemblies.
+    .NET Framework 4.8: the HarmonyX / MonoMod build shipped with BepInEx 5 detours methods there, which it
+    does not do on the modern .NET runtimes installed on this machine.
+    Run through ../verify-port.sh, which resolves the SPT install from .spt-path.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net48</TargetFramework>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <AssemblyName>PatchDryRun</AssemblyName>
+    <RootNamespace>PatchDryRun</RootNamespace>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <SptPathFile>$([MSBuild]::GetPathOfFileAbove('.spt-path', '$(MSBuildThisFileDirectory)'))</SptPathFile>
+    <SptRoot Condition=" '$(SptRoot)' == '' And '$(SPT_PATH)' != '' ">$(SPT_PATH)</SptRoot>
+    <SptRoot Condition=" '$(SptRoot)' == '' And '$(SptPathFile)' != '' ">$([System.Text.RegularExpressions.Regex]::Match($([System.IO.File]::ReadAllText('$(SptPathFile)')), 'SPT_PATH=([^\r\n]+)').Groups[1].Value.Trim())</SptRoot>
+    <SptRoot Condition=" '$(SptRoot)' == '' ">D:\SPT</SptRoot>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Compile-time only; at run time every assembly is resolved from the SPT install (see Program.Resolve). -->
+    <Reference Include="0Harmony"><HintPath>$(SptRoot)\BepInEx\core\0Harmony.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="BepInEx"><HintPath>$(SptRoot)\BepInEx\core\BepInEx.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Mono.Cecil"><HintPath>$(SptRoot)\BepInEx\core\Mono.Cecil.dll</HintPath><Private>false</Private></Reference>
+  </ItemGroup>
+
+</Project>
