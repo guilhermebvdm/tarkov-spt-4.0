@@ -1,6 +1,6 @@
 # tarkov-spt-4.0 — Contexto para Agentes
 
-Repositório de mods para SPT 4.0 (Single Player Tarkov). Lido por qualquer assistente AI (Claude Code, Gemini, Codex, Cursor).
+Repositório de mods para SPT 4.0 (Single Player Tushonka, antes Single Player Tarkov). Lido por qualquer assistente AI (Claude Code, Gemini, Codex, Cursor).
 
 ## Workspace
 
@@ -21,7 +21,7 @@ Repositório de mods para SPT 4.0 (Single Player Tarkov). Lido por qualquer assi
 - `design-system/` — TRL Design System: padrão visual **obrigatório** para todo editor web de mod (tokens + componentes CSS; ler `design-system/CLAUDE.md` antes de estilizar qualquer editor)
 - `docs/` — documentação técnica e arquitetural
 - `references/` — fontes read-only de verdade (não editar): `eft-decompiled/` (Assembly EFT), `spt-source/` (código-fonte do servidor SPT) e repositórios do FIKA (conexão coop: `fika-server/`, `fika-plugin/` e `fika-headless/`)
-- `wiki/` — snapshot read-only de github.com/sp-tarkov/wiki (CC BY-NC-ND 4.0; sincronizado via `.agents/hooks/sync-wiki.sh` — não editar)
+- `wiki/` — snapshot read-only de github.com/SP-Tushonka/wiki (CC BY-NC-ND 4.0; sincronizado via `.agents/hooks/sync-wiki.sh` — não editar)
 - `.claude/settings.json` — config do Claude Code (referencia hooks em .agents/)
 - `.claude/commands/` — slash commands do ciclo de desenvolvimento (fluxo ativo; ver [WORKFLOW.md](WORKFLOW.md))
 - `.claude/skills/` — skills do repo carregadas pelos commands (ver [WORKFLOW.md](WORKFLOW.md) § Skills)

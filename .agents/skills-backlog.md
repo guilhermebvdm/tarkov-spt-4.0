@@ -65,12 +65,12 @@ Recebe uma pasta de mod 3.x (ex: `mods/legacy-3x/<Nome>/`) e:
 
 ### Material que reusa
 
-- Wiki: [FAQs_40.md](../wiki/spt/FAQs_40.md), [How_SPT_Works.md](../wiki/spt/How_SPT_Works.md), [Updating_SPT.md](../wiki/spt/Updating_SPT.md)
+- Wiki: [FAQs_40.md](../wiki/spt/SPT_40/FAQs_40.md), [How_SPT_Works.md](../wiki/spt/SPT_4x/How_SPT_Works.md), [Updating_SPT.md](../wiki/spt/SPT_4x/Updating_SPT.md)
 - Repo: [mods/RZ-SPTMods/RZ-SPTMods/RZEssentials/](../mods/RZ-SPTMods/RZ-SPTMods/RZEssentials/) (exemplo real de DI + IOnLoad + Patcher_*)
 - Inventário: [docs/migration/mods-inventory.md](../docs/migration/mods-inventory.md)
 - Externos:
-  - [github.com/sp-tarkov/server-mod-examples](https://github.com/sp-tarkov/server-mod-examples) — exemplos numerados (1 → complexo)
-  - [github.com/sp-tarkov/server-csharp](https://github.com/sp-tarkov/server-csharp) — fonte do server
+  - [github.com/SP-Tushonka/server-mod-examples](https://github.com/SP-Tushonka/server-mod-examples) — exemplos numerados (1 → complexo)
+  - [github.com/SP-Tushonka/server-csharp](https://github.com/SP-Tushonka/server-csharp) — fonte do server
   - [deepwiki.com/sp-tarkov/server-csharp](https://deepwiki.com/sp-tarkov/server-csharp/1-overview) — doc gerada
   - [github.com/WelcomeToTarkov/WTT-CommonLib](https://github.com/WelcomeToTarkov/WTT-CommonLib/) — ex. `[Injectable]` + `IOnLoad`
   - NuGet: `SPTarkov.Server.Core 4.0.*`, `SPTarkov.DI 4.0.*`
@@ -93,12 +93,12 @@ Preenche linha do [mods-inventory.md](../docs/migration/mods-inventory.md) (Tipo
 **Fluxo:**
 
 1. Recebe nome ou pasta do mod.
-2. Cross-check em [forge.sp-tarkov.com](https://forge.sp-tarkov.com/) — existe versão 4.0? Quem mantém? Última atualização?
+2. Cross-check em [sp-mod.com](https://sp-mod.com/) (Forge) — existe versão 4.0? Quem mantém? Última atualização?
 3. Decide Status: 🟢 Instalar (4.0 publicado, estável) · ⬆️ Evoluir (interno, precisa update) · 🔧 Desenvolver (não há 4.0) · 🟠 Aguardar (autor anunciou WIP) · 🔴 Bloqueado · ⚫ Não incluir.
-4. Sugere Prioridade baseada em [Recommended_Mods_40.md](../wiki/spt/Recommended_Mods_40.md) e dependências de outros mods do inventário.
+4. Sugere Prioridade baseada em `Recommended_Mods_40.md` e dependências de outros mods do inventário. ⚠️ Essa página não existe mais na wiki (ausente no snapshot de 2026-09-27; em `wiki/spt/Archived_Pending_Deletion/` só há a lista do 3.11) — escolher outra fonte de curadoria ao implementar.
 5. Edita linha (com confirmação) ou cria nova em [mods-inventory.md](../docs/migration/mods-inventory.md), depois roda `node scripts/sync-mods-html.js`.
 
-**Material:** [mods-inventory.md](../docs/migration/mods-inventory.md) (taxonomia + fonte única), forge.sp-tarkov.com, Recommended_Mods_40.md.
+**Material:** [mods-inventory.md](../docs/migration/mods-inventory.md) (taxonomia + fonte única), sp-mod.com (Forge), `Recommended_Mods_40.md` (removida da wiki — ver passo 4).
 
 ---
 
@@ -115,7 +115,7 @@ Cria `mods/server/<Nome>/` com:
 - `config/<nome>.jsonc` + classe POCO + carga via `ConfigLoader<T>`
 - README mínimo com instruções de build/deploy
 
-**Material:** padrão de [mods/RZ-SPTMods/RZ-SPTMods/RZEssentials/](../mods/RZ-SPTMods/RZ-SPTMods/RZEssentials/), [server-mod-examples](https://github.com/sp-tarkov/server-mod-examples).
+**Material:** padrão de [mods/RZ-SPTMods/RZ-SPTMods/RZEssentials/](../mods/RZ-SPTMods/RZ-SPTMods/RZEssentials/), [server-mod-examples](https://github.com/SP-Tushonka/server-mod-examples).
 
 ---
 
@@ -145,7 +145,7 @@ Verifica `<mod>/`:
 - SPT version no `ModMetadata` ou `package.json` confere com 4.0.x
 - Refs `BepInEx.Core 5.x` + `HarmonyX 2.15` (client) / `SPTarkov.Server.Core 4.0.*` (server)
 - Dependências declaradas e presentes em `mods/deps/`
-- Cruza nome com [Known_Mod_Issues_40.md](../wiki/spt/Known_Mod_Issues_40.md) para listar issues conhecidos
+- Cruza nome com [Known_Mod_Issues_40.md](../wiki/spt/SPT_40/Known_Mod_Issues_40.md) para listar issues conhecidos
 - Sugere atualização de campos em [mods-inventory.md](../docs/migration/mods-inventory.md)
 
 ---
@@ -155,7 +155,7 @@ Verifica `<mod>/`:
 **Cenário:** evoluir 4.0
 **Status:** proposta · 🟢 Baixa
 
-Bump de semver respeitando [Updating_SPT.md](../wiki/spt/Updating_SPT.md): patch (Z) só pra hotfix compatível, minor pra feature, major se quebra. Atualiza `Version` na ModMetadata e adiciona linha no changelog do mod.
+Bump de semver respeitando [Updating_SPT.md](../wiki/spt/SPT_4x/Updating_SPT.md): patch (Z) só pra hotfix compatível, minor pra feature, major se quebra. Atualiza `Version` na ModMetadata e adiciona linha no changelog do mod.
 
 ---
 
@@ -181,7 +181,7 @@ Checklist + comandos do [debug_dnSpy.md](../wiki/spt/modding/tutorials/debug_dnS
 Recebe nome (item, trader, mapa, bot) e roteia consulta na ordem definida em [resources.md](resources.md):
 
 1. `wiki/spt/modding/references/*` (offline, versionado)
-2. db.sp-tarkov.com (fallback)
+2. db.sp-tushonka.com (fallback)
 3. Tarkynator / tarkov.dev
 
 Retorna ID + fonte.
@@ -193,7 +193,7 @@ Retorna ID + fonte.
 **Cenário:** transversal
 **Status:** proposta · 🟢 Baixa
 
-Pré-instalação: cruza mod com [Known_Mod_Issues_40.md](../wiki/spt/Known_Mod_Issues_40.md), confere SPT version no manifesto, e checa conflitos com mods já em [mods-inventory.md](../docs/migration/mods-inventory.md). Equivalente local ao [SPT-Check-Mods](https://github.com/refringe/SPT-Check-Mods).
+Pré-instalação: cruza mod com [Known_Mod_Issues_40.md](../wiki/spt/SPT_40/Known_Mod_Issues_40.md), confere SPT version no manifesto, e checa conflitos com mods já em [mods-inventory.md](../docs/migration/mods-inventory.md). Equivalente local ao [SPT-Check-Mods](https://github.com/refringe/SPT-Check-Mods).
 
 ---
 

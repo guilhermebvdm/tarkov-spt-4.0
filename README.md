@@ -1,6 +1,6 @@
 # tarkov-spt-4.0
 
-Ambiente de desenvolvimento de mods da **TRL (TarkovRedLine)** para **SPT 4.0** — Single Player Tarkov, EFT `0.16.9`, jogado em coop via Fika.
+Ambiente de desenvolvimento de mods da **TRL (TarkovRedLine)** para **SPT 4.0** — Single Player Tushonka (antes Single Player Tarkov), EFT `0.16.9`, jogado em coop via Fika.
 
 Reúne num só repositório:
 
@@ -43,4 +43,4 @@ Depois edite a linha `SPT_PATH=` apontando para a sua instalação — barras no
 - `mods/` — mods do projeto (client C#/BepInEx, server C#/SPTarkov.Server.Core)
 - `references/` — fontes read-only de verdade (Assembly EFT, server SPT, FIKA, grafos)
 - `scripts/`, `tools/` — utilitários (setup de referências, inventário, gestão de itens TRL)
-- `wiki/` — snapshot read-only de github.com/sp-tarkov/wiki (CC BY-NC-ND 4.0)
+- `wiki/` — snapshot read-only de github.com/SP-Tushonka/wiki (CC BY-NC-ND 4.0)

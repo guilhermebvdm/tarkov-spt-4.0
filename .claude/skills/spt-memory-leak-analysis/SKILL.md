@@ -24,7 +24,7 @@ Cadeia causal:
 - O **Fika headless** é uma instância do EFT (Unity) rodando **sem render**, que hospeda a raid coop. Ele carrega **os mesmos mods client** que os peers (precisam dar match).
 - Diferente de uma sessão solo (que fecha o processo ao voltar pro menu), o headless **fica de pé por horas**, hospedando **raid após raid no mesmo processo**.
 - Logo: um leak **per-raid** que no solo você nunca percebe (uma raid, fecha o jogo) **acumula linearmente** no headless. 30 raids = 30 grafos de raid retidos → OOM muito antes de "ter RAM sobrando" ajudar (o pagefile estoura / o processo é morto).
-- O **EFT já vaza por conta própria** (leak conhecido do jogo base — ver `wiki/spt/Performance_Tuning.md` e `Known_EFT_Issues_40.md`). O mod **soma** a esse baseline. Você não conserta o leak da BSG, mas **não pode adicionar mais**.
+- O **EFT já vaza por conta própria** (leak conhecido do jogo base — ver `wiki/spt/SPT_4x/Performance_Tuning.md` e `wiki/spt/SPT_40/Known_Live_Issues_40.md`, que é a antiga `Known_EFT_Issues_40.md`). O mod **soma** a esse baseline. Você não conserta o leak da BSG, mas **não pode adicionar mais**.
 
 **Regra de ouro da priorização:** a gravidade de um leak é dominada pela **taxa de acúmulo** (§4), não pelo tamanho de cada alocação. Um `int` vazado por frame é pior que um `Texture2D` vazado uma vez no boot.
 
@@ -176,7 +176,7 @@ Retenção **só se prova medindo**. Ordem, priorizando 🔴/🟠:
 ### Isolar o retentor num ambiente com muitos mods (§1.2 — culpado vs. vítima)
 - **Ranking por retenção (preferível):** no heap snapshot, **agrupar os objetos vivos por assembly/namespace de mod** — aponta o maior retentor direto, sem tentativa e erro. Snapshot início-da-raid vs. 15 min mostra quem **cresce**, não só quem é grande.
 - **Watermark de baseline:** medir RSS do headless **sem mods** vs. **com todos** (no menu) → o orçamento que os mods somam. Se já sobe perto do teto antes de entrar em raid, o problema é **agregado/consumo**, não um leak único — cortar mods ou assets é o caminho, não caçar um vazador.
-- **Bissecção 50/50** (`wiki/spt/Known_Mod_Issues_40.md`): desabilitar metade dos mods, reproduzir, estreitar até o(s) responsável(is). Cara, mas definitiva quando não há profiler. **Manter o mod set do headless idêntico ao dos peers a cada rodada** (senão a raid nem casa).
+- **Bissecção 50/50** (`wiki/spt/SPT_40/Known_Mod_Issues_40.md`): desabilitar metade dos mods, reproduzir, estreitar até o(s) responsável(is). Cara, mas definitiva quando não há profiler. **Manter o mod set do headless idêntico ao dos peers a cada rodada** (senão a raid nem casa).
 
 Matriz mínima de repro (mesma do `fix.md.tmpl`): **raid1→exit→raid2** (per-raid) + **alt-F4/morte/MIA** (teardown).
 

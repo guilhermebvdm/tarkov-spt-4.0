@@ -160,8 +160,8 @@ O script detecta o tipo pelo conteúdo de `modded/` (`.csproj` com BepInEx → c
 
 **Externas:**
 
-- [dev.sp-tarkov.com](https://dev.sp-tarkov.com/) — templates oficiais de BepInEx e server mod C#.
-- [github.com/sp-tarkov/server-mod-examples](https://github.com/sp-tarkov/server-mod-examples) — exemplos de server mod.
+- [dev.sp-tarkov.com](https://dev.sp-tarkov.com/) — templates oficiais de BepInEx e server mod C# — ⚠️ endereço fora do ar em 2026-09-30 (redireciona para `sp-tarkov.com`, que responde 410); não achei substituto verificado.
+- [github.com/SP-Tushonka/server-mod-examples](https://github.com/SP-Tushonka/server-mod-examples) — exemplos de server mod. ⚠️ A `main` desse repositório está em SPT 4.1.3 com os pacotes `SPTushonka.*` (commit `c0adf95`, 2026-08-21) — este repo é 4.0.13: conferir API e `.csproj` contra [`references/spt-source/`](../../references/spt-source/) antes de copiar.
 - [deepwiki.com/sp-tarkov/server-csharp](https://deepwiki.com/sp-tarkov/server-csharp/1-overview) — visão arquitetural do servidor, útil antes de mergulhar no código bruto.
 - [docs.bepinex.dev](https://docs.bepinex.dev/) · [harmony.pardeike.net](https://harmony.pardeike.net/) — frameworks de client mod.
 - SPT Discord, canal `#mods-development` — quando a doc falha.
@@ -174,3 +174,4 @@ O script detecta o tipo pelo conteúdo de `modded/` (`.csproj` com BepInEx → c
 | 2026-07-26 | Guilherme + agente | Reescrito e promovido a 🟢 Vivo. Removidas as instruções que contradiziam o harness: adicionar referências à mão do diretório do jogo e copiar DLL para `BepInEx/plugins/` (agora `/compile-mod` + `.spt-path`), VS2022 como pré-requisito (build é por CLI) e dnSpy como rotina de descoberta (agora decompile local + `types-index.json` + grafos, AP-09). Adicionados: lifecycle/filtro de player/API canônica com link para os APs, gate de versão, validação in-game como critério de entrega, e mapa de referências internas. |
 | 2026-07-26 | Guilherme | docs(technical): arquiva legado TS 3.x e redige credenciais Supabase expostas |
 | 2026-08-01 | Guilherme | docs(launcher): backlog items 031/032 — sync-notification and download-speed reports (2026-07-28) |
+| 2026-09-30 | Guilherme | chore(wiki): sync spt snapshot from SP-Tushonka/wiki@2b083a0 (new upstream) |

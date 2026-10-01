@@ -88,7 +88,31 @@ A deofuscação **não elimina** o AP-03 — patches ainda vão precisar validar
 3. Manter os fallbacks defensivos existentes (padrão `ResolveBackingFieldByCandidates`) como rede de segurança — não removê-los só porque o nome ficou estável, já que a cobertura das tabelas não é total.
 4. Antes de reescrever patches em massa, aguardar o 4.1 realmente sair — a FireFly foi clara que "falta muita coisa" e essas tabelas são referência, não confirmação final.
 
+## 7. Atualização de 2026-09-30 — o 4.1 foi lançado e a tabela oficial existe
+
+- **O SPT 4.1 foi lançado.** A wiki oficial (hoje em `wiki.sp-tushonka.com`, snapshot local em `wiki/spt/`) tem a pasta `SPT_41/` e o guia de migração de cliente [`Client_40_to_41.md`](../../wiki/spt/modding/SPT_41_Modding/Client_40_to_41.md); o repositório `SP-Tushonka/server-csharp` tem as tags `4.1.0` a `4.1.6`.
+- **A tabela oficial existe:** [`wiki/spt/modding/SPT_41_Modding/client/Class_Name_Mappings.md`](../../wiki/spt/modding/SPT_41_Modding/client/Class_Name_Mappings.md), em formato de tabela Markdown ``| `nome 4.0` | `nome 4.1` |``.
+- **Comparação medida** entre essa tabela (snapshot `2b083a0` da wiki, de 2026-09-27) e o [`consolidated-mappings.txt`](../files-from-4.1/consolidated-mappings.txt):
+
+| Medida | Resultado |
+|---|---|
+| Pares no `consolidated-mappings.txt` | 5.961 |
+| Pares na tabela oficial | 5.961 |
+| Pares idênticos (mesma esquerda, mesma direita) | 5.961 |
+| Só no `consolidated-mappings.txt` | 0 |
+| Só na tabela oficial | 0 |
+| Divergentes (mesma esquerda, direita diferente) | 0 |
+| Ordem das linhas | a mesma nas duas |
+
+- **O que isso muda nas seções anteriores:**
+  - §5, primeiro item: os nomes da direita chegaram por fonte comunitária, mas são os mesmos que a equipe do SPT publicou. A comparação foi feita contra o `consolidated-mappings.txt`, não contra os 10 JSONs — a diferença de 22 chaves entre os JSONs e o flat (§2) não foi reconferida aqui.
+  - §5, segundo item: `GClass898` e `GClass3008` também **não** estão na tabela oficial.
+  - §6, item 4: a condição "aguardar o 4.1 realmente sair" está satisfeita. Este repo continua em **SPT 4.0.13**; migrar os mods para o 4.1 é decisão à parte, não tomada neste documento.
+- **O que não muda:** `docs/files-from-4.1/` fica como está, e o status da tabela para o trabalho em 4.0 continua sendo o de [.agents/resources.md](../../.agents/resources.md) — aponta o conceito, quem prova é o decompile.
+
 ## Ver também
+
+- [`wiki/spt/modding/SPT_41_Modding/client/Class_Name_Mappings.md`](../../wiki/spt/modding/SPT_41_Modding/client/Class_Name_Mappings.md) — tabela oficial `nome 4.0` → `nome 4.1` (mesmos 5.961 pares do `consolidated-mappings.txt`)
 
 - [`spt4-vs-spt41-gclass-deobfuscation.html`](spt4-vs-spt41-gclass-deobfuscation.html) — versão visual deste documento (diagrama de fluxo + tabelas), mesma análise, formato para compartilhar
 - [`docs/files-from-4.1/consolidated-mappings.txt`](../files-from-4.1/consolidated-mappings.txt) — vista consolidada flat `nome-4.0 -> FQN-4.1` (superfície de grep do harness)
@@ -105,3 +129,5 @@ A deofuscação **não elimina** o AP-03 — patches ainda vão precisar validar
 | 2026-07-06 | Guilherme | chore(launcher): remove empty placeholder diff.txt |
 | 2026-07-18 | Guilherme + agente | Consolidação flat (`consolidated-mappings.txt`, 5.961 linhas `nome-4.0 -> FQN-4.1`) movida do `.txt` solto para `docs/files-from-4.1/`; registrada como superfície de grep do harness (§2 + resources.md + skill `graph-code-navigation`). Diff confirmou que **não** é superset dos JSONs. |
 | 2026-07-18 | Guilherme | spec(TRL-ImmersiveCombatMedicine): 001 review round A applied — P9+P10, assembly-verified anchors |
+| 2026-09-30 | Guilherme + agente | §7: SPT 4.1 lançado e tabela oficial `Class_Name_Mappings.md` na wiki; comparação com `consolidated-mappings.txt` — 5.961 pares idênticos, 0 só de um lado, 0 divergentes. |
+| 2026-09-30 | Guilherme | chore(wiki): sync spt snapshot from SP-Tushonka/wiki@2b083a0 (new upstream) |

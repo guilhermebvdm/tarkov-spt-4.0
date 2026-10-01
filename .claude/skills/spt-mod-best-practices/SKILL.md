@@ -92,7 +92,7 @@ If the spec talks about a "raid mod" that should not run in hideout, this guard 
 
 ## 3. Memory & performance
 
-- Profile bot-bound code: SPT is single-threaded CPU-bound on bot AI (see `wiki/spt/Performance_Tuning.md`). Anything you add inside a per-frame or per-bot-tick patch multiplies by N bots.
+- Profile bot-bound code: SPT is single-threaded CPU-bound on bot AI (see `wiki/spt/SPT_4x/Performance_Tuning.md`). Anything you add inside a per-frame or per-bot-tick patch multiplies by N bots.
 - Avoid allocations in hot paths: no `string.Format`, no LINQ chains, no `new List<T>()` per frame inside `Update`/`FixedUpdate`/per-tick AI patches. Reuse buffers.
 - Prefer `Span<T>`/array pooling (`ArrayPool<T>.Shared`) over short-lived `List<T>` for tight loops.
 - Cache reflection: `MethodInfo`, `FieldInfo`, `PropertyInfo`, `AccessTools.Field`, `AccessTools.Method` — resolve once in a static initializer, never per call.

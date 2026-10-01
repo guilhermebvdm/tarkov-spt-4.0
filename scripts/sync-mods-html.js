@@ -60,12 +60,14 @@ function parseEscopo(cell) {
     .join(',');
 }
 
-// Forge column: "[236](https://forge.sp-tarkov.com/mod/236/...)" → "236"
+// Forge column: "[236](https://sp-mod.com/mod/236/...)" → "236"
+// The Forge moved from forge.sp-tarkov.com to sp-mod.com (same /mod/<id>/<slug> path);
+// both hosts are accepted so rows that still carry the old address keep their id.
 // "—" or "— (note)" → null    "🔍" → ""
 function parseForge(cell) {
   if (isAbsent(cell)) return null;
   if (isSearch(cell)) return '';
-  const m = cell.match(/forge\.sp-tarkov\.com\/mod\/(\d+)/);
+  const m = cell.match(/(?:sp-mod\.com|forge\.sp-tarkov\.com)\/mod\/(\d+)/);
   if (m) return m[1];
   return '';
 }

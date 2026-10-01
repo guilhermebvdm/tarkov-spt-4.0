@@ -68,7 +68,7 @@ O formato de achado abaixo espelha o do `/code-review` de propósito — é voca
 ### Fase 1 — Elegibilidade (PORTÃO: reprovou, para tudo)
 
 Aplicar `trl-mod-publishing` §1. **Antes de julgar, reconferir a redação vigente** em
-<https://forge.sp-tarkov.com/content-guidelines> — a skill cita seções (`§4.2`, `§6.1`, `§6.2`) de uma fonte
+<https://sp-mod.com/content-guidelines> — a skill cita seções (`§4.2`, `§6.1`, `§6.2`) de uma fonte
 externa que muda sem aviso. Divergência entre a skill e o site vale como achado de manutenção do harness.
 
 Para cada portão, emitir veredito **APROVADO / REPROVADO / DECISÃO HUMANA**:

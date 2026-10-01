@@ -23,7 +23,7 @@ Consequências práticas:
 - **Client mods sobrevivem em linguagem, não em código.** Continuam C#/BepInEx, mas a base mudou o suficiente para exigir reconferência de cada ponto de patch.
 - **Uma linguagem só.** Antes: TypeScript no servidor + C# no cliente. Agora: C# nos dois.
 
-> A wiki oficial é direta: **nenhum mod 3.11 é compatível com 4.0**. Perfis sem mod migram; mods, não. Ver [wiki/spt/FAQs_40.md](../../wiki/spt/FAQs_40.md) e [wiki/spt/Updating_SPT.md](../../wiki/spt/Updating_SPT.md) (major/minor quebram todos os mods; só patch preserva compat).
+> A wiki oficial é direta: **nenhum mod 3.11 é compatível com 4.0**. Perfis sem mod migram; mods, não. Ver [wiki/spt/SPT_40/FAQs_40.md](../../wiki/spt/SPT_40/FAQs_40.md) e [wiki/spt/SPT_4x/Updating_SPT.md](../../wiki/spt/SPT_4x/Updating_SPT.md) (major/minor quebram todos os mods; só patch preserva compat).
 
 ---
 
@@ -42,7 +42,7 @@ Consequências práticas:
 
 ### Roteiro
 
-1. **Criar o projeto** a partir do template oficial de server mod C# ([dev.sp-tarkov.com](https://dev.sp-tarkov.com/)), em `mods/<mod>/modded/Server/`.
+1. **Criar o projeto** a partir do template oficial de server mod C# ([dev.sp-tarkov.com](https://dev.sp-tarkov.com/) — ⚠️ endereço fora do ar em 2026-09-30 (redireciona para `sp-tarkov.com`, que responde 410); não achei substituto verificado), em `mods/<mod>/modded/Server/`.
 2. **Mapear a API antiga para a nova.** A fonte de verdade é [`references/spt-source/`](../../references/spt-source/) — código-fonte vendorizado do servidor, read-only. Procure ali o serviço/helper equivalente **antes** de reimplementar: `ItemHelper`, `PresetHelper`, `InventoryHelper`, `ICloner` e companhia já existem.
 3. **Reescrever a lógica.** LINQ no lugar dos métodos de array; tipos concretos no lugar de acesso solto ao JSON.
 4. **Preencher a metadata.** Sem `AbstractModMetadata` corretamente preenchido (`Version`, `SptVersion`, contribuidores), o servidor recusa o mod.
@@ -109,3 +109,4 @@ A desofuscação **não elimina** o AP-03: assinatura de método pode mudar mesm
 | 2026-07-26 | Guilherme + agente | Reescrito e promovido a 🟢 Vivo. Substituída a instrução de abrir o `Assembly-CSharp.dll` no dnSpy pela ordem do harness (grafo → `.cs` → `types-index.json`; `ilspycmd` só nos 3 casos legítimos — AP-09) e a troca manual de referências por `/compile-mod` + `.spt-path`. Adicionados: tabela de mapeamento mental 3.x→4.0, `references/spt-source/` como fonte da API nova, auditoria de overrides (AP-03), premissas de Fika coop (AP-02), seção sobre o 4.1 e validação in-game como critério de entrega. |
 | 2026-07-26 | Guilherme | docs(technical): arquiva legado TS 3.x e redige credenciais Supabase expostas |
 | 2026-08-01 | Guilherme | docs(launcher): backlog items 031/032 — sync-notification and download-speed reports (2026-07-28) |
+| 2026-09-30 | Guilherme | chore(wiki): sync spt snapshot from SP-Tushonka/wiki@2b083a0 (new upstream) |

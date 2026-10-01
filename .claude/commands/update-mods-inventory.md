@@ -23,7 +23,7 @@ Atualiza `docs/migration/mods-inventory.html` com os dados mais recentes de `doc
 
 ## Regras de parse (implementadas no script)
 
-- `forge_id`: extrai o número da URL `forge.sp-tarkov.com/mod/{id}/` → `"123"`; `—` → `null`; `🔍` → `""`
+- `forge_id`: extrai o número da URL `sp-mod.com/mod/{id}/` (o endereço antigo `forge.sp-tarkov.com/mod/{id}/` também é aceito) → `"123"`; `—` → `null`; `🔍` → `""`
 - `r4_path`: GitHub → `"user/repo"`; GitLab/outro → URL completa; `—` → `null`; `🔍` → `""`
 - `tipo/atuacao/categoria`: remove emoji do início, extrai primeira palavra
 - `escopo`: separa por ` · `, remove emoji de cada parte, une com vírgula

@@ -92,7 +92,7 @@ Procedimento:
 
 ### 5. Contexto público cruzado
 
-`WebFetch`/`WebSearch`: página do mod no **Forge**, **GitHub/README**, **dependências** e mods relacionados/comparáveis. Para detalhes de servidor SPT 4.0, a fonte canônica é `github.com/sp-tarkov/server-csharp` (via `gh api`).
+`WebFetch`/`WebSearch`: página do mod no **Forge**, **GitHub/README**, **dependências** e mods relacionados/comparáveis. Para detalhes de servidor SPT 4.0, a fonte canônica é `github.com/SP-Tushonka/server-csharp` na tag `4.0.13` (via `gh api`, com `?ref=4.0.13` — a `main` já está em versão posterior).
 
 ### 6. Escrever `02-analise.md` (PT) — mesmo objetivo do ORBIT
 

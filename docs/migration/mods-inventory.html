@@ -1098,8 +1098,8 @@ function forgeCell(m) {
 
   const slug = FORGE_SLUGS[id] || '';
   const forgeUrl = slug
-    ? `https://forge.sp-tarkov.com/mod/${id}/${slug}`
-    : `https://forge.sp-tarkov.com/mod/${id}/`;
+    ? `https://sp-mod.com/mod/${id}/${slug}`
+    : `https://sp-mod.com/mod/${id}/`;
 
   return `<a href="${forgeUrl}" target="_blank" class="forge-link"
     onmouseenter="fpopShow(${m[I.n]},this)" onmouseleave="fpopHide()">
@@ -1315,8 +1315,8 @@ function fpopShow(n, anchor) {
   const id       = m[I.forge];
   const slug     = FORGE_SLUGS[id] || '';
   const forgeUrl = slug
-    ? `https://forge.sp-tarkov.com/mod/${id}/${slug}`
-    : `https://forge.sp-tarkov.com/mod/${id}/`;
+    ? `https://sp-mod.com/mod/${id}/${slug}`
+    : `https://sp-mod.com/mod/${id}/`;
   const name     = m[I.name].replace(/🏠\s*/,'');
   const catMeta  = CAT_META[m[I.cat]] || {icon:'', label: m[I.cat]};
   const eff      = effectiveStatus(m);
@@ -1330,7 +1330,7 @@ function fpopShow(n, anchor) {
     (catMeta.icon ? `<span class="b fpop-cat">${catMeta.icon} ${catMeta.label}</span>` : '') +
     `<span class="b bs-${eff}">${STATUS_LABELS[eff]||eff}</span>`;
   document.getElementById('fpop-id').innerHTML =
-    `forge.sp-tarkov.com / mod / <strong>${id}</strong>${slug ? ' / '+slug : ''}`;
+    `sp-mod.com / mod / <strong>${id}</strong>${slug ? ' / '+slug : ''}`;
   document.getElementById('fpop-url').innerHTML =
     `<a href="${forgeUrl}" target="_blank">${forgeUrl}</a>`;
 

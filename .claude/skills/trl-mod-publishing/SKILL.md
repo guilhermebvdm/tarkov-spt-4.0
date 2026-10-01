@@ -1,13 +1,13 @@
 ---
 name: trl-mod-publishing
-description: Regras de publicação pública de mods SPT no Forge (forge.sp-tarkov.com) e o padrão de identidade TRL (GUID, nome do plugin, assembly, pasta no BepInEx, arquivo de config, versão). Use durante /prepare-mod-for-publish, ao renomear/rebrandear um mod, ao criar um mod TRL novo, ou sempre que a tarefa mencionar publicar, distribuir ou lançar um mod para terceiros. Complementa `repo-workflow-best-practices` (fluxo interno) e `spt-mod-best-practices` (lifecycle).
+description: Regras de publicação pública de mods SPT no Forge (sp-mod.com) e o padrão de identidade TRL (GUID, nome do plugin, assembly, pasta no BepInEx, arquivo de config, versão). Use durante /prepare-mod-for-publish, ao renomear/rebrandear um mod, ao criar um mod TRL novo, ou sempre que a tarefa mencionar publicar, distribuir ou lançar um mod para terceiros. Complementa `repo-workflow-best-practices` (fluxo interno) e `spt-mod-best-practices` (lifecycle).
 ---
 
 # TRL Mod Publishing
 
 Duas coisas: **(1)** o que o Forge exige de um mod público e **(2)** o padrão de identidade dos mods TRL.
 
-> ⚠️ **A fonte é externa e muda.** O canônico é <https://forge.sp-tarkov.com/content-guidelines>. Nas citações
+> ⚠️ **A fonte é externa e muda.** O canônico é <https://sp-mod.com/content-guidelines>. Nas citações
 > abaixo, `§N.N` é a seção de lá. **Reconfirmar a redação vigente na fase 1** de toda auditoria — mudança de
 > política do Forge não avisa ninguém, e esta skill pode estar desatualizada sem parecer.
 >

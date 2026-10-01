@@ -22,7 +22,7 @@ Toda a investigação se organiza em torno de:
 1. **"O que este mod está fazendo mais vezes, por mais tempo, para mais entidades ou por mais ciclos de vida do que realmente precisa?"**
 2. **"Quando esse processamento deveria deixar de existir — e ele realmente deixa?"**
 
-Não se procura "código lento" em abstrato: procura-se **trabalho multiplicado** (por frame, por bot, por evento) e **trabalho zumbi** (que sobrevive à razão de existir). Contexto do repo que dá peso a isso: o SPT é CPU-bound single-thread na IA dos bots (`wiki/spt/Performance_Tuning.md`), e todo mod client roda também no **Fika headless** — um processo que fica de pé por horas hospedando raid após raid (`spt-memory-leak-analysis` §1).
+Não se procura "código lento" em abstrato: procura-se **trabalho multiplicado** (por frame, por bot, por evento) e **trabalho zumbi** (que sobrevive à razão de existir). Contexto do repo que dá peso a isso: o SPT é CPU-bound single-thread na IA dos bots (`wiki/spt/SPT_4x/Performance_Tuning.md`), e todo mod client roda também no **Fika headless** — um processo que fica de pé por horas hospedando raid após raid (`spt-memory-leak-analysis` §1).
 
 ---
 

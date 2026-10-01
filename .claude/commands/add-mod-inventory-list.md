@@ -27,7 +27,7 @@ Use `WebFetch` em cada URL para extrair:
 | **name** | `<h1>` da página |
 | **forge_id** | número na URL: `.../mod/{id}/...` |
 | **slug** | string final da URL: `.../mod/{id}/{slug}` |
-| **image stem** | valor depois de `forge-static.sp-tarkov.com/mods/` na URL do `<img>` principal do mod (pode ser número ou hash longo) |
+| **image stem** | valor depois de `files.sp-mod.com/mods/` na URL do `<img>` principal do mod, sem a extensão (pode ser número ou hash longo; o host antigo era `forge-static.sp-tarkov.com/mods/`) |
 | **repo 4.0** | link GitHub/GitLab nos detalhes do mod |
 | **tipo** | badge `Client` / `Server` / `Misto` |
 | **spt_version** | versão SPT listada |
@@ -49,7 +49,7 @@ Valores padrão para mods novos:
 | Atuação | Inferir com emojis do projeto (ex: `⚔️ Raid`, `🌐 Geral`, `🏚️ Hideout`). Use `🔍` só se impossível |
 | Categoria | Inferir com emojis do projeto (ex: `⚖️ Balanceamento`, `🛋️ QoL`, `⚙️ Core`). Use `🔍` só se impossível |
 | Escopo | Inferir com emojis do projeto (ex: `🤖 IA`, `🔫 Armas`, `🖼️ UI`). Use `🔍` só se impossível |
-| Forge | `[{id}](https://forge.sp-tarkov.com/mod/{id}/{slug})` |
+| Forge | `[{id}](https://sp-mod.com/mod/{id}/{slug})` |
 | Repo 3.x | `—` |
 | Repo 4.0 | `[user/repo](https://github.com/user/repo)` |
 | SPT 4.0? | `✅` se versão 4.0 confirmada |
