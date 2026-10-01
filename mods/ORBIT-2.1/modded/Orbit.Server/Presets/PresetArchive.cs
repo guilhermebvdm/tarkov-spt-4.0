@@ -43,7 +43,8 @@ public static class PresetArchive
         if (VersionError(version) is { } versionError) throw new InvalidDataException(versionError);
         if (!Enum.IsDefined(parts)) throw new InvalidDataException("Choose config, zones or both.");
         name = name.Trim();
-        var directory = $"SPT_Runtime/user/mods/ORBIT/addon/{name}/";
+        // SPT 4.0 port: the server folder is SPT/ (4.1: SPT_Runtime/) and the mod folder is the one it was installed in.
+        var directory = $"{Spt40Paths.AddonFolder}/{name}/";
         using var output = new MemoryStream();
         using (var archive = new ZipArchive(output, ZipArchiveMode.Create, leaveOpen: true))
         {

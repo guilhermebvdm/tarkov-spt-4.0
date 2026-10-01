@@ -15,7 +15,7 @@ internal static class NativeGhostLoot
     {
         try
         {
-            var field = AccessTools.Field(typeof(PatrolLootPointsData), "_lootingNow");
+            var field = Orbit.Compat.Spt40Members.Field(typeof(PatrolLootPointsData), "_lootingNow");
             if (field?.FieldType != typeof(bool)) return null;
             var data = Expression.Parameter(typeof(PatrolLootPointsData), "data");
             return Expression.Lambda<Func<PatrolLootPointsData, bool>>(Expression.Field(data, field), data).Compile();

@@ -29,9 +29,9 @@ public static class NativePatrolDiagnostics
     private const float StationarySeconds = 30f;
     private const float ReportInterval = 60f;
     private static readonly Dictionary<BotOwner, Observation> Observations = new();
-    private static readonly FieldInfo ComeTime = AccessTools.Field(typeof(PatrollingData), "_comeTime");
-    private static readonly FieldInfo ReserveChosenTime = AccessTools.Field(typeof(PatrollingData), "_reservChoosedTime");
-    private static readonly FieldInfo NextChangeWay = AccessTools.Field(typeof(PatrolPointChooserBasic), "_nextChangeWay");
+    private static readonly FieldInfo ComeTime = Orbit.Compat.Spt40Members.Field(typeof(PatrollingData), "_comeTime");
+    private static readonly FieldInfo ReserveChosenTime = Orbit.Compat.Spt40Members.Field(typeof(PatrollingData), "_reservChoosedTime");
+    private static readonly FieldInfo NextChangeWay = Orbit.Compat.Spt40Members.Field(typeof(PatrolPointChooserBasic), "_nextChangeWay");
     private static Type _huntType;
     private static readonly Dictionary<string, FieldInfo> HuntFields = new();
 

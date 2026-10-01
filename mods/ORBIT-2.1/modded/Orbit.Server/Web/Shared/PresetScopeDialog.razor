@@ -29,7 +29,7 @@
             </MudText>
             <MudText Typo="Typo.body2" Class="mt-3">
                 The ZIP includes @(_parts == PresetParts.ConfigOnly ? "config.json" : _parts == PresetParts.ZonesOnly ? "zones.json" : "config.json and zones.json")
-                under SPT_Runtime/user/mods/ORBIT/addon/&lt;preset name&gt;/. Extract it into the game folder.
+                under @(Spt40Paths.AddonFolder)/&lt;preset name&gt;/. Extract it into the game folder.
                 A one-part update leaves any other JSON already installed in that addon folder in place.
             </MudText>
         }

@@ -7,10 +7,21 @@
 @inject IJSRuntime JS
 @inject ISnackbar Snackbar
 
+@* SPT 4.0 port: the 4.0 host document (SPTarkov.Server.Web/Components/App.razor) loads no MudBlazor assets;
+   each layout brings its own, exactly as the host's BaseMudBlazorLayout does. Without the script the
+   interactive circuit dies on the first MudDrawer render ("mudElementRef was undefined") and every page
+   stays a dead, unstyled prerender. *@
+<HeadContent>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
+    <link href="@Assets["_content/MudBlazor/MudBlazor.min.css"]" rel="stylesheet" />
+</HeadContent>
+
 <MudThemeProvider IsDarkMode="true" Theme="_orbitTheme" />
 <MudPopoverProvider />
 <MudSnackbarProvider />
 <MudDialogProvider />
+
+<script src="@Assets["_content/MudBlazor/MudBlazor.min.js"]"></script>
 
 <MudLayout>
     <MudAppBar Elevation="0" Dense="false" Style="border-bottom: 1px solid var(--mud-palette-lines-default); backdrop-filter: blur(6px);">

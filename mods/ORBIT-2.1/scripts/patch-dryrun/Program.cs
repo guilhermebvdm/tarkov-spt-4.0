@@ -148,10 +148,16 @@ namespace PatchDryRun
             Probe(orbit, "Orbit.Systems.NativeGhostAdapters", "ResolveBindings");
 
             var fikaPath = Path.Combine(stage, "Orbit.Fika.dll");
-            if (File.Exists(fikaPath))
+            var fika = File.Exists(fikaPath) ? Assembly.LoadFrom(fikaPath) : null;
+
+            Section("3b. Reflection handles kept in static readonly fields (FieldInfo, MethodInfo, compiled readers)");
+            Console.WriteLine("  A null handle means the member name was not found: the mod then takes its fallback path for that feature.");
+            ScanStaticHandles(orbit);
+            if (fika != null) ScanStaticHandles(fika);
+
+            if (fika != null)
             {
                 Section("4. Orbit.Fika — door synchronisation (FikaPlayer / ObservedPlayer)");
-                var fika = Assembly.LoadFrom(fikaPath);
                 try
                 {
                     var receiver = fika.GetType("Orbit.Fika.DoorStateReceiver", true);
@@ -476,6 +482,49 @@ namespace PatchDryRun
                 Fail(type.Name + "." + method, Flatten(e));
             }
         }
+
+        // Null handles that are expected on this install, with the reason. Anything else that is null fails.
+        private static readonly Dictionary<string, string> ExpectedNull = new Dictionary<string, string>();
+
+        // Runs the static initialiser of every mod type that keeps a reflection handle in a static readonly
+        // field and reports the handles left null. Types whose initialiser needs the Unity runtime are listed
+        // as not checkable instead of failing.
+        private static void ScanStaticHandles(Assembly asm)
+        {
+            const BindingFlags flags = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
+            int ok = 0, bad = 0, skipped = 0;
+            foreach (var type in SafeTypes(asm).OrderBy(t => t.FullName))
+            {
+                if (type.IsGenericTypeDefinition || type.Name.StartsWith("<", StringComparison.Ordinal)) continue;
+                var handles = type.GetFields(flags).Where(f => f.IsInitOnly && !f.IsLiteral && IsHandle(f.FieldType)).ToList();
+                if (handles.Count == 0) continue;
+                try
+                {
+                    System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(type.TypeHandle);
+                }
+                catch (Exception e)
+                {
+                    skipped++;
+                    Console.WriteLine($"  SKIP  {type.Name,-36} static initialiser cannot run outside the game: {Flatten(e)}");
+                    continue;
+                }
+                foreach (var field in handles)
+                {
+                    object value;
+                    try { value = field.GetValue(null); }
+                    catch (Exception e) { Console.WriteLine($"  SKIP  {type.Name}.{field.Name}: {Flatten(e)}"); skipped++; continue; }
+                    var key = type.Name + "." + field.Name;
+                    if (value != null) { ok++; continue; }
+                    if (ExpectedNull.TryGetValue(key, out var why)) { Console.WriteLine($"  NULL  {key,-52} expected: {why}"); continue; }
+                    bad++;
+                    Fail(key, "null: the member this handle looks up by name does not exist on this install");
+                }
+            }
+            Console.WriteLine($"  -- {asm.GetName().Name}: {ok} handles resolved, {bad} null, {skipped} not checkable here");
+        }
+
+        private static bool IsHandle(Type t)
+            => typeof(MemberInfo).IsAssignableFrom(t) || typeof(Delegate).IsAssignableFrom(t);
 
         // ---------------------------------------------------------------- helpers
 

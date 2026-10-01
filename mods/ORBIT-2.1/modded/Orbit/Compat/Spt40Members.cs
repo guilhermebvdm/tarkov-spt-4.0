@@ -33,6 +33,33 @@ internal static class Spt40Members
         { (typeof(BotFirstAidClass), "ApplyToSelf"), "method_3" },
     };
 
+    // (type that declares the field on 4.0, 4.1 name) -> 4.0 name, for fields read through reflection.
+    private static readonly Dictionary<(Type, string), string> Fields = new()
+    {
+        { (typeof(PatrolLootPointsData), "_lootingNow"), "LootingNow" },             // PatrolLootPointsData.cs:135
+        { (typeof(PatrollingData), "_comeTime"), "ComeTime" },                       // PatrollingData.cs:34
+        { (typeof(PatrollingData), "_reservChoosedTime"), "ReservChoosedTime" },     // PatrollingData.cs:37
+        { (typeof(PatrolPointChooserBasic), "_nextChangeWay"), "NextChangeWay" },    // PatrolPointChooserBasic.cs:88
+        // "_shallStartInteract": private and still obfuscated on 4.0, and not the same field in each script.
+        // It is the flag set when the bot reaches the point and cleared by ManualUpdate when the wait ends.
+        { (typeof(DropItemReservWay), "_shallStartInteract"), "bool_1" },            // DropItemReservWay.cs:11 (set :65, cleared :23)
+        { (typeof(DropItemAndHealReservWay), "_shallStartInteract"), "bool_0" },     // DropItemAndHealReservWay.cs:11 (set :78, cleared :29)
+        { (typeof(UseSurgeKitReservWay), "_shallStartInteract"), "bool_0" },         // UseSurgeKitReservWay.cs:14 (set :88, cleared :32)
+    };
+
+    /// <summary>The field the sources name with its 4.1 name, looked up under its 4.0 name; null when absent.</summary>
+    public static FieldInfo Field(Type type, string name41)
+    {
+        const BindingFlags flags = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
+        for (var t = type; t != null; t = t.BaseType)
+        {
+            var name = Fields.TryGetValue((t, name41), out var name40) ? name40 : name41;
+            var field = t.GetField(name, flags);
+            if (field != null) return field;
+        }
+        return null;
+    }
+
     // The field holding the bot that owns a subsystem is "_owner" on 4.1. On 4.0 it is BotOwner_0 on the
     // classes deriving from GClass429 / GClass177<T> and Owner on BotDoorOpener and the patrol point choosers.
     private static readonly string[] OwnerFieldNames = { "BotOwner_0", "Owner", "_owner" };

@@ -18,7 +18,7 @@ internal static class NativeGhostPatrol
     {
         try
         {
-            var field = AccessTools.Field(type, "_shallStartInteract");
+            var field = Orbit.Compat.Spt40Members.Field(type, "_shallStartInteract");
             if (field?.FieldType != typeof(bool)) return null;
             var action = Expression.Parameter(typeof(AReserveWayAction), "action");
             return Expression.Lambda<Func<AReserveWayAction, bool>>(

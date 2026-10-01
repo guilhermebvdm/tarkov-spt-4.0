@@ -63,7 +63,7 @@
         }
     </SettingsCard>
 
-    <SettingsCard Title="Addons" Subtitle="Extract preset ZIPs into your game folder. Each folder in SPT_Runtime/user/mods/ORBIT/addon becomes one preset.">
+    <SettingsCard Title="Addons" Subtitle="@($"Extract preset ZIPs into your game folder. Each folder in {Spt40Paths.AddonFolder} becomes one preset.")">
         <MudText Typo="Typo.body2" Class="mb-3" Style="opacity:.75">
             Export config.json, zones.json or both in one ZIP. Existing JSON exports are still supported.
             Accepts global settings, zone packs and complete presets. A partial addon replaces only the settings
