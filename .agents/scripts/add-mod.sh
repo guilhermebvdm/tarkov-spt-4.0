@@ -1,17 +1,19 @@
 #!/usr/bin/env bash
 # add-mod.sh — clona um repo de mod, vendoriza em mods/<Nome>/ e gera estrutura padrão.
-# Uso: add-mod.sh <git-url> [--name <ModName>] [--forge <forge-url>]
+# Uso: add-mod.sh <git-url> [--name <ModName>] [--branch <branch-ou-tag>] [--forge <forge-url>]
 
 set -euo pipefail
 
 URL=""
 NAME=""
 FORGE=""
+REF=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --name)  NAME="${2:-}"; shift 2 ;;
-    --forge) FORGE="${2:-}"; shift 2 ;;
+    --name)   NAME="${2:-}"; shift 2 ;;
+    --branch) REF="${2:-}"; shift 2 ;;
+    --forge)  FORGE="${2:-}"; shift 2 ;;
     -h|--help)
       sed -n '2,4p' "$0" | sed 's|^# \{0,1\}||'
       exit 0 ;;
@@ -42,9 +44,12 @@ TPL="$ROOT/.agents/templates"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 
-echo "→ Clonando $URL ..."
-git clone --depth=1 "$URL" "$TMP/clone" >/dev/null 2>&1 \
-  || { echo "Erro: clone falhou ($URL)" >&2; exit 1; }
+CLONE_ARGS=(--depth=1)
+[[ -z "$REF" ]] || CLONE_ARGS+=(--branch "$REF")
+
+echo "→ Clonando $URL${REF:+ (branch/tag: $REF)} ..."
+git clone "${CLONE_ARGS[@]}" "$URL" "$TMP/clone" >/dev/null 2>&1 \
+  || { echo "Erro: clone falhou ($URL${REF:+, branch/tag: $REF})" >&2; exit 1; }
 
 SHA="$(git -C "$TMP/clone" rev-parse HEAD)"
 BRANCH="$(git -C "$TMP/clone" rev-parse --abbrev-ref HEAD)"
