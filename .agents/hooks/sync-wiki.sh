@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# Sincroniza wiki/ com o snapshot atual de github.com/sp-tarkov/wiki@main.
+# Sincroniza wiki/ com o snapshot atual de github.com/SP-Tushonka/wiki@main.
+# (O upstream antigo, o repositório "wiki" da organização sp-tarkov no GitHub,
+# está arquivado; o projeto passou a se chamar Single Player Tushonka.)
 #
 # Uso:
 #   bash .agents/hooks/sync-wiki.sh
@@ -16,7 +18,7 @@ WIKI_DIR="$REPO_ROOT/wiki/spt"
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
 
-UPSTREAM="sp-tarkov/wiki"
+UPSTREAM="SP-Tushonka/wiki"
 BRANCH="main"
 
 echo "==> Buscando SHA atual de $UPSTREAM@$BRANCH"

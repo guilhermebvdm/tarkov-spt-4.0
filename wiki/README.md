@@ -13,7 +13,7 @@ Pasta agregadora de bases de conhecimento externas mantidas como **snapshot some
 
 | Fonte | Pasta | Origem | Licença |
 |-------|-------|--------|---------|
-| Wiki oficial do SPT | [spt/](spt/) | [github.com/sp-tarkov/wiki](https://github.com/sp-tarkov/wiki) → [wiki.sp-tarkov.com](https://wiki.sp-tarkov.com/) | CC BY-NC-ND 4.0 |
+| Wiki oficial do SPT | [spt/](spt/) | [github.com/SP-Tushonka/wiki](https://github.com/SP-Tushonka/wiki) → [wiki.sp-tushonka.com](https://wiki.sp-tushonka.com/) | CC BY-NC-ND 4.0 |
 
 ## Regras gerais
 

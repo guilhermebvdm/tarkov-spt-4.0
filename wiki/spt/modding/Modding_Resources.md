@@ -2,32 +2,32 @@
 title: Modding Resources
 description: 
 published: true
-date: 2025-12-06T14:07:19.465Z
+date: 2026-08-16T22:08:48.720Z
 tags: modding
 editor: markdown
-dateCreated: 2025-07-23T16:46:34.874Z
+dateCreated: 2026-08-08T11:24:48.686Z
 ---
 
-> This page applies to SPT version `4.0`
+> This page applies to SPT version `4.0` and `4.1`
 {.is-info}
 
 Resources to get started making mods. It is recommended to begin with server mods.
 
-### [SPT Discord server](http://discord.sp-tarkov.com/) mod development channels:
+### [SPT Discord server](https://discord.sp-tushonka.com/) mod development channels:
 - [#mods-resources](https://discord.com/channels/875684761291599922/875806757836951575)
 - [#mods-development](https://discord.com/channels/875684761291599922/875803116409323562)
 
 ### General modding resources:
-- [Semantic versioning](<https://semver.org/>)
-- [SPT Item database](<https://db.sp-tarkov.com/search>)
-- [Tarkov-Dev](<https://api.tarkov.dev/>)
-- [Tarkynator](<https://tarkynator.com/>)
-- [Rider SPT ID Highlighter Plugin](<https://github.com/madmanbeavisx/spt-id-highlighter>)
-- [SPT Technical Documentation](<https://deepwiki.com/sp-tarkov/server-csharp/1-overview>)
+- [Semantic versioning](https://semver.org/)
+- [SPT Item database](https://db.sp-tushonka.com/)
+- [Tarkov-Dev](https://api.tarkov.dev/)
+- [Tarkynator](https://tarkynator.com/)
+- [Rider SPT ID Highlighter Plugin](https://github.com/madmanbeavisx/spt-id-highlighter)
+- [SPT Technical Documentation](https://deepwiki.com/SP-Tushonka/server-csharp)
 
 ### C# Resources:
 - [Microsoft interactive C# tutorials](https://learn.microsoft.com/en-us/dotnet/csharp/tour-of-csharp/tutorials/)
-- [Server mod examples](https://github.com/sp-tarkov/server-mod-examples)
+- [Server mod examples](https://github.com/SP-Tushonka/server-mod-examples)
 - [Jehree's beginner write up to get started with client modding](/modding/tutorials/Client_Modding_Quick_Guide)
 - [Tutorial: How to debug the game client with dnSpy](/modding/tutorials/debug_dnSpy)
 - [Bepinex docs](https://docs.bepinex.dev/)

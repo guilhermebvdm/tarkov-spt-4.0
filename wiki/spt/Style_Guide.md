@@ -2,10 +2,10 @@
 title: Style Guide
 description: Keep a consistent style across the Wiki.
 published: true
-date: 2026-02-03T02:42:28.732Z
+date: 2026-08-12T00:40:52.766Z
 tags: 
 editor: markdown
-dateCreated: 2025-08-28T19:25:07.078Z
+dateCreated: 2026-08-08T11:23:44.032Z
 ---
 
 Here's a rudimentary style guide for the Wiki. Nothing here is set in stone or enforced, and it'll see many changes as the Wiki develops.
@@ -35,6 +35,8 @@ If the information applies to any SPT version, simply have it state `This page a
 
 To remove any ambiguity, you should include the full filepath. For example, if you want to refer to the `profiles` folder: `[game folder]\SPT\user\profiles`
 
+If the page is only for SPT 4.1 `\SPT_Runtime\user\profiles` will suffice.
+
 Once written in full, additional references to it can be shortened to `\SPT\user\profiles`, or just `\profiles`.
 
 ## Links
@@ -56,15 +58,20 @@ Read the SPT Wiki's [Style Guide](https://wiki.sp-tarkov.com/en/Style_Guide) to 
 
 Conveniently, links to pages on this Wiki can be done by just referencing its location. The above example can also be written like this:
 
-```
-Read the SPT Wiki's [Style Guide](/Style_Guide) to see how you can contribute to the Wiki.
-```
+Read the SPT Wiki's [Style Guide](/Style_Guide) to see how to write Wiki pages.:
+`Read the SPT Wiki's [Style Guide](/Style_Guide) to see how you can contribute to the Wiki.`
+
+See [Known Mod Issues in SPT 4.0](/SPT_40/Known_Mod_Issues_40) for a solution.:
+`See [Known Mod Issues in SPT 4.0](/SPT_40/Known_Mod_Issues_40) for a solution.` 
+
+Read the [Mods](/SPT_4x/Profiles#mods) section of the [Profiles](/SPT_4x/Profiles) page.:
+`Read the [Mods](/SPT_4x/Profiles#mods) section of the [Profiles](/SPT_4x/Profiles) page.`
 
 ## Header sizes
 
 There are 6 different header sizes available. `#` will give you the largest title, while `######` will be the smallest.
 Note that using any header will allow for direct linking to that section of a page e.g.: https://wiki.sp-tarkov.com/en/Style_Guide#header-sizes
-
+As shown in the [File paths](/Style_guide#file-paths) section above, you can link these headers in other Wiki pages.
 You can copy the direct link to a header by hovering over it, right clicking `¶` and copying the link.
 
 ```
@@ -111,7 +118,7 @@ Embedded images can be hosted on external websites:
 ```
 
 This will imbed the image in the middle of the screen, with a width of 400 px. Use 600 for images with smaller text.
-However, this will put the image directly next to the text with no space in-between. Use the HTML code of `<br>` to seperate images from non-header text above it. Header text doesn't need it as it already spaces itself from images.
+However, this will put the image directly next to the text with no space in-between. Use the HTML code of `<br>` to separate images from non-header text above it. Header text doesn't need it as it already spaces itself from images.
 
 The examples below have `width=200` and `margin: 0 left` for demonstration purposes.
 
@@ -124,6 +131,19 @@ Notice how the top text is right against the image.
 <img src="/mod-install-v1.gif" alt="image title" width=200 style="display: block; margin: 0 left;">
 
 And this image, with the use of `<br>` has space above between it and the text.
+
+```
+Here is an image without the use of `<br>`:
+
+<img src="/mod-install-v1.gif" alt="image title" width=200 style="display: block; margin: 0 left;">
+
+Notice how the top text is right against the image.
+<br>
+<img src="/mod-install-v1.gif" alt="image title" width=200 style="display: block; margin: 0 left;">
+
+And this image, with the use of `<br>` has space above between it and the text.
+
+```
 
 You can also use `<div style="margin-top: 10px;"></div>` for finer control over the size of the gap. Change the `10px` to a value that works best.
 
@@ -138,7 +158,6 @@ The above will results in this:
 Example text.
 </div>
 
-Remember to add a `<br>` or a margin between the image and the caption.
 
 ## Text formatting
 The most subjective section. Use of bold and italicised text should still be standardised across the wiki.
@@ -159,6 +178,54 @@ The most subjective section. Use of bold and italicised text should still be sta
   - "Disable `Nvidia Reflex` in the graphics settings."
 - <kbd>Keyboard keys</kbd> should be used when referring to a keyboard key:
   - "...configure the client-side settings in the <kbd>F12</kbd> menu."
+
+## Tables
+
+Tables in markdown are bit of a hassle to setup. To get a table like this:
+
+| - | - |
+| | ham | burger |
+| ham | hamham | hamburger |
+| burger | burgerham | burgerburger |
+
+You would insert:
+
+```
+| - | - |
+| | ham | burger |
+| ham | hamham | hamburger |
+| burger | burgerham | burgerburger |
+```
+
+Note that without the first line the table won't work. Spaces around the words and the `-` aren't necessary but help with readability.
+
+For a more highlighted top row, swap the places of the first two lines:
+
+| | ham | burger |
+| - | - |
+| ham | hamham | hamburger |
+| burger | burgerham | burgerburger |
+
+```
+| | ham | burger |
+| - | - |
+| ham | hamham | hamburger |
+| burger | burgerham | burgerburger |
+```
+
+If you would like to have a multiline entry in one of the cells you need to use the HTML tag `<br>`.
+So for a table like this:
+
+| - | - |
+| hamburger | Ingredients:<br>Ham<br>Burger |
+
+You would insert:
+```
+| - | - |
+| hamburger | Ingredients:<br>Ham<br>Burger |
+```
+
+Again, the first line is necessary for the table to work. It's also important to not put extra spaces when `<br>` is used as they will get rendered in the final text.
 
 # See also
 [How to Contribute](/how_to_contribute)
