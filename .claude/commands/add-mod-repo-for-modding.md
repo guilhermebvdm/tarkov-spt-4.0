@@ -5,10 +5,10 @@ Adiciona um novo mod ao repositório clonando da URL fornecida e criando a estru
 ## Uso
 
 ```
-/add-mod-repo-for-modding <git-url> [--name <ModName>] [--branch <branch-ou-tag>] [--forge <forge-url>]
+/add-mod-repo-for-modding <git-url> [--name <ModName>] [--branch <branch-ou-tag>] [--forge <forge-url>] [--force]
 ```
 
-`<git-url>` é o endereço do repositório (`https://github.com/<dono>/<repo>`), não o de uma página de branch (`…/tree/<branch>`). Para clonar uma branch ou tag que não é a padrão, use `--branch`.
+`<git-url>` é o endereço do repositório (`https://github.com/<dono>/<repo>`), não o de uma página de branch (`…/tree/<branch>`). Para clonar uma branch ou tag que não é a padrão, use `--branch` (`--tag` é sinônimo). Endereço de release (`…/releases/tag/<tag>`) é aceito: o script extrai a tag e o endereço do repositório.
 
 ## O que fazer
 
@@ -36,8 +36,8 @@ Adiciona um novo mod ao repositório clonando da URL fornecida e criando a estru
 ## O que o script faz
 
 - Infere o nome do mod a partir da URL se `--name` não vier (basename do repo, sem `.git`)
-- Recusa sobrescrever se `mods/<Nome>/` já existir
-- Clona com `--depth=1` em diretório temporário (a branch padrão, ou a de `--branch` quando informada)
+- Recusa sobrescrever se `mods/<Nome>/` já existir; com `--force`, **exclui a pasta existente inteira** (inclusive `modded/`, `backlog/` e `memory/`) antes de clonar — só usar com pedido explícito do usuário
+- Clona com `--depth=1` em diretório temporário (a branch padrão, ou a de `--branch`/`--tag` quando informada)
 - Captura `HEAD` SHA, branch, licença (heurística) e versão (de `package.json` ou `*.csproj`)
 - **Remove `.git/` do clone** — nenhuma pasta de mod fica vinculada ao git original
 - Move clone → `mods/<Nome>/original/`
