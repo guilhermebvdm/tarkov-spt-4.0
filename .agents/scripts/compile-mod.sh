@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # compile-mod.sh — compila um mod (client BepInEx, server C#, server TypeScript, ou híbrido) e instala em D:\SPT.
-# Uso: compile-mod.sh <mod-name> [--spt-path <path>] [--flat] [--clean] [--force-config] [--allow-same-version] [--check-version]
+# Uso: compile-mod.sh <mod-name> [--spt-path <path>] [--flat] [--clean] [--force-config] [--allow-same-version] [--check-version] [--no-install]
 #   --force-config: overwrite install config/ even when it diverges from the repo (guard rail, item 019)
 #   --allow-same-version: bypass do gate de versão (recompilar deliberadamente sem bump)
 #   --check-version: só resolve e imprime as versões do mod (sem compilar nem instalar)
+#   --no-install: compila em mods/<mod>/builds/ e NÃO copia nada para o install do SPT
 
 set -euo pipefail
 
@@ -16,6 +17,7 @@ FORCE_CONFIG=0
 CONFIG_SKIPPED=0
 ALLOW_SAME_VERSION=0
 CHECK_VERSION_ONLY=0
+NO_INSTALL=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -25,8 +27,9 @@ while [[ $# -gt 0 ]]; do
     --force-config) FORCE_CONFIG=1; shift ;;
     --allow-same-version) ALLOW_SAME_VERSION=1; shift ;;
     --check-version)      CHECK_VERSION_ONLY=1; shift ;;
+    --no-install)         NO_INSTALL=1; shift ;;
     -h|--help)
-      sed -n '2,6p' "$0" | sed 's|^# \{0,1\}||'
+      sed -n '2,7p' "$0" | sed 's|^# \{0,1\}||'
       exit 0 ;;
     -*) echo "Erro: flag desconhecida: $1" >&2; exit 1 ;;
     *)
@@ -472,7 +475,7 @@ if [[ "$MOD_TYPE" == "server-typescript" ]]; then
 
   echo "✓ Build OK: $BUILDS"
 
-  if [[ -d "$SPT_PATH" ]]; then
+  if [[ -d "$SPT_PATH" && "$NO_INSTALL" != "1" ]]; then
     DEST_DIR="$SPT_PATH/SPT/user/mods/$MOD"
     mkdir -p "$DEST_DIR"
     rsync -a --delete --exclude='node_modules' --exclude='graphify-out' "$BUILDS/" "$DEST_DIR/" 2>/dev/null \
@@ -481,7 +484,8 @@ if [[ "$MOD_TYPE" == "server-typescript" ]]; then
   fi
 
   echo; echo "✓ Compilação concluída — $MOD ($MOD_TYPE)"; echo "  Build local: $BUILDS"
-  [[ -d "$SPT_PATH" ]] && echo "  Instalado em: ${DEST_DIR:-?}"
+  [[ -d "$SPT_PATH" && "$NO_INSTALL" != "1" ]] && echo "  Instalado em: ${DEST_DIR:-?}"
+  [[ "$NO_INSTALL" == "1" ]] && echo "  --no-install: nada foi copiado para $SPT_PATH"
   save_versions
   print_version_report
   exit 0
@@ -523,7 +527,7 @@ for CSPROJ in "${CSPROJS[@]}"; do
   done
   echo "  ✓ Build OK: $MAIN_DLL ($(stat -c%s "$MAIN_DLL" 2>/dev/null || stat -f%z "$MAIN_DLL") bytes); arquivada $ASM-$TS.dll"
 
-  [[ -d "$SPT_PATH" ]] || continue
+  [[ -d "$SPT_PATH" && "$NO_INSTALL" != "1" ]] || continue
 
   if [[ "$KIND" == "client" ]]; then
     if [[ "$FLAT_INSTALL" == "1" ]]; then
@@ -569,6 +573,7 @@ cat <<EOF
 EOF
 [[ "$BUILT_CLIENT" == "1" ]] && echo "  Client → ${CLIENT_DEST_SHOWN:-?}"
 [[ "$BUILT_SERVER" == "1" ]] && echo "  Server → ${SERVER_DEST_SHOWN:-?}"
+[[ "$NO_INSTALL" == "1" ]] && echo "  --no-install: nada foi copiado para $SPT_PATH"
 if [[ "$CONFIG_SKIPPED" == "1" ]]; then
   echo "  ⚠ config/ NOT copied to the install (diverges from repo) — use /sync-classes or --force-config"
 fi

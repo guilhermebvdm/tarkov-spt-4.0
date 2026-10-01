@@ -5,7 +5,7 @@ Compila um mod (client BepInEx ou server TypeScript) e instala automaticamente e
 ## Uso
 
 ```
-/compile-mod <ref> [--spt-path <path>] [--flat] [--clean] [--allow-same-version] [--check-version]
+/compile-mod <ref> [--spt-path <path>] [--flat] [--clean] [--allow-same-version] [--check-version] [--no-install]
 ```
 
 - `<ref>` — nome da pasta em `mods/`, path da pasta do mod, ou path de qualquer arquivo dentro.
@@ -14,6 +14,7 @@ Compila um mod (client BepInEx ou server TypeScript) e instala automaticamente e
 - `--clean` — apaga `mods/<mod>/builds/` antes de compilar, forçando rebuild completo (útil quando o cache do MSBuild gera artefatos stale).
 - `--allow-same-version` — bypassa o gate de versão (recompilar deliberadamente sem bump — ex.: rebuild idêntico para re-deploy). Nunca usar como atalho para não bumpar.
 - `--check-version` — só resolve e imprime as versões atuais do mod; não compila nem instala.
+- `--no-install` — compila em `mods/<mod>/builds/` e **não copia nada** para o install do SPT. Usar quando a build ainda não deve substituir o que está instalado (ex.: port ainda não validado de um mod que já roda no jogo). As referências continuam sendo resolvidas a partir do install.
 
 ## O que fazer
 
