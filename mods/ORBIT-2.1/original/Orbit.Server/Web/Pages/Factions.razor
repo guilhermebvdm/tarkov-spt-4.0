@@ -1,0 +1,100 @@
+@page "/orbit/factions"
+@layout Orbit.Server.Web.Shared.MainLayout
+@inherits Orbit.Server.Web.OrbitConfigPage
+@inject IDialogService DialogService
+
+<PageTitle>ORBIT: Factions</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Medium">
+    <PageHeader Title="Factions" OnReset="ResetPage"
+                Description="This config applies wherever the bots run (including headless). Save with the button in the top bar, then start a new raid. Client-side settings (log levels, performance) stay in the in-game F12 menu." />
+
+    <SettingsCard Title="Faction-mod takeover" OnReset="ResetTakeover"
+                  Subtitle="ON: ORBIT routes these bots like PMCs. OFF: their own mod behaviour wins. Only matters when the faction mod is installed. Save and restart the game after changing takeover.">
+        <OrbitSwitch @bind-Value="Cfg.Factions.TakeOverUntar" Label="Take over UNTAR bots"
+                     Tooltip="UNTAR bots keep their gear and spawns but navigate the map with ORBIT instead of their own checkpoint layers. Includes the raider hunt squads UNTAR orders through MoreBotsAPI (they are not vanilla raiders)." />
+        <OrbitSwitch @bind-Value="Cfg.Factions.TakeOverRuaf" Label="Take over RUAF bots"
+                     Tooltip="Covers both RUAF factions: the base RUAF roles and the RUAF Hardcore Remnant roles." />
+        <OrbitSwitch @bind-Value="Cfg.Factions.TakeOverBlackDivision" Label="Take over Black Division bots"
+                     Tooltip="OFF (default): Black Division keeps its own behaviour layers, as its author designed them." />
+        <OrbitSwitch @bind-Value="Cfg.Factions.TakeOverIsb" Label="Take over ISB bots"
+                     Tooltip="ON by default (requested by ISB's author). White Tusk commanders are always excluded so their always-on hunt behaviour stays intact." />
+        <OrbitSwitch @bind-Value="Cfg.Factions.TakeOverCombineSoldiers" Label="Take over Combine Soldiers bots"
+                     Tooltip="OFF (default): Combine Soldiers keep their own behaviour layers." />
+    </SettingsCard>
+
+    <SettingsCard Title="Vanilla behaviour" OnReset="ResetVanilla"
+                  Subtitle="ON: ORBIT leaves these bots on BSG's vanilla brain entirely. Save and restart the game after changing these switches.">
+        <OrbitSwitch Value="Cfg.Factions.VanillaScavs" ValueChanged="@((bool v) => SetVanilla(v, x => Cfg.Factions.VanillaScavs = x))" Label="Vanilla scavs"
+                     Tooltip="Bot scavs run on BSG's vanilla brain. PlayerScavs are unaffected." />
+        <OrbitSwitch Value="Cfg.Factions.VanillaGoons" ValueChanged="@((bool v) => SetVanilla(v, x => Cfg.Factions.VanillaGoons = x))" Label="Vanilla goons"
+                     Tooltip="Knight, Big Pipe and Bird Eye run on BSG's vanilla brain." />
+        <OrbitSwitch Value="Cfg.Factions.VanillaCultists" ValueChanged="@((bool v) => SetVanilla(v, x => Cfg.Factions.VanillaCultists = x))" Label="Vanilla cultists"
+                     Tooltip="Priest, warriors and cursed scavs run on BSG's vanilla brain." />
+        <OrbitSwitch Value="Cfg.Factions.VanillaRaiders" ValueChanged="@((bool v) => SetVanilla(v, x => Cfg.Factions.VanillaRaiders = x))" Label="Vanilla raiders"
+                     Tooltip="ON (default): Raiders keep their vanilla behaviour. OFF: ORBIT directs their activities outside combat. Rogues have their own switch. Faction hunt squads spawned through MoreBotsAPI (UNTAR, RUAF) follow their faction toggle instead." />
+        <OrbitSwitch Value="Cfg.Factions.VanillaRogues" ValueChanged="@((bool v) => SetVanilla(v, x => Cfg.Factions.VanillaRogues = x))" Label="Vanilla rogues"
+                     Tooltip="ON (default): Rogues keep their vanilla behaviour. OFF: ORBIT directs their activities outside combat, including Rogues added to other maps. Raiders have their own switch." />
+        <OrbitSwitch Value="Cfg.Factions.VanillaBloodhounds" ValueChanged="@((bool v) => SetVanilla(v, x => Cfg.Factions.VanillaBloodhounds = x))" Label="Vanilla bloodhounds"
+                     Tooltip="Bloodhounds (smugglers / arena spawns) run on BSG's vanilla brain." />
+    </SettingsCard>
+
+    <SettingsCard Title="Area roaming" OnReset="ResetRoaming"
+                  Subtitle="Percentage of each faction's squads that roll permission to leave their spawn area and roam the whole map. The rest stay local, still fully ORBIT-driven. Rolled once per squad per raid. (Community contribution by Andrewgdewar.)">
+        <OrbitSlider T="int" @bind-Value="Cfg.Factions.ScavAreaRoamingPct" Label="Scavs" Unit="%" Min="0" Max="100" Step="5"
+                     Tooltip="Share of bot-scav squads allowed to roam map-wide. 0 keeps every scav in its spawn quartier; 100 makes them all roam like PMCs. PlayerScavs are unaffected." />
+        <OrbitSlider T="int" @bind-Value="Cfg.Factions.GoonAreaRoamingPct" Label="Goons" Unit="%" Min="0" Max="100" Step="5"
+                     Tooltip="Share of Goon squads allowed to roam map-wide. Default 100 matches vanilla; even local Goons cover ground, they hear and see from very far." />
+        <OrbitSlider T="int" @bind-Value="Cfg.Factions.BloodhoundAreaRoamingPct" Label="Bloodhounds" Unit="%" Min="0" Max="100" Step="5"
+                     Tooltip="Share of Bloodhound squads allowed to roam map-wide." />
+    </SettingsCard>
+</MudContainer>
+
+@code {
+    // Every FactionsConfig field lives on this page, so a fresh instance is the page's defaults.
+    private void ResetPage() => Cfg.Factions = new FactionsConfig();
+
+    // Explain the native movement option when retaining vanilla behaviour.
+    // Cancel leaves the toggle untouched.
+    private async Task SetVanilla(bool on, Action<bool> apply)
+    {
+        // Applied optimistically, reverted on cancel: the bound value must actually CHANGE both
+        // ways or the switch component never re-renders and stays visually stuck ON.
+        apply(on);
+        if (!on) return;
+        var ok = await DialogService.ShowMessageBoxAsync(
+            "Disable ORBIT on these bots?",
+            "These bots will keep their vanilla behaviour. Enable Ghost movement and Vanilla / faction movement on the Ghost Mode page to keep supported behaviours moving while asleep. Without native movement, they sleep in place. Save your settings and restart the game to apply this change.",
+            yesText: "Disable ORBIT here", cancelText: "Cancel");
+        if (ok != true) apply(false);
+    }
+
+    private void ResetTakeover()
+    {
+        var d = new FactionsConfig();
+        Cfg.Factions.TakeOverUntar = d.TakeOverUntar;
+        Cfg.Factions.TakeOverRuaf = d.TakeOverRuaf;
+        Cfg.Factions.TakeOverBlackDivision = d.TakeOverBlackDivision;
+        Cfg.Factions.TakeOverIsb = d.TakeOverIsb;
+        Cfg.Factions.TakeOverCombineSoldiers = d.TakeOverCombineSoldiers;
+    }
+
+    private void ResetVanilla()
+    {
+        var d = new FactionsConfig();
+        Cfg.Factions.VanillaScavs = d.VanillaScavs;
+        Cfg.Factions.VanillaGoons = d.VanillaGoons;
+        Cfg.Factions.VanillaCultists = d.VanillaCultists;
+        Cfg.Factions.VanillaRaiders = d.VanillaRaiders;
+        Cfg.Factions.VanillaRogues = d.VanillaRogues;
+        Cfg.Factions.VanillaBloodhounds = d.VanillaBloodhounds;
+    }
+
+    private void ResetRoaming()
+    {
+        var d = new FactionsConfig();
+        Cfg.Factions.ScavAreaRoamingPct = d.ScavAreaRoamingPct;
+        Cfg.Factions.GoonAreaRoamingPct = d.GoonAreaRoamingPct;
+        Cfg.Factions.BloodhoundAreaRoamingPct = d.BloodhoundAreaRoamingPct;
+    }
+}

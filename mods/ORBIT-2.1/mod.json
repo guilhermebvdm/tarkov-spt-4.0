@@ -1,0 +1,11 @@
+{
+  "name": "ORBIT-2.1",
+  "upstream_url": "https://github.com/Chazut/ORBIT",
+  "upstream_sha": "8fd7e661073aa8b46ec8dc00a2b1d62ea7875ea7",
+  "upstream_branch": "2.1",
+  "forge_url": "",
+  "license": "MIT",
+  "version_base": "2.1.0",
+  "spt_version": "",
+  "created_at": "2026-10-01T01:12:35Z"
+}
