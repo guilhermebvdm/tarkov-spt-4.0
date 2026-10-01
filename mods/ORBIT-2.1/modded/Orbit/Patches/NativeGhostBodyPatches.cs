@@ -86,8 +86,8 @@ internal static class NativeGhostBodyPatches
         if (!NativeGhostSystem.HasSleepers) return true;
         if (__instance is BotDoorOpener opener)
             return !NativeGhostSystem.HandleDoorOperation(opener,
-                __originalMethod.Name == "ManualUpdate" ? null : opener._currentDoorLink?.Door,
-                __originalMethod.Name != "ManualUpdate" && opener._currentDoorLink == null, out _);
+                __originalMethod.Name == "ManualUpdate" ? null : opener.CurrentDoorLink?.Door,
+                __originalMethod.Name != "ManualUpdate" && opener.CurrentDoorLink == null, out _);
         var bot = Owners[__originalMethod](__instance);
         if (__instance is BotFirstAid && NativeGhostSystem.RetainSimulatedFirstAid(bot)) return false;
         if (__instance is BotLay) return !NativeGhostSystem.DeferProne(bot);

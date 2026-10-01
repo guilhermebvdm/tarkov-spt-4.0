@@ -12,7 +12,7 @@ public partial class WaypointSystem
     private Dictionary<string, string> CollectNativeZoneFloors()
     {
         var result = new Dictionary<string, string>();
-        foreach (var zone in _botsController.BotSpawner._allBotZones)
+        foreach (var zone in _botsController.BotSpawner.AllBotZones)
         {
             if (zone == null) continue;
             var points = new List<NativeFloorPoint>();

@@ -28,7 +28,7 @@ internal sealed class NativeGhostDoors(BotOwner bot, DoorSystem doors)
         var opener = bot.DoorOpener;
         if (door.GetType() != typeof(Door) || !door.enabled || !door.Operatable
             || door.DoorState is not (EDoorState.Shut or EDoorState.Interacting or EDoorState.Open)
-            || (opener?._currentDoorLink?.Door == door && opener._doBreach))
+            || (opener?.CurrentDoorLink?.Door == door && opener.DoBreach))
         {
             failure = $"door requires body: id={door.Id} state={door.DoorState}";
             return true;

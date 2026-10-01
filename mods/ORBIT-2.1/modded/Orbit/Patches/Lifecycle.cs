@@ -60,7 +60,7 @@ public class OrbitTickPatch : ModulePatch
     public static void Postfix(AICoreController __instance)
     {
         // _enable is BSG's IsActive flag — skip the tick when their controller hasn't enabled itself.
-        if (!__instance._enable)
+        if (!__instance.Bool_0)
             return;
 
         // The singleton can be absent here: released at raid end while a queued AICoreController tick

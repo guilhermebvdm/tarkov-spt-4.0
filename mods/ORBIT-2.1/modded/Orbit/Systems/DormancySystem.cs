@@ -1073,7 +1073,7 @@ public partial class DormancySystem
                 if (mainCamera != null)
                 {
                     var opticManager = cameraManager.OpticCameraManager;
-                    var scoped = opticManager != null && opticManager.IsAnyOpticCameraRendering;
+                    var scoped = opticManager != null && opticManager.Boolean_0;
                     if (!scoped)
                     {
                         // Cache the base FOV while unscoped: some sights zoom the MAIN camera too, so
@@ -2273,7 +2273,7 @@ public partial class DormancySystem
     /// </summary>
     private void KillWithAttribution(Player victim, Player killer)
     {
-        var damageInfo = new EFT.Ballistics.DamageInfo
+        var damageInfo = new DamageInfoStruct
         {
             DamageType = EDamageType.Bullet,
             Damage = 500f,

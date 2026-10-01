@@ -7,10 +7,10 @@ using SPTarkov.Server.Core.DI;
 
 namespace Orbit.Server.Load;
 
-[Injectable(TypePriority = OnLoadOrder.Preload + 10)]
+[Injectable(TypePriority = OnLoadOrder.PreSptModLoader + 10)]
 public sealed class OrbitServerLoad(ISptLogger<OrbitServerLoad> logger, PresetService presets) : IOnLoad
 {
-    public Task OnLoadAsync(CancellationToken cancellationToken)
+    public Task OnLoad()
     {
         presets.Initialize();
         logger.Info("[ORBIT] Server mod loaded - config UI at /orbit");

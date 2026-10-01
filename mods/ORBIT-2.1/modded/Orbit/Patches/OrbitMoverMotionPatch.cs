@@ -11,17 +11,17 @@ namespace Orbit.Patches;
 public class OrbitMoverMotionPatch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
-        => typeof(BotMoverImpostor).GetMethod(nameof(BotMoverImpostor.OnMotionApplied));
+        => typeof(BotMoverImpostor).GetMethod(nameof(BotMoverImpostor.method_21));
 
     [PatchPrefix]
     public static bool Prefix(BotMoverImpostor __instance, CollisionFlags flags)
     {
-        var bot = __instance._owner;
+        var bot = __instance.BotOwner_0;
         var agent = Singleton<BotRoster>.Instance?.GetAgent(bot);
         if (agent == null || !ReferenceEquals(agent.Bot, bot) || !agent.IsActive) return true;
         // Preserve the callback's collision bookkeeping and its normal no-native-path state.
-        __instance._isImpostorWorks = false;
-        __instance._lastFlags = flags;
+        __instance.Bool_0 = false;
+        __instance.CollisionFlags_0 = flags;
         return false;
     }
 }

@@ -8,10 +8,7 @@
         <Deterministic>false</Deterministic>
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <!-- Compile references: frozen copy of the SPT 4.1 client DLLs (refs/4.1, gitignored) -->
-        <SptRoot Condition=" '$(SptRoot)' == '' ">$(MSBuildProjectDirectory)\..\refs\4.1</SptRoot>
-        <!-- Deployment target: the live SPT 4.1 install -->
-        <DeployRoot Condition=" '$(DeployRoot)' == '' ">C:\Games\SPT-4.1</DeployRoot>
+        <!-- SPT 4.0 port: SptRoot (the SPT 4.0 install the references resolve from) comes from ..\Directory.Build.props -->
         <AssemblyName>ORBIT</AssemblyName>
     </PropertyGroup>
 
@@ -96,9 +93,6 @@
       <Compile Include="..\Shared\*.cs" Link="Zones\%(Filename)%(Extension)" />
     </ItemGroup>
 
-    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-      <MakeDir Directories="$(DeployRoot)\BepInEx\plugins\$(TargetName)" />
-      <Exec Command="copy /Y &quot;$(TargetPath)&quot; &quot;$(DeployRoot)\BepInEx\plugins\$(TargetName)\$(TargetFileName)&quot;&#xA;copy /Y &quot;$(TargetDir)$(TargetName).pdb&quot; &quot;$(DeployRoot)\BepInEx\plugins\$(TargetName)\$(TargetName).pdb&quot;" />
-    </Target>
+    <!-- SPT 4.0 port: the upstream PostBuild copy into C:\Games\SPT-4.1 was removed; /compile-mod installs the build. -->
 
 </Project>

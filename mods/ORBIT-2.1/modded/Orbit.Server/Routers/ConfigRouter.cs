@@ -14,7 +14,7 @@ namespace Orbit.Server.Routers;
 public sealed class ConfigRouter(JsonUtil jsonUtil, PresetService presets) : StaticRouter(jsonUtil, [
     new RouteAction<EmptyRequestData>(
         "/orbit/config",
-        (url, requestData, sessionId, output, cancellationToken) =>
+        (url, requestData, sessionId, output) =>
             new ValueTask<string>(presets.ConfigForGame())
     )
 ])

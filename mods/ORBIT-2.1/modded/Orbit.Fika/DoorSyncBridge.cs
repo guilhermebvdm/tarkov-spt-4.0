@@ -60,11 +60,11 @@ internal sealed class DoorSyncBridge : IDisposable
         try
         {
             var postfix = new HarmonyMethod(typeof(DoorSyncBridge), nameof(AfterInteraction));
-            _harmony.Patch(AccessTools.DeclaredMethod(typeof(FikaPlayer), nameof(FikaPlayer.ExecuteInteraction)), postfix: postfix);
-            _harmony.Patch(AccessTools.DeclaredMethod(typeof(ObservedPlayer), nameof(ObservedPlayer.ExecuteInteraction)), postfix: postfix);
+            _harmony.Patch(AccessTools.DeclaredMethod(typeof(FikaPlayer), nameof(FikaPlayer.vmethod_1)), postfix: postfix);
+            _harmony.Patch(AccessTools.DeclaredMethod(typeof(ObservedPlayer), nameof(ObservedPlayer.vmethod_1)), postfix: postfix);
             var startPostfix = new HarmonyMethod(typeof(DoorSyncBridge), nameof(AfterStartInteraction));
-            _harmony.Patch(AccessTools.DeclaredMethod(typeof(FikaPlayer), nameof(FikaPlayer.StartInteraction)), postfix: startPostfix);
-            _harmony.Patch(AccessTools.DeclaredMethod(typeof(ObservedPlayer), nameof(ObservedPlayer.StartInteraction)), postfix: startPostfix);
+            _harmony.Patch(AccessTools.DeclaredMethod(typeof(FikaPlayer), nameof(FikaPlayer.vmethod_0)), postfix: startPostfix);
+            _harmony.Patch(AccessTools.DeclaredMethod(typeof(ObservedPlayer), nameof(ObservedPlayer.vmethod_0)), postfix: startPostfix);
             // Use the dispatcher event directly: the current Fika Subscribe/Unsubscribe helpers
             // allocate different wrapper delegates, so they cannot remove the original handler.
             FikaEventDispatcher.OnFikaEvent += OnFikaEvent;

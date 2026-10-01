@@ -18,12 +18,12 @@ namespace Orbit.Server.Routers;
 public sealed class ZonesRouter(JsonUtil jsonUtil, ZoneStoreService zoneStore, PresetService presets) : StaticRouter(jsonUtil, [
     new RouteAction<EmptyRequestData>(
         "/orbit/zones",
-        (url, requestData, sessionId, output, cancellationToken) =>
+        (url, requestData, sessionId, output) =>
             new ValueTask<string>(presets.ZonesForGame())
     ),
     new RouteAction<NativeFloorsRequest>(
         "/orbit/zones/native-floors",
-        (url, requestData, sessionId, output, cancellationToken) =>
+        (url, requestData, sessionId, output) =>
         {
             zoneStore.RecordNativeFloors(requestData.MapId, requestData.Floors, requestData.CatalogRevision);
             return new ValueTask<string>("{}");

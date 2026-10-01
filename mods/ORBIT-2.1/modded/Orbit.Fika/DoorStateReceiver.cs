@@ -38,13 +38,13 @@ internal static class DoorStateReceiver
             && door.IsBroken == packet.Broken) return true;
         // Use the same public restoration entry point as Fika's reconnect snapshots.
         // It preserves real broken-door visuals, without generating a kick or a second open sound.
-        door.SetInitialSyncState(new WorldInteractiveObject.InteractiveObjectStatusInfo
+        door.SetInitialSyncState(new WorldInteractiveObject.WorldInteractiveDataPacketStruct
         {
             State = packet.State,
             IsBroken = packet.Broken,
         });
         door.CurrentAngle = packet.Angle;
-        EFT.GlobalEvents.GlobalEventsController.CreateEvent<EFT.GlobalEvents.InteractiveObjectInteractionResultEvent>()
+        GlobalEventHandlerClass.CreateEvent<EFT.GlobalEvents.InteractiveObjectInteractionResultEvent>()
             .Invoke(door, state);
         return true;
     }

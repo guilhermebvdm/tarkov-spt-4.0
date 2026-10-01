@@ -324,9 +324,9 @@ public partial class WaypointSystem
         _zones.Clear();
         var nativeFloors = CollectNativeZoneFloors();
 
-        for (var i = 0; i < _botsController.BotSpawner._allBotZones.Length; i++)
+        for (var i = 0; i < _botsController.BotSpawner.AllBotZones.Length; i++)
         {
-            var botZone = _botsController.BotSpawner._allBotZones[i];
+            var botZone = _botsController.BotSpawner.AllBotZones[i];
 
             if (!_zoneConfig.Value.BuiltinZones.TryGetValue(botZone.name, out var builtinZone))
                 continue;
@@ -2837,7 +2837,7 @@ public partial class WaypointSystem
     public List<Vector3> GetPositiveForceZoneAnchors()
     {
         var result = new List<Vector3>();
-        var botZones = _botsController?.BotSpawner?._allBotZones;
+        var botZones = _botsController?.BotSpawner?.AllBotZones;
         if (botZones != null)
         {
             for (var i = 0; i < botZones.Length; i++)

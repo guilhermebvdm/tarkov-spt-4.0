@@ -171,7 +171,7 @@ public static class ControllerExtensions
 {
     public static bool IsChangingWeaponNonLinq(this InventoryController controller)
     {
-        foreach (var activeEvent in controller.ActiveEvents)
+        foreach (var activeEvent in controller.List_0)
         {
             if (activeEvent is RemoveFromHandsEventArgs or SetInHandsEventArgs)
                 return true;
@@ -181,7 +181,7 @@ public static class ControllerExtensions
 
     public static bool HasAnyHandsActionNonLinq(this ItemController controller)
     {
-        foreach (var eventArg in controller.ActiveEvents)
+        foreach (var eventArg in controller.List_0)
         {
             if (eventArg is IItemInHandsEventArgs)
                 return true;

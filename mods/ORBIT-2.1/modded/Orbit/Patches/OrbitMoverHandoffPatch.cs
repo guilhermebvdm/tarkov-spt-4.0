@@ -12,11 +12,11 @@ namespace Orbit.Patches;
 public class OrbitMoverHandoffFallbackPatch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
-        => typeof(BotMover).GetMethod(nameof(BotMover.FindBetterPosition));
+        => typeof(BotMover).GetMethod(nameof(BotMover.method_4));
 
     internal static OrbitMovementRecovery Pending(BotMover mover)
     {
-        var bot = mover?._owner;
+        var bot = mover?.BotOwner_0;
         if (bot == null || bot.IsDead) return null;
         var agent = Singleton<BotRoster>.Instance?.GetAgent(bot);
         return agent != null && ReferenceEquals(agent.Bot, bot) && !agent.IsActive && !agent.IsDormant

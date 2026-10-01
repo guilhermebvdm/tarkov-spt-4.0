@@ -16,13 +16,13 @@ public class AirdropLandedPatch : ModulePatch
 
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(ClientAirDrop).GetMethod(nameof(ClientAirDrop.PlayLandingSound));
+        return typeof(ClientAirDrop).GetMethod(nameof(ClientAirDrop.method_0));
     }
 
     [PatchPostfix]
     public static void Postfix(ClientAirDrop __instance)
     {
-        var lootableContainer = __instance._syncObject.GetComponentInChildren<LootableContainer>();
+        var lootableContainer = __instance.AirdropSynchronizableObject_0.GetComponentInChildren<LootableContainer>();
         OnAirdropLanded?.Invoke(lootableContainer);
     }
 }

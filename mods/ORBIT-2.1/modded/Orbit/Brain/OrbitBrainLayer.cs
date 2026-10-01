@@ -206,7 +206,7 @@ public class OrbitBrainLayer : CustomLayer
         }
     }
 
-    private void OnLayerChanged(AICoreLayer<BotLogicDecision> layer)
+    private void OnLayerChanged(AICoreLayerClass<BotLogicDecision> layer)
     {
         // BigBrain has already selected the new layer. Release our movement hooks before any
         // physical operation can throw, otherwise both controllers can keep driving this bot.

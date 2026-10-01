@@ -465,7 +465,7 @@ public static class WeaponSwapper
     // execute" build failures and main-thread stalls.
     private const int PostTransactionSettleMs = 2500;
 
-    internal static async Task<bool> RunGuardedTransactionAsync<T>(BotOwner bot, OperationResult<T> op, string label, string nick, CancellationToken ct)
+    internal static async Task<bool> RunGuardedTransactionAsync<T>(BotOwner bot, GStruct154<T> op, string label, string nick, CancellationToken ct)
         where T : IOperationResult
     {
         var ic = bot.GetPlayer?.InventoryController;
@@ -628,13 +628,13 @@ public static class WeaponSwapper
             var sb = new System.Text.StringBuilder();
             sb.Append(operation?.GetType().Name ?? "?");
             IItemOwner sourceOwner = null;
-            if (operation is MoveResult move && move._item != null)
+            if (operation is MoveResult move && move.Item_0 != null)
             {
-                var to = move._to;
-                sb.Append($" {move._item.LocalizedName()} {DescribeAddress(move._item.CurrentAddress, bot)} -> {DescribeAddress(to, bot)} in {to?.Container?.ParentItem?.LocalizedName() ?? "?"} [{to}]");
-                var check = move._item.CheckAction(to);
+                var to = move.ItemAddress_1;
+                sb.Append($" {move.Item_0.LocalizedName()} {DescribeAddress(move.Item_0.CurrentAddress, bot)} -> {DescribeAddress(to, bot)} in {to?.Container?.ParentItem?.LocalizedName() ?? "?"} [{to}]");
+                var check = move.Item_0.CheckAction(to);
                 sb.Append(check.Failed ? $", CheckAction: {check.Error?.GetType().Name} {check.Error}" : ", CheckAction passes now");
-                sourceOwner = move._item.Parent?.GetOwner();
+                sourceOwner = move.Item_0.Parent?.GetOwner();
             }
             sb.Append($", inventory blocked: {ic.IsInventoryBlocked()}");
             sb.Append($", hands: {bot.GetPlayer.HandsController?.GetType().Name ?? "none"} holding {bot.GetPlayer.HandsController?.Item?.LocalizedName() ?? "nothing"}");

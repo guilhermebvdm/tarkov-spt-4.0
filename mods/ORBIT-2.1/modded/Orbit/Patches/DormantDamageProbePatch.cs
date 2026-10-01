@@ -28,7 +28,7 @@ public class DormantDamageProbePatch : ModulePatch
         => AccessTools.Method(typeof(ActiveHealthController), nameof(ActiveHealthController.ApplyDamage));
 
     [PatchPostfix]
-    public static void Postfix(ActiveHealthController __instance, EBodyPart bodyPart, float damage, EFT.Ballistics.DamageInfo damageInfo, float __result)
+    public static void Postfix(ActiveHealthController __instance, EBodyPart bodyPart, float damage, DamageInfoStruct damageInfo, float __result)
     {
         try
         {

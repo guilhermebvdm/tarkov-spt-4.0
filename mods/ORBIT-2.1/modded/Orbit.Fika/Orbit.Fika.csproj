@@ -7,12 +7,14 @@
         <LangVersion>default</LangVersion>
         <Deterministic>false</Deterministic>
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-        <!-- Compile references: frozen copy of the SPT 4.1 client DLLs (refs/4.1, gitignored) -->
-        <SptRoot Condition=" '$(SptRoot)' == '' ">$(MSBuildProjectDirectory)\..\refs\4.1</SptRoot>
-        <!-- Fika.Core built from source (github.com/project-fika/Fika-Plugin, cloned next to ORBIT) -->
-        <FikaRef Condition=" '$(FikaRef)' == '' ">C:\Dev\Fika-Plugin\Fika.Core\bin\Release\netstandard2.1\Fika.Core.dll</FikaRef>
+        <!-- SPT 4.0 port: SptRoot and FikaRef (the installed Fika.Core) come from ..\Directory.Build.props -->
         <AssemblyName>Orbit.Fika</AssemblyName>
     </PropertyGroup>
+
+    <ItemGroup>
+      <!-- SPT 4.0 port: global using aliases are per project, so the addon compiles the core's alias file too. -->
+      <Compile Include="..\Orbit\Compat\Spt40TypeAliases.cs" Link="Compat\Spt40TypeAliases.cs" />
+    </ItemGroup>
 
     <ItemGroup>
       <Reference Include="0Harmony">

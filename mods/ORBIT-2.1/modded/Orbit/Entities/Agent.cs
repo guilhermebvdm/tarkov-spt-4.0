@@ -60,7 +60,7 @@ public class Agent(int id, BotOwner bot, float[] taskScores) : Entity(id, taskSc
     public float LastGhostPatchUpAt = -999f;
 
     public readonly BotOwner Bot = bot;
-    public readonly Player Player = bot.Mover._player;
+    public readonly Player Player = bot.Mover.Player;
 
     public readonly Movement Movement = new();
     public readonly Stuck Stuck = new();
@@ -176,7 +176,7 @@ public class Agent(int id, BotOwner bot, float[] taskScores) : Entity(id, taskSc
     /// </summary>
     public readonly HashSet<int> ValueSkippedPoiIds = new();
 
-    private readonly BifacialTransform _bodyTransform = bot.Mover._player.PlayerBones.BodyTransform;
+    private readonly BifacialTransform _bodyTransform = bot.Mover.Player.PlayerBones.BodyTransform;
 
     public Vector3 Position
     {

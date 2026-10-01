@@ -1,0 +1,27 @@
+<Project>
+
+  <!--
+    SPT 4.0 port: where the three projects (Orbit, Orbit.Fika, Orbit.Server) find the game and server DLLs.
+
+    Upstream compiles against a frozen copy of the SPT 4.1 client (refs\4.1) and deploys to C:\Games\SPT-4.1.
+    Here the install is resolved the way the rest of this repository does it: SPT_PATH from the environment,
+    else the .spt-path file at the repository root (gitignored, one per machine), else D:\SPT. Nothing is
+    copied next to the sources and no path is hardcoded in the project files.
+
+    Every property below is set only when empty, so `-p:SptRoot=...` on the command line still wins, and the
+    conditional defaults left in the upstream .csproj files are simply skipped.
+  -->
+  <PropertyGroup>
+    <SptPathFile>$([MSBuild]::GetPathOfFileAbove('.spt-path', '$(MSBuildThisFileDirectory)'))</SptPathFile>
+    <SptRoot Condition=" '$(SptRoot)' == '' And '$(SPT_PATH)' != '' ">$(SPT_PATH)</SptRoot>
+    <SptRoot Condition=" '$(SptRoot)' == '' And '$(SptPathFile)' != '' ">$([System.Text.RegularExpressions.Regex]::Match($([System.IO.File]::ReadAllText('$(SptPathFile)')), 'SPT_PATH=([^\r\n]+)').Groups[1].Value.Trim())</SptRoot>
+    <SptRoot Condition=" '$(SptRoot)' == '' ">D:\SPT</SptRoot>
+
+    <!-- Orbit.Fika: the Fika.Core installed with the game, not a local source build. -->
+    <FikaRef Condition=" '$(FikaRef)' == '' ">$(SptRoot)\BepInEx\plugins\Fika\Fika.Core.dll</FikaRef>
+
+    <!-- Orbit.Server: the SPT 4.0 server folder inside the install. -->
+    <SPT_DIR Condition=" '$(SPT_DIR)' == '' ">$(SptRoot)\SPT</SPT_DIR>
+  </PropertyGroup>
+
+</Project>

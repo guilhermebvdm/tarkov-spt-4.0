@@ -27,41 +27,41 @@ internal sealed class OrbitMovementRecovery
     {
         // These coordinates are a current reference, not a certified NavMesh anchor. Invalidate
         // both link flags and timestamps so the first native tick cannot reuse the old spawn.
-        mover._linkedToNavmeshInitially = false;
-        mover._lastGoodCastPointTime = float.NegativeInfinity;
-        mover._prevPosLinkedTime = float.NegativeInfinity;
-        mover._lastGoodCastPoint = mover._prevSuccessLinkedFrom = mover._prevLinkPos = position;
-        mover.PositionOnWayInner = mover._positionOnWayCasted = position;
-        mover._prevOffsetGoodCasted = Vector3.zero;
-        mover._prevOffsetGoodCastedTime = float.NegativeInfinity;
+        mover.LinkedToNavmeshInitially = false;
+        mover.LastGoodCastPointTime = float.NegativeInfinity;
+        mover.PrevPosLinkedTime_1 = float.NegativeInfinity;
+        mover.LastGoodCastPoint = mover.PrevSuccessLinkedFrom_1 = mover.PrevLinkPos = position;
+        mover.PositionOnWayInner = mover.PositionOnWayCasted = position;
+        mover.PrevOffsetGoodCasted = Vector3.zero;
+        mover.PrevOffsetGoodCastedTime = float.NegativeInfinity;
     }
 
     internal void ConfirmNativeLink(BotMover mover, EBotLinkResult result)
     {
         if (!HandoffPending || result is not (EBotLinkResult.complete or EBotLinkResult.extraConnect)) return;
-        var position = mover._owner.GetPlayer.Position;
-        if (!TrySample(position, out _) || !BotGroundPlacement.HasSupport(mover._owner.GetPlayer)) return;
+        var position = mover.BotOwner_0.GetPlayer.Position;
+        if (!TrySample(position, out _) || !BotGroundPlacement.HasSupport(mover.BotOwner_0.GetPlayer)) return;
         HandoffPending = false;
     }
 
     internal Vector3 HandoffFallback(BotMover mover)
     {
-        var position = mover._owner.GetPlayer.Position;
+        var position = mover.BotOwner_0.GetPlayer.Position;
         // FindBetterPosition normally searches 100m around historical anchors. Until the native
         // mover confirms a fresh link, only a supported local landing may replace the body position.
         if (Time.time >= _nextHandoffProbe)
         {
             _nextHandoffProbe = Time.time + 2f;
-            if (BotLandingGuard.TryHandoffLanding(mover._owner, out var landing))
+            if (BotLandingGuard.TryHandoffLanding(mover.BotOwner_0, out var landing))
             {
                 InvalidateNativePosition(mover, landing);
-                Log.Debug($"MOVEMENT HANDOFF: {mover._owner.Profile.Nickname} local recovery from={position} to={landing}");
+                Log.Debug($"MOVEMENT HANDOFF: {mover.BotOwner_0.Profile.Nickname} local recovery from={position} to={landing}");
                 return landing;
             }
             if (Time.time >= _nextHandoffReport)
             {
                 _nextHandoffReport = Time.time + 10f;
-                Log.Debug($"MOVEMENT HANDOFF: {mover._owner.Profile.Nickname} awaiting local support at={position}; distant fallback suppressed");
+                Log.Debug($"MOVEMENT HANDOFF: {mover.BotOwner_0.Profile.Nickname} awaiting local support at={position}; distant fallback suppressed");
             }
         }
         if (Finite(position)) InvalidateNativePosition(mover, position);
@@ -105,8 +105,8 @@ internal sealed class OrbitMovementRecovery
         OffMeshSince = -1f;
         // Grounded state and a physical support check must agree before this can become a return point.
         // A supported interval prevents the teleport frame from certifying its own destination.
-        if (!BotGroundPlacement.HasSupport(mover._owner?.GetPlayer)
-            || BotLandingGuard.IsRejected(mover._owner, point))
+        if (!BotGroundPlacement.HasSupport(mover.BotOwner_0?.GetPlayer)
+            || BotLandingGuard.IsRejected(mover.BotOwner_0, point))
         { _supportedSince = -1f; return true; }
         if (_supportedSince < 0f) _supportedSince = Time.time;
         if (Time.time - _supportedSince < 0.5f) return true;
@@ -128,8 +128,8 @@ internal sealed class OrbitMovementRecovery
         _nextHandoffReport = 0f;
         if (mover != null && Finite(position)) InvalidateNativePosition(mover, position);
         if (mover == null || !TrySample(position, out var point)
-            || !BotGroundPlacement.HasSupport(mover._owner?.GetPlayer)
-            || BotLandingGuard.IsRejected(mover._owner, point)) return false;
+            || !BotGroundPlacement.HasSupport(mover.BotOwner_0?.GetPlayer)
+            || BotLandingGuard.IsRejected(mover.BotOwner_0, point)) return false;
         SeedNativePosition(mover, point);
         return true;
     }
@@ -137,12 +137,12 @@ internal sealed class OrbitMovementRecovery
     private static void SeedNativePosition(BotMover mover, Vector3 point)
     {
         // Only a successful, local NavMesh sample may advance the native recovery anchors.
-        mover._lastGoodCastPoint = point;
-        mover._prevSuccessLinkedFrom = point;
-        mover._prevLinkPos = point;
+        mover.LastGoodCastPoint = point;
+        mover.PrevSuccessLinkedFrom_1 = point;
+        mover.PrevLinkPos = point;
         mover.PositionOnWayInner = point;
-        mover._lastGoodCastPointTime = Time.time;
-        mover._prevPosLinkedTime = Time.time;
+        mover.LastGoodCastPointTime = Time.time;
+        mover.PrevPosLinkedTime_1 = Time.time;
     }
 
     internal bool TryReturnPoint(out Vector3 point)

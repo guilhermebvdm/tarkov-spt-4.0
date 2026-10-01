@@ -29,7 +29,7 @@ public class DormantBrainThrottlePatch : ModulePatch
     // The target is a static method whose first parameter is the agent (BigBrain names it __instance,
     // which Harmony would treat as an injection here), so it is read by position instead.
     [PatchPrefix]
-    public static bool Prefix(AICoreAgent<BotLogicDecision> __0, ref bool __result)
+    public static bool Prefix(AICoreAgentClass<BotLogicDecision> __0, ref bool __result)
     {
         if (NativeGhostSystem.ScheduleBrain(__0, out var skip))
         {
@@ -43,6 +43,6 @@ public class DormantBrainThrottlePatch : ModulePatch
     }
 
     [PatchFinalizer]
-    public static System.Exception Finalizer(AICoreAgent<BotLogicDecision> __0, System.Exception __exception)
+    public static System.Exception Finalizer(AICoreAgentClass<BotLogicDecision> __0, System.Exception __exception)
         => NativeGhostSystem.HandleBrainException(__0, __exception) ? null : __exception;
 }

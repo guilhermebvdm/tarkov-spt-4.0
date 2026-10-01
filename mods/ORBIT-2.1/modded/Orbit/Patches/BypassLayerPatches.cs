@@ -11,7 +11,7 @@ internal static class BypassGate
     public static bool ShouldBypassForOrbitBot(BaseLogicLayerSimple layer)
     {
         var roster = Singleton<BotRoster>.Instance;
-        return roster != null && roster.IsOrbitActive(layer._owner);
+        return roster != null && roster.IsOrbitActive(layer.BotOwner_0);
     }
 }
 

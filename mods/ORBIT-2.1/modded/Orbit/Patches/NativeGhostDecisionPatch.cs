@@ -8,11 +8,11 @@ namespace Orbit.Patches;
 public class NativeGhostDecisionPatch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
-        => AccessTools.Method(typeof(AICoreStrategy<BotLogicDecision>), "Update");
+        => AccessTools.Method(typeof(AICoreStrategyAbstractClass<BotLogicDecision>), "Update");
 
     [PatchPostfix]
-    public static void Postfix(AICoreStrategy<BotLogicDecision> __instance,
-        ref AICoreActionResult<BotLogicDecision, CoreActionResultParams>? __result)
+    public static void Postfix(AICoreStrategyAbstractClass<BotLogicDecision> __instance,
+        ref AICoreActionResultStruct<BotLogicDecision, CoreActionResultParams>? __result)
     {
         NativeGhostSystem.RefreshPeacefulDecision(__instance, ref __result);
         NativeGhostSystem.GuardDecision(__instance, ref __result);

@@ -45,7 +45,7 @@ internal static class NativeGhostDiagnostics
             var leader = bot.BotFollower?.BossToFollow;
             Log.Warning($"NATIVE GHOST BRAIN CONTEXT: [{bot.ProfileId}] layer={NativeGhostPartisan.Layer(bot) ?? "none"}"
                 + $" state={bot.BotState} position={bot.Position} leaderPresent={leader != null} leaderAlive={leader?.IsAlive}"
-                + $" follower={bot.BotFollower?.PatrolDataFollower?.followerAIBase?.GetType().Name ?? "none"}");
+                + $" follower={bot.BotFollower?.PatrolDataFollower?.FollowerAIBase?.GetType().Name ?? "none"}");
         }
         catch (Exception e)
         {

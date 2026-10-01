@@ -29,7 +29,7 @@ public class RescueInterceptPatch : ModulePatch
 
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(BotMover).GetMethod(nameof(BotMover.CastFromPos));
+        return typeof(BotMover).GetMethod(nameof(BotMover.method_10));
     }
 
     [PatchPrefix]

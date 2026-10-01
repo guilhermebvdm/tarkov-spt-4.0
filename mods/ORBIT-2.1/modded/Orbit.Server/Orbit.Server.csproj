@@ -1,14 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <!-- SPT 4.0 port: the 4.0 server runs on .NET 9 (upstream targets net10.0 for SPT 4.1). -->
+    <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AssemblyName>Orbit.Server</AssemblyName>
     <Version>2.1.0</Version>
     <RootNamespace>Orbit.Server</RootNamespace>
-    <!-- SPT 4.1 server root (DLL references + deploy target) -->
-    <SPT_DIR Condition=" '$(SPT_DIR)' == '' ">C:\Games\SPT-4.1\SPT_Runtime</SPT_DIR>
+    <!-- SPT 4.0 port: SPT_DIR (the SPT 4.0 server folder the references resolve from) comes from ..\Directory.Build.props -->
   </PropertyGroup>
 
   <ItemGroup>
@@ -34,16 +34,9 @@
   </ItemGroup>
 
   <Target Name="EnsureSptDir" BeforeTargets="Build">
-    <Error Condition="!Exists('$(SPT_DIR)\SPTarkov.Server.Core.dll')" Text="SPT_DIR does not point at a valid SPT 4.1 server (SPTarkov.Server.Core.dll not found)." />
+    <Error Condition="!Exists('$(SPT_DIR)\SPTarkov.Server.Core.dll')" Text="SPT_DIR ($(SPT_DIR)) does not point at a valid SPT 4.0 server (SPTarkov.Server.Core.dll not found). Set SPT_PATH or the .spt-path file at the repository root." />
   </Target>
 
-  <PropertyGroup>
-    <ModDeployDir>$(SPT_DIR)\user\mods\ORBIT</ModDeployDir>
-  </PropertyGroup>
-
-  <Target Name="DeployMod" AfterTargets="Build" Condition="Exists('$(ModDeployDir)')">
-    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ModDeployDir)" SkipUnchangedFiles="true" />
-    <Message Importance="high" Text="[Orbit.Server] Deployed DLL to $(ModDeployDir)" />
-  </Target>
+  <!-- SPT 4.0 port: the upstream DeployMod copy into SPT_DIR\user\mods\ORBIT was removed; /compile-mod installs the build. -->
 
 </Project>

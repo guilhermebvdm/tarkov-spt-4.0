@@ -228,12 +228,12 @@ public class Plugin : BaseUnityPlugin
         // directly when present. This is just a log — pricing already works via the cache either way, so we
         // don't block on it forever like before (headless would never satisfy the old loop).
         var attempts = 0;
-        while (Singleton<EFT.HandBook.Handbook>.Instance == null && attempts < 60)
+        while (Singleton<HandbookClass>.Instance == null && attempts < 60)
         {
             attempts++;
             yield return new WaitForSeconds(1f);
         }
-        Log.Info(Singleton<EFT.HandBook.Handbook>.Instance != null
+        Log.Info(Singleton<HandbookClass>.Instance != null
             ? $"EFT.HandBook.Handbook ready after {attempts}s — ItemPriceLookup using it directly"
             : "EFT.HandBook.Handbook absent (headless client?) — ItemPriceLookup using the server price cache");
     }

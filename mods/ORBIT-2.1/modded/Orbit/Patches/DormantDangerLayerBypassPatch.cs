@@ -20,7 +20,7 @@ internal static class DormantLayerGate
     {
         try
         {
-            var profileId = layer?._owner?.GetPlayer?.ProfileId;
+            var profileId = layer?.BotOwner_0?.GetPlayer?.ProfileId;
             return profileId != null && DormancySystem.IsDormantProfile(profileId);
         }
         catch

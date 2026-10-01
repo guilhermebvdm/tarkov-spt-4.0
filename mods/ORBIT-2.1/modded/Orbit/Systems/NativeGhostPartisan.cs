@@ -6,7 +6,8 @@ namespace Orbit.Systems;
 /// <summary>Partizan's mine approach remains native; placing a tripwire still requires an active body.</summary>
 internal static class NativeGhostPartisan
 {
-    public static string Layer(BotOwner bot) => bot?.Brain?.BaseBrain?.CurLayerInfo?.GetType().Name;
+    // SPT 4.0: the layer classes are still obfuscated (GClassNNNN); every caller compares against 4.1 names.
+    public static string Layer(BotOwner bot) => Orbit.Compat.Spt40TypeNames.Of(bot?.Brain?.BaseBrain?.CurLayerInfo);
 
     public static bool IsPartisan(BotOwner bot)
         => bot?.Profile?.Info?.Settings?.Role == WildSpawnType.bossPartisan;
@@ -40,9 +41,9 @@ internal static class NativeGhostPartisan
     {
         if (!IsPartisan(bot)) return null;
         if (!NativeGhostSystem.ReachOrderReady) return "partisan-reach-bridge";
-        if (bot.Boss?.BossLogic is not BossPartisan boss || boss._period == null) return "partisan-controller";
+        if (bot.Boss?.BossLogic is not BossPartisan boss || boss.Gclass25_0 == null) return "partisan-controller";
         if (bot.MinesData == null || bot.MinesData.Planting) return "partisan-planting";
-        if (boss._listOfPrewarms == null || boss._listOfPrewarms.Count > 0) return "partisan-prewarm";
+        if (boss.List_0 == null || boss.List_0.Count > 0) return "partisan-prewarm";
         var weapons = bot.WeaponManager;
         if (weapons == null || weapons.IsMelee || !weapons.HaveBullets || weapons.Reload == null || weapons.Reload.Reloading
             || weapons.Reload.BulletCount < weapons.Reload.MaxBulletCount * 0.5f
@@ -56,7 +57,7 @@ internal static class NativeGhostPartisan
     {
         if (IsPartisan(bot) && bot.Boss?.BossLogic is BossPartisan boss)
         {
-            boss._period.Update();
+            boss.Gclass25_0.Update();
         }
         // Do not call BossLogicUpdate: it also consumes prewarm mines through InventoryController.
         // The caller rechecks BodyReason after the tracking timer and wakes before placing anything.
@@ -74,15 +75,15 @@ internal static class NativeGhostPartisan
             || bot.Memory.GoalEnemy != null && !IsDistantMemory(bot) || BodyReason(bot) != null)
             return false;
         var cover = bot.Memory.CurCustomCoverPoint;
-        if (cover == null || !ReferenceEquals(layer._cachePoint, cover)
-            || layer._cachePoints == null || !layer._cachePoints.Contains(cover)
+        if (cover == null || !ReferenceEquals(layer.CustomNavigationPoint_0, cover)
+            || layer.HashSet_0 == null || !layer.HashSet_0.Contains(cover)
             || !navigation.Target.HasValue || (navigation.Target.Value - cover.Position).sqrMagnitude > 0.01f
             || !navigation.ConfirmInvalidPath()) return false;
 
         // EndGoToCoverPointTactical ends when its cover is absent. The next native GetDecision
         // skips this already visited cover and chooses the mine approach itself. Keep its mine,
         // visited-cover history and enemy memory intact; never fabricate arrival or plant a mine.
-        layer._cachePoint = null;
+        layer.CustomNavigationPoint_0 = null;
         bot.Memory.SetCoverPoints(null);
         navigation.Cancel();
         bot.Mover.ActualPathController.Stop();

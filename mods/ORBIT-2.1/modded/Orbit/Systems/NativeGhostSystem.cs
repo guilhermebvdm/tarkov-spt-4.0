@@ -24,7 +24,7 @@ public sealed partial class NativeGhostSystem
     {
         public BotOwner Bot;
         public BotMover Mover;
-        public AICoreAgent<BotLogicDecision> Brain;
+        public AICoreAgentClass<BotLogicDecision> Brain;
         public Action UpdateHunt;
         public bool CustomRole;
         public bool CouldStandBy;
@@ -50,7 +50,7 @@ public sealed partial class NativeGhostSystem
     }
 
     private static readonly Dictionary<BotOwner, Sleeper> Sleepers = new();
-    private static readonly Dictionary<AICoreAgent<BotLogicDecision>, Sleeper> Brains = new();
+    private static readonly Dictionary<AICoreAgentClass<BotLogicDecision>, Sleeper> Brains = new();
     private static readonly Dictionary<BotMover, Sleeper> Movers = new();
     private static readonly Dictionary<int, string> CustomActions = new();
     private static Type _huntType;
@@ -114,11 +114,11 @@ public sealed partial class NativeGhostSystem
 
     internal static string ActionName(BotLogicDecision decision) => CustomAction(decision) ?? decision.ToString();
 
-    internal static void RefreshPeacefulDecision(AICoreStrategy<BotLogicDecision> strategy,
-        ref AICoreActionResult<BotLogicDecision, CoreActionResultParams>? result)
+    internal static void RefreshPeacefulDecision(AICoreStrategyAbstractClass<BotLogicDecision> strategy,
+        ref AICoreActionResultStruct<BotLogicDecision, CoreActionResultParams>? result)
     {
         if (strategy is not BaseBrain brain || !result.HasValue) return;
-        var bot = brain._owner;
+        var bot = brain.Owner;
         if (bot == null || bot.IsDead || bot.Memory?.GoalEnemy != null || bot.Memory?.IsUnderFire == true
             || BodyReason(bot) != null) return;
         if (NativeGhostPartisan.Layer(bot) is not ("FollowerPatrolLayer" or "PatrolAssaultLayer"
@@ -209,7 +209,7 @@ public sealed partial class NativeGhostSystem
         if (bot.WeaponManager?.Grenades?.ThrowindNow == true) return "grenade";
         if (bot.Medecine is { Using: true }) return "medicine";
         if (bot.DoorOpener is { Interacting: true }) return "door";
-        if (bot.DoorOpener is { _enteringDoorSequence: true }
+        if (bot.DoorOpener is { EnteringDoorSequence: true }
             || bot.Mover?.CurrentState == EBotMoverState.NearDoor) return "door-sequence";
         var patrol = NativeGhostPatrol.BodyReason(bot);
         if (patrol != null) return patrol;
@@ -323,7 +323,7 @@ public sealed partial class NativeGhostSystem
     internal static bool HandleDoorOperation(BotDoorOpener opener, Door requested, bool physical, out bool waiting)
     {
         waiting = false;
-        var bot = opener?._owner;
+        var bot = opener?.Owner;
         if (!RetainsNativeState(bot)) return false;
         var state = Sleepers[bot];
         waiting = true;
@@ -453,7 +453,7 @@ public sealed partial class NativeGhostSystem
     public bool InFight(BotOwner bot)
         => Sleepers.TryGetValue(bot, out var state) && Time.time < state.PinnedUntil;
 
-    public static bool ScheduleBrain(AICoreAgent<BotLogicDecision> brain, out bool skip)
+    public static bool ScheduleBrain(AICoreAgentClass<BotLogicDecision> brain, out bool skip)
     {
         skip = false;
         if (!Brains.TryGetValue(brain, out var state)) return false;
@@ -509,10 +509,10 @@ public sealed partial class NativeGhostSystem
         return true;
     }
 
-    public static void GuardDecision(AICoreStrategy<BotLogicDecision> strategy,
-        ref AICoreActionResult<BotLogicDecision, CoreActionResultParams>? result)
+    public static void GuardDecision(AICoreStrategyAbstractClass<BotLogicDecision> strategy,
+        ref AICoreActionResultStruct<BotLogicDecision, CoreActionResultParams>? result)
     {
-        if (strategy is not BaseBrain brain || brain._owner == null || !Sleepers.TryGetValue(brain._owner, out var state)) return;
+        if (strategy is not BaseBrain brain || brain.Owner == null || !Sleepers.TryGetValue(brain.Owner, out var state)) return;
         if (!result.HasValue) return;
         var decision = result.Value.Action;
         if (decision == BotLogicDecision.heal && RetainSimulatedHealing(state))
@@ -577,7 +577,7 @@ public sealed partial class NativeGhostSystem
         }
     }
 
-    public static bool HandleBrainException(AICoreAgent<BotLogicDecision> brain, Exception exception)
+    public static bool HandleBrainException(AICoreAgentClass<BotLogicDecision> brain, Exception exception)
     {
         if (exception == null || !Brains.TryGetValue(brain, out var state)) return false;
         NativeGhostDiagnostics.BrainFailure(state.Bot, state.Decision, exception);
@@ -677,7 +677,7 @@ public sealed partial class NativeGhostSystem
                 if (travelled > 0.001f)
                 {
                     mover.NormDirCurPoint = (hit.position - from).normalized;
-                    mover._dirCurPoint = corner - hit.position;
+                    mover.DirCurPoint_1 = corner - hit.position;
                 }
                 if (!path.CheckShouldMove()) break;
                 if (distance > budget) break;
@@ -699,9 +699,9 @@ public sealed partial class NativeGhostSystem
     {
         var mover = bot.Mover;
         var position = bot.Position;
-        mover._lastGoodCastPoint = position;
-        mover._prevSuccessLinkedFrom = position;
-        mover._prevLinkPos = position;
+        mover.LastGoodCastPoint = position;
+        mover.PrevSuccessLinkedFrom_1 = position;
+        mover.PrevLinkPos = position;
         mover.PositionOnWayInner = position;
     }
 

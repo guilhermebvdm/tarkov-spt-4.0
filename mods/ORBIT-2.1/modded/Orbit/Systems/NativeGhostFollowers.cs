@@ -17,7 +17,7 @@ internal static class NativeGhostFollowers
         // Dispose does not reset IsInited. A fresh controller must not keep the old follower action alive.
         follower.PatrolDataFollower = new PatrolDataFollower(bot, follower.Index);
         if (bot.Boss is { IamBoss: true })
-            bot.Boss.SetPatrolMode();
+            bot.Boss.method_1();
         else
         {
             var chooser = PatrollingData.GetPointChooser(bot, PatrolMode.simple, bot.SpawnProfileData);

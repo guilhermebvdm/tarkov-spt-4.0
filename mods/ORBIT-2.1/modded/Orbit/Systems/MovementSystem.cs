@@ -535,7 +535,7 @@ public partial class MovementSystem
         {
             door.DoorState = EDoorState.Open;
             door.CurrentAngle = door.GetAngle(EDoorState.Open);
-            EFT.GlobalEvents.GlobalEventsController.CreateEvent<EFT.GlobalEvents.InteractiveObjectInteractionResultEvent>()
+            GlobalEventHandlerClass.CreateEvent<EFT.GlobalEvents.InteractiveObjectInteractionResultEvent>()
                 .Invoke(door, EDoorState.Open);
             Orbit.Api.OrbitDoorEvents.Raise(door, Orbit.Api.OrbitDoorEvents.Operation.Finalize);
         }
@@ -892,7 +892,7 @@ public partial class MovementSystem
                     // occlusion portal open). Mirrors BSG's breach completion — DoorState + CurrentAngle +
                     // interaction-result event.
                     watch.Door.CurrentAngle = watch.Door.GetAngle(EDoorState.Open);
-                    EFT.GlobalEvents.GlobalEventsController.CreateEvent<EFT.GlobalEvents.InteractiveObjectInteractionResultEvent>()
+                    GlobalEventHandlerClass.CreateEvent<EFT.GlobalEvents.InteractiveObjectInteractionResultEvent>()
                         .Invoke(watch.Door, EDoorState.Open);
                     Orbit.Api.OrbitDoorEvents.Raise(watch.Door, Orbit.Api.OrbitDoorEvents.Operation.Finalize);
                     Log.Debug($"DoorWatch: finalized door Id={watch.Door.Id} Interacting → Open after {watch.Kind} window (bot interactions never finalize door state) — leaf snapped open");
@@ -1075,7 +1075,7 @@ public partial class MovementSystem
                 Log.Debug($"{agent} OpenDoor on {door.Id}: Door.Interact returned non-success — interaction rejected by BSG (likely lock / key / state)");
                 return false;
             }
-            player.ExecuteInteraction(door, gstruct.Value);
+            player.vmethod_1(door, gstruct.Value);
             Orbit.Api.OrbitDoorEvents.Raise(door, Orbit.Api.OrbitDoorEvents.Operation.Open);
             // Set collision-pass AFTER ExecuteInteraction so the door's animation can drive the bot's traversal
             // through the swing arc. Order matters: setting it before ExecuteInteraction lets the bot rush the
@@ -1211,7 +1211,7 @@ public partial class MovementSystem
                 var gstruct = Door.Interact(player, EInteractionType.Close);
                 if (gstruct.Succeeded)
                 {
-                    player.ExecuteInteraction(door, gstruct.Value);
+                    player.vmethod_1(door, gstruct.Value);
                     door.DoorState = EDoorState.Shut;
                     _doorInteractCooldown[door.GetInstanceID()] = Time.time;
                     closed++;

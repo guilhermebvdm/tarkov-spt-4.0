@@ -374,7 +374,7 @@ public partial class OrbitLootHandler : MonoBehaviour, ILootHandler
             else if (container.DoorState == EDoorState.Open)
             {
                 if (FikaDetection.FikaLoaded)
-                    _bot.GetPlayer.ExecuteInteraction(container, new InteractionResult(EInteractionType.Close));
+                    _bot.GetPlayer.vmethod_1(container, new InteractionResult(EInteractionType.Close));
                 else container.Close();
             }
         }
@@ -1414,7 +1414,7 @@ public partial class OrbitLootHandler : MonoBehaviour, ILootHandler
                 new[] { inventory.Inventory.Equipment }, ItemManipulator.EMoveItemOrder.PickUp, true).Succeeded;
     }
 
-    private OperationResult<IItemOperationResult> FindPlace(DrainEntry entry, InventoryController inventoryController, string name, float price)
+    private GStruct154<IItemOperationResult> FindPlace(DrainEntry entry, InventoryController inventoryController, string name, float price)
     {
         var targets = new[] { inventoryController.Inventory.Equipment };
         var place = ItemManipulator.QuickFindAppropriatePlace(
@@ -1425,7 +1425,7 @@ public partial class OrbitLootHandler : MonoBehaviour, ILootHandler
         return place;
     }
 
-    private async Task<bool> RunTransactionAsync(OperationResult<IItemOperationResult> place, string name, CancellationToken ct)
+    private async Task<bool> RunTransactionAsync(GStruct154<IItemOperationResult> place, string name, CancellationToken ct)
     {
         var inventoryController = _bot.GetPlayer?.InventoryController;
         if (inventoryController == null) return false;
